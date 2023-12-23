@@ -663,6 +663,7 @@ void main() {
     final TestClipPaintingContext context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
+    context.dispose();
   });
 
   testWidgets('GridView respects clipBehavior', (WidgetTester tester) async {
@@ -729,6 +730,7 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
+    context.dispose();
   });
 
   testWidgets('GridView.builder respects clipBehavior', (WidgetTester tester) async {
@@ -861,6 +863,7 @@ void main() {
   testWidgets('SliverGrid sets correct extent for null returning builder delegate', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/130685
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: GridView.builder(

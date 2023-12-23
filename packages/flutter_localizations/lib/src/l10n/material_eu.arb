@@ -142,6 +142,7 @@
   "expandedHint": "Tolestuta",
   "collapsedHint": "Zabalduta",
   "menuDismissLabel": "Baztertu menua",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Bilatu",
+  "searchWebButtonLabel": "Bilatu sarean",
+  "shareButtonLabel": "Partekatu..."
 }

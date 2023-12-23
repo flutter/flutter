@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestNotifier extends ChangeNotifier {
   void notify() {
@@ -27,6 +26,12 @@ class A {
 }
 
 class B extends A with ChangeNotifier {
+  B() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   @override
   void test() {
     notifyListeners();
@@ -35,6 +40,12 @@ class B extends A with ChangeNotifier {
 }
 
 class Counter with ChangeNotifier {
+  Counter() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   int get value => _value;
   int _value = 0;
   set value(int value) {
@@ -50,7 +61,7 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
+  testWidgets('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
     final TestNotifier test = TestNotifier();
     bool callbackDidFinish = false;
     void foo() {
@@ -68,7 +79,7 @@ void main() {
     test.dispose();
   });
 
-  testWidgetsWithLeakTracking('ChangeNotifier', (WidgetTester tester) async {
+  testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
     void listener() {
       log.add('listener');

@@ -59,7 +59,7 @@ export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionCh
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
-typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
@@ -206,7 +206,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
         value == null || !value.composing.isValid || value.isComposingRangeValid,
         'New TextEditingValue $value has an invalid non-empty composing range '
         '${value.composing}. It is recommended to use a valid composing range, '
-        'even for readonly text fields',
+        'even for readonly text fields.',
       ),
       super(value ?? TextEditingValue.empty);
 
@@ -235,7 +235,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       !newValue.composing.isValid || newValue.isComposingRangeValid,
       'New TextEditingValue $newValue has an invalid non-empty composing range '
       '${newValue.composing}. It is recommended to use a valid composing range, '
-      'even for readonly text fields',
+      'even for readonly text fields.',
     );
     super.value = newValue;
   }
@@ -369,26 +369,26 @@ class ToolbarOptions {
 
   /// Whether to show copy option in toolbar.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   final bool copy;
 
   /// Whether to show cut option in toolbar.
   ///
   /// If [EditableText.readOnly] is set to true, cut will be disabled regardless.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   final bool cut;
 
   /// Whether to show paste option in toolbar.
   ///
   /// If [EditableText.readOnly] is set to true, paste will be disabled regardless.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   final bool paste;
 
   /// Whether to show select all option in toolbar.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   final bool selectAll;
 }
 
@@ -547,8 +547,11 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///
 /// This widget interacts with the [TextInput] service to let the user edit the
 /// text it contains. It also provides scrolling, selection, and cursor
-/// movement. This widget does not provide any focus management (e.g.,
-/// tap-to-focus).
+/// movement.
+///
+/// The [EditableText] widget is a low-level widget that is intended as a
+/// building block for custom widget sets. For a complete user experience,
+/// consider using a [TextField] or [CupertinoTextField].
 ///
 /// ## Handling User Input
 ///
@@ -662,13 +665,14 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///
 /// ## Gesture Events Handling
 ///
-/// This widget provides rudimentary, platform-agnostic gesture handling for
-/// user actions such as tapping, long-pressing and scrolling when
-/// [rendererIgnoresPointer] is false (false by default). To tightly conform
-/// to the platform behavior with respect to input gestures in text fields, use
-/// [TextField] or [CupertinoTextField]. For custom selection behavior, call
-/// methods such as [RenderEditable.selectPosition],
-/// [RenderEditable.selectWord], etc. programmatically.
+/// When [rendererIgnoresPointer] is false (the default), this widget provides
+/// rudimentary, platform-agnostic gesture handling for user actions such as
+/// tapping, long-pressing, and scrolling.
+///
+/// To provide more complete gesture handling, including double-click to select
+/// a word, drag selection, and platform-specific handling of gestures such as
+/// long presses, consider setting [rendererIgnoresPointer] to true and using
+/// [TextSelectionGestureDetectorBuilder].
 ///
 /// {@template flutter.widgets.editableText.showCaretOnScreen}
 /// ## Keep the caret visible when focused
@@ -696,7 +700,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// a currency value text field. The following example demonstrates how to
 /// suppress the default accessibility announcements by always announcing
 /// the content of the text field as a US currency value (the `\$` inserts
-/// a dollar sign, the `$newText interpolates the `newText` variable):
+/// a dollar sign, the `$newText` interpolates the `newText` variable):
 ///
 /// ```dart
 /// onChanged: (String newText) {
@@ -726,14 +730,6 @@ class EditableText extends StatefulWidget {
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
-  ///
-  /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
-  /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
-  /// [style], [cursorColor], [cursorOpacityAnimates], [backgroundCursorColor],
-  /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
-  /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
-  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],
-  /// [readOnly], and [enableIMEPersonalizedLearning] arguments must not be null.
   EditableText({
     super.key,
     required this.controller,
@@ -892,7 +888,7 @@ class EditableText extends StatefulWidget {
   /// copied with copy or cut. If [readOnly] is also true, then the text cannot
   /// be selected.
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to false.
   /// {@endtemplate}
   final bool obscureText;
 
@@ -908,7 +904,7 @@ class EditableText extends StatefulWidget {
   /// When this is set to true, the text cannot be modified
   /// by any shortcut or keyboard operation. The text is still selectable.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   /// {@endtemplate}
   final bool readOnly;
 
@@ -917,7 +913,7 @@ class EditableText extends StatefulWidget {
   /// When this is set to false, the width will be based on text width, which
   /// will also be affected by [textWidthBasis].
   ///
-  /// Defaults to true. Must not be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -957,7 +953,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   /// {@endtemplate}
   final bool autocorrect;
 
@@ -1006,14 +1002,14 @@ class EditableText extends StatefulWidget {
     if (_strutStyle == null) {
       return StrutStyle.fromTextStyle(style, forceStrutHeight: true);
     }
-    return _strutStyle!.inheritFromTextStyle(style);
+    return _strutStyle.inheritFromTextStyle(style);
   }
   final StrutStyle? _strutStyle;
 
   /// {@template flutter.widgets.editableText.textAlign}
   /// How the text should be aligned horizontally.
   ///
-  /// Defaults to [TextAlign.start] and cannot be null.
+  /// Defaults to [TextAlign.start].
   /// {@endtemplate}
   final TextAlign textAlign;
 
@@ -1041,7 +1037,7 @@ class EditableText extends StatefulWidget {
   /// Only supports text keyboards, other keyboard types will ignore this
   /// configuration. Capitalization is locale-aware.
   ///
-  /// Defaults to [TextCapitalization.none]. Must not be null.
+  /// Defaults to [TextCapitalization.none].
   ///
   /// See also:
   ///
@@ -1082,8 +1078,6 @@ class EditableText extends StatefulWidget {
   final TextScaler? textScaler;
 
   /// The color to use when painting the cursor.
-  ///
-  /// Cannot be null.
   final Color cursorColor;
 
   /// The color to use when painting the autocorrection Rect.
@@ -1101,8 +1095,7 @@ class EditableText extends StatefulWidget {
   /// The color to use when painting the background cursor aligned with the text
   /// while rendering the floating cursor.
   ///
-  /// Cannot be null. By default it is the disabled grey color from
-  /// CupertinoColors.
+  /// Typically this would be set to [CupertinoColors.inactiveGray].
   final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}
@@ -1238,7 +1231,7 @@ class EditableText extends StatefulWidget {
   /// If true, the keyboard will open as soon as this text field obtains focus.
   /// Otherwise, the keyboard is only shown after the user taps the text field.
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to false.
   /// {@endtemplate}
   // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
   // keyboard behavior.
@@ -1473,10 +1466,28 @@ class EditableText extends StatefulWidget {
   /// the editing position.
   final MouseCursor? mouseCursor;
 
-  /// If true, the [RenderEditable] created by this widget will not handle
-  /// pointer events, see [RenderEditable] and [RenderEditable.ignorePointer].
+  /// Whether the caller will provide gesture handling (true), or if the
+  /// [EditableText] is expected to handle basic gestures (false).
+  ///
+  /// When this is false, the [EditableText] (or more specifically, the
+  /// [RenderEditable]) enables some rudimentary gestures (tap to position the
+  /// cursor, long-press to select all, and some scrolling behavior).
+  ///
+  /// These behaviors are sufficient for debugging purposes but are inadequate
+  /// for user-facing applications. To enable platform-specific behaviors, use a
+  /// [TextSelectionGestureDetectorBuilder] to wrap the [EditableText], and set
+  /// [rendererIgnoresPointer] to true.
+  ///
+  /// When [rendererIgnoresPointer] is true true, the [RenderEditable] created
+  /// by this widget will not handle pointer events.
   ///
   /// This property is false by default.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderEditable.ignorePointer], which implements this feature.
+  ///  * [TextSelectionGestureDetectorBuilder], which implements platform-specific
+  ///    gestures and behaviors.
   final bool rendererIgnoresPointer;
 
   /// {@template flutter.widgets.editableText.cursorWidth}
@@ -1861,6 +1872,7 @@ class EditableText extends StatefulWidget {
     required final VoidCallback? onSelectAll,
     required final VoidCallback? onLookUp,
     required final VoidCallback? onSearchWeb,
+    required final VoidCallback? onShare,
     required final VoidCallback? onLiveTextInput,
   }) {
     final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
@@ -1870,6 +1882,10 @@ class EditableText extends StatefulWidget {
       // If the paste button is enabled, don't render anything until the state
       // of the clipboard is known, since it's used to determine if paste is
       // shown.
+
+      // On Android, the share button is before the select all button.
+      final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
+
       resultButtonItem.addAll(<ContextMenuButtonItem>[
         if (onCut != null)
           ContextMenuButtonItem(
@@ -1886,6 +1902,11 @@ class EditableText extends StatefulWidget {
             onPressed: onPaste,
             type: ContextMenuButtonType.paste,
           ),
+        if (onShare != null && showShareBeforeSelectAll)
+          ContextMenuButtonItem(
+            onPressed: onShare,
+            type: ContextMenuButtonType.share,
+          ),
         if (onSelectAll != null)
           ContextMenuButtonItem(
             onPressed: onSelectAll,
@@ -1900,6 +1921,11 @@ class EditableText extends StatefulWidget {
           ContextMenuButtonItem(
             onPressed: onSearchWeb,
             type: ContextMenuButtonType.searchWeb,
+          ),
+        if (onShare != null && !showShareBeforeSelectAll)
+          ContextMenuButtonItem(
+            onPressed: onShare,
+            type: ContextMenuButtonType.share,
           ),
       ]);
     }
@@ -2199,7 +2225,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
-  Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+  Color get _cursorColor {
+    final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
+    return widget.cursorColor.withOpacity(effectiveOpacity);
+  }
 
   @override
   bool get cutEnabled {
@@ -2276,6 +2305,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return !widget.obscureText
         && !textEditingValue.selection.isCollapsed
         && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
+  @override
+  bool get shareEnabled {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return !widget.obscureText
+            && !textEditingValue.selection.isCollapsed
+            && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
+    }
   }
 
   @override
@@ -2359,7 +2404,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
     clipboardStatus.update();
@@ -2399,7 +2444,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
   }
@@ -2443,8 +2488,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Look up the current selection, as in the "Look Up" edit menu button on iOS.
+  /// Look up the current selection,
+  /// as in the "Look Up" edit menu button on iOS.
+  ///
   /// Currently this is only implemented for iOS.
+  ///
   /// Throws an error if the selection is empty or collapsed.
   Future<void> lookUpSelection(SelectionChangedCause cause) async {
     assert(!widget.obscureText);
@@ -2460,9 +2508,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Launch a web search on the current selection,
-  ///   as in the "Search Web" edit menu button on iOS.
+  /// as in the "Search Web" edit menu button on iOS.
   ///
   /// Currently this is only implemented for iOS.
+  ///
   /// When 'obscureText' is true or the selection is empty,
   /// this function will not do anything
   Future<void> searchWebForSelection(SelectionChangedCause cause) async {
@@ -2475,6 +2524,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (text.isNotEmpty) {
       await SystemChannels.platform.invokeMethod(
         'SearchWeb.invoke',
+        text,
+      );
+    }
+  }
+
+  /// Launch the share interface for the current selection,
+  /// as in the "Share..." edit menu button on iOS.
+  ///
+  /// Currently this is only implemented for iOS and Android.
+  ///
+  /// When 'obscureText' is true or the selection is empty,
+  /// this function will not do anything
+  Future<void> shareSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+    if (widget.obscureText) {
+      return;
+    }
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod(
+        'Share.invoke',
         text,
       );
     }
@@ -2712,6 +2783,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onSearchWeb: searchWebEnabled
           ? () => searchWebForSelection(SelectionChangedCause.toolbar)
           : null,
+      onShare: shareEnabled
+          ? () => shareSelection(SelectionChangedCause.toolbar)
+          : null,
       onLiveTextInput: liveTextInputEnabled
           ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
           : null,
@@ -2758,7 +2832,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _flagInternalFocus();
           FocusScope.of(context).autofocus(widget.focusNode);
         }
-      });
+      }, debugLabel: 'EditableText.autofocus');
     }
 
     // Restart or stop the blinking cursor when TickerMode changes.
@@ -2829,7 +2903,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // See https://github.com/flutter/flutter/issues/126312
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _openInputConnection();
-      });
+      }, debugLabel: 'EditableText.openInputConnection');
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -3428,11 +3502,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
-      if (kIsWeb) {
-        _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
-      } else {
-        widget.focusNode.unfocus();
-      }
+      widget.focusNode.unfocus();
     }
   }
 
@@ -3665,7 +3735,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           rect: caretPadding.inflateRect(rectToReveal),
         );
       }
-    });
+    }, debugLabel: 'EditableText.showCaret');
   }
 
   late double _lastBottomViewInset;
@@ -3679,7 +3749,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_lastBottomViewInset != view.viewInsets.bottom) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _selectionOverlay?.updateForScroll();
-      });
+      }, debugLabel: 'EditableText.updateForScroll');
       if (_lastBottomViewInset < view.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
         // (on both iOS and Android). So we don't need to show caret with animation.
@@ -3811,8 +3881,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onCursorColorTick() {
-    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
-    _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
+    final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
+    renderEditable.cursorColor = widget.cursorColor.withOpacity(effectiveOpacity);
+    _cursorVisibilityNotifier.value = widget.showCursor && (EditableText.debugDeterministicCursor || _cursorBlinkOpacityController.value > 0);
   }
 
   bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled;
@@ -3981,7 +4052,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateSelectionRects();
     _updateComposingRectIfNeeded();
     _updateCaretRectIfNeeded();
-    SchedulerBinding.instance.addPostFrameCallback(_schedulePeriodicPostFrameCallbacks);
+    SchedulerBinding.instance.addPostFrameCallback(
+      _schedulePeriodicPostFrameCallbacks,
+      debugLabel: 'EditableText.postFrameCallbacks'
+    );
   }
   _ScribbleCacheKey? _scribbleCacheKey;
 
@@ -4055,11 +4129,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setSelectionRects(rects);
   }
 
-  // Sends the current composing rect to the iOS text input plugin via the text
-  // input channel. We need to keep sending the information even if no text is
-  // currently marked, as the information usually lags behind. The text input
-  // plugin needs to estimate the composing rect based on the latest caret rect,
-  // when the composing rect info didn't arrive in time.
+  // Sends the current composing rect to the embedder's text input plugin.
+  //
+  // In cases where the composing rect hasn't been updated in the embedder due
+  // to the lag of asynchronous messages over the channel, the position of the
+  // current caret rect is used instead.
+  //
+  // See: [_updateCaretRectIfNeeded]
   void _updateComposingRectIfNeeded() {
     final TextRange composingRange = _value.composing;
     assert(mounted);
@@ -4073,12 +4149,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setComposingRect(composingRect);
   }
 
+  // Sends the current caret rect to the embedder's text input plugin.
+  //
+  // The position of the caret rect is updated periodically such that if the
+  // user initiates composing input, the current cursor rect can be used for
+  // the first character until the composing rect can be sent.
+  //
+  // On selection changes, the start of the selection is used. This ensures
+  // that regardless of the direction the selection was created, the cursor is
+  // set to the position where next text input occurs. This position is used to
+  // position the IME's candidate selection menu.
+  //
+  // See: [_updateComposingRectIfNeeded]
   void _updateCaretRectIfNeeded() {
     final TextSelection? selection = renderEditable.selection;
-    if (selection == null || !selection.isValid || !selection.isCollapsed) {
+    if (selection == null || !selection.isValid) {
       return;
     }
-    final TextPosition currentTextPosition = TextPosition(offset: selection.baseOffset);
+    final TextPosition currentTextPosition = TextPosition(offset: selection.start);
     final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
     _textInputConnection!.setCaretRect(caretRect);
   }
@@ -4710,7 +4798,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
       child: TextFieldTapRegion(
-        onTapOutside: widget.onTapOutside ?? _defaultOnTapOutside,
+        onTapOutside: _hasFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
         debugLabel: kReleaseMode ? null : 'EditableText',
         child: MouseRegion(
           cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -4748,6 +4836,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 }
 
                 return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
+              },
+              undoStackModifier: (TextEditingValue value) {
+                // On Android we should discard the composing region when pushing
+                // a new entry to the undo stack. This prevents the TextInputPlugin
+                // from restarting the input on every undo/redo when the composing
+                // region is changed by the framework.
+                return defaultTargetPlatform == TargetPlatform.android ? value.copyWith(composing: TextRange.empty) : value;
               },
               focusNode: widget.focusNode,
               controller: widget.undoController,
@@ -4793,9 +4888,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             value: _value,
                             cursorColor: _cursorColor,
                             backgroundCursorColor: widget.backgroundCursorColor,
-                            showCursor: EditableText.debugDeterministicCursor
-                                ? ValueNotifier<bool>(widget.showCursor)
-                                : _cursorVisibilityNotifier,
+                            showCursor: _cursorVisibilityNotifier,
                             forceLine: widget.forceLine,
                             readOnly: widget.readOnly,
                             hasFocus: _hasFocus,

@@ -142,6 +142,7 @@
   "expandedHint": "Собрано",
   "collapsedHint": "Проширено",
   "menuDismissLabel": "Отфрлете го менито",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Погледнете нагоре",
+  "searchWebButtonLabel": "Пребарајте на интернет",
+  "shareButtonLabel": "Споделете..."
 }

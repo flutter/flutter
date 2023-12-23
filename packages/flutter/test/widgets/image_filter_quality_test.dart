@@ -137,7 +137,7 @@ class _TestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
     _loadCallCount += 1;
     return _streamCompleter;
   }

@@ -685,6 +685,7 @@ void main() {
 
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -948,6 +949,7 @@ void main() {
 
   testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1003,6 +1005,7 @@ void main() {
 
   testWidgets('Scrollbar thumb cannot be dragged into overscroll if the physics do not allow', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1055,6 +1058,7 @@ void main() {
 
   testWidgets('Scrollbar thumb cannot be dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1123,6 +1127,7 @@ void main() {
 
   testWidgets('Scrollbar thumb can be dragged into overscroll if the platform allows it', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1252,6 +1257,7 @@ void main() {
 
   testWidgets('Scrollbar hit test area adjusts for PointerDeviceKind', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1342,6 +1348,7 @@ void main() {
   testWidgets('hit test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99324
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     bool onTap = false;
     await tester.pumpWidget(
       Directionality(
@@ -1394,6 +1401,8 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       error = details;
     };
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1402,7 +1411,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             thumbVisibility: true,
-            controller: ScrollController(),
+            controller: controller,
             thumbColor: const Color(0x11111111),
             child: const SingleChildScrollView(
               child: SizedBox(
@@ -1432,6 +1441,8 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       error = details;
     };
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1440,7 +1451,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             thumbVisibility: true,
-            controller: ScrollController(),
+            controller: controller,
             thumbColor: const Color(0x11111111),
             child: const SingleChildScrollView(
               child: SizedBox(
@@ -1466,7 +1477,9 @@ void main() {
 
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1508,6 +1521,7 @@ void main() {
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1681,6 +1695,7 @@ void main() {
 
   testWidgets('Scrollbar thumb can be dragged in reverse', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1755,6 +1770,7 @@ void main() {
 
   testWidgets('RawScrollbar mainAxisMargin property works properly', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1785,6 +1801,7 @@ void main() {
 
   testWidgets('shape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1822,6 +1839,7 @@ void main() {
 
   testWidgets('minThumbLength property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1848,6 +1866,7 @@ void main() {
 
   testWidgets('shape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1884,6 +1903,7 @@ void main() {
 
   testWidgets('crossAxisMargin property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1909,6 +1929,7 @@ void main() {
 
   testWidgets('shape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1943,6 +1964,7 @@ void main() {
 
   testWidgets('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1975,6 +1997,7 @@ void main() {
 
   testWidgets('not passing any shape or radius to RawScrollbar will draw the usual rectangular thumb', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2001,6 +2024,7 @@ void main() {
 
   testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildFrame(double height) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2034,6 +2058,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildFrame() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2075,7 +2100,9 @@ void main() {
   testWidgets('Scrollbar will not flip axes based on notification is there is a scroll controller', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/87697
     final ScrollController verticalScrollController = ScrollController();
+    addTearDown(verticalScrollController.dispose);
     final ScrollController horizontalScrollController = ScrollController();
+    addTearDown(horizontalScrollController.dispose);
     Widget buildFrame() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2135,6 +2162,7 @@ void main() {
 
   testWidgets('notificationPredicate depth test.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final List<int> depths = <int>[];
     Widget buildFrame() {
       return Directionality(
@@ -2169,6 +2197,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/92262
   testWidgets('Do not crash when resize from scrollable to non-scrollable.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildFrame(double height) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2207,6 +2236,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/95840
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
       Directionality(
@@ -2289,6 +2319,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/95840
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
       Directionality(
@@ -2423,6 +2454,7 @@ void main() {
 
   testWidgets('Scrollbar track can be drawn', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2466,6 +2498,7 @@ void main() {
 
   testWidgets('RawScrollbar correctly assigns colors', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2512,6 +2545,7 @@ void main() {
 
   testWidgets('trackRadius and radius properties of RawScrollbar can draw RoundedRectangularRect', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2551,6 +2585,7 @@ void main() {
 
   testWidgets('Scrollbar asserts that a visible track has a visible thumb', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildApp() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2576,6 +2611,7 @@ void main() {
   testWidgets('Skip the ScrollPosition check if the bar was unmounted', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103939
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildApp(bool buildBar) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2614,6 +2650,7 @@ void main() {
   testWidgets('Track offset respects MediaQuery padding', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106834
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2645,6 +2682,7 @@ void main() {
 
   testWidgets('RawScrollbar.padding replaces MediaQueryData.padding', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
         Directionality(
             textDirection: TextDirection.ltr,
@@ -2677,6 +2715,7 @@ void main() {
 
   testWidgets('Scrollbar respect the NeverScrollableScrollPhysics physics', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2720,6 +2759,7 @@ void main() {
   testWidgets('The thumb should follow the pointer when the scroll metrics changed during dragging', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/112072
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2790,6 +2830,7 @@ void main() {
   testWidgets('The scrollable should not stutter when the scroll metrics shrink during dragging', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/121574
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2854,6 +2895,7 @@ void main() {
   testWidgets('The bar support mouse wheel event', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/109659
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildFrame() {
       return Directionality(
         textDirection: TextDirection.ltr,

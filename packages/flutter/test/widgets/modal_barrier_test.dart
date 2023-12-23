@@ -907,6 +907,7 @@ void main() {
     testWidgets('SemanticsClipper correctly clips Semantics.rect in four directions', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ValueNotifier<EdgeInsets> notifier = ValueNotifier<EdgeInsets>(const EdgeInsets.fromLTRB(10, 20, 30, 40));
+      addTearDown(notifier.dispose);
       const Rect fullScreen = TestSemantics.fullScreen;
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,

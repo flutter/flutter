@@ -25,5 +25,7 @@
   "noSpellCheckReplacementsLabel": "Engir staðgenglar fundust",
   "menuDismissLabel": "Loka valmynd",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Leita á vefnum",
+  "shareButtonLabel": "Deila...",
+  "clearButtonLabel": "Clear"
 }

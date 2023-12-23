@@ -48,6 +48,20 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isFlutterWebWasmEnabled => isEnabled(flutterWebWasm);
 
   @override
+  bool get isCliAnimationEnabled {
+    if (_platform.environment['TERM'] == 'dumb') {
+      return false;
+    }
+    return isEnabled(cliAnimation);
+  }
+
+  @override
+  bool get isNativeAssetsEnabled => isEnabled(nativeAssets);
+
+  @override
+  bool get isPreviewDeviceEnabled => isEnabled(previewDevice);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);

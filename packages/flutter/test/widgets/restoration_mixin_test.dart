@@ -11,8 +11,10 @@ void main() {
   testWidgets('claims bucket', (WidgetTester tester) async {
     const String id = 'hello world 1234';
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
     expect(rawData, isEmpty);
 
     await tester.pumpWidget(
@@ -37,7 +39,9 @@ void main() {
 
   testWidgets('claimed bucket with data', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       UnmanagedRestorationScope(
@@ -59,7 +63,9 @@ void main() {
 
   testWidgets('renames existing bucket when new ID is provided via widget', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       UnmanagedRestorationScope(
@@ -101,7 +107,9 @@ void main() {
 
   testWidgets('renames existing bucket when didUpdateRestorationId is called', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       UnmanagedRestorationScope(
@@ -136,8 +144,10 @@ void main() {
 
   testWidgets('Disposing widget removes its data', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
 
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isTrue);
     await tester.pumpWidget(
@@ -164,8 +174,10 @@ void main() {
 
   testWidgets('toggling id between null and non-null', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       UnmanagedRestorationScope(
@@ -225,8 +237,10 @@ void main() {
   testWidgets('move in and out of scope', (WidgetTester tester) async {
     final Key key = GlobalKey();
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       _TestRestorableWidget(
@@ -286,8 +300,10 @@ void main() {
 
   testWidgets('moving scope moves its data', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
     final Key key = GlobalKey();
 
     await tester.pumpWidget(

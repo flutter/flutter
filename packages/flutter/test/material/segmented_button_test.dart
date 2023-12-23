@@ -20,6 +20,83 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
+  testWidgets('SegmentsButton when compositing does not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/135747
+    // If the render object holds on to a stale canvas reference, this will
+    // throw an exception.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SegmentedButton<int>(
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(
+                value: 0,
+                label: Opacity(
+                  opacity: 0.5,
+                  child: Text('option'),
+                ),
+                icon: Opacity(
+                  opacity: 0.5,
+                  child: Icon(Icons.add),
+                ),
+              ),
+            ],
+            selected: const <int>{0},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(SegmentedButton<int>), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('SegmentedButton releases state controllers for deleted segments', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final Key key = UniqueKey();
+
+    Widget buildApp(Widget button) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: button,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildApp(
+        SegmentedButton<int>(
+          key: key,
+          segments: const <ButtonSegment<int>>[
+            ButtonSegment<int>(value: 1, label: Text('1')),
+            ButtonSegment<int>(value: 2, label: Text('2')),
+          ],
+          selected: const <int>{2},
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildApp(
+        SegmentedButton<int>(
+          key: key,
+          segments: const <ButtonSegment<int>>[
+            ButtonSegment<int>(value: 2, label: Text('2')),
+            ButtonSegment<int>(value: 3, label: Text('3')),
+          ],
+          selected: const <int>{2},
+        ),
+      ),
+    );
+
+    final SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers, hasLength(2));
+    expect(state.statesControllers.keys.first.value, 2);
+    expect(state.statesControllers.keys.last.value, 3);
+  });
 
   testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);

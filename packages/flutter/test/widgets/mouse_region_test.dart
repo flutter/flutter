@@ -1768,7 +1768,11 @@ void main() {
 
   testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderMouseRegion().debugFillProperties(builder);
+
+    final RenderMouseRegion renderMouseRegion = RenderMouseRegion();
+    addTearDown(renderMouseRegion.dispose);
+
+    renderMouseRegion.debugFillProperties(builder);
 
     final List<String> description = builder.properties.where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode node) => node.toString()).toList();
 
@@ -1783,14 +1787,21 @@ void main() {
 
   testWidgets("RenderMouseRegion's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderMouseRegion(
+
+    final RenderErrorBox renderErrorBox = RenderErrorBox();
+    addTearDown(renderErrorBox.dispose);
+
+    final RenderMouseRegion renderMouseRegion = RenderMouseRegion(
       onEnter: (PointerEnterEvent event) {},
       onExit: (PointerExitEvent event) {},
       onHover: (PointerHoverEvent event) {},
       cursor: SystemMouseCursors.click,
       validForMouseTracker: false,
-      child: RenderErrorBox(),
-    ).debugFillProperties(builder);
+      child: renderErrorBox,
+    );
+    addTearDown(renderMouseRegion.dispose);
+
+    renderMouseRegion.debugFillProperties(builder);
 
     final List<String> description = builder.properties.where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode node) => node.toString()).toList();
 

@@ -636,8 +636,6 @@ class SectorHitTestResult extends HitTestResult {
 /// A hit test entry used by [RenderSector].
 class SectorHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
-  ///
-  /// The [radius] and [theta] argument must not be null.
   SectorHitTestEntry(RenderSector super.target, { required this.radius,  required this.theta });
 
   @override

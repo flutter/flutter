@@ -266,6 +266,10 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) { },
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         await tester.pumpWidget(MaterialApp(
           home: Container(
             color: Colors.white,
@@ -273,7 +277,7 @@ void main() {
             // Wrap in an overlay so that the golden image includes the dragged item.
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(builder: (BuildContext context) {
+                entry = OverlayEntry(builder: (BuildContext context) {
                   // Wrap the list in padding to test that the positioning
                   // is correct when the origin of the overlay is different
                   // from the list.
@@ -375,6 +379,7 @@ void main() {
 
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
         final ScrollController primary = ScrollController();
+        addTearDown(primary.dispose);
         final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0, key: Key('C'), child: Text('C')),
@@ -405,6 +410,8 @@ void main() {
 
         // Now try changing the primary scroll controller and checking that the scroll view gets updated.
         final ScrollController primary2 = ScrollController();
+        addTearDown(primary2.dispose);
+
         await tester.pumpWidget(buildWithScrollController(primary2));
         scrollView = tester.widget(
           find.byType(Scrollable),
@@ -417,6 +424,8 @@ void main() {
         const Key secondBox = Key('B');
         const Key thirdBox = Key('A');
         final ScrollController customController = ScrollController();
+        addTearDown(customController.dispose);
+
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -477,6 +486,8 @@ void main() {
       testWidgets('ReorderableList auto scrolling is fast enough', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/121603.
         final ScrollController controller = ScrollController();
+        addTearDown(controller.dispose);
+
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -522,9 +533,13 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) { },
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         final Widget overlay = Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(builder: (BuildContext context) => reorderableList),
+            entry = OverlayEntry(builder: (BuildContext context) => reorderableList),
           ],
         );
         final Widget boilerplate = Localizations(
@@ -946,6 +961,10 @@ void main() {
             ),
           ],
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         await tester.pumpWidget(MaterialApp(
           home: Container(
             color: Colors.white,
@@ -953,7 +972,7 @@ void main() {
             // Wrap in an overlay so that the golden image includes the dragged item.
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(builder: (BuildContext context) {
+                entry = OverlayEntry(builder: (BuildContext context) {
                   // Wrap the list in padding to test that the positioning
                   // is correct when the origin of the overlay is different
                   // from the list.
@@ -1548,6 +1567,7 @@ void main() {
             ),
           );
         },
+        buildDefaultDragHandles: false,
         itemCount: items.length,
         onReorder: handleReorder,
       ),
@@ -1614,6 +1634,7 @@ void main() {
             ),
           );
         },
+        buildDefaultDragHandles: false,
         itemCount: items.length,
         onReorder: handleReorder,
         onReorderStart: (int index) {
@@ -1837,6 +1858,7 @@ void main() {
     Future<double> pumpListAndDrag({required double autoScrollerVelocityScalar}) async {
       final List<int> items = List<int>.generate(10, (int index) => index);
       final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
         MaterialApp(

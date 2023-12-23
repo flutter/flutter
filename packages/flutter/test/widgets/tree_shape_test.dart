@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'multi_view_testing.dart';
+
 void main() {
   testWidgets('Providing a RenderObjectWidget directly to the RootWidget fails', (WidgetTester tester) async {
     // No render tree exists to attach the RenderObjectWidget to.
@@ -1147,15 +1149,4 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
-}
-
-class FakeView extends TestFlutterView{
-  FakeView(FlutterView view, { this.viewId = 100 }) : super(
-    view: view,
-    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
-    display: view.display as TestDisplay,
-  );
-
-  @override
-  final int viewId;
 }

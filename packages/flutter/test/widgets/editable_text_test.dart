@@ -43,9 +43,6 @@ class _MatchesMethodCall extends Matcher {
   }
 }
 
-late TextEditingController controller;
-final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
-final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
 const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
@@ -63,21 +60,29 @@ TextEditingValue collapsedAtEnd(String text) {
 }
 
 void main() {
+  late TextEditingController controller;
+  late FocusNode focusNode;
+  late FocusScopeNode focusScopeNode;
+
   setUp(() async {
     final MockClipboard mockClipboard = MockClipboard();
     TestWidgetsFlutterBinding.ensureInitialized()
       .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     debugResetSemanticsIdCounter();
-    controller = TextEditingController();
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+    controller = TextEditingController();
+    focusNode = FocusNode(debugLabel: 'EditableText Node');
+    focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
   });
 
   tearDown(() {
     TestWidgetsFlutterBinding.ensureInitialized()
       .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     controller.dispose();
+    focusNode.dispose();
+    focusScopeNode.dispose();
   });
 
   // Tests that the desired keyboard action button is requested.
@@ -124,7 +129,6 @@ void main() {
     (WidgetTester tester) async {
       bool invokedLiveTextInputSuccessfully = false;
       final GlobalKey key = GlobalKey();
-      final TextEditingController controller = TextEditingController(text: '');
       await tester.pumpWidget(
         MaterialApp(
           home: Align(
@@ -136,7 +140,7 @@ void main() {
                 controller: controller,
                 showSelectionHandles: true,
                 autofocus: true,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: Typography.material2018().black.subtitle1!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
@@ -156,6 +160,7 @@ void main() {
                     onSelectAll: null,
                     onLookUp: null,
                     onSearchWeb: null,
+                    onShare: null,
                     onLiveTextInput: () {
                       invokedLiveTextInputSuccessfully = true;
                     },
@@ -191,12 +196,17 @@ void main() {
   testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
     final Key key = GlobalKey();
 
+    final TextEditingController controller1 = TextEditingController(text: 'blah blah');
+    addTearDown(controller1.dispose);
+    final TextEditingController controller2 = TextEditingController(text: 'blah blah');
+    addTearDown(controller2.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           key: key,
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: 'blah blah'),
+          controller: controller1,
           focusNode: focusNode,
           readOnly: true,
           style: textStyle,
@@ -218,7 +228,7 @@ void main() {
           child: EditableText(
             key: key,
             backgroundCursorColor: Colors.grey,
-            controller: TextEditingController(text: 'blah blah'),
+            controller: controller2,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
@@ -234,9 +244,8 @@ void main() {
     addTearDown(tester.view.reset);
 
     final ScrollController scrollController = ScrollController();
-    final TextEditingController textController = TextEditingController.fromValue(
-      const TextEditingValue(text: 'I love flutter'),
-    );
+    addTearDown(scrollController.dispose);
+    controller.value = const TextEditingValue(text: 'I love flutter');
 
     final Widget widget = MaterialApp(
       home: Scaffold(
@@ -248,7 +257,7 @@ void main() {
               SizedBox(
                 height: 20.0,
                 child: EditableText(
-                  controller: textController,
+                  controller: controller,
                   backgroundCursorColor: Colors.grey,
                   focusNode: focusNode,
                   style: const TextStyle(),
@@ -264,9 +273,9 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
     tester.view.viewInsets = const FakeViewPadding(bottom: 500);
-    textController.selection = TextSelection(
+    controller.selection = TextSelection(
       baseOffset: 0,
-      extentOffset: textController.text.length,
+      extentOffset: controller.text.length,
     );
 
     await tester.pump();
@@ -281,6 +290,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final Widget widget = MaterialApp(
       home: Scaffold(
         body: SingleChildScrollView(
@@ -301,7 +311,7 @@ void main() {
               SizedBox(
                 height: 20,
                 child: EditableText(
-                  controller: TextEditingController(),
+                  controller: controller,
                   backgroundCursorColor: Colors.grey,
                   focusNode: focusNode,
                   style: const TextStyle(),
@@ -325,7 +335,6 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/34538.
   testWidgets('RTL arabic correct caret placement after trailing whitespace', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -968,8 +977,8 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     controller.text = 'Text1';
 
     Future<void> pumpEditableText({ double? width, double? height, TextAlign textAlign = TextAlign.start }) async {
@@ -1096,7 +1105,6 @@ void main() {
   });
 
   testWidgets('enableSuggestions flag is sent to the engine properly', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
     const bool enableSuggestions = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -1126,7 +1134,6 @@ void main() {
   });
 
   testWidgets('enableIMEPersonalizedLearning flag is sent to the engine properly', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
     const bool enableIMEPersonalizedLearning = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -1157,7 +1164,6 @@ void main() {
 
   group('smartDashesType and smartQuotesType', () {
     testWidgets('sent to the engine properly', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
       const SmartDashesType smartDashesType = SmartDashesType.disabled;
       const SmartQuotesType smartQuotesType = SmartQuotesType.disabled;
       await tester.pumpWidget(
@@ -1190,7 +1196,6 @@ void main() {
     });
 
     testWidgets('default to true when obscureText is false', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
@@ -1219,7 +1224,6 @@ void main() {
     });
 
     testWidgets('default to false when obscureText is true', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
@@ -1250,11 +1254,8 @@ void main() {
   });
 
   testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController.fromValue(
-        const TextEditingValue(
-          text: 'initial value',
-        ),
-    );
+    controller.value = const TextEditingValue(text: 'initial value');
+
     Future<void> pumpEditableTextWithTextStyle(TextStyle style) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -1310,8 +1311,17 @@ void main() {
   });
 
   testWidgets('can update style of previous activated EditableText', (WidgetTester tester) async {
+    final TextEditingController controller1 = TextEditingController();
+    addTearDown(controller1.dispose);
+    final TextEditingController controller2 = TextEditingController();
+    addTearDown(controller2.dispose);
+    final TextEditingController controller3 = TextEditingController();
+    addTearDown(controller3.dispose);
+    final TextEditingController controller4 = TextEditingController();
+    addTearDown(controller4.dispose);
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
+
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1324,7 +1334,7 @@ void main() {
               children: <Widget>[
                 EditableText(
                   key: key1,
-                  controller: TextEditingController(),
+                  controller: controller1,
                   backgroundCursorColor: Colors.grey,
                   focusNode: focusNode,
                   style: const TextStyle(fontSize: 9),
@@ -1332,7 +1342,7 @@ void main() {
                 ),
                 EditableText(
                   key: key2,
-                  controller: TextEditingController(),
+                  controller: controller2,
                   backgroundCursorColor: Colors.grey,
                   focusNode: focusNode,
                   style: const TextStyle(fontSize: 9),
@@ -1367,7 +1377,7 @@ void main() {
               children: <Widget>[
                 EditableText(
                   key: key1,
-                  controller: TextEditingController(),
+                  controller: controller3,
                   backgroundCursorColor: Colors.grey,
                   focusNode: focusNode,
                   style: const TextStyle(fontSize: 20),
@@ -1375,7 +1385,7 @@ void main() {
                 ),
                 EditableText(
                   key: key2,
-                  controller: TextEditingController(),
+                  controller: controller4,
                   backgroundCursorColor: Colors.grey,
                   focusNode: focusNode,
                   style: const TextStyle(fontSize: 9),
@@ -1548,7 +1558,9 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
-  // Test case for https://github.com/flutter/flutter/issues/123523.
+  // Test case for
+  // https://github.com/flutter/flutter/issues/123523
+  // https://github.com/flutter/flutter/issues/134846 .
   testWidgets(
       'The focus and callback behavior are correct when TextInputClient.onConnectionClosed message received',
       (WidgetTester tester) async {
@@ -1586,17 +1598,9 @@ void main() {
     editableText.connectionClosed();
     await tester.pump();
 
-    if (kIsWeb) {
-      expect(onSubmittedInvoked, isTrue);
-      expect(onEditingCompleteInvoked, isTrue);
-      // Because we add the onEditingComplete and we didn't unfocus there, so focus still exists.
-      expect(focusNode.hasFocus, isTrue);
-    } else {
-      // For mobile and other platforms, calling connectionClosed will only unfocus.
-      expect(focusNode.hasFocus, isFalse);
-      expect(onEditingCompleteInvoked, isFalse);
-      expect(onSubmittedInvoked, isFalse);
-    }
+    expect(focusNode.hasFocus, isFalse);
+    expect(onEditingCompleteInvoked, isFalse);
+    expect(onSubmittedInvoked, isFalse);
   });
 
   testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
@@ -2094,6 +2098,8 @@ void main() {
 
   testWidgets('Copy selection does not collapse selection on desktop and iOS', (WidgetTester tester) async {
     final TextEditingController localController = TextEditingController(text: 'Hello world');
+    addTearDown(localController.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -2132,6 +2138,8 @@ void main() {
 
   testWidgets('Copy selection collapses selection and hides the toolbar on Android and Fuchsia', (WidgetTester tester) async {
     final TextEditingController localController = TextEditingController(text: 'Hello world');
+    addTearDown(localController.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -2210,11 +2218,13 @@ void main() {
   });
 
   testWidgets('can dynamically disable options in toolbar', (WidgetTester tester) async {
+    controller.text = 'blah blah';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: 'blah blah'),
+          controller: controller,
           focusNode: focusNode,
           toolbarOptions: const ToolbarOptions(
             copy: true,
@@ -2247,11 +2257,13 @@ void main() {
 
   testWidgets('can dynamically disable select all option in toolbar - cupertino', (WidgetTester tester) async {
     // Regression test: https://github.com/flutter/flutter/issues/40711
+    controller.text = 'blah blah';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: 'blah blah'),
+          controller: controller,
           focusNode: focusNode,
           toolbarOptions: ToolbarOptions.empty,
           style: textStyle,
@@ -2276,11 +2288,13 @@ void main() {
 
   testWidgets('can dynamically disable select all option in toolbar - material', (WidgetTester tester) async {
     // Regression test: https://github.com/flutter/flutter/issues/40711
+    controller.text = 'blah blah';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: 'blah blah'),
+          controller: controller,
           focusNode: focusNode,
           toolbarOptions: const ToolbarOptions(
             copy: true,
@@ -2311,11 +2325,13 @@ void main() {
   });
 
   testWidgets('cut and paste are disabled in read only mode even if explicitly set', (WidgetTester tester) async {
+    controller.text = 'blah blah';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: 'blah blah'),
+          controller: controller,
           focusNode: focusNode,
           readOnly: true,
           toolbarOptions: const ToolbarOptions(
@@ -2350,11 +2366,13 @@ void main() {
   });
 
   testWidgets('cut and copy are disabled in obscured mode even if explicitly set', (WidgetTester tester) async {
+    controller.text = 'blah blah';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: 'blah blah'),
+          controller: controller,
           focusNode: focusNode,
           obscureText: true,
           toolbarOptions: const ToolbarOptions(
@@ -2392,11 +2410,13 @@ void main() {
   });
 
   testWidgets('cut and copy do nothing in obscured mode even if explicitly called', (WidgetTester tester) async {
+    controller.text = 'blah blah';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: 'blah blah'),
+          controller: controller,
           focusNode: focusNode,
           obscureText: true,
           style: textStyle,
@@ -2432,11 +2452,13 @@ void main() {
   });
 
   testWidgets('select all does nothing if obscured and read-only, even if explicitly called', (WidgetTester tester) async {
+    controller.text = 'blah blah';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: 'blah blah'),
+          controller: controller,
           focusNode: focusNode,
           obscureText: true,
           readOnly: true,
@@ -2458,10 +2480,12 @@ void main() {
 
   group('buttonItemsForToolbarOptions', () {
     testWidgets('returns null when toolbarOptions are empty', (WidgetTester tester) async {
+      controller.text = 'TEXT';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'TEXT'),
+            controller: controller,
             toolbarOptions: ToolbarOptions.empty,
             focusNode: focusNode,
             style: textStyle,
@@ -2479,10 +2503,12 @@ void main() {
     });
 
     testWidgets('returns empty array when only cut is selected in toolbarOptions but cut is not enabled', (WidgetTester tester) async {
+      controller.text = 'TEXT';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'TEXT'),
+            controller: controller,
             toolbarOptions: const ToolbarOptions(cut: true),
             readOnly: true,
             focusNode: focusNode,
@@ -2503,7 +2529,7 @@ void main() {
 
     testWidgets('returns only cut button when only cut is selected in toolbarOptions and cut is enabled', (WidgetTester tester) async {
       const String text = 'TEXT';
-      final TextEditingController controller = TextEditingController(text: text);
+      controller.text = text;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2547,10 +2573,12 @@ void main() {
     });
 
     testWidgets('returns empty array when only copy is selected in toolbarOptions but copy is not enabled', (WidgetTester tester) async {
+      controller.text = 'TEXT';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'TEXT'),
+            controller: controller,
             toolbarOptions: const ToolbarOptions(copy: true),
             obscureText: true,
             focusNode: focusNode,
@@ -2571,7 +2599,7 @@ void main() {
 
     testWidgets('returns only copy button when only copy is selected in toolbarOptions and copy is enabled', (WidgetTester tester) async {
       const String text = 'TEXT';
-      final TextEditingController controller = TextEditingController(text: text);
+      controller.text = text;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2615,10 +2643,12 @@ void main() {
     });
 
     testWidgets('returns empty array when only paste is selected in toolbarOptions but paste is not enabled', (WidgetTester tester) async {
+      controller.text = 'TEXT';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'TEXT'),
+            controller: controller,
             toolbarOptions: const ToolbarOptions(paste: true),
             readOnly: true,
             focusNode: focusNode,
@@ -2639,7 +2669,7 @@ void main() {
 
     testWidgets('returns only paste button when only paste is selected in toolbarOptions and paste is enabled', (WidgetTester tester) async {
       const String text = 'TEXT';
-      final TextEditingController controller = TextEditingController(text: text);
+      controller.text = text;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2680,10 +2710,12 @@ void main() {
     });
 
     testWidgets('returns empty array when only selectAll is selected in toolbarOptions but selectAll is not enabled', (WidgetTester tester) async {
+      controller.text = 'TEXT';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'TEXT'),
+            controller: controller,
             toolbarOptions: const ToolbarOptions(selectAll: true),
             readOnly: true,
             obscureText: true,
@@ -2705,7 +2737,7 @@ void main() {
 
     testWidgets('returns only selectAll button when only selectAll is selected in toolbarOptions and selectAll is enabled', (WidgetTester tester) async {
       const String text = 'TEXT';
-      final TextEditingController controller = TextEditingController(text: text);
+      controller.text = text;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2741,8 +2773,8 @@ void main() {
   });
 
   testWidgets('Handles the read-only flag correctly', (WidgetTester tester) async {
-    final TextEditingController controller =
-        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    controller.text = 'Lorem ipsum dolor sit amet';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -2783,8 +2815,8 @@ void main() {
   });
 
   testWidgets('Does not accept updates when read-only', (WidgetTester tester) async {
-    final TextEditingController controller =
-        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    controller.text = 'Lorem ipsum dolor sit amet';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -2824,10 +2856,8 @@ void main() {
   });
 
   testWidgets('Read-only fields do not format text', (WidgetTester tester) async {
+    controller.text = 'Lorem ipsum dolor sit amet';
     late SelectionChangedCause selectionCause;
-
-    final TextEditingController controller =
-        TextEditingController(text: 'Lorem ipsum dolor sit amet');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2864,10 +2894,8 @@ void main() {
   });
 
   testWidgets('Selection changes during Scribble interaction should have the scribble cause', (WidgetTester tester) async {
+    controller.text = 'Lorem ipsum dolor sit amet';
     late SelectionChangedCause selectionCause;
-
-    final TextEditingController controller =
-        TextEditingController(text: 'Lorem ipsum dolor sit amet');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2912,8 +2940,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Requests focus and changes the selection when onScribbleFocus is called', (WidgetTester tester) async {
-    final TextEditingController controller =
-        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    controller.text = 'Lorem ipsum dolor sit amet';
     late SelectionChangedCause selectionCause;
 
     await tester.pumpWidget(
@@ -2944,8 +2971,7 @@ void main() {
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
   testWidgets('Declares itself for Scribble interaction if the bounds overlap the scribble rect and the widget is touchable', (WidgetTester tester) async {
-    final TextEditingController controller =
-        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3038,8 +3064,7 @@ void main() {
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
   testWidgets('single line Scribble fields can show a horizontal placeholder', (WidgetTester tester) async {
-    final TextEditingController controller =
-        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3113,8 +3138,7 @@ void main() {
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
   testWidgets('multiline Scribble fields can show a vertical placeholder', (WidgetTester tester) async {
-    final TextEditingController controller =
-        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3193,7 +3217,7 @@ void main() {
   testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;
     late StateSetter setState;
-    final TextEditingController controller = TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3231,7 +3255,7 @@ void main() {
   testWidgets('Sends "updateConfig" when obscureText is flipped', (WidgetTester tester) async {
     bool obscureText = true;
     late StateSetter setState;
-    final TextEditingController controller = TextEditingController(text: 'Lorem');
+    controller.text = 'Lorem';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3269,8 +3293,8 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
-        focusNode: FocusNode(),
+        controller: controller,
+        focusNode: focusNode,
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
@@ -3334,7 +3358,6 @@ void main() {
           bool shouldFocusNext = false,
           bool shouldFocusPrevious = false,
         }) async {
-      final FocusNode focusNode = FocusNode();
       final GlobalKey previousKey = GlobalKey();
       final GlobalKey nextKey = GlobalKey();
 
@@ -3347,7 +3370,7 @@ void main() {
             ),
             EditableText(
               backgroundCursorColor: Colors.grey,
-              controller: TextEditingController(),
+              controller: controller,
               focusNode: focusNode,
               style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
@@ -3388,12 +3411,10 @@ void main() {
   }, variant: focusVariants);
 
   testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
+        controller: controller,
         focusNode: focusNode,
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
@@ -3422,15 +3443,13 @@ void main() {
   });
 
   testWidgets('When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
+        controller: controller,
         focusNode: focusNode,
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
@@ -3462,15 +3481,13 @@ void main() {
   });
 
   testWidgets('When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
+        controller: controller,
         focusNode: focusNode,
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
@@ -3502,15 +3519,13 @@ void main() {
   });
 
   testWidgets('When "newline" action is called on a Editable text with maxLines == 1 callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
+        controller: controller,
         focusNode: focusNode,
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
@@ -3541,15 +3556,13 @@ void main() {
   });
 
   testWidgets('When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
+        controller: controller,
         focusNode: focusNode,
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
@@ -3692,6 +3705,7 @@ void main() {
     'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);
+      controller.text = 'ABCDEFG';
 
       void verifyAutocorrectionRectVisibility({ required bool expectVisible }) {
         PaintPattern evaluate() {
@@ -3719,9 +3733,6 @@ void main() {
 
         expect(findRenderEditable(tester), evaluate());
       }
-
-      final FocusNode focusNode = FocusNode();
-      final TextEditingController controller = TextEditingController(text: 'ABCDEFG');
 
       final Widget widget = MaterialApp(
         home: EditableText(
@@ -3773,12 +3784,13 @@ void main() {
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
     final TextEditingController controller1 =
         TextEditingController(text: 'Wibble');
+    addTearDown(controller1.dispose);
     final TextEditingController controller2 =
         TextEditingController(text: 'Wobble');
+    addTearDown(controller2.dispose);
     TextEditingController currentController = controller1;
     late StateSetter setState;
 
-    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
     Widget builder() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
@@ -3961,7 +3973,6 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const String value1 = 'EditableText content';
-
     controller.text = value1;
 
     await tester.pumpWidget(
@@ -4957,6 +4968,7 @@ void main() {
       Future<void> testByControls(TextSelectionControls controls) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final TextEditingController controller = TextEditingController(text: 'ABCDEFG');
+        addTearDown(controller.dispose);
 
         await tester.pumpWidget(MaterialApp(
           home: EditableText(
@@ -5082,7 +5094,6 @@ void main() {
 
   testWidgets('onChanged callback only invoked on text changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/111651 .
-    final TextEditingController controller = TextEditingController();
     int onChangedCount = 0;
     bool preventInput = false;
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
@@ -5095,7 +5106,7 @@ void main() {
         controller: controller,
         backgroundCursorColor: Colors.red,
         cursorColor: Colors.red,
-        focusNode: FocusNode(),
+        focusNode: focusNode,
         style: textStyle,
         onChanged: (String newString) { onChangedCount += 1; },
         inputFormatters: <TextInputFormatter>[formatter],
@@ -5132,14 +5143,13 @@ void main() {
       called += 1;
       return newValue;
     });
-    final TextEditingController controller = TextEditingController();
     final MediaQuery mediaQuery = MediaQuery(
       data: const MediaQueryData(),
       child: EditableText(
         controller: controller,
         backgroundCursorColor: Colors.red,
         cursorColor: Colors.red,
-        focusNode: FocusNode(),
+        focusNode: focusNode,
         style: textStyle,
         inputFormatters: <TextInputFormatter>[
           formatter,
@@ -5179,7 +5189,6 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -5187,7 +5196,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: EditableText(
             controller: controller,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -5209,7 +5218,6 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -5217,7 +5225,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: EditableText(
             controller: controller,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -5246,7 +5254,13 @@ void main() {
     });
 
     final TextEditingController controller1 = TextEditingController();
+    addTearDown(controller1.dispose);
+    final FocusNode focusNode1 = FocusNode();
+    addTearDown(focusNode1.dispose);
     final TextEditingController controller2 = TextEditingController();
+    addTearDown(controller2.dispose);
+    final FocusNode focusNode2 = FocusNode();
+    addTearDown(focusNode2.dispose);
     controller1.text = 'Text1';
     controller2.text = 'Text2';
 
@@ -5261,7 +5275,7 @@ void main() {
               EditableText(
                 key: ValueKey<String>(controller1.text),
                 controller: controller1,
-                focusNode: FocusNode(),
+                focusNode: focusNode1,
                 style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
@@ -5270,7 +5284,7 @@ void main() {
               EditableText(
                 key: ValueKey<String>(controller2.text),
                 controller: controller2,
-                focusNode: FocusNode(),
+                focusNode: focusNode2,
                 style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
@@ -5388,8 +5402,8 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     controller.text = 'Text1';
 
     Future<void> pumpEditableText({ double? width, double? height, TextAlign textAlign = TextAlign.start }) async {
@@ -5514,7 +5528,6 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     controller.text = 'Text1';
 
     await tester.pumpWidget(
@@ -5528,7 +5541,7 @@ void main() {
               EditableText(
                 key: ValueKey<String>(controller.text),
                 controller: controller,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
@@ -5564,8 +5577,8 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     controller.text = 'Text1';
 
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey();
@@ -5605,7 +5618,9 @@ void main() {
 
     // Scroll so that the top of each character is above the top of the renderEditable
     // and the bottom of each character is below the bottom of the renderEditable.
-    editableTextKey.currentState!.renderEditable.offset = ViewportOffset.fixed(0.5);
+    final ViewportOffset offset = ViewportOffset.fixed(0.5);
+    addTearDown(offset.dispose);
+    editableTextKey.currentState!.renderEditable.offset = offset;
 
     await tester.showKeyboard(find.byType(EditableText));
     // We should get all the rects.
@@ -5628,14 +5643,13 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
         child: EditableText(
           textDirection: TextDirection.rtl,
           controller: controller,
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           style: const TextStyle(
             fontSize: 20.0,
             fontFamily: 'Roboto',
@@ -5668,14 +5682,13 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(boldText: true),
         child: EditableText(
           textDirection: TextDirection.rtl,
           controller: controller,
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           style: const TextStyle(
             fontSize: 20.0,
             fontFamily: 'Roboto',
@@ -5731,7 +5744,7 @@ void main() {
                       backgroundCursorColor: Colors.grey,
                       key: editableTextKey,
                       controller: controller,
-                      focusNode: FocusNode(),
+                      focusNode: focusNode,
                       style: currentTextStyle,
                       cursorColor: Colors.blue,
                       selectionControls: materialTextSelectionControls,
@@ -5786,7 +5799,7 @@ void main() {
                 child: EditableText(
                   backgroundCursorColor: Colors.grey,
                   controller: controller,
-                  focusNode: FocusNode(),
+                  focusNode: focusNode,
                   style: textStyle,
                   cursorColor: Colors.blue,
                   selectionControls: materialTextSelectionControls,
@@ -5861,16 +5874,48 @@ void main() {
     );
 
     testWidgets(
-      'not sent with selection',
+      'set to selection start on forward selection',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(
           text: 'a' * 100,
-          selection: const TextSelection(baseOffset: 0, extentOffset: 10),
+          selection: const TextSelection(baseOffset: 10, extentOffset: 30),
         );
         await tester.pumpWidget(builder());
         await tester.showKeyboard(find.byType(EditableText));
 
-        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(140)),
+              containsPair('y', equals(0)),
+            ),
+          ),
+        ));
+      },
+    );
+
+    testWidgets(
+      'set to selection start on reversed selection',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(
+          text: 'a' * 100,
+          selection: const TextSelection(baseOffset: 30, extentOffset: 10),
+        );
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(140)),
+              containsPair('y', equals(0)),
+            ),
+          ),
+        ));
       },
     );
   });
@@ -5887,7 +5932,7 @@ void main() {
                 child: EditableText(
                   backgroundCursorColor: Colors.grey,
                   controller: controller,
-                  focusNode: FocusNode(),
+                  focusNode: focusNode,
                   style: textStyle,
                   cursorColor: Colors.blue,
                   selectionControls: materialTextSelectionControls,
@@ -5984,7 +6029,6 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -5992,7 +6036,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: EditableText(
             controller: controller,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -6009,14 +6053,11 @@ void main() {
   });
 
   testWidgets('Composing text is underlined and underline is cleared when losing focus', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(
-        text: 'text composing text',
-        selection: TextSelection.collapsed(offset: 14),
-        composing: TextRange(start: 5, end: 14),
-      ),
+    controller.value = const TextEditingValue(
+      text: 'text composing text',
+      selection: TextSelection.collapsed(offset: 14),
+      composing: TextRange(start: 5, end: 14),
     );
-    final FocusNode focusNode = FocusNode(debugLabel: 'Test Focus Node');
 
     await tester.pumpWidget(MaterialApp( // So we can show overlays.
       home: EditableText(
@@ -6057,8 +6098,7 @@ void main() {
   });
 
   testWidgets('text selection toolbar visibility', (WidgetTester tester) async {
-    const String testText = 'hello \n world \n this \n is \n text';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'hello \n world \n this \n is \n text';
 
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -6069,7 +6109,7 @@ void main() {
           child: EditableText(
             showSelectionHandles: true,
             controller: controller,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -6127,8 +6167,7 @@ void main() {
 
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
-    const String testText = 'XXXXX          XXXXX';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'XXXXX          XXXXX';
 
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -6138,7 +6177,7 @@ void main() {
           child: EditableText(
             showSelectionHandles: true,
             controller: controller,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -6299,8 +6338,7 @@ void main() {
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
-    const String testText = 'XXXXX          XXXXX';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'XXXXX          XXXXX';
 
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -6310,7 +6348,7 @@ void main() {
           child: EditableText(
             controller: controller,
             showSelectionHandles: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -6367,7 +6405,7 @@ void main() {
   Future<void> testTextEditing(WidgetTester tester, {required TargetPlatform targetPlatform}) async {
     final String targetPlatformString = targetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -6385,7 +6423,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -7390,7 +7428,7 @@ void main() {
     'keyboard shortcuts respect read-only',
     (WidgetTester tester) async {
       final String platform = defaultTargetPlatform.name.toLowerCase();
-      final TextEditingController controller = TextEditingController(text: testText);
+      controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
         extentOffset: testText.length ~/2,
@@ -7406,7 +7444,7 @@ void main() {
               readOnly: true,
               controller: controller,
               autofocus: true,
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -7568,7 +7606,7 @@ void main() {
   testWidgets('home/end keys', (WidgetTester tester) async {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -7586,7 +7624,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -7715,7 +7753,7 @@ void main() {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -7733,7 +7771,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -7871,7 +7909,7 @@ void main() {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -7889,7 +7927,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -8028,7 +8066,7 @@ void main() {
   testWidgets('shift + home/end keys', (WidgetTester tester) async {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -8046,7 +8084,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -8220,7 +8258,7 @@ void main() {
   );
 
   testWidgets('shift + home/end keys (Windows only)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -8236,7 +8274,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -8332,7 +8370,7 @@ void main() {
 
   testWidgets('home/end keys scrolling (Mac only)', (WidgetTester tester) async {
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -8348,7 +8386,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -8395,7 +8433,7 @@ void main() {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -8413,7 +8451,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -8580,7 +8618,7 @@ void main() {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -8598,7 +8636,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -8765,7 +8803,7 @@ void main() {
 
   testWidgets('shift + home/end keys to document boundary (Mac only)', (WidgetTester tester) async {
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -8782,7 +8820,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -8868,7 +8906,7 @@ void main() {
   );
 
   testWidgets('control + home/end keys (Windows only)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -8884,7 +8922,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -8933,7 +8971,7 @@ void main() {
   );
 
   testWidgets('control + shift + home/end keys (Windows only)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -8949,7 +8987,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -9020,13 +9058,14 @@ void main() {
   );
 
   testWidgets('pageup/pagedown keys on Apple platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
       affinity: TextAffinity.upstream,
     );
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     const int lines = 2;
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -9040,7 +9079,7 @@ void main() {
             scrollController: scrollController,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -9115,13 +9154,14 @@ void main() {
   );
 
   testWidgets('pageup/pagedown keys in a one line field on Apple platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
       affinity: TextAffinity.upstream,
     );
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
@@ -9133,7 +9173,7 @@ void main() {
             scrollController: scrollController,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -9194,8 +9234,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
-    const String testText = 'XXXXX          XXXXX';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'XXXXX          XXXXX';
 
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -9205,7 +9244,7 @@ void main() {
           child: EditableText(
             showSelectionHandles: true,
             controller: controller,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -9366,8 +9405,7 @@ void main() {
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.
-    const String testText = 'XXXXX\nXXXXX\nXXXXX';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'XXXXX\nXXXXX\nXXXXX';
 
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -9378,7 +9416,7 @@ void main() {
             showSelectionHandles: true,
             maxLines: 2,
             controller: controller,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -9416,9 +9454,11 @@ void main() {
 
   testWidgets('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/55547.
-    final TextEditingController controller = TextEditingController(text: testText * 20);
+    controller.text = testText * 20;
     final ScrollController editableScrollController = ScrollController();
+    addTearDown(editableScrollController.dispose);
     final ScrollController outerController = ScrollController();
+    addTearDown(outerController.dispose);
 
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -9432,7 +9472,7 @@ void main() {
               maxLines: null,
               controller: controller,
               scrollController: editableScrollController,
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -9457,8 +9497,9 @@ void main() {
   });
 
   testWidgets('bringIntoView does nothing if the physics prohibits implicit scrolling', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: testText * 20);
+    controller.text = testText * 20;
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     Future<void> buildWithPhysics({ ScrollPhysics? physics }) async {
       await tester.pumpWidget(MaterialApp(
@@ -9471,7 +9512,7 @@ void main() {
               maxLines: null,
               controller: controller,
               scrollController: scrollController,
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -9504,14 +9545,17 @@ void main() {
   });
 
   testWidgets('can change scroll controller', (WidgetTester tester) async {
+    controller.text = 'A' * 1000;
     final _TestScrollController scrollController1 = _TestScrollController();
+    addTearDown(scrollController1.dispose);
     final _TestScrollController scrollController2 = _TestScrollController();
+    addTearDown(scrollController2.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
-          controller: TextEditingController(text: 'A' * 1000),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
@@ -9527,8 +9571,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
-          controller: TextEditingController(text: 'A' * 1000),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
@@ -9544,8 +9588,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
-          controller: TextEditingController(text: 'A' * 1000),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
@@ -9560,8 +9604,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
-          controller: TextEditingController(text: 'A' * 1000),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
@@ -9581,8 +9625,8 @@ void main() {
           child: Transform(
             transform: Matrix4.zero(),
             child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
+              controller: controller,
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -9599,7 +9643,6 @@ void main() {
   });
 
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
     expect(
       () {
         EditableText(
@@ -9630,33 +9673,32 @@ void main() {
   });
 
   group('batch editing', () {
-    final TextEditingController controller = TextEditingController(text: testText);
-    final EditableText editableText = EditableText(
-      showSelectionHandles: true,
-      maxLines: 2,
-      controller: controller,
-      focusNode: FocusNode(),
-      cursorColor: Colors.red,
-      backgroundCursorColor: Colors.blue,
-      style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
-      keyboardType: TextInputType.text,
-    );
-
-    final Widget widget = MediaQuery(
-      data: const MediaQueryData(),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: editableText,
-      ),
-    );
+    Widget buildWidget() {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            showSelectionHandles: true,
+            maxLines: 2,
+            controller: controller,
+            focusNode: focusNode,
+            cursorColor: Colors.red,
+            backgroundCursorColor: Colors.blue,
+            style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      );
+    }
 
     testWidgets('batch editing works', (WidgetTester tester) async {
-      await tester.pumpWidget(widget);
+      await tester.pumpWidget(buildWidget());
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
 
-      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       state.updateEditingValue(const TextEditingValue(text: 'remote value'));
       tester.testTextInput.log.clear();
 
@@ -9690,12 +9732,12 @@ void main() {
     });
 
     testWidgets('batch edits need to be nested properly', (WidgetTester tester) async {
-      await tester.pumpWidget(widget);
+      await tester.pumpWidget(buildWidget());
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
 
-      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       state.updateEditingValue(const TextEditingValue(text: 'remote value'));
       tester.testTextInput.log.clear();
 
@@ -9710,12 +9752,12 @@ void main() {
     });
 
      testWidgets('catch unfinished batch edits on disposal', (WidgetTester tester) async {
-      await tester.pumpWidget(widget);
+      await tester.pumpWidget(buildWidget());
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
 
-      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       state.updateEditingValue(const TextEditingValue(text: 'remote value'));
       tester.testTextInput.log.clear();
 
@@ -9728,12 +9770,12 @@ void main() {
   });
 
   group('EditableText does not send editing values more than once', () {
-    Widget boilerplate(TextEditingController controller) {
+    Widget boilerplate() {
       final EditableText editableText = EditableText(
         showSelectionHandles: true,
         maxLines: 2,
         controller: controller,
-        focusNode: FocusNode(),
+        focusNode: focusNode,
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
         style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -9760,8 +9802,8 @@ void main() {
     }
 
     testWidgets('input from text input plugin', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: testText);
-      await tester.pumpWidget(boilerplate(controller));
+      controller.text = testText;
+      await tester.pumpWidget(boilerplate());
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
@@ -9790,8 +9832,8 @@ void main() {
     });
 
     testWidgets('input from text selection menu', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: testText);
-      await tester.pumpWidget(boilerplate(controller));
+      controller.text = testText;
+      await tester.pumpWidget(boilerplate());
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
@@ -9815,8 +9857,8 @@ void main() {
     });
 
     testWidgets('input from controller', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: testText);
-      await tester.pumpWidget(boilerplate(controller));
+      controller.text = testText;
+      await tester.pumpWidget(boilerplate());
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
@@ -9832,7 +9874,6 @@ void main() {
     });
 
     testWidgets('input from changing controller', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: testText);
       Widget build({ TextEditingController? textEditingController }) {
         return MediaQuery(
           data: const MediaQueryData(),
@@ -9842,7 +9883,7 @@ void main() {
               showSelectionHandles: true,
               maxLines: 2,
               controller: textEditingController ?? controller,
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               cursorColor: Colors.red,
               backgroundCursorColor: Colors.blue,
               style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -9858,7 +9899,9 @@ void main() {
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
       tester.testTextInput.log.clear();
-      await tester.pumpWidget(build(textEditingController: TextEditingController(text: 'new text')));
+      final TextEditingController controller1 = TextEditingController(text: 'new text');
+      addTearDown(controller1.dispose);
+      await tester.pumpWidget(build(textEditingController: controller1));
 
       List<TextEditingValue> updates = tester.testTextInput.log
         .where((MethodCall call) => call.method == 'TextInput.setEditingState')
@@ -9868,7 +9911,9 @@ void main() {
       expect(updates, const <TextEditingValue>[TextEditingValue(text: 'new text')]);
 
       tester.testTextInput.log.clear();
-      await tester.pumpWidget(build(textEditingController: TextEditingController(text: 'new new text')));
+      final TextEditingController controller2 = TextEditingController(text: 'new new text');
+      addTearDown(controller2.dispose);
+      await tester.pumpWidget(build(textEditingController: controller2));
 
       updates = tester.testTextInput.log
         .where((MethodCall call) => call.method == 'TextInput.setEditingState')
@@ -9880,13 +9925,12 @@ void main() {
   });
 
   testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
-    const String testText = 'flutter is the best!';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'flutter is the best!';
     final EditableText et = EditableText(
       showSelectionHandles: true,
       maxLines: 2,
       controller: controller,
-      focusNode: FocusNode(),
+      focusNode: focusNode,
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
       style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -9931,22 +9975,30 @@ void main() {
     'keyboard is requested after setEditingState after switching to a new text field',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/68571.
+      final TextEditingController controller1 = TextEditingController();
+      addTearDown(controller1.dispose);
+      final FocusNode focusNode1 = FocusNode();
+      addTearDown(focusNode1.dispose);
       final EditableText editableText1 = EditableText(
         showSelectionHandles: true,
         maxLines: 2,
-        controller: TextEditingController(),
-        focusNode: FocusNode(),
+        controller: controller1,
+        focusNode: focusNode1,
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
         style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
         keyboardType: TextInputType.text,
       );
 
+      final TextEditingController controller2 = TextEditingController();
+      addTearDown(controller2.dispose);
+      final FocusNode focusNode2 = FocusNode();
+      addTearDown(focusNode2.dispose);
       final EditableText editableText2 = EditableText(
         showSelectionHandles: true,
         maxLines: 2,
-        controller: TextEditingController(),
-        focusNode: FocusNode(),
+        controller: controller2,
+        focusNode: focusNode2,
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
         style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -9993,11 +10045,14 @@ void main() {
     'Autofill does not request focus',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91354 .
+      final TextEditingController controller1 = TextEditingController();
+      addTearDown(controller1.dispose);
       final FocusNode focusNode1 = FocusNode();
+      addTearDown(focusNode1.dispose);
       final EditableText editableText1 = EditableText(
         showSelectionHandles: true,
         maxLines: 2,
-        controller: TextEditingController(),
+        controller: controller1,
         focusNode: focusNode1,
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
@@ -10005,11 +10060,14 @@ void main() {
         keyboardType: TextInputType.text,
       );
 
+      final TextEditingController controller2 = TextEditingController();
+      addTearDown(controller2.dispose);
       final FocusNode focusNode2 = FocusNode();
+      addTearDown(focusNode2.dispose);
       final EditableText editableText2 = EditableText(
         showSelectionHandles: true,
         maxLines: 2,
-        controller: TextEditingController(),
+        controller: controller2,
         focusNode: focusNode2,
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
@@ -10042,13 +10100,12 @@ void main() {
 
   testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
     // We shouldn't get a message here because this change is owned by the platform side.
-    const String testText = 'flutter is the best!';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'flutter is the best!';
     final EditableText et = EditableText(
       showSelectionHandles: true,
       maxLines: 2,
       controller: controller,
-      focusNode: FocusNode(),
+      focusNode: focusNode,
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
       style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -10091,13 +10148,12 @@ void main() {
 
   testWidgets('setEditingState is called when text changes on controller', (WidgetTester tester) async {
     // We should get a message here because this change is owned by the framework side.
-    const String testText = 'flutter is the best!';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'flutter is the best!';
     final EditableText et = EditableText(
       showSelectionHandles: true,
       maxLines: 2,
       controller: controller,
-      focusNode: FocusNode(),
+      focusNode: focusNode,
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
       style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -10152,10 +10208,8 @@ void main() {
       }
       return newValue;
     });
-    final TextEditingController controller = TextEditingController();
     late StateSetter setState;
 
-    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
     Widget builder() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
@@ -10280,9 +10334,7 @@ void main() {
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       return collapsedAtEnd('Flutter is the best!');
     });
-    final TextEditingController controller = TextEditingController();
 
-    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
     Widget builder() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
@@ -10352,9 +10404,7 @@ void main() {
       log.add(methodCall);
       return null;
     });
-    final TextEditingController controller = TextEditingController();
 
-    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
     Widget builder() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
@@ -10433,7 +10483,6 @@ void main() {
 
   group('TextEditingController', () {
     testWidgets('TextEditingController.text set to empty string clears field', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
@@ -10474,9 +10523,7 @@ void main() {
         log.add(methodCall);
         return null;
       });
-      final TextEditingController controller = TextEditingController();
 
-      final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
       Widget builder() {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
@@ -10544,6 +10591,7 @@ void main() {
 
     testWidgets('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
       final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
+      addTearDown(controller.dispose);
       const Color color = Color.fromARGB(255, 1, 2, 3);
       final ThemeData lightTheme = ThemeData.light();
       await tester.pumpWidget(MaterialApp(
@@ -10552,7 +10600,7 @@ void main() {
         ),
         home: EditableText(
           controller: controller,
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
@@ -10566,7 +10614,6 @@ void main() {
 
     testWidgets('controller listener changes value', (WidgetTester tester) async {
       const double maxValue = 5.5555;
-      final TextEditingController controller = TextEditingController();
 
       controller.addListener(() {
         final double value = double.tryParse(controller.text.trim()) ?? .0;
@@ -10601,7 +10648,7 @@ void main() {
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -10614,7 +10661,7 @@ void main() {
         controller: controller,
         showSelectionHandles: true,
         autofocus: true,
-        focusNode: FocusNode(),
+        focusNode: focusNode,
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         backgroundCursorColor: Colors.grey,
@@ -10888,8 +10935,8 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
-        focusNode: FocusNode(),
+        controller: controller,
+        focusNode: focusNode,
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
@@ -11017,7 +11064,9 @@ void main() {
     void expectToAssert(TextEditingValue value, bool shouldAssert) {
       dynamic initException;
       dynamic updateException;
-      controller = TextEditingController();
+
+      TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       try {
         controller = TextEditingController.fromValue(value);
       } catch (e) {
@@ -11025,6 +11074,7 @@ void main() {
       }
 
       controller = TextEditingController();
+      addTearDown(controller.dispose);
       try {
         controller.value = value;
       } catch (e) {
@@ -11446,14 +11496,14 @@ void main() {
     const String errorText = 'Test EditableText callback error';
 
     testWidgets('onSelectionChanged can throw errors', (WidgetTester tester) async {
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
           maxLines: 2,
-          controller: TextEditingController(
-            text: 'flutter is the best!',
-          ),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
           style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -11473,14 +11523,14 @@ void main() {
     });
 
     testWidgets('onChanged can throw errors', (WidgetTester tester) async {
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
           maxLines: 2,
-          controller: TextEditingController(
-            text: 'flutter is the best!',
-          ),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
           style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -11499,14 +11549,14 @@ void main() {
     });
 
     testWidgets('onEditingComplete can throw errors', (WidgetTester tester) async {
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
           maxLines: 2,
-          controller: TextEditingController(
-            text: 'flutter is the best!',
-          ),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
           style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -11530,14 +11580,14 @@ void main() {
     });
 
     testWidgets('onSubmitted can throw errors', (WidgetTester tester) async {
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
           maxLines: 2,
-          controller: TextEditingController(
-            text: 'flutter is the best!',
-          ),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
           style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -11564,16 +11614,15 @@ void main() {
       final TextInputFormatter badFormatter = TextInputFormatter.withFunction(
         (TextEditingValue oldValue, TextEditingValue newValue) => throw FlutterError(errorText),
       );
-      final TextEditingController controller = TextEditingController(
-        text: 'flutter is the best!',
-      );
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
           maxLines: 2,
           controller: controller,
           inputFormatters: <TextInputFormatter>[badFormatter],
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
           style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
@@ -11597,6 +11646,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/72400.
   testWidgets("delete doesn't cause crash when selection is -1,-1", (WidgetTester tester) async {
     final UnsettableController unsettableController = UnsettableController();
+    addTearDown(unsettableController.dispose);
+
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -11636,7 +11687,7 @@ void main() {
       SingleActivator(LogicalKeyboardKey.keyV, control: true): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
       SingleActivator(LogicalKeyboardKey.keyA, control: true): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
     };
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -11694,7 +11745,7 @@ void main() {
   }, skip: kIsWeb); // [intended]
 
   testWidgets('navigating by word', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'word word word');
+    controller.text = 'word word word';
     // word wo|rd| word
     controller.selection = const TextSelection(
       baseOffset: 7,
@@ -11831,8 +11882,7 @@ void main() {
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
   testWidgets('navigating multiline text', (WidgetTester tester) async {
-    const String multilineText = 'word word word\nword word\nword'; // 15 + 10 + 4;
-    final TextEditingController controller = TextEditingController(text: multilineText);
+    controller.text = 'word word word\nword word\nword'; // 15 + 10 + 4;
     // wo|rd wo|rd
     controller.selection = const TextSelection(
       baseOffset: 17,
@@ -11990,8 +12040,7 @@ void main() {
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
   testWidgets("Mac's expand by line behavior on multiple lines", (WidgetTester tester) async {
-    const String multilineText = 'word word word\nword word\nword'; // 15 + 10 + 4;
-    final TextEditingController controller = TextEditingController(text: multilineText);
+    controller.text = 'word word word\nword word\nword'; // 15 + 10 + 4;
     // word word word
     // wo|rd word
     // w|ord
@@ -12092,8 +12141,7 @@ void main() {
   );
 
   testWidgets("Mac's expand extent position", (WidgetTester tester) async {
-    const String testText = 'Now is the time for all good people to come to the aid of their country';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = 'Now is the time for all good people to come to the aid of their country';
     // Start the selection in the middle somewhere.
     controller.selection = const TextSelection.collapsed(offset: 10);
     await tester.pumpWidget(MaterialApp(
@@ -12326,7 +12374,7 @@ void main() {
   );
 
   testWidgets('expanding selection to start/end single line', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'word word word');
+    controller.text = 'word word word';
     // word wo|rd| word
     controller.selection = const TextSelection(
       baseOffset: 7,
@@ -12413,7 +12461,7 @@ void main() {
   );
 
   testWidgets('can change text editing behavior by overriding actions', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -12459,9 +12507,7 @@ void main() {
   }, skip: kIsWeb); // [intended]
 
   testWidgets('ignore key event from web platform', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'test\ntest',
-    );
+    controller.text = 'test\ntest';
     controller.selection = const TextSelection(
       baseOffset: 0,
       extentOffset: 0,
@@ -12512,6 +12558,7 @@ void main() {
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 0);
     }
+    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
@@ -12581,12 +12628,13 @@ void main() {
   }, skip: kIsWeb); // [intended]
 
   testWidgets('EditableText does not leak animation controllers', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    controller.text = 'A';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           autofocus: true,
-          controller: TextEditingController(text: 'A'),
+          controller: controller,
           focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
@@ -12618,10 +12666,10 @@ void main() {
 
   testWidgets('Floating cursor affinity', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final FocusNode focusNode = FocusNode();
     final GlobalKey key = GlobalKey();
     // Set it up so that there will be word-wrap.
-    final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz');
+    controller.text = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz';
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -12680,14 +12728,13 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-testWidgets('Floating cursor ending with selection', (WidgetTester tester) async {
+  testWidgets('Floating cursor ending with selection', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final FocusNode focusNode = FocusNode();
     final GlobalKey key = GlobalKey();
     SelectionChangedCause? lastSelectionChangedCause;
-
-    final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890');
+    controller.text = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890';
     controller.selection = const TextSelection.collapsed(offset: 0);
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -12861,12 +12908,16 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     EditableText.debugDeterministicCursor = false;
   });
 
-
   group('Selection changed scroll into view', () {
     final String text = List<int>.generate(64, (int index) => index).join('\n');
     final TextEditingController controller = TextEditingController(text: text);
     final ScrollController scrollController = ScrollController();
     late double maxScrollExtent;
+
+    tearDownAll(() {
+      controller.dispose();
+      scrollController.dispose();
+    });
 
     Future<void> resetSelectionAndScrollOffset(WidgetTester tester, {required bool setMaxScrollExtent}) async {
       controller.value = controller.value.copyWith(
@@ -12880,7 +12931,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       maxScrollExtent = scrollController.position.maxScrollExtent;
       expect(scrollController.offset, targetOffset);
     }
-
 
     Future<TextSelectionDelegate> pumpLongScrollableText(WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
@@ -12973,10 +13023,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   testWidgets('Should not scroll on paste if caret already visible', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96658.
     final ScrollController scrollController = ScrollController();
-    final TextEditingController controller = TextEditingController(
-      text: 'Lorem ipsum please paste here: \n${".\n" * 50}',
-    );
-    final FocusNode focusNode = FocusNode();
+    addTearDown(scrollController.dispose);
+    controller.text = 'Lorem ipsum please paste here: \n${".\n" * 50}';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -13015,12 +13063,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   });
 
   testWidgets('Autofill enabled by default', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    controller.text = 'A';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           autofocus: true,
-          controller: TextEditingController(text: 'A'),
+          controller: controller,
           focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
@@ -13038,12 +13087,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   });
 
   testWidgets('Autofill can be disabled', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    controller.text = 'A';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           autofocus: true,
-          controller: TextEditingController(text: 'A'),
+          controller: controller,
           focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
@@ -13077,11 +13127,18 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     Future<void> sendUndo(WidgetTester tester) => sendUndoRedo(tester);
     Future<void> sendRedo(WidgetTester tester) => sendUndoRedo(tester, true);
 
-    Widget boilerplate(TextEditingController controller, [FocusNode? focusNode]) {
+    TextEditingValue emptyComposingOnAndroid(TextEditingValue value) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        return value.copyWith(composing: TextRange.empty);
+      }
+      return value;
+    }
+
+    Widget boilerplate() {
       return MaterialApp(
         home: EditableText(
           controller: controller,
-          focusNode: focusNode ?? FocusNode(),
+          focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
@@ -13122,8 +13179,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     );
 
     testWidgets('Should have no effect on an empty and non-focused field', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      await tester.pumpWidget(boilerplate(controller));
+      await tester.pumpWidget(boilerplate());
       expect(controller.value, TextEditingValue.empty);
 
       // Undo/redo have no effect on an empty field that has never been edited.
@@ -13138,9 +13194,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
     testWidgets('Should have no effect on an empty and focused field', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(boilerplate(controller, focusNode));
+      await tester.pumpWidget(boilerplate());
       await waitForThrottling(tester);
       expect(controller.value, TextEditingValue.empty);
 
@@ -13148,31 +13202,29 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       // state saved in text editing history.
       focusNode.requestFocus();
       await tester.pump();
-      expect(controller.value,  emptyTextCollapsed);
+      expect(controller.value, emptyTextCollapsed);
       await waitForThrottling(tester);
 
       // Undo/redo should have no effect. The field is focused and the value has
       // changed, but the text remains empty.
       await sendUndo(tester);
-      expect(controller.value,  emptyTextCollapsed);
+      expect(controller.value, emptyTextCollapsed);
 
       await sendRedo(tester);
-      expect(controller.value,  emptyTextCollapsed);
+      expect(controller.value, emptyTextCollapsed);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
     testWidgets('Can undo/redo a single insertion', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(boilerplate(controller, focusNode));
+      await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
       // state saved in text editing history.
       focusNode.requestFocus();
       await tester.pump();
       await waitForThrottling(tester);
-      expect(controller.value,  emptyTextCollapsed);
+      expect(controller.value, emptyTextCollapsed);
 
       // First insertion.
       await tester.enterText(find.byType(EditableText), textA);
@@ -13203,16 +13255,14 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
     testWidgets('Can undo/redo multiple insertions', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(boilerplate(controller, focusNode));
+      await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
       // state saved in text editing history.
       focusNode.requestFocus();
       await tester.pump();
       await waitForThrottling(tester);
-      expect(controller.value,  emptyTextCollapsed);
+      expect(controller.value, emptyTextCollapsed);
 
       // First insertion.
       await tester.enterText(find.byType(EditableText), textA);
@@ -13247,16 +13297,14 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     // This is only reproducible on Android platform because it is the only
     // platform where composing changes are saved in the editing history.
     testWidgets('Can undo as intented when adding a delay between undos', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(boilerplate(controller, focusNode));
+      await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
       // state saved in text editing history.
       focusNode.requestFocus();
       await tester.pump();
       await waitForThrottling(tester);
-      expect(controller.value,  emptyTextCollapsed);
+      expect(controller.value, emptyTextCollapsed);
 
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
@@ -13289,14 +13337,14 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       // Undo first insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep2);
+      expect(controller.value, emptyComposingOnAndroid(composingStep2));
 
       // Waiting for the throttling between undos should have no effect.
       await tester.pump(const Duration(milliseconds: 500));
 
       // Undo second insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep1);
+      expect(controller.value, emptyComposingOnAndroid(composingStep1));
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
@@ -13304,9 +13352,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     // Regression test for https://github.com/flutter/flutter/issues/120194.
     testWidgets('Cursor does not jump after undo', (WidgetTester tester) async {
       // Initialize the controller with a non empty text.
-      final TextEditingController controller = TextEditingController(text: textA);
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(boilerplate(controller, focusNode));
+      controller.text = textA;
+      await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
       // state saved in text editing history.
@@ -13329,9 +13376,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
     testWidgets('Initial value is recorded when an undo is received just after getting the focus', (WidgetTester tester) async {
       // Initialize the controller with a non empty text.
-      final TextEditingController controller = TextEditingController(text: textA);
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(boilerplate(controller, focusNode));
+      controller.text = textA;
+      await tester.pumpWidget(boilerplate());
 
       // Focus the field and do not wait for throttling delay before calling undo.
       focusNode.requestFocus();
@@ -13354,9 +13400,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
     testWidgets('Can make changes in the middle of the history', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(boilerplate(controller, focusNode));
+      await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
       // state saved in text editing history.
@@ -13408,8 +13452,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
     testWidgets('inside EditableText, duplicate changes', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -13539,13 +13581,12 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
     testWidgets('inside EditableText, autofocus', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
             autofocus: true,
             controller: controller,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: textStyle,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -13612,8 +13653,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
     testWidgets('does not save composing changes (except Android)', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -13773,8 +13812,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.android }), skip: kIsWeb); // [intended]
 
     testWidgets('does save composing changes on Android', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -13869,7 +13906,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13879,7 +13915,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13897,7 +13932,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13906,7 +13940,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13932,7 +13965,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13941,7 +13973,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13981,7 +14012,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13990,7 +14020,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -14007,8 +14036,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
 
     testWidgets('saves right up to composing change even when throttled', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -14110,10 +14137,12 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         case TargetPlatform.android:
           expect(
             controller.value,
-            const TextEditingValue(
-              text: '1 2 ni',
-              composing: TextRange(start: 4, end: 6),
-              selection: TextSelection.collapsed(offset: 6),
+            emptyComposingOnAndroid(
+              const TextEditingValue(
+                text: '1 2 ni',
+                composing: TextRange(start: 4, end: 6),
+                selection: TextSelection.collapsed(offset: 6),
+              ),
             ),
           );
         // Composing changes are ignored on all other platforms.
@@ -14167,10 +14196,12 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         case TargetPlatform.android:
           expect(
             controller.value,
-            const TextEditingValue(
-              text: '1 2 ni',
-              composing: TextRange(start: 4, end: 6),
-              selection: TextSelection.collapsed(offset: 6),
+            emptyComposingOnAndroid(
+              const TextEditingValue(
+                text: '1 2 ni',
+                composing: TextRange(start: 4, end: 6),
+                selection: TextSelection.collapsed(offset: 6),
+              ),
             ),
           );
         // Composing changes are ignored on all other platforms.
@@ -14211,6 +14242,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   testWidgets('pasting with the keyboard collapses the selection and places it after the pasted content', (WidgetTester tester) async {
     Future<void> testPasteSelection(WidgetTester tester, _VoidFutureCallback paste) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -14386,7 +14419,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
   // Regression test for https://github.com/flutter/flutter/issues/100585.
   testWidgets('can paste and remove field', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'text');
+    controller.text = 'text';
     late StateSetter setState;
     bool showField = true;
     final _CustomTextSelectionControls controls = _CustomTextSelectionControls(
@@ -14436,7 +14469,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
   // Regression test for https://github.com/flutter/flutter/issues/100585.
   testWidgets('can cut and remove field', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'text');
+    controller.text = 'text';
     late StateSetter setState;
     bool showField = true;
     final _CustomTextSelectionControls controls = _CustomTextSelectionControls(
@@ -14489,7 +14522,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     testWidgets('ctrl-A/E', (WidgetTester tester) async {
       final String targetPlatformString = defaultTargetPlatform.toString();
       final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
-      final TextEditingController controller = TextEditingController(text: testText);
+      controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
         extentOffset: 0,
@@ -14505,7 +14538,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               controller: controller,
               showSelectionHandles: true,
               autofocus: true,
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -14570,7 +14603,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     testWidgets('ctrl-F/B', (WidgetTester tester) async {
       final String targetPlatformString = defaultTargetPlatform.toString();
       final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
-      final TextEditingController controller = TextEditingController(text: testText);
+      controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
         extentOffset: 0,
@@ -14586,7 +14619,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               controller: controller,
               showSelectionHandles: true,
               autofocus: true,
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -14636,7 +14669,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     testWidgets('ctrl-N/P', (WidgetTester tester) async {
       final String targetPlatformString = defaultTargetPlatform.toString();
       final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
-      final TextEditingController controller = TextEditingController(text: testText);
+      controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
         extentOffset: 0,
@@ -14652,7 +14685,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               controller: controller,
               showSelectionHandles: true,
               autofocus: true,
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -14716,7 +14749,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         final String targetPlatformString = defaultTargetPlatform.toString();
         final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
 
-        final TextEditingController controller = TextEditingController(text: testText);
+        controller.text = testText;
         controller.selection = const TextSelection(
           baseOffset: 0,
           extentOffset: 0,
@@ -14732,7 +14765,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
                 controller: controller,
                 showSelectionHandles: true,
                 autofocus: true,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
@@ -14811,11 +14844,9 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         final String targetPlatformString = defaultTargetPlatform.toString();
         final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
 
-        final TextEditingController controller = TextEditingController(
-          // One extended grapheme cluster of length 8 and one surrogate pair of
-          // length 2.
-          text: '👨‍👩‍👦😆',
-        );
+        // One extended grapheme cluster of length 8 and one surrogate pair of
+        // length 2.
+        controller.text = '👨‍👩‍👦😆';
         controller.selection = const TextSelection(
           baseOffset: 0,
           extentOffset: 0,
@@ -14831,7 +14862,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
                 controller: controller,
                 showSelectionHandles: true,
                 autofocus: true,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
@@ -14908,7 +14939,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               controller: controller,
               showSelectionHandles: true,
               autofocus: true,
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -14951,7 +14982,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
   testWidgets('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    final TextEditingController controller = TextEditingController(text: '');
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
@@ -14962,7 +14992,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15003,11 +15033,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     testWidgets(
       'Spell check configured properly when spell check disabled by default',
         (WidgetTester tester) async {
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'A'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15025,11 +15057,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     testWidgets(
       'Spell check configured properly when spell check disabled manually',
         (WidgetTester tester) async {
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'A'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15048,11 +15082,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     testWidgets(
       'Error thrown when spell check configuration defined without specifying misspelled text style',
         (WidgetTester tester) async {
+      controller.text = 'A';
+
       expect(
           () {
             EditableText(
-                controller: TextEditingController(text: 'A'),
-                focusNode: FocusNode(),
+                controller: controller,
+                focusNode: focusNode,
                 style: const TextStyle(),
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
@@ -15070,12 +15106,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
           (WidgetTester tester) async {
         tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
           true;
+        controller.text = 'A';
 
         await tester.pumpWidget(
           MaterialApp(
             home: EditableText(
-              controller: TextEditingController(text: 'A'),
-              focusNode: FocusNode(),
+              controller: controller,
+              focusNode: focusNode,
               style: const TextStyle(),
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
@@ -15103,12 +15140,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       'Spell check configured properly with specified spell check service',
         (WidgetTester tester) async {
       final FakeSpellCheckService fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
 
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'A'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15136,12 +15174,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         false;
+      controller.text = 'A';
 
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'A'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15167,11 +15206,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'A'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15210,11 +15251,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'A'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15252,11 +15295,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'A'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15294,11 +15339,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
-            controller: TextEditingController(text: 'A'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15760,7 +15807,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -15776,14 +15823,16 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       );
 
       final BuildContext context = tester.firstElement(find.byType(EditableText));
+      final ValueNotifier<MagnifierInfo> notifier = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(notifier.dispose);
 
       expect(
-          editableText.magnifierConfiguration.magnifierBuilder(
-              context,
-              MagnifierController(),
-              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty)
-            ),
-          isNull,
+        editableText.magnifierConfiguration.magnifierBuilder(
+          context,
+          MagnifierController(),
+          notifier,
+        ),
+        isNull,
       );
     });
   });
@@ -15796,7 +15845,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
           controller: controller,
           showSelectionHandles: true,
           autofocus: true,
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
@@ -15837,7 +15886,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       MaterialApp(
         home: EditableText(
           controller: controller,
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
@@ -15856,11 +15905,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
   testWidgets('_CompositionCallback widget does not skip frames', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
-    );
-
+    controller.value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
     Offset offset = Offset.zero;
     late StateSetter setState;
 
@@ -15917,11 +15962,15 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   group('selection behavior when receiving focus', () {
     testWidgets('tabbing between fields', (WidgetTester tester) async {
       final TextEditingController controller1 = TextEditingController();
+      addTearDown(controller1.dispose);
       final TextEditingController controller2 = TextEditingController();
+      addTearDown(controller2.dispose);
       controller1.text = 'Text1';
       controller2.text = 'Text2\nLine2';
       final FocusNode focusNode1 = FocusNode();
+      addTearDown(focusNode1.dispose);
       final FocusNode focusNode2 = FocusNode();
+      addTearDown(focusNode2.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -16053,9 +16102,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
     testWidgets('Selection is updated when the field has focus and the new selection is invalid', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/120631.
-      final TextEditingController controller = TextEditingController();
       controller.text = 'Text';
-      final FocusNode focusNode = FocusNode();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -16111,10 +16158,11 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     });
 
     testWidgets('when having focus stolen between frames on web', (WidgetTester tester) async {
-      final TextEditingController controller1 = TextEditingController();
-      controller1.text = 'Text1';
+      controller.text = 'Text1';
       final FocusNode focusNode1 = FocusNode();
+      addTearDown(focusNode1.dispose);
       final FocusNode focusNode2 = FocusNode();
+      addTearDown(focusNode2.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -16122,8 +16170,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             crossAxisAlignment: CrossAxisAlignment.start,
             children:  <Widget>[
               EditableText(
-                key: ValueKey<String>(controller1.text),
-                controller: controller1,
+                key: ValueKey<String>(controller.text),
+                controller: controller,
                 focusNode: focusNode1,
                 style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
@@ -16143,7 +16191,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(focusNode1.hasFocus, isFalse);
       expect(focusNode2.hasFocus, isFalse);
       expect(
-        controller1.selection,
+        controller.selection,
         const TextSelection.collapsed(offset: -1),
       );
 
@@ -16152,7 +16200,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       // Set the text editing value in order to trigger an internal call to
       // requestFocus.
       state.userUpdateTextEditingValue(
-        controller1.value,
+        controller.value,
         SelectionChangedCause.keyboard,
       );
       // Focus takes a frame to update, so it hasn't changed yet.
@@ -16173,10 +16221,10 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(focusNode1.hasFocus, isTrue);
       expect(focusNode2.hasFocus, isFalse);
       expect(
-        controller1.selection,
+        controller.selection,
         TextSelection(
           baseOffset: 0,
-          extentOffset: controller1.text.length,
+          extentOffset: controller.text.length,
         ),
       );
     },
@@ -16210,7 +16258,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(),
+          controller: controller,
           focusNode: focusNode,
           obscureText: true,
           toolbarOptions: const ToolbarOptions(
@@ -16346,7 +16394,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(),
+          controller: controller,
           focusNode: focusNode,
           obscureText: true,
           toolbarOptions: const ToolbarOptions(
@@ -16430,7 +16478,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(),
+          controller: controller,
           focusNode: focusNode,
           obscureText: true,
           toolbarOptions: const ToolbarOptions(
@@ -16492,7 +16540,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(),
+          controller: controller,
           focusNode: focusNode,
           obscureText: true,
           toolbarOptions: const ToolbarOptions(
@@ -16552,7 +16600,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(),
+          controller: controller,
           focusNode: focusNode,
           obscureText: true,
           toolbarOptions: const ToolbarOptions(
@@ -16629,7 +16677,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         MaterialApp(
           home: EditableText(
             backgroundCursorColor: Colors.grey,
-            controller: TextEditingController(),
+            controller: controller,
             focusNode: focusNode,
             obscureText: true,
             toolbarOptions: const ToolbarOptions(
@@ -16655,6 +16703,32 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       expect(calls, equals(kIsWeb ? 0 : 2));
     });
+  });
+
+  testWidgets('Cursor color with an opacity is respected', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    const double opacity = 0.55;
+    controller.text = 'blah blah';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: key,
+          cursorColor: cursorColor.withOpacity(opacity),
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+        ),
+      ),
+    );
+
+    // Tap to show the cursor.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.renderEditable.cursorColor, cursorColor.withOpacity(opacity));
   });
 }
 
@@ -16939,6 +17013,16 @@ class TransformedEditableText extends StatefulWidget {
 class _TransformedEditableTextState extends State<TransformedEditableText> {
   bool _isTransformed = false;
 
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MediaQuery(
@@ -16951,8 +17035,8 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
             Transform.translate(
               offset: _isTransformed ? widget.offset : Offset.zero,
               child: EditableText(
-                controller: TextEditingController(),
-                focusNode: FocusNode(),
+                controller: _controller,
+                focusNode: _focusNode,
                 style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,

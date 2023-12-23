@@ -13,12 +13,14 @@ void main() {
       ..onTap = () {
         didTapLeft = true;
       };
+    addTearDown(tapLeft.dispose);
 
     bool didTapRight = false;
     final TapGestureRecognizer tapRight = TapGestureRecognizer()
       ..onTap = () {
         didTapRight = true;
       };
+    addTearDown(tapRight.dispose);
 
     const Key textKey = Key('text');
 

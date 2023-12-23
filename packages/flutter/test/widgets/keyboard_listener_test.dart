@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(KeyboardListener(focusNode: focusNode, child: Container()));
     await tester.pumpWidget(KeyboardListener(focusNode: focusNode, child: Container()));
     await tester.pumpWidget(Container());
@@ -18,6 +19,7 @@ void main() {
     final List<KeyEvent> events = <KeyEvent>[];
 
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       KeyboardListener(
@@ -39,13 +41,13 @@ void main() {
     expect(events[0].logicalKey, LogicalKeyboardKey.metaLeft);
 
     await tester.pumpWidget(Container());
-    focusNode.dispose();
   }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
 
   testWidgets('Web key event', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
 
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       KeyboardListener(
@@ -67,13 +69,13 @@ void main() {
     expect(events[0].logicalKey, LogicalKeyboardKey.metaLeft);
 
     await tester.pumpWidget(Container());
-    focusNode.dispose();
   });
 
   testWidgets('Defunct listeners do not receive events', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
 
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       KeyboardListener(
@@ -101,6 +103,5 @@ void main() {
     expect(events.length, 0);
 
     await tester.pumpWidget(Container());
-    focusNode.dispose();
   });
 }

@@ -77,11 +77,14 @@ void main() {
     }
 
     Widget builder() {
+      final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+      addTearDown(controller.dispose);
+
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView.builder(
-            controller: ScrollController(initialScrollOffset: 300.0),
+            controller: controller,
             itemBuilder: itemBuilder,
           ),
           right: const Text('Not Today'),
@@ -140,12 +143,15 @@ void main() {
     }
 
     Widget builder() {
+      final ScrollController controller = ScrollController(initialScrollOffset: 500.0);
+      addTearDown(controller.dispose);
+
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView.builder(
             scrollDirection: Axis.horizontal,
-            controller: ScrollController(initialScrollOffset: 500.0),
+            controller: controller,
             itemBuilder: itemBuilder,
           ),
           right: const Text('Not Today'),
@@ -435,6 +441,9 @@ void main() {
 
   testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
     const Text text = Text('test');
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
         Directionality(
             textDirection: TextDirection.ltr,
@@ -443,7 +452,7 @@ void main() {
                   height: 200.0,
                   child: ListView(
                     cacheExtent: 500.0,
-                    controller: ScrollController(initialScrollOffset: 300.0),
+                    controller: controller,
                     children: const <Widget>[
                       SizedBox(height: 140.0, child: text),
                       SizedBox(height: 160.0, child: text),
@@ -463,13 +472,16 @@ void main() {
   });
 
   testWidgets('ListView should paint with offset', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 120.0);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: SizedBox(
             height: 500.0,
             child: CustomScrollView(
-              controller: ScrollController(initialScrollOffset: 120.0),
+              controller: controller,
               slivers: <Widget>[
                 const SliverAppBar(
                   expandedHeight: 250.0,

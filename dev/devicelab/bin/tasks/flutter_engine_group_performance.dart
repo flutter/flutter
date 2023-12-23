@@ -16,7 +16,7 @@ const String _activityName = 'MainActivity';
 const int _numberOfIterations = 10;
 
 Future<void> _withApkInstall(
-    String apkPath, String bundleName, Function(AndroidDevice) body) async {
+    String apkPath, String bundleName, Future<void> Function(AndroidDevice) body) async {
   final DeviceDiscovery devices = DeviceDiscovery();
   final AndroidDevice device = await devices.workingDevice as AndroidDevice;
   await device.unlock();

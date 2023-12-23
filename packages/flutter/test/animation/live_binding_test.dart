@@ -7,11 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   /*
@@ -21,8 +18,9 @@ void main() {
 
   LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
-  testWidgetsWithLeakTracking('Should show event indicator for pointer events', (WidgetTester tester) async {
+  testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    addTearDown(animationSheet.dispose);
     final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
@@ -81,6 +79,7 @@ void main() {
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    addTearDown(animationSheet.dispose);
     final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
@@ -131,12 +130,11 @@ void main() {
     await tester.pumpFrames(target(), const Duration(milliseconds: 50));
     expect(taps, isEmpty);
 
-    final ui.Image image = await animationSheet.collate(6);
-
     await expectLater(
-      image,
+      animationSheet.collate(6),
       matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
-    image.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  );
 }

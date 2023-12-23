@@ -14,6 +14,9 @@ void main() {
     required FocusNode editableFocusNode,
     required FocusNode spyFocusNode,
   }) {
+    final TextEditingController controller = TextEditingController(text: 'dummy text');
+    addTearDown(controller.dispose);
+
     return MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
@@ -24,7 +27,7 @@ void main() {
           child: ActionSpy(
             focusNode: spyFocusNode,
             child: EditableText(
-              controller: TextEditingController(text: 'dummy text'),
+              controller: controller,
               showSelectionHandles: true,
               autofocus: true,
               focusNode: editableFocusNode,
@@ -134,7 +137,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -157,7 +162,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -180,7 +187,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -203,7 +212,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -226,7 +237,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -261,7 +274,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -299,7 +314,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -322,7 +339,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -345,7 +364,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -368,7 +389,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -391,7 +414,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -428,7 +453,9 @@ void main() {
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,

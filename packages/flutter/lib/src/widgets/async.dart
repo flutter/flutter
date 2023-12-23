@@ -94,7 +94,7 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
 
 /// State for [StreamBuilderBase].
 class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
-  StreamSubscription<T>? _subscription; // ignore: cancel_subscriptions
+  StreamSubscription<T>? _subscription;
   late S _summary;
 
   @override
@@ -200,7 +200,7 @@ class AsyncSnapshot<T> {
   /// and optionally either [data] or [error] with an optional [stackTrace]
   /// (but not both data and error).
   const AsyncSnapshot._(this.connectionState, this.data, this.error, this.stackTrace)
-    : assert(!(data != null && error != null)),
+    : assert(data == null || error == null),
       assert(stackTrace == null || error != null);
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
@@ -386,8 +386,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// strategy is given by [builder].
   ///
   /// The [initialData] is used to create the initial snapshot.
-  ///
-  /// The [builder] must not be null.
   const StreamBuilder({
     super.key,
     this.initialData,
@@ -517,8 +515,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
-  ///
-  /// The [builder] must not be null.
   const FutureBuilder({
     super.key,
     required this.future,
@@ -599,13 +595,14 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   @override
   void didUpdateWidget(FutureBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.future != widget.future) {
-      if (_activeCallbackIdentity != null) {
-        _unsubscribe();
-        _snapshot = _snapshot.inState(ConnectionState.none);
-      }
-      _subscribe();
+    if (oldWidget.future == widget.future) {
+      return;
     }
+    if (_activeCallbackIdentity != null) {
+      _unsubscribe();
+      _snapshot = _snapshot.inState(ConnectionState.none);
+    }
+    _subscribe();
   }
 
   @override
@@ -618,33 +615,35 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   void _subscribe() {
-    if (widget.future != null) {
-      final Object callbackIdentity = Object();
-      _activeCallbackIdentity = callbackIdentity;
-      widget.future!.then<void>((T data) {
-        if (_activeCallbackIdentity == callbackIdentity) {
-          setState(() {
-            _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
-          });
-        }
-      }, onError: (Object error, StackTrace stackTrace) {
-        if (_activeCallbackIdentity == callbackIdentity) {
-          setState(() {
-            _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
-          });
-        }
-        assert(() {
-          if (FutureBuilder.debugRethrowError) {
-            Future<Object>.error(error, stackTrace);
-          }
-          return true;
-        }());
-      });
-      // An implementation like `SynchronousFuture` may have already called the
-      // .then closure. Do not overwrite it in that case.
-      if (_snapshot.connectionState != ConnectionState.done) {
-        _snapshot = _snapshot.inState(ConnectionState.waiting);
+    if (widget.future == null) {
+      // There is no future to subscribe to, do nothing.
+      return;
+    }
+    final Object callbackIdentity = Object();
+    _activeCallbackIdentity = callbackIdentity;
+    widget.future!.then<void>((T data) {
+      if (_activeCallbackIdentity == callbackIdentity) {
+        setState(() {
+          _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
+        });
       }
+    }, onError: (Object error, StackTrace stackTrace) {
+      if (_activeCallbackIdentity == callbackIdentity) {
+        setState(() {
+          _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
+        });
+      }
+      assert(() {
+        if (FutureBuilder.debugRethrowError) {
+          Future<Object>.error(error, stackTrace);
+        }
+        return true;
+      }());
+    });
+    // An implementation like `SynchronousFuture` may have already called the
+    // .then closure. Do not overwrite it in that case.
+    if (_snapshot.connectionState != ConnectionState.done) {
+      _snapshot = _snapshot.inState(ConnectionState.waiting);
     }
   }
 

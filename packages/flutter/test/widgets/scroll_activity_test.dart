@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {
@@ -16,6 +17,7 @@ List<Widget> children(int n) {
 void main() {
   testWidgets('Scrolling with list view changes, leaving the overscroll', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
     controller.jumpTo(thirty);
@@ -30,6 +32,7 @@ void main() {
 
   testWidgets('Scrolling with list view changes, remaining overscrolled', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
     controller.jumpTo(thirty);
@@ -131,6 +134,7 @@ void main() {
 
   testWidgets('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     int? lastTapped;
     int? lastHovered;
     await tester.pumpWidget(MaterialApp(
@@ -207,6 +211,29 @@ void main() {
     await tester.tap(find.text('3'));
     expect(lastTapped, equals(3));
     await tester.pumpAndSettle();
+  });
+
+  test('$ScrollActivity dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => _ScrollActivity(_ScrollActivityDelegate()).dispose(),
+        _ScrollActivity,
+      ),
+      areCreateAndDispose,
+    );
+  });
+
+  test('$ScrollDragController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => ScrollDragController(
+          delegate: _ScrollActivityDelegate(),
+          details: DragStartDetails(),
+        ).dispose(),
+        ScrollDragController,
+      ),
+      areCreateAndDispose,
+    );
   });
 }
 
@@ -354,4 +381,34 @@ class _Carousel62209State extends State<Carousel62209> {
       ),
     );
   }
+}
+
+class _ScrollActivity extends ScrollActivity {
+  _ScrollActivity(super.delegate);
+
+  @override
+  bool get isScrolling => false;
+
+  @override
+  bool get shouldIgnorePointer => true;
+
+  @override
+  double get velocity => 0.0;
+}
+
+class _ScrollActivityDelegate extends ScrollActivityDelegate {
+  @override
+  void applyUserOffset(double delta) {}
+
+  @override
+  AxisDirection get axisDirection => AxisDirection.down;
+
+  @override
+  void goBallistic(double velocity) {}
+
+  @override
+  void goIdle() {}
+
+  @override
+  double setPixels(double pixels) => 0.0;
 }

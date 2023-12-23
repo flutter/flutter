@@ -4,12 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('position in the toolbar changes width', (WidgetTester tester) async {
+  testWidgets('position in the toolbar changes width', (WidgetTester tester) async {
     late StateSetter setState;
     int index = 1;
     int total = 3;
@@ -63,7 +62,7 @@ void main() {
   });
 
   for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
-    testWidgetsWithLeakTracking('foreground color by default', (WidgetTester tester) async {
+    testWidgets('foreground color by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -94,7 +93,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('custom foreground color', (WidgetTester tester) async {
+    testWidgets('custom foreground color', (WidgetTester tester) async {
       const Color customForegroundColor = Colors.red;
 
       await tester.pumpWidget(
@@ -121,6 +120,73 @@ void main() {
       expect(
         textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
         customForegroundColor,
+      );
+    });
+
+    testWidgets('background color by default', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/133027
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: colorScheme,
+          ),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbarTextButton(
+                padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                child: const Text('button'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TextButton), findsOneWidget);
+
+      final TextButton textButton = tester.widget(find.byType(TextButton));
+      // The background color is hardcoded to transparent by default so the buttons
+      // are the color of the container behind them. For example TextSelectionToolbar
+      // hardcodes the color value, and TextSelectionToolbarTextButton that are its
+      // children should be that color.
+      expect(
+        textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
+        Colors.transparent,
+      );
+    });
+
+    testWidgets('textButtonTheme should not override default background color', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/133027
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: colorScheme,
+            textButtonTheme: const TextButtonThemeData(
+              style: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue),
+              ),
+            ),
+          ),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbarTextButton(
+                padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                child: const Text('button'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TextButton), findsOneWidget);
+
+      final TextButton textButton = tester.widget(find.byType(TextButton));
+      // The background color is hardcoded to transparent by default so the buttons
+      // are the color of the container behind them. For example TextSelectionToolbar
+      // hardcodes the color value, and TextSelectionToolbarTextButton that are its
+      // children should be that color.
+      expect(
+        textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
+        Colors.transparent,
       );
     });
   }

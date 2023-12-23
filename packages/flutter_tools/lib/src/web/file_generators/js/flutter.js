@@ -144,7 +144,7 @@ _flutter.loader = null;
 
       const serviceWorkerActivation = navigator.serviceWorker
         .register(url)
-        .then(this._getNewServiceWorker)
+        .then((serviceWorkerRegistration) => this._getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion))
         .then(this._waitForServiceWorkerActivation);
 
       // Timeout race promise
@@ -162,9 +162,10 @@ _flutter.loader = null;
      * awaiting to be installed/updated.
      *
      * @param {ServiceWorkerRegistration} serviceWorkerRegistration
+     * @param {String} serviceWorkerVersion
      * @returns {Promise<ServiceWorker>}
      */
-    async _getNewServiceWorker(serviceWorkerRegistration) {
+    async _getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion) {
       if (!serviceWorkerRegistration.active && (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting)) {
         // No active web worker and we have installed or are installing
         // one for the first time. Simply wait for it to activate.
@@ -243,10 +244,10 @@ _flutter.loader = null;
      * Returns undefined when an `onEntrypointLoaded` callback is supplied in `options`.
      */
     async loadEntrypoint(options) {
-      const { entrypointUrl = `${baseUri}main.dart.js`, onEntrypointLoaded } =
+      const { entrypointUrl = `${baseUri}main.dart.js`, onEntrypointLoaded, nonce } =
         options || {};
 
-      return this._loadEntrypoint(entrypointUrl, onEntrypointLoaded);
+      return this._loadEntrypoint(entrypointUrl, onEntrypointLoaded, nonce);
     }
 
     /**
@@ -285,12 +286,12 @@ _flutter.loader = null;
      *                                is loaded, or undefined if `onEntrypointLoaded`
      *                                is a function.
      */
-    _loadEntrypoint(entrypointUrl, onEntrypointLoaded) {
+    _loadEntrypoint(entrypointUrl, onEntrypointLoaded, nonce) {
       const useCallback = typeof onEntrypointLoaded === "function";
 
       if (!this._scriptLoaded) {
         this._scriptLoaded = true;
-        const scriptTag = this._createScriptTag(entrypointUrl);
+        const scriptTag = this._createScriptTag(entrypointUrl, nonce);
         if (useCallback) {
           // Just inject the script tag, and return nothing; Flutter will call
           // `didCreateEngineInitializer` when it's done.
@@ -318,9 +319,12 @@ _flutter.loader = null;
      * @param {string} url
      * @returns {HTMLScriptElement}
      */
-    _createScriptTag(url) {
+    _createScriptTag(url, nonce) {
       const scriptTag = document.createElement("script");
       scriptTag.type = "application/javascript";
+      if (nonce) {
+        scriptTag.nonce = nonce;
+      }
       // Apply TrustedTypes validation, if available.
       let trustedUrl = url;
       if (this._ttPolicy != null) {

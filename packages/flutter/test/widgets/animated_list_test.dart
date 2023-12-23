@@ -628,6 +628,9 @@ void main() {
   testWidgets('AnimatedList.shrinkwrap is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/115040
     final ScrollController controller = ScrollController();
+
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

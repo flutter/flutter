@@ -24,6 +24,22 @@ class TestAssetBundle extends CachingAssetBundle {
           .encodeMessage(<String, Object>{'one': <Object>[]})!;
     }
 
+    if (key == 'AssetManifest.bin.json') {
+      // Encode the manifest data that will be used by the app
+      final ByteData data = const StandardMessageCodec().encodeMessage(<String, Object> {'one': <Object>[]})!;
+      // Simulate the behavior of NetworkAssetBundle.load here, for web tests
+      return ByteData.sublistView(
+        utf8.encode(
+          json.encode(
+            base64.encode(
+              // Encode only the actual bytes of the buffer, and no more...
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)
+            )
+          )
+        )
+      );
+    }
+
     if (key == 'counter') {
       return ByteData.sublistView(utf8.encode(loadCallCount[key]!.toString()));
     }

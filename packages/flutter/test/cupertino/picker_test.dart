@@ -47,7 +47,7 @@ void main() {
     expect(paragraph.text.style!.color, isSameColorAs(CupertinoColors.black));
     expect(paragraph.text.style!.copyWith(color: CupertinoColors.black), const TextStyle(
       inherit: false,
-      fontFamily: '.SF Pro Display',
+      fontFamily: 'CupertinoSystemDisplay',
       fontSize: 21.0,
       fontWeight: FontWeight.w400,
       letterSpacing: -0.6,
@@ -82,7 +82,7 @@ void main() {
 
     testWidgets('selected item is in the middle', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 1);
-
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -319,6 +319,7 @@ void main() {
 
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      addTearDown(controller.dispose);
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(
@@ -374,6 +375,7 @@ void main() {
     testWidgets('a big fling that overscrolls springs back', (WidgetTester tester) async {
       final FixedExtentScrollController controller =
           FixedExtentScrollController(initialItem: 10);
+      addTearDown(controller.dispose);
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(
@@ -499,6 +501,7 @@ void main() {
 
   testWidgets('Scroll controller is detached upon dispose', (WidgetTester tester) async {
     final SpyFixedExtentScrollController controller = SpyFixedExtentScrollController();
+    addTearDown(controller.dispose);
     expect(controller.hasListeners, false);
     expect(controller.positions.length, 0);
 
@@ -528,7 +531,8 @@ void main() {
     expect(controller.positions.length, 0);
   });
 
-  testWidgets('Registers taps and does not crash with certain diameterRatio', (WidgetTester tester) async {
+  testWidgets(
+      'Registers taps and does not crash with certain diameterRatio', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/126491
 
     final List<int> children = List<int>.generate(100, (int index) => index);

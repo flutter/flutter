@@ -30,6 +30,64 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
+  // Adapted from https://github.com/flutter/flutter/issues/129094
+  group('when fit is OverflowBoxFit.deferToChild', () {
+    group('OverflowBox behavior with long and short content', () {
+      for (final bool contentSuperLong in <bool>[false, true]) {
+        testWidgets('contentSuperLong=$contentSuperLong', (WidgetTester tester) async {
+          final GlobalKey<State<StatefulWidget>> key = GlobalKey();
+
+          final Column child = Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(width: 100, height: contentSuperLong ? 10000 : 100),
+            ],
+          );
+
+          await tester.pumpWidget(Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  key: key,
+                  child: OverflowBox(
+                    maxHeight: 1000000,
+                    fit: OverflowBoxFit.deferToChild,
+                    child: child,
+                  ),
+                ),
+              ],
+            ),
+          ));
+
+          expect(tester.getBottomLeft(find.byKey(key)).dy, contentSuperLong ? 600 : 100);
+        });
+      }
+    });
+
+    testWidgets('no child', (WidgetTester tester) async {
+      final GlobalKey<State<StatefulWidget>> key = GlobalKey();
+
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              key: key,
+              child: const OverflowBox(
+                maxHeight: 1000000,
+                fit: OverflowBoxFit.deferToChild,
+                // no child
+              ),
+            ),
+          ],
+        ),
+      ));
+
+      expect(tester.getBottomLeft(find.byKey(key)).dy, 0);
+    });
+  });
+
   testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
@@ -47,6 +105,7 @@ void main() {
       'maxWidth: 2.0',
       'minHeight: 3.0',
       'maxHeight: 4.0',
+      'fit: max',
     ]);
   });
 

@@ -142,6 +142,7 @@
   "expandedHint": "Жыйыштырылды",
   "collapsedHint": "Жайылып көрсөтүлдү",
   "menuDismissLabel": "Менюну жабуу",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Издөө",
+  "searchWebButtonLabel": "Интернеттен издөө",
+  "shareButtonLabel": "Бөлүшүү…"
 }

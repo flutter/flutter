@@ -44,6 +44,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'vm.';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopieer';
 
   @override
@@ -92,7 +95,7 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Kyk op';
 
   @override
   String get menuDismissLabel => 'Maak kieslys toe';
@@ -113,10 +116,13 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Soek';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Deursoek web';
 
   @override
   String get selectAllButtonLabel => 'Kies alles';
+
+  @override
+  String get shareButtonLabel => 'Deel …';
 
   @override
   String get tabSemanticsLabelRaw => r'Oortjie $tabIndex van $tabCount';
@@ -203,6 +209,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ጥዋት';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'ቅዳ';
 
   @override
@@ -251,7 +260,7 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ይመልከቱ';
 
   @override
   String get menuDismissLabel => 'ምናሌን አሰናብት';
@@ -272,10 +281,13 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'ፍለጋ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ድርን ፈልግ';
 
   @override
   String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
+
+  @override
+  String get shareButtonLabel => 'አጋራ...';
 
   @override
   String get tabSemanticsLabelRaw => r'ትር $tabIndex ከ$tabCount';
@@ -362,6 +374,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ص';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'نسخ';
 
   @override
@@ -410,7 +425,7 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute دقيقة​';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'النظر إلى أعلى';
 
   @override
   String get menuDismissLabel => 'إغلاق القائمة';
@@ -431,10 +446,13 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'بحث';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'البحث على الويب';
 
   @override
   String get selectAllButtonLabel => 'اختيار الكل';
+
+  @override
+  String get shareButtonLabel => 'مشاركة…';
 
   @override
   String get tabSemanticsLabelRaw => r'علامة التبويب $tabIndex من $tabCount';
@@ -521,6 +539,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'পূৰ্বাহ্ন';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
 
   @override
@@ -569,7 +590,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
 
   @override
   String get menuDismissLabel => 'অগ্ৰাহ্য কৰাৰ মেনু';
@@ -590,10 +611,13 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'সন্ধান কৰক';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ৱেবত সন্ধান কৰক';
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
+
+  @override
+  String get shareButtonLabel => 'শ্বেয়াৰ কৰক…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount টা টেবৰ $tabIndex নম্বৰটো';
@@ -680,6 +704,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopyalayın';
 
   @override
@@ -728,7 +755,7 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Axtarın';
 
   @override
   String get menuDismissLabel => 'Menyunu qapadın';
@@ -749,10 +776,13 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Axtarın';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Vebdə axtarın';
 
   @override
   String get selectAllButtonLabel => 'Hamısını seçin';
+
+  @override
+  String get shareButtonLabel => 'Paylaşın...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex/$tabCount';
@@ -839,6 +869,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'раніцы';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Капіраваць';
 
   @override
@@ -887,7 +920,7 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Знайсці';
 
   @override
   String get menuDismissLabel => 'Закрыць меню';
@@ -908,10 +941,13 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Пошук';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пошук у сетцы';
 
   @override
   String get selectAllButtonLabel => 'Выбраць усе';
+
+  @override
+  String get shareButtonLabel => 'Абагуліць...';
 
   @override
   String get tabSemanticsLabelRaw => r'Укладка $tabIndex з $tabCount';
@@ -998,6 +1034,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Копиране';
 
   @override
@@ -1067,10 +1106,13 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Търсене';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Търсене в мрежата';
 
   @override
   String get selectAllButtonLabel => 'Избиране на всички';
+
+  @override
+  String get shareButtonLabel => 'Споделяне...';
 
   @override
   String get tabSemanticsLabelRaw => r'Раздел $tabIndex от $tabCount';
@@ -1157,6 +1199,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'কপি করুন';
 
   @override
@@ -1205,7 +1250,7 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'লুক-আপ';
 
   @override
   String get menuDismissLabel => 'বাতিল করার মেনু';
@@ -1226,10 +1271,13 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'সার্চ করুন';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ওয়েবে সার্চ করুন';
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
+
+  @override
+  String get shareButtonLabel => 'শেয়ার করুন...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব';
@@ -1316,6 +1364,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'prijepodne';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
@@ -1364,7 +1415,7 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Pogled prema gore';
+  String get lookUpButtonLabel => 'Pogled nagore';
 
   @override
   String get menuDismissLabel => 'Odbacivanje menija';
@@ -1385,10 +1436,13 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Pretraživanje';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pretraži Web';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
+
+  @override
+  String get shareButtonLabel => 'Dijeli...';
 
   @override
   String get tabSemanticsLabelRaw => r'Kartica $tabIndex od $tabCount';
@@ -1475,6 +1529,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Copia';
 
   @override
@@ -1523,7 +1580,7 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Mira amunt';
 
   @override
   String get menuDismissLabel => 'Ignora el menú';
@@ -1544,10 +1601,13 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Cerca';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Cerca al web';
 
   @override
-  String get selectAllButtonLabel => 'Selecciona-ho tot';
+  String get selectAllButtonLabel => 'Seleccionar-ho tot';
+
+  @override
+  String get shareButtonLabel => 'Comparteix...';
 
   @override
   String get tabSemanticsLabelRaw => r'Pestanya $tabIndex de $tabCount';
@@ -1634,6 +1694,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopírovat';
 
   @override
@@ -1682,7 +1745,7 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Vyhledat';
 
   @override
   String get menuDismissLabel => 'Zavřít nabídku';
@@ -1703,10 +1766,13 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Hledat';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Vyhledávat na webu';
 
   @override
   String get selectAllButtonLabel => 'Vybrat vše';
+
+  @override
+  String get shareButtonLabel => 'Sdílet…';
 
   @override
   String get tabSemanticsLabelRaw => r'Karta $tabIndex z $tabCount';
@@ -1793,6 +1859,9 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Copïo';
 
   @override
@@ -1841,7 +1910,7 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute munud';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Chwilio';
 
   @override
   String get menuDismissLabel => "Diystyru'r ddewislen";
@@ -1862,10 +1931,13 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Chwilio';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "Chwilio'r We";
 
   @override
   String get selectAllButtonLabel => 'Dewis y Cyfan';
+
+  @override
+  String get shareButtonLabel => 'Rhannu...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex o $tabCount';
@@ -1952,6 +2024,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
@@ -2000,7 +2075,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå op';
 
   @override
   String get menuDismissLabel => 'Luk menu';
@@ -2021,10 +2096,13 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Søg';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søg på nettet';
 
   @override
-  String get selectAllButtonLabel => 'Vælg alle';
+  String get selectAllButtonLabel => 'Vælg alt';
+
+  @override
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get tabSemanticsLabelRaw => r'Fane $tabIndex af $tabCount';
@@ -2111,6 +2189,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
@@ -2159,7 +2240,7 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
   String get menuDismissLabel => 'Menü schließen';
@@ -2180,10 +2261,13 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Suche';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Im Web suchen';
 
   @override
-  String get selectAllButtonLabel => 'Alles auswählen';
+  String get selectAllButtonLabel => 'Alle auswählen';
+
+  @override
+  String get shareButtonLabel => 'Teilen…';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex von $tabCount';
@@ -2264,6 +2348,9 @@ class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
   });
 
   @override
+  String get selectAllButtonLabel => 'Alles auswählen';
+
+  @override
   String get modalBarrierDismissLabel => 'Schliessen';
 }
 
@@ -2289,6 +2376,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'π.μ.';
+
+  @override
+  String get clearButtonLabel => 'Clear';
 
   @override
   String get copyButtonLabel => 'Αντιγραφή';
@@ -2360,10 +2450,13 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Αναζήτηση';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Αναζήτηση στον ιστό';
 
   @override
   String get selectAllButtonLabel => 'Επιλογή όλων';
+
+  @override
+  String get shareButtonLabel => 'Κοινοποίηση…';
 
   @override
   String get tabSemanticsLabelRaw => r'Καρτέλα $tabIndex από $tabCount';
@@ -2450,6 +2543,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Copy';
 
   @override
@@ -2523,6 +2619,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex of $tabCount';
@@ -2843,6 +2942,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'a. m.';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
@@ -2891,7 +2993,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Buscador visual';
 
   @override
   String get menuDismissLabel => 'Cerrar menú';
@@ -2912,10 +3014,13 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Buscar';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buscar en la Web';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
+
+  @override
+  String get shareButtonLabel => 'Compartir...';
 
   @override
   String get tabSemanticsLabelRaw => r'Pestaña $tabIndex de $tabCount';
@@ -2996,6 +3101,9 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3015,9 +3123,6 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3041,6 +3146,9 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3060,9 +3168,6 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3086,6 +3191,9 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3105,9 +3213,6 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3131,6 +3236,9 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3150,9 +3258,6 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3176,6 +3281,9 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3195,9 +3303,6 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3221,6 +3326,9 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3240,9 +3348,6 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3266,6 +3371,9 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3285,9 +3393,6 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3311,6 +3416,9 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3330,9 +3438,6 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3356,6 +3461,9 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3375,9 +3483,6 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3401,6 +3506,9 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3420,9 +3528,6 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3446,6 +3551,9 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3465,9 +3573,6 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3491,6 +3596,9 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3510,9 +3618,6 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3536,6 +3641,9 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3555,9 +3663,6 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3581,6 +3686,9 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3600,9 +3708,6 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3626,6 +3731,9 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3645,9 +3753,6 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3671,6 +3776,9 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3690,9 +3798,6 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3716,6 +3821,9 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3735,9 +3843,6 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3761,6 +3866,9 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3780,9 +3888,6 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3806,6 +3911,9 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3825,9 +3933,6 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3851,6 +3956,9 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
 
   @override
@@ -3870,9 +3978,6 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3900,6 +4005,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get clearButtonLabel => 'Clear';
 
   @override
   String get copyButtonLabel => 'Kopeeri';
@@ -3971,10 +4079,13 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Otsige';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Otsi veebist';
 
   @override
   String get selectAllButtonLabel => 'Vali kõik';
+
+  @override
+  String get shareButtonLabel => 'Jaga …';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex. vaheleht $tabCount-st';
@@ -4061,6 +4172,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiatu';
 
   @override
@@ -4109,7 +4223,7 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Bilatu';
 
   @override
   String get menuDismissLabel => 'Baztertu menua';
@@ -4130,10 +4244,13 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Bilatu';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Bilatu sarean';
 
   @override
   String get selectAllButtonLabel => 'Hautatu dena';
+
+  @override
+  String get shareButtonLabel => 'Partekatu...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex/$tabCount fitxa';
@@ -4220,6 +4337,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ق.ظ.';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'کپی';
 
   @override
@@ -4268,7 +4388,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'جستجو';
 
   @override
   String get menuDismissLabel => 'بستن منو';
@@ -4289,10 +4409,13 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'جستجو';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'جستجو در وب';
 
   @override
   String get selectAllButtonLabel => 'انتخاب همه';
+
+  @override
+  String get shareButtonLabel => 'هم‌رسانی…';
 
   @override
   String get tabSemanticsLabelRaw => r'برگه $tabIndex از $tabCount';
@@ -4379,6 +4502,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ap';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopioi';
 
   @override
@@ -4427,7 +4553,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Hae';
 
   @override
   String get menuDismissLabel => 'Hylkää valikko';
@@ -4448,10 +4574,13 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Hae';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Hae verkosta';
 
   @override
   String get selectAllButtonLabel => 'Valitse kaikki';
+
+  @override
+  String get shareButtonLabel => 'Jaa…';
 
   @override
   String get tabSemanticsLabelRaw => r'Välilehti $tabIndex kautta $tabCount';
@@ -4538,6 +4667,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
@@ -4607,10 +4739,13 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Hanapin';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Maghanap sa Web';
 
   @override
   String get selectAllButtonLabel => 'Piliin Lahat';
+
+  @override
+  String get shareButtonLabel => 'Ibahagi...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex ng $tabCount';
@@ -4697,6 +4832,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Copier';
 
   @override
@@ -4745,7 +4883,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Recherche visuelle';
 
   @override
   String get menuDismissLabel => 'Fermer le menu';
@@ -4766,10 +4904,13 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Rechercher';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Rechercher sur le Web';
 
   @override
-  String get selectAllButtonLabel => 'Tout sélect.';
+  String get selectAllButtonLabel => 'Tout sélectionner';
+
+  @override
+  String get shareButtonLabel => 'Partager…';
 
   @override
   String get tabSemanticsLabelRaw => r'Onglet $tabIndex sur $tabCount';
@@ -4850,6 +4991,9 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   });
 
   @override
+  String get lookUpButtonLabel => 'Regarder en haut';
+
+  @override
   String get menuDismissLabel => 'Ignorer le menu';
 
   @override
@@ -4872,9 +5016,6 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
 
   @override
   String get timerPickerMinuteLabelOther => 'min';
-
-  @override
-  String get selectAllButtonLabel => 'Tout sélectionner';
 }
 
 /// The translations for Galician (`gl`).
@@ -4899,6 +5040,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
+
+  @override
+  String get clearButtonLabel => 'Clear';
 
   @override
   String get copyButtonLabel => 'Copiar';
@@ -4970,10 +5114,13 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Fai unha busca';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buscar na Web';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get tabSemanticsLabelRaw => r'Pestana $tabIndex de $tabCount';
@@ -5060,6 +5207,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
@@ -5108,7 +5258,7 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
   String get menuDismissLabel => 'Menü schließen';
@@ -5129,10 +5279,13 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Suche';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Im Web suchen';
 
   @override
-  String get selectAllButtonLabel => 'Alles auswählen';
+  String get selectAllButtonLabel => 'Alle auswählen';
+
+  @override
+  String get shareButtonLabel => 'Teilen…';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex von $tabCount';
@@ -5219,6 +5372,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'કૉપિ કરો';
 
   @override
@@ -5267,7 +5423,7 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'શોધો';
 
   @override
   String get menuDismissLabel => 'મેનૂ છોડી દો';
@@ -5288,10 +5444,13 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'શોધો';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'વેબ પર શોધો';
 
   @override
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
+
+  @override
+  String get shareButtonLabel => 'શેર કરો…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCountમાંથી $tabIndex ટૅબ';
@@ -5378,6 +5537,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'העתקה';
 
   @override
@@ -5426,7 +5588,7 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'חיפוש';
 
   @override
   String get menuDismissLabel => 'סגירת התפריט';
@@ -5447,10 +5609,13 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'חיפוש';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'חיפוש באינטרנט';
 
   @override
   String get selectAllButtonLabel => 'בחירת הכול';
+
+  @override
+  String get shareButtonLabel => 'שיתוף…';
 
   @override
   String get tabSemanticsLabelRaw => r'כרטיסייה $tabIndex מתוך $tabCount';
@@ -5537,6 +5702,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'कॉपी करें';
 
   @override
@@ -5585,7 +5753,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'लुक अप बटन';
 
   @override
   String get menuDismissLabel => 'मेन्यू खारिज करें';
@@ -5606,10 +5774,13 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'खोजें';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेब पर खोजें';
 
   @override
   String get selectAllButtonLabel => 'सभी चुनें';
+
+  @override
+  String get shareButtonLabel => 'शेयर करें…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount का टैब $tabIndex';
@@ -5696,6 +5867,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'prijepodne';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
@@ -5765,10 +5939,13 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Pretraživanje';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pretraži web';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
+
+  @override
+  String get shareButtonLabel => 'Dijeli...';
 
   @override
   String get tabSemanticsLabelRaw => r'Kartica $tabIndex od $tabCount';
@@ -5855,6 +6032,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'de.';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Másolás';
 
   @override
@@ -5924,10 +6104,13 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Keresés';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Keresés az interneten';
 
   @override
   String get selectAllButtonLabel => 'Összes kijelölése';
+
+  @override
+  String get shareButtonLabel => 'Megosztás…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount/$tabIndex. lap';
@@ -6014,6 +6197,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Պատճենել';
 
   @override
@@ -6062,7 +6248,7 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Փնտրել';
 
   @override
   String get menuDismissLabel => 'Փակել ընտրացանկը';
@@ -6083,10 +6269,13 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Որոնում';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Որոնել համացանցում';
 
   @override
   String get selectAllButtonLabel => 'Նշել բոլորը';
+
+  @override
+  String get shareButtonLabel => 'Կիսվել...';
 
   @override
   String get tabSemanticsLabelRaw => r'Ներդիր $tabIndex՝ $tabCount-ից';
@@ -6173,6 +6362,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Salin';
 
   @override
@@ -6221,7 +6413,7 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Cari';
 
   @override
   String get menuDismissLabel => 'Tutup menu';
@@ -6242,10 +6434,13 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Telusuri';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Telusuri di Web';
 
   @override
   String get selectAllButtonLabel => 'Pilih Semua';
+
+  @override
+  String get shareButtonLabel => 'Bagikan...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex dari $tabCount';
@@ -6332,6 +6527,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'f.h.';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Afrita';
 
   @override
@@ -6401,10 +6599,13 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Leit';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Leita á vefnum';
 
   @override
   String get selectAllButtonLabel => 'Velja allt';
+
+  @override
+  String get shareButtonLabel => 'Deila...';
 
   @override
   String get tabSemanticsLabelRaw => r'Flipi $tabIndex af $tabCount';
@@ -6491,6 +6692,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Copia';
 
   @override
@@ -6560,10 +6764,13 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Cerca';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Cerca sul web';
 
   @override
   String get selectAllButtonLabel => 'Seleziona tutto';
+
+  @override
+  String get shareButtonLabel => 'Condividi…';
 
   @override
   String get tabSemanticsLabelRaw => r'Scheda $tabIndex di $tabCount';
@@ -6650,6 +6857,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'コピー';
 
   @override
@@ -6719,10 +6929,13 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => '検索';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ウェブを検索';
 
   @override
-  String get selectAllButtonLabel => 'すべて選択';
+  String get selectAllButtonLabel => 'すべてを選択';
+
+  @override
+  String get shareButtonLabel => '共有...';
 
   @override
   String get tabSemanticsLabelRaw => r'タブ: $tabIndex/$tabCount';
@@ -6809,6 +7022,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'კოპირება';
 
   @override
@@ -6857,7 +7073,7 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'აიხედეთ ზემოთ';
 
   @override
   String get menuDismissLabel => 'მენიუს უარყოფა';
@@ -6878,10 +7094,13 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'ძიება';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ვებში ძიება';
 
   @override
   String get selectAllButtonLabel => 'ყველას არჩევა';
+
+  @override
+  String get shareButtonLabel => 'გაზიარება...';
 
   @override
   String get tabSemanticsLabelRaw => r'ჩანართი $tabIndex / $tabCount-დან';
@@ -6968,6 +7187,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'түстен кейін';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Көшіру';
 
   @override
@@ -7016,7 +7238,7 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Іздеу';
 
   @override
   String get menuDismissLabel => 'Мәзірді жабу';
@@ -7037,10 +7259,13 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Іздеу';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Интернеттен іздеу';
 
   @override
   String get selectAllButtonLabel => 'Барлығын таңдау';
+
+  @override
+  String get shareButtonLabel => 'Бөлісу…';
 
   @override
   String get tabSemanticsLabelRaw => r'Қойынды: $tabIndex/$tabCount';
@@ -7127,6 +7352,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'ចម្លង';
 
   @override
@@ -7196,10 +7424,13 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'ស្វែងរក';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ស្វែងរក​លើបណ្ដាញ';
 
   @override
   String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
+
+  @override
+  String get shareButtonLabel => 'ចែករំលែក...';
 
   @override
   String get tabSemanticsLabelRaw => r'ផ្ទាំងទី $tabIndex នៃ $tabCount';
@@ -7286,6 +7517,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
@@ -7334,7 +7568,7 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
 
   @override
   String get menuDismissLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cc6}\u{cc2}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
@@ -7355,10 +7589,13 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
   String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get shareButtonLabel => '\u{cb9}\u{c82}\u{c9a}\u{cbf}\u{c95}\u{cca}\u{cb3}\u{ccd}\u{cb3}\u{cbf}\u{2e}\u{2e}\u{2e}';
 
   @override
   String get tabSemanticsLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
@@ -7445,6 +7682,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => '오전';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => '복사';
 
   @override
@@ -7493,7 +7733,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '찾기';
 
   @override
   String get menuDismissLabel => '메뉴 닫기';
@@ -7514,10 +7754,13 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => '검색';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '웹 검색';
 
   @override
   String get selectAllButtonLabel => '전체 선택';
+
+  @override
+  String get shareButtonLabel => '공유...';
 
   @override
   String get tabSemanticsLabelRaw => r'탭 $tabCount개 중 $tabIndex번째';
@@ -7604,6 +7847,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'түшкө чейин';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Көчүрүү';
 
   @override
@@ -7652,7 +7898,7 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Издөө';
 
   @override
   String get menuDismissLabel => 'Менюну жабуу';
@@ -7673,10 +7919,13 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Издөө';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Интернеттен издөө';
 
   @override
   String get selectAllButtonLabel => 'Баарын тандоо';
+
+  @override
+  String get shareButtonLabel => 'Бөлүшүү…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount ичинен $tabIndex-өтмөк';
@@ -7763,6 +8012,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ກ່ອນທ່ຽງ';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'ສຳເນົາ';
 
   @override
@@ -7811,7 +8063,7 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ຊອກຫາຂໍ້ມູນ';
 
   @override
   String get menuDismissLabel => 'ປິດເມນູ';
@@ -7832,10 +8084,13 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'ຊອກຫາ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ຊອກຫາຢູ່ອິນເຕີເນັດ';
 
   @override
   String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
+
+  @override
+  String get shareButtonLabel => 'ແບ່ງປັນ...';
 
   @override
   String get tabSemanticsLabelRaw => r'ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount';
@@ -7922,6 +8177,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'priešpiet';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopijuoti';
 
   @override
@@ -7970,7 +8228,7 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Ieškoti';
 
   @override
   String get menuDismissLabel => 'Atsisakyti meniu';
@@ -7991,10 +8249,13 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Paieška';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Ieškoti žiniatinklyje';
 
   @override
   String get selectAllButtonLabel => 'Pasirinkti viską';
+
+  @override
+  String get shareButtonLabel => 'Bendrinti...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex skirtukas iš $tabCount';
@@ -8081,6 +8342,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'priekšpusdienā';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopēt';
 
   @override
@@ -8129,7 +8393,7 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute minūtes';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Meklēt';
 
   @override
   String get menuDismissLabel => 'Nerādīt izvēlni';
@@ -8150,10 +8414,13 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Meklēšana';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Meklēt tīmeklī';
 
   @override
   String get selectAllButtonLabel => 'Atlasīt visu';
+
+  @override
+  String get shareButtonLabel => 'Kopīgot…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex. cilne no $tabCount';
@@ -8240,6 +8507,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ПРЕТПЛАДНЕ';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Копирај';
 
   @override
@@ -8288,7 +8558,7 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Погледнете нагоре';
 
   @override
   String get menuDismissLabel => 'Отфрлете го менито';
@@ -8309,10 +8579,13 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Пребарувајте';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пребарајте на интернет';
 
   @override
   String get selectAllButtonLabel => 'Избери ги сите';
+
+  @override
+  String get shareButtonLabel => 'Споделете...';
 
   @override
   String get tabSemanticsLabelRaw => r'Картичка $tabIndex од $tabCount';
@@ -8399,6 +8672,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'പകർത്തുക';
 
   @override
@@ -8468,10 +8744,13 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'തിരയുക';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'വെബിൽ തിരയുക';
 
   @override
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get shareButtonLabel => 'പങ്കിടുക...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount ടാബിൽ $tabIndex-ാമത്തേത്';
@@ -8558,6 +8837,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ӨГЛӨӨ';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Хуулах';
 
   @override
@@ -8606,7 +8888,7 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Дээшээ харах';
 
   @override
   String get menuDismissLabel => 'Цэсийг хаах';
@@ -8627,10 +8909,13 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Хайх';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Вебээс хайх';
 
   @override
   String get selectAllButtonLabel => 'Бүгдийг сонгох';
+
+  @override
+  String get shareButtonLabel => 'Хуваалцах...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount-н $tabIndex-р таб';
@@ -8717,6 +9002,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'कॉपी करा';
 
   @override
@@ -8765,7 +9053,7 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'शोध घ्या';
 
   @override
   String get menuDismissLabel => 'मेनू डिसमिस करा';
@@ -8786,10 +9074,13 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'शोधा';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेबवर शोधा';
 
   @override
   String get selectAllButtonLabel => 'सर्व निवडा';
+
+  @override
+  String get shareButtonLabel => 'शेअर करा...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount पैकी $tabIndex टॅब';
@@ -8876,6 +9167,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'PG';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Salin';
 
   @override
@@ -8945,10 +9239,13 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Cari';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buat carian pada Web';
 
   @override
   String get selectAllButtonLabel => 'Pilih Semua';
+
+  @override
+  String get shareButtonLabel => 'Kongsi...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex daripada $tabCount';
@@ -9035,6 +9332,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
 
   @override
@@ -9083,7 +9383,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'အပေါ်ကြည့်ရန်';
 
   @override
   String get menuDismissLabel => 'မီနူးကိုပယ်ပါ';
@@ -9104,10 +9404,13 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'ရှာရန်';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ဝဘ်တွင်ရှာရန်';
 
   @override
   String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
+
+  @override
+  String get shareButtonLabel => 'မျှဝေရန်...';
 
   @override
   String get tabSemanticsLabelRaw => r'တဘ် $tabCount ခုအနက် $tabIndex ခု';
@@ -9194,6 +9497,9 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
@@ -9242,7 +9548,7 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå opp';
 
   @override
   String get menuDismissLabel => 'Lukk menyen';
@@ -9263,10 +9569,13 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Søk';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søk på nettet';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
+
+  @override
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get tabSemanticsLabelRaw => r'Fane $tabIndex av $tabCount';
@@ -9353,6 +9662,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'पूर्वाह्न';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'प्रतिलिपि गर्नुहोस्';
 
   @override
@@ -9401,7 +9713,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'माथितिर हेर्नुहोस्';
 
   @override
   String get menuDismissLabel => 'मेनु खारेज गर्नुहोस्';
@@ -9422,10 +9734,13 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'खोज्नुहोस्';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेबमा खोज्नुहोस्';
 
   @override
   String get selectAllButtonLabel => 'सबै चयन गर्नुहोस्';
+
+  @override
+  String get shareButtonLabel => 'सेयर गर्नुहोस्...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount मध्ये $tabIndex ट्याब';
@@ -9512,6 +9827,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'am';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiëren';
 
   @override
@@ -9560,7 +9878,7 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Opzoeken';
 
   @override
   String get menuDismissLabel => 'Menu sluiten';
@@ -9581,10 +9899,13 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Zoeken';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Op internet zoeken';
 
   @override
   String get selectAllButtonLabel => 'Alles selecteren';
+
+  @override
+  String get shareButtonLabel => 'Delen...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tabblad $tabIndex van $tabCount';
@@ -9671,6 +9992,9 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
@@ -9719,7 +10043,7 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå opp';
 
   @override
   String get menuDismissLabel => 'Lukk menyen';
@@ -9740,10 +10064,13 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Søk';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søk på nettet';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
+
+  @override
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get tabSemanticsLabelRaw => r'Fane $tabIndex av $tabCount';
@@ -9830,6 +10157,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
 
   @override
@@ -9878,7 +10208,7 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
 
   @override
   String get menuDismissLabel => 'ମେନୁ ଖାରଜ କରନ୍ତୁ';
@@ -9899,10 +10229,13 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'ସନ୍ଧାନ କରନ୍ତୁ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ';
 
   @override
   String get selectAllButtonLabel => 'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
+
+  @override
+  String get shareButtonLabel => 'ସେୟାର୍ କରନ୍ତୁ...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCountର $tabIndex ଟାବ୍';
@@ -9989,6 +10322,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
 
   @override
@@ -10037,7 +10373,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ਖੋਜੋ';
 
   @override
   String get menuDismissLabel => 'ਮੀਨੂ ਖਾਰਜ ਕਰੋ';
@@ -10058,10 +10394,13 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'ਖੋਜੋ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "ਵੈੱਬ 'ਤੇ ਖੋਜੋ";
 
   @override
   String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
+
+  @override
+  String get shareButtonLabel => 'ਸਾਂਝਾ ਕਰੋ...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ';
@@ -10148,6 +10487,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiuj';
 
   @override
@@ -10217,10 +10559,13 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Szukaj';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Szukaj w internecie';
 
   @override
   String get selectAllButtonLabel => 'Wybierz wszystkie';
+
+  @override
+  String get shareButtonLabel => 'Udostępnij…';
 
   @override
   String get tabSemanticsLabelRaw => r'Karta $tabIndex z $tabCount';
@@ -10307,6 +10652,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
@@ -10376,10 +10724,13 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Pesquisar';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pesquisar na Web';
 
   @override
-  String get selectAllButtonLabel => 'Selecionar Tudo';
+  String get selectAllButtonLabel => 'Selecionar tudo';
+
+  @override
+  String get shareButtonLabel => 'Compartilhar…';
 
   @override
   String get tabSemanticsLabelRaw => r'Guia $tabIndex de $tabCount';
@@ -10460,6 +10811,9 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
   });
 
   @override
+  String get shareButtonLabel => 'Partilhar…';
+
+  @override
   String get lookUpButtonLabel => 'Procurar';
 
   @override
@@ -10482,9 +10836,6 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
 
   @override
   String get timerPickerSecondLabelOther => 'seg';
-
-  @override
-  String get selectAllButtonLabel => 'Selecionar tudo';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorar';
@@ -10512,6 +10863,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
+
+  @override
+  String get clearButtonLabel => 'Clear';
 
   @override
   String get copyButtonLabel => 'Copiați';
@@ -10562,7 +10916,7 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Privire în sus';
 
   @override
   String get menuDismissLabel => 'Respingeți meniul';
@@ -10583,10 +10937,13 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Căutați';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Căutați pe web';
 
   @override
-  String get selectAllButtonLabel => 'Selectați-le pe toate';
+  String get selectAllButtonLabel => 'Selectează tot';
+
+  @override
+  String get shareButtonLabel => 'Trimiteți…';
 
   @override
   String get tabSemanticsLabelRaw => r'Fila $tabIndex din $tabCount';
@@ -10673,6 +11030,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'АМ';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Копировать';
 
   @override
@@ -10721,7 +11081,7 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Найти';
 
   @override
   String get menuDismissLabel => 'Закрыть меню';
@@ -10742,10 +11102,13 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Поиск';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Искать в интернете';
 
   @override
   String get selectAllButtonLabel => 'Выбрать все';
+
+  @override
+  String get shareButtonLabel => 'Поделиться';
 
   @override
   String get tabSemanticsLabelRaw => r'Вкладка $tabIndex из $tabCount';
@@ -10832,6 +11195,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'පෙ.ව.';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'පිටපත් කරන්න';
 
   @override
@@ -10880,7 +11246,7 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'උඩ බලන්න';
 
   @override
   String get menuDismissLabel => 'මෙනුව අස් කරන්න';
@@ -10901,10 +11267,13 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'සෙවීම';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'වෙබය සොයන්න';
 
   @override
   String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
+
+  @override
+  String get shareButtonLabel => 'බෙදා ගන්න...';
 
   @override
   String get tabSemanticsLabelRaw => r'ටැබ $tabCount න් $tabIndex';
@@ -10991,6 +11360,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopírovať';
 
   @override
@@ -11039,7 +11411,7 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Pohľad nahor';
 
   @override
   String get menuDismissLabel => 'Zavrieť ponuku';
@@ -11060,10 +11432,13 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Hľadať';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Hľadať na webe';
 
   @override
-  String get selectAllButtonLabel => 'Vybrať všetko';
+  String get selectAllButtonLabel => 'Označiť všetko';
+
+  @override
+  String get shareButtonLabel => 'Zdieľať…';
 
   @override
   String get tabSemanticsLabelRaw => r'Karta $tabIndex z $tabCount';
@@ -11150,6 +11525,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'DOP.';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
@@ -11198,7 +11576,7 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Pogled gor';
 
   @override
   String get menuDismissLabel => 'Opusti meni';
@@ -11219,10 +11597,13 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Iskanje';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Iskanje v spletu';
 
   @override
   String get selectAllButtonLabel => 'Izberi vse';
+
+  @override
+  String get shareButtonLabel => 'Deli …';
 
   @override
   String get tabSemanticsLabelRaw => r'Zavihek $tabIndex od $tabCount';
@@ -11309,6 +11690,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'paradite';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopjo';
 
   @override
@@ -11357,7 +11741,7 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Kërko';
 
   @override
   String get menuDismissLabel => 'Hiqe menynë';
@@ -11378,10 +11762,13 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Kërko';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Kërko në ueb';
 
   @override
   String get selectAllButtonLabel => 'Zgjidhi të gjitha';
+
+  @override
+  String get shareButtonLabel => 'Ndaj...';
 
   @override
   String get tabSemanticsLabelRaw => r'Skeda $tabIndex nga $tabCount';
@@ -11468,6 +11855,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'пре подне';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Копирај';
 
   @override
@@ -11516,7 +11906,7 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Поглед нагоре';
 
   @override
   String get menuDismissLabel => 'Одбаците мени';
@@ -11537,10 +11927,13 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Претражите';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Претражи веб';
 
   @override
   String get selectAllButtonLabel => 'Изабери све';
+
+  @override
+  String get shareButtonLabel => 'Дели…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex. картица од $tabCount';
@@ -11669,6 +12062,9 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuta';
 
   @override
+  String get lookUpButtonLabel => 'Pogled nagore';
+
+  @override
   String get menuDismissLabel => 'Odbacite meni';
 
   @override
@@ -11687,7 +12083,13 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get searchTextFieldPlaceholderLabel => 'Pretražite';
 
   @override
+  String get searchWebButtonLabel => 'Pretraži veb';
+
+  @override
   String get selectAllButtonLabel => 'Izaberi sve';
+
+  @override
+  String get shareButtonLabel => 'Deli…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex. kartica od $tabCount';
@@ -11747,6 +12149,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'FM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopiera';
 
   @override
@@ -11795,7 +12200,7 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Titta upp';
 
   @override
   String get menuDismissLabel => 'Stäng menyn';
@@ -11816,10 +12221,13 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Sök';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Sök på webben';
 
   @override
-  String get selectAllButtonLabel => 'Markera alla';
+  String get selectAllButtonLabel => 'Markera allt';
+
+  @override
+  String get shareButtonLabel => 'Dela …';
 
   @override
   String get tabSemanticsLabelRaw => r'Flik $tabIndex av $tabCount';
@@ -11906,6 +12314,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Nakili';
 
   @override
@@ -11954,7 +12365,7 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Tafuta';
 
   @override
   String get menuDismissLabel => 'Ondoa menyu';
@@ -11975,10 +12386,13 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Tafuta';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Tafuta kwenye Wavuti';
 
   @override
   String get selectAllButtonLabel => 'Teua Zote';
+
+  @override
+  String get shareButtonLabel => 'Shiriki...';
 
   @override
   String get tabSemanticsLabelRaw => r'Kichupo cha $tabIndex kati ya $tabCount';
@@ -12065,6 +12479,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'நகலெடு';
 
   @override
@@ -12113,7 +12530,7 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'தேடு';
 
   @override
   String get menuDismissLabel => 'மெனுவை மூடும்';
@@ -12134,10 +12551,13 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'தேடுக';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'இணையத்தில் தேடு';
 
   @override
   String get selectAllButtonLabel => 'எல்லாம் தேர்ந்தெடு';
+
+  @override
+  String get shareButtonLabel => 'பகிர்...';
 
   @override
   String get tabSemanticsLabelRaw => r'தாவல் $tabIndex / $tabCount';
@@ -12224,6 +12644,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'కాపీ చేయి';
 
   @override
@@ -12272,7 +12695,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'వెతకండి';
 
   @override
   String get menuDismissLabel => 'మెనూను తీసివేయండి';
@@ -12293,10 +12716,13 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'సెర్చ్ చేయి';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'వెబ్‌లో సెర్చ్ చేయండి';
 
   @override
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
+
+  @override
+  String get shareButtonLabel => 'షేర్ చేయండి...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCountలో $tabIndexవ ట్యాబ్';
@@ -12383,6 +12809,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'คัดลอก';
 
   @override
@@ -12431,7 +12860,7 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ค้นหา';
 
   @override
   String get menuDismissLabel => 'ปิดเมนู';
@@ -12452,10 +12881,13 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'ค้นหา';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ค้นหาบนอินเทอร์เน็ต';
 
   @override
   String get selectAllButtonLabel => 'เลือกทั้งหมด';
+
+  @override
+  String get shareButtonLabel => 'แชร์...';
 
   @override
   String get tabSemanticsLabelRaw => r'แท็บที่ $tabIndex จาก $tabCount';
@@ -12542,6 +12974,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
@@ -12611,10 +13046,13 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Hanapin';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Maghanap sa Web';
 
   @override
   String get selectAllButtonLabel => 'Piliin Lahat';
+
+  @override
+  String get shareButtonLabel => 'Ibahagi...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex ng $tabCount';
@@ -12701,6 +13139,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ÖÖ';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopyala';
 
   @override
@@ -12749,7 +13190,7 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Ara';
 
   @override
   String get menuDismissLabel => 'Menüyü kapat';
@@ -12770,10 +13211,13 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Ara';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "Web'de Ara";
 
   @override
   String get selectAllButtonLabel => 'Tümünü Seç';
+
+  @override
+  String get shareButtonLabel => 'Paylaş...';
 
   @override
   String get tabSemanticsLabelRaw => r'Sekme $tabIndex/$tabCount';
@@ -12860,6 +13304,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'дп';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Копіювати';
 
   @override
@@ -12908,7 +13355,7 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Шукати';
 
   @override
   String get menuDismissLabel => 'Закрити меню';
@@ -12929,10 +13376,13 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Шукайте';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пошук в Інтернеті';
 
   @override
   String get selectAllButtonLabel => 'Вибрати все';
+
+  @override
+  String get shareButtonLabel => 'Поділитися…';
 
   @override
   String get tabSemanticsLabelRaw => r'Вкладка $tabIndex з $tabCount';
@@ -13019,6 +13469,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'کاپی کریں';
 
   @override
@@ -13067,7 +13520,7 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'تفصیل دیکھیں';
 
   @override
   String get menuDismissLabel => 'مینو برخاست کریں';
@@ -13088,10 +13541,13 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'تلاش کریں';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ویب تلاش کریں';
 
   @override
   String get selectAllButtonLabel => 'سبھی منتخب کریں';
+
+  @override
+  String get shareButtonLabel => 'اشتراک کریں...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount میں سے $tabIndex ٹیب';
@@ -13178,6 +13634,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Nusxa olish';
 
   @override
@@ -13247,10 +13706,13 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Qidiruv';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Internetdan qidirish';
 
   @override
   String get selectAllButtonLabel => 'Barchasini tanlash';
+
+  @override
+  String get shareButtonLabel => 'Ulashish…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount varaqdan $tabIndex';
@@ -13337,6 +13799,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'SÁNG';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Sao chép';
 
   @override
@@ -13385,7 +13850,7 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Tra cứu';
 
   @override
   String get menuDismissLabel => 'Đóng trình đơn';
@@ -13406,10 +13871,13 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Tìm kiếm';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Tìm kiếm trên web';
 
   @override
   String get selectAllButtonLabel => 'Chọn tất cả';
+
+  @override
+  String get shareButtonLabel => 'Chia sẻ...';
 
   @override
   String get tabSemanticsLabelRaw => r'Thẻ $tabIndex/$tabCount';
@@ -13496,6 +13964,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => '上午';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => '复制';
 
   @override
@@ -13544,7 +14015,7 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '向上看';
 
   @override
   String get menuDismissLabel => '关闭菜单';
@@ -13565,10 +14036,13 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => '搜索';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '在网络上搜索';
 
   @override
   String get selectAllButtonLabel => '全选';
+
+  @override
+  String get shareButtonLabel => '分享…';
 
   @override
   String get tabSemanticsLabelRaw => r'第 $tabIndex 个标签，共 $tabCount 个';
@@ -13709,6 +14183,9 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get searchTextFieldPlaceholderLabel => '搜尋';
 
   @override
+  String get searchWebButtonLabel => '搜尋網頁';
+
+  @override
   String get selectAllButtonLabel => '全選';
 
   @override
@@ -13761,6 +14238,9 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get searchWebButtonLabel => '在網路上搜尋';
 
   @override
   String get noSpellCheckReplacementsLabel => '找不到替代文字';
@@ -13817,6 +14297,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get copyButtonLabel => 'Kopisha';
 
   @override
@@ -13865,7 +14348,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Bheka Phezulu';
 
   @override
   String get menuDismissLabel => 'Chitha imenyu';
@@ -13886,10 +14369,13 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Sesha';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Sesha Iwebhu';
 
   @override
   String get selectAllButtonLabel => 'Khetha konke';
+
+  @override
+  String get shareButtonLabel => 'Yabelana...';
 
   @override
   String get tabSemanticsLabelRaw => r'Ithebhu $tabIndex kwangu-$tabCount';

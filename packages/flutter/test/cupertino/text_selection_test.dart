@@ -94,11 +94,15 @@ void main() {
     }) {
       final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       return CupertinoApp(
         home: EditableText(
           key: key,
           controller: controller,
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           style: const TextStyle(),
           cursorColor: const Color.fromARGB(0, 0, 0, 0),
           backgroundCursorColor: const Color.fromARGB(0, 0, 0, 0),
@@ -193,6 +197,7 @@ void main() {
 
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
         home: Directionality(
             textDirection: TextDirection.ltr,
@@ -254,6 +259,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
         home: Directionality(
             textDirection: TextDirection.ltr,
@@ -336,7 +342,7 @@ void main() {
       expect(find.text('Look Up'), findsNothing);
       expect(find.text('Search Web'), findsOneWidget);
       expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tapping the back button thrice shows the first page again with the next button.
       await tapBackButton();
@@ -362,6 +368,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
         home: Directionality(
             textDirection: TextDirection.ltr,
@@ -394,6 +401,7 @@ void main() {
       expect(find.text('Select All'), findsNothing);
       expect(find.text('Look Up'), findsNothing);
       expect(find.text('Search Web'), findsNothing);
+      expect(find.text('Share...'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsNothing);
 
@@ -412,6 +420,7 @@ void main() {
       expect(find.text('Select All'), findsNothing);
       expect(find.text('Look Up'), findsNothing);
       expect(find.text('Search Web'), findsNothing);
+      expect(find.text('Share...'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
 
@@ -424,6 +433,7 @@ void main() {
       expect(find.text('Select All'), findsNothing);
       expect(find.text('Look Up'), findsNothing);
       expect(find.text('Search Web'), findsNothing);
+      expect(find.text('Share...'), findsNothing);
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
@@ -436,6 +446,7 @@ void main() {
       expect(find.text('Select All'), findsNothing);
       expect(find.text('Look Up'), findsNothing);
       expect(find.text('Search Web'), findsNothing);
+      expect(find.text('Share...'), findsNothing);
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
@@ -447,10 +458,11 @@ void main() {
       expect(find.text('Select All'), findsNothing);
       expect(find.text('Look Up'), findsOneWidget);
       expect(find.text('Search Web'), findsNothing);
+      expect(find.text('Share...'), findsNothing);
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
-      // Tapping the next button again shows the last page.
+      // Tapping the next button again shows the Search Web Button.
       await tapNextButton();
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
@@ -458,23 +470,27 @@ void main() {
       expect(find.text('Select All'), findsNothing);
       expect(find.text('Look Up'), findsNothing);
       expect(find.text('Search Web'), findsOneWidget);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsNothing);
-
-      // Tapping the back button thrice shows the second page again with the next button.
-      await tapBackButton();
-      await tapBackButton();
-      await tapBackButton();
-      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(3));
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('Look Up'), findsNothing);
+      expect(find.text('Share...'), findsNothing);
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
-      // Tapping the back button again shows the first page again.
+      // Tapping the next button again shows the last page and the Share button
+      await tapNextButton();
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
+      expect(find.text('Search Web'), findsNothing);
+      expect(find.text('Share...'), findsOneWidget);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsNothing);
+
+      // Tapping the back button 5 times shows the first page again.
+      await tapBackButton();
+      await tapBackButton();
+      await tapBackButton();
+      await tapBackButton();
       await tapBackButton();
       expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(2));
       expect(find.text('Cut'), findsOneWidget);
@@ -482,6 +498,8 @@ void main() {
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
       expect(find.text('Look Up'), findsNothing);
+      expect(find.text('Search Web'), findsNothing);
+      expect(find.text('Share...'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
     },
@@ -491,6 +509,7 @@ void main() {
 
     testWidgets('Handles very long locale strings', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
         locale: const Locale('en', 'us'),
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
@@ -604,6 +623,7 @@ void main() {
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
         final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
+        addTearDown(controller.dispose);
         await tester.pumpWidget(CupertinoApp(
           home: Directionality(
               textDirection: TextDirection.ltr,
@@ -660,8 +680,8 @@ void main() {
         final Offset textFieldOffset =
             tester.getTopLeft(find.byType(CupertinoTextField));
 
-        // 7.0 + 45.0 + 8.0 - 8.0 = _kToolbarArrowSize + _kToolbarHeight + _kToolbarContentDistance - padding
-        expect(selectionOffset.dy + 7.0 + 45.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
+        // 7.0 + 44.0 + 8.0 - 8.0 = _kToolbarArrowSize + text_button_height + _kToolbarContentDistance - padding
+        expect(selectionOffset.dy + 7.0 + 44.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
       },
       skip: isBrowser, // [intended] the selection menu isn't required by web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -913,7 +933,8 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('iOS selection handles scaling falls back to preferredLineHeight when the current frame does not match the previous', (WidgetTester tester) async {
+  testWidgets(
+    'iOS selection handles scaling falls back to preferredLineHeight when the current frame does not match the previous', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

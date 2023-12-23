@@ -21,6 +21,7 @@ import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'sliver.dart';
 import 'sliver_prototype_extent_list.dart';
+import 'sliver_varied_extent_list.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -118,6 +119,7 @@ class ReorderableList extends StatefulWidget {
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     this.proxyDecorator,
     this.padding,
@@ -135,10 +137,12 @@ class ReorderableList extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
   }) : assert(itemCount >= 0),
-       assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both',
-       );
+        assert(
+          (itemExtent == null && prototypeItem == null) ||
+          (itemExtent == null && itemExtentBuilder == null) ||
+          (prototypeItem == null && itemExtentBuilder == null),
+          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
+        );
 
   /// {@template flutter.widgets.reorderable_list.itemBuilder}
   /// Called, as needed, to build list item widgets.
@@ -252,6 +256,9 @@ class ReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.itemExtent}
   final double? itemExtent;
+
+  /// {@macro flutter.widgets.list_view.itemExtentBuilder}
+  final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
@@ -450,14 +457,17 @@ class SliverReorderableList extends StatefulWidget {
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     this.proxyDecorator,
     double? autoScrollerVelocityScalar,
   }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
        assert(itemCount >= 0),
        assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        );
 
   // An eyeballed value for a smooth scrolling experience.
@@ -486,6 +496,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.itemExtent}
   final double? itemExtent;
+
+  /// {@macro flutter.widgets.list_view.itemExtentBuilder}
+  final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
@@ -658,6 +671,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   @override
   void dispose() {
     _dragReset();
+    _recognizer?.dispose();
     super.dispose();
   }
 
@@ -717,6 +731,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _registerItem(_ReorderableItemState item) {
+    if (_dragInfo != null && _items[item.index] != item) {
+      item.updateForGap(_dragInfo!.index, _dragInfo!.itemExtent, false, _reverse);
+    }
     _items[item.index] = item;
     if (item.index == _dragInfo?.index) {
       item.dragging = true;
@@ -740,7 +757,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     _dragStartTransitionComplete = false;
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _dragStartTransitionComplete = true;
-    });
+    }, debugLabel: 'SliverReorderableList.completeDragStartTransition');
 
     _insertIndex = item.index;
     _dragInfo = _DragInfo(
@@ -787,19 +804,25 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   void _dragEnd(_DragInfo item) {
     setState(() {
       if (_insertIndex == item.index) {
-        _finalDropPosition = _itemOffsetAt(_insertIndex! + (_reverse ? 1 : 0));
-      } else if (_insertIndex! < widget.itemCount - 1) {
-        // Find the location of the item we want to insert before
-        _finalDropPosition = _itemOffsetAt(_insertIndex!);
-      } else {
-        // Inserting into the last spot on the list. If it's the only spot, put
-        // it back where it was. Otherwise, grab the second to last and move
-        // down by the gap.
-        final int itemIndex = _items.length > 1 ? _insertIndex! - 1 : _insertIndex!;
-        if (_reverse) {
-          _finalDropPosition = _itemOffsetAt(itemIndex) - _extentOffset(item.itemExtent, _scrollDirection);
+        // Although it's at its original position, the original position has been replaced by a zero-size box
+        // So when reversed, it should offset its own extent
+        _finalDropPosition = _reverse ? _itemOffsetAt(_insertIndex!) - _extentOffset(item.itemExtent, _scrollDirection) : _itemOffsetAt(_insertIndex!);
+      } else if (_reverse) {
+        if (_insertIndex! >= _items.length) {
+          // Drop at the starting position of the last element and offset its own extent
+          _finalDropPosition = _itemOffsetAt(_items.length - 1) - _extentOffset(item.itemExtent, _scrollDirection);
         } else {
-          _finalDropPosition = _itemOffsetAt(itemIndex) + _extentOffset(item.itemExtent, _scrollDirection);
+          // Drop at the end of the current element occupying the insert position
+          _finalDropPosition = _itemOffsetAt(_insertIndex!) + _extentOffset(_itemExtentAt(_insertIndex!), _scrollDirection);
+        }
+      } else {
+        if (_insertIndex! == 0) {
+          // Drop at the starting position of the first element and offset its own extent
+          _finalDropPosition = _itemOffsetAt(0) - _extentOffset(item.itemExtent, _scrollDirection);
+        } else {
+          // Drop at the end of the previous element occupying the insert position
+          final int atIndex = _insertIndex! - 1;
+          _finalDropPosition = _itemOffsetAt(atIndex) + _extentOffset(_itemExtentAt(atIndex), _scrollDirection);
         }
       }
     });
@@ -832,6 +855,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       _recognizer?.dispose();
       _recognizer = null;
       _overlayEntry?.remove();
+      _overlayEntry?.dispose();
       _overlayEntry = null;
       _finalDropPosition = null;
     }
@@ -938,8 +962,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   Offset _itemOffsetAt(int index) {
-    final RenderBox itemRenderBox =  _items[index]!.context.findRenderObject()! as RenderBox;
-    return itemRenderBox.localToGlobal(Offset.zero);
+    return _items[index]!.targetGeometry().topLeft;
+  }
+
+  double _itemExtentAt(int index) {
+    return _sizeExtent(_items[index]!.targetGeometry().size, _scrollDirection);
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
@@ -1034,6 +1061,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: widget.itemExtent!,
+      );
+    } else if (widget.itemExtentBuilder != null) {
+      return SliverVariedExtentList(
+        delegate: childrenDelegate,
+        itemExtentBuilder: widget.itemExtentBuilder!,
       );
     } else if (widget.prototypeItem != null) {
       return SliverPrototypeExtentList(

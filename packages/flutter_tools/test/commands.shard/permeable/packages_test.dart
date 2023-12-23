@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -40,9 +41,14 @@ void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
     late Directory tempDir;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -220,6 +226,15 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -231,6 +246,7 @@ void main() {
         platform: globals.platform,
         stdio: mockStdio,
       ),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('get --offline fetches packages', () async {
@@ -255,6 +271,81 @@ void main() {
       ),
     });
 
+    testUsingContext('get generates synthetic package when l10n.yaml has synthetic-package: true', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      final Directory projectDir = globals.fs.directory(projectPath);
+      projectDir
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .childFile('app_en.arb')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "hello": "Hello world!" }');
+      String pubspecFileContent = projectDir.childFile('pubspec.yaml').readAsStringSync();
+      pubspecFileContent = pubspecFileContent.replaceFirst(RegExp(r'\nflutter\:'), '''
+flutter:
+  generate: true
+''');
+      projectDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(pubspecFileContent);
+      projectDir
+        .childFile('l10n.yaml')
+        .writeAsStringSync('synthetic-package: true');
+      await runCommandIn(projectPath, 'get');
+      expect(
+        projectDir
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_gen')
+          .childDirectory('gen_l10n')
+          .childFile('app_localizations.dart')
+          .existsSync(),
+        true
+      );
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
+    testUsingContext('get generates normal files when l10n.yaml has synthetic-package: false', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      final Directory projectDir = globals.fs.directory(projectPath);
+      projectDir
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .childFile('app_en.arb')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "hello": "Hello world!" }');
+      projectDir
+        .childFile('l10n.yaml')
+        .writeAsStringSync('synthetic-package: false');
+      await runCommandIn(projectPath, 'get');
+      expect(
+        projectDir
+          .childDirectory('lib')
+          .childDirectory('l10n')
+          .childFile('app_localizations.dart')
+          .existsSync(),
+        true
+      );
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
     testUsingContext('set no plugins as usage value', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
@@ -264,6 +355,11 @@ void main() {
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesNumberPlugins'],
+        0,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -289,6 +385,11 @@ void main() {
 
       // A plugin example depends on the plugin itself, and integration_test.
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 2);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesNumberPlugins'],
+        2,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -311,6 +412,11 @@ void main() {
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, false);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesProjectModule'],
+        false,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -333,6 +439,11 @@ void main() {
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, true);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesProjectModule'],
+        true,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -364,6 +475,11 @@ void main() {
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesAndroidEmbeddingVersion'],
+        'v1',
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -386,6 +502,11 @@ void main() {
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesAndroidEmbeddingVersion'],
+        'v2',
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(

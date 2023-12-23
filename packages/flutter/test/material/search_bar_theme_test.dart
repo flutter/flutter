@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('SearchBarThemeData copyWith, ==, hashCode basics', () {
@@ -51,7 +50,7 @@ void main() {
     expect(theme.data.textCapitalization, null);
   });
 
-  testWidgetsWithLeakTracking('Default SearchBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SearchBarThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData().debugFillProperties(builder);
 
@@ -63,7 +62,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('SearchBarThemeData implements debugFillProperties', (
+  testWidgets('SearchBarThemeData implements debugFillProperties', (
       WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData(

@@ -122,7 +122,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -148,7 +148,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
   bool get isRepaintBoundary => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -201,7 +202,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
         // Schedule a new post frame callback.
         _setOffset();
       }
-    });
+    }, debugLabel: 'RenderAndroidView.setOffset');
   }
 
   @override
@@ -279,7 +280,10 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   RenderDarwinPlatformView({
     required T viewController,
     required this.hitTestBehavior,
-  }) : _viewController = viewController;
+      required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+  }) : _viewController = viewController {
+    updateGestureRecognizers(gestureRecognizers);
+  }
 
 
   /// The unique identifier of the platform view controlled by this controller.
@@ -313,8 +317,11 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 
   PointerEvent? _lastPointerDownEvent;
 
+  _UiKitViewGestureRecognizer? _gestureRecognizer;
+
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -374,6 +381,9 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     super.detach();
   }
+
+  /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers);
 }
 
 /// A render object for an iOS UIKit UIView.
@@ -396,19 +406,14 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 ///  * [PlatformViewsService], which is a service for controlling platform views.
 class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   /// Creates a render object for an iOS UIView.
-  ///
-  /// The `viewId`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
   RenderUiKitView({
       required super.viewController,
       required super.hitTestBehavior,
-      required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers
-    }) {
-    updateGestureRecognizers(gestureRecognizers);
-  }
+      required super.gestureRecognizers,
+    });
 
-  // TODO(schectman): Add gesture functionality to macOS platform view when implemented.
-  // https://github.com/flutter/flutter/issues/128519
   /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
+  @override
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
@@ -431,13 +436,35 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
     _lastPointerDownEvent = event.original ?? event;
   }
 
-  _UiKitViewGestureRecognizer? _gestureRecognizer;
-
   @override
   void detach() {
     _gestureRecognizer!.reset();
     super.detach();
   }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
+  }
+}
+
+/// A render object for a macOS platform view.
+class RenderAppKitView extends RenderDarwinPlatformView<AppKitViewController> {
+  /// Creates a render object for a macOS AppKitView.
+  RenderAppKitView({
+    required super.viewController,
+    required super.hitTestBehavior,
+    required super.gestureRecognizers,
+  });
+
+  // TODO(schectman): Add gesture functionality to macOS platform view when implemented.
+  // https://github.com/flutter/flutter/issues/128519
+  // This method will need to behave the same as the same-named method for RenderUiKitView,
+  // but use a _AppKitViewGestureRecognizer or equivalent, whose constructor shall accept an
+  // AppKitViewController.
+  @override
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {}
 }
 
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
@@ -634,8 +661,6 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 /// integrates it with the gesture arenas system and adds relevant semantic nodes to the semantics tree.
 class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// Creating a render object for a [PlatformViewSurface].
-  ///
-  /// The `controller` parameter must not be null.
   PlatformViewRenderBox({
     required PlatformViewController controller,
     required PlatformViewHitTestBehavior hitTestBehavior,
@@ -649,7 +674,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// The controller for this render object.
   PlatformViewController get controller => _controller;
   PlatformViewController _controller;
-  /// This value must not be null, and setting it to a new value will result in a repaint.
+  /// Setting this value to a new value will result in a repaint.
   set controller(covariant PlatformViewController controller) {
     assert(controller.viewId > -1);
 
@@ -694,7 +719,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   bool get isRepaintBoundary => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -789,5 +815,11 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void detach() {
     _gestureRecognizer!.reset();
     super.detach();
+  }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
   }
 }

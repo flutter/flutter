@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +19,7 @@ void main() {
 
   late DateTime firstDate;
   late DateTime lastDate;
-  late DateTime initialDate;
+  late DateTime? initialDate;
   late DateTime today;
   late SelectableDayPredicate? selectableDayPredicate;
   late DatePickerEntryMode initialEntryMode;
@@ -68,20 +73,24 @@ void main() {
     TextDirection textDirection = TextDirection.ltr,
     bool useMaterial3 = false,
     ThemeData? theme,
+    TextScaler textScaler = TextScaler.noScaling,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       theme: theme ?? ThemeData(useMaterial3: useMaterial3),
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return ElevatedButton(
-              onPressed: () {
-                buttonContext = context;
-              },
-              child: const Text('Go'),
-            );
-          },
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: textScaler),
+        child: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  buttonContext = context;
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
         ),
       ),
     ));
@@ -1044,6 +1053,37 @@ void main() {
       });
     });
 
+    testWidgets('Can select a day with no initial date', (WidgetTester tester) async {
+      initialDate = null;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        await tester.tap(find.text('12'));
+        await tester.tap(find.text('OK'));
+        expect(await date, equals(DateTime(2016, DateTime.january, 12)));
+      });
+    });
+
+    testWidgets('Can select a month with no initial date', (WidgetTester tester) async {
+      initialDate = null;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        await tester.tap(previousMonthIcon);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+        await tester.tap(find.text('25'));
+        await tester.tap(find.text('OK'));
+        expect(await date, DateTime(2015, DateTime.december, 25));
+      });
+    });
+
+    testWidgets('Can select a year with no initial date', (WidgetTester tester) async {
+      initialDate = null;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        await tester.tap(find.text('January 2016')); // Switch to year mode.
+        await tester.pump();
+        await tester.tap(find.text('2018'));
+        await tester.pump();
+        expect(find.text('January 2018'), findsOneWidget);
+      });
+    });
+
     testWidgets('Selecting date does not change displayed month', (WidgetTester tester) async {
       initialDate = DateTime(2020, DateTime.march, 15);
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
@@ -1105,8 +1145,8 @@ void main() {
 
     testWidgets('Cannot select a day outside bounds', (WidgetTester tester) async {
       initialDate = DateTime(2017, DateTime.january, 15);
-      firstDate = initialDate;
-      lastDate = initialDate;
+      firstDate = initialDate!;
+      lastDate = initialDate!;
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         // Earlier than firstDate. Should be ignored.
         await tester.tap(find.text('10'));
@@ -1120,7 +1160,7 @@ void main() {
 
     testWidgets('Cannot select a month past last date', (WidgetTester tester) async {
       initialDate = DateTime(2017, DateTime.january, 15);
-      firstDate = initialDate;
+      firstDate = initialDate!;
       lastDate = DateTime(2017, DateTime.february, 20);
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(nextMonthIcon);
@@ -1133,7 +1173,7 @@ void main() {
     testWidgets('Cannot select a month before first date', (WidgetTester tester) async {
       initialDate = DateTime(2017, DateTime.january, 15);
       firstDate = DateTime(2016, DateTime.december, 10);
-      lastDate = initialDate;
+      lastDate = initialDate!;
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(previousMonthIcon);
         await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -1437,6 +1477,52 @@ void main() {
         // Should not throw an exception.
         expect(tester.takeException(), null);
       });
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/131989.
+    testWidgets('Dialog contents do not overflow when resized during orientation change',
+      (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+        // Initial window size is wide for landscape mode.
+        tester.view.physicalSize = wideWindowSize;
+        tester.view.devicePixelRatio = 1.0;
+
+        await prepareDatePicker(tester, (Future<DateTime?> date) async {
+          // Change window size to narrow for portrait mode.
+          tester.view.physicalSize = narrowWindowSize;
+          await tester.pump();
+          expect(tester.takeException(), null);
+        });
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/139120.
+    testWidgets('Dialog contents are visible - textScaler 0.88, 1.0, 2.0',
+      (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        final List<double> scales = <double>[0.88, 1.0, 2.0];
+
+        for (final double scale in scales) {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Material(
+                  child: DatePickerDialog(
+                    firstDate: DateTime(2001),
+                    lastDate: DateTime(2031, DateTime.december, 31),
+                    initialDate: DateTime(2016, DateTime.january, 15),
+                    initialEntryMode: DatePickerEntryMode.input,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await expectLater(find.byType(Dialog), matchesGoldenFile('date_picker.dialog.contents.visible.$scale.png'));
+        }
     });
   });
 
@@ -2153,6 +2239,13 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
       );
     },
   );
+
+  @override
+  void dispose() {
+    _selectedDate.dispose();
+    _restorableDatePickerRouteFuture.dispose();
+    super.dispose();
+  }
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

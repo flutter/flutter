@@ -153,6 +153,7 @@
   "collapsedHint": "Wedi'i ehangu",
   "scanTextButtonLabel": "Sganio testun",
   "menuDismissLabel": "Diystyru'r ddewislen",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Chwilio",
+  "searchWebButtonLabel": "Chwilio'r We",
+  "shareButtonLabel": "Rhannu..."
 }

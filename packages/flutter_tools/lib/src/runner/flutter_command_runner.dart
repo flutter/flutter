@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -26,8 +27,8 @@ abstract final class FlutterGlobalOptions {
   static const String kColorFlag = 'color';
   static const String kContinuousIntegrationFlag = 'ci';
   static const String kDeviceIdOption = 'device-id';
-  static const String kDisableTelemetryFlag = 'disable-telemetry';
-  static const String kEnableTelemetryFlag = 'enable-telemetry';
+  static const String kDisableAnalyticsFlag = 'disable-analytics';
+  static const String kEnableAnalyticsFlag = 'enable-analytics';
   static const String kLocalEngineOption = 'local-engine';
   static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
   static const String kLocalEngineHostOption = 'local-engine-host';
@@ -101,17 +102,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
         defaultsTo: true,
         hide: !verboseHelp,
         help: 'Allow Flutter to check for updates when this command runs.');
-    argParser.addFlag(FlutterGlobalOptions.kSuppressAnalyticsFlag,
-        negatable: false,
-        help: 'Suppress analytics reporting for the current CLI invocation.');
-    argParser.addFlag(FlutterGlobalOptions.kDisableTelemetryFlag,
-        negatable: false,
-        help: 'Disable telemetry reporting each time a flutter or dart '
-              'command runs, until it is re-enabled.');
-    argParser.addFlag(FlutterGlobalOptions.kEnableTelemetryFlag,
+    argParser.addFlag(FlutterGlobalOptions.kEnableAnalyticsFlag,
         negatable: false,
         help: 'Enable telemetry reporting each time a flutter or dart '
               'command runs.');
+    argParser.addFlag(FlutterGlobalOptions.kDisableAnalyticsFlag,
+        negatable: false,
+        help: 'Disable telemetry reporting each time a flutter or dart '
+              'command runs, until it is re-enabled.');
+    argParser.addFlag(FlutterGlobalOptions.kSuppressAnalyticsFlag,
+        negatable: false,
+        help: 'Suppress analytics reporting for the current CLI invocation.');
     argParser.addOption(FlutterGlobalOptions.kPackagesOption,
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
@@ -237,8 +238,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // If the flag for enabling or disabling telemetry is passed in,
     // we will return out
-    if (topLevelResults.wasParsed(FlutterGlobalOptions.kDisableTelemetryFlag) ||
-        topLevelResults.wasParsed(FlutterGlobalOptions.kEnableTelemetryFlag)) {
+    if (topLevelResults.wasParsed(FlutterGlobalOptions.kDisableAnalyticsFlag) ||
+        topLevelResults.wasParsed(FlutterGlobalOptions.kEnableAnalyticsFlag)) {
       return;
     }
 
@@ -304,6 +305,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
           globals.flutterUsage.suppressAnalytics = true;
+          globals.analytics.suppressTelemetry();
         }
 
         globals.flutterVersion.ensureVersionFile();
@@ -328,6 +330,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
           globals.flutterUsage.sendCommand(FlutterGlobalOptions.kVersionFlag);
+          globals.analytics.send(Event.flutterCommandResult(
+            commandPath: 'version',
+            result: 'success',
+            commandHasTerminal: globals.stdio.hasTerminal,
+          ));
           final FlutterVersion version = globals.flutterVersion.fetchTagsAndGetVersion(
             clock: globals.systemClock,
           );

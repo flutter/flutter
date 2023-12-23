@@ -670,22 +670,22 @@ class SliverChildListDelegate extends SliverChildDelegate {
     }
     // Lazily fill the [_keyToIndex].
     if (!_keyToIndex!.containsKey(key)) {
-      int index = _keyToIndex![null]!;
+      int index = _keyToIndex[null]!;
       while (index < children.length) {
         final Widget child = children[index];
         if (child.key != null) {
-          _keyToIndex![child.key] = index;
+          _keyToIndex[child.key] = index;
         }
         if (child.key == key) {
           // Record current index for next function call.
-          _keyToIndex![null] = index + 1;
+          _keyToIndex[null] = index + 1;
           return index;
         }
         index += 1;
       }
-      _keyToIndex![null] = index;
+      _keyToIndex[null] = index;
     } else {
-      return _keyToIndex![key];
+      return _keyToIndex[key];
     }
     return null;
   }
@@ -933,8 +933,8 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     int? maxYIndex,
     this.addRepaintBoundaries = true,
     this.addAutomaticKeepAlives = true,
-  }) : assert(maxYIndex == null || maxYIndex >= 0),
-       assert(maxXIndex == null || maxXIndex >= 0),
+  }) : assert(maxYIndex == null || maxYIndex >= -1),
+       assert(maxXIndex == null || maxXIndex >= -1),
        _maxYIndex = maxYIndex,
        _maxXIndex = maxXIndex;
 
@@ -976,7 +976,9 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   /// [TwoDimensionalViewport] subclass to learn how this value is applied in
   /// the specific use case.
   ///
-  /// If not null, the value must be non-negative.
+  /// If not null, the value must be greater than or equal to -1, where -1
+  /// indicates there will be no children at all provided to the
+  /// [TwoDimensionalViewport].
   ///
   /// If the value changes, the delegate will call [notifyListeners]. This
   /// informs the [RenderTwoDimensionalViewport] that any cached information
@@ -997,7 +999,7 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     if (value == maxXIndex) {
       return;
     }
-    assert(value == null || value >= 0);
+    assert(value == null || value >= -1);
     _maxXIndex = value;
     notifyListeners();
   }
@@ -1020,7 +1022,7 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     if (maxYIndex == value) {
       return;
     }
-    assert(value == null || value >= 0);
+    assert(value == null || value >= -1);
     _maxYIndex = value;
     notifyListeners();
   }

@@ -8,17 +8,18 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'bundle_builder.dart';
-import 'cache.dart';
 import 'desktop_device.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
+import 'features.dart';
 import 'project.dart';
 import 'protocol_discovery.dart';
 
@@ -28,30 +29,96 @@ BundleBuilder _defaultBundleBuilder() {
   return BundleBuilder();
 }
 
+class PreviewDeviceDiscovery extends PollingDeviceDiscovery {
+  PreviewDeviceDiscovery({
+    required Platform platform,
+    required Artifacts artifacts,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    required FeatureFlags featureFlags,
+  }) : _artifacts = artifacts,
+       _logger = logger,
+       _processManager = processManager,
+       _fileSystem = fileSystem,
+       _platform = platform,
+       _features = featureFlags,
+       super('Flutter preview device');
+
+  final Platform _platform;
+  final Artifacts _artifacts;
+  final Logger _logger;
+  final ProcessManager _processManager;
+  final FileSystem _fileSystem;
+  final FeatureFlags _features;
+
+  @override
+  bool get canListAnything => _platform.isWindows;
+
+  @override
+  bool get supportsPlatform => _platform.isWindows;
+
+  @override
+  List<String> get wellKnownIds => <String>['preview'];
+
+  @override
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+  }) async {
+    final File previewBinary = _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
+    if (!previewBinary.existsSync()) {
+      return const <Device>[];
+    }
+    final PreviewDevice device = PreviewDevice(
+      artifacts: _artifacts,
+      fileSystem: _fileSystem,
+      logger: _logger,
+      processManager: _processManager,
+      previewBinary: previewBinary,
+    );
+    return <Device>[
+      if (_features.isPreviewDeviceEnabled)
+        device,
+    ];
+  }
+
+  @override
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) {
+    return devices();
+  }
+}
+
 /// A device type that runs a prebuilt desktop binary alongside a locally compiled kernel file.
-///
-/// This could be used to support debug local development without plugins on machines that
-/// have not completed the SDK setup. These features are not fully implemented and the
-/// device is not currently discoverable.
 class PreviewDevice extends Device {
   PreviewDevice({
-    required Platform platform,
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
+    required Artifacts artifacts,
+    required File previewBinary,
     @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
-  }) : _platform = platform,
+  }) : _previewBinary = previewBinary,
        _processManager = processManager,
        _logger = logger,
        _fileSystem = fileSystem,
        _bundleBuilderFactory = builderFactory,
-       super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.custom);
+       _artifacts = artifacts,
+       super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.windowsPreview);
 
-  final Platform _platform;
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
   final BundleBuilderFactory _bundleBuilderFactory;
+  final Artifacts _artifacts;
+  final File _previewBinary;
+
+  /// The set of plugins that are allowed to be used by Preview users.
+  ///
+  /// Currently no plugins are supported.
+  static const List<String> supportedPubPlugins = <String>[];
 
   @override
   void clearLogs() { }
@@ -86,7 +153,7 @@ class PreviewDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  String get name => 'preview';
+  String get name => 'Preview';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -116,7 +183,7 @@ class PreviewDevice extends Device {
       await _bundleBuilderFactory().build(
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
-        platform: TargetPlatform.tester,
+        platform: TargetPlatform.windows_x64,
         assetDirPath: getAssetBuildDirectory(),
       );
       copyDirectory(_fileSystem.directory(
@@ -128,13 +195,18 @@ class PreviewDevice extends Device {
     }
 
     // Merge with precompiled executable.
-    final Directory precompiledDirectory = _fileSystem.directory(_fileSystem.path.join(Cache.flutterRoot!, 'artifacts_temp', 'Debug'));
-    copyDirectory(precompiledDirectory, assetDirectory);
+    final String copiedPreviewBinaryPath = assetDirectory.childFile(_previewBinary.basename).path;
+    _previewBinary.copySync(copiedPreviewBinaryPath);
+
+    final String windowsPath = _artifacts
+      .getArtifactPath(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
+    final File windowsDll = _fileSystem.file(_fileSystem.path.join(windowsPath, 'flutter_windows.dll'));
+    final File icu = _fileSystem.file(_fileSystem.path.join(windowsPath, 'icudtl.dat'));
+    windowsDll.copySync(assetDirectory.childFile('flutter_windows.dll').path);
+    icu.copySync(assetDirectory.childDirectory('data').childFile('icudtl.dat').path);
 
     final Process process = await _processManager.start(
-      <String>[
-        assetDirectory.childFile('splash').path,
-      ],
+      <String>[copiedPreviewBinaryPath],
     );
     _process = process;
     _logReader.initializeProcess(process);
@@ -169,10 +241,7 @@ class PreviewDevice extends Device {
 
   @override
   Future<TargetPlatform> get targetPlatform async {
-    if (_platform.isWindows) {
-      return TargetPlatform.windows_x64;
-    }
-    return TargetPlatform.tester;
+    return TargetPlatform.windows_x64;
   }
 
   @override

@@ -576,7 +576,9 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
 ///   final ui.Canvas pictureCanvas = ui.Canvas(recorder);
 ///   pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
 ///   final ui.Picture picture = recorder.endRecording();
+///   addTearDown(picture.dispose);
 ///   ui.Image referenceImage = await picture.toImage(50, 50);
+///   addTearDown(referenceImage.dispose);
 ///
 ///   await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
 ///   await expectLater(image, matchesReferenceImage(referenceImage));
@@ -598,7 +600,11 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// provided, then they are not part of the comparison. All of the boolean
 /// flag and action fields must match, and default to false.
 ///
-/// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
+/// To find a [SemanticsNode] directly, use [CommonFinders.semantics].
+/// These methods will search the semantics tree directly and avoid the edge
+/// cases that [SemanticsController.find] sometimes runs into.
+///
+/// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -618,6 +624,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [containsSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
+  String? identifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -695,6 +702,7 @@ Matcher matchesSemantics({
   List<Matcher>? children,
 }) {
   return _MatchesSemanticsData(
+    identifier: identifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -778,7 +786,11 @@ Matcher matchesSemantics({
 /// There are no default expected values, so no unspecified values will be
 /// validated.
 ///
-/// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
+/// To find a [SemanticsNode] directly, use [CommonFinders.semantics].
+/// These methods will search the semantics tree directly and avoid the edge
+/// cases that [SemanticsController.find] sometimes runs into.
+///
+/// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -798,6 +810,7 @@ Matcher matchesSemantics({
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [matchesSemantics], a similar matcher with default values for flags and actions.
 Matcher containsSemantics({
+  String? identifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -875,6 +888,7 @@ Matcher containsSemantics({
   List<Matcher>? children,
 }) {
   return _MatchesSemanticsData(
+    identifier: identifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -1467,8 +1481,6 @@ double _matrix3Distance(Matrix3 a, Matrix3 b) {
 }
 
 double _sizeDistance(Size a, Size b) {
-  // TODO(a14n): remove ignore when lint is updated, https://github.com/dart-lang/linter/issues/1843
-  // ignore: unnecessary_parenthesis
   final Offset delta = (b - a) as Offset;
   return delta.distance;
 }
@@ -2139,10 +2151,13 @@ class _MatchesReferenceImage extends AsyncMatcher {
   @override
   Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image>) {
       imageFuture = item;
+      disposeImage = false;
     } else if (item is ui.Image) {
       imageFuture = Future<ui.Image>.value(item);
+      disposeImage = false;
     } else {
       final Finder finder = item as Finder;
       final Iterable<Element> elements = finder.evaluate();
@@ -2152,30 +2167,37 @@ class _MatchesReferenceImage extends AsyncMatcher {
         return 'matched too many widgets';
       }
       imageFuture = captureImage(elements.single);
+      disposeImage = true;
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
     return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData? bytes = await image.toByteData();
-      if (bytes == null) {
-        return 'could not be encoded.';
-      }
+      try {
+        final ByteData? bytes = await image.toByteData();
+        if (bytes == null) {
+          return 'could not be encoded.';
+        }
 
-      final ByteData? referenceBytes = await referenceImage.toByteData();
-      if (referenceBytes == null) {
-        return 'could not have its reference image encoded.';
-      }
+        final ByteData? referenceBytes = await referenceImage.toByteData();
+        if (referenceBytes == null) {
+          return 'could not have its reference image encoded.';
+        }
 
-      if (referenceImage.height != image.height || referenceImage.width != image.width) {
-        return 'does not match as width or height do not match. $image != $referenceImage';
-      }
+        if (referenceImage.height != image.height || referenceImage.width != image.width) {
+          return 'does not match as width or height do not match. $image != $referenceImage';
+        }
 
-      final int countDifferentPixels = _countDifferentPixels(
-        Uint8List.view(bytes.buffer),
-        Uint8List.view(referenceBytes.buffer),
-      );
-      return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+        final int countDifferentPixels = _countDifferentPixels(
+          Uint8List.view(bytes.buffer),
+          Uint8List.view(referenceBytes.buffer),
+        );
+        return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+      } finally {
+        if (disposeImage) {
+          image.dispose();
+        }
+      }
     });
   }
 
@@ -2187,6 +2209,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
 
 class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
+    required this.identifier,
     required this.label,
     required this.attributedLabel,
     required this.hint,
@@ -2324,6 +2347,7 @@ class _MatchesSemanticsData extends Matcher {
                 onLongPressHint: onLongPressHint,
               );
 
+  final String? identifier;
   final String? label;
   final AttributedString? attributedLabel;
   final String? hint;
@@ -2490,7 +2514,13 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'No SemanticsData provided. '
         'Maybe you forgot to enable semantics?');
     }
-    final SemanticsData data = node is SemanticsNode ? node.getSemanticsData() : (node as SemanticsData);
+
+    final SemanticsData data = switch (node) {
+      SemanticsNode() => node.getSemanticsData(),
+      FinderBase<SemanticsNode>() => node.evaluate().single.getSemanticsData(),
+      _ => node as SemanticsData,
+    };
+
     if (label != null && label != data.label) {
       return failWithDescription(matchState, 'label was: ${data.label}');
     }

@@ -167,7 +167,14 @@ void main() {
   testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
     final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+    addTearDown(() {
+      for (final FocusNode node in nodes) {
+        node.dispose();
+      }
+    });
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(

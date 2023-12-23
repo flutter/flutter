@@ -66,7 +66,6 @@ class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
   /// {@template flutter.widgets.AndroidView.constructorArgs}
-  /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   /// {@endtemplate}
   const AndroidView({
@@ -189,7 +188,7 @@ class AndroidView extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
@@ -230,13 +229,13 @@ abstract class _DarwinView extends StatefulWidget {
   /// {@macro flutter.widgets.AndroidView.layoutDirection}
   final TextDirection? layoutDirection;
 
-  /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createWithFrame:viewIdentifier:arguments:)
+  /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/ios-embedder/protocol_flutter_platform_view_factory-p.html#a4e3c4390cd6ebd982390635e9bca4edc)
   ///
   /// This can be used by plugins to pass constructor parameters to the embedded iOS view.
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
-  /// platform side. It should match the codec returned by [-\[FlutterPlatformViewFactory createArgsCodec:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createArgsCodec)
+  /// platform side. It should match the codec returned by [-\[FlutterPlatformViewFactory createArgsCodec:\]](/ios-embedder/protocol_flutter_platform_view_factory-p.html#a32c3c067cb45a83dfa720c74a0d5c93c)
   ///
   /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
   ///
@@ -325,6 +324,40 @@ class UiKitView extends _DarwinView {
   State<UiKitView> createState() => _UiKitViewState();
 }
 
+/// Widget that contains a macOS AppKit view.
+///
+/// Embedding macOS views is an expensive operation and should be avoided where
+/// a Flutter equivalent is possible.
+///
+/// The platform view's lifetime is the same as the lifetime of the [State]
+/// object for this widget. When the [State] is disposed the platform view (and
+/// auxiliary resources) are lazily released (some resources are immediately
+/// released and some by platform garbage collector). A stateful widget's state
+/// is disposed when the widget is removed from the tree or when it is moved
+/// within the tree. If the stateful widget has a key and it's only moved
+/// relative to its siblings, or it has a [GlobalKey] and it's moved within the
+/// tree, it will not be disposed.
+///
+/// Construction of AppKitViews is done asynchronously, before the underlying
+/// NSView is ready this widget paints nothing while maintaining the same
+/// layout constraints.
+class AppKitView extends _DarwinView {
+  /// Creates a widget that embeds a macOS AppKit NSView.
+  const AppKitView({
+    super.key,
+    required super.viewType,
+    super.onPlatformViewCreated,
+    super.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
+    super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+    super.gestureRecognizers,
+  });
+
+  @override
+  State<AppKitView> createState() => _AppKitViewState();
+}
+
 /// Callback signature for when the platform view's DOM element was created.
 ///
 /// [element] is the DOM element that was created.
@@ -386,30 +419,6 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// [onElementCreated] is called when the DOM element is created. It can be
   /// used by the app to customize the element by adding attributes and styles.
-  ///
-  /// ```dart
-  /// import 'package:flutter/widgets.dart';
-  /// import 'package:web/web.dart' as web;
-  ///
-  /// // ...
-  ///
-  /// class MyWidget extends StatelessWidget {
-  ///   const MyWidget({super.key});
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return HtmlElementView.fromTagName(
-  ///       tagName: 'div',
-  ///       onElementCreated: (Object element) {
-  ///         element as web.HTMLElement;
-  ///         element.style
-  ///             ..backgroundColor = 'blue'
-  ///             ..border = '1px solid red';
-  ///       },
-  ///     );
-  ///   }
-  /// }
-  /// ```
   factory HtmlElementView.fromTagName({
     Key? key,
     required String tagName,
@@ -631,6 +640,9 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
 
     if (widget.viewType != oldWidget.viewType) {
       _controller?.dispose();
+      _controller = null;
+      focusNode?.dispose();
+      focusNode = null;
       _createNewUiKitView();
       return;
     }
@@ -711,6 +723,31 @@ class _UiKitViewState extends _DarwinViewState<UiKitView, UiKitViewController, R
   }
 }
 
+class _AppKitViewState extends _DarwinViewState<AppKitView, AppKitViewController, RenderAppKitView, _AppKitPlatformView> {
+  @override
+  Future<AppKitViewController> createNewViewController(int id) async {
+    return PlatformViewsService.initAppKitView(
+      id: id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection!,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        focusNode?.requestFocus();
+      }
+    );
+  }
+
+  @override
+  _AppKitPlatformView childPlatformView() {
+    return _AppKitPlatformView(
+        controller: _controller!,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
+      );
+  }
+}
+
 class _AndroidPlatformView extends LeafRenderObjectWidget {
   const _AndroidPlatformView({
     required this.controller,
@@ -758,7 +795,8 @@ abstract class _DarwinPlatformView<TController extends DarwinPlatformViewControl
   void updateRenderObject(BuildContext context, TRender renderObject) {
     renderObject
       ..viewController = controller
-      ..hitTestBehavior = hitTestBehavior;
+      ..hitTestBehavior = hitTestBehavior
+      ..updateGestureRecognizers(gestureRecognizers);
   }
 }
 
@@ -773,11 +811,18 @@ class _UiKitPlatformView extends _DarwinPlatformView<UiKitViewController, Render
       gestureRecognizers: gestureRecognizers,
     );
   }
+}
+
+class _AppKitPlatformView extends _DarwinPlatformView<AppKitViewController, RenderAppKitView> {
+  const _AppKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
 
   @override
-  void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {
-    super.updateRenderObject(context, renderObject);
-    renderObject.updateGestureRecognizers(gestureRecognizers);
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderAppKitView(
+      viewController: controller,
+      hitTestBehavior: hitTestBehavior,
+      gestureRecognizers: gestureRecognizers,
+    );
   }
 }
 
@@ -868,8 +913,6 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 /// state of this widget is initialized, or when the `viewType` changes.
 class PlatformViewLink extends StatefulWidget {
   /// Construct a [PlatformViewLink] widget.
-  ///
-  /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
   ///
   /// See also:
   ///
@@ -1012,8 +1055,6 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a [PlatformViewSurface].
-  ///
-  /// The [controller] must not be null.
   const PlatformViewSurface({
     super.key,
     required this.controller,
@@ -1236,7 +1277,7 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
     // A call to `localToGlobal` requires waiting for a frame to render first.
     SchedulerBinding.instance.addPostFrameCallback((_) {
       onLayout(size, localToGlobal(Offset.zero));
-    });
+    }, debugLabel: 'PlatformViewPlaceholderBox.onLayout');
   }
 }
 
@@ -1268,6 +1309,6 @@ extension on PlatformViewController {
   void disposePostFrame() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       dispose();
-    });
+    }, debugLabel: 'PlatformViewController.dispose');
   }
 }

@@ -21,3 +21,13 @@ void tryToDelete(Directory directory) {
     print('Failed to delete ${directory.path}: $error');
   }
 }
+
+Matcher throwsExceptionWith(String messageSubString) {
+  return throwsA(
+      isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'description',
+          contains(messageSubString),
+      ),
+  );
+}

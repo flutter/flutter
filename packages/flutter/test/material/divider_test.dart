@@ -136,8 +136,9 @@ void main() {
 
   testWidgets('Vertical Divider Test 2', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Material(
           child: SizedBox(
             height: 24.0,
             child: Row(

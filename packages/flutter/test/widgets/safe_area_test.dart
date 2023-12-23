@@ -258,12 +258,15 @@ void main() {
 
   group('SliverSafeArea', () {
     Widget buildWidget(EdgeInsets mediaPadding, Widget sliver) {
+      late final ViewportOffset offset;
+      addTearDown(() => offset.dispose());
+
       return MediaQuery(
         data: MediaQueryData(padding: mediaPadding),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Viewport(
-            offset: ViewportOffset.fixed(0.0),
+            offset: offset = ViewportOffset.fixed(0.0),
             slivers: <Widget>[
               const SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('before'))),
               sliver,

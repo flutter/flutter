@@ -62,14 +62,22 @@ The `shutdown()` command will terminate the flutter daemon. It is not necessary 
 
 #### daemon.getSupportedPlatforms
 
-The `getSupportedPlatforms()` command will enumerate all platforms supported by the project located at the provided `projectRoot`. It returns a Map with the key 'platforms' containing a List of strings which describe the set of all possibly supported platforms. Possible values include:
-   - android
-   - ios
-   - linux #experimental
-   - macos #experimental
-   - windows #experimental
-   - fuchsia #experimental
-   - web #experimental
+The `getSupportedPlatforms()` command will enumerate all platforms supported
+by the project located at the provided `projectRoot`. It returns a Map with
+the key 'platformTypes' containing a Map of platform types to a Map with the
+following entries:
+
+- isSupported (bool) - whether or not the platform type is supported
+- reasons (List<Map<String, Object>>, only included if isSupported == false) - a list of reasons why the platform is not supported
+
+The schema for each element in `reasons` is:
+
+- reasonText (String) - a description of why the platform is not supported
+- fixText (String) - human readable instructions of how to fix this reason
+- fixCode (String) - stringified version of the `_ReasonCode` enum. To be used
+by daemon clients who intend to auto-fix.
+
+The possible platform types are the `PlatformType` enumeration in the lib/src/device.dart library.
 
 #### Events
 

@@ -21,25 +21,15 @@ export 'package:flutter/services.dart' show KeyEvent;
 /// For text entry, consider using a [EditableText], which integrates with
 /// on-screen keyboards and input method editors (IMEs).
 ///
-/// The [KeyboardListener] is different from [RawKeyboardListener] in that
-/// [KeyboardListener] uses the newer [HardwareKeyboard] API, which is
-/// preferable.
-///
 /// See also:
 ///
 ///  * [EditableText], which should be used instead of this widget for text
 ///    entry.
-///  * [RawKeyboardListener], a similar widget based on the old [RawKeyboard]
-///    API.
 class KeyboardListener extends StatelessWidget {
   /// Creates a widget that receives keyboard events.
   ///
   /// For text entry, consider using a [EditableText], which integrates with
   /// on-screen keyboards and input method editors (IMEs).
-  ///
-  /// The [focusNode] and [child] arguments are required and must not be null.
-  ///
-  /// The [autofocus] argument must not be null.
   ///
   /// The `key` is an identifier for widgets, and is unrelated to keyboards.
   /// See [Widget.key].

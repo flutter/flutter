@@ -31,13 +31,12 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
-  'video_player': '2.2.11',
-  // Keep pinned to latest until 1.0.0.
-  'material_color_utilities': '0.5.0',
-  // https://github.com/flutter/flutter/issues/111304
-  'url_launcher_android': '6.0.17',
-  // https://github.com/flutter/flutter/issues/115660
-  'archive': '3.3.2',
+  'material_color_utilities': '0.8.0', // Keep pinned to latest until 1.0.0.
+  'archive': '3.3.2', // https://github.com/flutter/flutter/issues/115660
+  'leak_tracker_flutter_testing': '2.0.0', // https://github.com/flutter/devtools/issues/3951
+  'test_api': '0.6.1', // https://github.com/flutter/flutter/issues/140169
+  'test_core': '0.5.9', // https://github.com/flutter/flutter/issues/140169
+  'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1753,7 +1752,7 @@ Directory createTemporaryFlutterSdk(
     // Fill in SDK dependency constraint.
     output.write('''
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 ''');
 
     output.writeln('dependencies:');
@@ -1785,7 +1784,7 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 ''');
 
   return directory;

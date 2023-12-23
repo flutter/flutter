@@ -160,6 +160,11 @@
     "description": "The label for paste buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
 
+  "clearButtonLabel": "Clear",
+  "@clearButtonLabel": {
+    "description": "The label for clear buttons and menu items."
+  },
+
   "selectAllButtonLabel": "Select All",
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
@@ -173,6 +178,11 @@
   "searchWebButtonLabel": "Search Web",
   "@searchWebButtonLabel": {
     "description": "The label for the Search Web button and menu items on iOS."
+  },
+
+  "shareButtonLabel": "Share...",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items on iOS."
   },
 
   "noSpellCheckReplacementsLabel": "No Replacements Found",

@@ -111,10 +111,6 @@ import 'inherited_notifier.dart';
 ///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 class Focus extends StatefulWidget {
   /// Creates a widget that manages a [FocusNode].
-  ///
-  /// The [child] argument is required and must not be null.
-  ///
-  /// The [autofocus] argument must not be null.
   const Focus({
     super.key,
     required this.child,
@@ -123,6 +119,10 @@ class Focus extends StatefulWidget {
     this.autofocus = false,
     this.onFocusChange,
     FocusOnKeyEventCallback? onKeyEvent,
+    @Deprecated(
+      'Use onKeyEvent instead. '
+      'This feature was deprecated after v3.18.0-2.0.pre.',
+    )
     FocusOnKeyCallback? onKey,
     bool? canRequestFocus,
     bool? skipTraversal,
@@ -203,7 +203,7 @@ class Focus extends StatefulWidget {
   /// If there is more than one widget with autofocus set, then the first one
   /// added to the tree will get focus.
   ///
-  /// Must not be null. Defaults to false.
+  /// Defaults to false.
   /// {@endtemplate}
   final bool autofocus;
 
@@ -232,8 +232,7 @@ class Focus extends StatefulWidget {
   /// A handler for keys that are pressed when this object or one of its
   /// children has focus.
   ///
-  /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
-  /// future. Prefer [onKeyEvent] instead.
+  /// This property is deprecated and will be removed. Use [onKeyEvent] instead.
   ///
   /// Key events are first given to the [FocusNode] that has primary focus, and
   /// if its [onKey] method return false, then they are given to each ancestor
@@ -245,6 +244,10 @@ class Focus extends StatefulWidget {
   /// keyboards in general. For text input, consider [TextField],
   /// [EditableText], or [CupertinoTextField] instead, which do support these
   /// things.
+  @Deprecated(
+    'Use onKeyEvent instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   FocusOnKeyCallback? get onKey => _onKey ?? focusNode?.onKey;
   final FocusOnKeyCallback? _onKey;
 
@@ -350,7 +353,7 @@ class Focus extends StatefulWidget {
   /// It is not typical to set this to false, as that can affect the semantics
   /// information available to accessibility systems.
   ///
-  /// Must not be null, defaults to true.
+  /// Defaults to true.
   /// {@endtemplate}
   final bool includeSemantics;
 
@@ -746,10 +749,6 @@ class _FocusState extends State<Focus> {
 ///    policy for a widget subtree.
 class FocusScope extends Focus {
   /// Creates a widget that manages a [FocusScopeNode].
-  ///
-  /// The [child] argument is required and must not be null.
-  ///
-  /// The [autofocus] argument must not be null.
   const FocusScope({
     super.key,
     FocusScopeNode? node,
@@ -870,10 +869,6 @@ class _FocusInheritedScope extends InheritedNotifier<FocusNode> {
 ///    `descendantsAreFocusable` attribute.
 class ExcludeFocus extends StatelessWidget {
   /// Const constructor for [ExcludeFocus] widget.
-  ///
-  /// The [excluding] argument must not be null.
-  ///
-  /// The [child] argument is required, and must not be null.
   const ExcludeFocus({
     super.key,
     this.excluding = true,

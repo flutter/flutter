@@ -796,6 +796,8 @@ void main() {
 
   testWidgets('RadioListTile onFocusChange callback', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'RadioListTile onFocusChange');
+    addTearDown(node.dispose);
+
     bool gotFocus = false;
     await tester.pumpWidget(
       MaterialApp(
