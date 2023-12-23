@@ -1004,8 +1004,6 @@ void main() {
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.hide');
     });
 
-    /// Only on the web, the `isMultiline` is used to determine whether to create an <input> or <textarea>
-    /// element when registering a custom text input control.
     test('the platform input control receives isMultiline true on attach', () async {
       final FakeTextInputControl control = FakeTextInputControl();
       TextInput.setInputControl(control);
@@ -1033,7 +1031,7 @@ void main() {
         // input control receives TextInputType.none with isMultiline flag
         MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineTrueJson]),
       ]);
-    }, skip: !kIsWeb);
+    }, skip: !kIsWeb); // https://github.com/flutter/flutter/issues/125875
 
     test('notifies changes to the attached client', () async {
       final FakeTextInputControl control = FakeTextInputControl();
