@@ -43,7 +43,20 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   double? get pressElevation => ${elevation("$tokenGroup$elevatedVariant.pressed.container")};
 
   @override
-  TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
+  TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")}?.copyWith(
+    color: _labelColor,
+  );
+
+  Color get _labelColor {
+    if (!isEnabled) {
+      // Without color opacity token. _RenderChip handles 'disable' opacity internally
+      return ${color("$tokenGroup.disabled.label-text.color")};
+    }
+
+    return isSelected
+      ? ${componentColor("$tokenGroup.selected.label-text")}
+      : ${componentColor("$tokenGroup.unselected.label-text")};
+  }
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -77,10 +90,30 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get checkmarkColor => ${color("$tokenGroup.with-leading-icon.selected.leading-icon.color")};
+  Color? get checkmarkColor => _leadingIconColor;
 
   @override
-  Color? get deleteIconColor => ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")};
+  Color? get deleteIconColor => _trailingIconColor;
+
+  Color get _leadingIconColor {
+    if (!isEnabled) {
+      return ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")};
+    }
+
+    return isSelected
+      ? ${color("$tokenGroup.with-leading-icon.selected.leading-icon.color")}
+      : ${color("$tokenGroup.with-leading-icon.unselected.leading-icon.color")};
+  }
+
+  Color get _trailingIconColor {
+    if (!isEnabled) {
+      return ${color("$tokenGroup.with-trailing-icon.disabled.trailing-icon.color")};
+    }
+
+    return isSelected
+      ? ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")}
+      : ${color("$tokenGroup.with-trailing-icon.unselected.trailing-icon.color")};
+  }
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
@@ -91,9 +124,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? ${color("$tokenGroup.with-icon.icon.color")}
-      : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")},
+    color: _leadingIconColor,
     size: ${getToken("$tokenGroup.with-icon.icon.size")},
   );
 

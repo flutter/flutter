@@ -263,7 +263,20 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: _labelColor,
+  );
+
+  Color get _labelColor {
+    if (!isEnabled) {
+      // Without color opacity token. _RenderChip handles 'disable' opacity internally
+      return _colors.onSurface;
+    }
+
+    return isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant;
+  }
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -287,10 +300,30 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  Color? get checkmarkColor => null;
+  Color? get checkmarkColor => _leadingIconColor;
 
   @override
-  Color? get deleteIconColor => _colors.onSecondaryContainer;
+  Color? get deleteIconColor => _trailingIconColor;
+
+  Color get _leadingIconColor {
+    if (!isEnabled) {
+      return _colors.onSurface;
+    }
+
+    return isSelected
+      ? _colors.primary
+      : _colors.onSurfaceVariant;
+  }
+
+  Color get _trailingIconColor {
+    if (!isEnabled) {
+      return _colors.onSurface;
+    }
+
+    return isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant;
+  }
 
   @override
   BorderSide? get side => !isSelected
@@ -301,9 +334,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? null
-      : _colors.onSurface,
+    color: _leadingIconColor,
     size: 18.0,
   );
 

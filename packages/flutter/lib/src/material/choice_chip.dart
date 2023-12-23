@@ -272,7 +272,20 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   double? get pressElevation => 1.0;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: _labelColor,
+  );
+
+  Color get _labelColor {
+    if (!isEnabled) {
+      // Without color opacity token. _RenderChip handles 'disable' opacity internally
+      return _colors.onSurface;
+    }
+
+    return isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant;
+  }
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -306,10 +319,30 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get checkmarkColor => _colors.onSecondaryContainer;
+  Color? get checkmarkColor => _leadingIconColor;
 
   @override
-  Color? get deleteIconColor => _colors.onSecondaryContainer;
+  Color? get deleteIconColor => _trailingIconColor;
+
+  Color get _leadingIconColor {
+    if (!isEnabled) {
+      return _colors.onSurface;
+    }
+
+    return isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.primary;
+  }
+
+  Color get _trailingIconColor {
+    if (!isEnabled) {
+      return _colors.onSurface;
+    }
+
+    return isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant;
+  }
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
@@ -320,9 +353,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? null
-      : _colors.onSurface,
+    color: _leadingIconColor,
     size: 18.0,
   );
 
