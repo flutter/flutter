@@ -122,6 +122,16 @@ IconThemeData getIconData(WidgetTester tester) {
   return iconTheme.data;
 }
 
+IconThemeData getIconDataForIcon(WidgetTester tester, IconData icon) {
+  final IconTheme iconTheme = tester.firstWidget(
+    find.ancestor(
+      of: find.byIcon(icon),
+      matching: find.byType(IconTheme),
+    ),
+  );
+  return iconTheme.data;
+}
+
 DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
   return tester.widget(
     find.ancestor(
@@ -849,8 +859,7 @@ void main() {
     // Test default icon theme.
     await tester.pumpWidget(buildChip());
 
-    // TODO(davidmartos96): If we keep this expect, the avatar would not follow Material specs
-    //expect(getIconData(tester).color, ThemeData().iconTheme.color);
+    expect(getIconData(tester).color, ThemeData().colorScheme.primary);
 
     // Test provided icon theme.
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
@@ -1093,5 +1102,68 @@ void main() {
 
     // Delete button tooltip should not be visible.
     expect(findTooltipContainer('Delete'), findsNothing);
+  });
+
+  testWidgets('Material3 - FilterChip icon colors', (WidgetTester tester) async {
+    const IconData avatarIcon = Icons.house;
+    final ThemeData theme = ThemeData();
+
+    Widget buildFlatChip({
+      required bool selected,
+    }) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip(
+              avatar: const Icon(Icons.house),
+              onSelected: (bool valueChanged) { },
+              label: const Text('FilterChip'),
+              selected: selected,
+              onDeleted: () { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Widget buildElevatedChip({
+      required bool selected,
+    }) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip.elevated(
+              avatar: const Icon(avatarIcon),
+              onSelected: (bool valueChanged) { },
+              label: const Text('FilterChip'),
+              selected: selected,
+              onDeleted: () { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Flat - Unselected
+    await tester.pumpWidget(buildFlatChip(selected: false));
+    expect(getIconDataForIcon(tester, avatarIcon).color, theme.colorScheme.primary);
+    expect(getIconDataForIcon(tester, Icons.clear).color, theme.colorScheme.onSurfaceVariant);
+
+    // Flat - Selected
+    await tester.pumpWidget(buildFlatChip(selected: true));
+    expect(getIconDataForIcon(tester, avatarIcon).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconDataForIcon(tester, Icons.clear).color, theme.colorScheme.onSecondaryContainer);
+
+    // Elevated - Unselected
+    await tester.pumpWidget(buildElevatedChip(selected: false));
+    expect(getIconDataForIcon(tester, avatarIcon).color, theme.colorScheme.primary);
+    expect(getIconDataForIcon(tester, Icons.clear).color, theme.colorScheme.onSurfaceVariant);
+
+    // Elevated - Selected
+    await tester.pumpWidget(buildElevatedChip(selected: true));
+    expect(getIconDataForIcon(tester, avatarIcon).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconDataForIcon(tester, Icons.clear).color, theme.colorScheme.onSecondaryContainer);
   });
 }
