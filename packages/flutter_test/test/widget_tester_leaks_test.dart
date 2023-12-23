@@ -16,6 +16,7 @@ late final String _test6TrackingOnNoLeaks;
 late final String _test7TrackingOnNoLeaks;
 late final String _test8TrackingOnNotDisposed;
 late final String _test9TrackingOnAsyncPump;
+late final String _test10TrackingOnPump;
 
 void main() {
   LeakTesting.collectedLeaksReporter = (Leaks leaks) => _verifyLeaks(leaks);
@@ -33,9 +34,7 @@ void main() {
   });
 
   testWidgets(_test1TrackingOnNoLeaks = 'test1, tracking-on, no leaks', (WidgetTester widgetTester) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, _test1TrackingOnNoLeaks);
-    expect(LeakTracking.phase.ignoreLeaks, false);
+    _verifyTestIsLeakTracked(_test1TrackingOnNoLeaks);
     await widgetTester.pumpWidget(Container());
   });
 
@@ -50,9 +49,7 @@ void main() {
   });
 
   testWidgets(_test3TrackingOnLeaks = 'test3, tracking-on, leaks', (WidgetTester widgetTester) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, _test3TrackingOnLeaks);
-    expect(LeakTracking.phase.ignoreLeaks, false);
+    _verifyTestIsLeakTracked(_test3TrackingOnLeaks);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
   });
 
@@ -60,9 +57,7 @@ void main() {
     _test4TrackingOnWithCreationStackTrace = 'test4, tracking-on, with creation stack trace',
     experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
   (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, true);
-      expect(LeakTracking.phase.name, _test4TrackingOnWithCreationStackTrace);
-      expect(LeakTracking.phase.ignoreLeaks, false);
+      _verifyTestIsLeakTracked(_test4TrackingOnWithCreationStackTrace);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     },
   );
@@ -71,37 +66,44 @@ void main() {
     _test5TrackingOnWithDisposalStackTrace = 'test5, tracking-on, with disposal stack trace',
   experimentalLeakTesting: LeakTesting.settings.withDisposalStackTrace(),
     (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, true);
-      expect(LeakTracking.phase.name, _test5TrackingOnWithDisposalStackTrace);
-      expect(LeakTracking.phase.ignoreLeaks, false);
+      _verifyTestIsLeakTracked(_test5TrackingOnWithDisposalStackTrace);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     },
   );
 
   testWidgets(_test6TrackingOnNoLeaks = 'test6, tracking-on, no leaks', (_) async {
+    _verifyTestIsLeakTracked(_test6TrackingOnNoLeaks);
     InstrumentedDisposable().dispose();
   });
 
   testWidgets(_test7TrackingOnNoLeaks = 'test7, tracking-on, tear down, no leaks', (_) async {
+    _verifyTestIsLeakTracked(_test7TrackingOnNoLeaks);
     final InstrumentedDisposable myClass = InstrumentedDisposable();
     addTearDown(myClass.dispose);
   });
 
   testWidgets(_test8TrackingOnNotDisposed = 'test8, tracking-on, not disposed leak', (_) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, _test8TrackingOnNotDisposed);
-    expect(LeakTracking.phase.ignoreLeaks, false);
+    _verifyTestIsLeakTracked(_test8TrackingOnNotDisposed);
     InstrumentedDisposable();
   });
 
-  testWidgets(_test9TrackingOnAsyncPump = 'test9, tracking-on, async and pump are not test helpers', (WidgetTester tester) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, _test9TrackingOnAsyncPump);
-    expect(LeakTracking.phase.ignoreLeaks, false);
+  testWidgets(_test9TrackingOnAsyncPump = 'test9, tracking-on, runAsync and pumpWidget are not test helpers', (WidgetTester tester) async {
+    _verifyTestIsLeakTracked(_test9TrackingOnAsyncPump);
     await tester.runAsync(() async {
       await tester.pumpWidget(StatelessLeakingWidget());
     });
   });
+
+  testWidgets(_test10TrackingOnPump = 'test10, tracking-on, pumpWidget is not test helper', (WidgetTester tester) async {
+    _verifyTestIsLeakTracked(_test10TrackingOnPump);
+    await tester.pumpWidget(StatelessLeakingWidget());
+  });
+}
+
+void _verifyTestIsLeakTracked(String testName) {
+  expect(LeakTracking.isStarted, true);
+  expect(LeakTracking.phase.name, testName);
+  expect(LeakTracking.phase.ignoreLeaks, false);
 }
 
 int _leakReporterInvocationCount = 0;
@@ -124,6 +126,7 @@ void _verifyLeaks(Leaks leaks) {
     expect(e.message, isNot(contains(_test7TrackingOnNoLeaks)));
     expect(e.message, contains('test: $_test8TrackingOnNotDisposed'));
     expect(e.message, contains('test: $_test9TrackingOnAsyncPump'));
+    expect(e.message, contains('test: $_test10TrackingOnPump'));
   }
 
   _verifyLeaksForTest(
@@ -136,45 +139,55 @@ void _verifyLeaks(Leaks leaks) {
       LeakType.notDisposed: <String>[],
     },
   );
-  // _verifyLeaksForTest(
-  //   leaks,
-  //   _test4TrackingOnWithCreationStackTrace,
-  //   notDisposed: 1,
-  //   notGCed: 1,
-  //   expectedContextKeys: <LeakType, List<String>>{
-  //     LeakType.notGCed: <String>['start'],
-  //     LeakType.notDisposed: <String>['start'],
-  //   },
-  // );
-  // _verifyLeaksForTest(
-  //   leaks,
-  //   _test5TrackingOnWithDisposalStackTrace,
-  //   notDisposed: 1,
-  //   notGCed: 1,
-  //   expectedContextKeys: <LeakType, List<String>>{
-  //     LeakType.notGCed: <String>['disposal'],
-  //     LeakType.notDisposed: <String>[],
-  //   },
-  // );
-  // _verifyLeaksForTest(
-  //   leaks,
-  //   _test8TrackingOnNotDisposed,
-  //   notDisposed: 1,
-  //   expectedContextKeys: <LeakType, List<String>>{
-  //     LeakType.notGCed: <String>[],
-  //     LeakType.notDisposed: <String>[],
-  //   },
-  // );
-  // _verifyLeaksForTest(
-  //   leaks,
-  //   _test9TrackingOnAsyncPump,
-  //   notDisposed: 1,
-  //   notGCed: 1,
-  //   expectedContextKeys: <LeakType, List<String>>{
-  //     LeakType.notGCed: <String>[],
-  //     LeakType.notDisposed: <String>[],
-  //   },
-  // );
+  _verifyLeaksForTest(
+    leaks,
+    _test4TrackingOnWithCreationStackTrace,
+    notDisposed: 1,
+    notGCed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>['start'],
+      LeakType.notDisposed: <String>['start'],
+    },
+  );
+  _verifyLeaksForTest(
+    leaks,
+    _test5TrackingOnWithDisposalStackTrace,
+    notDisposed: 1,
+    notGCed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>['disposal'],
+      LeakType.notDisposed: <String>[],
+    },
+  );
+  _verifyLeaksForTest(
+    leaks,
+    _test8TrackingOnNotDisposed,
+    notDisposed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>[],
+      LeakType.notDisposed: <String>[],
+    },
+  );
+  _verifyLeaksForTest(
+    leaks,
+    _test9TrackingOnAsyncPump,
+    notDisposed: 1,
+    notGCed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>[],
+      LeakType.notDisposed: <String>[],
+    },
+  );
+    _verifyLeaksForTest(
+    leaks,
+    _test10TrackingOnPump,
+    notDisposed: 1,
+    notGCed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>[],
+      LeakType.notDisposed: <String>[],
+    },
+  );
 }
 
 /// Verifies [allLeaks] contain expected number of leaks for the test [testDescription].
