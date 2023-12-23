@@ -1116,7 +1116,7 @@ void main() {
         home: Material(
           child: Center(
             child: FilterChip(
-              avatar: const Icon(Icons.house),
+              avatar: const Icon(avatarIcon),
               onSelected: (bool valueChanged) { },
               label: const Text('FilterChip'),
               selected: selected,
