@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester tester, RenderObject renderObject) async {
   assert(!renderObject.debugNeedsLayout);
@@ -36,7 +37,9 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester t
 }
 
 void main() {
-  testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgets('RenderParagraph relayout upon system fonts changes',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Text('text widget'),

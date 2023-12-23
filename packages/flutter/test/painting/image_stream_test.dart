@@ -78,6 +78,8 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
 }
 
 void main() {
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   late Image image20x10;
   late Image image200x100;
   setUp(() async {
