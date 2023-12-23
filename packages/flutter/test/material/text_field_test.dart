@@ -6692,11 +6692,15 @@ void main() {
     final TextEditingController textEditingController = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
+    addTearDown(textEditingController.dispose);
+
     int count = 0;
     void valueChanged() {
       count += 1;
     }
     final MaterialStatesController statesController = MaterialStatesController();
+    addTearDown(statesController.dispose);
+
     statesController.addListener(valueChanged);
     await tester.pumpWidget(
       MaterialApp(
@@ -6819,6 +6823,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
     await tester.pumpWidget(
       MaterialApp(
