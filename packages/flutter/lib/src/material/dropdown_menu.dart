@@ -374,7 +374,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   void refreshLeadingPadding() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if(!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() {
         leadingPadding = getWidth(_leadingKey);
       });
