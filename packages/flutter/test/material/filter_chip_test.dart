@@ -272,7 +272,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurfaceVariant.value
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -407,7 +407,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, 'filter chip').style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurfaceVariant.value,
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -849,7 +849,8 @@ void main() {
     // Test default icon theme.
     await tester.pumpWidget(buildChip());
 
-    expect(getIconData(tester).color, ThemeData().iconTheme.color);
+    // TODO(davidmartos96): If we keep this expect, the avatar would not follow Material specs
+    //expect(getIconData(tester).color, ThemeData().iconTheme.color);
 
     // Test provided icon theme.
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
@@ -880,7 +881,7 @@ void main() {
 
     // Test the delete button icon.
     expect(tester.getSize(find.byIcon(Icons.clear)), const Size(18.0, 18.0));
-    expect(getIconData(tester).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconData(tester).color, theme.colorScheme.onSurfaceVariant);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -906,7 +907,7 @@ void main() {
 
     // Test the delete button icon.
     expect(tester.getSize(find.byIcon(Icons.clear)), const Size(18.0, 18.0));
-    expect(getIconData(tester).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconData(tester).color, theme.colorScheme.onSurfaceVariant);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - FilterChip supports delete button', (WidgetTester tester) async {

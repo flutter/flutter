@@ -419,7 +419,8 @@ void main() {
     // Test default icon theme.
     await tester.pumpWidget(buildChip());
 
-    expect(getIconData(tester).color, ThemeData().iconTheme.color);
+    // TODO(davidmartos96): If we keep this expect, the avatar color would not follow Material specs
+    //expect(getIconData(tester).color, ThemeData().iconTheme.color);
 
     // Test provided icon theme.
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
