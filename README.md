@@ -45,21 +45,12 @@ upgrade` command).
 
 ## About Flutter
 
-We think Flutter will help you create beautiful, fast apps, with a productive,
-extensible and open development model, whether you're targeting iOS or Android,
-web, Windows, macOS, Linux or embedding it as the UI toolkit for a platform of
-your choice.
+As a UI toolkit, Flutter enables developers to create beautiful and fast applications while creating a productive, adaptable, and open development environment for Windows, macOS, Linux, iOS, Android, and the web.
 
-### Beautiful user experiences
+##Creating Stylish User Interfaces
+Our mission is to enable designers to realize their imaginative ideas without having to make compromises because of limitations imposed by frameworks. Because of its well-designed architecture, Flutter offers precise control over each pixel on the screen. Its strong compositing capabilities enable limitless overlay and animation of text, images, and video. Whether creating for iOS (Cupertino) or other platforms (Material), Flutter's extensive library of widgets guarantees an exceptional user experience and gives designers the freedom to tweak or create new visual elements.
 
-We want to enable designers to deliver their full creative vision without being
-forced to water it down due to limitations of the underlying framework.
-Flutter's [layered architecture] gives you control over every pixel on the
-screen and its powerful compositing capabilities let you overlay and animate
-graphics, video, text, and controls without limitation. Flutter includes a full
-[set of widgets][widget catalog] that deliver pixel-perfect experiences whether
-you're building for iOS ([Cupertino]) or other platforms ([Material]), along with
-support for customizing or creating entirely new visual components.
+
 
 <p align="center"><img src="https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true" alt="Reflectly hero image"></p>
 
@@ -86,7 +77,7 @@ and see the results instantly without restarting your app or losing its state.
 
 ### Extensible and open model
 
-Flutter works with any development tool (or none at all), and also includes
+Flutter works with any development tool (or none at all) and also includes
 editor plug-ins for both [Visual Studio Code] and [IntelliJ / Android Studio].
 Flutter provides [tens of thousands of packages][Flutter packages] to speed your
 development, regardless of your target platform. And accessing other native code
