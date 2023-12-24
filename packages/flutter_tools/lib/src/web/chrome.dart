@@ -117,12 +117,12 @@ class ChromiumLauncher {
     required OperatingSystemUtils operatingSystemUtils,
     required BrowserFinder browserFinder,
     required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _processManager = processManager,
-       _operatingSystemUtils = operatingSystemUtils,
-       _browserFinder = browserFinder,
-       _logger = logger;
+  })  : _fileSystem = fileSystem,
+        _platform = platform,
+        _processManager = processManager,
+        _operatingSystemUtils = operatingSystemUtils,
+        _browserFinder = browserFinder,
+        _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -147,7 +147,7 @@ class ChromiumLauncher {
   }
 
   /// The executable this launcher will use.
-  String findExecutable() =>  _browserFinder(_platform, _fileSystem);
+  String findExecutable() => _browserFinder(_platform, _fileSystem);
 
   /// Launch a Chromium browser to a particular `host` page.
   ///
@@ -160,7 +160,8 @@ class ChromiumLauncher {
   /// [skipCheck] does not attempt to make a devtools connection before returning.
   ///
   /// [webBrowserFlags] add arbitrary browser flags.
-  Future<Chromium> launch(String url, {
+  Future<Chromium> launch(
+    String url, {
     bool headless = false,
     int? debugPort,
     bool skipCheck = false,
@@ -172,7 +173,8 @@ class ChromiumLauncher {
     }
 
     if (_logger.isVerbose) {
-      _logger.printTrace('Launching Chromium (url = $url, headless = $headless, skipCheck = $skipCheck, debugPort = $debugPort)');
+      _logger.printTrace(
+          'Launching Chromium (url = $url, headless = $headless, skipCheck = $skipCheck, debugPort = $debugPort)');
     }
 
     final String chromeExecutable = _browserFinder(_platform, _fileSystem);
@@ -182,14 +184,14 @@ class ChromiumLauncher {
 
       if (!_platform.isWindows) {
         // The "--version" argument is not supported on Windows.
-        final ProcessResult versionResult = await _processManager.run(<String>[chromeExecutable, '--version']);
+        final ProcessResult versionResult =
+            await _processManager.run(<String>[chromeExecutable, '--version']);
         _logger.printTrace('Using ${versionResult.stdout}');
       }
     }
 
-
     final Directory userDataDir = _fileSystem.systemTempDirectory
-      .createTempSync('flutter_tools_chrome_device.');
+        .createTempSync('flutter_tools_chrome_device.');
 
     if (cacheDir != null) {
       // Seed data dir with previous state.
@@ -208,19 +210,19 @@ class ChromiumLauncher {
       // Since we are using a temp profile, disable features that slow the
       // Chrome launch.
       '--disable-extensions',
+      '--disable-web-security',
       '--disable-popup-blocking',
       '--bwsi',
       '--no-first-run',
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      if (headless)
-        ...<String>[
-          '--headless',
-          '--disable-gpu',
-          '--no-sandbox',
-          '--window-size=2400,1800',
-        ],
+      if (headless) ...<String>[
+        '--headless',
+        '--disable-gpu',
+        '--no-sandbox',
+        '--window-size=2400,1800',
+      ],
       ...webBrowserFlags,
       url,
     ];
@@ -239,23 +241,28 @@ class ChromiumLauncher {
         }
       }));
     }
-    return connect(Chromium(
-      port,
-      ChromeConnection('localhost', port),
-      url: url,
-      process: process,
-      chromiumLauncher: this,
-      logger: _logger,
-    ), skipCheck);
+    return connect(
+        Chromium(
+          port,
+          ChromeConnection('localhost', port),
+          url: url,
+          process: process,
+          chromiumLauncher: this,
+          logger: _logger,
+        ),
+        skipCheck);
   }
 
-  Future<Process> _spawnChromiumProcess(List<String> args, String chromeExecutable) async {
+  Future<Process> _spawnChromiumProcess(
+      List<String> args, String chromeExecutable) async {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
-      final ProcessResult result = _processManager.runSync(<String>['file', chromeExecutable]);
+      final ProcessResult result =
+          _processManager.runSync(<String>['file', chromeExecutable]);
       // Check if ARM Chrome is installed.
       // Mach-O 64-bit executable arm64
       if ((result.stdout as String).contains('arm64')) {
-        _logger.printTrace('Found ARM Chrome installation at $chromeExecutable, forcing native launch.');
+        _logger.printTrace(
+            'Found ARM Chrome installation at $chromeExecutable, forcing native launch.');
         // If so, force Chrome to launch natively.
         args.insertAll(0, <String>['/usr/bin/arch', '-arm64']);
       }
@@ -270,11 +277,11 @@ class ChromiumLauncher {
       final Process process = await _processManager.start(args);
 
       process.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((String line) {
-          _logger.printTrace('[CHROME]: $line');
-        });
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+        _logger.printTrace('[CHROME]: $line');
+      });
 
       // Wait until the DevTools are listening before trying to connect. This is
       // only required for flutter_test --platform=chrome and not flutter run.
@@ -282,38 +289,39 @@ class ChromiumLauncher {
       bool shouldRetry = false;
       final List<String> errors = <String>[];
       await process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .map((String line) {
-          _logger.printTrace('[CHROME]: $line');
-          errors.add('[CHROME]:$line');
-          if (line.contains(_kGlibcError)) {
-            hitGlibcBug = true;
-            shouldRetry = true;
-          }
-          return line;
-        })
-        .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-          if (hitGlibcBug) {
-            _logger.printTrace(
-              'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
-              'Will try launching browser again.',
-            );
-            // Return value unused.
-            return '';
-          }
-          if (retry >= kMaxRetries) {
-            errors.forEach(_logger.printError);
-            _logger.printError('Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
-            throw ToolExit(
-              'Failed to launch browser. Make sure you are using an up-to-date '
-              'Chrome or Edge. Otherwise, consider using -d web-server instead '
-              'and filing an issue at https://github.com/flutter/flutter/issues.',
-            );
-          }
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .map((String line) {
+        _logger.printTrace('[CHROME]: $line');
+        errors.add('[CHROME]:$line');
+        if (line.contains(_kGlibcError)) {
+          hitGlibcBug = true;
           shouldRetry = true;
+        }
+        return line;
+      }).firstWhere((String line) => line.startsWith('DevTools listening'),
+              orElse: () {
+        if (hitGlibcBug) {
+          _logger.printTrace(
+            'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
+            'Will try launching browser again.',
+          );
+          // Return value unused.
           return '';
-        });
+        }
+        if (retry >= kMaxRetries) {
+          errors.forEach(_logger.printError);
+          _logger.printError(
+              'Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
+          throw ToolExit(
+            'Failed to launch browser. Make sure you are using an up-to-date '
+            'Chrome or Edge. Otherwise, consider using -d web-server instead '
+            'and filing an issue at https://github.com/flutter/flutter/issues.',
+          );
+        }
+        shouldRetry = true;
+        return '';
+      });
 
       if (!hitGlibcBug && !shouldRetry) {
         return process;
@@ -323,7 +331,8 @@ class ChromiumLauncher {
       // A precaution that avoids accumulating browser processes, in case the
       // glibc bug doesn't cause the browser to quit and we keep looping and
       // launching more processes.
-      unawaited(process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
+      unawaited(
+          process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
         process.kill();
         // sigterm
         return 15;
@@ -337,7 +346,8 @@ class ChromiumLauncher {
 
   // This is a JSON file which contains configuration from the browser session,
   // such as window position. It is located under the Chrome data-dir folder.
-  String get _preferencesPath => _fileSystem.path.join('Default', 'preferences');
+  String get _preferencesPath =>
+      _fileSystem.path.join('Default', 'preferences');
 
   /// Copy Chrome user information from a Chrome session into a per-project
   /// cache.
@@ -352,16 +362,15 @@ class ChromiumLauncher {
   /// dart debug extension with a user controlled browser profile will lead to a
   /// better experience.
   void _cacheUserSessionInformation(Directory userDataDir, Directory cacheDir) {
-    final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
-    final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
+    final Directory targetChromeDefault = _fileSystem
+        .directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
+    final Directory sourceChromeDefault = _fileSystem
+        .directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
     if (sourceChromeDefault.existsSync()) {
       targetChromeDefault.createSync(recursive: true);
       try {
-        copyDirectory(
-          sourceChromeDefault,
-          targetChromeDefault,
-          shouldCopyDirectory: _isNotCacheDirectory
-        );
+        copyDirectory(sourceChromeDefault, targetChromeDefault,
+            shouldCopyDirectory: _isNotCacheDirectory);
       } on FileSystemException catch (err) {
         // This is a best-effort update. Display the message in case the failure is relevant.
         // one possible example is a file lock due to multiple running chrome instances.
@@ -369,23 +378,28 @@ class ChromiumLauncher {
       }
     }
 
-    final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir.path, _preferencesPath));
-    final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
+    final File targetPreferencesFile = _fileSystem
+        .file(_fileSystem.path.join(cacheDir.path, _preferencesPath));
+    final File sourcePreferencesFile = _fileSystem
+        .file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
 
     if (sourcePreferencesFile.existsSync()) {
-       targetPreferencesFile.parent.createSync(recursive: true);
-       // If the file contains a crash string, remove it to hide the popup on next run.
-       final String contents = sourcePreferencesFile.readAsStringSync();
-       targetPreferencesFile.writeAsStringSync(contents
-           .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
+      targetPreferencesFile.parent.createSync(recursive: true);
+      // If the file contains a crash string, remove it to hide the popup on next run.
+      final String contents = sourcePreferencesFile.readAsStringSync();
+      targetPreferencesFile.writeAsStringSync(contents.replaceFirst(
+          '"exit_type":"Crashed"', '"exit_type":"Normal"'));
     }
   }
 
   /// Restore Chrome user information from a per-project cache into Chrome's
   /// user data directory.
-  void _restoreUserSessionInformation(Directory cacheDir, Directory userDataDir) {
-    final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
-    final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
+  void _restoreUserSessionInformation(
+      Directory cacheDir, Directory userDataDir) {
+    final Directory sourceChromeDefault = _fileSystem
+        .directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
+    final Directory targetChromeDefault = _fileSystem
+        .directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
     try {
       if (sourceChromeDefault.existsSync()) {
         targetChromeDefault.createSync(recursive: true);
@@ -403,8 +417,8 @@ class ChromiumLauncher {
   // Cache, Code Cache, and GPUCache are nearly 1GB of data
   bool _isNotCacheDirectory(Directory directory) {
     return !directory.path.endsWith('Cache') &&
-           !directory.path.endsWith('Code Cache') &&
-           !directory.path.endsWith('GPUCache');
+        !directory.path.endsWith('Code Cache') &&
+        !directory.path.endsWith('GPUCache');
   }
 
   /// Connect to the [chrome] instance, testing the connection if
@@ -443,7 +457,7 @@ class ChromiumLauncher {
     for (int i = 1; i <= attempts; i++) {
       try {
         final List<ChromeTab> tabs =
-          await chrome.chromeConnection.getTabs(retryFor: retryFor);
+            await chrome.chromeConnection.getTabs(retryFor: retryFor);
 
         if (tabs.isNotEmpty) {
           return tabs.first;
@@ -509,17 +523,16 @@ class Chromium {
     ProcessSignal.sigterm.kill(_process);
     await _process.exitCode.timeout(const Duration(seconds: 5), onTimeout: () {
       _logger.printWarning(
-        'Failed to exit Chromium (pid: ${_process.pid}) using SIGTERM. Will try '
-        'sending SIGKILL instead.'
-      );
+          'Failed to exit Chromium (pid: ${_process.pid}) using SIGTERM. Will try '
+          'sending SIGKILL instead.');
       ProcessSignal.sigkill.kill(_process);
-      return _process.exitCode.timeout(const Duration(seconds: 5), onTimeout: () async {
+      return _process.exitCode.timeout(const Duration(seconds: 5),
+          onTimeout: () async {
         _logger.printWarning(
-          'Failed to exit Chromium (pid: ${_process.pid}) using SIGKILL. Giving '
-          'up. Will continue, assuming Chromium has exited successfully, but '
-          'it is possible that this left a dangling Chromium process running '
-          'on the system.'
-        );
+            'Failed to exit Chromium (pid: ${_process.pid}) using SIGKILL. Giving '
+            'up. Will continue, assuming Chromium has exited successfully, but '
+            'it is possible that this left a dangling Chromium process running '
+            'on the system.');
         return 0;
       });
     });
