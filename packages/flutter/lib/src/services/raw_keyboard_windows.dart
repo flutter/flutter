@@ -10,7 +10,6 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 // Virtual key VK_PROCESSKEY in Win32 API.
 //
@@ -19,14 +18,25 @@ const int _vkProcessKey = 0xe5;
 
 /// Platform-specific key event data for Windows.
 ///
+/// This class is DEPRECATED. Platform specific key event data will no longer
+/// available. See [KeyEvent] for what is available.
+///
 /// This object contains information about key events obtained from Windows's
 /// win32 API.
 ///
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataWindows extends RawKeyEventData {
   /// Creates a key event data structure specific for Windows.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataWindows({
     this.keyCode = 0,
     this.scanCode = 0,

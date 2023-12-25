@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +47,7 @@ void main() {
 
   group('PlatformMenuBar', () {
     group('basic menu structure is transmitted to platform', () {
-      testWidgetsWithLeakTracking('using onSelected', (WidgetTester tester) async {
+      testWidgets('using onSelected', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Material(
@@ -79,7 +78,7 @@ void main() {
           equals(expectedStructure),
         );
       });
-      testWidgetsWithLeakTracking('using onSelectedIntent', (WidgetTester tester) async {
+      testWidgets('using onSelectedIntent', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Material(
@@ -127,7 +126,7 @@ void main() {
       );
       expect(tester.takeException(), isA<AssertionError>());
     });
-    testWidgetsWithLeakTracking('diagnostics', (WidgetTester tester) async {
+    testWidgets('diagnostics', (WidgetTester tester) async {
       const PlatformMenuItem item = PlatformMenuItem(
         label: 'label2',
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
@@ -159,7 +158,7 @@ void main() {
     });
   });
   group('MenuBarItem', () {
-    testWidgetsWithLeakTracking('diagnostics', (WidgetTester tester) async {
+    testWidgets('diagnostics', (WidgetTester tester) async {
       const PlatformMenuItem childItem = PlatformMenuItem(
         label: 'label',
       );
@@ -183,7 +182,7 @@ void main() {
   });
 
   group('ShortcutSerialization', () {
-    testWidgetsWithLeakTracking('character constructor', (WidgetTester tester) async {
+    testWidgets('character constructor', (WidgetTester tester) async {
       final ShortcutSerialization serialization = ShortcutSerialization.character('?');
       expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
         'shortcutCharacter': '?',
@@ -196,7 +195,7 @@ void main() {
       }));
     });
 
-    testWidgetsWithLeakTracking('modifier constructor', (WidgetTester tester) async {
+    testWidgets('modifier constructor', (WidgetTester tester) async {
       final ShortcutSerialization serialization = ShortcutSerialization.modifier(LogicalKeyboardKey.home);
       expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
         'shortcutTrigger': LogicalKeyboardKey.home.keyId,

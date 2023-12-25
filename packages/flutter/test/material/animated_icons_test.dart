@@ -9,7 +9,6 @@ import 'dart:math' as math show pi;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 class MockCanvas extends Fake implements Canvas {
@@ -95,7 +94,7 @@ class RecordedScale extends RecordedCanvasCall {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('IconTheme color', (WidgetTester tester) async {
+  testWidgets('IconTheme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -116,7 +115,7 @@ void main() {
     expect(canvas.capturedPaint, hasColor(0xFF666666));
   });
 
-  testWidgetsWithLeakTracking('IconTheme opacity', (WidgetTester tester) async {
+  testWidgets('IconTheme opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -138,7 +137,7 @@ void main() {
     expect(canvas.capturedPaint, hasColor(0x80666666));
   });
 
-  testWidgetsWithLeakTracking('color overrides IconTheme color', (WidgetTester tester) async {
+  testWidgets('color overrides IconTheme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -160,7 +159,7 @@ void main() {
     expect(canvas.capturedPaint, hasColor(0xFF0000FF));
   });
 
-  testWidgetsWithLeakTracking('IconTheme size', (WidgetTester tester) async {
+  testWidgets('IconTheme size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -184,7 +183,7 @@ void main() {
     expect(canvas.capturedSy, 0.25);
   });
 
-  testWidgetsWithLeakTracking('size overridesIconTheme size', (WidgetTester tester) async {
+  testWidgets('size overridesIconTheme size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -209,7 +208,7 @@ void main() {
     expect(canvas.capturedSy, 2);
   });
 
-  testWidgetsWithLeakTracking('Semantic label', (WidgetTester tester) async {
+  testWidgets('Semantic label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -229,7 +228,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Inherited text direction rtl', (WidgetTester tester) async {
+  testWidgets('Inherited text direction rtl', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
@@ -258,7 +257,7 @@ void main() {
         matchesGoldenFile('animated_icons_test.icon.rtl.png'));
   });
 
-  testWidgetsWithLeakTracking('Inherited text direction ltr', (WidgetTester tester) async {
+  testWidgets('Inherited text direction ltr', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -285,7 +284,7 @@ void main() {
         matchesGoldenFile('animated_icons_test.icon.ltr.png'));
   });
 
-  testWidgetsWithLeakTracking('Inherited text direction overridden', (WidgetTester tester) async {
+  testWidgets('Inherited text direction overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -311,7 +310,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Direction has no effect on position of widget', (WidgetTester tester) async {
+  testWidgets('Direction has no effect on position of widget', (WidgetTester tester) async {
     const AnimatedIcon icon = AnimatedIcon(
       progress: AlwaysStoppedAnimation<double>(0.0),
       icon: AnimatedIcons.arrow_menu,
