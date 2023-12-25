@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+
+
 class _Test {
   final String name;
   final void Function(WidgetTester tester) body;
@@ -24,14 +26,9 @@ class _Test {
     this.notGCedInHelpers = 0,
   });
 
-  /// Verifies [allLeaks] contain expected number of leaks for the test [testDescription].
-  void _verifyLeaks(Leaks allLeaks, String testDescription, LeakTesting settings) {
-    final Leaks testLeaks = Leaks(
-      allLeaks.byType.map(
-        (LeakType key, List<LeakReport> value) =>
-            MapEntry<LeakType, List<LeakReport>>(key, value.where((LeakReport leak) => leak.phase == testDescription).toList()),
-      ),
-    );
+  /// Verifies [leaks] contain expected number of leaks for the test [testDescription].
+  void _verifyLeaks(Leaks leaks, String testDescription, LeakTesting settings) {
+
 
     for (final LeakType type in expectedContextKeys.keys) {
       final List<LeakReport> leaks = testLeaks.byType[type] ?? <LeakReport>[];
@@ -59,13 +56,13 @@ class _Test {
   int expectedCount,
   String testDescription,
 ) {
-  expect(list.length, expectedCount, reason: testDescription);
+    expect(list.length, expectedCount, reason: testDescription);
 
-  for (final LeakReport leak in list) {
-    expect(leak.trackedClass, contains(InstrumentedDisposable.library));
-    expect(leak.trackedClass, contains('$InstrumentedDisposable'));
+    for (final LeakReport leak in list) {
+      expect(leak.trackedClass, contains(InstrumentedDisposable.library));
+      expect(leak.trackedClass, contains('$InstrumentedDisposable'));
+    }
   }
-}
 }
 
 
