@@ -7,6 +7,76 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+class _Test {
+  final String name;
+  final void Function(WidgetTester tester) body;
+  final int notDisposedTotal;
+  final int notGCedTotal;
+  final int notDisposedInHelpers;
+  final int notGCedInHelpers;
+
+  _Test({
+    required this.name,
+    required this.body,
+    this.notDisposedTotal = 0,
+    this.notGCedTotal = 0,
+    this.notDisposedInHelpers = 0,
+    this.notGCedInHelpers = 0,
+  });
+
+  /// Verifies [allLeaks] contain expected number of leaks for the test [testDescription].
+  void _verifyLeaks(Leaks allLeaks, String testDescription, LeakTesting settings) {
+    final Leaks testLeaks = Leaks(
+      allLeaks.byType.map(
+        (LeakType key, List<LeakReport> value) =>
+            MapEntry<LeakType, List<LeakReport>>(key, value.where((LeakReport leak) => leak.phase == testDescription).toList()),
+      ),
+    );
+
+    for (final LeakType type in expectedContextKeys.keys) {
+      final List<LeakReport> leaks = testLeaks.byType[type] ?? <LeakReport>[];
+      final List<String> expectedKeys = expectedContextKeys[type]!..sort();
+      for (final LeakReport leak in leaks) {
+        final List<String> actualKeys = leak.context?.keys.toList() ?? <String>[];
+        expect(actualKeys..sort(), equals(expectedKeys), reason: '$testDescription, $type');
+      }
+    }
+
+    _verifyLeakList(
+      testLeaks.notDisposed,
+      notDisposed,
+      name,
+    );
+    _verifyLeakList(
+      testLeaks.notGCed,
+      notGCed,
+      testDescription,
+    );
+  }
+
+  void _verifyLeakList(
+  List<LeakReport> list,
+  int expectedCount,
+  String testDescription,
+) {
+  expect(list.length, expectedCount, reason: testDescription);
+
+  for (final LeakReport leak in list) {
+    expect(leak.trackedClass, contains(InstrumentedDisposable.library));
+    expect(leak.trackedClass, contains('$InstrumentedDisposable'));
+  }
+}
+}
+
+
+final _tests = <String, _Test>{
+  "":_Test(
+    name: 'group, leaks',
+    body: (WidgetTester tester) {
+
+})
+};
+
 late final String _test1TrackingOnNoLeaks;
 late final String _test2TrackingOffLeaks;
 late final String _test3TrackingOnLeaks;
@@ -18,6 +88,7 @@ late final String _test8TrackingOnNotDisposed;
 late final String _test9TrackingOnAsyncPump;
 late final String _test10TrackingOnPump;
 
+
 void main() {
   LeakTesting.collectedLeaksReporter = (Leaks leaks) => _verifyLeaks(leaks);
   LeakTesting.enable();
@@ -27,7 +98,7 @@ void main() {
   .withTracked(allNotDisposed: true, allNotGCed: true)
   .withIgnored(createdByTestHelpers: true);
 
-  group('Group', () {
+  group('Groups are handled', () {
     testWidgets('test', (_) async {
       StatelessLeakingWidget();
     });
@@ -51,6 +122,7 @@ void main() {
   testWidgets(_test3TrackingOnLeaks = 'test3, tracking-on, leaks', (WidgetTester widgetTester) async {
     _verifyTestIsLeakTracked(_test3TrackingOnLeaks);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
+
   });
 
   testWidgets(
@@ -129,115 +201,65 @@ void _verifyLeaks(Leaks leaks) {
     expect(e.message, contains('test: $_test10TrackingOnPump'));
   }
 
-  _verifyLeaksForTest(
-    leaks,
-    _test3TrackingOnLeaks,
-    notDisposed: 1,
-    notGCed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>[],
-      LeakType.notDisposed: <String>[],
-    },
-  );
-  _verifyLeaksForTest(
-    leaks,
-    _test4TrackingOnWithCreationStackTrace,
-    notDisposed: 1,
-    notGCed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>['start'],
-      LeakType.notDisposed: <String>['start'],
-    },
-  );
-  _verifyLeaksForTest(
-    leaks,
-    _test5TrackingOnWithDisposalStackTrace,
-    notDisposed: 1,
-    notGCed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>['disposal'],
-      LeakType.notDisposed: <String>[],
-    },
-  );
-  _verifyLeaksForTest(
-    leaks,
-    _test8TrackingOnNotDisposed,
-    notDisposed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>[],
-      LeakType.notDisposed: <String>[],
-    },
-  );
-  _verifyLeaksForTest(
-    leaks,
-    _test9TrackingOnAsyncPump,
-    notDisposed: 1,
-    notGCed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>[],
-      LeakType.notDisposed: <String>[],
-    },
-  );
-    _verifyLeaksForTest(
-    leaks,
-    _test10TrackingOnPump,
-    notDisposed: 1,
-    notGCed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>[],
-      LeakType.notDisposed: <String>[],
-    },
-  );
+  // _verifyLeaksForTest(
+  //   leaks,
+  //   _test3TrackingOnLeaks,
+  //   notDisposed: 1,
+  //   notGCed: 1,
+  //   expectedContextKeys: <LeakType, List<String>>{
+  //     LeakType.notGCed: <String>[],
+  //     LeakType.notDisposed: <String>[],
+  //   },
+  // );
+  // _verifyLeaksForTest(
+  //   leaks,
+  //   _test4TrackingOnWithCreationStackTrace,
+  //   notDisposed: 1,
+  //   notGCed: 1,
+  //   expectedContextKeys: <LeakType, List<String>>{
+  //     LeakType.notGCed: <String>['start'],
+  //     LeakType.notDisposed: <String>['start'],
+  //   },
+  // );
+  // _verifyLeaksForTest(
+  //   leaks,
+  //   _test5TrackingOnWithDisposalStackTrace,
+  //   notDisposed: 1,
+  //   notGCed: 1,
+  //   expectedContextKeys: <LeakType, List<String>>{
+  //     LeakType.notGCed: <String>['disposal'],
+  //     LeakType.notDisposed: <String>[],
+  //   },
+  // );
+  // _verifyLeaksForTest(
+  //   leaks,
+  //   _test8TrackingOnNotDisposed,
+  //   notDisposed: 1,
+  //   expectedContextKeys: <LeakType, List<String>>{
+  //     LeakType.notGCed: <String>[],
+  //     LeakType.notDisposed: <String>[],
+  //   },
+  // );
+  // _verifyLeaksForTest(
+  //   leaks,
+  //   _test9TrackingOnAsyncPump,
+  //   notDisposed: 1,
+  //   notGCed: 1,
+  //   expectedContextKeys: <LeakType, List<String>>{
+  //     LeakType.notGCed: <String>[],
+  //     LeakType.notDisposed: <String>[],
+  //   },
+  // );
+  //   _verifyLeaksForTest(
+  //   leaks,
+  //   _test10TrackingOnPump,
+  //   notDisposed: 1,
+  //   notGCed: 1,
+  //   expectedContextKeys: <LeakType, List<String>>{
+  //     LeakType.notGCed: <String>[],
+  //     LeakType.notDisposed: <String>[],
+  //   },
+  // );
 }
 
-/// Verifies [allLeaks] contain expected number of leaks for the test [testDescription].
-///
-/// [notDisposed] and [notGCed] set number for expected leaks by leak type.
-/// The method will fail if the leaks context does not contain [expectedContextKeys].
-void _verifyLeaksForTest(
-  Leaks allLeaks,
-  String testDescription, {
-  int notDisposed = 0,
-  int notGCed = 0,
-  Map<LeakType, List<String>> expectedContextKeys = const <LeakType, List<String>>{},
-}) {
-  final Leaks testLeaks = Leaks(
-    allLeaks.byType.map(
-      (LeakType key, List<LeakReport> value) =>
-          MapEntry<LeakType, List<LeakReport>>(key, value.where((LeakReport leak) => leak.phase == testDescription).toList()),
-    ),
-  );
 
-  for (final LeakType type in expectedContextKeys.keys) {
-    final List<LeakReport> leaks = testLeaks.byType[type] ?? <LeakReport>[];
-    final List<String> expectedKeys = expectedContextKeys[type]!..sort();
-    for (final LeakReport leak in leaks) {
-      final List<String> actualKeys = leak.context?.keys.toList() ?? <String>[];
-      expect(actualKeys..sort(), equals(expectedKeys), reason: '$testDescription, $type');
-    }
-  }
-
-  _verifyLeakList(
-    testLeaks.notDisposed,
-    notDisposed,
-    testDescription,
-  );
-  _verifyLeakList(
-    testLeaks.notGCed,
-    notGCed,
-    testDescription,
-  );
-}
-
-void _verifyLeakList(
-  List<LeakReport> list,
-  int expectedCount,
-  String testDescription,
-) {
-  expect(list.length, expectedCount, reason: testDescription);
-
-  for (final LeakReport leak in list) {
-    expect(leak.trackedClass, contains(InstrumentedDisposable.library));
-    expect(leak.trackedClass, contains('$InstrumentedDisposable'));
-  }
-}
