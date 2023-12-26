@@ -76,9 +76,6 @@ FlutterWindowsView::FlutterWindowsView(
   // Take the binding handler, and give it a pointer back to self.
   binding_handler_ = std::move(window_binding);
   binding_handler_->SetView(this);
-
-  render_target_ = std::make_unique<WindowsRenderTarget>(
-      binding_handler_->GetRenderTarget());
 }
 
 FlutterWindowsView::~FlutterWindowsView() {
@@ -116,7 +113,7 @@ void FlutterWindowsView::OnEmptyFrameGenerated() {
   // Platform thread is blocked for the entire duration until the
   // resize_status_ is set to kDone.
   engine_->surface_manager()->ResizeSurface(
-      GetRenderTarget(), resize_target_width_, resize_target_height_,
+      GetWindowHandle(), resize_target_width_, resize_target_height_,
       binding_handler_->NeedsVSync());
   resize_status_ = ResizeState::kFrameGenerated;
 }
@@ -132,7 +129,7 @@ bool FlutterWindowsView::OnFrameGenerated(size_t width, size_t height) {
   if (resize_target_width_ == width && resize_target_height_ == height) {
     // Platform thread is blocked for the entire duration until the
     // resize_status_ is set to kDone.
-    engine_->surface_manager()->ResizeSurface(GetRenderTarget(), width, height,
+    engine_->surface_manager()->ResizeSurface(GetWindowHandle(), width, height,
                                               binding_handler_->NeedsVSync());
     resize_status_ = ResizeState::kFrameGenerated;
     return true;
@@ -638,7 +635,7 @@ bool FlutterWindowsView::PresentSoftwareBitmap(const void* allocation,
 void FlutterWindowsView::CreateRenderSurface() {
   if (engine_ && engine_->surface_manager()) {
     PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
-    engine_->surface_manager()->CreateSurface(GetRenderTarget(), bounds.width,
+    engine_->surface_manager()->CreateSurface(GetWindowHandle(), bounds.width,
                                               bounds.height);
 
     UpdateVsync(*engine_, *binding_handler_);
@@ -658,12 +655,8 @@ void FlutterWindowsView::OnHighContrastChanged() {
   engine_->UpdateHighContrastMode();
 }
 
-WindowsRenderTarget* FlutterWindowsView::GetRenderTarget() const {
-  return render_target_.get();
-}
-
-PlatformWindow FlutterWindowsView::GetPlatformWindow() const {
-  return binding_handler_->GetPlatformWindow();
+HWND FlutterWindowsView::GetWindowHandle() const {
+  return binding_handler_->GetWindowHandle();
 }
 
 FlutterWindowsEngine* FlutterWindowsView::GetEngine() {

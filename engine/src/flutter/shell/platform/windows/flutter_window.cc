@@ -164,14 +164,6 @@ void FlutterWindow::SetView(WindowBindingHandlerDelegate* window) {
   }
 }
 
-WindowsRenderTarget FlutterWindow::GetRenderTarget() {
-  return WindowsRenderTarget(GetWindowHandle());
-}
-
-PlatformWindow FlutterWindow::GetPlatformWindow() {
-  return GetWindowHandle();
-}
-
 float FlutterWindow::GetDpiScale() {
   return static_cast<float>(GetCurrentDPI()) / static_cast<float>(base_dpi);
 }
@@ -408,7 +400,7 @@ void FlutterWindow::OnWindowStateEvent(WindowStateEvent event) {
       focused_ = false;
       break;
   }
-  HWND hwnd = GetPlatformWindow();
+  HWND hwnd = GetWindowHandle();
   if (hwnd && binding_handler_delegate_) {
     binding_handler_delegate_->OnWindowStateEvent(hwnd, event);
   }
