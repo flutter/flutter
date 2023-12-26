@@ -24,11 +24,12 @@ class WindowsProcTable {
   // Used to react differently to touch or pen inputs. Returns false on failure.
   // Available on Windows 8 and newer, otherwise returns false.
   virtual BOOL GetPointerType(UINT32 pointer_id,
-                              POINTER_INPUT_TYPE* pointer_type);
+                              POINTER_INPUT_TYPE* pointer_type) const;
 
   // Get the preferred languages for the thread, and optionally the process,
   // and system, in that order, depending on the flags.
-  // See
+  //
+  // See:
   // https://learn.microsoft.com/windows/win32/api/winnls/nf-winnls-getthreadpreferreduilanguages
   virtual LRESULT GetThreadPreferredUILanguages(DWORD flags,
                                                 PULONG count,
@@ -38,9 +39,16 @@ class WindowsProcTable {
   // Get whether high contrast is enabled.
   //
   // Available on Windows 8 and newer, otherwise returns false.
-  // See
+  //
+  // See:
   // https://learn.microsoft.com/windows/win32/winauto/high-contrast-parameter
-  virtual bool GetHighContrastEnabled();
+  virtual bool GetHighContrastEnabled() const;
+
+  // Get whether the system compositor, DWM, is enabled.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/dwmapi/nf-dwmapi-dwmiscompositionenabled
+  virtual bool DwmIsCompositionEnabled() const;
 
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,

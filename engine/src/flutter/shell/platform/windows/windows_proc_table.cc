@@ -4,6 +4,9 @@
 
 #include "flutter/shell/platform/windows/windows_proc_table.h"
 
+#include <WinUser.h>
+#include <dwmapi.h>
+
 namespace flutter {
 
 WindowsProcTable::WindowsProcTable() {
@@ -17,7 +20,7 @@ WindowsProcTable::~WindowsProcTable() {
 }
 
 BOOL WindowsProcTable::GetPointerType(UINT32 pointer_id,
-                                      POINTER_INPUT_TYPE* pointer_type) {
+                                      POINTER_INPUT_TYPE* pointer_type) const {
   if (!get_pointer_type_.has_value()) {
     return FALSE;
   }
@@ -32,7 +35,7 @@ LRESULT WindowsProcTable::GetThreadPreferredUILanguages(DWORD flags,
   return ::GetThreadPreferredUILanguages(flags, count, languages, length);
 }
 
-bool WindowsProcTable::GetHighContrastEnabled() {
+bool WindowsProcTable::GetHighContrastEnabled() const {
   HIGHCONTRAST high_contrast = {.cbSize = sizeof(HIGHCONTRAST)};
   if (!::SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(HIGHCONTRAST),
                                &high_contrast, 0)) {
@@ -40,6 +43,15 @@ bool WindowsProcTable::GetHighContrastEnabled() {
   }
 
   return high_contrast.dwFlags & HCF_HIGHCONTRASTON;
+}
+
+bool WindowsProcTable::DwmIsCompositionEnabled() const {
+  BOOL composition_enabled;
+  if (SUCCEEDED(::DwmIsCompositionEnabled(&composition_enabled))) {
+    return composition_enabled;
+  }
+
+  return true;
 }
 
 }  // namespace flutter

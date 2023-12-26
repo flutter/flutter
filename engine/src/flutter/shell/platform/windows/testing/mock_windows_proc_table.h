@@ -21,14 +21,16 @@ class MockWindowsProcTable : public WindowsProcTable {
   MOCK_METHOD(BOOL,
               GetPointerType,
               (UINT32 pointer_id, POINTER_INPUT_TYPE* pointer_type),
-              (override));
+              (const, override));
 
   MOCK_METHOD(LRESULT,
               GetThreadPreferredUILanguages,
               (DWORD, PULONG, PZZWSTR, PULONG),
               (const, override));
 
-  MOCK_METHOD(bool, GetHighContrastEnabled, (), (override));
+  MOCK_METHOD(bool, GetHighContrastEnabled, (), (const, override));
+
+  MOCK_METHOD(bool, DwmIsCompositionEnabled, (), (const, override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowsProcTable);
