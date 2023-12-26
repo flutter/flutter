@@ -2354,7 +2354,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// [SelectParagraphSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    return _handleSelectMultiSelectableBoundary(event);
+    // return _handleSelectMultiSelectableBoundary(event);
+    return _handleSelectBoundary(event);
   }
 
   /// Removes the selection of all selectables this delegate manages.
