@@ -96,19 +96,33 @@ enum HostArtifact {
   /// The summary dill with null safety enabled for the dartdevc target.
   webPlatformDart2JSSoundKernelDill,
 
-  /// The precompiled SDKs and sourcemaps for web debug builds.
-  webPrecompiledSdk,
-  webPrecompiledSdkSourcemaps,
-  webPrecompiledCanvaskitSdk,
-  webPrecompiledCanvaskitSdkSourcemaps,
-  webPrecompiledCanvaskitAndHtmlSdk,
-  webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
-  webPrecompiledSoundSdk,
-  webPrecompiledSoundSdkSourcemaps,
-  webPrecompiledCanvaskitSoundSdk,
-  webPrecompiledCanvaskitSoundSdkSourcemaps,
-  webPrecompiledCanvaskitAndHtmlSoundSdk,
-  webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+  /// The precompiled SDKs and sourcemaps for web debug builds with the AMD module system.
+  webPrecompiledAmdSdk,
+  webPrecompiledAmdSdkSourcemaps,
+  webPrecompiledAmdCanvaskitSdk,
+  webPrecompiledAmdCanvaskitSdkSourcemaps,
+  webPrecompiledAmdCanvaskitAndHtmlSdk,
+  webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps,
+  webPrecompiledAmdSoundSdk,
+  webPrecompiledAmdSoundSdkSourcemaps,
+  webPrecompiledAmdCanvaskitSoundSdk,
+  webPrecompiledAmdCanvaskitSoundSdkSourcemaps,
+  webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
+  webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps,
+
+  /// The precompiled SDKs and sourcemaps for web debug builds with the DDC module system.
+  webPrecompiledDdcSdk,
+  webPrecompiledDdcSdkSourcemaps,
+  webPrecompiledDdcCanvaskitSdk,
+  webPrecompiledDdcCanvaskitSdkSourcemaps,
+  webPrecompiledDdcCanvaskitAndHtmlSdk,
+  webPrecompiledDdcCanvaskitAndHtmlSdkSourcemaps,
+  webPrecompiledDdcSoundSdk,
+  webPrecompiledDdcSoundSdkSourcemaps,
+  webPrecompiledDdcCanvaskitSoundSdk,
+  webPrecompiledDdcCanvaskitSoundSdkSourcemaps,
+  webPrecompiledDdcCanvaskitAndHtmlSoundSdk,
+  webPrecompiledDdcCanvaskitAndHtmlSoundSdkSourcemaps,
 
   iosDeploy,
   idevicesyslog,
@@ -259,19 +273,31 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'dart2js_platform.dill';
     case HostArtifact.flutterWebLibrariesJson:
       return 'libraries.json';
-    case HostArtifact.webPrecompiledSdk:
-    case HostArtifact.webPrecompiledCanvaskitSdk:
-    case HostArtifact.webPrecompiledCanvaskitAndHtmlSdk:
-    case HostArtifact.webPrecompiledSoundSdk:
-    case HostArtifact.webPrecompiledCanvaskitSoundSdk:
-    case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk:
+    case HostArtifact.webPrecompiledAmdSdk:
+    case HostArtifact.webPrecompiledAmdCanvaskitSdk:
+    case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk:
+    case HostArtifact.webPrecompiledAmdSoundSdk:
+    case HostArtifact.webPrecompiledAmdCanvaskitSoundSdk:
+    case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk:
+    case HostArtifact.webPrecompiledDdcSdk:
+    case HostArtifact.webPrecompiledDdcCanvaskitSdk:
+    case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdk:
+    case HostArtifact.webPrecompiledDdcSoundSdk:
+    case HostArtifact.webPrecompiledDdcCanvaskitSoundSdk:
+    case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdk:
       return 'dart_sdk.js';
-    case HostArtifact.webPrecompiledSdkSourcemaps:
-    case HostArtifact.webPrecompiledCanvaskitSdkSourcemaps:
-    case HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps:
-    case HostArtifact.webPrecompiledSoundSdkSourcemaps:
-    case HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
-    case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
+    case HostArtifact.webPrecompiledAmdSdkSourcemaps:
+    case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
+    case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps:
+    case HostArtifact.webPrecompiledAmdSoundSdkSourcemaps:
+    case HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps:
+    case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps:
+    case HostArtifact.webPrecompiledDdcSdkSourcemaps:
+    case HostArtifact.webPrecompiledDdcCanvaskitSdkSourcemaps:
+    case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdkSourcemaps:
+    case HostArtifact.webPrecompiledDdcSoundSdkSourcemaps:
+    case HostArtifact.webPrecompiledDdcCanvaskitSoundSdkSourcemaps:
+    case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdkSourcemaps:
       return 'dart_sdk.js.map';
     case HostArtifact.impellerc:
       return 'impellerc$exe';
@@ -399,9 +425,8 @@ abstract class Artifacts {
   /// Retrieve a host specific artifact that does not depend on the
   /// current build mode or environment.
   FileSystemEntity getHostArtifact(
-    HostArtifact artifact, {
-      bool ddcModuleSystem = false,
-  });
+    HostArtifact artifact,
+  );
 
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
@@ -437,10 +462,8 @@ class CachedArtifacts implements Artifacts {
 
   @override
   FileSystemEntity getHostArtifact(
-    HostArtifact artifact, {
-      bool ddcModuleSystem = false,
-  }) {
-    final String ddcModuleSystemPathName = ddcModuleSystem ? 'ddc' : 'amd';
+    HostArtifact artifact,
+  ) {
     switch (artifact) {
       case HostArtifact.flutterWebSdk:
         final String path = _getFlutterWebSdkPath();
@@ -460,29 +483,53 @@ class CachedArtifacts implements Artifacts {
       case HostArtifact.webPlatformDart2JSSoundKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledSdk:
-      case HostArtifact.webPrecompiledSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', ddcModuleSystemPathName, _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdSdk:
+      case HostArtifact.webPrecompiledAmdSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitSdk:
-      case HostArtifact.webPrecompiledCanvaskitSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledSoundSdk:
-      case HostArtifact.webPrecompiledSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdSoundSdk:
+      case HostArtifact.webPrecompiledAmdSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitSoundSdk:
-      case HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitSoundSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk:
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcSdk:
+      case HostArtifact.webPrecompiledDdcSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcSoundSdk:
+      case HostArtifact.webPrecompiledDdcSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitSoundSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.idevicesyslog:
       case HostArtifact.idevicescreenshot:
@@ -897,10 +944,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
 
   @override
   FileSystemEntity getHostArtifact(
-    HostArtifact artifact, {
-      bool ddcModuleSystem = false,
-  }) {
-    final String ddcModuleSystemPathName = ddcModuleSystem ? 'ddc' : 'amd';
+    HostArtifact artifact,
+  ) {
     switch (artifact) {
       case HostArtifact.flutterWebSdk:
         final String path = _getFlutterWebSdkPath();
@@ -920,29 +965,53 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case HostArtifact.webPlatformDart2JSSoundKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledSdk:
-      case HostArtifact.webPrecompiledSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', ddcModuleSystemPathName, _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdSdk:
+      case HostArtifact.webPrecompiledAmdSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitSdk:
-      case HostArtifact.webPrecompiledCanvaskitSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledSoundSdk:
-      case HostArtifact.webPrecompiledSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdSoundSdk:
+      case HostArtifact.webPrecompiledAmdSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitSoundSdk:
-      case HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitSoundSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk:
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcSdk:
+      case HostArtifact.webPrecompiledDdcSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcSoundSdk:
+      case HostArtifact.webPrecompiledDdcSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitSoundSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.idevicesyslog:
       case HostArtifact.idevicescreenshot:
@@ -964,7 +1033,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final File file = _fileSystem.file(_fileSystem.path.join(_hostEngineOutPath, artifactFileName));
         if (!file.existsSync()) {
-          return _backupCache.getHostArtifact(artifact, ddcModuleSystem: ddcModuleSystem);
+          return _backupCache.getHostArtifact(artifact);
         }
         return file;
     }
@@ -1216,10 +1285,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
 
   @override
   FileSystemEntity getHostArtifact(
-    HostArtifact artifact, {
-      bool ddcModuleSystem = false,
-  }) {
-    final String ddcModuleSystemPathName = ddcModuleSystem ? 'ddc' : 'amd';
+    HostArtifact artifact,
+  ) {
     switch (artifact) {
       case HostArtifact.flutterWebSdk:
         final String path = _getFlutterWebSdkPath();
@@ -1239,29 +1306,53 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.webPlatformDart2JSSoundKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledSdk:
-      case HostArtifact.webPrecompiledSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', ddcModuleSystemPathName, _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdSdk:
+      case HostArtifact.webPrecompiledAmdSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitSdk:
-      case HostArtifact.webPrecompiledCanvaskitSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledSoundSdk:
-      case HostArtifact.webPrecompiledSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdSoundSdk:
+      case HostArtifact.webPrecompiledAmdSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitSoundSdk:
-      case HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitSoundSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk:
-      case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', '$ddcModuleSystemPathName-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk:
+      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcSdk:
+      case HostArtifact.webPrecompiledDdcSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-html', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcSoundSdk:
+      case HostArtifact.webPrecompiledDdcSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitSoundSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-sound', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdk:
+      case HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdkSourcemaps:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'ddc-canvaskit-html-sound', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.iosDeploy:
       case HostArtifact.idevicesyslog:
@@ -1271,7 +1362,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.impellerc:
       case HostArtifact.scenec:
       case HostArtifact.libtessellator:
-        return _parent.getHostArtifact(artifact, ddcModuleSystem: ddcModuleSystem);
+        return _parent.getHostArtifact(artifact);
     }
   }
 
@@ -1385,12 +1476,10 @@ class OverrideArtifacts implements Artifacts {
 
   @override
   FileSystemEntity getHostArtifact(
-    HostArtifact artifact, {
-      bool ddcModuleSystem = false,
-    }) {
+    HostArtifact artifact,
+  ) {
     return parent.getHostArtifact(
       artifact,
-      ddcModuleSystem: ddcModuleSystem,
     );
   }
 }
@@ -1444,9 +1533,8 @@ class _TestArtifacts implements Artifacts {
 
   @override
   FileSystemEntity getHostArtifact(
-    HostArtifact artifact, {
-      bool ddcModuleSystem = false,
-    }) {
+    HostArtifact artifact,
+  ) {
       return fileSystem.file(artifact.toString());
   }
 }

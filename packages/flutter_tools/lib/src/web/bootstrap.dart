@@ -79,7 +79,7 @@ var forceLoadModule = function (relativeUrl, root) {
 
 String generateDDCBootstrapScript({
   required String entrypoint,
-  required String dartLibraryUrl,
+  required String ddcModuleLoaderUrl,
   required String mapperUrl,
   required bool generateLoadingIndicator,
 }) {
@@ -91,7 +91,7 @@ $_simpleLoaderScript
 // A map containing the URLs for the bootstrap scripts in debug.
 let _scriptUrls = {
   "mapper": "$mapperUrl",
-  "dartLibrary": "$dartLibraryUrl"
+  "moduleLoader": "$ddcModuleLoaderUrl"
 };
 
 // Create a TrustedTypes policy so we can attach Scripts...
@@ -127,8 +127,8 @@ function getTTScriptUrl(scriptName) {
   // Load pre-requisite DDC scripts. We intentionally use invalid names to avoid namespace clashes.
   let prerequisiteScripts = [
     {
-      "src": getTTScriptUrl("dartLibrary"),
-      "id": "dart_library \x00"
+      "src": getTTScriptUrl("moduleLoader"),
+      "id": "ddc_module_loader \x00"
     },
     {
       "src": getTTScriptUrl("mapper"),
@@ -172,9 +172,9 @@ function getTTScriptUrl(scriptName) {
           moduleSet = new Set(libraryCache["modules"])
         }
         loader.addScriptsToQueue(scripts, function(script) {
-            // Preemptively load the dart_library and previously executed modules.
+            // Preemptively load the module loader and previously executed modules.
             return moduleSet.size == 0
-                  || script.id.includes("dart_library")
+                  || script.id.includes("ddc_module_loader")
                   // We preemptively load the stack_trace_mapper module so that we can
                   // translate JS errors to Dart.
                   || script.id.includes("stack_trace_mapper")
@@ -474,7 +474,6 @@ String generateDDCMainModule({
   required String entrypoint,
   required bool nullAssertions,
   required bool nativeNullAssertions,
-  String bootstrapModule = 'main_module.bootstrap',
   String? exportedMain,
 }) {
   final String entrypointMainName = exportedMain ?? entrypoint.split('.')[0];
@@ -483,16 +482,20 @@ String generateDDCMainModule({
 /* ENTRYPOINT_EXTENTION_MARKER */
 
 (function() {
+  // Flutter Web uses a generated main entrypoint, which shares app and module names.
   let appName = "$entrypoint";
+  let moduleName = "$entrypoint";
 
-  // A uuid that identifies a subapp.
+  // Use a dummy UUID since multi-apps are not supported on Flutter Web.
   let uuid = "00000000-0000-0000-0000-000000000000";
 
-  // We embed the main function in a child object to align with the external
-  // build system.
+  let dart = dart_library.import('dart_sdk', appName).dart;
+  dart.nonNullAsserts($nullAssertions);
+  dart.nativeNonNullAsserts($nativeNullAssertions);
+
   let child = {};
   child.main = function() {
-    dart_library.start(appName, uuid, "$entrypoint", "$entrypointMainName");
+    dart_library.start(appName, uuid, moduleName, "$entrypointMainName");
   }
 
   /* MAIN_EXTENSION_MARKER */

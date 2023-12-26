@@ -52,6 +52,7 @@ class BuildInfo {
        fileSystemRoots = fileSystemRoots ?? const <String>[],
        dartDefines = dartDefines ?? const <String>[],
        dartExperiments = dartExperiments ?? const <String>[];
+       
 
   final BuildMode mode;
 
@@ -221,6 +222,9 @@ class BuildInfo {
   /// the flavor name in the output bundle files has the first character lower-cased,
   /// so the uncapitalized flavor name is used to compute the output file name
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
+
+  /// The module system DDC is targeting, or null if not using DDC.
+  DdcModuleFormat? get ddcModuleFormat => _ddcModuleFormatFromFrontEndArgs(extraFrontEndOptions);
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -1041,6 +1045,28 @@ enum NullSafetyMode {
   unsound,
   /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
+}
+
+/// Indicates the module system DDC is targeting.
+enum DdcModuleFormat {
+  amd,
+  ddc,
+  es6,
+}
+
+DdcModuleFormat? _ddcModuleFormatFromFrontEndArgs(List<String>? extraFrontEndArgs) {
+  if (extraFrontEndArgs == null) {
+    return null;
+  }
+  const String ddcModuleFormatString = '--dartdevc-module-format=';
+  for (final String flag in extraFrontEndArgs) {
+    if (flag.startsWith(ddcModuleFormatString)) {
+      final String moduleFormatString = flag
+          .substring(ddcModuleFormatString.length, flag.length);
+      return DdcModuleFormat.values.byName(moduleFormatString);
+    }
+  }
+  return null;
 }
 
 String _getCurrentHostPlatformArchName() {

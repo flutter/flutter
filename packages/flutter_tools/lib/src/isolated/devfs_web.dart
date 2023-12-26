@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
+import 'package:dwds/utilities.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
@@ -196,9 +197,10 @@ class WebAssetServer implements AssetReader {
       try {
         if (tlsCertPath != null && tlsCertKeyPath != null) {
           final SecurityContext serverContext = SecurityContext()
-             ..useCertificateChain(tlsCertPath)
-             ..usePrivateKey(tlsCertKeyPath);
-          httpServer = await HttpServer.bindSecure(address, port, serverContext);
+            ..useCertificateChain(tlsCertPath)
+            ..usePrivateKey(tlsCertKeyPath);
+          httpServer =
+              await HttpServer.bindSecure(address, port, serverContext);
         } else {
           httpServer = await HttpServer.bind(address, port);
         }
@@ -445,8 +447,7 @@ class WebAssetServer implements AssetReader {
       final Directory canvasKitDirectory =
           globals.fs.directory(globals.fs.path.join(
         globals.artifacts!
-            .getHostArtifact(HostArtifact.flutterWebSdk,
-                ddcModuleSystem: _ddcModuleSystem)
+            .getHostArtifact(HostArtifact.flutterWebSdk)
             .path,
         'canvaskit',
       ));
@@ -596,20 +597,23 @@ class WebAssetServer implements AssetReader {
     }
 
     final Directory flutterWebSdk = globals.fs.directory(globals.artifacts!
-        .getHostArtifact(HostArtifact.flutterWebSdk,
-            ddcModuleSystem: _ddcModuleSystem));
+        .getHostArtifact(HostArtifact.flutterWebSdk));
     final File webSdkFile = globals.fs.file(flutterWebSdk.uri.resolve(path));
 
     return webSdkFile;
   }
 
-  File get _resolveDartSdkJsFile => globals.fs.file(globals.artifacts!
-      .getHostArtifact(kDartSdkJsArtifactMap[webRenderer]![_nullSafetyMode]!,
-          ddcModuleSystem: _ddcModuleSystem));
+  File get _resolveDartSdkJsFile {
+    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap = _ddcModuleSystem ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    return globals.fs.file(globals.artifacts!
+      .getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+  }
 
-  File get _resolveDartSdkJsMapFile => globals.fs.file(globals.artifacts!
-      .getHostArtifact(kDartSdkJsMapArtifactMap[webRenderer]![_nullSafetyMode]!,
-          ddcModuleSystem: _ddcModuleSystem));
+  File get _resolveDartSdkJsMapFile {
+    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>  dartSdkArtifactMap = _ddcModuleSystem ? kDdcDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+    return globals.fs.file(globals.artifacts!
+      .getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+  }
 
   @override
   Future<String?> dartSourceContents(String serverPath) async {
@@ -819,10 +823,10 @@ class WebDevFS implements DevFS {
     }
     String url = '$hostname:$selectedPort';
     if (hostname == 'any') {
-      url ='localhost:$selectedPort';
+      url = 'localhost:$selectedPort';
     }
     _baseUri = Uri.http(url, webAssetServer.basePath);
-    if (tlsCertPath != null && tlsCertKeyPath!= null) {
+    if (tlsCertPath != null && tlsCertKeyPath != null) {
       _baseUri = Uri.https(url, webAssetServer.basePath);
     }
     return _baseUri!;
@@ -895,7 +899,7 @@ class WebDevFS implements DevFS {
         ddcModuleSystem
             ? generateDDCBootstrapScript(
                 entrypoint: entrypoint,
-                dartLibraryUrl: 'ddc_module_loader.js',
+                ddcModuleLoaderUrl: 'ddc_module_loader.js',
                 mapperUrl: 'stack_trace_mapper.js',
                 generateLoadingIndicator: enableDwds,
               )
@@ -912,6 +916,7 @@ class WebDevFS implements DevFS {
                 entrypoint: entrypoint,
                 nullAssertions: nullAssertions,
                 nativeNullAssertions: nativeNullAssertions,
+                exportedMain: pathToJSIdentifier(entrypoint.split('.')[0]),
               )
             : generateMainModule(
                 entrypoint: entrypoint,
