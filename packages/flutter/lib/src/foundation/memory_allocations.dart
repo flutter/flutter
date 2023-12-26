@@ -98,7 +98,11 @@ class ObjectDisposed extends ObjectEvent {
 }
 
 /// An interface for listening to object lifecycle events.
-@Deprecated('Use FlutterMemoryAllocations instead.')
+@Deprecated(
+  'Use `FlutterMemoryAllocations` instead. '
+  'The class `MemoryAllocations` will be introduced in a pure Dart library. '
+  'This feature was deprecated after v3.18.0-18.0.pre.'
+)
 typedef MemoryAllocations = FlutterMemoryAllocations;
 
 /// An interface for listening to object lifecycle events.
