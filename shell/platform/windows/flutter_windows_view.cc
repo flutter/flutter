@@ -40,8 +40,7 @@ bool SurfaceWillUpdate(size_t cur_width,
 
 /// Update the surface's swap interval to block until the v-blank iff
 /// the system compositor is disabled.
-void UpdateVsync(const FlutterWindowsEngine& engine,
-                 const WindowBindingHandler& window) {
+void UpdateVsync(const FlutterWindowsEngine& engine, bool needs_vsync) {
   AngleSurfaceManager* surface_manager = engine.surface_manager();
   if (!surface_manager) {
     return;
@@ -52,7 +51,6 @@ void UpdateVsync(const FlutterWindowsEngine& engine,
   // the raster thread. If the engine is initializing, the raster thread doesn't
   // exist yet and the render surface can be made current on the platform
   // thread.
-  auto needs_vsync = window.NeedsVSync();
   if (engine.running()) {
     engine.PostRasterThreadTask([surface_manager, needs_vsync]() {
       surface_manager->SetVSyncEnabled(needs_vsync);
@@ -72,7 +70,13 @@ void UpdateVsync(const FlutterWindowsEngine& engine,
 }  // namespace
 
 FlutterWindowsView::FlutterWindowsView(
-    std::unique_ptr<WindowBindingHandler> window_binding) {
+    std::unique_ptr<WindowBindingHandler> window_binding,
+    std::shared_ptr<WindowsProcTable> windows_proc_table)
+    : windows_proc_table_(std::move(windows_proc_table)) {
+  if (windows_proc_table_ == nullptr) {
+    windows_proc_table_ = std::make_shared<WindowsProcTable>();
+  }
+
   // Take the binding handler, and give it a pointer back to self.
   binding_handler_ = std::move(window_binding);
   binding_handler_->SetView(this);
@@ -114,7 +118,7 @@ void FlutterWindowsView::OnEmptyFrameGenerated() {
   // resize_status_ is set to kDone.
   engine_->surface_manager()->ResizeSurface(
       GetWindowHandle(), resize_target_width_, resize_target_height_,
-      binding_handler_->NeedsVSync());
+      NeedsVsync());
   resize_status_ = ResizeState::kFrameGenerated;
 }
 
@@ -130,7 +134,7 @@ bool FlutterWindowsView::OnFrameGenerated(size_t width, size_t height) {
     // Platform thread is blocked for the entire duration until the
     // resize_status_ is set to kDone.
     engine_->surface_manager()->ResizeSurface(GetWindowHandle(), width, height,
-                                              binding_handler_->NeedsVSync());
+                                              NeedsVsync());
     resize_status_ = ResizeState::kFrameGenerated;
     return true;
   }
@@ -638,7 +642,7 @@ void FlutterWindowsView::CreateRenderSurface() {
     engine_->surface_manager()->CreateSurface(GetWindowHandle(), bounds.width,
                                               bounds.height);
 
-    UpdateVsync(*engine_, *binding_handler_);
+    UpdateVsync(*engine_, NeedsVsync());
 
     resize_target_width_ = bounds.width;
     resize_target_height_ = bounds.height;
@@ -706,13 +710,20 @@ void FlutterWindowsView::UpdateSemanticsEnabled(bool enabled) {
 }
 
 void FlutterWindowsView::OnDwmCompositionChanged() {
-  UpdateVsync(*engine_, *binding_handler_);
+  UpdateVsync(*engine_, NeedsVsync());
 }
 
 void FlutterWindowsView::OnWindowStateEvent(HWND hwnd, WindowStateEvent event) {
   if (engine_) {
     engine_->OnWindowStateEvent(hwnd, event);
   }
+}
+
+bool FlutterWindowsView::NeedsVsync() const {
+  // If the Desktop Window Manager composition is enabled,
+  // the system itself synchronizes with vsync.
+  // See: https://learn.microsoft.com/windows/win32/dwm/composition-ovw
+  return !windows_proc_table_->DwmIsCompositionEnabled();
 }
 
 }  // namespace flutter
