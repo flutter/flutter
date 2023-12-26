@@ -110,7 +110,7 @@ typedef MemoryAllocations = FlutterMemoryAllocations;
 /// If [kFlutterMemoryAllocationsEnabled] is true,
 /// [FlutterMemoryAllocations] listens to creation and disposal events
 /// for disposable objects in Flutter Framework.
-/// To dispatch events for other objects, invoke
+/// To dispatch other events objects, invoke
 /// [FlutterMemoryAllocations.dispatchObjectEvent].
 ///
 /// Use this class with condition `kFlutterMemoryAllocationsEnabled`,
