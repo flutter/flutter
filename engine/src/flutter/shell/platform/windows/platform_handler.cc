@@ -258,7 +258,7 @@ void PlatformHandler::GetPlainText(
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
 
-  int open_result = clipboard->Open(std::get<HWND>(*view->GetRenderTarget()));
+  int open_result = clipboard->Open(view->GetWindowHandle());
   if (open_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(open_result);
@@ -302,7 +302,7 @@ void PlatformHandler::GetHasStrings(
       scoped_clipboard_provider_();
 
   bool hasStrings;
-  int open_result = clipboard->Open(std::get<HWND>(*view->GetRenderTarget()));
+  int open_result = clipboard->Open(view->GetWindowHandle());
   if (open_result != kErrorSuccess) {
     // Swallow errors of type ERROR_ACCESS_DENIED. These happen when the app is
     // not in the foreground and GetHasStrings is irrelevant.
@@ -339,7 +339,7 @@ void PlatformHandler::SetPlainText(
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
 
-  int open_result = clipboard->Open(std::get<HWND>(*view->GetRenderTarget()));
+  int open_result = clipboard->Open(view->GetWindowHandle());
   if (open_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(open_result);

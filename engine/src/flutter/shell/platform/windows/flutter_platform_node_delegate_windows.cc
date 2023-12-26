@@ -87,8 +87,8 @@ gfx::Rect FlutterPlatformNodeDelegateWindows::GetBoundsRect(
       coordinate_system, clipping_behavior, offscreen_result);
   POINT origin{bounds.x(), bounds.y()};
   POINT extent{bounds.x() + bounds.width(), bounds.y() + bounds.height()};
-  ClientToScreen(view_->GetPlatformWindow(), &origin);
-  ClientToScreen(view_->GetPlatformWindow(), &extent);
+  ClientToScreen(view_->GetWindowHandle(), &origin);
+  ClientToScreen(view_->GetWindowHandle(), &extent);
   return gfx::Rect(origin.x, origin.y, extent.x - origin.x,
                    extent.y - origin.y);
 }
@@ -107,7 +107,7 @@ void FlutterPlatformNodeDelegateWindows::SetFocus() {
 
 gfx::AcceleratedWidget
 FlutterPlatformNodeDelegateWindows::GetTargetForNativeAccessibilityEvent() {
-  return view_->GetPlatformWindow();
+  return view_->GetWindowHandle();
 }
 
 ui::AXPlatformNode* FlutterPlatformNodeDelegateWindows::GetPlatformNode()

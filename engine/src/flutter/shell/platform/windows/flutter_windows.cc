@@ -211,7 +211,7 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
 }
 
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
-  return ViewFromHandle(view)->GetPlatformWindow();
+  return ViewFromHandle(view)->GetWindowHandle();
 }
 
 IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {

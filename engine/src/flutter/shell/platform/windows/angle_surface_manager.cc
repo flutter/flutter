@@ -229,10 +229,10 @@ void AngleSurfaceManager::CleanUp() {
   }
 }
 
-bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
+bool AngleSurfaceManager::CreateSurface(HWND hwnd,
                                         EGLint width,
                                         EGLint height) {
-  if (!render_target || !initialize_succeeded_) {
+  if (!hwnd || !initialize_succeeded_) {
     return false;
   }
 
@@ -245,10 +245,9 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
       EGL_FIXED_SIZE_ANGLE, EGL_TRUE, EGL_WIDTH, width,
       EGL_HEIGHT,           height,   EGL_NONE};
 
-  surface = eglCreateWindowSurface(
-      egl_display_, egl_config_,
-      static_cast<EGLNativeWindowType>(std::get<HWND>(*render_target)),
-      surfaceAttributes);
+  surface = eglCreateWindowSurface(egl_display_, egl_config_,
+                                   static_cast<EGLNativeWindowType>(hwnd),
+                                   surfaceAttributes);
   if (surface == EGL_NO_SURFACE) {
     LogEglError("Surface creation failed.");
     return false;
@@ -260,7 +259,7 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
   return true;
 }
 
-void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
+void AngleSurfaceManager::ResizeSurface(HWND hwnd,
                                         EGLint width,
                                         EGLint height,
                                         bool vsync_enabled) {
@@ -275,7 +274,7 @@ void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
     // See: https://github.com/flutter/flutter/issues/79427
     ClearContext();
     DestroySurface();
-    if (!CreateSurface(render_target, width, height)) {
+    if (!CreateSurface(hwnd, width, height)) {
       FML_LOG(ERROR)
           << "AngleSurfaceManager::ResizeSurface failed to create surface";
     }

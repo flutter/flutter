@@ -17,14 +17,8 @@ class MockAngleSurfaceManager : public AngleSurfaceManager {
  public:
   MockAngleSurfaceManager() : AngleSurfaceManager(false) {}
 
-  MOCK_METHOD(bool,
-              CreateSurface,
-              (WindowsRenderTarget*, EGLint, EGLint),
-              (override));
-  MOCK_METHOD(void,
-              ResizeSurface,
-              (WindowsRenderTarget*, EGLint, EGLint, bool),
-              (override));
+  MOCK_METHOD(bool, CreateSurface, (HWND, EGLint, EGLint), (override));
+  MOCK_METHOD(void, ResizeSurface, (HWND, EGLint, EGLint, bool), (override));
   MOCK_METHOD(void, DestroySurface, (), (override));
 
   MOCK_METHOD(bool, MakeCurrent, (), (override));

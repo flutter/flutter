@@ -50,11 +50,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Destroys current rendering surface if one has been allocated.
   void DestroyRenderSurface();
 
-  // Return the currently configured WindowsRenderTarget.
-  WindowsRenderTarget* GetRenderTarget() const;
-
-  // Return the currently configured PlatformWindow.
-  virtual PlatformWindow GetPlatformWindow() const;
+  // Return the currently configured HWND.
+  virtual HWND GetWindowHandle() const;
 
   // Returns the engine backing this view.
   FlutterWindowsEngine* GetEngine();
@@ -367,11 +364,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // needed before passing on to engine.
   void SendPointerEventWithData(const FlutterPointerEvent& event_data,
                                 PointerState* state);
-
-  // Currently configured WindowsRenderTarget for this view used by
-  // surface_manager for creation of render surfaces and bound to the physical
-  // os window.
-  std::unique_ptr<WindowsRenderTarget> render_target_;
 
   // The engine associated with this view.
   FlutterWindowsEngine* engine_ = nullptr;

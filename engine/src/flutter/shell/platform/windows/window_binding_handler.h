@@ -36,13 +36,6 @@ struct PointerLocation {
   size_t y;
 };
 
-// Type representing an underlying platform window.
-using PlatformWindow = HWND;
-
-// Type representing a platform object that can be accepted by the Angle
-// rendering layer to bind to and render pixels into.
-using WindowsRenderTarget = std::variant<HWND>;
-
 // Abstract class for binding Windows platform windows to Flutter views.
 class WindowBindingHandler {
  public:
@@ -52,18 +45,13 @@ class WindowBindingHandler {
   // such as key presses, mouse position updates etc.
   virtual void SetView(WindowBindingHandlerDelegate* view) = 0;
 
-  // Returns a valid WindowsRenderTarget representing the platform object that
-  // rendering can be bound to by ANGLE rendering backend.
-  virtual WindowsRenderTarget GetRenderTarget() = 0;
-
-  // Returns a valid PlatformWindow representing the backing
-  // window.
-  virtual PlatformWindow GetPlatformWindow() = 0;
+  // Returns the underlying HWND backing the window.
+  virtual HWND GetWindowHandle() = 0;
 
   // Returns the scale factor for the backing window.
   virtual float GetDpiScale() = 0;
 
-  // Returns whether the PlatformWindow is currently visible.
+  // Returns whether the HWND is currently visible.
   virtual bool IsVisible() = 0;
 
   // Returns the bounds of the backing window in physical pixels.
