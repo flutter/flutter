@@ -67,7 +67,7 @@ final Map<String, LeakTesting> _usedSettings = <String, LeakTesting>{};
 
 void main() {
   for (final LeakTestCase test in tests) {
-    for (final  MapEntry<String, LeakTesting> settings in leakTestingCases.entries) {
+    for (final  MapEntry<String, LeakTesting> settings in leakTestingSettingsCases.entries) {
       final String testName = '${test.name}, ${settings.key}';
       _usedSettings[settings.key] = settings.value;
       testWidgets(testName, experimentalLeakTesting: settings.value, (WidgetTester tester) async {
