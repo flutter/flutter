@@ -428,24 +428,31 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   List<_SelectableFragment> _getSelectableFragments() {
     final String plainText = text.toPlainText(includeSemanticsLabels: false);
     final List<_SelectableFragment> result = <_SelectableFragment>[];
-    int start = 0;
-    while (start < plainText.length) {
-      int end = plainText.indexOf(_placeholderCharacter, start);
-      if (start != end) {
-        if (end == -1) {
-          end = plainText.length;
-        }
-        result.add(
-          _SelectableFragment(
-            paragraph: this,
-            range: TextRange(start: start, end: end),
-            fullText: plainText,
-          ),
-        );
-        start = end;
-      }
-      start += 1;
-    }
+    result.add(
+      _SelectableFragment(
+        paragraph: this,
+        range: TextRange(start: 0, end: plainText.length),
+        fullText: plainText,
+      ),
+    );
+    // int start = 0;
+    // while (start < plainText.length) {
+    //   int end = plainText.indexOf(_placeholderCharacter, start);
+    //   if (start != end) {
+    //     if (end == -1) {
+    //       end = plainText.length;
+    //     }
+    //     result.add(
+    //       _SelectableFragment(
+    //         paragraph: this,
+    //         range: TextRange(start: start, end: end),
+    //         fullText: plainText,
+    //       ),
+    //     );
+    //     start = end;
+    //   }
+    //   start += 1;
+    // }
     return result;
   }
 
@@ -1358,6 +1365,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     _selectionGeometry = _getSelectionGeometry();
+    _fragmentRanges = _getSelectableFragmentRanges();
   }
 
   final TextRange range;
@@ -1368,6 +1376,8 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   TextPosition? _textSelectionEnd;
 
   bool _selectableContainsOriginTextBoundary = false;
+
+  late final List<TextRange> _fragmentRanges;
 
   LayerLink? _startHandleLayerLink;
   LayerLink? _endHandleLayerLink;
@@ -1425,6 +1435,25 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         : SelectionStatus.uncollapsed,
       hasContent: true,
     );
+  }
+
+  List<TextRange> _getSelectableFragmentRanges() {
+    final List<TextRange> results = <TextRange>[];
+    int start = 0;
+    while (start < fullText.length) {
+      int end = fullText.indexOf(RenderParagraph._placeholderCharacter, start);
+      if (start != end) {
+        if (end == -1) {
+          end = fullText.length;
+        }
+        results.add(
+          TextRange(start: start, end: end),
+        );
+        start = end;
+      }
+      start += 1;
+    }
+    return results;
   }
 
   @override
@@ -2079,9 +2108,15 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   @override
   List<Rect> get boundingBoxes {
     if (_cachedBoundingBoxes == null) {
-      final List<TextBox> boxes = paragraph.getBoxesForSelection(
-        TextSelection(baseOffset: range.start, extentOffset: range.end),
-      );
+      final List<TextBox> boxes = <TextBox>[];
+      for (final TextRange range in _fragmentRanges) {
+        boxes.addAll(
+          paragraph.getBoxesForSelection(
+            TextSelection(baseOffset: range.start, extentOffset: range.end),
+          ),
+        );
+      }
+      
       if (boxes.isNotEmpty) {
         _cachedBoundingBoxes = <Rect>[];
         for (final TextBox textBox in boxes) {
@@ -2125,6 +2160,44 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return _rect.size;
   }
 
+  List<TextRange> calculateRemainingRanges(TextRange primaryRange, List<TextRange> excludeRanges) {
+    List<TextRange> remainingRanges = [];
+    int currentStart = primaryRange.start;
+
+    // Sort the exclude ranges by start index
+    excludeRanges.sort((a, b) => a.start.compareTo(b.start));
+
+    for (TextRange range in excludeRanges) {
+      // If there's a gap between the current start and the next exclude range's start, add that gap as a remaining range
+      if (currentStart < range.start) {
+        remainingRanges.add(TextRange(start: currentStart, end: range.start));
+      }
+      // Move the current start to the end of the excluding range
+      currentStart = range.end;
+    }
+
+    // After processing all exclude ranges, check if there's any part of the primary range left
+    if (currentStart < primaryRange.end) {
+      remainingRanges.add(TextRange(start: currentStart, end: primaryRange.end));
+    }
+
+    return remainingRanges;
+  }
+
+
+  TextRange? intersect(TextRange a, TextRange b) {
+    int startMax = math.max(a.start, b.start);
+    int endMin = math.min(a.end, b.end);
+
+    if (startMax <= endMin) {
+      // This means there is an intersection
+      return TextRange(start: startMax, end: endMin);
+    }
+    // If no intersection, return null or handle accordingly
+    return null;
+  }
+
+
   void paint(PaintingContext context, Offset offset) {
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
@@ -2137,9 +2210,24 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       final Paint selectionPaint = Paint()
         ..style = PaintingStyle.fill
         ..color = paragraph.selectionColor!;
-      for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
-        context.canvas.drawRect(
-            textBox.toRect().shift(offset), selectionPaint);
+      final List<TextRange> selections = <TextRange>[];
+      final List<TextBox> boxesForSelection = <TextBox>[];
+      for (final TextRange range in _fragmentRanges) {
+        final TextRange? intersectRange = intersect(range, selection);
+        if (intersectRange != null) {
+          selections.add(intersectRange);
+        }
+      }
+      if (selections.isNotEmpty) {
+        for (final TextRange range in selections) {
+          boxesForSelection.addAll(paragraph.getBoxesForSelection(TextSelection(baseOffset: range.start, extentOffset: range.end)));
+        }
+      }
+      if (boxesForSelection.isNotEmpty) {
+        for (final TextBox box in boxesForSelection) {
+          context.canvas.drawRect(
+              box.toRect().shift(offset), selectionPaint);
+        }
       }
     }
     if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
