@@ -33,14 +33,12 @@ class AngleSurfaceManager {
 
   // Creates an EGLSurface wrapper and backing DirectX 11 SwapChain
   // associated with window, in the appropriate format for display.
-  // Target represents the visual entity to bind to. Width and
-  // height represent dimensions surface is created at.
+  // HWND is the window backing the surface. Width and height represent
+  // dimensions surface is created at.
   //
   // After the surface is created, |SetVSyncEnabled| should be called on a
   // thread that can bind the |egl_context_|.
-  virtual bool CreateSurface(WindowsRenderTarget* render_target,
-                             EGLint width,
-                             EGLint height);
+  virtual bool CreateSurface(HWND hwnd, EGLint width, EGLint height);
 
   // Resizes backing surface from current size to newly requested size
   // based on width and height for the specific case when width and height do
@@ -48,7 +46,7 @@ class AngleSurfaceManager {
   // to bind to.
   //
   // This binds |egl_context_| to the current thread.
-  virtual void ResizeSurface(WindowsRenderTarget* render_target,
+  virtual void ResizeSurface(HWND hwnd,
                              EGLint width,
                              EGLint height,
                              bool enable_vsync);

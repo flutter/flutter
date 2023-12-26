@@ -72,7 +72,7 @@ class MockFlutterWindow : public FlutterWindow {
   MOCK_METHOD(UINT, Win32DispatchMessage, (UINT, WPARAM, LPARAM), (override));
   MOCK_METHOD(BOOL, Win32PeekMessage, (LPMSG, UINT, UINT, UINT), (override));
   MOCK_METHOD(uint32_t, Win32MapVkToChar, (uint32_t), (override));
-  MOCK_METHOD(HWND, GetPlatformWindow, (), (override));
+  MOCK_METHOD(HWND, GetWindowHandle, (), (override));
   MOCK_METHOD(ui::AXFragmentRootDelegateWin*,
               GetAxFragmentRootDelegate,
               (),
@@ -341,7 +341,7 @@ TEST(FlutterWindowTest, AlertNode) {
 
 TEST(FlutterWindowTest, LifecycleFocusMessages) {
   MockFlutterWindow win32window;
-  EXPECT_CALL(win32window, GetPlatformWindow)
+  EXPECT_CALL(win32window, GetWindowHandle)
       .WillRepeatedly(Return(reinterpret_cast<HWND>(1)));
   MockWindowBindingHandlerDelegate delegate;
 
@@ -373,7 +373,7 @@ TEST(FlutterWindowTest, LifecycleFocusMessages) {
 
 TEST(FlutterWindowTest, CachedLifecycleMessage) {
   MockFlutterWindow win32window;
-  EXPECT_CALL(win32window, GetPlatformWindow)
+  EXPECT_CALL(win32window, GetWindowHandle)
       .WillRepeatedly(Return(reinterpret_cast<HWND>(1)));
   EXPECT_CALL(win32window, OnWindowStateEvent)
       .WillRepeatedly([&](WindowStateEvent event) {
@@ -413,8 +413,8 @@ TEST(FlutterWindowTest, PosthumousWindowMessage) {
 
   {
     MockFlutterWindow win32window(false);
-    EXPECT_CALL(win32window, GetPlatformWindow).WillRepeatedly([&]() {
-      return win32window.FlutterWindow::GetPlatformWindow();
+    EXPECT_CALL(win32window, GetWindowHandle).WillRepeatedly([&]() {
+      return win32window.FlutterWindow::GetWindowHandle();
     });
     EXPECT_CALL(win32window, OnWindowStateEvent)
         .WillRepeatedly([&](WindowStateEvent event) {
@@ -423,7 +423,7 @@ TEST(FlutterWindowTest, PosthumousWindowMessage) {
     EXPECT_CALL(win32window, OnResize).Times(AnyNumber());
     win32window.SetView(&delegate);
     win32window.InitializeChild("Title", 1, 1);
-    hwnd = win32window.GetPlatformWindow();
+    hwnd = win32window.GetWindowHandle();
     SendMessage(hwnd, WM_SIZE, 0, MAKEWORD(1, 1));
     SendMessage(hwnd, WM_SETFOCUS, 0, 0);
 

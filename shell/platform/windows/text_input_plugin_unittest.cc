@@ -140,7 +140,7 @@ class TextInputPluginTest : public WindowsTest {
 
     window_ = window.get();
     EXPECT_CALL(*window_, SetView).Times(1);
-    EXPECT_CALL(*window, GetRenderTarget).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*window, GetWindowHandle).WillRepeatedly(Return(nullptr));
 
     engine_ = builder.Build();
     view_ = std::make_unique<MockFlutterWindowsView>(std::move(window));

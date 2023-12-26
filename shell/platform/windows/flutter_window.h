@@ -50,8 +50,6 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                        unsigned int width,
                        unsigned int height);
 
-  HWND GetWindowHandle();
-
   // |KeyboardManager::WindowDelegate|
   virtual BOOL Win32PeekMessage(LPMSG lpMsg,
                                 UINT wMsgFilterMin,
@@ -155,10 +153,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual void SetView(WindowBindingHandlerDelegate* view) override;
 
   // |FlutterWindowBindingHandler|
-  virtual WindowsRenderTarget GetRenderTarget() override;
-
-  // |FlutterWindowBindingHandler|
-  virtual PlatformWindow GetPlatformWindow() override;
+  virtual HWND GetWindowHandle() override;
 
   // |FlutterWindowBindingHandler|
   virtual float GetDpiScale() override;

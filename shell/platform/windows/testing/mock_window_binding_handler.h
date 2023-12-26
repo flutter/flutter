@@ -20,8 +20,7 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   virtual ~MockWindowBindingHandler();
 
   MOCK_METHOD(void, SetView, (WindowBindingHandlerDelegate * view), (override));
-  MOCK_METHOD(WindowsRenderTarget, GetRenderTarget, (), (override));
-  MOCK_METHOD(PlatformWindow, GetPlatformWindow, (), (override));
+  MOCK_METHOD(HWND, GetWindowHandle, (), (override));
   MOCK_METHOD(float, GetDpiScale, (), (override));
   MOCK_METHOD(bool, IsVisible, (), (override));
   MOCK_METHOD(void, OnWindowResized, (), (override));
