@@ -171,9 +171,6 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual void SetFlutterCursor(HCURSOR cursor) override;
 
   // |FlutterWindowBindingHandler|
-  virtual void OnWindowResized() override;
-
-  // |FlutterWindowBindingHandler|
   virtual bool OnBitmapSurfaceCleared() override;
 
   // |FlutterWindowBindingHandler|

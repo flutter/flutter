@@ -185,12 +185,6 @@ void FlutterWindow::SetFlutterCursor(HCURSOR cursor) {
   ::SetCursor(current_cursor_);
 }
 
-void FlutterWindow::OnWindowResized() {
-  // Blocking the raster thread until DWM flushes alleviates glitches where
-  // previous size surface is stretched over current size view.
-  DwmFlush();
-}
-
 void FlutterWindow::OnDpiScale(unsigned int dpi) {};
 
 // When DesktopWindow notifies that a WM_Size message has come in
