@@ -226,6 +226,9 @@ class BuildInfo {
   /// The module system DDC is targeting, or null if not using DDC.
   DdcModuleFormat? get ddcModuleFormat => _ddcModuleFormatFromFrontEndArgs(extraFrontEndOptions);
 
+  /// 'true' if this build uses the DDC module system.
+  bool get usesDdcModules => ddcModuleFormat == DdcModuleFormat.ddc;
+
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
   ///
