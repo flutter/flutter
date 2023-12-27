@@ -16781,7 +16781,7 @@ void main() {
     testWidgets('is called when the EditableText loses focus', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
       tearDown(focusNode.dispose);
-      bool onBlurCalled = false;
+      bool hasFocus = false;
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -16798,20 +16798,25 @@ void main() {
             style: textStyle,
             cursorColor: cursorColor,
             selectionControls: materialTextSelectionControls,
+            onFocus: (String? value) {
+              hasFocus = true;
+            },
             onBlur: (String? value) {
-              onBlurCalled = true;
+              hasFocus = false;
             },
           ),
         ),
       );
 
-      expect(onBlurCalled, isFalse);
+      expect(hasFocus, isFalse);
       focusNode.requestFocus();
       await tester.pump();
-      expect(onBlurCalled, isFalse);
+
+      expect(hasFocus, isTrue);
       focusNode.unfocus();
       await tester.pump();
-      expect(onBlurCalled, isTrue);
+
+      expect(hasFocus, isFalse);
     });
 
     testWidgets('is called when the EditableText loses focus via tabbing', (WidgetTester tester) async {
@@ -16819,7 +16824,7 @@ void main() {
       tearDown(focusNode1.dispose);
       final FocusNode focusNode2 = FocusNode();
       tearDown(focusNode2.dispose);
-      bool onBlurCalled = false;
+      bool hasFocus = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -16834,10 +16839,10 @@ void main() {
                 cursorColor: cursorColor,
                 selectionControls: materialTextSelectionControls,
                 onFocus: (String? value) {
-                  onBlurCalled = true;
+                  hasFocus = true;
                 },
                 onBlur: (String? value) {
-                  onBlurCalled = false;
+                  hasFocus = false;
                 },
               ),
               const SizedBox(height: 200.0),
@@ -16848,8 +16853,11 @@ void main() {
                 style: textStyle,
                 cursorColor: cursorColor,
                 selectionControls: materialTextSelectionControls,
+                onFocus: (String? value) {
+                  hasFocus = true;
+                },
                 onBlur: (String? value) {
-                  onBlurCalled = true;
+                  hasFocus = false;
                 },
               ),
               const SizedBox(height: 100.0),
@@ -16858,17 +16866,20 @@ void main() {
         ),
       );
 
-      expect(onBlurCalled, isFalse);
+      expect(hasFocus, isFalse);
       focusNode1.requestFocus();
       await tester.pump();
 
       // Tab to the second field (single line).
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
-      expect(onBlurCalled, isFalse);
-      focusNode2.requestFocus();
-      await tester.pump();
-      expect(onBlurCalled, isTrue);
+      expect(hasFocus, isTrue);
+
+      // Tab to the second field (single line).
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(hasFocus, isFalse);
     });
   });
 
