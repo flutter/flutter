@@ -793,6 +793,13 @@ class NavigatorObserver {
   /// The [Navigator] replaced `oldRoute` with `newRoute`.
   void didReplace({ Route<dynamic>? newRoute, Route<dynamic>? oldRoute }) { }
 
+  /// The top most route has changed.
+  ///
+  /// The `newRoute` is the new top most route. This can be a new route pushed
+  /// on top of the screen, or an existing route that become the new top-most
+  /// route due to previous top-most route is popped.
+  void didChangeTop(Route<dynamic> newRoute, Route<dynamic>? oldRoute) { }
+
   /// The [Navigator]'s routes are being moved by a user gesture.
   ///
   /// For example, this is called when an iOS back gesture starts, and is used
@@ -4011,6 +4018,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     ];
   }
 
+  _RouteEntry? _lastEntry;
   String? _lastAnnouncedRouteName;
 
   bool _debugUpdatingPage = false;
@@ -4437,7 +4445,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // notifications.
     _flushRouteAnnouncement();
 
+    final _RouteEntry lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate)!;
+    if (_lastEntry != lastEntry) {
+      for(final NavigatorObserver observer in _effectiveObservers) {
+        observer.didChangeTop(lastEntry.route, _lastEntry?.route);
+      }
+    }
+    _lastEntry = lastEntry;
     // Announce route name changes.
+    if (widget.reportsRouteUpdateToEngine) {
+      final String? routeName = lastEntry?.route.settings.name;
+      if (routeName != null && routeName != _lastAnnouncedRouteName) {
+        SystemNavigator.routeInformationUpdated(uri: Uri.parse(routeName));
+        _lastAnnouncedRouteName = routeName;
+      }
+    }
     if (widget.reportsRouteUpdateToEngine) {
       final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       final String? routeName = lastEntry?.route.settings.name;
