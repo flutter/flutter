@@ -8,7 +8,7 @@ for testing, this document refers to them as "tests".
 
 Current statuses for the devicelab are available at
 <https://flutter-dashboard.appspot.com/#/build>. See [dashboard user
-guide](https://github.com/flutter/cocoon/blob/master/app_flutter/USER_GUIDE.md)
+guide](https://github.com/flutter/cocoon/blob/main/dashboard/USER_GUIDE.md)
 for information on using the dashboards.
 
 ## Table of Contents
