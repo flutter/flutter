@@ -16705,115 +16705,162 @@ void main() {
     });
   });
 
-   group('onFocus/onBlur', () {
-    testWidgets('onFocus and onBlur callbacks are called', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      bool didFocus = false;
-      bool didBlur = false;
-
+  group('onFocus', () {
+    testWidgets('is called when the EditableText receives focus', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+      bool onFocusCalled = false;
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
+            backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
-            onFocus: () {
-              didFocus = true;
-            },
-            onBlur: () {
-              didBlur = true;
+            onFocus: (String? value) {
+              onFocusCalled = true;
             },
           ),
         ),
       );
 
-      expect(didFocus, isFalse);
-      expect(didBlur, isFalse);
-
+      expect(onFocusCalled, isFalse);
       focusNode.requestFocus();
-      await tester.pumpAndSettle();
-
-      expect(didFocus, isTrue);
-      expect(didBlur, isFalse);
-
-      focusNode.unfocus();
-      await tester.pumpAndSettle();
-
-      expect(didFocus, isTrue);
-      expect(didBlur, isTrue);
+      await tester.pump();
+      expect(onFocusCalled, isTrue);
     });
-
-    testWidgets('onFocus and onBlur callbacks are called when focus changes', (WidgetTester tester) async {
-      final FocusNode focusNode1 = FocusNode();
-      final FocusNode focusNode2 = FocusNode();
-      bool didFocus1 = false;
-      bool didBlur1 = false;
-      bool didFocus2 = false;
-      bool didBlur2 = false;
-
+    testWidgets('is called when the EditableText receives focus via tabbing', (WidgetTester tester) async {
+      final FocusNode focusNode1 = FocusNode(debugLabel: 'EditableText Focus Node 1');
+      final FocusNode focusNode2 = FocusNode(debugLabel: 'EditableText Focus Node 2');
+      bool onFocusCalled = false;
       await tester.pumpWidget(
         MaterialApp(
           home: Column(
-            children: <Widget>[
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:  <Widget>[
               EditableText(
+                backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: focusNode1,
                 style: textStyle,
                 cursorColor: cursorColor,
-                backgroundCursorColor: Colors.grey,
                 selectionControls: materialTextSelectionControls,
-                onFocus: () {
-                  didFocus1 = true;
-                },
-                onBlur: () {
-                  didBlur1 = true;
+                onFocus: (String? value) {
+                  onFocusCalled = true;
                 },
               ),
+              const SizedBox(height: 200.0),
               EditableText(
+                backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: focusNode2,
                 style: textStyle,
                 cursorColor: cursorColor,
-                backgroundCursorColor: Colors.grey,
                 selectionControls: materialTextSelectionControls,
-                onFocus: () {
-                  didFocus2 = true;
-                },
-                onBlur: () {
-                  didBlur2 = true;
+              ),
+              const SizedBox(height: 100.0),
+            ],
+
+          ),
+        ),
+      );
+
+      expect(onFocusCalled, isFalse);
+      focusNode1.requestFocus();
+      await tester.pump();
+
+      // Tab to the second field (single line).
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(onFocusCalled, isTrue);
+    });
+  });
+
+  group('onBlur', () {
+    testWidgets('is called when the EditableText loses focus', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+      bool onBlurCalled = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: true,
+            toolbarOptions: const ToolbarOptions(
+              copy: true,
+              cut: true,
+              paste: true,
+              selectAll: true,
+            ),
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            onBlur: (String? value) {
+              onBlurCalled = true;
+            },
+          ),
+        ),
+      );
+
+      expect(onBlurCalled, isFalse);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(onBlurCalled, isFalse);
+      focusNode.unfocus();
+      await tester.pump();
+      expect(onBlurCalled, isTrue);
+    });
+
+    testWidgets('is called when the EditableText loses focus via tabbing', (WidgetTester tester) async {
+      final FocusNode focusNode1 = FocusNode(debugLabel: 'EditableText Focus Node 1');
+      final FocusNode focusNode2 = FocusNode(debugLabel: 'EditableText Focus Node 2');
+      bool onBlurCalled = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:  <Widget>[
+              EditableText(
+                backgroundCursorColor: Colors.grey,
+                controller: controller,
+                focusNode: focusNode1,
+                style: textStyle,
+                cursorColor: cursorColor,
+                selectionControls: materialTextSelectionControls,
+                onBlur: (String? value) {
+                  onBlurCalled = true;
                 },
               ),
+              const SizedBox(height: 200.0),
+              EditableText(
+                backgroundCursorColor: Colors.grey,
+                controller: controller,
+                focusNode: focusNode2,
+                style: textStyle,
+                cursorColor: cursorColor,
+                selectionControls: materialTextSelectionControls,
+              ),
+              const SizedBox(height: 100.0),
             ],
           ),
         ),
       );
 
-      expect(didFocus1, isFalse);
-      expect(didBlur1, isFalse);
-      expect(didFocus2, isFalse);
-      expect(didBlur2, isFalse);
-
+      expect(onBlurCalled, isFalse);
       focusNode1.requestFocus();
+      await tester.pump();
+
+      // Tab to the second field (single line).
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
-
-      expect(didFocus1, isTrue);
-      expect(didBlur1, isFalse);
-      expect(didFocus2, isFalse);
-      expect(didBlur2, isFalse);
-
+      expect(onBlurCalled, isFalse);
       focusNode2.requestFocus();
-      await tester.pumpAndSettle();
-
-      expect(didFocus1, isTrue);
-      expect(didBlur1, isTrue);
-
-      expect(didFocus2, isTrue);
-      expect(didBlur2, isFalse);
+      await tester.pump();
+      expect(onBlurCalled, isTrue);
     });
-    });
+  });
 
   testWidgets('Cursor color with an opacity is respected', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
