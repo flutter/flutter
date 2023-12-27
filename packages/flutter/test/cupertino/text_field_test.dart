@@ -10099,7 +10099,7 @@ void main() {
   });
 
    group('onFocus', () {
-    testWidgets('onFocusChange is called when focus changes', (WidgetTester tester) async {
+    testWidgets('is called when focus changes', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       addTearDown(focusNode.dispose);
       bool didGetFocus = false;
@@ -10123,7 +10123,7 @@ void main() {
       expect(didGetFocus, isTrue);
     });
 
-    testWidgets('onFocusChange is called when focus changes via tap', (WidgetTester tester) async {
+    testWidgets('is called when focus changes via tap', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       addTearDown(focusNode.dispose);
       bool focusChanged = false;
@@ -10147,36 +10147,137 @@ void main() {
       expect(focusChanged, isTrue);
     });
 
-    testWidgets('onFocusChange is called when focus changes via keyboard', (WidgetTester tester) async {
+    testWidgets('is called when focus changes via keyboard', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       addTearDown(focusNode.dispose);
-      bool focusChanged = false;
+      bool hasFocus = false;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoTextField(
-              focusNode: focusNode,
-              onFocus: (String? value) {
-                focusChanged = true;
-              },
-            ),
+                  key: const Key('first'),
+                  focusNode: focusNode,
+                  onFocus: (String? value) {
+                    hasFocus = true;
+                  },
+               ),
           ),
         ),
       );
-      await tester.pump();
-      expect(focusChanged, isFalse);
 
-      await tester.tap(find.byType(CupertinoTextField));
       await tester.pump();
-      expect(focusChanged, isTrue);
+      expect(hasFocus, isFalse);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pump();
-      expect(focusChanged, isFalse);
+      await tester.pumpAndSettle();
+      expect(hasFocus, isTrue);
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab,);
-      await tester.pump();
-      expect(focusChanged, isTrue);
     });
-  }); 
+  });
+
+  group('onBlur', () {
+    testWidgets('is called when focus changes', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      addTearDown(focusNode.dispose);
+      bool didLoseFocus = false;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              focusNode: focusNode,
+              onBlur: (String? value) {
+                didLoseFocus = true;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(didLoseFocus, isFalse);
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(didLoseFocus, isFalse);
+
+      focusNode.unfocus();
+      await tester.pump();
+      expect(didLoseFocus, isTrue);
+    });
+
+    testWidgets('is called when focus changes via tap', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      bool hasFocus = false;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Column(
+            children: <Widget>[
+              CupertinoTextField(
+                key: const Key('first'),
+                focusNode: focusNode,
+                onFocus: (String? value) {
+                  hasFocus = true;
+                },
+                onBlur: (String? value) {
+                  hasFocus = false;
+                },
+              ),
+              const CupertinoTextField(),
+
+            ],
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(hasFocus, isFalse);
+
+      await tester.tap(find.byType(CupertinoTextField).first);
+      await tester.pumpAndSettle();
+      expect(hasFocus, isTrue);
+
+      await tester.tap(find.byType(CupertinoTextField).last);
+      await tester.pumpAndSettle();
+      expect(hasFocus, isFalse);
+    });
+
+    testWidgets('is called when focus changes via keyboard', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      addTearDown(focusNode.dispose);
+      bool hasFocus = false;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                CupertinoTextField(
+                  focusNode: focusNode,
+                  onFocus: (String? value) {
+                    hasFocus = true;
+                  },
+                  onBlur: (String? value) {
+                    hasFocus = false;
+                  },
+                ),
+                const CupertinoTextField(),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(hasFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(hasFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(hasFocus, isFalse);
+    });
+  });
 }

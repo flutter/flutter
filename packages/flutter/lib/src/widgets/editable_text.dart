@@ -1848,12 +1848,12 @@ class EditableText extends StatefulWidget {
   final TextMagnifierConfiguration magnifierConfiguration;
 
 
-  /// {@template flutter.widgets.editableText.onFocus}
+  /// {@template flutter.widgets.EditableText.onFocus}
   /// Called when the text field becomes the primary focus.
   /// {@endtemplate}
   final ValueChanged<String>? onFocus;
 
-  /// {@template flutter.widgets.editableText.onBlur}
+  /// {@template flutter.widgets.EditableText.onBlur}
   /// Called when the text field is no longer the primary focus.
   /// {@endtemplate}
   final ValueChanged<String>? onBlur;

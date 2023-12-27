@@ -16746,9 +16746,6 @@ void main() {
                 style: textStyle,
                 cursorColor: cursorColor,
                 selectionControls: materialTextSelectionControls,
-                onFocus: (String? value) {
-                  onFocusCalled = true;
-                },
               ),
               const SizedBox(height: 200.0),
               EditableText(
@@ -16758,6 +16755,9 @@ void main() {
                 style: textStyle,
                 cursorColor: cursorColor,
                 selectionControls: materialTextSelectionControls,
+                onFocus: (String? value) {
+                  onFocusCalled = true;
+                },
               ),
               const SizedBox(height: 100.0),
             ],
@@ -16779,8 +16779,6 @@ void main() {
 
   group('onBlur', () {
     testWidgets('is called when the EditableText loses focus', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
-      tearDown(focusNode.dispose);
       bool hasFocus = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -16821,9 +16819,8 @@ void main() {
 
     testWidgets('is called when the EditableText loses focus via tabbing', (WidgetTester tester) async {
       final FocusNode focusNode1 = FocusNode();
-      tearDown(focusNode1.dispose);
       final FocusNode focusNode2 = FocusNode();
-      tearDown(focusNode2.dispose);
+
       bool hasFocus = false;
 
       await tester.pumpWidget(
@@ -16838,12 +16835,6 @@ void main() {
                 style: textStyle,
                 cursorColor: cursorColor,
                 selectionControls: materialTextSelectionControls,
-                onFocus: (String? value) {
-                  hasFocus = true;
-                },
-                onBlur: (String? value) {
-                  hasFocus = false;
-                },
               ),
               const SizedBox(height: 200.0),
               EditableText(

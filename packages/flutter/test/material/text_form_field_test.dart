@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 
@@ -1663,18 +1664,26 @@ void main() {
   testWidgets('TextFormField onBlur is called when the form is unfocused', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    bool blurred = false;
+    bool hasFocus = false;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Form(
           key: formKey,
-          child: TextFormField(
-            key: stateKey,
-            initialValue: 'initialValue',
-            onBlur: (String? value) {
-              blurred = true;
-            },
+          child: Column(
+            children: <Widget>[
+              TextFormField(
+                key: stateKey,
+                initialValue: 'initialValue',
+                onFocus: (String value) {
+                  hasFocus = true;
+                },
+                onBlur: (String? value) {
+                  hasFocus = false;
+                },
+              ),
+              const TextField(),
+            ],
           ),
         ),
       ),
@@ -1682,16 +1691,16 @@ void main() {
 
     // Initial value is 'initialValue'.
     expect(stateKey.currentState!.value, 'initialValue');
-    expect(blurred, isFalse);
+    expect(hasFocus, isFalse);
 
     // Focus the form field.
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TextField).first);
     await tester.pump();
-    expect(blurred, isFalse);
+    expect(hasFocus, isTrue);
 
-    // Unfocus the form field.
-    await tester.tap(find.byType(TextField));
+    //Click on the second text field to unfocus the first.
+    await tester.tap(find.byType(TextField).last);
     await tester.pump();
-    expect(blurred, isTrue);
+    expect(hasFocus, isFalse);
   });
 }
