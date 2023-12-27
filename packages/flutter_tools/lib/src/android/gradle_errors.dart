@@ -214,6 +214,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     'java.io.FileNotFoundException: https://downloads.gradle.org',
     'java.io.IOException: Unable to tunnel through proxy',
+    'java.io.IOException: Server returned HTTP response code: 502',
     'java.lang.RuntimeException: Timeout of',
     'java.util.zip.ZipException: error in opening zip file',
     'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
