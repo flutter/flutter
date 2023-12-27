@@ -287,6 +287,8 @@ class CupertinoTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.onFocus,
+    this.onBlur,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -778,6 +780,12 @@ class CupertinoTextField extends StatefulWidget {
   /// If [SpellCheckConfiguration.misspelledTextStyle] is not specified in this
   /// configuration, then [cupertinoMisspelledTextStyle] is used by default.
   final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// {@macro flutter.widgets.EditableText.onFocus}
+  final ValueChanged<String>? onFocus;
+
+  /// {@macro flutter.widgets.EditableText.onBlur}
+  final ValueChanged<String>? onBlur;
 
   /// The [TextStyle] used to indicate misspelled words in the Cupertino style.
   ///
@@ -1413,6 +1421,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             contentInsertionConfiguration: widget.contentInsertionConfiguration,
             contextMenuBuilder: widget.contextMenuBuilder,
             spellCheckConfiguration: spellCheckConfiguration,
+            onFocus: widget.onFocus,
+            onBlur: widget.onBlur,
           ),
         ),
       ),

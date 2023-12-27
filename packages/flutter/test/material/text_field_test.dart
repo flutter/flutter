@@ -17090,6 +17090,65 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
+
+  group('onFocus', () {
+    testWidgets('is called when the text field gains focus', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      final TextEditingController controller = _textEditingController();
+      bool didGetFocus = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                onFocus: (String? value){
+                  didGetFocus = true;
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(didGetFocus, isFalse);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(didGetFocus, isTrue);
+    });
+  });
+
+  group('onBlur', () {
+    testWidgets('is called when the text field loses focus', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      final TextEditingController controller = _textEditingController();
+      bool didLoseFocus = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                onBlur: (String? value){
+                  didLoseFocus = true;
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(didLoseFocus, isFalse);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(didLoseFocus, isFalse);
+      focusNode.unfocus();
+      await tester.pump();
+      expect(didLoseFocus, isTrue);
+    });
+  });
 }
 
 /// A Simple widget for testing the obscure text.

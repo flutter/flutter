@@ -1628,4 +1628,70 @@ void main() {
     expect(stateKey.currentState!.value,'initialValue');
     expect(value, 'initialValue');
   });
+
+  testWidgets('TextFormField onFocus is called when the form is focused', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    bool focused = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Form(
+          key: formKey,
+          child: TextFormField(
+            key: stateKey,
+            initialValue: 'initialValue',
+            onFocus: (String? value) {
+              focused = true;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Initial value is 'initialValue'.
+    expect(stateKey.currentState!.value, 'initialValue');
+    expect(focused, isFalse);
+
+    // Focus the form field.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(focused, isTrue);
+  });
+
+
+  testWidgets('TextFormField onBlur is called when the form is unfocused', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    bool blurred = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Form(
+          key: formKey,
+          child: TextFormField(
+            key: stateKey,
+            initialValue: 'initialValue',
+            onBlur: (String? value) {
+              blurred = true;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Initial value is 'initialValue'.
+    expect(stateKey.currentState!.value, 'initialValue');
+    expect(blurred, isFalse);
+
+    // Focus the form field.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(blurred, isFalse);
+
+    // Unfocus the form field.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(blurred, isTrue);
+  });
 }

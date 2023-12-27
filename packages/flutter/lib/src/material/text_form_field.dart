@@ -173,6 +173,8 @@ class TextFormField extends FormField<String> {
     Clip clipBehavior = Clip.hardEdge,
     bool scribbleEnabled = true,
     bool canRequestFocus = true,
+    ValueChanged<String>? onFocus,
+    ValueChanged<String>? onBlur,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -266,6 +268,8 @@ class TextFormField extends FormField<String> {
                clipBehavior: clipBehavior,
                scribbleEnabled: scribbleEnabled,
                canRequestFocus: canRequestFocus,
+               onFocus: onFocus,
+               onBlur: onBlur,
              ),
            );
          },

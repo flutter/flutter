@@ -811,6 +811,8 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
+    this.onFocus,
+    this.onBlur,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -1844,6 +1846,28 @@ class EditableText extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
+
+
+  /// {@template flutter.widgets.editableText.onFocus}
+  /// Called when the text field becomes the primary focus.
+  ///
+  /// See also:
+  ///
+  ///  * [FocusNode.onFocusChanged], which is triggered when the focus node
+  ///    changes between having and not having the focus.
+  /// {@endtemplate}
+  final ValueChanged<String>? onFocus;
+
+  /// {@template flutter.widgets.editableText.onBlur}
+  /// Called when the text field is no longer the primary focus.
+  ///
+  /// See also:
+  ///
+  ///  * [FocusNode.onFocusChanged], which is triggered when the focus node
+  ///    changes between having and not having the focus.
+  /// {@endtemplate}
+  final ValueChanged<String>? onBlur;
+
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -4000,7 +4024,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (updatedSelection != null) {
         _handleSelectionChanged(updatedSelection, null);
       }
+      widget.onFocus?.call(_value.text);
     } else {
+      widget.onBlur?.call(_value.text);
       WidgetsBinding.instance.removeObserver(this);
       setState(() { _currentPromptRectRange = null; });
     }

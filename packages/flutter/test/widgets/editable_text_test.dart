@@ -16705,6 +16705,116 @@ void main() {
     });
   });
 
+   group('onFocus/onBlur', () {
+    testWidgets('onFocus and onBlur callbacks are called', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      bool didFocus = false;
+      bool didBlur = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            onFocus: () {
+              didFocus = true;
+            },
+            onBlur: () {
+              didBlur = true;
+            },
+          ),
+        ),
+      );
+
+      expect(didFocus, isFalse);
+      expect(didBlur, isFalse);
+
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(didFocus, isTrue);
+      expect(didBlur, isFalse);
+
+      focusNode.unfocus();
+      await tester.pumpAndSettle();
+
+      expect(didFocus, isTrue);
+      expect(didBlur, isTrue);
+    });
+
+    testWidgets('onFocus and onBlur callbacks are called when focus changes', (WidgetTester tester) async {
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+      bool didFocus1 = false;
+      bool didBlur1 = false;
+      bool didFocus2 = false;
+      bool didBlur2 = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            children: <Widget>[
+              EditableText(
+                controller: controller,
+                focusNode: focusNode1,
+                style: textStyle,
+                cursorColor: cursorColor,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                onFocus: () {
+                  didFocus1 = true;
+                },
+                onBlur: () {
+                  didBlur1 = true;
+                },
+              ),
+              EditableText(
+                controller: controller,
+                focusNode: focusNode2,
+                style: textStyle,
+                cursorColor: cursorColor,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                onFocus: () {
+                  didFocus2 = true;
+                },
+                onBlur: () {
+                  didBlur2 = true;
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(didFocus1, isFalse);
+      expect(didBlur1, isFalse);
+      expect(didFocus2, isFalse);
+      expect(didBlur2, isFalse);
+
+      focusNode1.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(didFocus1, isTrue);
+      expect(didBlur1, isFalse);
+      expect(didFocus2, isFalse);
+      expect(didBlur2, isFalse);
+
+      focusNode2.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(didFocus1, isTrue);
+      expect(didBlur1, isTrue);
+
+      expect(didFocus2, isTrue);
+      expect(didBlur2, isFalse);
+    });
+    });
+
   testWidgets('Cursor color with an opacity is respected', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const double opacity = 0.55;
