@@ -4445,8 +4445,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // notifications.
     _flushRouteAnnouncement();
 
-    final _RouteEntry lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate)!;
-    if (_lastEntry != lastEntry) {
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    if (lastEntry != null && _lastEntry != lastEntry) {
       for(final NavigatorObserver observer in _effectiveObservers) {
         observer.didChangeTop(lastEntry.route, _lastEntry?.route);
       }

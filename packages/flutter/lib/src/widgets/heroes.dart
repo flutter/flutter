@@ -837,7 +837,6 @@ class HeroController extends NavigatorObserver {
   void didChangeTop(Route<dynamic> newRoute, Route<dynamic>? oldRoute) {
     assert(newRoute.isCurrent);
     assert(navigator != null);
-    print('didChangeTop newRoute $newRoute, oldRoute $oldRoute');
     if (oldRoute == null) {
       return;
     }
