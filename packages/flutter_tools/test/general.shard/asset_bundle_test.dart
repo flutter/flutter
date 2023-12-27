@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(andrewkolos): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/140665
+// Fails with "flutter test --test-randomize-ordering-seed=20231227"
+@Tags(<String>['no-shuffle'])
+library;
+
 import 'dart:convert';
 import 'dart:typed_data';
 
