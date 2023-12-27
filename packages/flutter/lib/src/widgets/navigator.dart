@@ -3969,12 +3969,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final NavigatorObserver observer in _effectiveObservers) {
       NavigatorObserver._navigators[observer] = null;
     }
+    _effectiveObservers = const <NavigatorObserver>[];
     super.deactivate();
   }
 
   @override
   void activate() {
     super.activate();
+    _updateEffectiveObservers();
     for (final NavigatorObserver observer in _effectiveObservers) {
       assert(observer.navigator == null);
       NavigatorObserver._navigators[observer] = this;
@@ -4447,7 +4449,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry != null && _lastEntry != lastEntry) {
-      for(final NavigatorObserver observer in _effectiveObservers) {
+      for (final NavigatorObserver observer in _effectiveObservers) {
         observer.didChangeTop(lastEntry.route, _lastEntry?.route);
       }
     }
