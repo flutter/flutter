@@ -54,4 +54,8 @@ bool WindowsProcTable::DwmIsCompositionEnabled() const {
   return true;
 }
 
+HRESULT WindowsProcTable::DwmFlush() const {
+  return ::DwmFlush();
+}
+
 }  // namespace flutter

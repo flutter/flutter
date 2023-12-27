@@ -57,9 +57,6 @@ class WindowBindingHandler {
   // Returns the bounds of the backing window in physical pixels.
   virtual PhysicalWindowBounds GetPhysicalWindowBounds() = 0;
 
-  // Invoked after the window has been resized.
-  virtual void OnWindowResized() = 0;
-
   // Sets the cursor that should be used when the mouse is over the Flutter
   // content. See mouse_cursor.dart for the values and meanings of cursor_name.
   virtual void UpdateFlutterCursor(const std::string& cursor_name) = 0;
