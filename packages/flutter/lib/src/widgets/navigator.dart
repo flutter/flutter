@@ -796,8 +796,8 @@ class NavigatorObserver {
   /// The top most route has changed.
   ///
   /// The `newRoute` is the new top most route. This can be a new route pushed
-  /// on top of the screen, or an existing route that become the new top-most
-  /// route due to previous top-most route is popped.
+  /// on top of the screen, or an existing route that becomes the new top-most
+  /// route due to previous top-most route was popped.
   void didChangeTop(Route<dynamic> newRoute, Route<dynamic>? oldRoute) { }
 
   /// The [Navigator]'s routes are being moved by a user gesture.
