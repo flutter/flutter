@@ -613,7 +613,11 @@ bool FlutterWindowsView::SwapBuffers() {
       resize_status_ = ResizeState::kDone;
       lock.unlock();
       resize_cv_.notify_all();
-      binding_handler_->OnWindowResized();
+
+      // Blocking the raster thread until DWM flushes alleviates glitches where
+      // previous size surface is stretched over current size view.
+      windows_proc_table_->DwmFlush();
+
       if (!visible) {
         swap_buffers_result = engine_->surface_manager()->SwapBuffers();
       }

@@ -50,6 +50,13 @@ class WindowsProcTable {
   // https://learn.microsoft.com/windows/win32/api/dwmapi/nf-dwmapi-dwmiscompositionenabled
   virtual bool DwmIsCompositionEnabled() const;
 
+  // Issues a flush call that blocks the caller until all of the outstanding
+  // surface updates have been made.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/dwmapi/nf-dwmapi-dwmflush
+  virtual HRESULT DwmFlush() const;
+
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,
                                          POINTER_INPUT_TYPE* pointerType);

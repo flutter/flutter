@@ -32,6 +32,8 @@ class MockWindowsProcTable : public WindowsProcTable {
 
   MOCK_METHOD(bool, DwmIsCompositionEnabled, (), (const, override));
 
+  MOCK_METHOD(HRESULT, DwmFlush, (), (const, override));
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowsProcTable);
 };
