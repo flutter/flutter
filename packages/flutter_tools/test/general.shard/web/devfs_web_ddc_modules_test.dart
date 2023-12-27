@@ -47,7 +47,7 @@ void main() {
   late Platform windows;
   late FakeHttpServer httpServer;
   late BufferLogger logger;
-  const bool usesDdcModuleSystem = false;
+  const bool usesDdcModuleSystem = true;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -73,9 +73,9 @@ void main() {
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
         fileSystem: globals.fs,
-        flutterRoot: null,
+        flutterRoot: null, // ignore: avoid_redundant_argument_values
         platform: FakePlatform(),
-        webBuildDirectory: null,
+        webBuildDirectory: null, // ignore: avoid_redundant_argument_values
       );
     }, overrides: <Type, Generator>{
       Logger: () => logger,
@@ -654,7 +654,7 @@ void main() {
     expect(httpServer.closed, true);
   }));
 
-  test('Can start web server with specified AMD module system assets', () => testbed.run(() async {
+  test('Can start web server with specified DDC module system assets', () => testbed.run(() async {
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -671,7 +671,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -687,26 +687,26 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null,
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
       ddcModuleSystem: usesDdcModuleSystem,
     );
-    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     final String webPrecompiledSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledAmdSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledDdcSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledAmdSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledDdcSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
@@ -737,7 +737,7 @@ void main() {
       shaderCompiler: const FakeShaderCompiler(),
     );
 
-    expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('ddc_module_loader.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('stack_trace_mapper.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
@@ -789,7 +789,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -804,13 +804,13 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null,
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
     );
-    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
@@ -822,13 +822,13 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
     final String webPrecompiledSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledDdcSoundSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledDdcSoundSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSoundSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSoundSdkSourcemaps).path;
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
@@ -854,7 +854,7 @@ void main() {
       shaderCompiler: const FakeShaderCompiler(),
     );
 
-    expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('ddc_module_loader.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('stack_trace_mapper.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
@@ -924,7 +924,7 @@ void main() {
         nullSafetyMode: NullSafetyMode.sound,
         ddcModuleSystem: usesDdcModuleSystem,
       );
-      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
       final FakeAppConnection firstConnection = FakeAppConnection();
       final FakeAppConnection secondConnection = FakeAppConnection();
@@ -969,7 +969,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -978,15 +978,15 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null,
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
     );
-    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
@@ -1008,7 +1008,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1026,13 +1026,13 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null,
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
     );
-    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     await webDevFS.create();
@@ -1055,7 +1055,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1073,13 +1073,13 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null,
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
     );
-    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     await webDevFS.create();
@@ -1110,7 +1110,7 @@ void main() {
       tlsCertPath: dummyCertPath,
       tlsCertKeyPath: dummyCertKeyPath,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1121,13 +1121,13 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null,
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
       ddcModuleSystem: usesDdcModuleSystem,
     );
-    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
@@ -1257,7 +1257,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1268,13 +1268,13 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null,
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
       ddcModuleSystem: usesDdcModuleSystem,
     );
-    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
