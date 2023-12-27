@@ -1850,21 +1850,11 @@ class EditableText extends StatefulWidget {
 
   /// {@template flutter.widgets.editableText.onFocus}
   /// Called when the text field becomes the primary focus.
-  ///
-  /// See also:
-  ///
-  ///  * [FocusNode.onFocusChanged], which is triggered when the focus node
-  ///    changes between having and not having the focus.
   /// {@endtemplate}
   final ValueChanged<String>? onFocus;
 
   /// {@template flutter.widgets.editableText.onBlur}
   /// Called when the text field is no longer the primary focus.
-  ///
-  /// See also:
-  ///
-  ///  * [FocusNode.onFocusChanged], which is triggered when the focus node
-  ///    changes between having and not having the focus.
   /// {@endtemplate}
   final ValueChanged<String>? onBlur;
 

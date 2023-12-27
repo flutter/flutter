@@ -16780,6 +16780,7 @@ void main() {
   group('onBlur', () {
     testWidgets('is called when the EditableText loses focus', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+      tearDown(focusNode.dispose);
       bool onBlurCalled = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -16814,9 +16815,12 @@ void main() {
     });
 
     testWidgets('is called when the EditableText loses focus via tabbing', (WidgetTester tester) async {
-      final FocusNode focusNode1 = FocusNode(debugLabel: 'EditableText Focus Node 1');
-      final FocusNode focusNode2 = FocusNode(debugLabel: 'EditableText Focus Node 2');
+      final FocusNode focusNode1 = FocusNode();
+      tearDown(focusNode1.dispose);
+      final FocusNode focusNode2 = FocusNode();
+      tearDown(focusNode2.dispose);
       bool onBlurCalled = false;
+
       await tester.pumpWidget(
         MaterialApp(
           home: Column(
@@ -16829,8 +16833,11 @@ void main() {
                 style: textStyle,
                 cursorColor: cursorColor,
                 selectionControls: materialTextSelectionControls,
-                onBlur: (String? value) {
+                onFocus: (String? value) {
                   onBlurCalled = true;
+                },
+                onBlur: (String? value) {
+                  onBlurCalled = false;
                 },
               ),
               const SizedBox(height: 200.0),
@@ -16841,6 +16848,9 @@ void main() {
                 style: textStyle,
                 cursorColor: cursorColor,
                 selectionControls: materialTextSelectionControls,
+                onBlur: (String? value) {
+                  onBlurCalled = true;
+                },
               ),
               const SizedBox(height: 100.0),
             ],
