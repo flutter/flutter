@@ -69,7 +69,7 @@ void main() {
       })
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '║ See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
@@ -88,7 +88,7 @@ void main() {
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .toList();
     expect(result.length, 4 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
-    expect(result[0], '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════');
+    expect(result[0], '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════');
     expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
     expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter');
     expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
@@ -100,7 +100,7 @@ void main() {
     final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'
       .replaceAll('/', Platform.isWindows ? r'\' : '/');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '║ The following file does not have the right license header for dart files:\n'
       '║   $file\n'
       '║ The expected license header is:\n'
@@ -121,7 +121,7 @@ void main() {
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
@@ -139,7 +139,7 @@ void main() {
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
@@ -152,7 +152,7 @@ void main() {
     ), shouldHaveErrors: !Platform.isWindows);
     if (!Platform.isWindows) {
       expect(result,
-        '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
         '║ test/analyze-test-input/root/packages/foo/serviceaccount.enc:0: file is not valid UTF-8\n'
         '║ All files in this repository must be UTF-8. In particular, images and other binaries\n'
         '║ must not be checked into this repository. This is because we are very sensitive to the\n'
@@ -229,7 +229,7 @@ void main() {
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '║ \n'
       '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".\n'
@@ -259,7 +259,7 @@ void main() {
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '║ \n'
       '║ Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.\n'
