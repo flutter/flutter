@@ -4,7 +4,6 @@
 
 import 'binding.dart';
 
-// ignore: avoid_classes_with_only_static_members
 /// Stand-in for non-web platforms' [BackgroundIsolateBinaryMessenger].
 class BackgroundIsolateBinaryMessenger {
   /// Throws an [UnsupportedError].

@@ -161,7 +161,7 @@ class TapSemanticEvent extends SemanticsEvent {
 /// Using this API is generally not recommended, as it may break a users' expectation of
 /// how a11y focus works and therefore should be just very carefully.
 ///
-/// One possibile use case:
+/// One possible use case:
 /// For example, the currently focused rendering object is replaced by another rendering
 /// object. In general, such design should be avoided if possible. If not, one may want
 /// to refocus the newly added rendering object.

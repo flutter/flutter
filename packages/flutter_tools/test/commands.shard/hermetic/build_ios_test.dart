@@ -24,10 +24,12 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -70,6 +72,7 @@ final Platform notMacosPlatform = FakePlatform(
 void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
+  late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeProcessManager processManager;
   late ProcessUtils processUtils;
@@ -83,6 +86,10 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
     usage = TestUsage();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
@@ -536,6 +543,9 @@ void main() {
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'ios')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,
@@ -543,6 +553,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -587,6 +598,13 @@ void main() {
           parameters:CustomDimensions(),
         ),
       ));
+
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+          label: 'plist-impeller-enabled',
+          buildType: 'ios',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -607,6 +625,7 @@ void main() {
       ),
       Usage: () => usage,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('Sends an analytics event when Impeller is disabled', () async {
@@ -642,6 +661,13 @@ void main() {
           parameters:CustomDimensions(),
         ),
       ));
+
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+          label: 'plist-impeller-disabled',
+          buildType: 'ios',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -673,6 +699,7 @@ void main() {
           plutilCommand, plutilCommand, plutilCommand,
         ]),
       ),
+      Analytics: () => fakeAnalytics,
     });
   });
 

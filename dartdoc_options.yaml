@@ -26,6 +26,7 @@ dartdoc:
     - category-order-gives-missing-package-name
     - deprecated
     - ignored-canonical-for
+    - missing-example-file
     - missing-from-search-index
     - no-canonical-found
     - no-documentable-libraries
@@ -33,9 +34,10 @@ dartdoc:
     - orphaned-file
     - reexported-private-api-across-packages
     - unknown-file
+    - unknown-html-fragment
     - unknown-macro
     - unresolved-doc-reference
     ## Ignores that are elevated to errors:
-    # - type-as-html # not yet tested
-    # - missing-constant-constructor # not yet tested
-    # - missing-code-block-language # not yet tested
+    # - type-as-html # broken, https://github.com/dart-lang/dartdoc/issues/3545
+    - missing-constant-constructor
+    # - missing-code-block-language # blocked on https://github.com/dart-lang/matcher/pull/230

@@ -14,13 +14,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../services/fake_platform_views.dart';
 
 void main() {
   group('AndroidView', () {
-    testWidgetsWithLeakTracking('Create Android view', (WidgetTester tester) async {
+    testWidgets('Create Android view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -48,7 +47,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Create Android view with params', (WidgetTester tester) async {
+    testWidgets('Create Android view with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -92,7 +91,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Zero sized Android view is not created', (WidgetTester tester) async {
+    testWidgets('Zero sized Android view is not created', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
@@ -110,7 +109,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Resize Android view', (WidgetTester tester) async {
+    testWidgets('Resize Android view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -168,7 +167,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Change Android view type', (WidgetTester tester) async {
+    testWidgets('Change Android view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -206,7 +205,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Dispose Android view', (WidgetTester tester) async {
+    testWidgets('Dispose Android view', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
@@ -234,7 +233,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view survives widget tree change', (WidgetTester tester) async {
+    testWidgets('Android view survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -272,7 +271,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view gets touch events', (WidgetTester tester) async {
+    testWidgets('Android view gets touch events', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -299,7 +298,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view transparent hit test behavior', (WidgetTester tester) async {
+    testWidgets('Android view transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -348,7 +347,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('Android view translucent hit test behavior', (WidgetTester tester) async {
+    testWidgets('Android view translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -399,7 +398,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('Android view opaque hit test behavior', (WidgetTester tester) async {
+    testWidgets('Android view opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -449,7 +448,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking("Android view touch events are in virtual display's coordinate system", (WidgetTester tester) async {
+    testWidgets("Android view touch events are in virtual display's coordinate system", (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -479,7 +478,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view directionality', (WidgetTester tester) async {
+    testWidgets('Android view directionality', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('maps');
@@ -528,7 +527,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view ambient directionality', (WidgetTester tester) async {
+    testWidgets('Android view ambient directionality', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('maps');
@@ -583,7 +582,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view can lose gesture arenas', (WidgetTester tester) async {
+    testWidgets('Android view can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -618,7 +617,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view drag gesture recognizer', (WidgetTester tester) async {
+    testWidgets('Android view drag gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -638,7 +637,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -664,7 +665,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view long press gesture recognizer', (WidgetTester tester) async {
+    testWidgets('Android view long press gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -684,7 +685,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -707,7 +710,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view tap gesture recognizer', (WidgetTester tester) async {
+    testWidgets('Android view tap gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -727,7 +730,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -750,7 +755,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('Android view can claim gesture after all pointers are up', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -790,7 +795,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view rebuilt during gesture', (WidgetTester tester) async {
+    testWidgets('Android view rebuilt during gesture', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -837,7 +842,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Android view with eager gesture recognizer', (WidgetTester tester) async {
+    testWidgets('Android view with eager gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -853,7 +858,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -883,7 +892,7 @@ void main() {
 
     // This test makes sure it doesn't crash.
     // https://github.com/flutter/flutter/issues/21514
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'RenderAndroidView reconstructed with same gestureRecognizers does not crash',
       (WidgetTester tester) async {
         final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
@@ -893,7 +902,11 @@ void main() {
           viewType: 'webview',
           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<EagerGestureRecognizer>(
-              () => EagerGestureRecognizer(),
+              () {
+                final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                addTearDown(recognizer.dispose);
+                return recognizer;
+              },
             ),
           },
           layoutDirection: TextDirection.ltr,
@@ -905,14 +918,16 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
+    testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -939,7 +954,7 @@ void main() {
       expect(factoryInvocationCount, 1);
     });
 
-    testWidgetsWithLeakTracking('AndroidView has correct semantics', (WidgetTester tester) async {
+    testWidgets('AndroidView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
@@ -994,7 +1009,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgetsWithLeakTracking('AndroidView can take input focus', (WidgetTester tester) async {
+    testWidgets('AndroidView can take input focus', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1046,7 +1061,7 @@ void main() {
       expect(androidViewFocusNode.hasFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('AndroidView sets a platform view text input client when focused', (WidgetTester tester) async {
+    testWidgets('AndroidView sets a platform view text input client when focused', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1095,7 +1110,7 @@ void main() {
       expect(lastPlatformViewTextClient['platformViewId'], currentViewId + 1);
     });
 
-    testWidgetsWithLeakTracking('AndroidView clears platform focus when unfocused', (WidgetTester tester) async {
+    testWidgets('AndroidView clears platform focus when unfocused', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1140,7 +1155,7 @@ void main() {
       expect(viewsController.lastClearedFocusViewId, currentViewId + 1);
     });
 
-    testWidgetsWithLeakTracking('can set and update clipBehavior', (WidgetTester tester) async {
+    testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
@@ -1186,7 +1201,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('clip is handled correctly during resizing', (WidgetTester tester) async {
+    testWidgets('clip is handled correctly during resizing', (WidgetTester tester) async {
       // Regressing test for https://github.com/flutter/flutter/issues/67343
 
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
@@ -1228,7 +1243,7 @@ void main() {
       expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 50.0));
     });
 
-    testWidgetsWithLeakTracking('offset is sent to the platform', (WidgetTester tester) async {
+    testWidgets('offset is sent to the platform', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
@@ -1254,7 +1269,7 @@ void main() {
       controller = FakeAndroidViewController(0);
     });
 
-    testWidgetsWithLeakTracking('AndroidViewSurface sets pointTransformer of view controller', (WidgetTester tester) async {
+    testWidgets('AndroidViewSurface sets pointTransformer of view controller', (WidgetTester tester) async {
       final AndroidViewSurface surface = AndroidViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -1264,7 +1279,7 @@ void main() {
       expect(controller.pointTransformer, isNotNull);
     });
 
-    testWidgetsWithLeakTracking('AndroidViewSurface defaults to texture-based rendering', (WidgetTester tester) async {
+    testWidgets('AndroidViewSurface defaults to texture-based rendering', (WidgetTester tester) async {
       final AndroidViewSurface surface = AndroidViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -1277,7 +1292,7 @@ void main() {
       ), findsOneWidget);
     });
 
-    testWidgetsWithLeakTracking('AndroidViewSurface uses view-based rendering when initially required', (WidgetTester tester) async {
+    testWidgets('AndroidViewSurface uses view-based rendering when initially required', (WidgetTester tester) async {
       controller.requiresViewComposition = true;
       final AndroidViewSurface surface = AndroidViewSurface(
         controller: controller,
@@ -1291,7 +1306,7 @@ void main() {
       ), findsOneWidget);
     });
 
-    testWidgetsWithLeakTracking('AndroidViewSurface can switch to view-based rendering after creation', (WidgetTester tester) async {
+    testWidgets('AndroidViewSurface can switch to view-based rendering after creation', (WidgetTester tester) async {
       final AndroidViewSurface surface = AndroidViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -1323,7 +1338,7 @@ void main() {
   });
 
   group('UiKitView', () {
-    testWidgetsWithLeakTracking('Create UIView', (WidgetTester tester) async {
+    testWidgets('Create UIView', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1346,7 +1361,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Change UIView view type', (WidgetTester tester) async {
+    testWidgets('Change UIView view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1379,7 +1394,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Dispose UIView ', (WidgetTester tester) async {
+    testWidgets('Dispose UIView ', (WidgetTester tester) async {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
@@ -1407,7 +1422,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Dispose UIView before creation completed ', (WidgetTester tester) async {
+    testWidgets('Dispose UIView before creation completed ', (WidgetTester tester) async {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.creationDelay = Completer<void>();
@@ -1438,7 +1453,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('UIView survives widget tree change', (WidgetTester tester) async {
+    testWidgets('UIView survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1471,7 +1486,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Create UIView with params', (WidgetTester tester) async {
+    testWidgets('Create UIView with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1509,7 +1524,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('UiKitView accepts gestures', (WidgetTester tester) async {
+    testWidgets('UiKitView accepts gestures', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1537,7 +1552,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
     });
 
-    testWidgetsWithLeakTracking('UiKitView transparent hit test behavior', (WidgetTester tester) async {
+    testWidgets('UiKitView transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1582,7 +1597,7 @@ void main() {
       expect(numPointerDownsOnParent, 1);
     });
 
-    testWidgetsWithLeakTracking('UiKitView translucent hit test behavior', (WidgetTester tester) async {
+    testWidgets('UiKitView translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1627,7 +1642,7 @@ void main() {
       expect(numPointerDownsOnParent, 1);
     });
 
-    testWidgetsWithLeakTracking('UiKitView opaque hit test behavior', (WidgetTester tester) async {
+    testWidgets('UiKitView opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1670,7 +1685,7 @@ void main() {
       expect(numPointerDownsOnParent, 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView can lose gesture arenas', (WidgetTester tester) async {
+    testWidgets('UiKitView can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1708,7 +1723,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 1);
     });
 
-    testWidgetsWithLeakTracking('UiKitView tap gesture recognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView tap gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1728,7 +1743,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1752,7 +1769,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView long press gesture recognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView long press gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1772,7 +1789,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1794,7 +1813,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView drag gesture recognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView drag gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1814,7 +1833,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1836,7 +1857,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('UiKitView can claim gesture after all pointers are up', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1876,7 +1897,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView rebuilt during gesture', (WidgetTester tester) async {
+    testWidgets('UiKitView rebuilt during gesture', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1921,7 +1942,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView with eager gesture recognizer', (WidgetTester tester) async {
+    testWidgets('UiKitView with eager gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1937,7 +1958,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -1965,7 +1990,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
+    testWidgets('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -1995,7 +2020,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'UiKitView rejects gestures absorbed by siblings if the touch is outside of the platform view bounds but inside platform view frame',
       (WidgetTester tester) async {
         // UiKitView is positioned at (left=0, top=100, right=300, bottom=600).
@@ -2045,14 +2070,16 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking('UiKitView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -2079,7 +2106,7 @@ void main() {
       expect(factoryInvocationCount, 1);
     });
 
-    testWidgetsWithLeakTracking('UiKitView can take input focus', (WidgetTester tester) async {
+    testWidgets('UiKitView can take input focus', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2132,7 +2159,7 @@ void main() {
       expect(uiKitViewFocusNode.hasFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('UiKitView sends TextInput.setPlatformViewClient when focused', (WidgetTester tester) async {
+    testWidgets('UiKitView sends TextInput.setPlatformViewClient when focused', (WidgetTester tester) async {
 
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
@@ -2171,7 +2198,7 @@ void main() {
       expect(channelArguments['platformViewId'], currentViewId + 1);
     });
 
-    testWidgetsWithLeakTracking('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
+    testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
@@ -2185,7 +2212,7 @@ void main() {
         ),
       );
       // casting to dynamic is required since the state class is private.
-      // ignore: avoid_dynamic_calls, invalid_assignment
+      // ignore: invalid_assignment
       final FocusNode node = (tester.state(find.byType(UiKitView)) as dynamic).focusNode;
       expect(() => ChangeNotifier.debugAssertNotDisposed(node), isNot(throwsAssertionError));
       await tester.pumpWidget(
@@ -2199,7 +2226,7 @@ void main() {
       expect(() => ChangeNotifier.debugAssertNotDisposed(node), throwsAssertionError);
     });
 
-    testWidgetsWithLeakTracking('UiKitView has correct semantics', (WidgetTester tester) async {
+    testWidgets('UiKitView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
@@ -2246,7 +2273,7 @@ void main() {
   });
 
   group('AppKitView', () {
-    testWidgetsWithLeakTracking('Create AppView', (WidgetTester tester) async {
+    testWidgets('Create AppView', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2269,7 +2296,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Change AppKitView view type', (WidgetTester tester) async {
+    testWidgets('Change AppKitView view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2302,7 +2329,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Dispose AppKitView ', (WidgetTester tester) async {
+    testWidgets('Dispose AppKitView ', (WidgetTester tester) async {
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
@@ -2330,7 +2357,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Dispose AppKitView before creation completed ', (WidgetTester tester) async {
+    testWidgets('Dispose AppKitView before creation completed ', (WidgetTester tester) async {
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.creationDelay = Completer<void>();
@@ -2361,7 +2388,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('AppKitView survives widget tree change', (WidgetTester tester) async {
+    testWidgets('AppKitView survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2394,7 +2421,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Create AppKitView with params', (WidgetTester tester) async {
+    testWidgets('Create AppKitView with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2434,7 +2461,7 @@ void main() {
 
     // TODO(schectman): De-skip the following tests once macOS gesture recognizers are present.
     // https://github.com/flutter/flutter/issues/128519
-    testWidgetsWithLeakTracking('AppKitView accepts gestures', (WidgetTester tester) async {
+    testWidgets('AppKitView accepts gestures', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2462,7 +2489,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
     }, skip: true); // https://github.com/flutter/flutter/issues/128519
 
-    testWidgetsWithLeakTracking('AppKitView transparent hit test behavior', (WidgetTester tester) async {
+    testWidgets('AppKitView transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2507,7 +2534,7 @@ void main() {
       expect(numPointerDownsOnParent, 1);
     }, skip: true); // https://github.com/flutter/flutter/issues/128519
 
-    testWidgetsWithLeakTracking('AppKitView translucent hit test behavior', (WidgetTester tester) async {
+    testWidgets('AppKitView translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2552,7 +2579,7 @@ void main() {
       expect(numPointerDownsOnParent, 1);
     }, skip: true); // https://github.com/flutter/flutter/issues/128519
 
-    testWidgetsWithLeakTracking('AppKitView opaque hit test behavior', (WidgetTester tester) async {
+    testWidgets('AppKitView opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2595,7 +2622,7 @@ void main() {
       expect(numPointerDownsOnParent, 0);
     }, skip: true); // https://github.com/flutter/flutter/issues/128519
 
-    testWidgetsWithLeakTracking('UiKitView can lose gesture arenas', (WidgetTester tester) async {
+    testWidgets('UiKitView can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2633,7 +2660,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 1);
     });
 
-    testWidgetsWithLeakTracking('UiKitView tap gesture recognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView tap gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2653,7 +2680,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2677,7 +2706,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView long press gesture recognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView long press gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2697,7 +2726,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2719,7 +2750,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView drag gesture recognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView drag gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2739,7 +2770,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2761,7 +2794,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('UiKitView can claim gesture after all pointers are up', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2801,7 +2834,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView rebuilt during gesture', (WidgetTester tester) async {
+    testWidgets('UiKitView rebuilt during gesture', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2846,7 +2879,7 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking('UiKitView with eager gesture recognizer', (WidgetTester tester) async {
+    testWidgets('UiKitView with eager gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2862,7 +2895,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -2890,7 +2927,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
+    testWidgets('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2920,7 +2957,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'UiKitView rejects gestures absorbed by siblings if the touch is outside of the platform view bounds but inside platform view frame',
       (WidgetTester tester) async {
         // UiKitView is positioned at (left=0, top=100, right=300, bottom=600).
@@ -2970,14 +3007,16 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking('UiKitView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -3004,7 +3043,7 @@ void main() {
       expect(factoryInvocationCount, 1);
     });
 
-    testWidgetsWithLeakTracking('AppKitView can take input focus', (WidgetTester tester) async {
+    testWidgets('AppKitView can take input focus', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -3057,7 +3096,7 @@ void main() {
       expect(uiKitViewFocusNode.hasFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('AppKitView sends TextInput.setPlatformViewClient when focused', (WidgetTester tester) async {
+    testWidgets('AppKitView sends TextInput.setPlatformViewClient when focused', (WidgetTester tester) async {
 
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
@@ -3096,7 +3135,7 @@ void main() {
       expect(channelArguments['platformViewId'], currentViewId + 1);
     });
 
-    testWidgetsWithLeakTracking('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
+    testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
@@ -3110,7 +3149,7 @@ void main() {
         ),
       );
       // casting to dynamic is required since the state class is private.
-      // ignore: avoid_dynamic_calls, invalid_assignment
+      // ignore: invalid_assignment
       final FocusNode node = (tester.state(find.byType(AppKitView)) as dynamic).focusNode;
       expect(() => ChangeNotifier.debugAssertNotDisposed(node), isNot(throwsAssertionError));
       await tester.pumpWidget(
@@ -3124,7 +3163,7 @@ void main() {
       expect(() => ChangeNotifier.debugAssertNotDisposed(node), throwsAssertionError);
     });
 
-    testWidgetsWithLeakTracking('AppKitView has correct semantics', (WidgetTester tester) async {
+    testWidgets('AppKitView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
@@ -3177,7 +3216,7 @@ void main() {
       controller = FakePlatformViewController(0);
     });
 
-    testWidgetsWithLeakTracking('PlatformViewSurface should create platform view layer', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface should create platform view layer', (WidgetTester tester) async {
       final PlatformViewSurface surface = PlatformViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -3187,7 +3226,7 @@ void main() {
       expect(() => tester.layers.whereType<PlatformViewLayer>().first, returnsNormally);
     });
 
-    testWidgetsWithLeakTracking('PlatformViewSurface can lose gesture arenas', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface can lose gesture arenas', (WidgetTester tester) async {
       bool verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
@@ -3223,7 +3262,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('PlatformViewSurface gesture recognizers dispatch events', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface gesture recognizers dispatch events', (WidgetTester tester) async {
       bool verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
@@ -3241,7 +3280,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -3262,7 +3303,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('PlatformViewSurface can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface can claim gesture after all pointers are up', (WidgetTester tester) async {
       bool verticalDragAcceptedByParent = false;
       // The long press recognizer rejects the gesture after the PlatformViewSurface gets the pointer up event.
       // This test makes sure that the PlatformViewSurface can win the gesture after it got the pointer up event.
@@ -3297,7 +3338,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('PlatformViewSurface rebuilt during gesture', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface rebuilt during gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -3339,7 +3380,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('PlatformViewSurface with eager gesture recognizer', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface with eager gesture recognizer', (WidgetTester tester) async {
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -3353,7 +3394,11 @@ void main() {
                 hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
               ),
@@ -3378,11 +3423,13 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('PlatformViewRenderBox reconstructed with same gestureRecognizers', (WidgetTester tester) async {
+    testWidgets('PlatformViewRenderBox reconstructed with same gestureRecognizers', (WidgetTester tester) async {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         ++factoryInvocationCount;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       final PlatformViewSurface platformViewSurface = PlatformViewSurface(
@@ -3402,11 +3449,13 @@ void main() {
       expect(factoryInvocationCount, 2);
     });
 
-    testWidgetsWithLeakTracking('PlatformViewSurface rebuilt with same gestureRecognizers', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface rebuilt with same gestureRecognizers', (WidgetTester tester) async {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         ++factoryInvocationCount;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -3435,7 +3484,7 @@ void main() {
       expect(factoryInvocationCount, 1);
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'PlatformViewLink Widget init, should create a placeholder widget before onPlatformViewCreated and a PlatformViewSurface after',
       (WidgetTester tester) async {
         final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -3479,7 +3528,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'PlatformViewLink widget should not trigger creation with an empty size',
       (WidgetTester tester) async {
         late PlatformViewController controller;
@@ -3521,7 +3570,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'PlatformViewLink calls create when needed for Android texture display modes',
       (WidgetTester tester) async {
         final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -3576,7 +3625,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking('PlatformViewLink includes offset in create call when using texture layer', (WidgetTester tester) async {
+    testWidgets('PlatformViewLink includes offset in create call when using texture layer', (WidgetTester tester) async {
       addTearDown(tester.view.reset);
 
       late FakeAndroidViewController controller;
@@ -3620,7 +3669,7 @@ void main() {
       expect(controller.createPosition, const Offset(150, 75));
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'PlatformViewLink does not double-call create for Android Hybrid Composition',
       (WidgetTester tester) async {
         final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -3670,7 +3719,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking('PlatformViewLink Widget dispose', (WidgetTester tester) async {
+    testWidgets('PlatformViewLink Widget dispose', (WidgetTester tester) async {
       late FakePlatformViewController disposedController;
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
@@ -3695,7 +3744,7 @@ void main() {
       expect(disposedController.disposed, true);
     });
 
-    testWidgetsWithLeakTracking('PlatformViewLink handles onPlatformViewCreated when disposed', (WidgetTester tester) async {
+    testWidgets('PlatformViewLink handles onPlatformViewCreated when disposed', (WidgetTester tester) async {
       late PlatformViewCreationParams creationParams;
       late FakePlatformViewController controller;
       final PlatformViewLink platformViewLink = PlatformViewLink(
@@ -3721,7 +3770,7 @@ void main() {
       expect(() => creationParams.onPlatformViewCreated(creationParams.id), returnsNormally);
     });
 
-    testWidgetsWithLeakTracking('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
+    testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final List<int> ids = <int>[];
@@ -3776,7 +3825,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('PlatformViewLink re-initializes when view type changes', (WidgetTester tester) async {
+    testWidgets('PlatformViewLink re-initializes when view type changes', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final List<int> ids = <int>[];
       final List<int> surfaceViewIds = <int>[];
@@ -3848,7 +3897,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('PlatformViewLink can take any widget to return in the SurfaceFactory', (WidgetTester tester) async {
+    testWidgets('PlatformViewLink can take any widget to return in the SurfaceFactory', (WidgetTester tester) async {
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
@@ -3865,7 +3914,7 @@ void main() {
       expect(() => tester.allWidgets.whereType<Container>().first, returnsNormally);
     });
 
-    testWidgetsWithLeakTracking('PlatformViewLink manages the focus properly', (WidgetTester tester) async {
+    testWidgets('PlatformViewLink manages the focus properly', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       late FakePlatformViewController controller;
       late ValueChanged<bool> focusChanged;
@@ -3930,7 +3979,7 @@ void main() {
       expect(controller.focusCleared, true);
     });
 
-    testWidgetsWithLeakTracking('PlatformViewLink sets a platform view text input client when focused', (WidgetTester tester) async {
+    testWidgets('PlatformViewLink sets a platform view text input client when focused', (WidgetTester tester) async {
       late FakePlatformViewController controller;
       late int viewId;
 
@@ -3980,7 +4029,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Platform views respect hitTestBehavior', (WidgetTester tester) async {
+  testWidgets('Platform views respect hitTestBehavior', (WidgetTester tester) async {
     final FakePlatformViewController controller = FakePlatformViewController(0);
 
     final List<String> logs = <String>[];
@@ -4119,7 +4168,7 @@ void main() {
     expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
   });
 
-  testWidgetsWithLeakTracking('HtmlElementView can be instantiated', (WidgetTester tester) async {
+  testWidgets('HtmlElementView can be instantiated', (WidgetTester tester) async {
     late final Widget htmlElementView;
     expect(() {
       htmlElementView = const HtmlElementView(viewType: 'webview');

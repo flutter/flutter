@@ -45,34 +45,20 @@ enum Category {
 
 /// The platform sub-folder that a device type supports.
 enum PlatformType {
-  web._('web'),
-  android._('android'),
-  ios._('ios'),
-  linux._('linux'),
-  macos._('macos'),
-  windows._('windows'),
-  fuchsia._('fuchsia'),
-  custom._('custom');
-
-  const PlatformType._(this.value);
-
-  final String value;
+  web,
+  android,
+  ios,
+  linux,
+  macos,
+  windows,
+  fuchsia,
+  custom,
+  windowsPreview;
 
   @override
-  String toString() => value;
+  String toString() => name;
 
-  static PlatformType? fromString(String platformType) {
-    return const <String, PlatformType>{
-      'web': web,
-      'android': android,
-      'ios': ios,
-      'linux': linux,
-      'macos': macos,
-      'windows': windows,
-      'fuchsia': fuchsia,
-      'custom': custom,
-    }[platformType];
-  }
+  static PlatformType? fromString(String platformType) => values.asNameMap()[platformType];
 }
 
 /// A discovery mechanism for flutter-supported development devices.
@@ -951,6 +937,8 @@ class DebuggingOptions {
     this.devToolsServerAddress,
     this.hostname,
     this.port,
+    this.tlsCertPath,
+    this.tlsCertKeyPath,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
@@ -979,6 +967,8 @@ class DebuggingOptions {
       this.dartEntrypointArgs = const <String>[],
       this.port,
       this.hostname,
+      this.tlsCertPath,
+      this.tlsCertKeyPath,
       this.webEnableExposeUrl,
       this.webUseSseForDebugProxy = true,
       this.webUseSseForDebugBackend = true,
@@ -1055,6 +1045,8 @@ class DebuggingOptions {
     required this.devToolsServerAddress,
     required this.port,
     required this.hostname,
+    required this.tlsCertPath,
+    required this.tlsCertKeyPath,
     required this.webEnableExposeUrl,
     required this.webUseSseForDebugProxy,
     required this.webUseSseForDebugBackend,
@@ -1108,6 +1100,8 @@ class DebuggingOptions {
   final Uri? devToolsServerAddress;
   final String? port;
   final String? hostname;
+  final String? tlsCertPath;
+  final String? tlsCertKeyPath;
   final bool? webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
@@ -1243,6 +1237,8 @@ class DebuggingOptions {
     'devToolsServerAddress': devToolsServerAddress.toString(),
     'port': port,
     'hostname': hostname,
+    'tlsCertPath': tlsCertPath,
+    'tlsCertKeyPath': tlsCertKeyPath,
     'webEnableExposeUrl': webEnableExposeUrl,
     'webUseSseForDebugProxy': webUseSseForDebugProxy,
     'webUseSseForDebugBackend': webUseSseForDebugBackend,
@@ -1296,6 +1292,8 @@ class DebuggingOptions {
       devToolsServerAddress: json['devToolsServerAddress'] != null ? Uri.parse(json['devToolsServerAddress']! as String) : null,
       port: json['port'] as String?,
       hostname: json['hostname'] as String?,
+      tlsCertPath: json['tlsCertPath'] as String?,
+      tlsCertKeyPath: json['tlsCertKeyPath'] as String?,
       webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
       webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
       webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,

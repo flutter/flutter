@@ -67,7 +67,7 @@ Future<void> main() async {
       );
 
       const String ffiPackageName = 'ffi_package';
-      await _createFfiPackage(ffiPackageName, tempDir);
+      await createFfiPackage(ffiPackageName, tempDir);
 
       section('Add FFI package');
 
@@ -729,18 +729,4 @@ class $dartPluginClass {
 
   // Remove the native plugin code.
   await Directory(path.join(pluginDir, 'ios')).delete(recursive: true);
-}
-
-Future<void> _createFfiPackage(String name, Directory parent) async {
-  await inDirectory(parent, () async {
-    await flutter(
-      'create',
-      options: <String>[
-        '--org',
-        'io.flutter.devicelab',
-        '--template=package_ffi',
-        name,
-      ],
-    );
-  });
 }

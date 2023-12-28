@@ -28,6 +28,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   bool measureCpuGpu = true,
   bool badScroll = false,
   bool? enableImpeller,
+  bool forceOpenGLES = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -37,6 +38,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
     'complex_layout_scroll_perf',
     measureCpuGpu: measureCpuGpu,
     enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
   ).run;
 }
 
@@ -143,6 +145,7 @@ TaskFunction createBackdropFilterPerfTest({
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
     saveTraceFile: true,
     enableImpeller: enableImpeller,
+    disablePartialRepaint: true,
   ).run;
 }
 
@@ -767,6 +770,51 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
   return tally;
 }
 
+/// Opens the file at testDirectory + 'ios/Runner/Info.plist'
+/// and adds the following entry to the application.
+/// <FTLDisablePartialRepaint/>
+/// <true/>
+void _disablePartialRepaint(String testDirectory) {
+  final String manifestPath = path.join(
+      testDirectory, 'ios', 'Runner', 'Info.plist');
+  final File file = File(manifestPath);
+
+  if (!file.existsSync()) {
+    throw Exception('Info.plist not found at $manifestPath');
+  }
+
+  final String xmlStr = file.readAsStringSync();
+  final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('FLTDisablePartialRepaint', 'true'),
+  ];
+
+  final XmlElement applicationNode =
+      xmlDoc.findAllElements('dict').first;
+
+  // Check if the meta-data node already exists.
+  for (final (String key, String value) in keyPairs) {
+    applicationNode.children.add(XmlElement(XmlName('key'), <XmlAttribute>[], <XmlNode>[
+      XmlText(key)
+    ], false));
+    applicationNode.children.add(XmlElement(XmlName(value)));
+  }
+
+  file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
+}
+
+Future<void> _resetPlist(String testDirectory) async {
+  final String manifestPath = path.join(
+      testDirectory, 'ios', 'Runner', 'Info.plist');
+  final File file = File(manifestPath);
+
+  if (!file.existsSync()) {
+    throw Exception('Info.plist not found at $manifestPath');
+  }
+
+  await exec('git', <String>['checkout', file.path]);
+}
+
 /// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
 /// and adds the following entry to the application.
 /// <meta-data
@@ -1124,6 +1172,7 @@ class PerfTest {
     this.timeoutSeconds,
     this.enableImpeller,
     this.forceOpenGLES,
+    this.disablePartialRepaint = false,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -1142,6 +1191,7 @@ class PerfTest {
     this.timeoutSeconds,
     this.enableImpeller,
     this.forceOpenGLES,
+    this.disablePartialRepaint = false,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -1180,6 +1230,9 @@ class PerfTest {
 
   /// Whether the perf test force Impeller's OpenGLES backend.
   final bool? forceOpenGLES;
+
+  /// Whether partial repaint functionality should be disabled (iOS only).
+  final bool disablePartialRepaint;
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
@@ -1230,14 +1283,42 @@ class PerfTest {
       final String? localEngineHost = localEngineHostFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
-      Future<void> Function()? manifestReset;
-      if (forceOpenGLES ?? false) {
-        assert(enableImpeller!);
-        _addOpenGLESToManifest(testDirectory);
-        manifestReset = () => _resetManifest(testDirectory);
+      bool changedPlist = false;
+      bool changedManifest = false;
+
+      Future<void> resetManifest() async {
+        if (!changedManifest) {
+          return;
+        }
+        try {
+          await _resetManifest(testDirectory);
+        } catch (err) {
+          print('Caught exception while trying to reset AndroidManifest: $err');
+        }
+      }
+
+      Future<void> resetPlist() async {
+        if (!changedPlist) {
+          return;
+        }
+        try {
+          await _resetPlist(testDirectory);
+        } catch (err) {
+           print('Caught exception while trying to reset Info.plist: $err');
+        }
       }
 
       try {
+        if (forceOpenGLES ?? false) {
+          assert(enableImpeller!);
+          changedManifest = true;
+          _addOpenGLESToManifest(testDirectory);
+        }
+        if (disablePartialRepaint) {
+          changedPlist = true;
+          _disablePartialRepaint(testDirectory);
+        }
+
         final List<String> options = <String>[
           if (localEngine != null) ...<String>['--local-engine', localEngine],
           if (localEngineHost != null) ...<String>[
@@ -1278,9 +1359,8 @@ class PerfTest {
           await flutter('drive', options: options);
         }
       } finally {
-        if (manifestReset != null) {
-          await manifestReset();
-        }
+        await resetManifest();
+        await resetPlist();
       }
 
       final Map<String, dynamic> data = json.decode(
@@ -1607,7 +1687,17 @@ class CompileTest {
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
-        await flutter('build', options: options);
+        await flutter(
+          'build',
+          options: options,
+          environment: <String, String> {
+            // iOS 12.1 and lower did not have Swift ABI compatibility so Swift apps embedded the Swift runtime.
+            // https://developer.apple.com/documentation/xcode-release-notes/swift-5-release-notes-for-xcode-10_2#App-Thinning
+            // The gallery pulls in Swift plugins. Set lowest version to 12.2 to avoid benchmark noise.
+            // This should be removed when when Flutter's minimum supported version is >12.2.
+            'FLUTTER_XCODE_IPHONEOS_DEPLOYMENT_TARGET': '12.2',
+          },
+        );
         watch.stop();
         final Directory buildDirectory = dir(path.join(
           cwd,
@@ -2011,14 +2101,11 @@ enum ReportedDurationTestFlavor {
 }
 
 String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
-  switch (flavor) {
-    case ReportedDurationTestFlavor.debug:
-      return 'debug';
-    case ReportedDurationTestFlavor.profile:
-      return 'profile';
-    case ReportedDurationTestFlavor.release:
-      return 'release';
-  }
+  return switch (flavor) {
+    ReportedDurationTestFlavor.debug   => 'debug',
+    ReportedDurationTestFlavor.profile => 'profile',
+    ReportedDurationTestFlavor.release => 'release',
+  };
 }
 
 class ReportedDurationTest {

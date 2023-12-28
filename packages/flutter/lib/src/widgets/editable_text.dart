@@ -59,7 +59,7 @@ export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionCh
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
-typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
@@ -1882,6 +1882,10 @@ class EditableText extends StatefulWidget {
       // If the paste button is enabled, don't render anything until the state
       // of the clipboard is known, since it's used to determine if paste is
       // shown.
+
+      // On Android, the share button is before the select all button.
+      final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
+
       resultButtonItem.addAll(<ContextMenuButtonItem>[
         if (onCut != null)
           ContextMenuButtonItem(
@@ -1898,6 +1902,11 @@ class EditableText extends StatefulWidget {
             onPressed: onPaste,
             type: ContextMenuButtonType.paste,
           ),
+        if (onShare != null && showShareBeforeSelectAll)
+          ContextMenuButtonItem(
+            onPressed: onShare,
+            type: ContextMenuButtonType.share,
+          ),
         if (onSelectAll != null)
           ContextMenuButtonItem(
             onPressed: onSelectAll,
@@ -1913,7 +1922,7 @@ class EditableText extends StatefulWidget {
             onPressed: onSearchWeb,
             type: ContextMenuButtonType.searchWeb,
           ),
-        if (onShare != null)
+        if (onShare != null && !showShareBeforeSelectAll)
           ContextMenuButtonItem(
             onPressed: onShare,
             type: ContextMenuButtonType.share,
@@ -2190,6 +2199,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool get _spellCheckResultsReceived => spellCheckEnabled && spellCheckResults != null && spellCheckResults!.suggestionSpans.isNotEmpty;
 
+  /// The text processing service used to retrieve the native text processing actions.
+  final ProcessTextService _processTextService = DefaultProcessTextService();
+
+  /// The list of native text processing actions provided by the engine.
+  final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
+
   /// Whether to create an input connection with the platform for text editing
   /// or not.
   ///
@@ -2300,13 +2315,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get shareEnabled {
-    if (defaultTargetPlatform != TargetPlatform.iOS) {
-      return false;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return !widget.obscureText
+            && !textEditingValue.selection.isCollapsed
+            && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
     }
-
-    return !widget.obscureText
-        && !textEditingValue.selection.isCollapsed
-        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
   }
 
   @override
@@ -2396,14 +2416,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.update();
   }
 
+  bool get _allowPaste {
+    return !widget.readOnly && textEditingValue.selection.isValid;
+  }
+
   /// Paste text from [Clipboard].
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
-    if (widget.readOnly) {
-      return;
-    }
-    final TextSelection selection = textEditingValue.selection;
-    if (!selection.isValid) {
+    if (!_allowPaste) {
       return;
     }
     // Snapshot the input before using `await`.
@@ -2412,16 +2432,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (data == null) {
       return;
     }
+    _pasteText(cause, data.text!);
+  }
+
+  void _pasteText(SelectionChangedCause cause, String text) {
+    if (!_allowPaste) {
+      return;
+    }
 
     // After the paste, the cursor should be collapsed and located after the
     // pasted content.
+    final TextSelection selection = textEditingValue.selection;
     final int lastSelectionIndex = math.max(selection.baseOffset, selection.extentOffset);
     final TextEditingValue collapsedTextEditingValue = textEditingValue.copyWith(
       selection: TextSelection.collapsed(offset: lastSelectionIndex),
     );
 
     userUpdateTextEditingValue(
-      collapsedTextEditingValue.replaced(selection, data.text!),
+      collapsedTextEditingValue.replaced(selection, text),
       cause,
     );
     if (cause == SelectionChangedCause.toolbar) {
@@ -2516,9 +2544,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Launch the share interface for the current selection,
-  /// as in the "Share" edit menu button on iOS.
+  /// as in the "Share..." edit menu button on iOS.
   ///
-  /// Currently this is only implemented for iOS.
+  /// Currently this is only implemented for iOS and Android.
   ///
   /// When 'obscureText' is true or the selection is empty,
   /// this function will not do anything
@@ -2775,7 +2803,35 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onLiveTextInput: liveTextInputEnabled
           ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
           : null,
-    );
+    )..addAll(_textProcessingActionButtonItems);
+  }
+
+  List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final TextSelection selection = textEditingValue.selection;
+    if (widget.obscureText || !selection.isValid || selection.isCollapsed) {
+      return buttonItems;
+    }
+
+    for (final ProcessTextAction action in _processTextActions) {
+      buttonItems.add(ContextMenuButtonItem(
+        label: action.label,
+        onPressed: () async {
+          final String selectedText = selection.textInside(textEditingValue.text);
+          if (selectedText.isNotEmpty) {
+            final String? processedText = await _processTextService.processTextAction(action.id, selectedText, widget.readOnly);
+            // If an activity does not return a modified version, just hide the toolbar.
+            // Otherwise use the result to replace the selected text.
+            if (processedText != null && _allowPaste) {
+              _pasteText(SelectionChangedCause.toolbar, processedText);
+            } else {
+              hideToolbar();
+            }
+          }
+        },
+      ));
+    }
+    return buttonItems;
   }
 
   // State lifecycle:
@@ -2790,6 +2846,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.addListener(_onEditableScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+    _initProcessTextActions();
+  }
+
+  /// Query the engine to initialize the list of text processing actions to show
+  /// in the text selection toolbar.
+  Future<void> _initProcessTextActions() async {
+    _processTextActions.clear();
+    _processTextActions.addAll(await _processTextService.queryTextActions());
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -4115,11 +4179,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setSelectionRects(rects);
   }
 
-  // Sends the current composing rect to the iOS text input plugin via the text
-  // input channel. We need to keep sending the information even if no text is
-  // currently marked, as the information usually lags behind. The text input
-  // plugin needs to estimate the composing rect based on the latest caret rect,
-  // when the composing rect info didn't arrive in time.
+  // Sends the current composing rect to the embedder's text input plugin.
+  //
+  // In cases where the composing rect hasn't been updated in the embedder due
+  // to the lag of asynchronous messages over the channel, the position of the
+  // current caret rect is used instead.
+  //
+  // See: [_updateCaretRectIfNeeded]
   void _updateComposingRectIfNeeded() {
     final TextRange composingRange = _value.composing;
     assert(mounted);
@@ -4133,12 +4199,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setComposingRect(composingRect);
   }
 
+  // Sends the current caret rect to the embedder's text input plugin.
+  //
+  // The position of the caret rect is updated periodically such that if the
+  // user initiates composing input, the current cursor rect can be used for
+  // the first character until the composing rect can be sent.
+  //
+  // On selection changes, the start of the selection is used. This ensures
+  // that regardless of the direction the selection was created, the cursor is
+  // set to the position where next text input occurs. This position is used to
+  // position the IME's candidate selection menu.
+  //
+  // See: [_updateComposingRectIfNeeded]
   void _updateCaretRectIfNeeded() {
     final TextSelection? selection = renderEditable.selection;
-    if (selection == null || !selection.isValid || !selection.isCollapsed) {
+    if (selection == null || !selection.isValid) {
       return;
     }
-    final TextPosition currentTextPosition = TextPosition(offset: selection.baseOffset);
+    final TextPosition currentTextPosition = TextPosition(offset: selection.start);
     final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
     _textInputConnection!.setCaretRect(caretRect);
   }
@@ -4770,7 +4848,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
       child: TextFieldTapRegion(
-        onTapOutside: widget.onTapOutside ?? _defaultOnTapOutside,
+        onTapOutside: _hasFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
         debugLabel: kReleaseMode ? null : 'EditableText',
         child: MouseRegion(
           cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -4808,6 +4886,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 }
 
                 return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
+              },
+              undoStackModifier: (TextEditingValue value) {
+                // On Android we should discard the composing region when pushing
+                // a new entry to the undo stack. This prevents the TextInputPlugin
+                // from restarting the input on every undo/redo when the composing
+                // region is changed by the framework.
+                return defaultTargetPlatform == TargetPlatform.android ? value.copyWith(composing: TextRange.empty) : value;
               },
               focusNode: widget.focusNode,
               controller: widget.undoController,

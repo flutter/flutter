@@ -5,10 +5,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('FadeTransition', (WidgetTester tester) async {
+  testWidgets('FadeTransition', (WidgetTester tester) async {
     final DebugPrintCallback oldPrint = debugPrint;
     final List<String> log = <String>[];
     debugPrint = (String? message, { int? wrapWidth }) {
@@ -19,6 +18,7 @@ void main() {
       vsync: const TestVSync(),
       duration: const Duration(seconds: 2),
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(FadeTransition(
       opacity: controller,
       child: const Placeholder(),

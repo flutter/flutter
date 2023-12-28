@@ -1486,7 +1486,7 @@ mixin WidgetInspectorService {
   @protected
   @Deprecated(
     'Use addPubRootDirectories instead. '
-    'This feature was deprecated after v3.1.0-9.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   void setPubRootDirectories(List<String> pubRootDirectories) {
     addPubRootDirectories(pubRootDirectories);
@@ -3380,7 +3380,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    // ignore: unused_element, unused_element_parameter
+    // ignore: unused_element
     this.name,
   });
 

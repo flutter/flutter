@@ -218,6 +218,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void didUpdateWidget(CupertinoPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.scrollController != null && oldWidget.scrollController == null) {
+      _controller?.dispose();
       _controller = null;
     } else if (widget.scrollController == null && oldWidget.scrollController != null) {
       assert(_controller == null);

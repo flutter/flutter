@@ -5,10 +5,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Shows header', (WidgetTester tester) async {
+  testWidgets('Shows header', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -23,7 +22,7 @@ void main() {
     expect(find.text('Header'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Shows footer', (WidgetTester tester) async {
+  testWidgets('Shows footer', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -38,7 +37,7 @@ void main() {
     expect(find.text('Footer'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
+  testWidgets('Shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -55,7 +54,7 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgetsWithLeakTracking('Shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
+  testWidgets('Shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -76,7 +75,7 @@ void main() {
     expect(childrenColumn.children.length, 5);
   });
 
-  testWidgetsWithLeakTracking('Does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
+  testWidgets('Does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -94,7 +93,7 @@ void main() {
     expect(childrenColumn.children.length, 1);
   });
 
-  testWidgetsWithLeakTracking('Does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
+  testWidgets('Does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'App',
@@ -116,7 +115,7 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgetsWithLeakTracking('Sets background color for section', (WidgetTester tester) async {
+  testWidgets('Sets background color for section', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
 
     await tester.pumpWidget(
@@ -139,7 +138,7 @@ void main() {
     expect(boxDecoration.color, backgroundColor);
   });
 
-  testWidgetsWithLeakTracking('Setting clipBehavior clips children section', (WidgetTester tester) async {
+  testWidgets('Setting clipBehavior clips children section', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -154,7 +153,7 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Not setting clipBehavior does not produce a RenderClipRRect object', (WidgetTester tester) async {
+  testWidgets('Not setting clipBehavior does not produce a RenderClipRRect object', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -167,5 +166,58 @@ void main() {
 
     final Iterable<RenderClipRRect> renderClips = tester.allRenderObjects.whereType<RenderClipRRect>();
     expect(renderClips, isEmpty);
+  });
+
+  testWidgets('Does not double up padding on header', (WidgetTester tester) async {
+    const Widget header = Text('Header');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoFormSection(
+            header: header,
+            children: <Widget>[CupertinoTextFormFieldRow()],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byWidget(header)), const Offset(20, 22));
+  });
+
+  testWidgets('Does not double up padding on footer', (WidgetTester tester) async {
+    const Widget footer = Text('Footer');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoFormSection(
+            footer: footer,
+            children: <Widget>[CupertinoTextFormFieldRow()],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byWidget(footer)), offsetMoreOrLessEquals(const Offset(20, 65), epsilon: 1));
+  });
+
+  testWidgets('Sets custom margin', (WidgetTester tester) async {
+    final Widget child = CupertinoTextFormFieldRow();
+
+    const double margin = 35;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoFormSection(
+            margin: const EdgeInsets.all(margin),
+            children: <Widget>[child],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byWidget(child)), offsetMoreOrLessEquals(const Offset(margin, 22 + margin), epsilon: 1));
   });
 }
