@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -593,6 +594,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       }
     }
     Form.maybeOf(context)?._register(this);
+    Material.maybeOf(context)?.markNeedsPaint();
     return widget.builder(this);
   }
 }

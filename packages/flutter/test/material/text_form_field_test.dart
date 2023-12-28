@@ -1628,4 +1628,49 @@ void main() {
     expect(stateKey.currentState!.value,'initialValue');
     expect(value, 'initialValue');
   });
+  testWidgets('should update material decorations', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (BuildContext context, _) =>
+              RepaintBoundary(
+                child: SizedBox(
+                  height: 100,
+                  child: ListView(
+                    children: <Widget>[
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 3,
+                        controller: controller,
+                        // onChanged: Material.of(context).markNeedsPaint,
+                      ),
+                      Ink(
+                        decoration: const ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                  color: Colors.red
+                              )
+                          ),
+                        ),
+                        child: const SizedBox(height: 1,),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        ),
+        ),
+    ));
+    await tester.enterText(find.byType(TextFormField), '\n');
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('text_form_field_test.update_decorations.png'),
+    );
+
+  });
 }
