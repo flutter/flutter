@@ -17149,6 +17149,7 @@ void main() {
       await tester.pump();
       expect(didLoseFocus, isTrue);
     });
+  });
 
   testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
     const String initialText = 'I love Flutter';
