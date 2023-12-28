@@ -4064,13 +4064,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (updatedSelection != null) {
         _handleSelectionChanged(updatedSelection, null);
       }
-      if(widget.onFocus != null) {
-        widget.onFocus!(_value.text);
-      }
+      widget.onFocus?.call(_value.text);
     } else {
-      if(widget.onBlur != null) {
-        widget.onBlur!(_value.text);
-      }
+      widget.onBlur?.call(_value.text);
       WidgetsBinding.instance.removeObserver(this);
       setState(() { _currentPromptRectRange = null; });
     }
