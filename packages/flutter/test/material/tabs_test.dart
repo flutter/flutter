@@ -391,7 +391,7 @@ void main() {
       final ThemeData theme = ThemeData(fontFamily: 'FlutterTest', useMaterial3: useMaterial3);
       return MaterialApp(theme: theme, home: const Center(child: Material(
         child: Tab(
-          icon: Icon(Icons.house), 
+          icon: Icon(Icons.house),
           text: 'x',
         )
       )));
@@ -402,7 +402,7 @@ void main() {
       final Rect labelRect = tester.getRect(find.text('x'));
       return labelRect.top - iconRect.bottom;
     }
-    
+
     // Material 2
     await tester.pumpWidget(
       buildApp(useMaterial3: false),
