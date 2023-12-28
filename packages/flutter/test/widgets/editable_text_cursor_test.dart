@@ -1314,7 +1314,7 @@ void main() {
   variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('Floating cursor showing with local position', (WidgetTester tester) async {
+  testWidgets('Floating cursor showing with local position', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey key = GlobalKey();
     controller.text = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890';

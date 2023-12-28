@@ -10095,7 +10095,7 @@ void main() {
     expect(rectWithText.height, greaterThan(100));
   });
 
-  testWidgetsWithLeakTracking('Start the floating cursor on long tap', (WidgetTester tester) async {
+  testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = TextEditingController(
       text: 'abcd',
