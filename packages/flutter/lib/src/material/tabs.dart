@@ -107,7 +107,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.text,
     this.icon,
-    this.iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.iconMargin,
     this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
@@ -132,7 +132,10 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   ///
   /// Only useful when used in combination with [icon], and either one of
   /// [text] or [child] is non-null.
-  final EdgeInsetsGeometry iconMargin;
+  /// 
+  /// If [ThemeData.useMaterial3] is true, the default value is 2 pixels of bottom margin.
+  /// Otherwise, the default value is 10 pixels of bottom margin.
+  final EdgeInsetsGeometry? iconMargin;
 
   /// The height of the [Tab].
   ///
@@ -159,11 +162,16 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       label = icon!;
     } else {
       calculatedHeight = _kTextAndIconTabHeight;
+      final EdgeInsetsGeometry effectiveIconMargin = iconMargin ?? (
+        Theme.of(context).useMaterial3
+          ? const EdgeInsets.only(bottom: 2)
+          : const EdgeInsets.only(bottom: 10)
+      );
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            margin: iconMargin,
+            margin: effectiveIconMargin,
             child: icon,
           ),
           _buildLabelText(),
