@@ -1629,9 +1629,6 @@ void main() {
     expect(value, 'initialValue');
   });
   testWidgets('should update material decorations', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: StatefulBuilder(
