@@ -3189,7 +3189,7 @@ class _InspectorOverlayLayer extends Layer {
       candidates.add(_TransformedRect(candidate, rootRenderObject));
     }
     final _TransformedRect selectedRect = _TransformedRect(selected, rootRenderObject);
-    final String shortDescription = selection.currentElement!.toStringShort();
+    final String widgetName = selection.currentElement!.toStringShort();
     final String width = selectedRect.rect.width.toStringAsFixed(1);
     final String height = selectedRect.rect.height.toStringAsFixed(1);
 
