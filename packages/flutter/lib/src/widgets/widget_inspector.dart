@@ -3196,7 +3196,7 @@ class _InspectorOverlayLayer extends Layer {
     final _InspectorOverlayRenderState state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
       selected: selectedRect,
-      tooltip: '$shortDescription($width x $height)',
+      tooltip: '$widgetName($width x $height)',
       textDirection: TextDirection.ltr,
       candidates: candidates,
     );
