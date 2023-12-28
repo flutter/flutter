@@ -375,6 +375,41 @@ void main() {
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
+  group('didExceedMaxLines', () {
+    RenderParagraph createRenderParagraph({
+      int? maxLines,
+      TextOverflow overflow = TextOverflow.clip,
+    }) {
+      return RenderParagraph(
+        const TextSpan(
+          text: 'Here is a long text, maybe exceed maxlines',
+          style: TextStyle(fontSize: 10.0),
+        ),
+        textDirection: TextDirection.ltr,
+        overflow: overflow,
+        maxLines: maxLines,
+      );
+    }
+
+    test('none limited', () {
+      final RenderParagraph paragraph = createRenderParagraph();
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      expect(paragraph.didExceedMaxLines, false);
+    });
+
+    test('limited by maxLines', () {
+      final RenderParagraph paragraph = createRenderParagraph(maxLines: 1);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      expect(paragraph.didExceedMaxLines, true);
+    });
+
+    test('limited by ellipsis', () {
+      final RenderParagraph paragraph = createRenderParagraph(overflow: TextOverflow.ellipsis);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      expect(paragraph.didExceedMaxLines, true);
+    });
+  });
+
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
