@@ -11331,6 +11331,9 @@ class CupertinoLocalizationRw extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Uyumunsi';
+
+  @override
+  String get clearButtonLabel => 'Siba';
 }
 
 /// The translations for Sinhala Sinhalese (`si`).

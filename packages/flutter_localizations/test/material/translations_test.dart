@@ -633,7 +633,8 @@ void main() {
   testWidgets('Share button label on Material', (WidgetTester tester) async {
     const Locale locale = Locale('en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
-    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    final MaterialLocalizations localizations =
+        await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationEn>());
     expect(localizations.shareButtonLabel, 'Share');
   });
