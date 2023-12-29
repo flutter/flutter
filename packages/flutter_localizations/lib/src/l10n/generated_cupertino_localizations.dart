@@ -11195,6 +11195,9 @@ class CupertinoLocalizationRw extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get clearButtonLabel => 'Hanagura';
+
+  @override
   String get copyButtonLabel => 'Kopiya';
 
   @override
@@ -11331,9 +11334,6 @@ class CupertinoLocalizationRw extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Uyumunsi';
-
-  @override
-  String get clearButtonLabel => 'Siba';
 }
 
 /// The translations for Sinhala Sinhalese (`si`).

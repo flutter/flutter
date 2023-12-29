@@ -198,5 +198,6 @@
   "menuDismissLabel": "Kuraho meni",
   "@menuDismissLabel": {
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
-  }
+  },
+  "clearButtonLabel": "Hanagura"
 }
