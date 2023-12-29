@@ -784,7 +784,7 @@ void main() {
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleNavigatorRouterDelegatePopPage = bool Function(Route<void> route, void result, SimpleNavigatorRouterDelegate delegate);
 
 class SelectAllSpy extends Action<SelectAllTextIntent> {
   bool invoked = false;
@@ -841,7 +841,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   }
 
   final SimpleRouterDelegateBuilder builder;
-  final SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
+  final SimpleNavigatorRouterDelegatePopPage onPopPage;
 
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) {
@@ -858,13 +858,13 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
     return Navigator(
       key: navigatorKey,
       onPopPage: _handlePopPage,
-      pages: <Page<void>>[
+      pages: <Page>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const MaterialPage<void>(
+        const MaterialPage(
           child: Text('base'),
         ),
-        MaterialPage<void>(
+        MaterialPage(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),

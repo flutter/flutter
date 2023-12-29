@@ -370,13 +370,13 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 // the content is up to date after page updates.
 class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
   _PageBasedCupertinoPageRoute({
-    required CupertinoPage<T> page,
+    required CupertinoPage page,
     super.allowSnapshotting = true,
   }) : super(settings: page) {
     assert(opaque);
   }
 
-  CupertinoPage<T> get _page => settings as CupertinoPage<T>;
+  CupertinoPage get _page => settings as CupertinoPage;
 
   @override
   Widget buildContent(BuildContext context) => _page.child;
@@ -402,15 +402,10 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
 /// route remains in memory. To free all the resources when this is not
 /// necessary, set [maintainState] to false.
 ///
-/// The type `T` specifies the return type of the route which can be supplied as
-/// the route is popped from the stack via [Navigator.transitionDelegate] by
-/// providing the optional `result` argument to the
-/// [RouteTransitionRecord.markForPop] in the [TransitionDelegate.resolve].
-///
 /// See also:
 ///
 ///  * [CupertinoPageRoute], for a [PageRoute] version of this class.
-class CupertinoPage<T> extends Page<T> {
+class CupertinoPage extends Page {
   /// Creates a cupertino page.
   const CupertinoPage({
     required this.child,
@@ -440,8 +435,8 @@ class CupertinoPage<T> extends Page<T> {
   final bool allowSnapshotting;
 
   @override
-  Route<T> createRoute(BuildContext context) {
-    return _PageBasedCupertinoPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
+  Route<Object?> createRoute(BuildContext context) {
+    return _PageBasedCupertinoPageRoute<Object?>(page: this, allowSnapshotting: allowSnapshotting);
   }
 }
 

@@ -490,7 +490,7 @@ class MockScrollBehavior extends ScrollBehavior {
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleNavigatorRouterDelegatePopPage = bool Function(Route<void> route, void result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
@@ -523,7 +523,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   }
 
   SimpleRouterDelegateBuilder builder;
-  SimpleNavigatorRouterDelegatePopPage<void>? onPopPage;
+  SimpleNavigatorRouterDelegatePopPage? onPopPage;
 
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) {
@@ -540,13 +540,13 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
     return Navigator(
       key: navigatorKey,
       onPopPage: _handlePopPage,
-      pages: <Page<void>>[
+      pages: <Page>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const CupertinoPage<void>(
+        const CupertinoPage(
           child:  Text('base'),
         ),
-        CupertinoPage<void>(
+        CupertinoPage(
           key: ValueKey<String?>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),

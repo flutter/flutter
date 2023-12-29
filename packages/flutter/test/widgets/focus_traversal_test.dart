@@ -571,8 +571,8 @@ void main() {
                   width: 100,
                   height: 100,
                   child: Navigator(
-                    pages: <Page<void>>[
-                      MaterialPage<void>(
+                    pages: <Page>[
+                      MaterialPage(
                         child: Focus(
                           focusNode: node2,
                           child: const SizedBox(width: 100, height: 100),

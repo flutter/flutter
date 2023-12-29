@@ -1710,7 +1710,7 @@ Widget buildBoilerPlate(Widget child) {
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation? information);
 typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result);
+typedef SimpleNavigatorRouterDelegatePopPage = bool Function(Route<void> route, void result);
 typedef RouterReportRouterInformation = void Function(RouteInformation information, RouteInformationReportingType type);
 typedef CustomRouteInformationParserCallback = RouteInformation Function(RouteInformation information, BuildContext context);
 
@@ -1802,7 +1802,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   late RouteInformation _routeInformation;
 
   SimpleRouterDelegateBuilder builder;
-  SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
+  SimpleNavigatorRouterDelegatePopPage onPopPage;
 
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) {
@@ -1819,13 +1819,13 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
     return Navigator(
       key: navigatorKey,
       onPopPage: _handlePopPage,
-      pages: <Page<void>>[
+      pages: <Page>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const MaterialPage<void>(
+        const MaterialPage(
           child: Text('base'),
         ),
-        MaterialPage<void>(
+        MaterialPage(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),

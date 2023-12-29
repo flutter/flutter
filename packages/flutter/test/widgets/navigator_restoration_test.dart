@@ -1102,7 +1102,7 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
         }
         return false;
       },
-      pages: _routes.value.isEmpty ? const <Page<Object?>>[] : _routes.value.split(',').map((String name) {
+      pages: _routes.value.isEmpty ? const <Page>[] : _routes.value.split(',').map((String name) {
         if (name.startsWith('r-')) {
           name = name.substring(2);
           return TestPage(
@@ -1145,7 +1145,7 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
   }
 }
 
-class TestPage extends Page<void> {
+class TestPage extends Page {
   const TestPage({super.key, required String super.name, super.restorationId});
 
   @override

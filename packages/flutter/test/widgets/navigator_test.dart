@@ -195,7 +195,7 @@ void main() {
         )
       )
     );
-    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    const MaterialPage page = MaterialPage(child: Text('page'));
     nav.currentState!.push<void>(page.createRoute(nav.currentContext!));
     await tester.pumpAndSettle();
     expect(find.text('page'), findsOneWidget);
@@ -206,14 +206,14 @@ void main() {
   });
 
   testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
-    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    const MaterialPage page = MaterialPage(child: Text('page'));
     await tester.pumpWidget(
       MediaQuery(
         data: MediaQueryData.fromView(tester.view),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
-            pages: const <Page<void>>[page],
+            pages: const <Page>[page],
             onPopPage: (_, __) => false,
           ),
         ),
@@ -228,7 +228,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
-            pages: const <Page<void>>[page],
+            pages: const <Page>[page],
             clipBehavior: Clip.none,
             onPopPage: (_, __) => false,
           ),
@@ -239,7 +239,7 @@ void main() {
   });
 
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
-    final List<Page<void>> pages = <Page<void>>[
+    final List<Page> pages = <Page>[
       const ZeroTransitionPage(name: 'Page 1'),
       const ZeroTransitionPage(name: 'Page 2'),
     ];
@@ -666,8 +666,8 @@ void main() {
     // Regression Test for https://github.com/flutter/flutter/issues/61346.
     Widget buildNavigator() {
       return Navigator(
-        pages: const <Page<void>>[
-          MaterialPage<void>(
+        pages: const <Page>[
+          MaterialPage(
             child: Placeholder(),
           ),
         ],
@@ -696,7 +696,7 @@ void main() {
   });
 
   testWidgets('Page-based route pop before push finishes', (WidgetTester tester) async {
-    List<Page<void>> pages = <Page<void>>[const MaterialPage<void>(child: Text('Page 1'))];
+    List<Page> pages = <Page>[const MaterialPage(child: Text('Page 1'))];
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     Widget buildNavigator() {
       return Navigator(
@@ -715,7 +715,7 @@ void main() {
     );
     expect(find.text('Page 1'), findsOneWidget);
     pages = pages.toList();
-    pages.add(const MaterialPage<void>(child: Text('Page 2')));
+    pages.add(const MaterialPage(child: Text('Page 2')));
 
     await tester.pumpWidget(
       TestDependencies(
@@ -733,12 +733,12 @@ void main() {
 
   testWidgets('Pages update does update overlay correctly', (WidgetTester tester) async {
     // Regression Test for https://github.com/flutter/flutter/issues/64941.
-    List<Page<void>> pages = const <Page<void>>[
-      MaterialPage<void>(
+    List<Page> pages = const <Page>[
+      MaterialPage(
         key:  ValueKey<int>(0),
         child: Text('page 0'),
       ),
-      MaterialPage<void>(
+      MaterialPage(
         key: ValueKey<int>(1),
         child: Text('page 1'),
       ),
@@ -759,8 +759,8 @@ void main() {
     expect(find.text('page 0'), findsNothing);
 
     // Removes the first page.
-    pages = const <Page<void>>[
-      MaterialPage<void>(
+    pages = const <Page>[
+      MaterialPage(
         key: ValueKey<int>(1),
         child: Text('page 1'),
       ),
@@ -2736,7 +2736,7 @@ void main() {
   group('Page api', () {
     Widget buildNavigator({
       required FlutterView view,
-      required List<Page<dynamic>> pages,
+      required List<Page> pages,
       required PopPageCallback onPopPage,
       GlobalKey<NavigatorState>? key,
       TransitionDelegate<dynamic>? transitionDelegate,
@@ -2772,7 +2772,7 @@ void main() {
       ];
 
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
 
@@ -2928,9 +2928,9 @@ void main() {
     });
 
     testWidgets('Can pop route with local history entries using page api', (WidgetTester tester) async {
-      List<Page<void>> myPages = const <Page<void>>[
-        MaterialPage<void>(child: Text('page1')),
-        MaterialPage<void>(child: Text('page2')),
+      List<Page> myPages = const <Page>[
+        MaterialPage(child: Text('page1')),
+        MaterialPage(child: Text('page2')),
       ];
       await tester.pumpWidget(
         MediaQuery(
@@ -2954,8 +2954,8 @@ void main() {
       route.addLocalHistoryEntry(LocalHistoryEntry(onRemove: () => entryRemoved = true));
       expect(route.willHandlePopInternally, true);
 
-      myPages = const <Page<void>>[
-        MaterialPage<void>(child: Text('page1')),
+      myPages = const <Page>[
+        MaterialPage(child: Text('page1')),
       ];
 
       await tester.pumpWidget(
@@ -2979,9 +2979,9 @@ void main() {
     });
 
     testWidgets('ModalRoute must comply with willHandlePopInternally when there is a PopScope', (WidgetTester tester) async {
-      const List<Page<void>> myPages = <Page<void>>[
-        MaterialPage<void>(child: Text('page1')),
-        MaterialPage<void>(
+      const List<Page> myPages = <Page>[
+        MaterialPage(child: Text('page1')),
+        MaterialPage(
           child: PopScope(
             canPop: false,
             child: Text('page2'),
@@ -3019,7 +3019,7 @@ void main() {
       late Animation<double> secondaryAnimationOfRouteThree;
       late Animation<double> primaryAnimationOfRouteThree;
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
-      List<Page<dynamic>> myPages = <Page<dynamic>>[
+      List<Page> myPages = <Page>[
         BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
@@ -3032,7 +3032,7 @@ void main() {
       ];
 
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
 
@@ -3046,7 +3046,7 @@ void main() {
       );
       expect(find.text('initial'), findsOneWidget);
 
-      myPages = <Page<dynamic>>[
+      myPages = <Page>[
         BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
@@ -3115,7 +3115,7 @@ void main() {
       // Starts pops the pages using page api and verify the animations chain
       // correctly.
 
-      myPages = <Page<dynamic>>[
+      myPages = <Page>[
         BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
@@ -3168,7 +3168,7 @@ void main() {
       late Animation<double> primaryAnimationOfRouteTwo;
       late Animation<double> secondaryAnimationOfRouteThree;
       late Animation<double> primaryAnimationOfRouteThree;
-      List<Page<dynamic>> myPages = <Page<void>>[
+      List<Page> myPages = <Page>[
         BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
@@ -3198,7 +3198,7 @@ void main() {
         ),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
       await tester.pumpWidget(
@@ -3276,7 +3276,7 @@ void main() {
       Widget buildNavigator(bool secondPage) {
         return TestDependencies(
           child: Navigator(
-            pages: <Page<void>>[
+            pages: <Page>[
               const ZeroDurationPage(
                 child: Text('page1'),
               ),
@@ -3304,7 +3304,7 @@ void main() {
       ];
 
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
 
@@ -3450,7 +3450,7 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
 
@@ -3589,7 +3589,7 @@ void main() {
       ];
 
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
 
@@ -3652,7 +3652,7 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
 
@@ -3792,12 +3792,12 @@ void main() {
 
     testWidgets('can repush a page that was previously popped before it has finished popping', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
-      List<Page<dynamic>> myPages = <TestPage>[
+      List<Page> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
       await tester.pumpWidget(
@@ -3844,12 +3844,12 @@ void main() {
 
     testWidgets('can update pages before a route has finished popping', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
-      List<Page<dynamic>> myPages = <TestPage>[
+      List<Page> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
       await tester.pumpWidget(
@@ -3896,12 +3896,12 @@ void main() {
     testWidgets('can update pages before a pageless route has finished popping', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/68162.
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
-      List<Page<dynamic>> myPages = <TestPage>[
+      List<Page> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
-        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        myPages.removeWhere((Page page) => route.settings == page);
         return route.didPop(result);
       }
       await tester.pumpWidget(
@@ -4924,7 +4924,7 @@ void main() {
                     pages: pages.map((_Page page) {
                       switch (page) {
                         case _Page.home:
-                          return MaterialPage<void>(
+                          return MaterialPage(
                             child: _LinksPage(
                               title: 'Home page',
                               buttons: <Widget>[
@@ -4948,13 +4948,13 @@ void main() {
                             ),
                           );
                         case _Page.one:
-                          return const MaterialPage<void>(
+                          return const MaterialPage(
                             child: _LinksPage(
                               title: 'Page one',
                             ),
                           );
                         case _Page.noPop:
-                          return const MaterialPage<void>(
+                          return const MaterialPage(
                             child: _LinksPage(
                               title: 'Cannot pop page',
                               canPop: false,
@@ -5040,7 +5040,7 @@ void main() {
                     pages: pages.map((_Page page) {
                       switch (page) {
                         case _Page.home:
-                          return MaterialPage<void>(
+                          return MaterialPage(
                             child: _LinksPage(
                               title: 'Home page',
                               buttons: <Widget>[
@@ -5064,13 +5064,13 @@ void main() {
                             ),
                           );
                         case _Page.one:
-                          return const MaterialPage<void>(
+                          return const MaterialPage(
                             child: _LinksPage(
                               title: 'Page one',
                             ),
                           );
                         case _Page.noPop:
-                          return const MaterialPage<void>(
+                          return const MaterialPage(
                             child: _LinksPage(
                               title: 'Cannot pop page',
                               canPop: false,
@@ -5218,7 +5218,7 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   }
 }
 
-class ZeroTransitionPage extends Page<void> {
+class ZeroTransitionPage extends Page {
   const ZeroTransitionPage({
     super.key,
     super.arguments,
@@ -5234,7 +5234,7 @@ class ZeroTransitionPage extends Page<void> {
   }
 }
 
-class TestPage extends Page<void> {
+class TestPage extends Page {
   const TestPage({
     super.key,
     required String super.name,
@@ -5298,7 +5298,7 @@ class NavigatorObservation {
   String toString() => 'NavigatorObservation($operation, $current, $previous)';
 }
 
-class BuilderPage extends Page<void> {
+class BuilderPage extends Page {
   const BuilderPage({super.key, super.name, required this.pageBuilder});
 
   final RoutePageBuilder pageBuilder;
@@ -5312,7 +5312,7 @@ class BuilderPage extends Page<void> {
   }
 }
 
-class ZeroDurationPage extends Page<void> {
+class ZeroDurationPage extends Page {
   const ZeroDurationPage({required this.child});
 
   final Widget child;

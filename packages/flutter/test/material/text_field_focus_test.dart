@@ -15,7 +15,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Navigator(
-            pages: const <Page<void>>[_APage(), _BPage()],
+            pages: const <Page>[_APage(), _BPage()],
             onPopPage: (Route<dynamic> route, dynamic result) {
               return false;
             },
@@ -565,7 +565,7 @@ void main() {
   }, variant: TargetPlatformVariant.desktop());
 }
 
-class _APage extends Page<void> {
+class _APage extends Page {
   const _APage();
 
   @override
@@ -575,7 +575,7 @@ class _APage extends Page<void> {
   );
 }
 
-class _BPage extends Page<void> {
+class _BPage extends Page {
   const _BPage();
 
   @override

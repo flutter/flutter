@@ -486,8 +486,8 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Navigator(
               onPopPage: (Route<dynamic> route, dynamic result) { return false; },
-              pages: const <Page<Object?>>[
-                CupertinoPage<void>(
+              pages: const <Page>[
+                CupertinoPage(
                   restorationId: 'p1',
                   child: TestRestorableWidget(restorationId: 'p1'),
                 ),
@@ -572,9 +572,9 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
     return CupertinoApp(
       home: Navigator(
         key: widget.navigatorKey,
-        pages: <Page<void>>[
-          const CupertinoPage<void>(child: Text('home')),
-          if (_subpage != null) CupertinoPage<void>(child: Text(_subpage!)),
+        pages: <Page>[
+          const CupertinoPage(child: Text('home')),
+          if (_subpage != null) CupertinoPage(child: Text(_subpage!)),
         ],
         onPopPage: (Route<dynamic> route, dynamic result) {
           if (!route.didPop(result)) {
