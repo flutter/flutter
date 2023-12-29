@@ -29,7 +29,8 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
 /**
- * For apps only. Provides the flutter extension used in app/build.gradle.
+ * For apps only. Provides the flutter extension used in the app-level Gradle
+ * build file (app/build.gradle or app/build.gradle.kts).
  *
  * The versions specified here should match the values in
  * packages/flutter_tools/lib/src/android/gradle_utils.dart, so when bumping,
@@ -62,7 +63,7 @@ class FlutterExtension {
 
     /**
      * Specifies the relative directory to the Flutter project directory.
-     * In an app project, this is ../.. since the app's build.gradle is under android/app.
+     * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
     String source = "../.."
 
@@ -90,7 +91,8 @@ buildscript {
 
 /**
  * Some apps don't set default compile options.
- * Apps can change these values in android/app/build.gradle.
+ * Apps can change these values in the app-level Gradle build file
+ * (android/app/build.gradle or android/app/build.gradle.kts).
  * This just ensures that default values are set.
  */
 android {
@@ -451,11 +453,13 @@ class FlutterPlugin implements Plugin<Project> {
 
     // TODO(54566): Can remove this function and its call sites once resolved.
     /**
-     * Returns `true` if the given path contains an `android/build.gradle` file.
+     * Returns `true` if the given path contains an `android` directory
+     * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private static Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, "android" + File.separator + "build.gradle")
-        return editableAndroidProject.exists()
+    private Boolean doesSupportAndroidPlatform(String path) {
+        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
+        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+        return buildGradle.exists() || buildGradleKts.exists()
     }
 
     /** Adds the plugin project dependency to the app project. */
