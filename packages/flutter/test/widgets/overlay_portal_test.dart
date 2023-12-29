@@ -91,10 +91,6 @@ void main() {
   final OverlayPortalController controller4 = OverlayPortalController(debugLabel: 'controller4');
 
   setUp(() {
-    controller1.show();
-    controller2.show();
-    controller3.show();
-    controller4.show();
     _PaintOrder.paintOrder.clear();
   });
 
@@ -196,6 +192,7 @@ void main() {
       ),
     );
 
+    await tester.pumpWidget(widget);
     controller1.show();
     await tester.pumpWidget(widget);
 
@@ -231,6 +228,7 @@ void main() {
       ),
     );
 
+    await tester.pumpWidget(widget);
     controller1.show();
     await tester.pumpWidget(widget);
 
@@ -264,6 +262,7 @@ void main() {
       ),
     );
 
+    await tester.pumpWidget(widget);
     controller1.show();
     await tester.pumpWidget(widget);
 
@@ -389,17 +388,16 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('show/hide notifies listeners', (WidgetTester tester) async {
-    final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
     final List<bool> valuesSeen = <bool>[];
     void portalListener() {
-      valuesSeen.add(controller.isShowing);
+      valuesSeen.add(controller1.isShowing);
     }
     late final OverlayEntry overlayEntry;
     addTearDown(() {
-      controller.removeListener(portalListener);
+      controller1.removeListener(portalListener);
       overlayEntry..remove()..dispose();
     });
-    controller.addListener(portalListener);
+    controller1.addListener(portalListener);
 
     const Widget target = SizedBox();
     final Widget widget = Directionality(
@@ -409,7 +407,7 @@ void main() {
           overlayEntry = OverlayEntry(
             builder: (BuildContext context) {
               return OverlayPortal(
-                controller: controller,
+                controller: controller1,
                 overlayChildBuilder: (BuildContext context) => target,
               );
             },
@@ -422,25 +420,25 @@ void main() {
     await tester.pump();
     expect(valuesSeen.isEmpty, true);
 
-    controller.show();
+    controller1.show();
     await tester.pump();
     expect(valuesSeen, <bool>[true]);
 
     // Calls that do not trigger a state change do not fire listeners.
-    controller.show();
+    controller1.show();
     await tester.pump();
     expect(valuesSeen, <bool>[true]);
 
-    controller.hide();
+    controller1.hide();
     await tester.pump();
     expect(valuesSeen, <bool>[true, false]);
 
     // Calls that do not trigger a state change do not fire listeners.
-    controller.hide();
+    controller1.hide();
     await tester.pump();
     expect(valuesSeen, <bool>[true, false]);
 
-    controller.show();
+    controller1.show();
     await tester.pump();
     expect(valuesSeen, <bool>[true, false, true]);
   });

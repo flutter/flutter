@@ -1417,16 +1417,12 @@ class OverlayPortalController with ChangeNotifier {
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.
   void show() {
-    final _OverlayPortalState? state = _attachTarget;
-    if (state != null) {
-      final bool wasShowing = isShowing;
-      state.show(_now());
-      if (wasShowing != isShowing) {
-        // Only log if the state was changed.
-        notifyListeners();
-      }
-    } else {
-      _zOrderIndex = _now();
+    final _OverlayPortalState state = _attachTarget!;
+    final bool wasShowing = isShowing;
+    state.show(_now());
+    if (wasShowing != isShowing) {
+      // Only log if the state was changed.
+      notifyListeners();
     }
   }
 
@@ -1439,27 +1435,20 @@ class OverlayPortalController with ChangeNotifier {
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.
   void hide() {
-    final _OverlayPortalState? state = _attachTarget;
-    if (state != null) {
-      final bool wasShowing = isShowing;
-      state.hide();
-      if (wasShowing != isShowing) {
-        // Only log if the state was changed.
-        notifyListeners();
-      }
-    } else {
-      assert(_zOrderIndex != null);
-      _zOrderIndex = null;
+    final _OverlayPortalState state = _attachTarget!;
+    final bool wasShowing = isShowing;
+    state.hide();
+    if (wasShowing != isShowing) {
+      // Only log if the state was changed.
+      notifyListeners();
     }
   }
 
   /// Whether the associated [OverlayPortal] should build and show its overlay
   /// child, using its `overlayChildBuilder`.
   bool get isShowing {
-    final _OverlayPortalState? state = _attachTarget;
-    return state != null
-      ? state._zOrderIndex != null
-      : _zOrderIndex != null;
+    final _OverlayPortalState state = _attachTarget!;
+    return state._zOrderIndex != null;
   }
 
   /// Convenience method for toggling the current [isShowing] status.
@@ -1698,7 +1687,10 @@ class _OverlayPortalState extends State<OverlayPortal> {
   }
 
   void hide() {
-    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(
+      SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks,
+      '${widget.controller.runtimeType}.hide() should not be called during build.'
+    );
     setState(() { _zOrderIndex = null; });
     _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
