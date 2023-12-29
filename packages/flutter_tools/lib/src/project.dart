@@ -552,10 +552,28 @@ class AndroidProject extends FlutterProjectPlatform {
     return imperativeMatch || declarativeMatch;
   }
 
+  /// Gets top-level Gradle build file.
+  /// See https://developer.android.com/build#top-level.
+  ///
+  /// It can be written in Groovy (build.gradle) or Kotlin (build.gradle.kts).
+  File get hostAppGradleFile {
+    if (hostAppGradleRoot.childFile('build.gradle.kts').existsSync()) {
+      return hostAppGradleRoot.childFile('build.gradle.kts');
+    }
+    return hostAppGradleRoot.childFile('build.gradle');
+  }
+
   /// Gets the module-level build.gradle file.
   /// See https://developer.android.com/build#module-level.
-  File get appGradleFile => hostAppGradleRoot.childDirectory('app')
-      .childFile('build.gradle');
+  ///
+  /// It can be written in Groovy (build.gradle) or Kotlin (build.gradle.kts).
+  File get appGradleFile {
+    final Directory appDir = hostAppGradleRoot.childDirectory('app');
+    if (appDir.childFile('build.gradle.kts').existsSync()) {
+      return appDir.childFile('build.gradle.kts');
+    }
+    return appDir.childFile('build.gradle');
+  }
 
   File get appManifestFile {
     if (isUsingGradle) {
@@ -652,7 +670,7 @@ $javaGradleCompatUrl
   }
 
   bool get isUsingGradle {
-    return hostAppGradleRoot.childFile('build.gradle').existsSync();
+    return hostAppGradleFile.existsSync();
   }
 
   String? get applicationId {
@@ -671,8 +689,7 @@ $javaGradleCompatUrl
   }
 
   String? get group {
-    final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _groupPattern)?.group(1);
+    return firstMatchInFile(hostAppGradleFile, _groupPattern)?.group(1);
   }
 
   /// The build directory where the Android artifacts are placed.
