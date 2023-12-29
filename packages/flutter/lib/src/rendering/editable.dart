@@ -2366,31 +2366,27 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool _resetOriginOnBottom = false;
   double? _resetFloatingCursorAnimationValue;
 
-  EdgeInsets _calculateFloatingCursorBounds() {
-    final double topBound = -floatingCursorAddedMargin.top;
-    final double bottomBound = _textPainter.height - preferredLineHeight + floatingCursorAddedMargin.bottom;
-    final double leftBound = -floatingCursorAddedMargin.left;
-    final double rightBound = _textPainter.width + floatingCursorAddedMargin.right;
-    return EdgeInsets.fromLTRB(leftBound, topBound, rightBound, bottomBound);
-  }
-
-  Offset _calculateAdjustedCursorOffset(Offset offset, EdgeInsets boundingRect) {
-    final double adjustedX = math.min(math.max(offset.dx, boundingRect.left), boundingRect.right);
-    final double adjustedY = math.min(math.max(offset.dy, boundingRect.top), boundingRect.bottom);
+  Offset _calculateAdjustedCursorOffset(Offset offset, EdgeInsets boundingRects) {
+    final double adjustedX = clampDouble(offset.dx, boundingRects.left, boundingRects.right);
+    final double adjustedY = clampDouble(offset.dy, boundingRects.top, boundingRects.bottom);
     return Offset(adjustedX, adjustedY);
   }
 
   /// Returns the position within the text field closest to the raw cursor offset.
   Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset, {bool? shouldResetOrigin}) {
     Offset deltaPosition = Offset.zero;
-    final EdgeInsets boundingRect = _calculateFloatingCursorBounds();
+    final double topBound = -floatingCursorAddedMargin.top;
+    final double bottomBound = math.min(size.height, _textPainter.height) - preferredLineHeight + floatingCursorAddedMargin.bottom;
+    final double leftBound = -floatingCursorAddedMargin.left;
+    final double rightBound = math.min(size.width, _textPainter.width) + floatingCursorAddedMargin.right;
+    final EdgeInsets boundingRects = EdgeInsets.fromLTRB(leftBound, topBound, rightBound, bottomBound);
 
     if (shouldResetOrigin != null) {
       _shouldResetOrigin = shouldResetOrigin;
     }
 
     if (!_shouldResetOrigin) {
-      return _calculateAdjustedCursorOffset(rawCursorOffset, boundingRect);
+      return _calculateAdjustedCursorOffset(rawCursorOffset, boundingRects);
     }
 
     if (_previousOffset != null) {
@@ -2400,32 +2396,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the raw cursor offset has gone off an edge, we want to reset the relative
     // origin of the dragging when the user drags back into the field.
     if (_resetOriginOnLeft && deltaPosition.dx > 0) {
-      _relativeOrigin = Offset(rawCursorOffset.dx - boundingRect.left, _relativeOrigin.dy);
+      _relativeOrigin = Offset(rawCursorOffset.dx - boundingRects.left, _relativeOrigin.dy);
       _resetOriginOnLeft = false;
     } else if (_resetOriginOnRight && deltaPosition.dx < 0) {
-      _relativeOrigin = Offset(rawCursorOffset.dx - boundingRect.right, _relativeOrigin.dy);
+      _relativeOrigin = Offset(rawCursorOffset.dx - boundingRects.right, _relativeOrigin.dy);
       _resetOriginOnRight = false;
     }
     if (_resetOriginOnTop && deltaPosition.dy > 0) {
-      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - boundingRect.top);
+      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - boundingRects.top);
       _resetOriginOnTop = false;
     } else if (_resetOriginOnBottom && deltaPosition.dy < 0) {
-      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - boundingRect.bottom);
+      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - boundingRects.bottom);
       _resetOriginOnBottom = false;
     }
 
     final double currentX = rawCursorOffset.dx - _relativeOrigin.dx;
     final double currentY = rawCursorOffset.dy - _relativeOrigin.dy;
-    final Offset adjustedOffset = _calculateAdjustedCursorOffset(Offset(currentX, currentY), boundingRect);
+    final Offset adjustedOffset = _calculateAdjustedCursorOffset(Offset(currentX, currentY), boundingRects);
 
-    if (currentX < boundingRect.left && deltaPosition.dx < 0) {
+    if (currentX < boundingRects.left && deltaPosition.dx < 0) {
       _resetOriginOnLeft = true;
-    } else if (currentX > boundingRect.right && deltaPosition.dx > 0) {
+    } else if (currentX > boundingRects.right && deltaPosition.dx > 0) {
       _resetOriginOnRight = true;
     }
-    if (currentY < boundingRect.top && deltaPosition.dy < 0) {
+    if (currentY < boundingRects.top && deltaPosition.dy < 0) {
       _resetOriginOnTop = true;
-    } else if (currentY > boundingRect.bottom && deltaPosition.dy > 0) {
+    } else if (currentY > boundingRects.bottom && deltaPosition.dy > 0) {
       _resetOriginOnBottom = true;
     }
 
@@ -2437,7 +2433,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Sets the screen position of the floating cursor and the text position
   /// closest to the cursor.
   void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset, TextPosition lastTextPosition, { double? resetLerpValue }) {
-    if (state == FloatingCursorDragState.Start) {
+    if (state == FloatingCursorDragState.End) {
       _relativeOrigin = Offset.zero;
       _previousOffset = null;
       _shouldResetOrigin = true;
