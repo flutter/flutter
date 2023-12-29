@@ -408,7 +408,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Typically this is the number of fingers being used to pan the widget using the gesture
   /// recognizer.
   int get pointerCount {
-    return _pointerPanZooms.length + _pointerQueue.length;
+    // PointerPanZoom protocol doesn't contain the exact number of pointers
+    // used on the trackpad, as it isn't exposed by all platforms. However, it
+    // will always be at least two.
+    return (2 * _pointerPanZooms.length) + _pointerQueue.length;
   }
 
   late Offset _initialFocalPoint;
@@ -583,7 +586,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
       focalPoint += p.focalPoint;
     }
-    _currentFocalPoint = pointerCount > 0 ? focalPoint / pointerCount.toDouble() : Offset.zero;
+    _currentFocalPoint = focalPoint / math.max(1, _pointerLocations.length + _pointerPanZooms.length).toDouble();
 
     if (previousFocalPoint == null) {
       _localFocalPoint = PointerEvent.transformPosition(
