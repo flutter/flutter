@@ -425,13 +425,12 @@ class FlutterPlugin implements Plugin<Project> {
      * just using the `plugins.android` list.
      */
     private configureLegacyPluginEachProjects(Project project) {
-        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         try {
-            if (!settingsGradle.text.contains("'.flutter-plugins'")) {
+            if (!settingsGradleFile().text.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
-            throw new GradleException("settings.gradle does not exist: ${settingsGradle.absolutePath}")
+            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${settingsGradleFile().absolutePath}")
         }
         List<Map<String, Object>> deps = getPluginDependencies(project)
         List<String> plugins = getPluginList(project).collect { it.name as String }
@@ -440,7 +439,7 @@ class FlutterPlugin implements Plugin<Project> {
             Project pluginProject = project.rootProject.findProject(":${it.name}")
             if (pluginProject == null) {
                 // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
-                project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle.")
+                project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
             } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
@@ -460,6 +459,12 @@ class FlutterPlugin implements Plugin<Project> {
         File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
         File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
         return buildGradle.exists() || buildGradleKts.exists()
+    }
+
+    private File settingsGradleFile() {
+        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
+        File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
+        return settingsGradleKts.exists() ? settingsGradleKts : settingsGradle
     }
 
     /** Adds the plugin project dependency to the app project. */
