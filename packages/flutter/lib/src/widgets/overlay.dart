@@ -1418,15 +1418,15 @@ class OverlayPortalController with ChangeNotifier {
   /// rebuilt.
   void show() {
     final _OverlayPortalState? state = _attachTarget;
+    final bool wasShowing = isShowing;
     if (state != null) {
-      final bool wasShowing = isShowing;
       state.show(_now());
-      if (wasShowing != isShowing) {
-        // Only log if the state was changed.
-        notifyListeners();
-      }
     } else {
       _zOrderIndex = _now();
+    }
+    if (wasShowing != isShowing) {
+      // Only log if the state was changed.
+      notifyListeners();
     }
   }
 
@@ -1440,16 +1440,16 @@ class OverlayPortalController with ChangeNotifier {
   /// rebuilt.
   void hide() {
     final _OverlayPortalState? state = _attachTarget;
+    final bool wasShowing = isShowing;
     if (state != null) {
-      final bool wasShowing = isShowing;
       state.hide();
-      if (wasShowing != isShowing) {
-        // Only log if the state was changed.
-        notifyListeners();
-      }
     } else {
       assert(_zOrderIndex != null);
       _zOrderIndex = null;
+    }
+    if (wasShowing != isShowing) {
+      // Only log if the state was changed.
+      notifyListeners();
     }
   }
 

@@ -445,6 +445,32 @@ void main() {
     expect(valuesSeen, <bool>[true, false, true]);
   });
 
+  testWidgetsWithLeakTracking('show/hide notifies listeners even if detached', (WidgetTester tester) async {
+    final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
+    final List<bool> valuesSeen = <bool>[];
+    void portalListener() {
+      valuesSeen.add(controller.isShowing);
+    }
+    addTearDown(() {
+      controller.removeListener(portalListener);
+    });
+    controller.addListener(portalListener);
+
+    expect(valuesSeen.isEmpty, true);
+
+    controller.show();
+    await tester.pump();
+    expect(valuesSeen, <bool>[true]);
+
+    controller.hide();
+    await tester.pump();
+    expect(valuesSeen, <bool>[true, false]);
+
+    controller.show();
+    await tester.pump();
+    expect(valuesSeen, <bool>[true, false, true]);
+  });
+
   testWidgetsWithLeakTracking('overlayChildBuilder is not evaluated until show is called', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
