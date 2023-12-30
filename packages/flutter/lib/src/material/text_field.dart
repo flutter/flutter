@@ -285,6 +285,7 @@ class TextField extends StatefulWidget {
     this.onAppPrivateCommand,
     this.inputFormatters,
     this.enabled,
+    this.ignorePointer,
     this.cursorWidth = 2.0,
     this.cursorHeight,
     this.cursorRadius,
@@ -597,6 +598,8 @@ class TextField extends StatefulWidget {
   /// If non-null this property overrides the [decoration]'s
   /// [InputDecoration.enabled] property.
   final bool? enabled;
+
+  final bool? ignorePointer;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
@@ -1559,7 +1562,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       onExit: (PointerExitEvent event) => _handleHover(false),
       child: TextFieldTapRegion(
         child: IgnorePointer(
-          ignoring: !_isEnabled,
+          ignoring: widget.ignorePointer ?? !_isEnabled,
           child: AnimatedBuilder(
             animation: controller, // changes the _currentLength
             builder: (BuildContext context, Widget? child) {
