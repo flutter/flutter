@@ -21,6 +21,8 @@ final List<LeakTestCase> _tests = <LeakTestCase>[
         RunAsyncCallback<dynamic>? runAsync) async {
       StatelessLeakingWidget();
     },
+    notDisposedTotal: 1,
+    notGCedTotal: 1,
   ),
   LeakTestCase(
       name: 'dispose in tear down',
