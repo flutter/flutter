@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is auto generated.
-// To update all the settings.gradle files in the Flutter repo,
-// See dev/tools/bin/generate_gradle_lockfiles.dart.
+// This file is currently NOT auto generated.
+// DO NOT update it by running by dev/tools/bin/generate_gradle_lockfiles.dart.
 
 pluginManagement {
     def flutterSdkPath = {
@@ -16,7 +15,6 @@ pluginManagement {
     }
     settings.ext.flutterSdkPath = flutterSdkPath()
 
-    // Flutter Gradle Plugin ships together with the Flutter SDK
     includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
 
     repositories {

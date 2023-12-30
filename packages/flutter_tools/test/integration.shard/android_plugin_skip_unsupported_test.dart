@@ -147,7 +147,7 @@ void main() {
     final ProcessResult buildApkResult = await testUnsupportedPlugin(
         project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
-        isNot(contains('Please fix your settings.gradle.')));
+        isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
   });
 
