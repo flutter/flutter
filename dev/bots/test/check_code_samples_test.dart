@@ -119,7 +119,7 @@ void main() {
       shouldHaveErrors: true,
     );
     final String lines = <String>[
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
       '║ The following examples are not linked from any source file API doc comments:',
       '║   examples/api/lib/layer/missing_example.0.dart',
       '║ Either link them to a source file API doc comment, or remove them.',
@@ -142,7 +142,7 @@ void main() {
     );
     final bool isWindows = Platform.isWindows;
     final String lines = <String>[
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
       '║ The following examples are not linked from any source file API doc comments:',
       if (!isWindows) '║   examples/api/lib/animation/curves/curve2_d.0.dart',
       if (!isWindows) '║   examples/api/lib/layer/foo_example.0.dart',
@@ -152,7 +152,7 @@ void main() {
       if (isWindows) r'║   examples\api\lib\layer\bar_example.0.dart',
       '║ Either link them to a source file API doc comment, or remove them.',
       '╚═══════════════════════════════════════════════════════════════════════════════',
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
       '║ The following malformed links were found in API doc comments:',
       if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/animation/curves.dart:6: ///* see code in examples/api/lib/animation/curves/curve2_d.0.dart *',
       if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///*See Code *',
@@ -178,7 +178,7 @@ void main() {
       shouldHaveErrors: true,
     );
     final String lines = <String>[
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
       '║ The following example test files are missing:',
       '║   examples/api/test/layer/bar_example.0_test.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
