@@ -14,5 +14,7 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "cmake.sourceDirectory": "C:/Users/fam/Desktop/king_vpn/flutter/dev/a11y_assessments/linux",
+    "cmake.options.statusBarVisibility": "visible"
 }
