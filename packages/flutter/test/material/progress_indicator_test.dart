@@ -1251,6 +1251,27 @@ void main() {
     expect(container.margin, testIndicatorMargin);
     expect(padding.padding, testIndicatorPadding);
   });
+
+  testWidgets('LinearProgressIndicator(value: double.infinity) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: LinearProgressIndicator(value: double.infinity),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
+    handle.dispose();
+  });
 }
 
 class _RefreshProgressIndicatorGolden extends StatefulWidget {
