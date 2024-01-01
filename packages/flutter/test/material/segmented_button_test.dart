@@ -664,4 +664,31 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byTooltip('t2'), findsOneWidget);
     expect(find.byTooltip('t3'), findsOneWidget);
   });
+
+  testWidgets('SegmentedButton has correct disabled style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: FutureBuilder<int>(
+                future: Future<int>.value(1),
+                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                  return SegmentedButton<int>(
+                    segments: const <ButtonSegment<int>>[
+                      ButtonSegment<int>(value: 0, label: Text('foo')),
+                    ],
+                    selected: const <int>{0},
+                  );
+                }),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    const MaterialState disabled = MaterialState.disabled;
+    expect(state.statesControllers.values.first.value.last, disabled);
+  });
 }
