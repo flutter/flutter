@@ -783,6 +783,22 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return result;
   }
 
+  /// Selects a paragraph in a selectable at the location
+  /// [SelectParagraphSelectionEvent.globalPosition].
+  @override
+  SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    debugPrint('select paragraph from text container');
+    final SelectionResult result = super.handleSelectParagraph(event);
+    if (currentSelectionStartIndex != -1) {
+      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    }
+    if (currentSelectionEndIndex != -1) {
+      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
   @override
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
     final SelectionResult result = super.handleClearSelection(event);
@@ -824,6 +840,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         _hasReceivedEndEvent.remove(selectable);
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
         break;
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:
