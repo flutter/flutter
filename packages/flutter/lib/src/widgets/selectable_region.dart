@@ -1647,6 +1647,22 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
     return result;
   }
 
+  /// Selects a paragraph in a selectable at the location
+  /// [SelectParagraphSelectionEvent.globalPosition].
+  @override
+  SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    debugPrint('select paragraphzzzzzz');
+    final SelectionResult result = super.handleSelectParagraph(event);
+    if (currentSelectionStartIndex != -1) {
+      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    }
+    if (currentSelectionEndIndex != -1) {
+      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
   @override
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
     final SelectionResult result = super.handleClearSelection(event);
@@ -2254,48 +2270,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
-  SelectionResult _handleSelectMultiSelectableBoundary(SelectionEvent event) {
-    late final Offset effectiveGlobalPosition;
-    if (event.type == SelectionEventType.selectParagraph) {
-      effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
-    }
-    bool searchingForBoundaryStart = true;
-    SelectionResult? lastSelectionResult;
-    for (int index = 0; index < selectables.length; index += 1) {
-      debugPrint('${selectables[index]}');
-      final SelectionGeometry existingGeometry = selectables[index].value;
-      lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
-      if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
-        return SelectionResult.next;
-      }
-      if (lastSelectionResult == SelectionResult.next) {
-        if (!searchingForBoundaryStart) {
-          continue;
-        }
-      }
-      if (index == 0 && lastSelectionResult == SelectionResult.previous) {
-        return SelectionResult.previous;
-      }
-      if (selectables[index].value != existingGeometry) {
-        // Geometry has changed as a result of select word, need to clear the
-        // selection of other selectables to keep selection in sync.
-        if (!searchingForBoundaryStart) {
-          debugPrint('setting end');
-          currentSelectionEndIndex = index;
-          _flushInactiveSelections();
-        } else {
-          debugPrint('setting start boundary');
-          currentSelectionStartIndex = index;
-          searchingForBoundaryStart = false;
-          continue;
-        }
-      }
-      return SelectionResult.end;
-    }
-    assert(lastSelectionResult == null);
-    return SelectionResult.end;
-  }
-
   SelectionResult _handleSelectBoundary(SelectionEvent event) {
     late final Offset effectiveGlobalPosition;
     if (event.type == SelectionEventType.selectWord) {
@@ -2360,7 +2334,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// [SelectParagraphSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    // return _handleSelectMultiSelectableBoundary(event);
     return _handleSelectBoundary(event);
   }
 
