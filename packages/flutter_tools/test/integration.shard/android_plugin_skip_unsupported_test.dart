@@ -167,7 +167,7 @@ void main() {
     expect(
       buildApkResult,
       const ProcessResultMatcher(
-          stderrPattern: 'Please fix your settings.gradle.'),
+          stderrPattern: 'Please fix your settings.gradle/settings.gradle.kts'),
     );
   });
 }
