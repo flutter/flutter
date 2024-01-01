@@ -347,9 +347,9 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
           : null;
       final MaterialStatesController controller = statesControllers.putIfAbsent(segment, () => MaterialStatesController());
       if (segmentSelected) {
-        controller.value.add(MaterialState.selected);
+          controller.value.add(MaterialState.selected);
       } else {
-        controller.value.remove(MaterialState.selected);
+          controller.value.remove(MaterialState.selected);
       }
 
       final Widget button = icon != null
