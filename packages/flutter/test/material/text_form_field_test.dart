@@ -13,6 +13,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
@@ -1638,24 +1639,30 @@ void main() {
           builder: (BuildContext context, _) =>
               RepaintBoundary(
                 child: SizedBox(
-                  height: 100,
-                  child: ListView(
-                    children: <Widget>[
-                      TextFormField(
-                        minLines: 1,
-                        maxLines: 3,
-                      ),
-                      Ink(
-                        decoration: const ShapeDecoration(
-                          shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                  color: Colors.red
-                              )
-                          ),
+                  key: const Key('gold area'),
+                  // Area reduced for test performance. A larger box may make
+                  // the bug more visible.
+                  height: 90,
+                  width: 4,
+                  child: Material(
+                    child: ListView(
+                      children: <Widget>[
+                        TextFormField(
+                          minLines: 1,
+                          maxLines: 3,
                         ),
-                        child: const SizedBox(height: 1,),
-                      ),
-                    ],
+                        Ink(
+                          decoration: const ShapeDecoration(
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: Colors.red
+                                )
+                            ),
+                          ),
+                          child: const SizedBox(height: 1,),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1666,8 +1673,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await expectLater(
-      find.byType(RepaintBoundary).first,
-      matchesGoldenFile('text_form_field_test.update_decorations.png'),
+      find.byKey(const Key('gold area')).first,
+      matchesGoldenFile('text_form_field.update_decorations.png'),
     );
 
   });
