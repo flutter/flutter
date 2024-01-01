@@ -30,6 +30,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../../lib/src/version.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -1206,6 +1207,138 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
+      });
+    });
+
+    group('Flutter version', () {
+      late _TestDeviceManager testDeviceManager;
+      late Logger logger;
+      late FileSystem fileSystem;
+
+      const List<String> flutterVersionDartDefines = [
+        'FLUTTER_VERSION',
+        'FLUTTER_CHANNEL',
+        'FLUTTER_GIT_URL',
+        'FLUTTER_FRAMEWORK_REVISION',
+        'FLUTTER_ENGINE_REVISION',
+        'FLUTTER_DART_VERSION',
+      ];
+
+      setUp(() {
+        logger = BufferLogger.test();
+        testDeviceManager = _TestDeviceManager(logger: logger);
+        fileSystem = MemoryFileSystem.test();
+      });
+
+      for (final dartDefine in flutterVersionDartDefines) {
+        testUsingContext("tool exits when $dartDefine is already set in user's environment", () async {
+          fileSystem.file('lib/main.dart').createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('.packages').createSync();
+
+          final FakeDevice device = FakeDevice('name', 'id');
+          testDeviceManager.devices = <Device>[device];
+          final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner =  createTestCommandRunner(command);
+
+          expect(runner.run(<String>['run', '--no-pub', '--no-hot', '--flavor=strawberry']),
+            throwsToolExit(message: '$dartDefine is used by the framework and cannot be set in the environment.'));
+
+        }, overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Platform: () => FakePlatform(
+            environment: <String, String>{
+              dartDefine: 'I was already set'
+            }
+          ),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+        });
+
+        testUsingContext('tool exits when $dartDefine is set in --dart-define or --dart-define-from-file', () async {
+          fileSystem.file('lib/main.dart').createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('.packages').createSync();
+          fileSystem.file('config.json')..createSync()..writeAsStringSync('{"$dartDefine": "AlreadySet"}');
+
+          final FakeDevice device = FakeDevice('name', 'id');
+          testDeviceManager.devices = <Device>[device];
+          final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner =  createTestCommandRunner(command);
+
+          expect(runner.run(<String>['run', '--dart-define=$dartDefine=AlreadySet', '--no-pub', '--no-hot']),
+            throwsToolExit(message: '$dartDefine is used by the framework and cannot be set using --dart-define or --dart-define-from-file'));
+
+          expect(runner.run(<String>['run', '--dart-define-from-file=config.json', '--no-pub', '--no-hot']),
+            throwsToolExit(message: '$dartDefine is used by the framework and cannot be set using --dart-define or --dart-define-from-file'));
+        }, overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Platform: () => FakePlatform(),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+        });
+      }
+
+      testUsingContext('FLUTTER_VERSION is set in dartDefines', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, contains('FLUTTER_VERSION=0.0.0'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        FlutterVersion: () => FakeFlutterVersion(),
+      });
+
+      testUsingContext('FLUTTER_CHANNEL is set in dartDefines', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, contains('FLUTTER_CHANNEL=master'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        FlutterVersion: () => FakeFlutterVersion(),
+      });
+
+      testUsingContext('FLUTTER_GIT_URL is set in dartDefines', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, contains('FLUTTER_GIT_URL=https://github.com/flutter/flutter.git'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        FlutterVersion: () => FakeFlutterVersion(),
+      });
+
+      testUsingContext('FLUTTER_FRAMEWORK_REVISION is set in dartDefines', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, contains('FLUTTER_FRAMEWORK_REVISION=11111'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        FlutterVersion: () => FakeFlutterVersion(),
+      });
+
+      testUsingContext('FLUTTER_ENGINE_REVISION is set in dartDefines', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, contains('FLUTTER_ENGINE_REVISION=abcde'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        FlutterVersion: () => FakeFlutterVersion(),
+      });
+
+      testUsingContext('FLUTTER_DART_VERSION is set in dartDefines', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, contains('FLUTTER_DART_VERSION=12'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        FlutterVersion: () => FakeFlutterVersion(),
       });
     });
   });
