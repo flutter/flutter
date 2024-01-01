@@ -128,7 +128,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   }) {
     String? expandedSemanticsValue = semanticsValue;
     if (value != null) {
-      expandedSemanticsValue ??= '${(value!.clamp(0.0, 1.0) * 100).round()}%';
+      expandedSemanticsValue ??= '${(clampDouble(value!, 0.0, 1.0) * 100).round()}%';
     }
     return Semantics(
       label: semanticsLabel,
