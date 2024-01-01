@@ -2,6 +2,8 @@
 *        text=auto
 
 # Always perform LF normalization on these files
+./bin/flutter  text
+./bin/dart     text
 *.dart   text
 *.gradle text
 *.html   text
