@@ -1301,6 +1301,8 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
     }
 
+    _addFlutterVersion();
+
     return BuildInfo(buildMode,
       flavor,
       trackWidgetCreation: trackWidgetCreation,
@@ -1340,6 +1342,35 @@ abstract class FlutterCommand extends Command<void> {
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
           && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
     );
+  }
+
+  // This adds the Dart defines used to access various Flutter version information at runtime.
+  void _addFlutterVersion() {
+    const List<String> dartDefines = [
+      'FLUTTER_VERSION',
+      'FLUTTER_CHANNEL',
+      'FLUTTER_GIT_URL',
+      'FLUTTER_FRAMEWORK_REVISION',
+      'FLUTTER_ENGINE_REVISION',
+      'FLUTTER_DART_VERSION',
+    ];
+
+    for(final String dartDefine in dartDefines) {
+      if (globals.platform.environment[dartDefine] != null) {
+        throwToolExit('$dartDefine is used by the framework and cannot be set in the environment.');
+      }
+      if (dartDefines.any((String define) => define.startsWith(dartDefine))) {
+        throwToolExit('$dartDefine is used by the framework and cannot be '
+          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}');
+      }
+    }
+    
+    dartDefines.add('FLUTTER_VERSION=${globals.flutterVersion.frameworkVersion}');
+    dartDefines.add('FLUTTER_CHANNEL=${globals.flutterVersion.channel}');
+    dartDefines.add('FLUTTER_GIT_URL=${globals.flutterVersion.repositoryUrl}');
+    dartDefines.add('FLUTTER_FRAMEWORK_REVISION=${globals.flutterVersion.frameworkRevisionShort}');
+    dartDefines.add('FLUTTER_ENGINE_REVISION=${globals.flutterVersion.engineRevisionShort}');
+    dartDefines.add('FLUTTER_DART_VERSION=${globals.flutterVersion.dartSdkVersion}');
   }
 
   void setupApplicationPackages() {
