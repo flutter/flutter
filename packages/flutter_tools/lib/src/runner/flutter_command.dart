@@ -1346,7 +1346,7 @@ abstract class FlutterCommand extends Command<void> {
 
   // This adds the Dart defines used to access various Flutter version information at runtime.
   void _addFlutterVersion() {
-    const List<String> dartDefines = [
+    const List<String> dartDefines = <String>[
       'FLUTTER_VERSION',
       'FLUTTER_CHANNEL',
       'FLUTTER_GIT_URL',

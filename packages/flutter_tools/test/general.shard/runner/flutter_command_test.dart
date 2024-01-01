@@ -1215,7 +1215,7 @@ void main() {
       late Logger logger;
       late FileSystem fileSystem;
 
-      const List<String> flutterVersionDartDefines = [
+      const List<String> flutterVersionDartDefines = <String>[
         'FLUTTER_VERSION',
         'FLUTTER_CHANNEL',
         'FLUTTER_GIT_URL',
@@ -1230,7 +1230,7 @@ void main() {
         fileSystem = MemoryFileSystem.test();
       });
 
-      for (final dartDefine in flutterVersionDartDefines) {
+      for (final String dartDefine in flutterVersionDartDefines) {
         testUsingContext("tool exits when $dartDefine is already set in user's environment", () async {
           fileSystem.file('lib/main.dart').createSync(recursive: true);
           fileSystem.file('pubspec.yaml').createSync();
