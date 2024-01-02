@@ -286,9 +286,11 @@ class WebAssetServer implements AssetReader {
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        BuildSettings(appEntrypoint: packageConfig.toPackageUri(
+          BuildSettings(
+            appEntrypoint: packageConfig.toPackageUri(
           globals.fs.file(entrypoint).absolute.uri,
-        )),
+            ),
+          ),
       ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
