@@ -1227,7 +1227,6 @@ void main() {
       '--native-null-assertions',
       '--enable-impeller',
       '--enable-vulkan-validation',
-      '--impeller-force-gl',
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
@@ -1249,7 +1248,6 @@ void main() {
     expect(options.traceSystrace, true);
     expect(options.enableImpeller, ImpellerStatus.enabled);
     expect(options.enableVulkanValidation, true);
-    expect(options.impellerForceGL, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
     expect(options.usingCISystem, true);
