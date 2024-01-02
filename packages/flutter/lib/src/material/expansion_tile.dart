@@ -576,7 +576,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconColor = _animationController.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _animationController.drive(_backgroundColorTween.chain(_easeOutTween));
 
-    _isExpanded = PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
+    dynamic pageStore = PageStorage.maybeOf(context)?.readState(context);
+    if (pageStore is bool?) {
+      _isExpanded = pageStore ?? widget.initiallyExpanded;
+    } else {
+      _isExpanded = widget.initiallyExpanded;
+    }
     if (_isExpanded) {
       _animationController.value = 1.0;
     }
