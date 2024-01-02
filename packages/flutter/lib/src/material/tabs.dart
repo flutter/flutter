@@ -1025,7 +1025,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// tabs with only icon or text, this padding is vertically
   /// adjusted to provide uniform padding to all tabs.
   ///
-  /// If this property is null, then kTabLabelPadding is used.
+  /// If this property is null, then [kTabLabelPadding] is used.
   final EdgeInsetsGeometry? labelPadding;
 
   /// Defines the ink response focus, hover, and splash colors.
