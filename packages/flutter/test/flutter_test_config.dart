@@ -11,6 +11,17 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '_goldens_io.dart'
   if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
 
+/// If true, leak tracking will be enabled for all tests `testWidgetsWithLeakTracking`.
+///
+/// By default, the constant is false.
+/// To enable the leak tracking for all tests, either pass the compilation flag
+/// `--dart-define=flutter_test_config.leak_tracking=true` or
+/// temporarily pass `defaultValue = true` to `fromEnvironment` in the constant definition.
+///
+/// To enable leak tracking for an individual test file, add the line to the test `main`:
+/// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
+const bool _kLeakTracking = bool.fromEnvironment('LEAK_TRACKING');
+
 /// Test configuration for each test library in this directory.
 ///
 /// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
@@ -25,17 +36,22 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   LeakTracking.warnForUnsupportedPlatforms = false;
 
-  // TODO(polina-c): clean up leaks and stop ignoring them.
-  // https://github.com/flutter/flutter/issues/137311
-  // Leak tracking is off by default. To temporary enable it add `.withTrackedAll()` after `settings`.
   LeakTesting.settings = LeakTesting
     .settings
+    // TODO(polina-c): clean up leaks and stop ignoring them.
+    // https://github.com/flutter/flutter/issues/137311
     .withIgnored(
       allNotGCed: true,
       notDisposed: <String, int?>{
         'OverlayEntry': null,
       },
     );
+
+  // Leak tracking is off by default.
+  // To enable it, follow doc for [_kLeakTracking].
+  if (_kLeakTracking) {
+    LeakTesting.settings = LeakTesting.settings.withTrackedAll();
+  }
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
