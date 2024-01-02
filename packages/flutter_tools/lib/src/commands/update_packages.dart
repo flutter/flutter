@@ -29,6 +29,7 @@ import '../runner/flutter_command.dart';
 /// in ways that prevent them from ever upgrading Flutter again!
 const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
+  'dwds': '22.1.0', // https://github.com/flutter/flutter/issues/140796
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'material_color_utilities': '0.8.0', // Keep pinned to latest until 1.0.0.
