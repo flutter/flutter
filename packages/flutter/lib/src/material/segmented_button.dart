@@ -275,33 +275,32 @@ class SegmentedButton<T> extends StatefulWidget {
       (backgroundColor == null && disabledBackgroundColor == null && selectedBackgroundColor == null)
         ? null
         : _SegmentButtonDefaultColor(backgroundColor, disabledBackgroundColor, selectedBackgroundColor);
-    final MaterialStateProperty<Color?>? overlayColor = (foregroundColor == null)
+    final Color? overlayColor = (foregroundColor == null)
       ? null
-      : _SegmentedButtonDefaultOverlay(foregroundColor);
-    final MaterialStateProperty<MouseCursor?>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-      ? null
-      : _SegmentedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
-    return ButtonStyle(
-      textStyle: ButtonStyleButton.allOrNull(textStyle),
-      backgroundColor: backgroundColorProp,
-      foregroundColor: foregroundColorProp,
-      overlayColor: overlayColor,
-      shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
-      surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
-      elevation: ButtonStyleButton.allOrNull<double>(elevation),
-      padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
-      minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
-      fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
-      maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
-      side: ButtonStyleButton.allOrNull<BorderSide>(side),
-      shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: mouseCursor,
+      : _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor);
+    return TextButton.styleFrom(
+      textStyle: textStyle,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
+      elevation: elevation,
+      padding: padding,
+      minimumSize: minimumSize,
+      fixedSize: fixedSize,
+      maximumSize: maximumSize,
+      side: side,
+      shape: shape,
+      enabledMouseCursor: enabledMouseCursor,
+      disabledMouseCursor: disabledMouseCursor,
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
       alignment: alignment,
       splashFactory: splashFactory,
+    ).copyWith(
+      foregroundColor: foregroundColorProp,
+      backgroundColor: backgroundColorProp,
+      overlayColor: MaterialStatePropertyAll<Color?>(overlayColor),
     );
   }
 
@@ -542,43 +541,6 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       controller.dispose();
     }
     super.dispose();
-  }
-}
-
-@immutable
-class _SegmentedButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
-  _SegmentedButtonDefaultOverlay(this.overlay);
-
-  final Color overlay;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-     if (states.contains(MaterialState.pressed)) {
-      return overlay.withOpacity(0.12);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return overlay.withOpacity(0.08);
-    }
-    if (states.contains(MaterialState.focused)) {
-      return overlay.withOpacity(0.12);
-    }
-    return null;
-  }
-}
-
-@immutable
-class _SegmentedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
-  _SegmentedButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
-
-  final MouseCursor? enabledCursor;
-  final MouseCursor? disabledCursor;
-
-  @override
-  MouseCursor? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return disabledCursor;
-    }
-    return enabledCursor;
   }
 }
 
@@ -1027,6 +989,33 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   }
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
+
+  static Color resolveStateColor(Color? unselectedColor, Color? selectedColor) {
+    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return selectedColor!.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return selectedColor!.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return selectedColor!.withOpacity(0.12);
+        }
+      } else {
+        if (states.contains(MaterialState.pressed)) {
+          return unselectedColor!.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return unselectedColor!.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return unselectedColor!.withOpacity(0.12);
+        }
+      }
+      return Colors.transparent;
+    });
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - SegmentedButton

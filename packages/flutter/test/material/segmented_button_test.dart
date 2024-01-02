@@ -665,7 +665,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byTooltip('t3'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton.styleFrom is applied to the SegmentedButton', (WidgetTester tester) async {
+  testWidgets('SegmentedButton.styleFrom is applied to the SegmentedButton', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xfffffff0);
     const Color backgroundColor =  Color(0xfffffff1);
     const Color selectedBackgroundColor = Color(0xfffffff2);
