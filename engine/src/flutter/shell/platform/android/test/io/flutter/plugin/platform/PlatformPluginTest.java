@@ -11,6 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.doThrow;
@@ -611,6 +612,20 @@ public class PlatformPluginTest {
     platformPlugin.mPlatformMessageHandler.setFrameworkHandlesBack(true);
 
     verify(mockPlatformPluginDelegate, times(1)).setFrameworkHandlesBack(true);
+  }
+
+  @Test
+  public void testPlatformPluginDelegateNull() throws Exception {
+    Activity mockActivity = mock(Activity.class);
+    PlatformPlugin platformPlugin =
+        new PlatformPlugin(mockActivity, mockPlatformChannel, null /*platformPluginDelegate*/);
+
+    try {
+      platformPlugin.mPlatformMessageHandler.setFrameworkHandlesBack(true);
+    } catch (NullPointerException e) {
+      // Not expected
+      fail("NullPointerException was thrown");
+    }
   }
 
   @Test
