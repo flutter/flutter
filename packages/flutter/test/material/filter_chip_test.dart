@@ -122,16 +122,6 @@ IconThemeData getIconData(WidgetTester tester) {
   return iconTheme.data;
 }
 
-IconThemeData getIconDataForIcon(WidgetTester tester, IconData icon) {
-  final IconTheme iconTheme = tester.firstWidget(
-    find.ancestor(
-      of: find.byIcon(icon),
-      matching: find.byType(IconTheme),
-    ),
-  );
-  return iconTheme.data;
-}
-
 DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
   return tester.widget(
     find.ancestor(
@@ -1108,62 +1098,61 @@ void main() {
     const IconData avatarIcon = Icons.house;
     final ThemeData theme = ThemeData();
 
-    Widget buildFlatChip({
+    Widget buildChips({
       required bool selected,
     }) {
       return MaterialApp(
         theme: theme,
         home: Material(
-          child: Center(
-            child: FilterChip(
-              avatar: const Icon(avatarIcon),
-              onSelected: (bool valueChanged) { },
-              label: const Text('FilterChip'),
-              selected: selected,
-              onDeleted: () { },
-            ),
+          child: Column(
+            children: <Widget>[
+              FilterChip(
+                avatar: const Icon(avatarIcon),
+                onSelected: (bool valueChanged) { },
+                label: const Text('FilterChip'),
+                selected: selected,
+                onDeleted: () { },
+              ),
+              FilterChip.elevated(
+                avatar: const Icon(avatarIcon),
+                onSelected: (bool valueChanged) { },
+                label: const Text('Elevated FilterChip'),
+                selected: selected,
+                onDeleted: () { },
+              ),
+            ],
           ),
         ),
       );
     }
 
-    Widget buildElevatedChip({
-      required bool selected,
-    }) {
-      return MaterialApp(
-        theme: theme,
-        home: Material(
-          child: Center(
-            child: FilterChip.elevated(
-              avatar: const Icon(avatarIcon),
-              onSelected: (bool valueChanged) { },
-              label: const Text('FilterChip'),
-              selected: selected,
-              onDeleted: () { },
-            ),
-          ),
+    IconThemeData getIconDataForIcon(WidgetTester tester, IconData icon, {required bool elevatedChip}) {
+      final List<Icon> icons = tester.widgetList<Icon>(
+         find.byIcon(icon),
+      ).toList();
+      // Based on the order of the chips in the column
+      final Icon foundIcon = elevatedChip ? icons[1] : icons[0];
+      final IconTheme iconTheme = tester.firstWidget<IconTheme>(
+        find.ancestor(
+          of: find.byWidget(foundIcon),
+          matching: find.byType(IconTheme),
         ),
       );
+      return iconTheme.data;
     }
 
-    // Flat - Unselected
-    await tester.pumpWidget(buildFlatChip(selected: false));
-    expect(getIconDataForIcon(tester, avatarIcon).color, theme.colorScheme.primary);
-    expect(getIconDataForIcon(tester, Icons.clear).color, theme.colorScheme.onSurfaceVariant);
+    // Unselected state
+    await tester.pumpWidget(buildChips(selected: false));
+    expect(getIconDataForIcon(elevatedChip: false, tester, avatarIcon).color, theme.colorScheme.primary);
+    expect(getIconDataForIcon(elevatedChip: false, tester, Icons.clear).color, theme.colorScheme.onSurfaceVariant);
+    expect(getIconDataForIcon(elevatedChip: true, tester, avatarIcon).color, theme.colorScheme.primary);
+    expect(getIconDataForIcon(elevatedChip: true, tester, Icons.clear).color, theme.colorScheme.onSurfaceVariant);
 
-    // Flat - Selected
-    await tester.pumpWidget(buildFlatChip(selected: true));
-    expect(getIconDataForIcon(tester, avatarIcon).color, theme.colorScheme.onSecondaryContainer);
-    expect(getIconDataForIcon(tester, Icons.clear).color, theme.colorScheme.onSecondaryContainer);
-
-    // Elevated - Unselected
-    await tester.pumpWidget(buildElevatedChip(selected: false));
-    expect(getIconDataForIcon(tester, avatarIcon).color, theme.colorScheme.primary);
-    expect(getIconDataForIcon(tester, Icons.clear).color, theme.colorScheme.onSurfaceVariant);
-
-    // Elevated - Selected
-    await tester.pumpWidget(buildElevatedChip(selected: true));
-    expect(getIconDataForIcon(tester, avatarIcon).color, theme.colorScheme.onSecondaryContainer);
-    expect(getIconDataForIcon(tester, Icons.clear).color, theme.colorScheme.onSecondaryContainer);
+    // Selected state
+    await tester.pumpWidget(buildChips(selected: true));
+    expect(getIconDataForIcon(elevatedChip: false, tester, avatarIcon).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconDataForIcon(elevatedChip: false, tester, Icons.clear).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconDataForIcon(elevatedChip: true, tester, avatarIcon).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconDataForIcon(elevatedChip: true, tester, Icons.clear).color, theme.colorScheme.onSecondaryContainer);
   });
 }
