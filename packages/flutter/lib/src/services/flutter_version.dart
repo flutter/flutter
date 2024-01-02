@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 /// [FlutterVersion] contains various meta information about whith which Flutter build this app was compiled.
 /// This contains the information that is output by executing `flutter --version`.
 /// 
