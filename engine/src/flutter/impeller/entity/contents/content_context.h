@@ -12,6 +12,7 @@
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/status_or.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/entity.h"
@@ -692,10 +693,17 @@ class ContentContext {
 
   /// @brief  Creates a new texture of size `texture_size` and calls
   ///         `subpass_callback` with a `RenderPass` for drawing to the texture.
-  std::shared_ptr<Texture> MakeSubpass(const std::string& label,
-                                       ISize texture_size,
-                                       const SubpassCallback& subpass_callback,
-                                       bool msaa_enabled = true) const;
+  fml::StatusOr<RenderTarget> MakeSubpass(
+      const std::string& label,
+      ISize texture_size,
+      const SubpassCallback& subpass_callback,
+      bool msaa_enabled = true) const;
+
+  /// Makes a subpass that will render to `subpass_target`.
+  fml::StatusOr<RenderTarget> MakeSubpass(
+      const std::string& label,
+      const RenderTarget& subpass_target,
+      const SubpassCallback& subpass_callback) const;
 
   std::shared_ptr<LazyGlyphAtlas> GetLazyGlyphAtlas() const {
     return lazy_glyph_atlas_;

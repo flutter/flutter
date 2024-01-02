@@ -79,7 +79,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
     }
   }
 
-  auto texture = renderer.MakeSubpass(
+  fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
       label, ISize::Ceil(coverage->GetSize()),
       [&contents = *this, &entity, &coverage](const ContentContext& renderer,
                                               RenderPass& pass) -> bool {
@@ -92,12 +92,12 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
       },
       msaa_enabled);
 
-  if (!texture) {
+  if (!render_target.ok()) {
     return std::nullopt;
   }
 
   auto snapshot = Snapshot{
-      .texture = texture,
+      .texture = render_target.value().GetRenderTargetTexture(),
       .transform = Matrix::MakeTranslation(coverage->GetOrigin()),
   };
   if (sampler_descriptor.has_value()) {
