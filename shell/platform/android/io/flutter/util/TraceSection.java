@@ -4,10 +4,37 @@
 
 package io.flutter.util;
 
+import android.annotation.TargetApi;
 import androidx.annotation.NonNull;
 import androidx.tracing.Trace;
 
-public final class TraceSection {
+@TargetApi(19)
+public final class TraceSection implements AutoCloseable {
+  /**
+   * Factory used to support the try-with-resource construct.
+   *
+   * <p>To get scoped trace events, use the try-with-resource construct, for instance:
+   *
+   * <pre>{@code
+   * try (TraceSection e = TraceSection.scoped("MyTraceEvent")) {
+   *   // code.
+   * }
+   * }</pre>
+   */
+  public static TraceSection scoped(String name) {
+    return new TraceSection(name);
+  }
+
+  /** Constructor used to support the try-with-resource construct. */
+  private TraceSection(String name) {
+    begin(name);
+  }
+
+  @Override
+  public void close() {
+    end();
+  }
+
   private static String cropSectionName(@NonNull String sectionName) {
     return sectionName.length() < 124 ? sectionName : sectionName.substring(0, 124) + "...";
   }
