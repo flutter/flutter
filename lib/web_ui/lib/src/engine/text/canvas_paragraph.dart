@@ -431,6 +431,7 @@ abstract class StyleNode {
         letterSpacing: _letterSpacing,
         wordSpacing: _wordSpacing,
         height: _height,
+        leadingDistribution: _leadingDistribution,
         locale: _locale,
         background: _background,
         foreground: _foreground,
@@ -456,6 +457,7 @@ abstract class StyleNode {
   double? get _letterSpacing;
   double? get _wordSpacing;
   double? get _height;
+  ui.TextLeadingDistribution? get _leadingDistribution;
   ui.Locale? get _locale;
   ui.Paint? get _background;
   ui.Paint? get _foreground;
@@ -520,6 +522,9 @@ class ChildStyleNode extends StyleNode {
 
   @override
   double? get _height => style.height ?? parent._height;
+
+  @override
+  ui.TextLeadingDistribution? get _leadingDistribution => style.leadingDistribution ?? parent._leadingDistribution;
 
   @override
   ui.Locale? get _locale => style.locale ?? parent._locale;
@@ -597,6 +602,9 @@ class RootStyleNode extends StyleNode {
 
   @override
   double? get _height => paragraphStyle.height;
+
+  @override
+  ui.TextLeadingDistribution? get _leadingDistribution => null;
 
   @override
   ui.Locale? get _locale => paragraphStyle.locale;

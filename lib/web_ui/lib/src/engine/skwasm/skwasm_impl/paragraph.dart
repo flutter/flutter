@@ -317,7 +317,11 @@ class SkwasmTextStyle implements ui.TextStyle {
     this.shadows,
     this.fontFeatures,
     this.fontVariations,
-  });
+  }) : assert(
+        color == null || foreground == null,
+        'Cannot provide both a color and a foreground\n'
+        'The color argument is just a shorthand for "foreground: Paint()..color = color".',
+       );
 
   void applyToNative(SkwasmNativeTextStyle style) {
     final TextStyleHandle handle = style.handle;
@@ -451,6 +455,98 @@ class SkwasmTextStyle implements ui.TextStyle {
   final List<ui.Shadow>? shadows;
   final List<ui.FontFeature>? fontFeatures;
   final List<ui.FontVariation>? fontVariations;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is SkwasmTextStyle
+        && other.color == color
+        && other.decoration == decoration
+        && other.decorationColor == decorationColor
+        && other.decorationStyle == decorationStyle
+        && other.fontWeight == fontWeight
+        && other.fontStyle == fontStyle
+        && other.textBaseline == textBaseline
+        && other.leadingDistribution == leadingDistribution
+        && other.fontFamily == fontFamily
+        && other.fontSize == fontSize
+        && other.letterSpacing == letterSpacing
+        && other.wordSpacing == wordSpacing
+        && other.height == height
+        && other.decorationThickness == decorationThickness
+        && other.locale == locale
+        && other.background == background
+        && other.foreground == foreground
+        && listEquals<ui.Shadow>(other.shadows, shadows)
+        && listEquals<String>(other.fontFamilyFallback, fontFamilyFallback)
+        && listEquals<ui.FontFeature>(other.fontFeatures, fontFeatures)
+        && listEquals<ui.FontVariation>(other.fontVariations, fontVariations);
+  }
+
+  @override
+  int get hashCode {
+    final List<ui.Shadow>? shadows = this.shadows;
+    final List<ui.FontFeature>? fontFeatures = this.fontFeatures;
+    final List<ui.FontVariation>? fontVariations = this.fontVariations;
+    final List<String>? fontFamilyFallback = this.fontFamilyFallback;
+    return Object.hash(
+      color,
+      decoration,
+      decorationColor,
+      decorationStyle,
+      fontWeight,
+      fontStyle,
+      textBaseline,
+      leadingDistribution,
+      fontFamily,
+      fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback),
+      fontSize,
+      letterSpacing,
+      wordSpacing,
+      height,
+      locale,
+      background,
+      foreground,
+      shadows == null ? null : Object.hashAll(shadows),
+      decorationThickness,
+      // Object.hash goes up to 20 arguments, but we have 21
+      Object.hash(
+        fontFeatures == null ? null : Object.hashAll(fontFeatures),
+        fontVariations == null ? null : Object.hashAll(fontVariations),
+      )
+    );
+  }
+
+  @override
+  String toString() {
+    final List<String>? fontFamilyFallback = this.fontFamilyFallback;
+    final String? fontFamily = this.fontFamily;
+    return 'TextStyle('
+             'color: ${color ?? "unspecified"}, '
+             'decoration: ${decoration ?? "unspecified"}, '
+             'decorationColor: ${decorationColor ?? "unspecified"}, '
+             'decorationStyle: ${decorationStyle ?? "unspecified"}, '
+             'decorationThickness: ${decorationThickness ?? "unspecified"}, '
+             'fontWeight: ${fontWeight ?? "unspecified"}, '
+             'fontStyle: ${fontStyle ?? "unspecified"}, '
+             'textBaseline: ${textBaseline ?? "unspecified"}, '
+             'fontFamily: ${fontFamily != null && fontFamily.isNotEmpty ? fontFamily : "unspecified"}, '
+             'fontFamilyFallback: ${fontFamilyFallback != null && fontFamilyFallback.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
+             'fontSize: ${fontSize ?? "unspecified"}, '
+             'letterSpacing: ${letterSpacing != null ? "${letterSpacing}x" : "unspecified"}, '
+             'wordSpacing: ${wordSpacing != null ? "${wordSpacing}x" : "unspecified"}, '
+             'height: ${height != null ? "${height}x" : "unspecified"}, '
+             'leadingDistribution: ${leadingDistribution ?? "unspecified"}, '
+             'locale: ${locale ?? "unspecified"}, '
+             'background: ${background ?? "unspecified"}, '
+             'foreground: ${foreground ?? "unspecified"}, '
+             'shadows: ${shadows ?? "unspecified"}, '
+             'fontFeatures: ${fontFeatures ?? "unspecified"}, '
+             'fontVariations: ${fontVariations ?? "unspecified"}'
+           ')';
+  }
 }
 
 class SkwasmStrutStyle extends SkwasmObjectWrapper<RawStrutStyle> implements ui.StrutStyle {
