@@ -269,8 +269,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
       @NonNull String channel,
       @Nullable ByteBuffer message,
       @Nullable BinaryMessenger.BinaryReply callback) {
-    TraceSection.begin("DartMessenger#send on " + channel);
-    try {
+    try (TraceSection e = TraceSection.scoped("DartMessenger#send on " + channel)) {
       Log.v(TAG, "Sending message with callback over channel '" + channel + "'");
       int replyId = nextReplyId++;
       if (callback != null) {
@@ -281,8 +280,6 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
       } else {
         flutterJNI.dispatchPlatformMessage(channel, message, message.position(), replyId);
       }
-    } finally {
-      TraceSection.end();
     }
   }
 
@@ -317,8 +314,8 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
     Runnable myRunnable =
         () -> {
           TraceSection.endAsyncSection("PlatformChannel ScheduleHandler on " + channel, replyId);
-          TraceSection.begin("DartMessenger#handleMessageFromDart on " + channel);
-          try {
+          try (TraceSection e =
+              TraceSection.scoped("DartMessenger#handleMessageFromDart on " + channel)) {
             invokeHandler(handlerInfo, message, replyId);
             if (message != null && message.isDirect()) {
               // This ensures that if a user retains an instance to the ByteBuffer and it
@@ -328,7 +325,6 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
           } finally {
             // This is deleting the data underneath the message object.
             flutterJNI.cleanupMessageData(messageData);
-            TraceSection.end();
           }
         };
     final DartMessengerTaskQueue nonnullTaskQueue =

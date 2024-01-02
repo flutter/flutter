@@ -157,8 +157,7 @@ public class FlutterLoader {
       throw new IllegalStateException("startInitialization must be called on the main thread");
     }
 
-    TraceSection.begin("FlutterLoader#startInitialization");
-    try {
+    try (TraceSection e = TraceSection.scoped("FlutterLoader#startInitialization")) {
       // Ensure that the context is actually the application context.
       final Context appContext = applicationContext.getApplicationContext();
 
@@ -186,8 +185,7 @@ public class FlutterLoader {
           new Callable<InitResult>() {
             @Override
             public InitResult call() {
-              TraceSection.begin("FlutterLoader initTask");
-              try {
+              try (TraceSection e = TraceSection.scoped("FlutterLoader initTask")) {
                 ResourceExtractor resourceExtractor = initResources(appContext);
 
                 flutterJNI.loadLibrary();
@@ -205,14 +203,10 @@ public class FlutterLoader {
                     PathUtils.getFilesDir(appContext),
                     PathUtils.getCacheDirectory(appContext),
                     PathUtils.getDataDirectory(appContext));
-              } finally {
-                TraceSection.end();
               }
             }
           };
       initResultFuture = executorService.submit(initTask);
-    } finally {
-      TraceSection.end();
     }
   }
 
@@ -245,8 +239,7 @@ public class FlutterLoader {
           "ensureInitializationComplete must be called after startInitialization");
     }
 
-    TraceSection.begin("FlutterLoader#ensureInitializationComplete");
-    try {
+    try (TraceSection e = TraceSection.scoped("FlutterLoader#ensureInitializationComplete")) {
       InitResult result = initResultFuture.get();
 
       List<String> shellArgs = new ArrayList<>();
@@ -363,8 +356,6 @@ public class FlutterLoader {
     } catch (Exception e) {
       Log.e(TAG, "Flutter initialization failed.", e);
       throw new RuntimeException(e);
-    } finally {
-      TraceSection.end();
     }
   }
 
