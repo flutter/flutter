@@ -1784,6 +1784,51 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return SelectionResult.end;
   }
 
+  TextRange? _intersect(TextRange a, TextRange b) {
+    if (a.start == b.start && a.end == b.end) {
+      return null;
+    }
+    int startMax = math.max(a.start, b.start);
+    int endMin = math.min(a.end, b.end);
+
+    if (startMax <= endMin) {
+      // This means there is an intersection
+      return TextRange(start: startMax, end: endMin);
+    }
+    // If no intersection, return null or handle accordingly
+    return null;
+  }
+
+  SelectionResult _handleSelectMultiTextBoundary(_TextBoundaryRecord textBoundary) {
+    // This fragment may not contain the boundary, decide what direction the target
+    // fragment is located in. Because fragments are separated by placeholder
+    // spans, we also check if the beginning or end of the boundary is touching
+    // either edge of this fragment.
+    if (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset <= range.start) {
+      return SelectionResult.previous;
+    } else if (textBoundary.boundaryStart.offset >= range.end && textBoundary.boundaryEnd.offset > range.end) {
+      return SelectionResult.next;
+    }
+    // Fragments are separated by placeholder span, the text boundary shouldn't
+    // expand across fragments.
+    // assert(textBoundary.boundaryStart.offset >= range.start && textBoundary.boundaryEnd.offset <= range.end);
+    late final TextRange? intersectRange;
+    if ((intersectRange = _intersect(range, TextRange(start: textBoundary.boundaryStart.offset, end: textBoundary.boundaryEnd.offset))) != null) {
+      debugPrint('intersect');
+      _textSelectionStart = TextPosition(offset: intersectRange!.start);
+      _textSelectionEnd = TextPosition(offset: intersectRange!.end);
+      if (range.end < textBoundary.boundaryEnd.offset) {
+        debugPrint('next');
+        return SelectionResult.next;
+      }
+      return SelectionResult.end;
+    }
+    _textSelectionStart = textBoundary.boundaryStart;
+    _textSelectionEnd = textBoundary.boundaryEnd;
+    _selectableContainsOriginTextBoundary = true;
+    return SelectionResult.end;
+  }
+
   _TextBoundaryRecord _adjustTextBoundaryAtPosition(TextRange textBoundary, TextPosition position) {
     late final TextPosition start;
     late final TextPosition end;
@@ -1816,17 +1861,19 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   /// located at the globalPosition.
 
   SelectionResult _handleSelectParagraph(Offset globalPosition) {
+    debugPrint('handleSelectParagraph from $fullText');
     final Offset localPosition = paragraph.globalToLocal(globalPosition);
-    final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition)));
+    // final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition)));
+    final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
     final _TextBoundaryRecord paragraphBoundary = _getParagraphBoundaryAtPosition(position);
     // If this selectable fragment is followed by an inline element, then we
     // should tell the selection delegate to continue walking through the selectable
     // tree to find the complete paragraph. Only continue walking if the paragraph
     // did not end on a line terminator.
-    final SelectionResult result = _handleSelectTextBoundary(paragraphBoundary);
-    if (!TextLayoutMetrics.isLineTerminator(fullText.codeUnitAt(paragraphBoundary.boundaryEnd.offset - 1))) {
-      return SelectionResult.next;
-    }
+    final SelectionResult result = _handleSelectMultiTextBoundary(paragraphBoundary);
+    // if (!TextLayoutMetrics.isLineTerminator(fullText.codeUnitAt(paragraphBoundary.boundaryEnd.offset - 1))) {
+    //   return SelectionResult.next;
+    // }
     return result;
   }
 
@@ -1834,11 +1881,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final ParagraphBoundary paragraphBoundary = ParagraphBoundary(fullText);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.
-    int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == range.end || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? range.start;
-    int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? range.end;
+    int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == fullText.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
+    int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? fullText.length;
     // Clamp to selectable.
-    paragraphStart = paragraphStart < range.start ? range.start : paragraphStart;
-    paragraphEnd = paragraphEnd > range.end ? range.end : paragraphEnd;
+    // paragraphStart = paragraphStart < range.start ? range.start : paragraphStart;
+    // paragraphEnd = paragraphEnd > range.end ? range.end : paragraphEnd;
     final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
     assert(paragraphRange.isNormalized);
     return _adjustTextBoundaryAtPosition(paragraphRange, position);

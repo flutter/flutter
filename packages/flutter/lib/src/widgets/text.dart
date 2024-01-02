@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/rendering.dart';
@@ -783,12 +784,65 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return result;
   }
 
+  // Clears the selection on all selectables not in the range of
+  // currentSelectionStartIndex..currentSelectionEndIndex.
+  //
+  // If one of the edges does not exist, then this method will clear the selection
+  // in all selectables except the existing edge.
+  //
+  // If neither of the edges exist this method immediately returns.
+  void _flushInactiveSelections() {
+    if (currentSelectionStartIndex == -1 && currentSelectionEndIndex == -1) {
+      return;
+    }
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      final int skipIndex = currentSelectionStartIndex == -1 ? currentSelectionEndIndex : currentSelectionStartIndex;
+      selectables
+        .where((Selectable target) => target != selectables[skipIndex])
+        .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
+      return;
+    }
+    final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int skipEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int index = 0; index < selectables.length; index += 1) {
+      if (index >= skipStart && index <= skipEnd) {
+        continue;
+      }
+      dispatchSelectionEventToChild(selectables[index], const ClearSelectionEvent());
+    }
+  }
+
   /// Selects a paragraph in a selectable at the location
   /// [SelectParagraphSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     debugPrint('select paragraph from text container');
-    final SelectionResult result = super.handleSelectParagraph(event);
+    // final SelectionResult result = super.handleSelectParagraph(event);
+    SelectionResult? lastSelectionResult;
+    bool allSwitch = false;
+    for (int index = 0; index < selectables.length; index += 1) {
+      final SelectionGeometry existingGeometry = selectables[index].value;
+      lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+      if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
+        return SelectionResult.next;
+      }
+      if (lastSelectionResult == SelectionResult.next) {
+        if (selectables[index].value != existingGeometry && !allSwitch) {
+          currentSelectionStartIndex = index;
+          allSwitch = true;
+        }
+        continue;
+      }
+      if (index == 0 && lastSelectionResult == SelectionResult.previous) {
+        return SelectionResult.previous;
+      }
+      if (selectables[index].value != existingGeometry) {
+        // Geometry has changed as a result of select paragraph, need to clear the
+        // selection of other selectables to keep selection in sync.
+        _flushInactiveSelections();
+        currentSelectionEndIndex = index;
+      }
+    }
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
     }
@@ -796,7 +850,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
     }
     _updateLastEdgeEventsFromGeometries();
-    return result;
+    return lastSelectionResult!;
   }
 
   @override
