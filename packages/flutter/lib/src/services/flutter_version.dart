@@ -4,7 +4,7 @@
 
 /// [FlutterVersion] contains various meta information about whith which Flutter build this app was compiled.
 /// This contains the information that is output by executing `flutter --version`.
-/// 
+///
 /// See also:
 ///  - [Platform.version](https://api.dart.dev/stable/dart-io/Platform/version.html)
 class FlutterVersion {

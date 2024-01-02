@@ -1366,7 +1366,7 @@ abstract class FlutterCommand extends Command<void> {
           'Use FlutterVersion to access it in Flutter code');
       }
     }
-    
+
     dartDefines.add('FLUTTER_VERSION=${globals.flutterVersion.frameworkVersion}');
     dartDefines.add('FLUTTER_CHANNEL=${globals.flutterVersion.channel}');
     dartDefines.add('FLUTTER_GIT_URL=${globals.flutterVersion.repositoryUrl}');

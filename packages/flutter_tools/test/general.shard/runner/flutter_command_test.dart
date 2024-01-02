@@ -1310,7 +1310,7 @@ void main() {
       testUsingContext('FLUTTER_GIT_URL is set in dartDefines', () async {
         final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
-        
+
         expect(buildInfo.dartDefines, contains('FLUTTER_GIT_URL=https://github.com/flutter/flutter.git'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
