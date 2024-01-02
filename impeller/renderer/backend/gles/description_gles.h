@@ -27,8 +27,6 @@ class DescriptionGLES {
 
   std::string GetString() const;
 
-  Version GetGlVersion() const;
-
   bool HasExtension(const std::string& ext) const;
 
   /// @brief      Returns whether GLES includes the debug extension.
