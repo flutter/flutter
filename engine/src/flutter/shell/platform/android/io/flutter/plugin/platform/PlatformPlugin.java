@@ -38,7 +38,7 @@ public class PlatformPlugin {
 
   private final Activity activity;
   private final PlatformChannel platformChannel;
-  private final PlatformPluginDelegate platformPluginDelegate;
+  @Nullable private final PlatformPluginDelegate platformPluginDelegate;
   private PlatformChannel.SystemChromeStyle currentTheme;
   private int mEnabledOverlays;
   private static final String TAG = "PlatformPlugin";
@@ -161,7 +161,7 @@ public class PlatformPlugin {
   public PlatformPlugin(
       @NonNull Activity activity,
       @NonNull PlatformChannel platformChannel,
-      @NonNull PlatformPluginDelegate delegate) {
+      @Nullable PlatformPluginDelegate delegate) {
     this.activity = activity;
     this.platformChannel = platformChannel;
     this.platformChannel.setPlatformMessageHandler(mPlatformMessageHandler);
@@ -499,7 +499,9 @@ public class PlatformPlugin {
   }
 
   private void setFrameworkHandlesBack(boolean frameworkHandlesBack) {
-    platformPluginDelegate.setFrameworkHandlesBack(frameworkHandlesBack);
+    if (platformPluginDelegate != null) {
+      platformPluginDelegate.setFrameworkHandlesBack(frameworkHandlesBack);
+    }
   }
 
   private void popSystemNavigator() {
