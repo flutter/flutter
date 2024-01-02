@@ -3663,13 +3663,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _isInternalScrollableNotification(BuildContext? notificationContext) {
     final ScrollableState? scrollableState = notificationContext?.findAncestorStateOfType<ScrollableState>();
-    if (_scrollableKey.currentContext == scrollableState?.context) {
-      return true;
-    }
-    return false;
+    return _scrollableKey.currentContext == scrollableState?.context;
   }
 
   void _handleContextMenuOnParentScroll(ScrollNotification notification) {
+    if (notification !is ScrollStartNotification
+       || notification !is ScrollEndNotification) {
+      return;
+    }
     if (_isInternalScrollableNotification(notification.context)) {
       return;
     }
@@ -3726,9 +3727,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
       _valueWhenToolbarShowScheduled = toolbarIsVisible ? _value : null;
       if (_valueWhenToolbarShowScheduled != null) {
-        if (_selectionOverlay?.toolbarIsVisible ?? false) {
-          _selectionOverlay?.hideToolbar();
-        }
+        _selectionOverlay?.hideToolbar();
       }
     } else if (notification is ScrollEndNotification) {
       if (_valueWhenToolbarShowScheduled == null) {
