@@ -1587,6 +1587,39 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(find.text('!'), findsOneWidget);
   });
 
+  testWidgets('StepperProperties test', (WidgetTester tester) async {
+    const StepperProperties stepperProperties = StepperProperties(
+      height: 48,
+      width:48,
+      margin: EdgeInsets.zero,
+    );
+
+    const Widget widget = SizedBox.shrink();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            stepperProperties: stepperProperties,
+             steps: List<Step>.generate(3, (int index) {
+               return Step(
+                 title: Text('Step $index'),
+                 content: widget,
+               );
+             }),
+          ),
+        ),
+      ),
+    );
+
+    final Finder stepperFinder = find.byType(Stepper);
+    final Stepper stepper = tester.widget<Stepper>(stepperFinder);
+
+    expect(stepper.stepperProperties?.height, stepperProperties.height);
+    expect(stepper.stepperProperties?.width, stepperProperties.width);
+    expect(stepper.stepperProperties?.margin, stepperProperties.margin);
+  });
+
 }
 
 class _TappableColorWidget extends StatefulWidget {
