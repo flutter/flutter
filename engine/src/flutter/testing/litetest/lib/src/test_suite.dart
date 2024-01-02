@@ -40,10 +40,20 @@ class TestSuite {
       );
     }
     if (skip) {
-      _logger.writeln('Test $name: Skipped');
+      _logger.writeln('Test "$name": Skipped');
+      _primeQueue();
       return;
     }
     _pushTest(name, body);
+  }
+
+  void _primeQueue() {
+    if (!_testQueuePrimed) {
+      // All tests() must be added synchronously with main, so we can enqueue an
+      // event to start all tests to run after main() is done.
+      Timer.run(_startAllTests);
+      _testQueuePrimed = true;
+    }
   }
 
   void _pushTest(
@@ -53,12 +63,7 @@ class TestSuite {
     final Test newTest = Test(name, body, logger: _logger);
     _testQueue.add(newTest);
     newTest.state = TestState.queued;
-    if (!_testQueuePrimed) {
-      // All tests() must be added synchronously with main, so we can enqueue an
-      // event to start all tests to run after main() is done.
-      Timer.run(_startAllTests);
-      _testQueuePrimed = true;
-    }
+    _primeQueue();
   }
 
   void _startAllTests() {
@@ -72,6 +77,10 @@ class TestSuite {
       });
     }
     _lifecycle.onStart();
+    if (_testQueue.isEmpty) {
+      _logger.writeln('All tests skipped.');
+      _lifecycle.onDone(_testQueue);
+    }
   }
 }
 

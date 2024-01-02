@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:isolate';
 
 import 'package:async_helper/async_helper.dart';
 import 'package:async_helper/async_minitest.dart';
@@ -12,6 +13,25 @@ import 'package:litetest/src/test_suite.dart';
 
 Future<void> main() async {
   asyncStart();
+
+  test('skip', () async {
+    final StringBuffer buffer = StringBuffer();
+    final TestLifecycle lifecycle = TestLifecycle();
+    final TestSuite ts = TestSuite(
+      logger: buffer,
+      lifecycle: lifecycle,
+    );
+
+    ts.test('Test', () {
+      expect(1, equals(1));
+    }, skip: true);
+    final bool result = await lifecycle.result;
+
+    expect(result, true);
+    expect(buffer.toString(), equals(
+      'Test "Test": Skipped\nAll tests skipped.\n',
+    ));
+  });
 
   test('test', () async {
     final StringBuffer buffer = StringBuffer();
@@ -211,6 +231,8 @@ Test "Test3": Passed
 }
 
 class TestLifecycle implements Lifecycle {
+  final ReceivePort port = ReceivePort();
+
   final Completer<bool> _testCompleter = Completer<bool>();
 
   Future<bool> get result => _testCompleter.future;
@@ -225,5 +247,6 @@ class TestLifecycle implements Lifecycle {
       testsSucceeded = testsSucceeded && (t.state == TestState.succeeded);
     }
     _testCompleter.complete(testsSucceeded);
+    port.close();
   }
 }
