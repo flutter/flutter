@@ -1301,7 +1301,7 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
     }
 
-    _addFlutterVersion();
+    _addFlutterVersionToDartDefines(dartDefines);
 
     return BuildInfo(buildMode,
       flavor,
@@ -1345,8 +1345,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   // This adds the Dart defines used to access various Flutter version information at runtime.
-  void _addFlutterVersion() {
-    const List<String> dartDefines = <String>[
+  void _addFlutterVersionToDartDefines(List<String> dartDefines) {
+    const List<String> flutterVersionDartDefines = <String>[
       'FLUTTER_VERSION',
       'FLUTTER_CHANNEL',
       'FLUTTER_GIT_URL',
@@ -1355,13 +1355,15 @@ abstract class FlutterCommand extends Command<void> {
       'FLUTTER_DART_VERSION',
     ];
 
-    for(final String dartDefine in dartDefines) {
+    for(final String dartDefine in flutterVersionDartDefines) {
       if (globals.platform.environment[dartDefine] != null) {
-        throwToolExit('$dartDefine is used by the framework and cannot be set in the environment.');
+        throwToolExit('$dartDefine is used by the framework and cannot be set in the environment. '
+          'Use FlutterVersion to access it in Flutter code');
       }
       if (dartDefines.any((String define) => define.startsWith(dartDefine))) {
         throwToolExit('$dartDefine is used by the framework and cannot be '
-          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}');
+          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}. '
+          'Use FlutterVersion to access it in Flutter code');
       }
     }
     
