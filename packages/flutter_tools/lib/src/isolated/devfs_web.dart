@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
@@ -100,7 +99,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<void> initialize({String? moduleFormat, bool? soundNullSafety}) async {}
+  Future<void> initialize(CompilerOptions options) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -287,9 +286,11 @@ class WebAssetServer implements AssetReader {
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        packageConfig.toPackageUri(
+          BuildSettings(
+            appEntrypoint: packageConfig.toPackageUri(
           globals.fs.file(entrypoint).absolute.uri,
-        ),
+            ),
+          ),
       ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,

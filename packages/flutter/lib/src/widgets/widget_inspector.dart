@@ -3188,11 +3188,15 @@ class _InspectorOverlayLayer extends Layer {
       }
       candidates.add(_TransformedRect(candidate, rootRenderObject));
     }
+    final _TransformedRect selectedRect = _TransformedRect(selected, rootRenderObject);
+    final String widgetName = selection.currentElement!.toStringShort();
+    final String width = selectedRect.rect.width.toStringAsFixed(1);
+    final String height = selectedRect.rect.height.toStringAsFixed(1);
 
     final _InspectorOverlayRenderState state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
-      selected: _TransformedRect(selected, rootRenderObject),
-      tooltip: selection.currentElement!.toStringShort(),
+      selected: selectedRect,
+      tooltip: '$widgetName ($width x $height)',
       textDirection: TextDirection.ltr,
       candidates: candidates,
     );
@@ -3380,7 +3384,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    // ignore: unused_element, unused_element_parameter
+    // ignore: unused_element
     this.name,
   });
 

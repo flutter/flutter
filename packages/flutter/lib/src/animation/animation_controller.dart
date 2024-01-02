@@ -300,10 +300,10 @@ class AnimationController extends Animation<double>
     _internalSetValue(value);
   }
 
-  /// Dispatches event of object creation to [MemoryAllocations.instance].
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
   void _maybeDispatchObjectCreation() {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterAnimationLibrary,
         className: '$AnimationController',
         object: this,
@@ -833,7 +833,7 @@ class AnimationController extends Animation<double>
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _ticker!.dispose();
     _ticker = null;
