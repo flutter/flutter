@@ -7201,11 +7201,6 @@ ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/f
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/plugin_registrar_windows.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/compositor.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/compositor_opengl.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/compositor_opengl.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/compositor_software.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/compositor_software.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/cursor_handler.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/cursor_handler.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/direct_manipulation.cc + ../../../flutter/LICENSE
@@ -10044,11 +10039,6 @@ FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/flu
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view.h
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/plugin_registrar_windows.h
-FILE: ../../../flutter/shell/platform/windows/compositor.h
-FILE: ../../../flutter/shell/platform/windows/compositor_opengl.cc
-FILE: ../../../flutter/shell/platform/windows/compositor_opengl.h
-FILE: ../../../flutter/shell/platform/windows/compositor_software.cc
-FILE: ../../../flutter/shell/platform/windows/compositor_software.h
 FILE: ../../../flutter/shell/platform/windows/cursor_handler.cc
 FILE: ../../../flutter/shell/platform/windows/cursor_handler.h
 FILE: ../../../flutter/shell/platform/windows/direct_manipulation.cc

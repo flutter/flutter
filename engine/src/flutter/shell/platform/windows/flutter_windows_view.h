@@ -27,6 +27,9 @@
 
 namespace flutter {
 
+// ID for the window frame buffer.
+inline constexpr uint32_t kWindowFrameBufferID = 0;
+
 // An OS-windowing neutral abstration for a Flutter view that works
 // with win32 HWNDs.
 class FlutterWindowsView : public WindowBindingHandlerDelegate {
@@ -65,21 +68,15 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Swap the view's surface buffers. Must be called on the engine's raster
   // thread. Returns true if the buffers were swapped.
   //
-  // |OnFrameGenerated| or |OnEmptyFrameGenerated| must be called before this
-  // method.
-  //
   // If the view is resizing, this returns false if the frame is not the target
   // size. Otherwise, it unblocks the platform thread and blocks the raster
   // thread until the v-blank.
-  virtual bool SwapBuffers();
-
-  // Callback to clear a previously presented software bitmap.
-  virtual bool ClearSoftwareBitmap();
+  bool SwapBuffers();
 
   // Callback for presenting a software bitmap.
-  virtual bool PresentSoftwareBitmap(const void* allocation,
-                                     size_t row_bytes,
-                                     size_t height);
+  bool PresentSoftwareBitmap(const void* allocation,
+                             size_t row_bytes,
+                             size_t height);
 
   // Send initial bounds to embedder.  Must occur after engine has initialized.
   void SendInitialBounds();
@@ -90,18 +87,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // |WindowBindingHandlerDelegate|
   void OnHighContrastChanged() override;
 
-  // Called on the raster thread when |CompositorOpenGL| receives an empty
-  // frame.
-  //
-  // This resizes the surface if a resize is pending.
-  void OnEmptyFrameGenerated();
-
-  // Called on the raster thread when |CompositorOpenGL| receives a frame.
-  // Returns true if the frame can be presented.
-  //
-  // This resizes the surface if a resize is pending and |width| and
-  // |height| match the target size.
-  bool OnFrameGenerated(size_t width, size_t height);
+  // Returns the frame buffer id for the engine to render to.
+  uint32_t GetFrameBufferId(size_t width, size_t height);
 
   // Sets the cursor that should be used when the mouse is over the Flutter
   // content. See mouse_cursor.dart for the values and meanings of cursor_name.
