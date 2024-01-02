@@ -115,9 +115,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
-  if (isAndroidLibrary && nativeAssets.isNotEmpty) {
-    throwToolExit('Native assets are not yet supported in Android add2app.');
-  }
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
   await _copyNativeAssetsAndroid(buildUri_, assetTargetLocations, fileSystem);

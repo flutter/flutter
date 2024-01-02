@@ -1127,7 +1127,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flavor(flavorValue)
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
-            Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1140,10 +1140,20 @@ class FlutterPlugin implements Plugin<Project> {
                             return "lib/${abi}/lib${filename}"
                         }
                     }
+                    // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
+                    // The `$project.buildDir` is '.android/Flutter/build/' instead of 'build/'.
+                    def buildDir = "${getFlutterSourceDirectory()}/build"
+                    def nativeAssetsDir = "${buildDir}/native_assets/android/jniLibs/lib"
+                    from("${nativeAssetsDir}/${abi}") {
+                        include "*.so"
+                        rename { String filename ->
+                            return "lib/${abi}/${filename}"
+                        }
+                    }
                 }
             }
             addApiDependencies(project, variant.name, project.files {
-                packFlutterAppAotTask
+                packJniLibsTask
             })
             Task copyFlutterAssetsTask = project.tasks.create(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
