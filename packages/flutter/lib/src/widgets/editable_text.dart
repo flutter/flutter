@@ -3697,7 +3697,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // The notification context of a ScrollNotification points to the RawGestureDetector
     // of the Scrollable. We get the ScrollableState associated with this notification
     // by looking up the tree.
-    final BuildContext? notificationScrollableContext = notificationContext?.findAncestorStateOfType<ScrollableState>()?.context;
+    final BuildContext? notificationScrollableContext = notificationContext.findAncestorStateOfType<ScrollableState>()?.context;
     if (notificationScrollableContext == null) {
       return false;
     }
