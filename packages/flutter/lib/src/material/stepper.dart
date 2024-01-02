@@ -2,20 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-
-import 'button_style.dart';
-import 'color_scheme.dart';
-import 'colors.dart';
-import 'debug.dart';
-import 'icons.dart';
-import 'ink_well.dart';
-import 'material.dart';
-import 'material_localizations.dart';
-import 'material_state.dart';
-import 'text_button.dart';
-import 'text_theme.dart';
-import 'theme.dart';
+import 'package:flutter/material.dart';
 
 // TODO(dragostis): Missing functionality:
 //   * mobile horizontal mode with adding/removing steps
@@ -68,6 +55,7 @@ class ControlsDetails {
     this.onStepCancel,
     this.onStepContinue,
   });
+
   /// Index that is active for the surrounding [Stepper] widget. This may be
   /// different from [stepIndex] if the user has just changed steps and we are
   /// currently animating toward that step.
@@ -121,7 +109,9 @@ const Color _kCircleActiveDark = Colors.black87;
 const Color _kDisabledLight = Colors.black38;
 const Color _kDisabledDark = Colors.white38;
 const double _kStepSize = 24.0;
-const double _kTriangleHeight = _kStepSize * 0.866025; // Triangle height. sqrt(3.0) / 2.0
+const double _kTriangleSqrt = 0.866025; // sqrt(3.0) / 2.0
+const double _kTriangleHeight = _kStepSize * _kTriangleSqrt;
+const double _kMaxStepSize = 80.0;
 
 /// A material step used in [Stepper]. The step can have a title and subtitle,
 /// an icon within its circle, some content and a state that governs its
@@ -211,6 +201,7 @@ class Stepper extends StatefulWidget {
     this.connectorColor,
     this.connectorThickness,
     this.stepIconBuilder,
+    this.stepperProperties,
   }) : assert(0 <= currentStep && currentStep < steps.length);
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
@@ -338,6 +329,9 @@ class Stepper extends StatefulWidget {
   /// If null, the default icons will be used for respective [StepState].
   final StepIconBuilder? stepIconBuilder;
 
+  /// Customize some properties of the stepper.
+  final StepperProperties? stepperProperties;
+
   @override
   State<Stepper> createState() => _StepperState();
 }
@@ -368,6 +362,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       _oldStates[i] = oldWidget.steps[i].state;
     }
   }
+
+  StepperProperties? get stepperProperties => widget.stepperProperties;
 
   bool _isFirst(int index) {
     return index == 0;
@@ -441,7 +437,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           size: 18.0,
         );
       case StepState.error:
-        return const Text('!', style: _kStepStyle);
+        return const Center(child: Text('!', style: _kStepStyle));
     }
   }
 
@@ -464,9 +460,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildCircle(int index, bool oldState) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      width: _kStepSize,
-      height: _kStepSize,
+      margin: stepperProperties?.margin ?? const EdgeInsets.symmetric(vertical: 8.0),
+      width: stepperProperties?.width ?? _kStepSize,
+      height: stepperProperties?.height ?? _kStepSize,
       child: AnimatedContainer(
         curve: Curves.fastOutSlowIn,
         duration: kThemeAnimationDuration,
@@ -483,13 +479,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildTriangle(int index, bool oldState) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      width: _kStepSize,
-      height: _kStepSize,
+      margin: stepperProperties?.margin ?? const EdgeInsets.symmetric(vertical: 8.0),
+      width: stepperProperties?.width ?? _kStepSize,
+      height: stepperProperties?.height ?? _kStepSize,
       child: Center(
         child: SizedBox(
-          width: _kStepSize,
-          height: _kTriangleHeight, // Height of 24dp-long-sided equilateral triangle.
+          width: stepperProperties?.width  ?? _kStepSize,
+          height: stepperProperties?.height != null ? stepperProperties!.height! * _kTriangleSqrt : _kTriangleHeight,
           child: CustomPaint(
             painter: _TrianglePainter(
               color: _isDark() ? _kErrorDark : _kErrorLight,
@@ -724,14 +720,21 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalBody(int index) {
+    final double? marginLeft = stepperProperties?.margin?.resolve(TextDirection.ltr).left;
+    final double? stepWidth = stepperProperties?.width;
     return Stack(
       children: <Widget>[
         PositionedDirectional(
-          start: 24.0,
+          // Adjust the left side of the line so that it is centered under the
+          // circle.
+          start: 24.0 + (marginLeft ?? 0.0),
           top: 0.0,
           bottom: 0.0,
           child: SizedBox(
-            width: 24.0,
+            // The line is drawn from the center of the circle vertically until
+            // it reaches the bottom and then horizontally to the edge of the
+            // stepper.
+            width: stepWidth ?? _kStepSize,
             child: Center(
               child: SizedBox(
                 width: widget.connectorThickness ?? 1.0,
@@ -745,8 +748,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: Container(height: 0.0),
           secondChild: Container(
-            margin: widget.margin ?? const EdgeInsetsDirectional.only(
-              start: 60.0,
+            margin: widget.margin ??  EdgeInsetsDirectional.only(
+              // Adjust the left side of the content so that it is aligned with
+              // the labels of the previous and next steps.
+              start: 60.0 + (marginLeft ?? 0.0),
               end: 24.0,
               bottom: 24.0,
             ),
@@ -809,19 +814,16 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
-              SizedBox(
-                height: _isLabel() ? 104.0 : 72.0,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    if (widget.steps[i].label != null) const SizedBox(height: 24.0,),
-                    Center(child: _buildIcon(i)),
-                    if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i),),
-                  ],
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  if (widget.steps[i].label != null) const SizedBox(height: 24.0,),
+                  Center(child: _buildIcon(i)),
+                  if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i),),
+                ],
               ),
               Container(
-                margin: const EdgeInsetsDirectional.only(start: 12.0),
+                margin: stepperProperties?.margin ?? const EdgeInsetsDirectional.only(start: 12.0),
                 child: _buildHeaderText(i),
               ),
             ],
@@ -831,7 +833,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           Expanded(
             child: Container(
               key: Key('line$i'),
-              margin: const EdgeInsets.symmetric(horizontal: 8.0),
+              margin: stepperProperties?.margin ?? const EdgeInsets.symmetric(horizontal: 8.0),
               height: widget.connectorThickness ?? 1.0,
               color: _connectorColor(widget.steps[i+1].isActive),
             ),
@@ -856,6 +858,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           elevation: widget.elevation ?? 2,
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0),
+            height: stepperProperties?.height != null ? stepperProperties!.height! * 2 : null,
             child: Row(
               children: children,
             ),
@@ -937,4 +940,34 @@ class _TrianglePainter extends CustomPainter {
       Paint()..color = color,
     );
   }
+}
+
+/// [Stepper] will use these properties to customize some of its parts.
+class StepperProperties {
+  /// Constructs a [StepperStyle] with the given values.
+  const StepperProperties({
+    this.height,
+    this.width,
+    this.margin,
+  })  : assert(height == null || height >= _kStepSize && height <= _kMaxStepSize,
+            'height must be greater than $_kStepSize and less than $_kMaxStepSize'),
+        assert(width == null || width >= _kStepSize && width <= _kMaxStepSize,
+            'width must be greater than $_kStepSize and less than $_kMaxStepSize'),
+        assert(
+            height == null || width == null || height == width, 'height and width must be equal if both are not null');
+
+  /// The height of icon in the step.
+  ///
+  /// If null, the default height is used.
+  final double? height;
+
+  /// The width of icon in the step.
+  ///
+  /// If null, the default width is used.
+  final double? width;
+
+  /// The margin of line and icon in the step.
+  ///
+  /// If null, the default margin is used.
+  final EdgeInsets? margin;
 }
