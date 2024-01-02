@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
     int _disposals = 0;
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   test('Publishers dispatch events in debug mode', () async {
     void listener(ObjectEvent event) {
