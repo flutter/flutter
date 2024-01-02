@@ -148,7 +148,7 @@ mixin class ChangeNotifier implements Listenable {
   bool _debugDisposed = false;
 
   /// If true, the event [ObjectCreated] for this instance was dispatched to
-  /// [MemoryAllocations].
+  /// [FlutterMemoryAllocations].
   ///
   /// As [ChangedNotifier] is used as mixin, it does not have constructor,
   /// so we use [addListener] to dispatch the event.
@@ -207,7 +207,7 @@ mixin class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners => _count > 0;
 
-  /// Dispatches event of the [object] creation to [MemoryAllocations.instance].
+  /// Dispatches event of the [object] creation to [FlutterMemoryAllocations.instance].
   ///
   /// If the event was already dispatched or [kFlutterMemoryAllocationsEnabled]
   /// is false, the method is noop.
@@ -231,7 +231,7 @@ mixin class ChangeNotifier implements Listenable {
     // Tree shaker does not include this method and the class MemoryAllocations
     // if kFlutterMemoryAllocationsEnabled is false.
     if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterFoundationLibrary,
         className: '$ChangeNotifier',
         object: object,
@@ -384,7 +384,7 @@ mixin class ChangeNotifier implements Listenable {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _listeners = _emptyListeners;
     _count = 0;

@@ -45,7 +45,7 @@ abstract class ObjectEvent{
   /// The method enables code like:
   /// ```dart
   /// void myDartMethod(Map<Object, Map<String, Object>> event) {}
-  /// MemoryAllocations.instance
+  /// FlutterMemoryAllocations.instance
   ///   .addListener((ObjectEvent event) => myDartMethod(event.toMap()));
   /// ```
   Map<Object, Map<String, Object>> toMap();
@@ -98,12 +98,20 @@ class ObjectDisposed extends ObjectEvent {
 }
 
 /// An interface for listening to object lifecycle events.
+@Deprecated(
+  'Use `FlutterMemoryAllocations` instead. '
+  'The class `MemoryAllocations` will be introduced in a pure Dart library. '
+  'This feature was deprecated after v3.18.0-18.0.pre.'
+)
+typedef MemoryAllocations = FlutterMemoryAllocations;
+
+/// An interface for listening to object lifecycle events.
 ///
 /// If [kFlutterMemoryAllocationsEnabled] is true,
-/// [MemoryAllocations] listens to creation and disposal events
+/// [FlutterMemoryAllocations] listens to creation and disposal events
 /// for disposable objects in Flutter Framework.
-/// To dispatch events for other objects, invoke
-/// [MemoryAllocations.dispatchObjectEvent].
+/// To dispatch other events objects, invoke
+/// [FlutterMemoryAllocations.dispatchObjectEvent].
 ///
 /// Use this class with condition `kFlutterMemoryAllocationsEnabled`,
 /// to make sure not to increase size of the application by the code
@@ -111,13 +119,13 @@ class ObjectDisposed extends ObjectEvent {
 ///
 /// The class is optimized for massive event flow and small number of
 /// added or removed listeners.
-class MemoryAllocations {
-  MemoryAllocations._();
+class FlutterMemoryAllocations {
+  FlutterMemoryAllocations._();
 
-  /// The shared instance of [MemoryAllocations].
+  /// The shared instance of [FlutterMemoryAllocations].
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
-  static final MemoryAllocations instance = MemoryAllocations._();
+  static final FlutterMemoryAllocations instance = FlutterMemoryAllocations._();
 
   /// List of listeners.
   ///

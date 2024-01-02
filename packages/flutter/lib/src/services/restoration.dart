@@ -951,10 +951,10 @@ class RestorationBucket {
 
   // TODO(polina-c): stop duplicating code across disposables
   // https://github.com/flutter/flutter/issues/137435
-  /// Dispatches event of object creation to [MemoryAllocations.instance].
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
   void _maybeDispatchObjectCreation() {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/services.dart',
         className: '$RestorationBucket',
         object: this,
@@ -979,7 +979,7 @@ class RestorationBucket {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _visitChildren(_dropChild, concurrentModification: true);
     _claimedChildren.clear();
