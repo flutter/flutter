@@ -223,15 +223,15 @@ static std::optional<Entity> AdvancedBlend(
     return true;
   };
 
-  auto out_texture = renderer.MakeSubpass(
+  fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
       "Advanced Blend Filter", ISize(subpass_coverage.GetSize()), callback);
-  if (!out_texture) {
+  if (!render_target.ok()) {
     return std::nullopt;
   }
 
   return Entity::FromSnapshot(
       Snapshot{
-          .texture = out_texture,
+          .texture = render_target.value().GetRenderTargetTexture(),
           .transform = Matrix::MakeTranslation(subpass_coverage.GetOrigin()),
           // Since we absorbed the transform of the inputs and used the
           // respective snapshot sampling modes when blending, pass on
@@ -646,16 +646,16 @@ static std::optional<Entity> PipelineBlend(
     return true;
   };
 
-  auto out_texture = renderer.MakeSubpass(
+  fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
       "Pipeline Blend Filter", ISize(subpass_coverage.GetSize()), callback);
 
-  if (!out_texture) {
+  if (!render_target.ok()) {
     return std::nullopt;
   }
 
   return Entity::FromSnapshot(
       Snapshot{
-          .texture = out_texture,
+          .texture = render_target.value().GetRenderTargetTexture(),
           .transform = Matrix::MakeTranslation(subpass_coverage.GetOrigin()),
           // Since we absorbed the transform of the inputs and used the
           // respective snapshot sampling modes when blending, pass on
