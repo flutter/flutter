@@ -1083,7 +1083,6 @@ class FlutterPlugin implements Plugin<Project> {
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
-            boolean isAndroidLibraryValue = isBuildingAar || isUsedAsSubproject
 
             String variantBuildMode = buildModeFor(variant.buildType)
             String flavorValue = variant.getFlavorName()
@@ -1123,7 +1122,6 @@ class FlutterPlugin implements Plugin<Project> {
                 codeSizeDirectory(codeSizeDirectoryValue)
                 deferredComponents(deferredComponentsValue)
                 validateDeferredComponents(validateDeferredComponentsValue)
-                isAndroidLibrary(isAndroidLibraryValue)
                 flavor(flavorValue)
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
@@ -1423,8 +1421,6 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean validateDeferredComponents
     @Optional @Input
-    Boolean isAndroidLibrary
-    @Optional @Input
     String flavor
 
     @OutputFiles
@@ -1520,9 +1516,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args("-dAndroidArchs=${targetPlatformValues.join(' ')}")
             args("-dMinSdkVersion=${minSdkVersion}")
-            if (isAndroidLibrary != null) {
-                args("-dIsAndroidLibrary=${isAndroidLibrary ? "true" : "false"}")
-            }
             args(ruleNames)
         }
     }

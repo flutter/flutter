@@ -78,7 +78,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   Uri? yamlParentDirectory,
   required FileSystem fileSystem,
   required int targetAndroidNdkApi,
-  bool isAndroidLibrary = false,
 }) async {
   const OS targetOS = OS.android;
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOS);
