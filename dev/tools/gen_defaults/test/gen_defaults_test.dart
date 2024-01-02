@@ -329,6 +329,9 @@ static final String tokenBar = 'foo';
       expect(printLog, contains(errorColoredString('Token unavailable: foobar')));
       expect(printLog, contains('❌ foo'));
       expect(printLog, contains('Tokens used: 0/1'));
+      expect(printLog, contains(errorColoredString('Some referenced tokens do not exist: 2')));
+      expect(printLog, contains('  baz'));
+      expect(printLog, contains('  foobar'));
     }));
 
     test('can log and dump versions & tokens to a file', overridePrint(() {
