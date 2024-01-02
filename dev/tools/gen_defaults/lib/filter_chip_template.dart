@@ -109,7 +109,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
       ? isSelected
         ? ${color("$tokenGroup.with-leading-icon.selected.leading-icon.color")}
         : ${color("$tokenGroup.with-leading-icon.unselected.leading-icon.color")}
-      : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")};,
+      : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")},
     size: ${getToken("$tokenGroup.with-icon.icon.size")},
   );
 

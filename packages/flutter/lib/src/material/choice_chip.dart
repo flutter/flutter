@@ -338,7 +338,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
       ? isSelected
         ? _colors.onSecondaryContainer
         : _colors.primary
-      : _colors.onSurface;,
+      : _colors.onSurface,
     size: 18.0,
   );
 
