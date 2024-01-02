@@ -11,6 +11,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
@@ -41,16 +42,53 @@ bool RuntimeEffectContents::CanInheritOpacity(const Entity& entity) const {
   return false;
 }
 
+static ShaderType GetShaderType(RuntimeUniformType type) {
+  switch (type) {
+    case kSampledImage:
+      return ShaderType::kSampledImage;
+    case kFloat:
+      return ShaderType::kFloat;
+    case kBoolean:
+    case kSignedByte:
+    case kUnsignedByte:
+    case kSignedShort:
+    case kUnsignedShort:
+    case kSignedInt:
+    case kUnsignedInt:
+    case kSignedInt64:
+    case kUnsignedInt64:
+    case kHalfFloat:
+    case kDouble:
+      VALIDATION_LOG << "Unsupported uniform type.";
+      return ShaderType::kVoid;
+  }
+}
+
+static std::shared_ptr<ShaderMetadata> MakeShaderMetadata(
+    const RuntimeUniformDescription& uniform) {
+  auto metadata = std::make_shared<ShaderMetadata>();
+  metadata->name = uniform.name;
+  metadata->members.emplace_back(ShaderStructMemberMetadata{
+      .type = GetShaderType(uniform.type),
+      .size = uniform.GetSize(),
+      .byte_length = uniform.bit_width / 8,
+  });
+
+  return metadata;
+}
+
 bool RuntimeEffectContents::Render(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const {
-// TODO(jonahwilliams): FragmentProgram API is not fully wired up on Android.
-// Disable until this is complete so that integration tests and benchmarks can
-// run m3 applications.
-#ifdef FML_OS_ANDROID
-  return true;
-#else
-
+  // TODO(jonahwilliams): FragmentProgram API is not fully wired up on Android.
+  // Disable until this is complete so that integration tests and benchmarks can
+  // run m3 applications.
+  if (renderer.GetContext()->GetBackendType() ==
+      Context::BackendType::kVulkan) {
+    FML_DLOG(WARNING)
+        << "Fragment programs not supported on Vulkan. Content dropped.";
+    return true;
+  }
   auto context = renderer.GetContext();
   auto library = context->GetShaderLibrary();
 
@@ -172,10 +210,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   size_t buffer_index = 0;
   size_t buffer_offset = 0;
   for (const auto& uniform : runtime_stage_->GetUniforms()) {
-    // TODO(113715): Populate this metadata once GLES is able to handle
-    //               non-struct uniform names.
-    std::shared_ptr<ShaderMetadata> metadata =
-        std::make_shared<ShaderMetadata>();
+    std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
 
     switch (uniform.type) {
       case kSampledImage: {
@@ -226,9 +261,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
   size_t sampler_index = 0;
   for (const auto& uniform : runtime_stage_->GetUniforms()) {
-    // TODO(113715): Populate this metadata once GLES is able to handle
-    //               non-struct uniform names.
-    ShaderMetadata metadata;
+    std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
 
     switch (uniform.type) {
       case kSampledImage: {
@@ -241,7 +274,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         SampledImageSlot image_slot;
         image_slot.name = uniform.name.c_str();
         image_slot.texture_index = uniform.location - minimum_sampler_index;
-        cmd.BindResource(ShaderStage::kFragment, image_slot, metadata,
+        cmd.BindResource(ShaderStage::kFragment, image_slot, *metadata,
                          input.texture, sampler);
 
         sampler_index++;
@@ -260,7 +293,6 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     return restore.Render(renderer, entity, pass);
   }
   return true;
-#endif  // FML_OS_ANDROID
 }
 
 }  // namespace impeller

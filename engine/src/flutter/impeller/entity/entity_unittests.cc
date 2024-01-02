@@ -2132,13 +2132,14 @@ TEST_P(EntityTest, YUVToRGBFilter) {
 }
 
 TEST_P(EntityTest, RuntimeEffect) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
+  if (!BackendSupportsFragmentProgram()) {
     GTEST_SKIP_("This backend doesn't support runtime effects.");
   }
 
   auto runtime_stages =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage = runtime_stages[RuntimeStageBackend::kMetal];
+  auto runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 

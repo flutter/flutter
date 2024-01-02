@@ -23,18 +23,26 @@ namespace testing {
 using RuntimeStageTest = RuntimeStagePlayground;
 INSTANTIATE_PLAYGROUND_SUITE(RuntimeStageTest);
 
-TEST(RuntimeStageTest, CanReadValidBlob) {
+TEST_P(RuntimeStageTest, CanReadValidBlob) {
+  if (!BackendSupportsFragmentProgram()) {
+    GTEST_SKIP_("This backend doesn't support runtime effects.");
+  }
+
   const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[RuntimeStageBackend::kMetal];
+  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(stage->IsValid());
   ASSERT_EQ(stage->GetShaderStage(), RuntimeShaderStage::kFragment);
 }
 
-TEST(RuntimeStageTest, CanRejectInvalidBlob) {
+TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
+  if (!BackendSupportsFragmentProgram()) {
+    GTEST_SKIP_("This backend doesn't support runtime effects.");
+  }
+
   ScopedValidationDisable disable_validation;
   const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
@@ -46,16 +54,20 @@ TEST(RuntimeStageTest, CanRejectInvalidBlob) {
   ::memset(junk_allocation->GetBuffer(), 127, junk_allocation->GetLength());
   auto stages = RuntimeStage::DecodeRuntimeStages(
       CreateMappingFromAllocation(junk_allocation));
-  ASSERT_FALSE(stages[RuntimeStageBackend::kMetal]);
+  ASSERT_FALSE(stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())]);
 }
 
-TEST(RuntimeStageTest, CanReadUniforms) {
+TEST_P(RuntimeStageTest, CanReadUniforms) {
+  if (!BackendSupportsFragmentProgram()) {
+    GTEST_SKIP_("This backend doesn't support runtime effects.");
+  }
+
   const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[RuntimeStageBackend::kMetal];
+  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   ASSERT_TRUE(stage->IsValid());
   ASSERT_EQ(stage->GetUniforms().size(), 17u);
@@ -191,15 +203,16 @@ TEST(RuntimeStageTest, CanReadUniforms) {
 }
 
 TEST_P(RuntimeStageTest, CanRegisterStage) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("Skipped: https://github.com/flutter/flutter/issues/105538");
+  if (!BackendSupportsFragmentProgram()) {
+    GTEST_SKIP_("This backend doesn't support runtime effects.");
   }
+
   const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[RuntimeStageBackend::kMetal];
+  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(stage->IsValid());
   std::promise<bool> registration;
   auto future = registration.get_future();
@@ -229,11 +242,11 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
 }
 
 TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("Skipped: https://github.com/flutter/flutter/issues/105538");
+  if (!BackendSupportsFragmentProgram()) {
+    GTEST_SKIP_("This backend doesn't support runtime effects.");
   }
   auto stages = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
-  auto stage = stages[RuntimeStageBackend::kMetal];
+  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   ASSERT_TRUE(stage);
   ASSERT_NE(stage, nullptr);

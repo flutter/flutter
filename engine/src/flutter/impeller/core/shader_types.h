@@ -70,6 +70,7 @@ struct ShaderStructMemberMetadata {
 };
 
 struct ShaderMetadata {
+  // This must match the uniform name in the shader program.
   std::string name;
   std::vector<ShaderStructMemberMetadata> members;
 };

@@ -12,6 +12,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/status.h"
 #include "flutter/fml/time/time_delta.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/core/texture.h"
 #include "impeller/geometry/point.h"
 #include "impeller/image/compressed_image.h"
@@ -29,6 +30,19 @@ enum class PlaygroundBackend {
   kOpenGLES,
   kVulkan,
 };
+
+constexpr inline RuntimeStageBackend PlaygroundBackendToRuntimeStageBackend(
+    PlaygroundBackend backend) {
+  switch (backend) {
+    case PlaygroundBackend::kMetal:
+      return RuntimeStageBackend::kMetal;
+    case PlaygroundBackend::kOpenGLES:
+      return RuntimeStageBackend::kOpenGLES;
+    case PlaygroundBackend::kVulkan:
+      return RuntimeStageBackend::kVulkan;
+  }
+  FML_UNREACHABLE();
+}
 
 std::string PlaygroundBackendToString(PlaygroundBackend backend);
 

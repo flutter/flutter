@@ -60,7 +60,14 @@ impellerc("runtime_stages") {
     "gradient.frag",
   ]
   sl_file_extension = "iplr"
-  shader_target_flag = "--runtime-stage-metal"
+
+  # TODO(dnfield): Make impellerc able to bundle multiple non-SkSL shaders.
+  # https://github.com/flutter/flutter/issues/140817
+  if (is_ios || is_mac) {
+    shader_target_flag = "--runtime-stage-metal"
+  } else {
+    shader_target_flag = "--runtime-stage-gles"
+  }
   iplr = true
 }
 
