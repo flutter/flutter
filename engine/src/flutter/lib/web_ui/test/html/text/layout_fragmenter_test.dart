@@ -287,3 +287,53 @@ List<_Fragment> split(CanvasParagraph paragraph) {
 List<LayoutFragment> computeLayoutFragments(CanvasParagraph paragraph) {
   return LayoutFragmenter(paragraph.plainText, paragraph.spans).fragment();
 }
+
+extension _EngineTextStyle on EngineTextStyle {
+  EngineTextStyle copyWith({
+    Color? color,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    TextDecorationStyle? decorationStyle,
+    double? decorationThickness,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
+    TextBaseline? textBaseline,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    double? fontSize,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? height,
+    TextLeadingDistribution? leadingDistribution,
+    Locale? locale,
+    Paint? background,
+    Paint? foreground,
+    List<Shadow>? shadows,
+    List<FontFeature>? fontFeatures,
+    List<FontVariation>? fontVariations,
+  }) {
+    return EngineTextStyle(
+      color: color ?? this.color,
+      decoration: decoration ?? this.decoration,
+      decorationColor: decorationColor ?? this.decorationColor,
+      decorationStyle: decorationStyle ?? this.decorationStyle,
+      decorationThickness: decorationThickness ?? this.decorationThickness,
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      textBaseline: textBaseline ?? this.textBaseline,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
+      fontSize: fontSize ?? this.fontSize,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
+      height: height ?? this.height,
+      leadingDistribution: leadingDistribution,
+      locale: locale ?? this.locale,
+      background: background ?? this.background,
+      foreground: foreground ?? this.foreground,
+      shadows: shadows ?? this.shadows,
+      fontFeatures: fontFeatures ?? this.fontFeatures,
+      fontVariations: fontVariations ?? this.fontVariations,
+    );
+  }
+}
