@@ -41,10 +41,10 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+  Color? get checkmarkColor => null;
 
   @override
-  Color? get deleteIconColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+  Color? get deleteIconColor => null;
 
   @override
   BorderSide? get side => isEnabled

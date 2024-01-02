@@ -43,6 +43,11 @@ abstract class TokenTemplate {
     return _tokens[tokenName];
   }
 
+  /// Resolve a token if available or null otherwise.
+  dynamic getTokenOrNull(String tokenName) {
+    return tokenAvailable(tokenName) ? getToken(tokenName) : null;
+  }
+
   static const String beginGeneratedComment = '''
 
 // BEGIN GENERATED TOKEN PROPERTIES''';
@@ -108,14 +113,18 @@ abstract class TokenTemplate {
   /// If there is a value for the given token, this will return
   /// the value prepended with [colorSchemePrefix].
   ///
-  /// Otherwise it will return [defaultValue].
+  /// Otherwise it will return [defaultValue] if provided or 'null' if not.
+  ///
+  /// If a [defaultValue] is not provided and the token does's exist, the token
+  /// lookup is logged and a warning will be shown at the end of the process.
   ///
   /// See also:
   ///   * [componentColor], that provides support for an optional opacity.
-  String color(String colorToken, [String defaultValue = 'null']) {
-    return tokenAvailable(colorToken)
-      ? '$colorSchemePrefix${getToken(colorToken)}'
-      : defaultValue;
+  String color(String colorToken, [String? defaultValue]) {
+    final bool logTokenLookup = defaultValue == null;
+    final String effectiveDefault = defaultValue ?? 'null';
+    final dynamic tokenVal = logTokenLookup ? getToken(colorToken) : getTokenOrNull(colorToken);
+    return tokenVal == null ? effectiveDefault : '$colorSchemePrefix$tokenVal';
   }
 
   /// Generate a [ColorScheme] color name for the given token or a transparent
@@ -244,7 +253,7 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = (getToken('$componentToken.width') ?? getToken('$componentToken.height') ?? 1.0) as double;
+    final double width = (getTokenOrNull('$componentToken.width') ?? getTokenOrNull('$componentToken.height') ?? 1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 
