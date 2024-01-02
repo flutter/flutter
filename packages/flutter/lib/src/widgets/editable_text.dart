@@ -3690,11 +3690,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   bool _scrollableNotificationIsFromSameSubtree(BuildContext? notificationContext) {
+    if (notificationContext == null) {
+      return false;
+    }
     BuildContext? currentContext = context;
     // The notification context of a ScrollNotification points to the RawGestureDetector
     // of the Scrollable. We get the ScrollableState associated with this notification
     // by looking up the tree.
     final BuildContext? notificationScrollableContext = notificationContext?.findAncestorStateOfType<ScrollableState>()?.context;
+    if (notificationScrollableContext == null) {
+      return false;
+    }
     while (currentContext != null) {
       final ScrollableState? scrollableState = currentContext.findAncestorStateOfType<ScrollableState>();
       if (scrollableState?.context == notificationScrollableContext) {
