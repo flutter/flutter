@@ -8,7 +8,7 @@
 /// See also:
 ///  - [Platform.version](https://api.dart.dev/stable/dart-io/Platform/version.html)
 class FlutterVersion {
-  FlutterVersion._();
+  const FlutterVersion._();
 
   /// The Flutter version used to compile the app.
   static const String version = String.fromEnvironment('FLUTTER_VERSION');
