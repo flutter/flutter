@@ -44,19 +44,12 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
 
   @override
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")}?.copyWith(
-    color: _labelColor,
+    color: isEnabled
+      ? isSelected
+        ? ${color("$tokenGroup.selected.label-text.color")}
+        : ${color("$tokenGroup.unselected.label-text.color")}
+      : ${color("$tokenGroup.disabled.label-text.color")},
   );
-
-  Color get _labelColor {
-    if (!isEnabled) {
-      // Without color opacity token. _RenderChip handles 'disable' opacity internally
-      return ${color("$tokenGroup.disabled.label-text.color")};
-    }
-
-    return isSelected
-      ? ${componentColor("$tokenGroup.selected.label-text")}
-      : ${componentColor("$tokenGroup.unselected.label-text")};
-  }
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -95,25 +88,17 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   @override
   Color? get deleteIconColor => _trailingIconColor;
 
-  Color get _leadingIconColor {
-    if (!isEnabled) {
-      return ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")};
-    }
-
-    return isSelected
+  Color get _leadingIconColor => isEnabled
+    ? isSelected
       ? ${color("$tokenGroup.with-leading-icon.selected.leading-icon.color")}
-      : ${color("$tokenGroup.with-leading-icon.unselected.leading-icon.color")};
-  }
+      : ${color("$tokenGroup.with-leading-icon.unselected.leading-icon.color")}
+    : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")};
 
-  Color get _trailingIconColor {
-    if (!isEnabled) {
-      return ${color("$tokenGroup.with-trailing-icon.disabled.trailing-icon.color")};
-    }
-
-    return isSelected
+  Color get _trailingIconColor => isEnabled
+    ? isSelected
       ? ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")}
-      : ${color("$tokenGroup.with-trailing-icon.unselected.trailing-icon.color")};
-  }
+      : ${color("$tokenGroup.with-trailing-icon.unselected.trailing-icon.color")}
+    : ${color("$tokenGroup.with-trailing-icon.disabled.trailing-icon.color")};
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected

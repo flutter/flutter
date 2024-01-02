@@ -299,19 +299,12 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
 
   @override
   TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
-    color: _labelColor,
+    color: isEnabled
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.onSurfaceVariant
+      : _colors.onSurface,
   );
-
-  Color get _labelColor {
-    if (!isEnabled) {
-      // Without color opacity token. _RenderChip handles 'disable' opacity internally
-      return _colors.onSurface;
-    }
-
-    return isSelected
-      ? _colors.onSecondaryContainer
-      : _colors.onSurfaceVariant;
-  }
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -350,25 +343,17 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   @override
   Color? get deleteIconColor => _trailingIconColor;
 
-  Color get _leadingIconColor {
-    if (!isEnabled) {
-      return _colors.onSurface;
-    }
-
-    return isSelected
+  Color get _leadingIconColor => isEnabled
+    ? isSelected
       ? _colors.onSecondaryContainer
-      : _colors.primary;
-  }
+      : _colors.primary
+    : _colors.onSurface;
 
-  Color get _trailingIconColor {
-    if (!isEnabled) {
-      return _colors.onSurface;
-    }
-
-    return isSelected
+  Color get _trailingIconColor => isEnabled
+    ? isSelected
       ? _colors.onSecondaryContainer
-      : _colors.onSurfaceVariant;
-  }
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
