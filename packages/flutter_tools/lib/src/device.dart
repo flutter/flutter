@@ -955,7 +955,6 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableVulkanValidation = false,
-    this.impellerForceGL = false,
     this.uninstallFirst = false,
     this.serveObservatory = false,
     this.enableDartProfiling = true,
@@ -982,7 +981,6 @@ class DebuggingOptions {
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
       this.enableVulkanValidation = false,
-      this.impellerForceGL = false,
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
@@ -1063,7 +1061,6 @@ class DebuggingOptions {
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.enableVulkanValidation,
-    required this.impellerForceGL,
     required this.uninstallFirst,
     required this.serveObservatory,
     required this.enableDartProfiling,
@@ -1108,7 +1105,6 @@ class DebuggingOptions {
   final bool webUseSseForInjectedClient;
   final ImpellerStatus enableImpeller;
   final bool enableVulkanValidation;
-  final bool impellerForceGL;
   final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
@@ -1255,7 +1251,6 @@ class DebuggingOptions {
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
     'enableVulkanValidation': enableVulkanValidation,
-    'impellerForceGL': impellerForceGL,
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1310,7 +1305,6 @@ class DebuggingOptions {
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
       enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
-      impellerForceGL: (json['impellerForceGL'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
