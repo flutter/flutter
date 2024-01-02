@@ -652,14 +652,14 @@ void main() {
         events.add(event);
       }
     }
-    MemoryAllocations.instance.addListener(listener);
+    FlutterMemoryAllocations.instance.addListener(listener);
 
     await createAndDisposeRoute();
     expect(events, hasLength(2));
     expect(events.first, isA<ObjectCreated>());
     expect(events.last, isA<ObjectDisposed>());
 
-    MemoryAllocations.instance.removeListener(listener);
+    FlutterMemoryAllocations.instance.removeListener(listener);
   });
 
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
