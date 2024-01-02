@@ -43,7 +43,8 @@ abstract class TokenTemplate {
     return _tokens[tokenName];
   }
 
-  /// Resolve a token if available or null otherwise.
+  /// Resolve a token if available or null otherwise. Unlike [getToken], this
+  /// method will not log the token lookup if the token doesn't exist.
   dynamic getTokenOrNull(String tokenName) {
     return tokenAvailable(tokenName) ? getToken(tokenName) : null;
   }
