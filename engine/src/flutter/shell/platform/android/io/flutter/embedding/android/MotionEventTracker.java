@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /** Tracks the motion events received by the FlutterView. */
 public final class MotionEventTracker {
-
+  private static final String TAG = "MotionEventTracker";
   /** Represents a unique identifier corresponding to a motion event. */
   public static class MotionEventId {
     private static final AtomicLong ID_COUNTER = new AtomicLong(0);
@@ -55,7 +55,14 @@ public final class MotionEventTracker {
   @NonNull
   public MotionEventId track(@NonNull MotionEvent event) {
     MotionEventId eventId = MotionEventId.createUnique();
-    eventById.put(eventId.id, MotionEvent.obtain(event));
+    // We copy event here because the original MotionEvent delivered to us
+    // will be automatically recycled (`MotionEvent.recycle`) by the RootView and we need
+    // access to it after the RootView code runs.
+    // The return value of `MotionEvent.obtain(event)` is still verifiable if the input
+    // event was verifiable. Other overloads of `MotionEvent.obtain` do not have this
+    // guarantee and should be avoided when possible.
+    MotionEvent eventCopy = MotionEvent.obtain(event);
+    eventById.put(eventId.id, eventCopy);
     unusedEvents.add(eventId.id);
     return eventId;
   }

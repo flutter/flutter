@@ -19,7 +19,7 @@ import java.util.Map;
 
 /** Sends touch information from Android to Flutter in a format that Flutter understands. */
 public class AndroidTouchProcessor {
-
+  private static final String TAG = "AndroidTouchProcessor";
   // Must match the PointerChange enum in pointer.dart.
   @IntDef({
     PointerChange.CANCEL,
