@@ -258,6 +258,7 @@ class HtmlRenderer implements Renderer {
     letterSpacing: letterSpacing,
     wordSpacing: wordSpacing,
     height: height,
+    leadingDistribution: leadingDistribution,
     locale: locale,
     background: background,
     foreground: foreground,
