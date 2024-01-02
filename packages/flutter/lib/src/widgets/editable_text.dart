@@ -3667,8 +3667,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleContextMenuOnParentScroll(ScrollNotification notification) {
-    if (notification !is ScrollStartNotification
-       || notification !is ScrollEndNotification) {
+    if (notification is! ScrollStartNotification
+       || notification is! ScrollEndNotification) {
       return;
     }
     if (_isInternalScrollableNotification(notification.context)) {
