@@ -276,6 +276,9 @@ void main() {
 
     await tester.drag(find.byKey(innerKey), const Offset(0, 2000)); // Over-scroll the inner Scrollable to the bottom
 
+    // Using a precise value to make addition/subtraction possible later in the test
+    // Which better conveys the intent of the test
+    // The value is not equal to 2000 due to BouncingScrollPhysics of the inner Scrollable
     const double endPosition = -1974.0862087158384;
     const Duration nextFrame = Duration(microseconds: 16666);
 
