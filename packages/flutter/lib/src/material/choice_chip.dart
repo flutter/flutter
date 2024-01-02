@@ -312,18 +312,14 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get checkmarkColor => _leadingIconColor;
-
-  @override
-  Color? get deleteIconColor => _trailingIconColor;
-
-  Color get _leadingIconColor => isEnabled
+  Color? get checkmarkColor => isEnabled
     ? isSelected
       ? _colors.onSecondaryContainer
       : _colors.primary
     : _colors.onSurface;
 
-  Color get _trailingIconColor => isEnabled
+  @override
+  Color? get deleteIconColor => isEnabled
     ? isSelected
       ? _colors.onSecondaryContainer
       : _colors.onSurfaceVariant
@@ -338,7 +334,11 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: _leadingIconColor,
+    color: isEnabled
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.primary
+      : _colors.onSurface;,
     size: 18.0,
   );
 

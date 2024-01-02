@@ -83,18 +83,14 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get checkmarkColor => _leadingIconColor;
-
-  @override
-  Color? get deleteIconColor => _trailingIconColor;
-
-  Color get _leadingIconColor => isEnabled
+  Color? get checkmarkColor => isEnabled
     ? isSelected
       ? ${color("$tokenGroup.with-leading-icon.selected.leading-icon.color")}
       : ${color("$tokenGroup.with-leading-icon.unselected.leading-icon.color")}
     : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")};
 
-  Color get _trailingIconColor => isEnabled
+  @override
+  Color? get deleteIconColor => isEnabled
     ? isSelected
       ? ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")}
       : ${color("$tokenGroup.with-trailing-icon.unselected.trailing-icon.color")}
@@ -109,7 +105,11 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: _leadingIconColor,
+    color: isEnabled
+      ? isSelected
+        ? ${color("$tokenGroup.with-leading-icon.selected.leading-icon.color")}
+        : ${color("$tokenGroup.with-leading-icon.unselected.leading-icon.color")}
+      : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")};,
     size: ${getToken("$tokenGroup.with-icon.icon.size")},
   );
 
