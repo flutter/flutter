@@ -436,13 +436,16 @@ void main() {
           'run',
           '--no-pub',
           '--no-hot',
-          '--flavor=vanilla'
+          '--flavor=vanilla',
+          '-d',
+          'all',
         ];
 
         // Useful for test readability.
         // ignore: avoid_redundant_argument_values
-        final FakeDevice device = FakeDevice(supportsFlavors: false);
-        testDeviceManager.devices = <Device>[device];
+        final FakeDevice deviceWithoutFlavorSupport = FakeDevice(supportsFlavors: false);
+        final FakeDevice deviceWithFlavorSupport = FakeDevice(supportsFlavors: true);
+        testDeviceManager.devices = <Device>[deviceWithoutFlavorSupport, deviceWithFlavorSupport];
 
         await expectLater(
           () => createTestCommandRunner(RunCommand()).run(runCommand),
