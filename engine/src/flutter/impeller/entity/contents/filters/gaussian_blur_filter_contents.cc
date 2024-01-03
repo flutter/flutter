@@ -121,7 +121,8 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
     const SamplerDescriptor& sampler_descriptor,
     Entity::TileMode tile_mode,
     const GaussianBlurFragmentShader::BlurInfo& blur_info,
-    std::optional<RenderTarget> destination_target) {
+    std::optional<RenderTarget> destination_target,
+    const Quad& blur_uvs) {
   if (blur_info.blur_sigma < kEhCloseEnough) {
     return input_pass;
   }
@@ -153,10 +154,10 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
 
         BindVertices<GaussianBlurVertexShader>(cmd, host_buffer,
                                                {
-                                                   {Point(0, 0), Point(0, 0)},
-                                                   {Point(1, 0), Point(1, 0)},
-                                                   {Point(0, 1), Point(0, 1)},
-                                                   {Point(1, 1), Point(1, 1)},
+                                                   {blur_uvs[0], blur_uvs[0]},
+                                                   {blur_uvs[1], blur_uvs[1]},
+                                                   {blur_uvs[2], blur_uvs[2]},
+                                                   {blur_uvs[3], blur_uvs[3]},
                                                });
 
         SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
@@ -181,6 +182,14 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
     return renderer.MakeSubpass("Gaussian Blur Filter", subpass_size,
                                 subpass_callback);
   }
+}
+
+/// Returns `rect` relative to `reference`, where Rect::MakeXYWH(0,0,1,1) will
+/// be returned when `rect` == `reference`.
+Rect MakeReferenceUVs(const Rect& reference, const Rect& rect) {
+  Rect result = Rect::MakeOriginSize(rect.GetOrigin() - reference.GetOrigin(),
+                                     rect.GetSize());
+  return result.Scale(1.0f / Vector2(reference.GetSize()));
 }
 
 }  // namespace
@@ -311,6 +320,29 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   Vector2 pass1_pixel_size =
       1.0 / Vector2(pass1_out.value().GetRenderTargetTexture()->GetSize());
 
+  std::optional<Rect> input_snapshot_coverage = input_snapshot->GetCoverage();
+  Quad blur_uvs = {Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1)};
+  if (expanded_coverage_hint.has_value() &&
+      input_snapshot_coverage.has_value() &&
+      // TODO(https://github.com/flutter/flutter/issues/140890): Remove this
+      //   condition. There is some flaw in coverage stopping us from using this
+      //   today. I attempted to use source coordinates to calculate the uvs,
+      //   but that didn't work either.
+      input_snapshot.has_value() &&
+      input_snapshot.value().transform.IsTranslationScaleOnly()) {
+    // Only process the uvs where the blur is happening, not the whole texture.
+    std::optional<Rect> uvs = MakeReferenceUVs(input_snapshot_coverage.value(),
+                                               expanded_coverage_hint.value())
+                                  .Intersection(Rect::MakeSize(Size(1, 1)));
+    FML_DCHECK(uvs.has_value());
+    if (uvs.has_value()) {
+      blur_uvs[0] = uvs->GetLeftTop();
+      blur_uvs[1] = uvs->GetRightTop();
+      blur_uvs[2] = uvs->GetLeftBottom();
+      blur_uvs[3] = uvs->GetRightBottom();
+    }
+  }
+
   fml::StatusOr<RenderTarget> pass2_out =
       MakeBlurSubpass(renderer, /*input_pass=*/pass1_out.value(),
                       input_snapshot->sampler_descriptor, tile_mode_,
@@ -320,7 +352,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                           .blur_radius = blur_radius.y * effective_scalar.y,
                           .step_size = 1.0,
                       },
-                      /*destination_target=*/std::nullopt);
+                      /*destination_target=*/std::nullopt, blur_uvs);
 
   if (!pass2_out.ok()) {
     return std::nullopt;
@@ -341,7 +373,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                           .blur_radius = blur_radius.x * effective_scalar.x,
                           .step_size = 1.0,
                       },
-                      pass3_destination);
+                      pass3_destination, blur_uvs);
 
   if (!pass3_out.ok()) {
     return std::nullopt;
