@@ -51,6 +51,7 @@ class RuntimeStageData {
     std::vector<UniformDescription> uniforms;
     std::vector<InputDescription> inputs;
     std::shared_ptr<fml::Mapping> shader;
+    RuntimeStageBackend backend;
 
     Shader(const Shader&) = delete;
     Shader& operator=(const Shader&) = delete;
@@ -60,8 +61,7 @@ class RuntimeStageData {
 
   ~RuntimeStageData();
 
-  void AddShader(RuntimeStageBackend backend,
-                 const std::shared_ptr<Shader>& data);
+  void AddShader(const std::shared_ptr<Shader>& data);
 
   std::unique_ptr<fb::RuntimeStagesT> CreateFlatbuffer() const;
 
