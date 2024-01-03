@@ -41,7 +41,6 @@ class TokenLogger {
   /// Logs a token.
   void log(String token) {
     if (!_allTokens.containsKey(token)) {
-      print('\x1B[31m' 'Token unavailable: $token' '\x1B[0m');
       _unavailableTokens.add(token);
       return;
     }

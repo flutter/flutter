@@ -325,13 +325,35 @@ static final String tokenBar = 'foo';
       logger.log('foobar');
       logger.printTokensUsage(verbose: true);
 
-      expect(printLog, contains(errorColoredString('Token unavailable: baz')));
-      expect(printLog, contains(errorColoredString('Token unavailable: foobar')));
       expect(printLog, contains('❌ foo'));
       expect(printLog, contains('Tokens used: 0/1'));
       expect(printLog, contains(errorColoredString('Some referenced tokens do not exist: 2')));
       expect(printLog, contains('  baz'));
       expect(printLog, contains('  foobar'));
+    }));
+
+    test("color function doesn't log when providing a default", overridePrint(() {
+      allTokens['color_foo_req'] = 'value';
+
+      // color_foo_opt is not available, but because it has a default value, it won't warn about it
+
+      TestColorTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ color_foo_req'));
+      expect(printLog, contains('Tokens used: 1/1'));
+    }));
+
+    test('color function logs when not providing a default', overridePrint(() {
+      // Nor color_foo_req or color_foo_opt are available, but only color_foo_req will be logged.
+      // This mimics a token being removed, but expected to exist.
+
+      TestColorTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('Tokens used: 0/0'));
+      expect(printLog, contains(errorColoredString('Some referenced tokens do not exist: 1')));
+      expect(printLog, contains('  color_foo_req'));
     }));
 
     test('can log and dump versions & tokens to a file', overridePrint(() {
@@ -370,5 +392,15 @@ class TestTemplate extends TokenTemplate {
   String generate() => '''
 static final String tokenFoo = '${getToken('foo')}';
 static final String tokenBar = '${getToken('bar')}';
+''';
+}
+
+class TestColorTemplate extends TokenTemplate {
+  TestColorTemplate(super.blockName, super.fileName, super.tokens);
+
+  @override
+  String generate() => '''
+static final Color color_1 = '${color('color_foo_req')}';
+static final Color color_2 = '${color('color_foo_opt', 'Colors.red')}';
 ''';
 }
