@@ -7,7 +7,7 @@
 ///
 /// See also:
 ///  - [Platform.version](https://api.dart.dev/stable/dart-io/Platform/version.html)
-class FlutterVersion {
+abstract final class FlutterVersion {
   const FlutterVersion._();
 
   /// The Flutter version used to compile the app.
