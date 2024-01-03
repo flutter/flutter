@@ -266,7 +266,7 @@ bool _isTearDownForTestFileConfigured = false;
 /// This function should be invoked in all functions, that may be invoked by user in the test file,
 /// to be invoked before any other `tearDownAll`.
 void _configureTearDownForTestFile() {
-  if (_isTearDownForTestFileConfigured) {
+  if (_isTearDownForTestFileConfigured || !LeakTesting.enabled) {
     return;
   }
   _declarer.tearDownAll(_tearDownForTestFile);
