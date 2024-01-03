@@ -1006,15 +1006,15 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   ///    the equivalent boxes.
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getBoxesForSelection(
       selection,
-      boxHeightStyle: boxHeightStyle,
-      boxWidthStyle: boxWidthStyle,
+      boxHeightStyle: boxHeightStyle ?? selectionHeightStyle,
+      boxWidthStyle: boxWidthStyle ?? selectionWidthStyle,
     );
   }
 
@@ -1236,7 +1236,11 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         placeholderIndex += 1;
       } else {
         final TextDirection initialDirection = currentDirection;
-        final List<ui.TextBox> rects = getBoxesForSelection(selection);
+        final List<ui.TextBox> rects = getBoxesForSelection(
+          selection,
+          boxHeightStyle: selectionHeightStyle,
+          boxWidthStyle: selectionWidthStyle,
+        );
         if (rects.isEmpty) {
           continue;
         }
@@ -2111,11 +2115,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       final Paint selectionPaint = Paint()
         ..style = PaintingStyle.fill
         ..color = paragraph.selectionColor!;
-      for (final TextBox textBox in paragraph.getBoxesForSelection(
-        selection,
-        boxHeightStyle: paragraph.selectionHeightStyle,
-        boxWidthStyle: paragraph.selectionWidthStyle,
-      )) {
+      for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
         context.canvas.drawRect(
             textBox.toRect().shift(offset), selectionPaint);
       }

@@ -50,8 +50,8 @@ class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
   @override
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     if (selection == emptyListSelection) {
       return <ui.TextBox>[];
@@ -78,8 +78,8 @@ class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
   @override
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     if (text.getSpanForPosition(selection.base) is WidgetSpan) {
       return <ui.TextBox>[];
