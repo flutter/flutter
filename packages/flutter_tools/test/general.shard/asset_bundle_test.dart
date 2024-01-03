@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(andrewkolos): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/140665
-// Fails with "flutter test --test-randomize-ordering-seed=20231227"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -356,14 +349,14 @@ flutter:
         return bundle;
       }
 
-      late final String? previousCacheFlutterRootValue;
+      late String? previousCacheFlutterRootValue;
 
-      setUpAll(() {
+      setUp(() {
         previousCacheFlutterRootValue = Cache.flutterRoot;
         Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: testFileSystem, userMessages: UserMessages());
       });
 
-      tearDownAll(() => Cache.flutterRoot = previousCacheFlutterRootValue);
+      tearDown(() => Cache.flutterRoot = previousCacheFlutterRootValue);
 
       testWithoutContext('correctly bundles assets given a simple asset manifest with flavors', () async {
         testFileSystem.file('.packages').createSync();
