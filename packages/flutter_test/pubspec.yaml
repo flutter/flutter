@@ -54,3 +54,14 @@ dev_dependencies:
   file: 7.0.0
 
 # PUBSPEC CHECKSUM: 6913
+
+dependency_overrides:
+  leak_tracker_flutter_testing:
+    path: ../../../leak_tracker/pkgs/leak_tracker_flutter_testing
+  leak_tracker:
+    path: ../../../leak_tracker/pkgs/leak_tracker
+  leak_tracker_testing:
+    path: ../../../leak_tracker/pkgs/leak_tracker_testing
+  flutter_test:
+    path: ../flutter_test
+
