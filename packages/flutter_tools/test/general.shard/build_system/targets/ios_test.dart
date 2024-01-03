@@ -813,56 +813,6 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('fails when bitcode strip fails', () async {
-      binary.createSync(recursive: true);
-
-      final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
-        fileSystem: fileSystem,
-        outputDir: outputDir,
-        defines: <String, String>{
-          kIosArchs: 'arm64',
-          kSdkRoot: 'path/to/iPhoneOS.sdk',
-        },
-      );
-
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store/',
-          'Artifact.flutterFramework.TargetPlatform.ios.release.EnvironmentType.physical',
-          outputDir.path,
-        ]),
-        lipoCommandNonFatResult,
-        lipoVerifyArm64Command,
-        FakeCommand(command: <String>[
-          'xcrun',
-          'bitcode_strip',
-          binary.path,
-          '-r',
-          '-o',
-          binary.path,
-        ], exitCode: 1, stderr: 'bitcode_strip error'),
-      ]);
-
-      await expectLater(
-        const ReleaseUnpackIOS().build(environment),
-        throwsA(isException.having(
-          (Exception exception) => exception.toString(),
-          'description',
-          contains('Failed to strip bitcode for output/Flutter.framework/Flutter.\nbitcode_strip error'),
-        )),
-      );
-
-      expect(processManager, hasNoRemainingExpectations);
-    });
-
     testWithoutContext('strips framework', () async {
       binary.createSync(recursive: true);
 
