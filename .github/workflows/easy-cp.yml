@@ -59,7 +59,7 @@ jobs:
         working-directory: ./flutter
         run: |
           git push -u origin cp-${CHANNEL}-${COMMIT_SHA}
-          gh pr create --title "[cp-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter --head flutteractionsbot:cp-${CHANNEL}-${COMMIT_SHA}
+          gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
