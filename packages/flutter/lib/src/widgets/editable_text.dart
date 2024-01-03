@@ -3162,7 +3162,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
-  Rect? _startCaretRect;
+  Offset? _startCaretCenter;
 
   // The most recent text position as determined by the location of the floating
   // cursor.
@@ -3197,15 +3197,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // we cache the position.
         _pointOffsetOrigin = point.offset;
 
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
-        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        final Offset startCaretCenter;
+        final TextPosition currentTextPosition;
+        final bool shouldResetOrigin;
+        // Only non-null when starting a floating cursor via long press.
+        if (point.startLocation != null) {
+          shouldResetOrigin = false;
+          (startCaretCenter, currentTextPosition) = point.startLocation!;
+        } else {
+          shouldResetOrigin = true;
+          currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
+          startCaretCenter = renderEditable.getLocalRectForCaret(currentTextPosition).center;
+        }
 
-        _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
+        _startCaretCenter = startCaretCenter;
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(_startCaretCenter! - _floatingCursorOffset, shouldResetOrigin: shouldResetOrigin);
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.Update:
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
-        final Offset rawCursorOffset = _startCaretRect!.center + centeredPoint - _floatingCursorOffset;
+        final Offset rawCursorOffset = _startCaretCenter! + centeredPoint - _floatingCursorOffset;
 
         _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
         _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
@@ -3245,7 +3256,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
         _handleSelectionChanged(TextSelection.fromPosition(_lastTextPosition!), SelectionChangedCause.forcePress);
       }
-      _startCaretRect = null;
+      _startCaretCenter = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
       _lastBoundedOffset = null;

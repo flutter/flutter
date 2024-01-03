@@ -512,7 +512,7 @@ void main() {
     // Long press to put the cursor after the "s".
     const int index = 3;
     await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Double tap on the same location to select the word around the cursor.
     await tester.tapAt(textOffsetToPosition(tester, index));
@@ -561,7 +561,7 @@ void main() {
     // Long press to put the cursor after the "s".
     const int index = 3;
     await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Double tap on the same location to select the word around the cursor.
     await tester.tapAt(textOffsetToPosition(tester, index));
@@ -610,7 +610,7 @@ void main() {
     // Long press to put the cursor after the "s".
     const int index = 3;
     await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Double tap on the same location to select the word around the cursor.
     await tester.tapAt(textOffsetToPosition(tester, index));
@@ -1244,7 +1244,7 @@ void main() {
     final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
     await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -1715,7 +1715,7 @@ void main() {
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
     await tester.longPressAt(ePos, pointer: 7);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // 'def' is selected.
     expect(controller.selection.baseOffset, testValue.indexOf('d'));
@@ -2174,7 +2174,7 @@ void main() {
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
     await tester.longPressAt(ePos, pointer: 7);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.length);
@@ -4209,7 +4209,7 @@ void main() {
     // Long press does select text.
     final Offset ePos = textOffsetToPosition(tester, 1);
     await tester.longPressAt(ePos, pointer: 7);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(controller.selection.isCollapsed, false);
   });
 
@@ -4237,7 +4237,7 @@ void main() {
     // Long press doesn't select text.
     final Offset ePos2 = textOffsetToPosition(tester, 1);
     await tester.longPressAt(ePos2, pointer: 7);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(controller.selection.isCollapsed, true);
   });
 
@@ -4265,7 +4265,7 @@ void main() {
     // Long press doesn't select text.
     final Offset ePos2 = textOffsetToPosition(tester, 1);
     await tester.longPressAt(ePos2, pointer: 7);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(controller.selection.isCollapsed, true);
   });
 
@@ -4284,7 +4284,7 @@ void main() {
     // Long press does select text.
     final Offset bPos = textOffsetToPosition(tester, 1);
     await tester.longPressAt(bPos, pointer: 7);
-    await tester.pump();
+    await tester.pumpAndSettle();
     final TextSelection selection = controller.selection;
     expect(selection.isCollapsed, false);
     expect(selection.baseOffset, 0);
@@ -11418,7 +11418,7 @@ void main() {
 
       // Long press again keeps the selection menu visible.
       await tester.longPressAt(textOffsetToPosition(tester, 0));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('Paste'), findsOneWidget);
     },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
@@ -11769,7 +11769,7 @@ void main() {
       final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'
 
       await tester.longPressAt(ePos);
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
 
       // Tap slightly behind the previous tap to avoid tapping the context menu
       // on desktop.
@@ -12737,7 +12737,7 @@ void main() {
       final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'
 
       await tester.longPressAt(wPos);
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 3),
@@ -17354,6 +17354,48 @@ void main() {
       expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
+
+  testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final TextEditingController controller = _textEditingController(
+      text: 'abcd',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              key: const ValueKey<int>(1),
+              child: TextField(
+                autofocus: true,
+                controller: controller,
+              ),
+            )
+          ),
+        ),
+      ),
+    );
+    // Wait for autofocus.
+    await tester.pumpAndSettle();
+    final Offset textFieldCenter = tester.getCenter(find.byType(TextField));
+    final TestGesture gesture = await tester.startGesture(textFieldCenter);
+    await tester.pump(kLongPressTimeout);
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_floating_cursor.regular_and_floating_both.material.0.png'),
+    );
+    await gesture.moveTo(Offset(10, textFieldCenter.dy));
+    await tester.pump();
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_floating_cursor.only_floating_cursor.material.0.png'),
+    );
+    await gesture.up();
+    EditableText.debugDeterministicCursor = false;
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 }
 
