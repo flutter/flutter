@@ -110,6 +110,10 @@ class PluginTest {
     // Currently this test is only implemented for macOS; it can be extended to
     // others as needed.
     if (buildTarget == 'macos') {
+      // Clean before regenerating the config to ensure that the pod steps run.
+      await inDirectory(Directory(app.rootPath), () async {
+        await evalFlutter('clean');
+      });
       await app.build(buildTarget, configOnly: true, localEngine: buildDir);
     }
   }
