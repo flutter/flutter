@@ -665,31 +665,42 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byTooltip('t3'), findsOneWidget);
   });
 
-  testWidgets('SegmentedButton has correct disabled style', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+  testWidgets('Disabled SegmentedButton has correct states when rebuilding', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
         home: Scaffold(
           body: Center(
-            child: FutureBuilder<int>(
-                future: Future<int>.value(1),
-                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-                  return SegmentedButton<int>(
-                    segments: const <ButtonSegment<int>>[
-                      ButtonSegment<int>(value: 0, label: Text('foo')),
+            child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Column(
+                    children: <Widget>[
+                      SegmentedButton<int>(
+                        segments: const <ButtonSegment<int>>[
+                          ButtonSegment<int>(value: 0, label: Text('foo')),
+                        ],
+                        selected: const <int>{0},
+                      ),
+                      ElevatedButton(
+                        onPressed: () => setState(() {}),
+                        child: const Text('Trigger rebuild'),
+                      ),
                     ],
-                    selected: const <int>{0},
                   );
-                }),
+                }
+            ),
           ),
         ),
       ),
     );
-    await tester.pump();
-    final SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
-    const MaterialState disabled = MaterialState.disabled;
-    expect(state.statesControllers.values.first.value.last, disabled);
+    final Set<MaterialState> states = <MaterialState>{ MaterialState.selected, MaterialState.disabled };
+    // Check the initial states.
+    SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers.values.first.value, states);
+    // Trigger a rebuild.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    // Check the states after the rebuild.
+    state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers.values.first.value, states);
   });
-
 }
