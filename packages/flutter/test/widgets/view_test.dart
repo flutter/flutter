@@ -140,8 +140,8 @@ void main() {
     );
   });
 
-  testWidgets('ViewCollection must have one view', (WidgetTester tester) async {
-    expect(() => ViewCollection(views: const <Widget>[]), throwsAssertionError);
+  testWidgets('ViewCollection may start with zero views', (WidgetTester tester) async {
+    expect(() => const ViewCollection(views: <Widget>[]), returnsNormally);
   });
 
   testWidgets('ViewAnchor.child does not see surrounding view', (WidgetTester tester) async {

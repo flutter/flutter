@@ -293,8 +293,8 @@ void main() {
   testWidgets('ViewCollection cannot have render object widgets as children', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
-      widget: ViewCollection(
-        views: const <Widget>[
+      widget: const ViewCollection(
+        views: <Widget>[
           ColoredBox(color: Colors.red),
         ],
       ),
