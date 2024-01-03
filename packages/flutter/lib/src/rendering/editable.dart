@@ -2366,7 +2366,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool _resetOriginOnBottom = false;
   double? _resetFloatingCursorAnimationValue;
 
-  Offset _calculateAdjustedCursorOffset(Offset offset, EdgeInsets boundingRects) {
+  static Offset _calculateAdjustedCursorOffset(Offset offset, Rect boundingRects) {
     final double adjustedX = clampDouble(offset.dx, boundingRects.left, boundingRects.right);
     final double adjustedY = clampDouble(offset.dy, boundingRects.top, boundingRects.bottom);
     return Offset(adjustedX, adjustedY);
@@ -2379,7 +2379,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final double bottomBound = math.min(size.height, _textPainter.height) - preferredLineHeight + floatingCursorAddedMargin.bottom;
     final double leftBound = -floatingCursorAddedMargin.left;
     final double rightBound = math.min(size.width, _textPainter.width) + floatingCursorAddedMargin.right;
-    final EdgeInsets boundingRects = EdgeInsets.fromLTRB(leftBound, topBound, rightBound, bottomBound);
+    final Rect boundingRects = Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
 
     if (shouldResetOrigin != null) {
       _shouldResetOrigin = shouldResetOrigin;

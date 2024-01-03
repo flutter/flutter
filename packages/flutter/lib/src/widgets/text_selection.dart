@@ -2453,7 +2453,7 @@ class TextSelectionGestureDetectorBuilder {
               from: details.globalPosition,
               cause: SelectionChangedCause.longPress,
             );
-            // Show the floating cursor
+            // Show the floating cursor.
             final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
               state: FloatingCursorDragState.Start,
               startLocation: (
