@@ -305,8 +305,7 @@ class FormState extends State<Form> {
   /// Validates every [FormField] that is a descendant of this [Form], and
   /// returns a [Set] of [FormFieldState] of the invalid field(s) only, if any.
   ///
-  /// This method can be useful to highlight field(s) with errors,
-  /// possibly using their widget key(s).
+  /// This method can be useful to highlight field(s) with errors.
   ///
   /// The form will rebuild to report the results.
   ///
