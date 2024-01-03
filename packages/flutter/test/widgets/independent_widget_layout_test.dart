@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show FlutterView, ViewConstraints;
+import 'dart:ui' show FlutterView;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-const Size _kTestViewSize = Size(800.0, 600.0);
 
 class ScheduledFrameTrackingPlatformDispatcher extends TestPlatformDispatcher {
   ScheduledFrameTrackingPlatformDispatcher({ required super.platformDispatcher });
@@ -36,7 +34,7 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView({required super.view}) : super(
-    configuration: ViewConfiguration(constraints: ViewConstraints.tight(_kTestViewSize)),
+    configuration: TestViewConfiguration.fromView(view: view),
   );
 
   @override

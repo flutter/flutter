@@ -450,7 +450,7 @@ void main() {
     expect(children, isNot(contains(rawViewOwner)));
   });
 
-  testWidgetsWithLeakTracking('RenderView does not use size of child if constraints are tight', (WidgetTester tester) async {
+  testWidgets('RenderView does not use size of child if constraints are tight', (WidgetTester tester) async {
     const Size physicalSize = Size(300, 600);
     final Size logicalSize = physicalSize / tester.view.devicePixelRatio;
     tester.view.physicalConstraints = ViewConstraints.tight(physicalSize);
@@ -466,7 +466,7 @@ void main() {
     expect(child.size, logicalSize);
   });
 
-  testWidgetsWithLeakTracking('RenderView sizes itself to child if constraints allow it (unconstrained)', (WidgetTester tester) async {
+  testWidgets('RenderView sizes itself to child if constraints allow it (unconstrained)', (WidgetTester tester) async {
     const Size size = Size(300, 600);
     tester.view.physicalConstraints = const ViewConstraints(); // unconstrained
     await tester.pumpWidget(SizedBox.fromSize(size: size));
@@ -481,7 +481,7 @@ void main() {
     expect(child.size, size);
   });
 
-  testWidgetsWithLeakTracking('RenderView sizes itself to child if constraints allow it (constrained)', (WidgetTester tester) async {
+  testWidgets('RenderView sizes itself to child if constraints allow it (constrained)', (WidgetTester tester) async {
     const Size size = Size(30, 60);
     const ViewConstraints viewConstraints = ViewConstraints(maxWidth: 333, maxHeight: 666);
     final BoxConstraints boxConstraints = BoxConstraints.fromViewConstraints(viewConstraints / tester.view.devicePixelRatio);
@@ -498,7 +498,7 @@ void main() {
     expect(child.size, size);
   });
 
-  testWidgetsWithLeakTracking('RenderView respects constraints when child wants to be bigger than allowed', (WidgetTester tester) async {
+  testWidgets('RenderView respects constraints when child wants to be bigger than allowed', (WidgetTester tester) async {
     const Size size = Size(3000, 6000);
     const ViewConstraints viewConstraints = ViewConstraints(maxWidth: 300, maxHeight: 600);
     tester.view.physicalConstraints = viewConstraints;

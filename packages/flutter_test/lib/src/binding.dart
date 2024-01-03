@@ -559,8 +559,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     final FlutterView view = renderView.flutterView;
     if (_surfaceSize != null && view == platformDispatcher.implicitView) {
+      final BoxConstraints constraints = BoxConstraints.tight(_surfaceSize!);
       return ViewConfiguration(
-        constraints: ui.ViewConstraints.tight(_surfaceSize!),
+        logicalConstraints: constraints,
+        physicalConstraints: constraints * view.devicePixelRatio,
         devicePixelRatio: view.devicePixelRatio,
       );
     }
@@ -2119,7 +2121,11 @@ class TestViewConfiguration extends ViewConfiguration {
   TestViewConfiguration.fromView({required ui.FlutterView view, Size size = _kDefaultTestViewportSize})
       : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
         _physicalSize = view.physicalSize,
-        super(devicePixelRatio: view.devicePixelRatio, constraints: ui.ViewConstraints.tight(size));
+        super(
+          devicePixelRatio: view.devicePixelRatio,
+          logicalConstraints: BoxConstraints.tight(size),
+          physicalConstraints: BoxConstraints.tight(size) * view.devicePixelRatio,
+      );
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
