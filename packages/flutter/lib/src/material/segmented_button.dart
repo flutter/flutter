@@ -275,7 +275,7 @@ class SegmentedButton<T> extends StatefulWidget {
       (backgroundColor == null && disabledBackgroundColor == null && selectedBackgroundColor == null)
         ? null
         : _SegmentButtonDefaultColor(backgroundColor, disabledBackgroundColor, selectedBackgroundColor);
-    final Color? overlayColor = (foregroundColor == null)
+    final MaterialStateProperty<Color?>? overlayColor = (foregroundColor == null)
       ? null
       : _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor);
     return TextButton.styleFrom(
@@ -300,7 +300,7 @@ class SegmentedButton<T> extends StatefulWidget {
     ).copyWith(
       foregroundColor: foregroundColorProp,
       backgroundColor: backgroundColorProp,
-      overlayColor: MaterialStatePropertyAll<Color?>(overlayColor),
+      overlayColor: overlayColor,
     );
   }
 
@@ -990,27 +990,27 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 
-  static Color resolveStateColor(Color? unselectedColor, Color? selectedColor) {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+  static MaterialStateProperty<Color?>? resolveStateColor(Color? unselectedColor, Color? selectedColor){
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return selectedColor!.withOpacity(0.12);
+          return selectedColor?.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
-          return selectedColor!.withOpacity(0.08);
+          return selectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return selectedColor!.withOpacity(0.12);
+          return selectedColor?.withOpacity(0.12);
         }
       } else {
         if (states.contains(MaterialState.pressed)) {
-          return unselectedColor!.withOpacity(0.12);
+          return unselectedColor?.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
-          return unselectedColor!.withOpacity(0.08);
+          return unselectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return unselectedColor!.withOpacity(0.12);
+          return unselectedColor?.withOpacity(0.12);
         }
       }
       return Colors.transparent;

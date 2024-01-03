@@ -761,6 +761,18 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
       find.byType(SegmentedButton<int>),
       paints..line(color: styleFromStyle.side?.resolve(enabled)?.color),
     );
+
+    // Test foreground color is applied to the overlay color.
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.down(tester.getCenter(find.text('1')));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: foregroundColor.withOpacity(0.08)));
   });
 }
 
