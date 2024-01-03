@@ -144,6 +144,8 @@ class Step {
     this.state = StepState.indexed,
     this.isActive = false,
     this.label,
+    this.decoration,
+    this.errorPainter,
   });
 
   /// The title of the step that typically describes it.
@@ -170,6 +172,15 @@ class Step {
   /// Only [StepperType.horizontal], Optional widget that appears under the [title].
   /// By default, uses the `bodyLarge` theme.
   final Widget? label;
+
+  /// Will define the decoration of the circle.
+  final BoxDecoration? decoration;
+
+  /// By default, the error icon is a triangle with an exclamation point.
+  ///
+  /// This property allows you to override the default error icon with a custom
+  /// painter.
+  final CustomPainter? errorPainter;
 }
 
 /// A material stepper widget that displays progress through a sequence of
@@ -483,7 +494,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       child: AnimatedContainer(
         curve: Curves.fastOutSlowIn,
         duration: kThemeAnimationDuration,
-        decoration: BoxDecoration(
+        decoration: widget.steps[index].decoration ?? BoxDecoration(
           color: _circleColor(index),
           shape: BoxShape.circle,
         ),
@@ -504,7 +515,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           width: stepperProperties?.width  ?? _kStepSize,
           height: stepperProperties?.height != null ? stepperProperties!.height! * _kTriangleSqrt : _kTriangleHeight,
           child: CustomPaint(
-            painter: _TrianglePainter(
+            painter: widget.steps[index].errorPainter ?? _TrianglePainter(
               color: _isDark() ? _kErrorDark : _kErrorLight,
             ),
             child: Align(
