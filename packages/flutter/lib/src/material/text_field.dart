@@ -599,6 +599,8 @@ class TextField extends StatefulWidget {
   /// [InputDecoration.enabled] property.
   final bool? enabled;
 
+  /// If false the text field is "disabled" but still scrollable.
+  /// However, if [enabled] is true, then the text field is "active" and still scrollable.
   final bool? ignorePointer;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
@@ -982,7 +984,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
   @override
-  bool get selectionEnabled => widget.selectionEnabled;
+  bool get selectionEnabled => widget.selectionEnabled && _isEnabled;
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
