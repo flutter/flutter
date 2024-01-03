@@ -124,6 +124,7 @@
 ../../../flutter/impeller/.gitignore
 ../../../flutter/impeller/README.md
 ../../../flutter/impeller/aiks/aiks_gradient_unittests.cc
+../../../flutter/impeller/aiks/aiks_path_unittests.cc
 ../../../flutter/impeller/aiks/aiks_unittests.cc
 ../../../flutter/impeller/aiks/aiks_unittests.h
 ../../../flutter/impeller/aiks/canvas_recorder_unittests.cc

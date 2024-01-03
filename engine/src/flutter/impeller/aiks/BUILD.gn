@@ -85,6 +85,7 @@ template("aiks_unittests_component") {
   target_name = invoker.target_name
   predefined_sources = [
     "aiks_gradient_unittests.cc",
+    "aiks_path_unittests.cc",
     "aiks_unittests.cc",
     "aiks_unittests.h",
   ]
