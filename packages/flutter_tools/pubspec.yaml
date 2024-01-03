@@ -7,6 +7,9 @@ environment:
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
+  #
+  # For detailed instructions, refer to:
+  # https://github.com/flutter/flutter/wiki/Updating-dependencies-in-Flutter
   archive: 3.3.2
   args: 2.4.2
   browser_launcher: 1.1.1
