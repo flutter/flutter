@@ -1,4 +1,4 @@
-Signature: 321edb367e87456d2770efdd865da56e
+Signature: 4157a7a500d5fb5bf2d30481d3ff24be
 
 ====================================================================================================
 LIBRARY: etc1
@@ -6804,6 +6804,8 @@ ORIGIN: ../../../flutter/third_party/skia/src/sksl/SkSLPool.cpp + ../../../flutt
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/SkSLPool.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/SkSLSampleUsage.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/SkSLThreadContext.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLHLSLCodeGenerator.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLHLSLCodeGenerator.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLFunctionPrototype.h + ../../../flutter/third_party/skia/LICENSE
@@ -6937,6 +6939,8 @@ FILE: ../../../flutter/third_party/skia/src/sksl/SkSLPool.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/SkSLPool.h
 FILE: ../../../flutter/third_party/skia/src/sksl/SkSLSampleUsage.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/SkSLThreadContext.cpp
+FILE: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLHLSLCodeGenerator.cpp
+FILE: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLHLSLCodeGenerator.h
 FILE: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.h
 FILE: ../../../flutter/third_party/skia/src/sksl/ir/SkSLFunctionPrototype.h
