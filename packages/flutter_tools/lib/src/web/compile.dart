@@ -90,8 +90,19 @@ class WebBuilder {
     final Status status = _logger.startProgress('Compiling $target for the Web...');
     final Stopwatch sw = Stopwatch()..start();
     try {
+      final List<WebCompileConfig> configs;
+      if (compilerConfig.isWasm) {
+        configs = <WebCompileConfig>[
+          const WebCompileConfig(renderer: WebRendererMode.skwasm, isWasm: true),
+          const WebCompileConfig(renderer: WebRendererMode.canvaskit, isWasm: false),
+        ];
+      } else {
+        configs = <WebCompileConfig>[
+          WebCompileConfig(renderer: buildInfo.webRenderer, isWasm: false),
+        ];
+      }
       final BuildResult result = await _buildSystem.build(
-          WebServiceWorker(_fileSystem, buildInfo.webRenderer, isWasm: compilerConfig.isWasm),
+          WebServiceWorker(_fileSystem, configs),
           Environment(
             projectDir: _fileSystem.currentDirectory,
             outputDir: outputDirectory,

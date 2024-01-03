@@ -119,6 +119,9 @@ abstract class Dart2WebTarget extends Target {
   final WebRendererMode webRenderer;
   Source get compilerSnapshot;
 
+  Map<String, dynamic> get buildConfig;
+  List<String> get buildFiles;
+
   @override
   List<Target> get dependencies => const <Target>[
     WebEntrypointTarget(),
@@ -135,7 +138,9 @@ abstract class Dart2WebTarget extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[];
+  List<Source> get outputs => buildFiles.map(
+    (String file) => Source.pattern('{OUTPUT_DIR}/$file')
+  ).toList();
 }
 
 class Dart2JSTarget extends Dart2WebTarget {
@@ -231,6 +236,18 @@ class Dart2JSTarget extends Dart2WebTarget {
       environment.buildDir.childFile('dart2js.d'),
     );
   }
+
+  @override
+  Map<String, dynamic> get buildConfig => <String, dynamic>{
+    'compileTarget': 'dart2js',
+    'renderer': webRenderer.name,
+    'mainJsPath': 'main.dart.js',
+  };
+
+  @override
+  List<String> get buildFiles => <String>[
+    'main.dart.js',
+  ];
 }
 
 class Dart2WasmTarget extends Dart2WebTarget {
@@ -337,36 +354,57 @@ class Dart2WasmTarget extends Dart2WebTarget {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/main.dart.wasm'),
-    Source.pattern('{OUTPUT_DIR}/main.dart.mjs'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  Map<String, dynamic> get buildConfig => <String, dynamic>{
+    'compileTarget': 'dart2wasm',
+    'renderer': webRenderer.name,
+    'mainWasmPath': 'main.dart.wasm',
+    'jsSupportRuntimePath': 'main.dart.mjs',
+  };
+
+  @override
+  List<String> get buildFiles => <String>[
+    'main.dart.wasm',
+    'main.dart.mjs',
   ];
+}
+
+class WebCompileConfig {
+  const WebCompileConfig({required this.renderer, required this.isWasm});
+
+  final WebRendererMode renderer;
+  final bool isWasm;
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
-  const WebReleaseBundle(this.webRenderer, {required this.isWasm});
+  WebReleaseBundle(List<WebCompileConfig> configs) : this._withTargets(
+    configs.map((WebCompileConfig config) {
+      if (config.isWasm) {
+        return Dart2WasmTarget(config.renderer);
+      } else {
+        return Dart2JSTarget(config.renderer);
+      }
+    }).toList()
+  );
 
-  final WebRendererMode webRenderer;
-  final bool isWasm;
+  const WebReleaseBundle._withTargets(this.compileTargets);
 
-  List<String> get buildFiles => <String>[
-    'main.dart.js',
-    if (isWasm) ...<String>[
-      'main.dart.wasm',
-      'main.dart.mjs',
-    ],
-  ];
+  final List<Dart2WebTarget> compileTargets;
+
+  List<String> get buildFiles => compileTargets.fold(
+    const Iterable<String>.empty(),
+    (Iterable<String> current, Dart2WebTarget target) => current.followedBy(target.buildFiles)
+  ).toList();
 
   @override
   String get name => 'web_release_bundle';
 
   @override
-  List<Target> get dependencies => <Target>[
-    Dart2JSTarget(WebRendererMode.canvaskit),
-    if (isWasm) Dart2WasmTarget(WebRendererMode.skwasm),
-  ];
+  List<Target> get dependencies => compileTargets;
 
   @override
   List<Source> get inputs => <Source>[
@@ -381,27 +419,6 @@ class WebReleaseBundle extends Target {
     'flutter_assets.d',
     'web_resources.d',
   ];
-
-  String _getJsBuildConfig() {
-    return '''
-{
-  compileTarget: "dart2js",
-  renderer: "canvaskit",
-  mainJsPath: "main.dart.js",
-}
-''';
-  }
-
-  String _getWasmBuildConfig() {
-    return '''
-{
-  compileTarget: "dart2wasm",
-  renderer: "skwasm",
-  mainWasmPath: "main.dart.wasm",
-  jsSupportRuntimePath: "main.dart.mjs",
-}
-''';
-  }
 
   @override
   Future<void> build(Environment environment) async {
@@ -450,22 +467,19 @@ class WebReleaseBundle extends Target {
       // because it would need to be the hash for the entire bundle and not just the resource
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
-        final List<String> buildDescriptions = isWasm
-          ? <String>[_getWasmBuildConfig(), _getJsBuildConfig()]
-          : <String>[_getJsBuildConfig()];
-        final String buildConfig = '''
-_flutter.buildConfig = {
-  engineRevision: "${globals.flutterVersion.engineRevision}",
-  builds: [
-    ${buildDescriptions.join(',\n    ')},
-  ],
-}
-''';
+        final List<Map<String, dynamic>> buildDescriptions = compileTargets.map(
+          (Dart2WebTarget target) => target.buildConfig
+        ).toList();
+        final Map<String, dynamic> buildConfig = <String, dynamic>{
+          'engineRevision': globals.flutterVersion.engineRevision,
+          'builds': buildDescriptions,
+        };
+        final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
         final IndexHtml indexHtml = IndexHtml(inputFile.readAsStringSync());
         indexHtml.applySubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
           serviceWorkerVersion: Random().nextInt(4294967296).toString(),
-          buildConfig: buildConfig,
+          buildConfig: buildConfigString,
         );
         outputFile.writeAsStringSync(indexHtml.content);
         continue;
@@ -505,11 +519,9 @@ _flutter.buildConfig = {
 /// These assets can be cached until a new version of the flutter web sdk is
 /// downloaded.
 class WebBuiltInAssets extends Target {
-  const WebBuiltInAssets(this.fileSystem, this.webRenderer, {required this.isWasm});
+  const WebBuiltInAssets(this.fileSystem);
 
   final FileSystem fileSystem;
-  final WebRendererMode webRenderer;
-  final bool isWasm;
 
   @override
   String get name => 'web_static_assets';
@@ -565,21 +577,18 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.webRenderer, {required this.isWasm});
+  const WebServiceWorker(this.fileSystem, this.compileConfigs);
 
   final FileSystem fileSystem;
-  final WebRendererMode webRenderer;
-  final bool isWasm;
+  final List<WebCompileConfig> compileConfigs;
 
   @override
   String get name => 'web_service_worker';
 
   @override
   List<Target> get dependencies => <Target>[
-    Dart2JSTarget(WebRendererMode.canvaskit),
-    if (isWasm) Dart2WasmTarget(WebRendererMode.skwasm),
-    WebReleaseBundle(webRenderer, isWasm: isWasm),
-    WebBuiltInAssets(fileSystem, webRenderer, isWasm: isWasm),
+    WebReleaseBundle(compileConfigs),
+    WebBuiltInAssets(fileSystem),
   ];
 
   @override
@@ -634,7 +643,7 @@ class WebServiceWorker extends Target {
       urlToHash,
       <String>[
         'main.dart.js',
-        if (isWasm) ...<String>[
+        if (compileConfigs.any((WebCompileConfig config) => config.isWasm)) ...<String>[
           'main.dart.wasm',
           'main.dart.mjs',
         ],
