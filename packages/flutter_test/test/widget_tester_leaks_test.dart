@@ -19,6 +19,7 @@ late final String _test7TrackingOnNoLeaks;
 late final String _test8TrackingOnNotDisposed;
 
 void main() {
+  LeakTesting.enable();
   LeakTesting.collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
   LeakTesting.settings = LeakTesting.settings.copyWith(ignore: false);
 
