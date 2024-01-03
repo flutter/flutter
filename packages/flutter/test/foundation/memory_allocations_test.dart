@@ -26,7 +26,7 @@ class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
 }
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   PrintOverrideTestBinding();
 
