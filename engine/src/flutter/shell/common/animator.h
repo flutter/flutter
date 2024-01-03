@@ -58,8 +58,7 @@ class Animator final {
   ///
   ///           This method must be called during a vsync callback, or
   ///           technically, between Animator::BeginFrame and Animator::EndFrame
-  ///           (both private methods). Otherwise, an assertion will be
-  ///           triggered.
+  ///           (both private methods). Otherwise, this call will be ignored.
   ///
   void Render(std::unique_ptr<flutter::LayerTree> layer_tree,
               float device_pixel_ratio);

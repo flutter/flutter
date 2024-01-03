@@ -143,12 +143,15 @@ void Animator::BeginFrame(
 
 void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree,
                       float device_pixel_ratio) {
-  // Animator::Render should be called after BeginFrame, which is indicated by
-  // frame_timings_recorder_ being non-null. Otherwise, this call is ignored.
-  if (frame_timings_recorder_ == nullptr) {
-    return;
-  }
   has_rendered_ = true;
+
+  if (!frame_timings_recorder_) {
+    // Framework can directly call render with a built scene.
+    frame_timings_recorder_ = std::make_unique<FrameTimingsRecorder>();
+    const fml::TimePoint placeholder_time = fml::TimePoint::Now();
+    frame_timings_recorder_->RecordVsync(placeholder_time, placeholder_time);
+    frame_timings_recorder_->RecordBuildStart(placeholder_time);
+  }
 
   TRACE_EVENT_WITH_FRAME_NUMBER(frame_timings_recorder_, "flutter",
                                 "Animator::Render", /*flow_id_count=*/0,

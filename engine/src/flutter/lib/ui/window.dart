@@ -373,8 +373,14 @@ class FlutterView {
   ///   painting.
   void render(Scene scene, {Size? size}) {
     // Duplicated calls or calls outside of onBeginFrame/onDrawFrame (indicated
-    // by _renderedViews being null) are ignored. See _renderedViews.
-    final bool validRender = platformDispatcher._renderedViews?.add(this) ?? false;
+    // by _debugRenderedViews being null) are ignored. See _debugRenderedViews.
+    // TODO(dkwingsmt): We should change this skip into an assertion.
+    // https://github.com/flutter/flutter/issues/137073
+    bool validRender = true;
+    assert(() {
+      validRender = platformDispatcher._debugRenderedViews?.add(this) ?? false;
+      return true;
+    }());
     if (validRender) {
       _render(scene as _NativeScene, size?.width ?? physicalSize.width, size?.height ?? physicalSize.height);
     }
