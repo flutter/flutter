@@ -146,6 +146,11 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
+
+    checked = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
   // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
