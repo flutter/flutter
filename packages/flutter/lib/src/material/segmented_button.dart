@@ -275,7 +275,7 @@ class SegmentedButton<T> extends StatefulWidget {
       (backgroundColor == null && disabledBackgroundColor == null && selectedBackgroundColor == null)
         ? null
         : _SegmentButtonDefaultColor(backgroundColor, disabledBackgroundColor, selectedBackgroundColor);
-    final MaterialStateProperty<Color?>? overlayColor = (foregroundColor == null)
+    final MaterialStateProperty<Color?>? overlayColor = (foregroundColor == null && selectedForegroundColor == null)
       ? null
       : _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor);
     return TextButton.styleFrom(
@@ -990,7 +990,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 
-  static MaterialStateProperty<Color?>? resolveStateColor(Color? unselectedColor, Color? selectedColor){
+  static MaterialStateProperty<Color?> resolveStateColor(Color? unselectedColor, Color? selectedColor){
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {

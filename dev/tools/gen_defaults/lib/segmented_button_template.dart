@@ -120,27 +120,27 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 
-  static Color resolveStateColor(Color? unselectedColor, Color? selectedColor) {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+  static MaterialStateProperty<Color?> resolveStateColor(Color? unselectedColor, Color? selectedColor){
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return selectedColor!${_layerOpacity('$tokenGroup.pressed.state-layer.opacity')};
+          return selectedColor?.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
-          return selectedColor!${_layerOpacity('$tokenGroup.hover.state-layer.opacity')};
+          return selectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return selectedColor!${_layerOpacity('$tokenGroup.focus.state-layer.opacity')};
+          return selectedColor?.withOpacity(0.12);
         }
       } else {
         if (states.contains(MaterialState.pressed)) {
-          return unselectedColor!${_layerOpacity('$tokenGroup.pressed.state-layer.opacity')};
+          return unselectedColor?.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
-          return unselectedColor!${_layerOpacity('$tokenGroup.hover.state-layer.opacity')};
+          return unselectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return unselectedColor!${_layerOpacity('$tokenGroup.focus.state-layer.opacity')};
+          return unselectedColor?.withOpacity(0.12);
         }
       }
       return Colors.transparent;
