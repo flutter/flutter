@@ -26,7 +26,7 @@ if (enable_unittests) {
 
   impellerc("compile_general_shaders") {
     shaders = test_shaders
-    shader_target_flag = "--sksl"
+    shader_target_flags = [ "--sksl" ]
     intermediates_subdir = "iplr"
     sl_file_extension = "iplr"
     iplr = true

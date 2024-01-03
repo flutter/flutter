@@ -280,7 +280,7 @@ template("_impellerc") {
 }
 
 # Required: shaders                 The list of shaders inputs to compile.
-# Required: shader_target_flag      The target flag to append. Valid options:
+# Required: shader_target_flags     The target flag(s) to append. Valid options:
 #                                       --sksl
 #                                       --metal-ios
 #                                       --metal-desktop
@@ -288,6 +288,7 @@ template("_impellerc") {
 #                                       --opengl-desktop
 #                                       --vulkan
 #                                       --runtime-stage-metal
+#                                       --runtime-stage-gles
 # Required: sl_file_extension       The file extension to use for output files.
 #                                   Not required for --shader_bundle mode.
 # Optional: iplr                    Causes --sl output to be in iplr/runtime
@@ -305,7 +306,7 @@ template("_impellerc") {
 #                                   flatbuffer.
 template("impellerc") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
-  assert(defined(invoker.shader_target_flag),
+  assert(defined(invoker.shader_target_flags),
          "The flag to impellerc for target selection must be specified.")
   assert(defined(invoker.sl_file_extension) || defined(invoker.shader_bundle),
          "The extension of the SL file must be specified (metal, glsl, etc..).")
@@ -315,7 +316,10 @@ template("impellerc") {
         "When shader_bundle is specified, shader_output_bundle must also be specified.")
   }
 
-  sksl = invoker.shader_target_flag == "--sksl"
+  sksl = false
+  foreach(shader_target_flag, invoker.shader_target_flags) {
+    sksl = shader_target_flag == "--sksl"
+  }
   iplr = false
   if (defined(invoker.iplr) && invoker.iplr) {
     iplr = invoker.iplr
@@ -347,13 +351,10 @@ template("impellerc") {
       generated_dir = "$target_gen_dir"
     }
 
-    shader_target_flag = invoker.shader_target_flag
+    shader_target_flags = invoker.shader_target_flags
 
     shader_lib_dir = rebase_path("//flutter/impeller/compiler/shader_lib")
-    args = [
-      "--include=$shader_lib_dir",
-      "$shader_target_flag",
-    ]
+    args = [ "--include=$shader_lib_dir" ] + shader_target_flags
 
     # When we're in single invocation mode, we can't use source enumeration.
     if (!single_invocation) {
@@ -414,7 +415,7 @@ template("impellerc") {
 
       outputs = [ sl_output ]
     } else if (sksl) {
-      # When SkSL is selected as the `shader_target_flag`, don't generate
+      # When SkSL is selected as a `shader_target_flags`, don't generate
       # C++ reflection state. Nothing needs to use it and it's likely invalid
       # given the special cases when generating SkSL.
       # Note that this configuration is orthogonal to the "--iplr" flag
@@ -536,13 +537,13 @@ template("_impeller_shaders_metal") {
     metal_version = metal_version
     sl_file_extension = "metal"
     use_half_textures = use_half_textures
-    shader_target_flag = ""
+    shader_target_flags = []
     defines = [ "IMPELLER_TARGET_METAL" ]
     if (is_ios) {
-      shader_target_flag = "--metal-ios"
+      shader_target_flags += [ "--metal-ios" ]
       defines += [ "IMPELLER_TARGET_METAL_IOS" ]
     } else if (is_mac) {
-      shader_target_flag = "--metal-desktop"
+      shader_target_flags = [ "--metal-desktop" ]
       defines += [ "IMPELLER_TARGET_METAL_DESKTOP" ]
     } else {
       assert(false, "Metal not supported on this platform.")
@@ -631,9 +632,9 @@ template("_impeller_shaders_gles") {
       intermediates_subdir = "gles"
     }
     if (is_mac) {
-      shader_target_flag = "--opengl-desktop"
+      shader_target_flags = [ "--opengl-desktop" ]
     } else {
-      shader_target_flag = "--opengl-es"
+      shader_target_flags = [ "--opengl-es" ]
     }
 
     defines = [ "IMPELLER_TARGET_OPENGLES" ]
@@ -710,7 +711,7 @@ template("_impeller_shaders_vk") {
 
       intermediates_subdir = "vk"
     }
-    shader_target_flag = "--vulkan"
+    shader_target_flags = [ "--vulkan" ]
 
     defines = [ "IMPELLER_TARGET_VULKAN" ]
   }

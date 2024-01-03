@@ -24,12 +24,12 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
 ///         directly.
 std::optional<fb::ShaderBundleT> GenerateShaderBundleFlatbuffer(
     const std::string& bundle_config_json,
-    SourceOptions& options);
+    const SourceOptions& options);
 
 /// @brief  Parses the JSON shader bundle configuration and invokes the
 ///         compiler multiple times to produce a shader bundle flatbuffer, which
 ///         is then output to the `sl` file.
-bool GenerateShaderBundle(Switches& switches, SourceOptions& options);
+bool GenerateShaderBundle(Switches& switches);
 
 }  // namespace compiler
 }  // namespace impeller

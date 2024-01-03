@@ -82,7 +82,7 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
 }
 
 static std::unique_ptr<fb::ShaderT> GenerateShaderFB(
-    SourceOptions& options,
+    SourceOptions options,
     const std::string& shader_name,
     const ShaderConfig& shader_config) {
   auto result = std::make_unique<fb::ShaderT>();
@@ -130,27 +130,7 @@ static std::unique_ptr<fb::ShaderT> GenerateShaderFB(
     return nullptr;
   }
   RuntimeStageData stages;
-  switch (options.target_platform) {
-    case TargetPlatform::kUnknown:
-    case TargetPlatform::kMetalDesktop:
-    case TargetPlatform::kMetalIOS:
-    case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
-    case TargetPlatform::kVulkan:
-    case TargetPlatform::kSkSL:
-      std::cerr << "Invalid target platform "
-                << TargetPlatformToString(options.target_platform);
-      return nullptr;
-    case TargetPlatform::kRuntimeStageMetal:
-      stages.AddShader(RuntimeStageBackend::kMetal, stage_data);
-      break;
-    case TargetPlatform::kRuntimeStageGLES:
-      stages.AddShader(RuntimeStageBackend::kOpenGLES, stage_data);
-      break;
-    case TargetPlatform::kRuntimeStageVulkan:
-      stages.AddShader(RuntimeStageBackend::kVulkan, stage_data);
-      break;
-  }
+  stages.AddShader(stage_data);
   result->shader = stages.CreateFlatbuffer();
   if (!result->shader) {
     std::cerr << "Failed to create flatbuffer for bundled shader \""
@@ -163,7 +143,7 @@ static std::unique_ptr<fb::ShaderT> GenerateShaderFB(
 
 std::optional<fb::ShaderBundleT> GenerateShaderBundleFlatbuffer(
     const std::string& bundle_config_json,
-    SourceOptions& options) {
+    const SourceOptions& options) {
   // --------------------------------------------------------------------------
   /// 1. Parse the bundle configuration.
   ///
@@ -192,13 +172,13 @@ std::optional<fb::ShaderBundleT> GenerateShaderBundleFlatbuffer(
   return shader_bundle;
 }
 
-bool GenerateShaderBundle(Switches& switches, SourceOptions& options) {
+bool GenerateShaderBundle(Switches& switches) {
   // --------------------------------------------------------------------------
   /// 1. Parse the shader bundle and generate the flatbuffer result.
   ///
 
-  auto shader_bundle =
-      GenerateShaderBundleFlatbuffer(switches.shader_bundle, options);
+  auto shader_bundle = GenerateShaderBundleFlatbuffer(
+      switches.shader_bundle, switches.CreateSourceOptions());
   if (!shader_bundle.has_value()) {
     // Specific error messages are already handled by
     // GenerateShaderBundleFlatbuffer.
