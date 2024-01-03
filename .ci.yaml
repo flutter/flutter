@@ -81,7 +81,6 @@ platform_properties:
         ]
       os: Mac-12|Mac-13
       device_type: none
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -95,7 +94,6 @@ platform_properties:
       os: Mac-12|Mac-13
       device_type: none
       cpu: arm64
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -111,7 +109,6 @@ platform_properties:
       os: Mac-12|Mac-13
       tags: >
         ["devicelab", "hostonly", "mac"]
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -125,7 +122,6 @@ platform_properties:
       os: Mac-12|Mac-13
       device_type: none
       cpu: x86
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -140,7 +136,6 @@ platform_properties:
       os: Mac-12|Mac-13
       device_type: none
       cpu: x86
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -176,7 +171,6 @@ platform_properties:
       os: Mac-12|Mac-13
       cpu: x86
       device_os: iOS-16
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -191,7 +185,6 @@ platform_properties:
       os: Mac-12|Mac-13
       cpu: arm64
       device_os: iOS-16
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -1064,7 +1057,6 @@ targets:
       - .ci.yaml
 
   - name: Linux android_preview_tool_integration_tests
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -2305,7 +2297,6 @@ targets:
 
   - name: Linux_android hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2359,6 +2350,7 @@ targets:
       task_name: integration_ui_driver
 
   - name: Linux_pixel_7pro integration_ui_keyboard_resize
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/140645
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2426,7 +2418,6 @@ targets:
   - name: Linux_pixel_7pro native_assets_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3165,8 +3156,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3723,26 +3713,24 @@ targets:
   - name: Mac_x64 verify_binaries_codesigned
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      validation: verify_binaries_codesigned
-      validation_name: Verify x64 binaries codesigned
+      shard: verify_binaries_codesigned
 
   - name: Mac_arm64 verify_binaries_codesigned
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      validation: verify_binaries_codesigned
-      validation_name: Verify arm64 binaries codesigned
+      shard: verify_binaries_codesigned
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
@@ -4016,11 +4004,11 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios_xcode_debug
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18"
+          "sdk_version": "15a240d"
         }
+      os: Mac-13
     bringup: true
 
   # TODO(vashworth): Stop running in presubmit after macOS 13 upgrade is complete (https://github.com/flutter/flutter/issues/134737)
@@ -4058,11 +4046,11 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up_xcode_debug
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18"
+          "sdk_version": "15a240d"
         }
+      os: Mac-13
     bringup: true
 
   - name: Mac_ios flutter_view_ios__start_up
@@ -4149,11 +4137,11 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver_xcode_debug
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18"
+          "sdk_version": "15a240d"
         }
+      os: Mac-13
     bringup: true
 
   - name: Mac_ios integration_ui_ios_frame_number
@@ -4298,11 +4286,11 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios_xcode_debug
-      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18"
+          "sdk_version": "15a240d"
         }
+      os: Mac-13
     bringup: true
 
   - name: Mac native_assets_ios_simulator
@@ -4495,7 +4483,6 @@ targets:
 
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
-    # TODO(vashworth): Take out of bringup once https://github.com/flutter/flutter/issues/138194 is resolved.
     timeout: 60
     properties:
       tags: >

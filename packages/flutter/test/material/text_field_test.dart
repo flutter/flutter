@@ -27,6 +27,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 import '../widgets/live_text_utils.dart';
+import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
 import 'feedback_tester.dart';
@@ -17089,6 +17090,270 @@ void main() {
   },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
+    const String initialText = 'I love Flutter';
+    final TextEditingController controller = _textEditingController(text: initialText);
+    final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    // Long press to put the cursor after the "F".
+    final int index = initialText.indexOf('F');
+    await tester.longPressAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+
+    // Double tap on the same location to select the word around the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 7, extentOffset: 14));
+
+    // The toolbar is visible and the text processing actions are visible on Android.
+    final bool areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+    expect(find.text(fakeAction1Label), areTextActionsSupported ? findsOneWidget : findsNothing);
+    expect(find.text(fakeAction2Label), areTextActionsSupported ? findsOneWidget : findsNothing);
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
+  testWidgets(
+    'Text processing actions are not added to the toolbar for obscured text',
+    (WidgetTester tester) async {
+      const String initialText = 'I love Flutter';
+      final TextEditingController controller = _textEditingController(text: initialText);
+      final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+      TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              obscureText: true,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Long press to put the cursor after the "F".
+      final int index = initialText.indexOf('F');
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      // The toolbar is visible but does not contain the text processing actions.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.text(fakeAction1Label), findsNothing);
+      expect(find.text(fakeAction2Label), findsNothing);
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
+  testWidgets(
+    'Text processing actions are not added to the toolbar if selection is collapsed (Android only)',
+    (WidgetTester tester) async {
+      const String initialText = 'I love Flutter';
+      final TextEditingController controller = _textEditingController(text: initialText);
+      final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+      TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Open the text selection toolbar.
+      await showSelectionMenuAt(tester, controller, initialText.indexOf('F'));
+      await skipPastScrollingAnimation(tester);
+
+      // The toolbar is visible but does not contain the text processing actions.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(controller.selection.isCollapsed, true);
+
+      expect(find.text(fakeAction1Label), findsNothing);
+      expect(find.text(fakeAction2Label), findsNothing);
+    },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
+  testWidgets(
+    'Invoke a text processing action that does not return a value (Android only)',
+    (WidgetTester tester) async {
+      const String initialText = 'I love Flutter';
+      final TextEditingController controller = _textEditingController(text: initialText);
+      final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+      TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Long press to put the cursor after the "F".
+      final int index = initialText.indexOf('F');
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 7, extentOffset: 14));
+
+      // Run an action that does not return a processed text.
+      await tester.tap(find.text(fakeAction2Label));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // The action was correctly called.
+      expect(mockProcessTextHandler.lastCalledActionId, fakeAction2Id);
+      expect(mockProcessTextHandler.lastTextToProcess, 'Flutter');
+
+      // The text field was not updated.
+      expect(controller.text, initialText);
+
+      // The toolbar is no longer visible.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+    },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
+  testWidgets(
+    'Invoking a text processing action that returns a value replaces the selection (Android only)',
+    (WidgetTester tester) async {
+      const String initialText = 'I love Flutter';
+      final TextEditingController controller = _textEditingController(text: initialText);
+      final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+      TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Long press to put the cursor after the "F".
+      final int index = initialText.indexOf('F');
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 7, extentOffset: 14));
+
+      // Run an action that returns a processed text.
+      await tester.tap(find.text(fakeAction1Label));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // The action was correctly called.
+      expect(mockProcessTextHandler.lastCalledActionId, fakeAction1Id);
+      expect(mockProcessTextHandler.lastTextToProcess, 'Flutter');
+
+      // The text field was updated.
+      expect(controller.text, 'I love Flutter!!!');
+
+      // The toolbar is no longer visible.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+    },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
+  testWidgets(
+    'Invoking a text processing action that returns a value does not replace the selection of a readOnly text field (Android only)',
+    (WidgetTester tester) async {
+      const String initialText = 'I love Flutter';
+      final TextEditingController controller = _textEditingController(text: initialText);
+      final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+      TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              readOnly: true,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Long press to put the cursor after the "F".
+      final int index = initialText.indexOf('F');
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 7, extentOffset: 14));
+
+      // Run an action that returns a processed text.
+      await tester.tap(find.text(fakeAction1Label));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // The Action was correctly called.
+      expect(mockProcessTextHandler.lastCalledActionId, fakeAction1Id);
+      expect(mockProcessTextHandler.lastTextToProcess, 'Flutter');
+
+      // The text field was not updated.
+      expect(controller.text, initialText);
+
+      // The toolbar is no longer visible.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+    },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 }
 
