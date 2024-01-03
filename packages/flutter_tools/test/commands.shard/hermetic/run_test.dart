@@ -447,7 +447,7 @@ void main() {
         await expectLater(
           () => createTestCommandRunner(RunCommand()).run(runCommand),
           throwsToolExit(
-            message: '--flavor is only supported for Android and iOS devices.',
+            message: '--flavor is only supported for Android, macOS, and iOS devices.',
           ),
         );
       }, overrides: <Type, Generator>{
