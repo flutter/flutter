@@ -453,11 +453,19 @@ class WebReleaseBundle extends Target {
         final List<String> buildDescriptions = isWasm
           ? <String>[_getWasmBuildConfig(), _getJsBuildConfig()]
           : <String>[_getJsBuildConfig()];
+        final String buildConfig = '''
+_flutter.buildConfig = {
+  engineRevision: "${globals.flutterVersion.engineRevision}",
+  builds: [
+    ${buildDescriptions.join(',\n    ')},
+  ],
+}
+''';
         final IndexHtml indexHtml = IndexHtml(inputFile.readAsStringSync());
         indexHtml.applySubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
           serviceWorkerVersion: Random().nextInt(4294967296).toString(),
-          buildConfig: buildDescriptions.join(',\n')
+          buildConfig: buildConfig,
         );
         outputFile.writeAsStringSync(indexHtml.content);
         continue;

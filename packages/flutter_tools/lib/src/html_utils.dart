@@ -84,14 +84,8 @@ class IndexHtml {
     }
     if (buildConfig != null) {
       _content = _content.replaceFirst(
-            '{{flutter_build_config}}',
-'''
-_flutter.buildConfig = {
-  builds: [
-    $buildConfig,
-  ]
-}
-'''
+        '{{flutter_build_config}}',
+        buildConfig,
       );
     }
   }
