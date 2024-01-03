@@ -511,11 +511,15 @@ public class FlutterRenderer implements TextureRegistry {
 
     private void maybeCloseReader(ImageReader reader) {
       synchronized (this) {
+        if (!readersToClose.contains(reader)) {
+          return;
+        }
         if (this.lastConsumedImage != null && this.lastConsumedImage.reader == reader) {
           // There is still a consumed image in flight for this reader. Don't close.
           return;
         }
-        if (!readersToClose.contains(reader)) {
+        if (this.lastProducedImage != null && this.lastProducedImage.reader == reader) {
+          // There is still a pending image for this reader. Don't close.
           return;
         }
         readersToClose.remove(reader);
@@ -550,7 +554,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
       // Close the previously pushed buffer.
       if (toClose != null) {
-        Log.i(TAG, "Dropped frame.");
+        Log.i(TAG, "Dropping rendered frame that was not acquired in time.");
         toClose.close();
       }
       if (image != null) {
@@ -655,6 +659,11 @@ public class FlutterRenderer implements TextureRegistry {
     public void disableFenceForTest() {
       // Roboelectric's implementation of SyncFence is borked.
       ignoringFence = true;
+    }
+
+    @VisibleForTesting
+    public int readersToCloseSize() {
+      return readersToClose.size();
     }
   }
 

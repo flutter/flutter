@@ -43,6 +43,12 @@ public class FlutterRendererTest {
   private Surface fakeSurface2;
 
   @Before
+  public void init() {
+    // Uncomment the following line to enable logging output in test.
+    // ShadowLog.stream = System.out;
+  }
+
+  @Before
   public void setup() {
     fakeFlutterJNI = mock(FlutterJNI.class);
     fakeSurface = mock(Surface.class);
@@ -531,5 +537,66 @@ public class FlutterRendererTest {
 
     // We should not get a new frame because the produced frame was for the previous size.
     assertNull(texture.acquireLatestImage());
+  }
+
+  @Test
+  public void ImageReaderSurfaceProducerHandlesLateFrameWhenResizeInflight() {
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer.ImageReaderSurfaceProducer texture =
+        flutterRenderer.new ImageReaderSurfaceProducer(0);
+    texture.disableFenceForTest();
+
+    // Returns a null image when one hasn't been produced.
+    assertNull(texture.acquireLatestImage());
+
+    // Give the texture an initial size.
+    texture.setSize(1, 1);
+
+    // Grab the surface so we can render a frame at 1x1 after resizing.
+    Surface surface = texture.getSurface();
+    assertNotNull(surface);
+    Canvas canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+
+    // Let callbacks run, this will produce a single frame.
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // Resize.
+    texture.setSize(4, 4);
+
+    // Render a frame at the old size (by using the pre-resized Surface)
+    canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+
+    // Let callbacks run.
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // We will acquire a frame that is the old size.
+    Image produced = texture.acquireLatestImage();
+    assertNotNull(produced);
+    assertEquals(produced.getWidth(), 1);
+    assertEquals(produced.getHeight(), 1);
+
+    // We will still have one pending reader to be closed.
+    // If we didn't we would have closed the reader that owned the image we just acquired.
+    assertEquals(1, texture.readersToCloseSize());
+
+    // Render a new frame with the current size.
+    surface = texture.getSurface();
+    assertNotNull(surface);
+    canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+
+    // Let callbacks run.
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // Acquire the new image.
+    assertNotNull(texture.acquireLatestImage());
+
+    // We will have no pending readers to close.
+    assertEquals(0, texture.readersToCloseSize());
   }
 }
