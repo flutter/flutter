@@ -12,7 +12,7 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, kDoubleTapTimeout, kSecondaryMouseButton;
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, kDoubleTapTimeout, kLongPressTimeout, kSecondaryMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -279,7 +279,7 @@ void main() {
       // Long press to put the cursor after the "s".
       const int index = 3;
       await tester.longPressAt(textOffsetToPosition(tester, index));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Double tap on the same location to select the word around the cursor.
       await tester.tapAt(textOffsetToPosition(tester, index));
@@ -329,7 +329,7 @@ void main() {
     // Long press to put the cursor after the "s".
     const int index = 3;
     await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Double tap on the same location to select the word around the cursor.
     await tester.tapAt(textOffsetToPosition(tester, index));
@@ -377,7 +377,7 @@ void main() {
     // Long press to put the cursor after the "s".
     const int index = 3;
     await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Double tap on the same location to select the word around the cursor.
     await tester.tapAt(textOffsetToPosition(tester, index));
@@ -1749,7 +1749,7 @@ void main() {
     await tester.longPressAt(
       tester.getTopRight(find.text("j'aime la poutine")),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 200));
 
     Text text = tester.widget<Text>(find.text('Paste'));
@@ -1780,7 +1780,7 @@ void main() {
     await tester.longPressAt(
       tester.getTopRight(find.text("j'aime la poutine")),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 200));
 
     text = tester.widget<Text>(find.text('Paste'));
@@ -1816,7 +1816,7 @@ void main() {
     // Long press to put the cursor after the "w".
     const int index = 3;
     await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: index),
@@ -1863,7 +1863,7 @@ void main() {
     // Long press to select 'Atwater'
     const int index = 3;
     await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection(baseOffset: 0, extentOffset: 7),
@@ -1922,7 +1922,7 @@ void main() {
       tester.getTopRight(find.text('readonly')),
     );
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
@@ -1962,7 +1962,7 @@ void main() {
     await tester.longPressAt(
       tester.getTopRight(find.text("j'aime la poutine")),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 200));
 
     await tester.tap(find.text('Select All'));
@@ -2244,7 +2244,7 @@ void main() {
       // Long press to select 'Atwater'.
       const int index = 3;
       await tester.longPressAt(textOffsetToPosition(tester, index));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
@@ -2304,7 +2304,7 @@ void main() {
       // Long press to put the cursor after the "w".
       const int index = 3;
       await tester.longPressAt(textOffsetToPosition(tester, index));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: index),
@@ -2349,7 +2349,7 @@ void main() {
       // Long press to put the cursor after the "w".
       const int index = 3;
       await tester.longPressAt(textOffsetToPosition(tester, index));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Second tap doesn't select anything.
       await tester.tapAt(textOffsetToPosition(tester, index));
@@ -2993,7 +2993,7 @@ void main() {
     await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.longPressAt(textFieldStart + const Offset(150.0, 5.0));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Should only have paste option when whole obscure text is selected.
     expect(find.text('Paste'), findsOneWidget);
@@ -3007,7 +3007,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     // Long tap at the end.
     await tester.longPressAt(textFieldEnd + const Offset(-10.0, 5.0));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Should have paste and select all options when collapse.
     expect(find.text('Paste'), findsOneWidget);
@@ -3110,7 +3110,7 @@ void main() {
       final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'
 
       await tester.longPressAt(ePos);
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
 
       expectCupertinoToolbarForCollapsedSelection();
 
@@ -3524,7 +3524,7 @@ void main() {
       final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'
 
       await tester.longPressAt(wPos);
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
 
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, 3);
@@ -7986,7 +7986,7 @@ void main() {
     final Offset textFieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
     await tester.longPressAt(textFieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pumpAndSettle(const Duration(milliseconds: 150));
     // Tap the Select All button.
     await tester.tapAt(textFieldStart + const Offset(20.0, 100.0));
     await tester.pump(const Duration(milliseconds: 300));
@@ -8040,7 +8040,7 @@ void main() {
     final Offset textFieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
     await tester.longPressAt(textFieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pumpAndSettle(const Duration(milliseconds: 150));
     // Tap the Select All button.
     await tester.tapAt(textFieldStart + const Offset(20.0, 100.0));
     await tester.pump(const Duration(milliseconds: 300));
@@ -10094,4 +10094,45 @@ void main() {
     // placeholder.
     expect(rectWithText.height, greaterThan(100));
   });
+
+  testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final TextEditingController controller = TextEditingController(
+      text: 'abcd',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              key: const ValueKey<int>(1),
+              child: CupertinoTextField(
+                autofocus: true,
+                controller: controller,
+              ),
+            )
+          ),
+        ),
+      ),
+    );
+    // Wait for autofocus.
+    await tester.pumpAndSettle();
+    final Offset textFieldCenter = tester.getCenter(find.byType(CupertinoTextField));
+    final TestGesture gesture = await tester.startGesture(textFieldCenter);
+    await tester.pump(kLongPressTimeout);
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_floating_cursor.regular_and_floating_both.cupertino.0.png'),
+    );
+    await gesture.moveTo(Offset(10, textFieldCenter.dy));
+    await tester.pump();
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_floating_cursor.only_floating_cursor.cupertino.0.png'),
+    );
+    await gesture.up();
+    EditableText.debugDeterministicCursor = false;
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
