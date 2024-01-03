@@ -109,8 +109,13 @@ class FlutterTesterTestDevice extends TestDevice {
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
       '--enable-checked-mode',
       '--verify-entry-points',
-      '--enable-software-rendering',
-      '--skia-deterministic-rendering',
+      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
+        '--enable-impeller'
+      else
+        ...<String>[
+          '--enable-software-rendering',
+          '--skia-deterministic-rendering',
+        ],
       if (debuggingOptions.enableDartProfiling)
         '--enable-dart-profiling',
       '--non-interactive',
