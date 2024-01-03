@@ -158,30 +158,20 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyIdleBeforeRender) {
   latch.Wait();
   ASSERT_FALSE(delegate.notify_idle_called_);
 
-  fml::AutoResetWaitableEvent render_latch;
   // Validate it has not notified idle and try to render.
   task_runners.GetUITaskRunner()->PostDelayedTask(
       [&] {
         ASSERT_FALSE(delegate.notify_idle_called_);
-        EXPECT_CALL(delegate, OnAnimatorBeginFrame).WillOnce([&] {
-          auto layer_tree = std::make_unique<LayerTree>(
-              LayerTree::Config(), SkISize::Make(600, 800));
-          animator->Render(std::move(layer_tree), 1.0);
-          render_latch.Signal();
-        });
-        // Request a frame that builds a layer tree and renders a frame.
-        // When the frame is rendered, render_latch will be signaled.
-        animator->RequestFrame(true);
+        auto layer_tree = std::make_unique<LayerTree>(LayerTree::Config(),
+                                                      SkISize::Make(600, 800));
+        animator->Render(std::move(layer_tree), 1.0);
         task_runners.GetPlatformTaskRunner()->PostTask(flush_vsync_task);
       },
       // See kNotifyIdleTaskWaitTime in animator.cc.
       fml::TimeDelta::FromMilliseconds(60));
   latch.Wait();
-  render_latch.Wait();
 
-  // A frame has been rendered, and the next frame request will notify idle.
-  // But at the moment there isn't another frame request, therefore it still
-  // hasn't notified idle.
+  // Still hasn't notified idle because there has been no frame request.
   task_runners.GetUITaskRunner()->PostTask([&] {
     ASSERT_FALSE(delegate.notify_idle_called_);
     // False to avoid getting cals to BeginFrame that will request more frames
@@ -249,16 +239,16 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyDelegateIfPipelineIsNotEmpty) {
 
   for (int i = 0; i < 2; i++) {
     task_runners.GetUITaskRunner()->PostTask([&] {
-      EXPECT_CALL(delegate, OnAnimatorBeginFrame).WillOnce([&] {
-        auto layer_tree = std::make_unique<LayerTree>(LayerTree::Config(),
-                                                      SkISize::Make(600, 800));
-        animator->Render(std::move(layer_tree), 1.0);
-        begin_frame_latch.Signal();
-      });
       animator->RequestFrame();
       task_runners.GetPlatformTaskRunner()->PostTask(flush_vsync_task);
     });
     begin_frame_latch.Wait();
+
+    PostTaskSync(task_runners.GetUITaskRunner(), [&] {
+      auto layer_tree = std::make_unique<LayerTree>(LayerTree::Config(),
+                                                    SkISize::Make(600, 800));
+      animator->Render(std::move(layer_tree), 1.0);
+    });
   }
 
   PostTaskSync(task_runners.GetUITaskRunner(), [&] { animator.reset(); });
