@@ -17,6 +17,9 @@ class PointFieldGeometry final : public Geometry {
 
   static size_t ComputeCircleDivisions(Scalar scaled_radius, bool round);
 
+  /// If the platform can use compute safely.
+  static bool CanUseCompute(const ContentContext& renderer);
+
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
