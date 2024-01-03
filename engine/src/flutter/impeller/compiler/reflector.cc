@@ -15,8 +15,10 @@
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/compiler/code_gen_template.h"
+#include "impeller/compiler/types.h"
 #include "impeller/compiler/uniform_sorter.h"
 #include "impeller/compiler/utilities.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/geometry/half.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/scalar.h"
@@ -81,7 +83,7 @@ static std::string ExecutionModelToString(spv::ExecutionModel model) {
   }
 }
 
-static std::string StringToShaderStage(std::string str) {
+static std::string StringToShaderStage(const std::string& str) {
   if (str == "vertex") {
     return "ShaderStage::kVertex";
   }
@@ -98,13 +100,13 @@ static std::string StringToShaderStage(std::string str) {
 }
 
 Reflector::Reflector(Options options,
-                     std::shared_ptr<const spirv_cross::ParsedIR> ir,
-                     std::shared_ptr<fml::Mapping> shader_data,
-                     CompilerBackend compiler)
+                     const std::shared_ptr<const spirv_cross::ParsedIR>& ir,
+                     const std::shared_ptr<fml::Mapping>& shader_data,
+                     const CompilerBackend& compiler)
     : options_(std::move(options)),
-      ir_(std::move(ir)),
-      shader_data_(std::move(shader_data)),
-      compiler_(std::move(compiler)) {
+      ir_(ir),
+      shader_data_(shader_data),
+      compiler_(compiler) {
   if (!ir_ || !compiler_) {
     return;
   }
@@ -128,9 +130,6 @@ Reflector::Reflector(Options options,
   }
 
   runtime_stage_shader_ = GenerateRuntimeStageData();
-  if (!runtime_stage_shader_) {
-    return;
-  }
 
   is_valid_ = true;
 }
@@ -318,8 +317,35 @@ std::shared_ptr<fml::Mapping> Reflector::GenerateReflectionCC() const {
   return InflateTemplate(kReflectionCCTemplate);
 }
 
+static std::optional<RuntimeStageBackend> GetRuntimeStageBackend(
+    TargetPlatform target_platform) {
+  switch (target_platform) {
+    case TargetPlatform::kUnknown:
+    case TargetPlatform::kMetalDesktop:
+    case TargetPlatform::kMetalIOS:
+    case TargetPlatform::kOpenGLES:
+    case TargetPlatform::kOpenGLDesktop:
+    case TargetPlatform::kVulkan:
+      return std::nullopt;
+    case TargetPlatform::kRuntimeStageMetal:
+      return RuntimeStageBackend::kMetal;
+    case TargetPlatform::kRuntimeStageGLES:
+      return RuntimeStageBackend::kOpenGLES;
+    case TargetPlatform::kRuntimeStageVulkan:
+      return RuntimeStageBackend::kVulkan;
+    case TargetPlatform::kSkSL:
+      return RuntimeStageBackend::kSkSL;
+  }
+  FML_UNREACHABLE();
+}
+
 std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
     const {
+  auto backend = GetRuntimeStageBackend(options_.target_platform);
+  if (!backend.has_value()) {
+    return nullptr;
+  }
+
   const auto& entrypoints = compiler_->get_entry_points_and_stages();
   if (entrypoints.size() != 1u) {
     VALIDATION_LOG << "Single entrypoint not found.";
@@ -329,6 +355,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
   data->entrypoint = options_.entry_point_name;
   data->stage = entrypoints.front().execution_model;
   data->shader = shader_data_;
+  data->backend = backend.value();
 
   // Sort the IR so that the uniforms are in declaration order.
   std::vector<spirv_cross::ID> uniforms =

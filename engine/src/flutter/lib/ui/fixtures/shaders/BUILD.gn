@@ -18,7 +18,7 @@ if (enable_unittests) {
 
   impellerc("ink_sparkle") {
     shaders = [ "//flutter/impeller/fixtures/ink_sparkle.frag" ]
-    shader_target_flag = "--sksl"
+    shader_target_flags = [ "--sksl" ]
     intermediates_subdir = "iplr"
     sl_file_extension = "iplr"
     iplr = true
@@ -26,7 +26,7 @@ if (enable_unittests) {
 
   impellerc("ink_sparkle_web") {
     shaders = [ "//flutter/impeller/fixtures/ink_sparkle.frag" ]
-    shader_target_flag = "--sksl"
+    shader_target_flags = [ "--sksl" ]
     intermediates_subdir = "iplr-json"
     sl_file_extension = "iplr"
     iplr = true
@@ -38,7 +38,10 @@ if (enable_unittests) {
       "//flutter/impeller/fixtures/ordering/shader_with_samplers.frag",
       "//flutter/third_party/test_shaders/selman/glow_shader.frag",
     ]
-    shader_target_flag = "--runtime-stage-metal"
+    shader_target_flags = [
+      "--runtime-stage-metal",
+      "--runtime-stage-gles",
+    ]
     intermediates_subdir = "iplr-remap"
     sl_file_extension = "iplr"
     iplr = true

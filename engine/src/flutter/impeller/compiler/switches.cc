@@ -10,6 +10,7 @@
 #include <map>
 
 #include "flutter/fml/file.h"
+#include "fml/command_line.h"
 #include "impeller/compiler/types.h"
 #include "impeller/compiler/utilities.h"
 
@@ -22,6 +23,9 @@ static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
     {"vulkan", TargetPlatform::kVulkan},
     {"opengl-es", TargetPlatform::kOpenGLES},
     {"opengl-desktop", TargetPlatform::kOpenGLDesktop},
+};
+
+static const std::map<std::string, TargetPlatform> kKnownRuntimeStages = {
     {"sksl", TargetPlatform::kSkSL},
     {"runtime-stage-metal", TargetPlatform::kRuntimeStageMetal},
     {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},
@@ -35,49 +39,77 @@ static const std::map<std::string, SourceType> kKnownSourceTypes = {
 };
 
 void Switches::PrintHelp(std::ostream& stream) {
+  // clang-format off
+  const std::string optional_prefix =          "[optional]          ";
+  const std::string optional_multiple_prefix = "[optional,multiple] ";
+  // clang-format on
+
   stream << std::endl;
   stream << "ImpellerC is an offline shader processor and reflection engine."
          << std::endl;
   stream << "---------------------------------------------------------------"
          << std::endl;
-  stream << "Valid Argument are:" << std::endl;
+  stream << "Expected invocation is:" << std::endl << std::endl;
+  stream << "./impellerc <One platform or multiple runtime stages> "
+            "--input=<source_file> --sl=<sl_output_file> <optional arguments>"
+         << std::endl
+         << std::endl;
+
+  stream << "Valid platforms are:" << std::endl << std::endl;
   stream << "One of [";
   for (const auto& platform : kKnownPlatforms) {
     stream << " --" << platform.first;
   }
-  stream << " ]" << std::endl;
-  stream << "--input=<source_file>" << std::endl;
-  stream << "[optional] --input-type={";
+  stream << " ]" << std::endl << std::endl;
+
+  stream << "Valid runtime stages are:" << std::endl << std::endl;
+  stream << "At least one of [";
+  for (const auto& platform : kKnownRuntimeStages) {
+    stream << " --" << platform.first;
+  }
+  stream << " ]" << std::endl << std::endl;
+
+  stream << "Optional arguments:" << std::endl << std::endl;
+  stream << optional_prefix
+         << "--spirv=<spirv_output_file> (ignored for --shader-bundle)"
+         << std::endl;
+  stream << optional_prefix << "--input-type={";
   for (const auto& source_type : kKnownSourceTypes) {
     stream << source_type.first << ", ";
   }
   stream << "}" << std::endl;
-  stream << "--sl=<sl_output_file>" << std::endl;
-  stream << "--spirv=<spirv_output_file> (ignored for --shader-bundle)"
+  stream << optional_prefix << "--source-language=glsl|hlsl (default: glsl)"
          << std::endl;
-  stream << "[optional] --source-language=glsl|hlsl (default: glsl)"
-         << std::endl;
-  stream << "[optional] --entry-point=<entry_point_name> (default: main; "
+  stream << optional_prefix
+         << "--entry-point=<entry_point_name> (default: main; "
             "ignored for glsl)"
          << std::endl;
-  stream << "[optional] --iplr (causes --sl file to be emitted in iplr format)"
+  stream << optional_prefix
+         << "--iplr (causes --sl file to be emitted in "
+            "iplr format)"
          << std::endl;
-  stream << "[optional] --shader-bundle=<bundle_spec> (causes --sl file to be "
+  stream << optional_prefix
+         << "--shader-bundle=<bundle_spec> (causes --sl "
+            "file to be "
             "emitted in Flutter GPU's shader bundle format)"
          << std::endl;
-  stream << "[optional] --reflection-json=<reflection_json_file>" << std::endl;
-  stream << "[optional] --reflection-header=<reflection_header_file>"
+  stream << optional_prefix << "--reflection-json=<reflection_json_file>"
          << std::endl;
-  stream << "[optional] --reflection-cc=<reflection_cc_file>" << std::endl;
-  stream << "[optional,multiple] --include=<include_directory>" << std::endl;
-  stream << "[optional,multiple] --define=<define>" << std::endl;
-  stream << "[optional] --depfile=<depfile_path>" << std::endl;
-  stream << "[optional] --gles-language-version=<number>" << std::endl;
-  stream << "[optional] --json" << std::endl;
-  stream << "[optional] --use-half-textures (force openGL semantics when "
+  stream << optional_prefix << "--reflection-header=<reflection_header_file>"
+         << std::endl;
+  stream << optional_prefix << "--reflection-cc=<reflection_cc_file>"
+         << std::endl;
+  stream << optional_multiple_prefix << "--include=<include_directory>"
+         << std::endl;
+  stream << optional_multiple_prefix << "--define=<define>" << std::endl;
+  stream << optional_prefix << "--depfile=<depfile_path>" << std::endl;
+  stream << optional_prefix << "--gles-language-version=<number>" << std::endl;
+  stream << optional_prefix << "--json" << std::endl;
+  stream << optional_prefix
+         << "--use-half-textures (force openGL semantics when "
             "targeting metal)"
          << std::endl;
-  stream << "[optional] --require-framebuffer-fetch" << std::endl;
+  stream << optional_prefix << "--require-framebuffer-fetch" << std::endl;
 }
 
 Switches::Switches() = default;
@@ -102,6 +134,17 @@ static TargetPlatform TargetPlatformFromCommandLine(
   return target;
 }
 
+static std::vector<TargetPlatform> RuntimeStagesFromCommandLine(
+    const fml::CommandLine& command_line) {
+  std::vector<TargetPlatform> stages;
+  for (const auto& platform : kKnownRuntimeStages) {
+    if (command_line.HasOption(platform.first)) {
+      stages.push_back(platform.second);
+    }
+  }
+  return stages;
+}
+
 static SourceType SourceTypeFromCommandLine(
     const fml::CommandLine& command_line) {
   auto source_type_option =
@@ -114,8 +157,7 @@ static SourceType SourceTypeFromCommandLine(
 }
 
 Switches::Switches(const fml::CommandLine& command_line)
-    : target_platform(TargetPlatformFromCommandLine(command_line)),
-      working_directory(std::make_shared<fml::UniqueFD>(fml::OpenDirectory(
+    : working_directory(std::make_shared<fml::UniqueFD>(fml::OpenDirectory(
           Utf8FromPath(std::filesystem::current_path()).c_str(),
           false,  // create if necessary,
           fml::FilePermission::kRead))),
@@ -143,7 +185,9 @@ Switches::Switches(const fml::CommandLine& command_line)
           command_line.GetOptionValueWithDefault("entry-point", "main")),
       use_half_textures(command_line.HasOption("use-half-textures")),
       require_framebuffer_fetch(
-          command_line.HasOption("require-framebuffer-fetch")) {
+          command_line.HasOption("require-framebuffer-fetch")),
+      target_platform_(TargetPlatformFromCommandLine(command_line)),
+      runtime_stages_(RuntimeStagesFromCommandLine(command_line)) {
   auto language = ToLowerCase(
       command_line.GetOptionValueWithDefault("source-language", "glsl"));
 
@@ -200,8 +244,10 @@ bool Switches::AreValid(std::ostream& explain) const {
   const bool shader_bundle_mode = !shader_bundle.empty();
 
   bool valid = true;
-  if (target_platform == TargetPlatform::kUnknown) {
-    explain << "The target platform (only one) was not specified." << std::endl;
+  if (target_platform_ == TargetPlatform::kUnknown && runtime_stages_.empty()) {
+    explain << "Either a target platform was not specified, or no runtime "
+               "stages were specified."
+            << std::endl;
     valid = false;
   }
 
@@ -240,6 +286,45 @@ bool Switches::AreValid(std::ostream& explain) const {
   }
 
   return valid;
+}
+
+std::vector<TargetPlatform> Switches::PlatformsToCompile() const {
+  if (target_platform_ == TargetPlatform::kUnknown) {
+    return runtime_stages_;
+  }
+  return {target_platform_};
+}
+
+TargetPlatform Switches::SelectDefaultTargetPlatform() const {
+  if (target_platform_ == TargetPlatform::kUnknown) {
+    return runtime_stages_.front();
+  }
+  return target_platform_;
+}
+
+SourceOptions Switches::CreateSourceOptions(
+    std::optional<TargetPlatform> target_platform) const {
+  SourceOptions options;
+  options.target_platform =
+      target_platform.value_or(SelectDefaultTargetPlatform());
+  options.source_language = source_language;
+  if (input_type == SourceType::kUnknown) {
+    options.type = SourceTypeFromFileName(source_file_name);
+  } else {
+    options.type = input_type;
+  }
+  options.working_directory = working_directory;
+  options.file_name = source_file_name;
+  options.include_dirs = include_directories;
+  options.defines = defines;
+  options.entry_point_name = EntryPointFunctionNameFromSourceName(
+      source_file_name, options.type, options.source_language, entry_point);
+  options.json_format = json_format;
+  options.gles_language_version = gles_language_version;
+  options.metal_version = metal_version;
+  options.use_half_textures = use_half_textures;
+  options.require_framebuffer_fetch = require_framebuffer_fetch;
+  return options;
 }
 
 }  // namespace compiler

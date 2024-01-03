@@ -58,9 +58,9 @@ class Reflector {
   };
 
   Reflector(Options options,
-            std::shared_ptr<const spirv_cross::ParsedIR> ir,
-            std::shared_ptr<fml::Mapping> shader_data,
-            CompilerBackend compiler);
+            const std::shared_ptr<const spirv_cross::ParsedIR>& ir,
+            const std::shared_ptr<fml::Mapping>& shader_data,
+            const CompilerBackend& compiler);
 
   ~Reflector();
 

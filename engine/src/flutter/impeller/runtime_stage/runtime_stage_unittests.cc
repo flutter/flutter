@@ -9,6 +9,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/base/allocation.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/pipeline_descriptor.h"
@@ -275,6 +276,21 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   desc.SetStencilPixelFormat(stencil_fmt);
   auto pipeline = GetContext()->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_NE(pipeline, nullptr);
+}
+
+TEST_P(RuntimeStageTest, ContainsExpectedShaderTypes) {
+  auto stages = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  // Right now, SkSL gets implicitly bundled regardless of what the build rule
+  // for this test requested. After
+  // https://github.com/flutter/flutter/issues/138919, this may require a build
+  // rule change or a new test.
+  EXPECT_TRUE(stages[RuntimeStageBackend::kSkSL]);
+
+  EXPECT_TRUE(stages[RuntimeStageBackend::kOpenGLES]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kMetal]);
+  // TODO(dnfield): Flip this when
+  // https://github.com/flutter/flutter/issues/122823 is fixed.
+  EXPECT_FALSE(stages[RuntimeStageBackend::kVulkan]);
 }
 
 }  // namespace testing
