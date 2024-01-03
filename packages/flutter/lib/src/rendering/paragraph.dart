@@ -276,6 +276,8 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
     Color? selectionColor,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     SelectionRegistrar? registrar,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
@@ -286,6 +288,8 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
        _softWrap = softWrap,
        _overflow = overflow,
        _selectionColor = selectionColor,
+       _selectionHeightStyle = selectionHeightStyle,
+       _selectionWidthStyle = selectionWidthStyle,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -621,6 +625,36 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _selectionColor = value;
+    if (_lastSelectableFragments?.any((_SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
+      markNeedsPaint();
+    }
+  }
+
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
+  ui.BoxHeightStyle _selectionHeightStyle = ui.BoxHeightStyle.tight;
+  set selectionHeightStyle(ui.BoxHeightStyle value) {
+    if (_selectionHeightStyle == value) {
+      return;
+    }
+    _selectionHeightStyle = value;
+    if (_lastSelectableFragments?.any((_SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
+      markNeedsPaint();
+    }
+  }
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
+  ui.BoxWidthStyle _selectionWidthStyle = ui.BoxWidthStyle.tight;
+  set selectionWidthStyle(ui.BoxWidthStyle value) {
+    if (_selectionWidthStyle == value) {
+      return;
+    }
+    _selectionWidthStyle = value;
     if (_lastSelectableFragments?.any((_SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
       markNeedsPaint();
     }
@@ -2077,7 +2111,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       final Paint selectionPaint = Paint()
         ..style = PaintingStyle.fill
         ..color = paragraph.selectionColor!;
-      for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
+      for (final TextBox textBox in paragraph.getBoxesForSelection(
+        selection,
+        boxHeightStyle: paragraph.selectionHeightStyle,
+        boxWidthStyle: paragraph.selectionWidthStyle,
+      )) {
         context.canvas.drawRect(
             textBox.toRect().shift(offset), selectionPaint);
       }
