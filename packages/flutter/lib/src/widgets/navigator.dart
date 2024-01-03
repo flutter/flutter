@@ -3516,6 +3516,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
+  /// Whether the route was started popping by user gesture.
+  bool popGestureStarted = false;
+
   void _handleHistoryChanged() {
     final bool navigatorCanPop = canPop();
     late final bool routeBlocksPop;
@@ -5475,6 +5478,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void didStopUserGesture() {
     assert(_userGesturesInProgress > 0);
     _userGesturesInProgress -= 1;
+    popGestureStarted = false;
     if (_userGesturesInProgress == 0) {
       for (final NavigatorObserver observer in _effectiveObservers) {
         observer.didStopUserGesture();
