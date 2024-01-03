@@ -965,7 +965,7 @@ class _TrianglePainter extends CustomPainter {
 
 /// [Stepper] will use these properties to customize some of its parts.
 class StepperProperties {
-  /// Constructs a [StepperStyle] with the given values.
+  /// Constructs a [StepperProperties] with the given values.
   const StepperProperties({
     this.height,
     this.width,
