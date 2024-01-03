@@ -84,10 +84,8 @@ class TokenLogger {
     if (_unavailableTokens.isNotEmpty) {
       print('');
       print('\x1B[31m' 'Some referenced tokens do not exist: ${_unavailableTokens.length}' '\x1B[0m');
-      if (verbose) {
-        for (final String token in _unavailableTokens) {
-          print('  $token');
-        }
+      for (final String token in _unavailableTokens) {
+        print('  $token');
       }
     }
   }
