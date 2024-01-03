@@ -378,6 +378,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   StepperProperties? get stepperProperties => widget.stepperProperties;
 
+  double get _heightFactor {
+    return (_isLabel() && stepperProperties?.height != null) ? 2.5 : 2.0;
+  }
+
   bool _isFirst(int index) {
     return index == 0;
   }
@@ -735,11 +739,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Widget _buildVerticalBody(int index) {
     final double? marginLeft = stepperProperties?.margin?.resolve(TextDirection.ltr).left;
     final double? stepWidth = stepperProperties?.width;
+
     return Stack(
       children: <Widget>[
         PositionedDirectional(
-          // Adjust the left side of the line so that it is centered under the
-          // circle.
+          // Adjusts the left side of the line so that it is centered when
+          // [StepperType.error] is displayed.
           start: 24.0 + (marginLeft ?? 0.0),
           top: 0.0,
           bottom: 0.0,
@@ -827,13 +832,16 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  if (widget.steps[i].label != null) const SizedBox(height: 24.0,),
-                  Center(child: _buildIcon(i)),
-                  if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i),),
-                ],
+               SizedBox(
+                height: _isLabel() ? 104.0 : 72.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    if (widget.steps[i].label != null) const SizedBox(height: 24.0,),
+                    Center(child: _buildIcon(i)),
+                    if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i),),
+                  ],
+                ),
               ),
               Container(
                 margin: stepperProperties?.margin ?? const EdgeInsetsDirectional.only(start: 12.0),
@@ -871,7 +879,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           elevation: widget.elevation ?? 2,
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0),
-            height: stepperProperties?.height != null ? stepperProperties!.height! * 2 : null,
+            height: stepperProperties?.height != null ? stepperProperties!.height! * _heightFactor : null,
             child: Row(
               children: children,
             ),
