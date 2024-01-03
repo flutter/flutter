@@ -664,4 +664,118 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byTooltip('t2'), findsOneWidget);
     expect(find.byTooltip('t3'), findsOneWidget);
   });
+
+  testWidgets('SegmentedButton.styleFrom is applied to the SegmentedButton', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xfffffff0);
+    const Color backgroundColor =  Color(0xfffffff1);
+    const Color selectedBackgroundColor = Color(0xfffffff2);
+    const Color selectedForegroundColor = Color(0xfffffff3);
+    const Color disabledBackgroundColor = Color(0xfffffff4);
+    const Color disabledForegroundColor = Color(0xfffffff5);
+    const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
+    const MouseCursor disabledMouseCursor = SystemMouseCursors.grab;
+
+    final ButtonStyle styleFromStyle = SegmentedButton.styleFrom(
+      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColor,
+      selectedForegroundColor: selectedForegroundColor,
+      selectedBackgroundColor: selectedBackgroundColor,
+      disabledForegroundColor: disabledForegroundColor,
+      disabledBackgroundColor: disabledBackgroundColor,
+      shadowColor: const Color(0xfffffff6),
+      surfaceTintColor: const Color(0xfffffff7),
+      elevation: 1,
+      textStyle: const TextStyle(color: Color(0xfffffff8)),
+      padding: const EdgeInsets.all(2),
+      side: const BorderSide(color: Color(0xfffffff9)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
+      enabledMouseCursor: enabledMouseCursor,
+      disabledMouseCursor: disabledMouseCursor,
+      visualDensity: VisualDensity.compact,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      animationDuration: const Duration(milliseconds: 100),
+      enableFeedback: true,
+      alignment: Alignment.center,
+      splashFactory: NoSplash.splashFactory,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SegmentedButton<int>(
+            style: styleFromStyle,
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('1')),
+              ButtonSegment<int>(value: 2, label: Text('2')),
+              ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
+            ],
+            selected: const <int>{2},
+            onSelectionChanged: (Set<int> selected) { },
+            selectedIcon: const Icon(Icons.alarm),
+          ),
+        ),
+      ),
+    ));
+
+    // Test provided button style is applied to the enabled button segment.
+    ButtonStyle? buttonStyle = tester.widget<TextButton>(find.byType(TextButton).first).style;
+    expect(buttonStyle?.foregroundColor?.resolve(enabled), foregroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(enabled), backgroundColor);
+    expect(buttonStyle?.overlayColor, styleFromStyle.overlayColor);
+    expect(buttonStyle?.surfaceTintColor, styleFromStyle.surfaceTintColor);
+    expect(buttonStyle?.elevation, styleFromStyle.elevation);
+    expect(buttonStyle?.textStyle, styleFromStyle.textStyle);
+    expect(buttonStyle?.padding, styleFromStyle.padding);
+    expect(buttonStyle?.mouseCursor?.resolve(enabled), enabledMouseCursor);
+    expect(buttonStyle?.visualDensity, styleFromStyle.visualDensity);
+    expect(buttonStyle?.tapTargetSize, styleFromStyle.tapTargetSize);
+    expect(buttonStyle?.animationDuration, styleFromStyle.animationDuration);
+    expect(buttonStyle?.enableFeedback, styleFromStyle.enableFeedback);
+    expect(buttonStyle?.alignment, styleFromStyle.alignment);
+    expect(buttonStyle?.splashFactory, styleFromStyle.splashFactory);
+
+    // Test provided button style is applied selected button segment.
+    buttonStyle = tester.widget<TextButton>(find.byType(TextButton).at(1)).style;
+    expect(buttonStyle?.foregroundColor?.resolve(selected), selectedForegroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(selected), selectedBackgroundColor);
+    expect(buttonStyle?.mouseCursor?.resolve(enabled), enabledMouseCursor);
+
+    // Test provided button style is applied disabled button segment.
+    buttonStyle = tester.widget<TextButton>(find.byType(TextButton).last).style;
+    expect(buttonStyle?.foregroundColor?.resolve(disabled), disabledForegroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(disabled), disabledBackgroundColor);
+    expect(buttonStyle?.mouseCursor?.resolve(disabled), disabledMouseCursor);
+
+    // Test provided button style is applied to the segmented button material.
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(SegmentedButton<int>),
+      matching: find.byType(Material),
+    ).first);
+    expect(material.shape, styleFromStyle.shape?.resolve(enabled)?.copyWith(side: BorderSide.none));
+    expect(material.elevation, styleFromStyle.elevation?.resolve(enabled));
+    expect(material.shadowColor, styleFromStyle.shadowColor?.resolve(enabled));
+    expect(material.surfaceTintColor, styleFromStyle.surfaceTintColor?.resolve(enabled));
+
+    // Test provided button style border is applied to the segmented button border.
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints..line(color: styleFromStyle.side?.resolve(enabled)?.color),
+    );
+
+    // Test foreground color is applied to the overlay color.
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.down(tester.getCenter(find.text('1')));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: foregroundColor.withOpacity(0.08)));
+  });
 }
+
+Set<MaterialState> enabled = const <MaterialState>{};
+Set<MaterialState> disabled = const <MaterialState>{ MaterialState.disabled };
+Set<MaterialState> selected = const <MaterialState>{ MaterialState.selected };
