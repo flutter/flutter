@@ -31,7 +31,7 @@ class BottomNavigationBarItem {
     this.tooltip,
   }) : activeIcon = activeIcon ?? icon;
 
-  /// A key to be passed through to the resultant widget
+  /// A key to be passed through to the resultant widget.
   ///
   /// This allows the identification of different [BottomNavigationBarItem]s through their keys.
   ///
