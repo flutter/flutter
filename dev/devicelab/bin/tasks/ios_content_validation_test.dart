@@ -48,7 +48,7 @@ Future<void> main() async {
             '    • Version Number: 1.0.0\n',
             '    • Build Number: 1\n',
             '    • Display Name: Hello\n',
-            '    • Deployment Target: 11.0\n',
+            '    • Deployment Target: 12.0\n',
             '    • Bundle Identifier: com.example.hello\n',
             '    ! Your application still contains the default "com.example" bundle identifier.\n',
             '[!] App Icon and Launch Image Assets Validation\n',
