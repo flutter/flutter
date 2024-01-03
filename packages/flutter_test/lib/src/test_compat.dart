@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' show Timeout;
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
@@ -163,6 +164,7 @@ void test(
   Map<String, dynamic>? onPlatform,
   int? retry,
 }) {
+  _configureTearDownForTestFile();
   _declarer.test(
     description.toString(),
     body,
@@ -186,6 +188,7 @@ void test(
 /// of running the group's tests.
 @isTestGroup
 void group(Object description, void Function() body, { dynamic skip, int? retry }) {
+  _configureTearDownForTestFile();
   _declarer.group(description.toString(), body, skip: skip, retry: retry);
 }
 
@@ -201,6 +204,7 @@ void group(Object description, void Function() body, { dynamic skip, int? retry 
 /// Each callback at the top level or in a given group will be run in the order
 /// they were declared.
 void setUp(dynamic Function() body) {
+  _configureTearDownForTestFile();
   _declarer.setUp(body);
 }
 
@@ -218,6 +222,7 @@ void setUp(dynamic Function() body) {
 ///
 /// See also [addTearDown], which adds tear-downs to a running test.
 void tearDown(dynamic Function() body) {
+  _configureTearDownForTestFile();
   _declarer.tearDown(body);
 }
 
@@ -235,6 +240,7 @@ void tearDown(dynamic Function() body) {
 /// prefer [setUp], and only use [setUpAll] if the callback is prohibitively
 /// slow.
 void setUpAll(dynamic Function() body) {
+  _configureTearDownForTestFile();
   _declarer.setUpAll(body);
 }
 
@@ -250,9 +256,27 @@ void setUpAll(dynamic Function() body) {
 /// prefer [tearDown], and only use [tearDownAll] if the callback is
 /// prohibitively slow.
 void tearDownAll(dynamic Function() body) {
+  _configureTearDownForTestFile();
   _declarer.tearDownAll(body);
 }
 
+bool _isTearDownForTestFileConfigured = false;
+/// Configures `tearDownAll` after all user defined `tearDownAll` in the test file.
+///
+/// This function should be invoked in all functions, that may be invoked by user in the test file,
+/// to be invoked before any other `tearDownAll`.
+void _configureTearDownForTestFile() {
+  if (_isTearDownForTestFileConfigured) {
+    return;
+  }
+  _declarer.tearDownAll(_tearDownForTestFile);
+  _isTearDownForTestFileConfigured = true;
+}
+
+/// Tear down that should happen after all user defined tear down.
+Future<void> _tearDownForTestFile() async {
+  await maybeTearDownLeakTrackingForAll();
+}
 
 /// A reporter that prints each test on its own line.
 ///
