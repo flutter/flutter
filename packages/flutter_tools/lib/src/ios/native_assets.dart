@@ -106,7 +106,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Map<AssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets);
-  await copyNativeAssetsMacOSHost(
+  await _copyNativeAssetsIOS(
     buildUri,
     fatAssetTargetLocations,
     codesignIdentity,
@@ -168,7 +168,54 @@ Asset _targetLocationIOS(Asset asset) {
       return asset;
     case AssetAbsolutePath _:
       final String fileName = path.uri.pathSegments.last;
-      return asset.copyWith(path: AssetAbsolutePath(Uri(path: fileName)));
+      final String name =
+          fileName.replaceFirst('lib', '').replaceFirst('.dylib', '');
+      return asset.copyWith(
+        path: AssetAbsolutePath(Uri(path: '$name.framework/$name')),
+      );
   }
-  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
+  throw Exception(
+      'Unsupported asset path type ${path.runtimeType} in asset $asset');
+}
+
+/// Copies native assets into a framework per dynamic library.
+///
+/// For `flutter run -release` a multi-architecture solution is needed. So,
+/// `lipo` is used to combine all target architectures into a single file.
+///
+/// The install name is set so that it matches what the place it will
+/// be bundled in the final app.
+///
+/// Code signing is also done here, so that it doesn't have to be done in
+/// in xcode_backend.dart.
+Future<void> _copyNativeAssetsIOS(
+  Uri buildUri,
+  Map<AssetPath, List<Asset>> assetTargetLocations,
+  String? codesignIdentity,
+  BuildMode buildMode,
+  FileSystem fileSystem,
+) async {
+  if (assetTargetLocations.isNotEmpty) {
+    globals.logger
+        .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
+    for (final MapEntry<AssetPath, List<Asset>> assetMapping
+        in assetTargetLocations.entries) {
+      final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
+      final List<Uri> sources = <Uri>[
+        for (final Asset source in assetMapping.value)
+          (source.path as AssetAbsolutePath).uri
+      ];
+      final Uri targetUri = buildUri.resolveUri(target);
+      final File dylibFile = fileSystem.file(targetUri);
+      final Directory frameworkDir = dylibFile.parent;
+      if (!await frameworkDir.exists()) {
+        await frameworkDir.create(recursive: true);
+      }
+      await lipoDylibs(dylibFile, sources);
+      await setInstallNameDylib(dylibFile);
+      await createInfoPlist(targetUri.pathSegments.last, frameworkDir);
+      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+    }
+    globals.logger.printTrace('Copying native assets done.');
+  }
 }

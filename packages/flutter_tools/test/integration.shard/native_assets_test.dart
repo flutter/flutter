@@ -292,18 +292,46 @@ void main() {
 void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   final Directory appBundle = appDirectory.childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app');
   expect(appBundle, exists);
-  final Directory dylibsFolder = appBundle.childDirectory('Contents/Frameworks');
-  expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(OS.macOS.dylibFileName(packageName));
-  expect(dylib, exists);
+  final Directory frameworksFolder =
+      appBundle.childDirectory('Contents/Frameworks');
+  expect(frameworksFolder, exists);
+
+  // MyFramework.framework/
+  //   MyFramework  -> Versions/Current/MyFramework
+  //   Resources    -> Versions/Current/Resources
+  //   Versions/
+  //     A/
+  //       MyFramework
+  //       Resources/
+  //         Info.plist
+  //     Current  -> A
+  final Directory frameworkDir =
+      frameworksFolder.childDirectory('$packageName.framework');
+  final Directory versionsDir = frameworkDir.childDirectory('Versions');
+  final Directory versionADir = versionsDir.childDirectory('A');
+  final Directory resourcesDir = versionADir.childDirectory('Resources');
+  expect(resourcesDir, exists);
+  final File dylibFile = versionADir.childFile(packageName);
+  expect(dylibFile, exists);
+  final Link currentLink = versionsDir.childLink('Current');
+  expect(currentLink, exists);
+  expect(currentLink.resolveSymbolicLinksSync(), versionADir.path);
+  final Link resourcesLink = frameworkDir.childLink('Resources');
+  expect(resourcesLink, exists);
+  expect(resourcesLink.resolveSymbolicLinksSync(), resourcesDir.path);
+  final Link dylibLink = frameworkDir.childLink(packageName);
+  expect(dylibLink, exists);
+  expect(dylibLink.resolveSymbolicLinksSync(), dylibFile.path);
 }
 
 void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   final Directory appBundle = appDirectory.childDirectory('build/ios/${buildMode.upperCaseFirst()}-iphoneos/Runner.app');
   expect(appBundle, exists);
-  final Directory dylibsFolder = appBundle.childDirectory('Frameworks');
-  expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(OS.iOS.dylibFileName(packageName));
+  final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
+  expect(frameworksFolder, exists);
+  final File dylib = frameworksFolder
+      .childDirectory('$packageName.framework')
+      .childFile(packageName);
   expect(dylib, exists);
 }
 
@@ -379,7 +407,9 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
   final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
-  final File dylib = frameworksFolder.childFile(OS.macOS.dylibFileName(packageName));
+  final File dylib = frameworksFolder
+      .childDirectory('$packageName.framework')
+      .childFile(packageName);
   expect(dylib, exists);
 }
 
