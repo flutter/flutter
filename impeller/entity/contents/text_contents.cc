@@ -109,7 +109,7 @@ bool TextContents::Render(const ContentContext& renderer,
 
   // Common vertex uniforms for all glyphs.
   VS::FrameInfo frame_info;
-  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+  frame_info.mvp = pass.GetOrthographicTransform();
   frame_info.atlas_size =
       Vector2{static_cast<Scalar>(atlas->GetTexture()->GetSize().width),
               static_cast<Scalar>(atlas->GetTexture()->GetSize().height)};

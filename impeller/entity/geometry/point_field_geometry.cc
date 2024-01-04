@@ -30,8 +30,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
   return {
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer = vtx_builder->CreateVertexBuffer(host_buffer),
-      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransform(),
+      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
       .prevent_overdraw = false,
   };
 }
@@ -59,8 +58,7 @@ GeometryResult PointFieldGeometry::GetPositionUVBuffer(
   return {
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer = uv_vtx_builder.CreateVertexBuffer(host_buffer),
-      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransform(),
+      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
       .prevent_overdraw = false,
   };
 }
@@ -238,8 +236,7 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
       .vertex_buffer = {.vertex_buffer = output,
                         .vertex_count = total,
                         .index_type = IndexType::kNone},
-      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransform(),
+      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
       .prevent_overdraw = false,
   };
 }

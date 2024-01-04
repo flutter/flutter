@@ -96,8 +96,10 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
         vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator()));
 
     VS::UniformBuffer uniforms;
-    uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   Matrix::MakeScale(GetContentScale());
+    EXPECT_EQ(pass.GetOrthographicTransform(),
+              Matrix::MakeOrthographic(pass.GetRenderTargetSize()));
+    uniforms.mvp =
+        pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
     VS::BindUniformBuffer(cmd,
                           pass.GetTransientsBuffer().EmplaceUniform(uniforms));
 
@@ -266,7 +268,9 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
     for (size_t i = 0; i < 1; i++) {
       for (size_t j = 0; j < 1; j++) {
         VS::UniformBuffer uniforms;
-        uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+        EXPECT_EQ(pass.GetOrthographicTransform(),
+                  Matrix::MakeOrthographic(pass.GetRenderTargetSize()));
+        uniforms.mvp = pass.GetOrthographicTransform() *
                        Matrix::MakeScale(GetContentScale()) *
                        Matrix::MakeTranslation({i * 50.0f, j * 50.0f, 0.0f});
         VS::BindUniformBuffer(
@@ -438,8 +442,10 @@ TEST_P(RendererTest, CanRenderInstanced) {
 
   ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
     VS::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                     Matrix::MakeScale(GetContentScale());
+    EXPECT_EQ(pass.GetOrthographicTransform(),
+              Matrix::MakeOrthographic(pass.GetRenderTargetSize()));
+    frame_info.mvp =
+        pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
     VS::BindInstanceInfo(
@@ -539,7 +545,9 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
         cmd.BindVertices(vertex_buffer);
 
         VS::FrameInfo frame_info;
-        frame_info.mvp = Matrix::MakeOrthographic(pass->GetRenderTargetSize()) *
+        EXPECT_EQ(pass->GetOrthographicTransform(),
+                  Matrix::MakeOrthographic(pass->GetRenderTargetSize()));
+        frame_info.mvp = pass->GetOrthographicTransform() *
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(
             cmd, pass->GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -664,7 +672,9 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
         cmd.BindVertices(vertex_buffer);
 
         VS::FrameInfo frame_info;
-        frame_info.mvp = Matrix::MakeOrthographic(pass->GetRenderTargetSize()) *
+        EXPECT_EQ(pass->GetOrthographicTransform(),
+                  Matrix::MakeOrthographic(pass->GetRenderTargetSize()));
+        frame_info.mvp = pass->GetOrthographicTransform() *
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(
             cmd, pass->GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -785,7 +795,9 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
         cmd.BindVertices(vertex_buffer);
 
         VS::FrameInfo frame_info;
-        frame_info.mvp = Matrix::MakeOrthographic(pass->GetRenderTargetSize()) *
+        EXPECT_EQ(pass->GetOrthographicTransform(),
+                  Matrix::MakeOrthographic(pass->GetRenderTargetSize()));
+        frame_info.mvp = pass->GetOrthographicTransform() *
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(
             cmd, pass->GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -857,7 +869,8 @@ TEST_P(RendererTest, TheImpeller) {
     cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
     VS::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(size);
+    EXPECT_EQ(pass.GetOrthographicTransform(), Matrix::MakeOrthographic(size));
+    frame_info.mvp = pass.GetOrthographicTransform();
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
@@ -905,8 +918,9 @@ TEST_P(RendererTest, ArrayUniforms) {
     cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
     VS::FrameInfo frame_info;
+    EXPECT_EQ(pass.GetOrthographicTransform(), Matrix::MakeOrthographic(size));
     frame_info.mvp =
-        Matrix::MakeOrthographic(size) * Matrix::MakeScale(GetContentScale());
+        pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
@@ -962,8 +976,9 @@ TEST_P(RendererTest, InactiveUniforms) {
     cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
     VS::FrameInfo frame_info;
+    EXPECT_EQ(pass.GetOrthographicTransform(), Matrix::MakeOrthographic(size));
     frame_info.mvp =
-        Matrix::MakeOrthographic(size) * Matrix::MakeScale(GetContentScale());
+        pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
@@ -1223,7 +1238,9 @@ TEST_P(RendererTest, StencilMask) {
       cmd.BindVertices(vertex_buffer);
 
       VS::UniformBuffer uniforms;
-      uniforms.mvp = Matrix::MakeOrthographic(pass->GetRenderTargetSize()) *
+      EXPECT_EQ(pass->GetOrthographicTransform(),
+                Matrix::MakeOrthographic(pass->GetRenderTargetSize()));
+      uniforms.mvp = pass->GetOrthographicTransform() *
                      Matrix::MakeScale(GetContentScale());
       if (mirror) {
         uniforms.mvp = Matrix::MakeScale(Vector2(-1, 1)) * uniforms.mvp;

@@ -30,8 +30,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     return GeometryResult{
         .type = PrimitiveType::kTriangleStrip,
         .vertex_buffer = vertex_buffer,
-        .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                     entity.GetTransform(),
+        .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
         .prevent_overdraw = false,
     };
   }
@@ -61,8 +60,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
   return GeometryResult{
       .type = PrimitiveType::kTriangle,
       .vertex_buffer = vertex_buffer,
-      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransform(),
+      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
       .prevent_overdraw = false,
   };
 }
@@ -97,8 +95,7 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
         .type = PrimitiveType::kTriangleStrip,
         .vertex_buffer =
             vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer()),
-        .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                     entity.GetTransform(),
+        .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
         .prevent_overdraw = false,
     };
   }
@@ -131,8 +128,7 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
       .type = PrimitiveType::kTriangle,
       .vertex_buffer =
           vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer()),
-      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransform(),
+      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
       .prevent_overdraw = false,
   };
 }
