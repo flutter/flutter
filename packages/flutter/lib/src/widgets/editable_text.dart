@@ -688,12 +688,16 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// {@endtemplate}
 ///
 /// ## Scrolling Considerations
-/// When [EditableText] is placed within a [Scrollable] or within nested
-/// [Scrollable]s, consider placing a [ScrollNotificationObserver] above the
-/// root [Scrollable] to ensure proper scroll coordination for [EditableText]
-/// and its components like [TextSelectionOverlay]. If a [Scaffold] is present
-/// above the [Scrollable]s in the widget hierarchy, it automatically creates
-/// its own [ScrollNotificationObserver].
+///
+/// If a [Scaffold] is used as the parent of the [Scrollable]s that contain
+/// [EditableText], it will automatically create its own
+/// [ScrollNotificationObserver]. This ensures proper scroll coordination
+/// for [EditableText] and its components like [TextSelectionOverlay].
+///
+/// When using a [EditableText] within a [Scrollable] or nested [Scrollable]s
+/// without a [Scaffold] as the parent, ensure proper scroll coordination by
+/// placing a [ScrollNotificationObserver] above the root [Scrollable] that
+/// contains the [EditableText].
 ///
 /// {@template flutter.widgets.editableText.accessibility}
 /// ## Troubleshooting Common Accessibility Issues
@@ -2932,6 +2936,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         hideToolbar();
       }
     }
+
+    if (_scrollNotificationObserver != null) {
+      // Only update subscription when the scroll notification observer is not null.
+      // We only subscribe to the scroll notification observer when the context
+      // menu is shown on platforms that support _platformSupportsFadeOnScroll.
+      _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
+      _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+      _scrollNotificationObserver?.addListener(_handleContextMenuOnParentScroll);
+    }
   }
 
   @override
@@ -3666,9 +3679,46 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return _scrollableKey.currentContext == scrollableState?.context;
   }
 
+  bool _scrollableNotificationIsFromSameSubtree(BuildContext? notificationContext) {
+    if (notificationContext == null) {
+      return false;
+    }
+    BuildContext? currentContext = context;
+    // The notification context of a ScrollNotification points to the RawGestureDetector
+    // of the Scrollable. We get the ScrollableState associated with this notification
+    // by looking up the tree.
+    final ScrollableState? notificationScrollableState = notificationContext.findAncestorStateOfType<ScrollableState>();
+    if (notificationScrollableState == null) {
+      return false;
+    }
+    while (currentContext != null) {
+      final ScrollableState? scrollableState = currentContext.findAncestorStateOfType<ScrollableState>();
+      if (scrollableState == notificationScrollableState) {
+        return true;
+      }
+      currentContext = scrollableState?.context;
+    }
+    return false;
+  }
+
   void _handleContextMenuOnParentScroll(ScrollNotification notification) {
+    // Do some preliminary checks to avoid expensive subtree traversal.
     if (notification is! ScrollStartNotification
        && notification is! ScrollEndNotification) {
+      return;
+    }
+    if (notification is ScrollStartNotification
+       && _valueWhenToolbarShowScheduled != null) {
+      return;
+    }
+    if (notification is ScrollEndNotification
+       && _valueWhenToolbarShowScheduled == null) {
+      return;
+    }
+    if (notification is ScrollEndNotification
+       && _valueWhenToolbarShowScheduled != _value) {
+      _valueWhenToolbarShowScheduled = null;
+      _disposeScrollNotificationObserver();
       return;
     }
     if (_isInternalScrollableNotification(notification.context)) {
@@ -3687,28 +3737,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final double obscuredHorizontal = (view.padding.left + view.padding.right) / view.devicePixelRatio;
     final Size visibleScreenSize = Size(screenSize.width - obscuredHorizontal, screenSize.height - obscuredVertical);
     return Rect.fromLTWH(view.padding.left / view.devicePixelRatio, view.padding.top / view.devicePixelRatio, visibleScreenSize.width, visibleScreenSize.height);
-  }
-
-  bool _scrollableNotificationIsFromSameSubtree(BuildContext? notificationContext) {
-    if (notificationContext == null) {
-      return false;
-    }
-    BuildContext? currentContext = context;
-    // The notification context of a ScrollNotification points to the RawGestureDetector
-    // of the Scrollable. We get the ScrollableState associated with this notification
-    // by looking up the tree.
-    final BuildContext? notificationScrollableContext = notificationContext.findAncestorStateOfType<ScrollableState>()?.context;
-    if (notificationScrollableContext == null) {
-      return false;
-    }
-    while (currentContext != null) {
-      final ScrollableState? scrollableState = currentContext.findAncestorStateOfType<ScrollableState>();
-      if (scrollableState?.context == notificationScrollableContext) {
-        return true;
-      }
-      currentContext = scrollableState?.context;
-    }
-    return false;
   }
 
   void _handleContextMenuOnScroll(ScrollNotification notification) {
@@ -3742,6 +3770,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_valueWhenToolbarShowScheduled != _value) {
         // Value has changed so we should invalidate any toolbar scheduling.
         _valueWhenToolbarShowScheduled = null;
+        _disposeScrollNotificationObserver();
         return;
       }
 
