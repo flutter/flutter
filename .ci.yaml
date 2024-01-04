@@ -2297,7 +2297,6 @@ targets:
 
   - name: Linux_android hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2419,7 +2418,6 @@ targets:
   - name: Linux_pixel_7pro native_assets_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4785,6 +4783,36 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows framework_tests_libraries_leak_tracking
+    recipe: flutter/flutter_drone
+    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: framework_tests
+      subshard: libraries
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Windows framework_tests_misc
     recipe: flutter/flutter_drone
     timeout: 60
@@ -4814,6 +4842,40 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows framework_tests_misc_leak_tracking
+    recipe: flutter/flutter_drone
+    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "android_sdk", "version": "version:34v3"}
+        ]
+      shard: framework_tests
+      subshard: misc
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
+    runIf:
+      - dev/**
+      - examples/api/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Windows framework_tests_widgets
     recipe: flutter/flutter_drone
     timeout: 60
@@ -4826,6 +4888,36 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows framework_tests_widgets_leak_tracking
+    recipe: flutter/flutter_drone
+    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: framework_tests
+      subshard: widgets
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
