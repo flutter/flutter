@@ -4,10 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('GridView default control', (WidgetTester tester) async {
+  testWidgets('GridView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -21,7 +20,7 @@ void main() {
   });
 
   // Tests https://github.com/flutter/flutter/issues/5522
-  testWidgetsWithLeakTracking('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
+  testWidgets('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
     final Widget testWidget = Directionality(
@@ -77,7 +76,7 @@ void main() {
     expect(find.text('4'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('GridView.count() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+  testWidgets('GridView.count() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
     Widget buildFrame(int itemCount) {
       return Directionality(

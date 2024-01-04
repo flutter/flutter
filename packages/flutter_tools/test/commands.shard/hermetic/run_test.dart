@@ -1227,7 +1227,6 @@ void main() {
       '--native-null-assertions',
       '--enable-impeller',
       '--enable-vulkan-validation',
-      '--impeller-force-gl',
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
@@ -1249,7 +1248,6 @@ void main() {
     expect(options.traceSystrace, true);
     expect(options.enableImpeller, ImpellerStatus.enabled);
     expect(options.enableVulkanValidation, true);
-    expect(options.impellerForceGL, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
     expect(options.usingCISystem, true);
@@ -1301,9 +1299,6 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   String get adbPath => 'adb';
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     bool isLocalEmulator = false,
@@ -1439,9 +1434,6 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     this.connectionInterface = DeviceConnectionInterface.attached,

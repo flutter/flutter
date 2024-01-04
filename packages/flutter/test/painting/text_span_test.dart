@@ -8,7 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('TextSpan equals', () {
@@ -251,6 +250,24 @@ void main() {
     expect(textSpan2.compareTo(textSpan2), RenderComparison.identical);
   });
 
+  test('GetSpanForPosition', () {
+    const TextSpan textSpan = TextSpan(
+      text: '',
+      children: <InlineSpan>[
+        TextSpan(text: '', children: <InlineSpan>[
+          TextSpan(text: 'a'),
+        ]),
+        TextSpan(text: 'b'),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    expect((textSpan.getSpanForPosition(const TextPosition(offset: 0)) as TextSpan?)?.text, 'a');
+    expect((textSpan.getSpanForPosition(const TextPosition(offset: 1)) as TextSpan?)?.text, 'b');
+    expect((textSpan.getSpanForPosition(const TextPosition(offset: 2)) as TextSpan?)?.text, 'c');
+    expect((textSpan.getSpanForPosition(const TextPosition(offset: 3)) as TextSpan?)?.text, isNull);
+  });
+
   test('GetSpanForPosition with WidgetSpan', () {
     const TextSpan textSpan = TextSpan(
       text: 'a',
@@ -328,7 +345,7 @@ void main() {
     expect(indexInTree(const TextSpan(text: 'foobar')), null);
   });
 
-  testWidgetsWithLeakTracking('handles mouse cursor', (WidgetTester tester) async {
+  testWidgets('handles mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -365,7 +382,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('handles onEnter and onExit', (WidgetTester tester) async {
+  testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
     final List<PointerEvent> logEvents = <PointerEvent>[];
     await tester.pumpWidget(
       Directionality(
@@ -410,7 +427,7 @@ void main() {
     expect(logEvents[1], isA<PointerExitEvent>());
   });
 
-  testWidgetsWithLeakTracking('TextSpan can compute StringAttributes', (WidgetTester tester) async {
+  testWidgets('TextSpan can compute StringAttributes', (WidgetTester tester) async {
     const TextSpan span = TextSpan(
       text: 'aaaaa',
       spellOut: true,
