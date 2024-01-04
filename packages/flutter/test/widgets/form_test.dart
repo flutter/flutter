@@ -1011,4 +1011,58 @@ void main() {
     await tester.pump();
     expect(find.text('test_error'), findsNothing);
   });
+
+  testWidgets('AutovalidateMode.onFocusChange', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String? errorText(String? value) => '$value/error';
+
+    Widget builder() {
+      return MaterialApp(
+        theme: ThemeData(),
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Form(
+                key: formKey,
+                autovalidateMode: AutovalidateMode.onFocusChange,
+                child: Material(
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        initialValue: 'bar',
+                        validator: errorText,
+                      ),
+                      TextFormField(
+                        initialValue: 'bar',
+                        validator: errorText,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    // No error text is visible yet.
+    expect(find.text(errorText('foo')!), findsNothing);
+
+    // Enter text in the first TextFormField
+    await tester.enterText(find.byType(TextFormField).first, 'foo');
+    await tester.pumpAndSettle();
+
+    // Tap on the second TextFormField to trigger validation
+    await tester.tap(find.byType(TextFormField).last);
+    await tester.pumpAndSettle();
+
+    // Verify that the error text is displayed for the first TextFormField
+    expect(find.text(errorText('foo')!), findsOneWidget);
+    expect(find.text(errorText('bar')!), findsNothing);
+  });
 }

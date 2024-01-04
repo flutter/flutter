@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'pop_scope.dart';
@@ -239,6 +241,10 @@ class FormState extends State<Form> {
         if (_hasInteractedByUser) {
           _validate();
         }
+      case AutovalidateMode.onFocusChange:
+        if (!FocusScope.of(context).hasPrimaryFocus) {
+          _validate();
+        }
       case AutovalidateMode.disabled:
         break;
     }
@@ -300,6 +306,23 @@ class FormState extends State<Form> {
   bool _validate() {
     bool hasError = false;
     String errorMessage = '';
+    final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onFocusChange;
+
+    // Only validate currently focused field if autovalidateMode is onFocusChange.
+    // Otherwise, validate all fields.
+    if (validateOnFocusChange) {
+      final FocusScopeNode focusScope = FocusScope.of(context);
+      final FocusNode? focusedChild = focusScope.focusedChild;
+      if (focusedChild != null) {
+        final FormFieldState<dynamic>? focusedFormField = focusedChild.context?.findAncestorStateOfType<FormFieldState<dynamic>>();
+        if (focusedFormField != null) {
+          hasError = !focusedFormField.validate();
+          errorMessage = focusedFormField.errorText ?? '';
+        }
+      }
+      return !hasError;
+    }
+
     for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
       errorMessage += field.errorText ?? '';
@@ -588,6 +611,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           if (_hasInteractedByUser.value) {
             _validate();
           }
+        case AutovalidateMode.onFocusChange:
+          if (!FocusScope.of(context).hasPrimaryFocus) {
+            _validate();
+          }
         case AutovalidateMode.disabled:
           break;
       }
@@ -608,4 +635,13 @@ enum AutovalidateMode {
   /// Used to auto-validate [Form] and [FormField] only after each user
   /// interaction.
   onUserInteraction,
+
+  /// Used to auto-validate current [FormField] when unfocused.
+  ///
+  /// This mode is useful when you want to validate a [FormField] after the user
+  /// has interacted with another one.
+  ///
+  /// If you want validate all fields of a [Form] after the user has interacted
+  /// with one, use [always] instead.
+  onFocusChange,
 }
