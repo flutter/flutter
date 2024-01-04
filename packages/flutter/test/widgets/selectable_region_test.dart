@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -545,6 +547,48 @@ void main() {
     }
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('can set selectionHeightStyle and selectionWidthStyle for text', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            SelectableRegion(
+              focusNode: focusNode,
+              selectionControls: materialTextSelectionControls,
+              child: const Text(
+                'hello',
+                selectionHeightStyle: ui.BoxHeightStyle.max,
+                selectionWidthStyle: ui.BoxWidthStyle.max,
+                style: TextStyle(fontSize: 10, height: 1.5),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder textFinder = find.descendant(of: find.text('hello'), matching: find.byType(RichText));
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(textFinder);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(textFinder));
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+    expect(boxes.length, 1);
+    final Offset selectionBox = globalize(boxes[0].toRect().bottomRight, paragraph) - globalize(boxes[0].toRect().topLeft, paragraph);
+
+    // The selection box is the size of the paragraph.
+    expect(selectionBox.dx, paragraph.size.width);
+    expect(selectionBox.dy, paragraph.size.height);
+
+  });
 
   group('SelectionArea integration', () {
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
