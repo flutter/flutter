@@ -304,8 +304,8 @@ void main() {
 
     Finder textHasIcon(String text, IconData icon) {
       return find.descendant(
-          of: find.widgetWithText(Row, text),
-          matching: find.byIcon(icon)
+        of: find.widgetWithText(Row, text),
+        matching: find.byIcon(icon)
       );
     }
 
@@ -341,8 +341,8 @@ void main() {
 
     Finder textHasIcon(String text, IconData icon) {
       return find.descendant(
-          of: find.widgetWithText(Row, text),
-          matching: find.byIcon(icon)
+        of: find.widgetWithText(Row, text),
+        matching: find.byIcon(icon)
       );
     }
 
@@ -384,8 +384,8 @@ void main() {
 
     Finder rowWithIcons(IconData icon1, IconData icon2) {
       return find.descendant(
-          of: find.widgetWithIcon(Row, icon1),
-          matching: find.byIcon(icon2)
+        of: find.widgetWithIcon(Row, icon1),
+        matching: find.byIcon(icon2)
       );
     }
 
@@ -781,22 +781,22 @@ void main() {
         home: Scaffold(
           body: Center(
             child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return Column(
-                    children: <Widget>[
-                      SegmentedButton<int>(
-                        segments: const <ButtonSegment<int>>[
-                          ButtonSegment<int>(value: 0, label: Text('foo')),
-                        ],
-                        selected: const <int>{0},
-                      ),
-                      ElevatedButton(
-                        onPressed: () => setState(() {}),
-                        child: const Text('Trigger rebuild'),
-                      ),
-                    ],
-                  );
-                }
+              builder: (BuildContext context, StateSetter setState) {
+                return Column(
+                  children: <Widget>[
+                    SegmentedButton<int>(
+                      segments: const <ButtonSegment<int>>[
+                        ButtonSegment<int>(value: 0, label: Text('foo')),
+                      ],
+                      selected: const <int>{0},
+                    ),
+                    ElevatedButton(
+                      onPressed: () => setState(() {}),
+                      child: const Text('Trigger rebuild'),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
