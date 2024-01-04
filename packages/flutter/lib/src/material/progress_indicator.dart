@@ -708,11 +708,17 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     final double? val = widget.value;
 
     if (val == null) {
-      return CupertinoActivityIndicator(key: widget.key, color: tickColor);
+      return CupertinoActivityIndicator(
+        key: widget.key,
+        color: tickColor
+      );
     }
 
     return CupertinoActivityIndicator.partiallyRevealed(
-        key: widget.key, color: tickColor, progress: val);
+        key: widget.key,
+      color: tickColor,
+      progress: val
+    );
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
