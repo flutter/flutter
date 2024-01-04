@@ -1,0 +1,66 @@
+{
+    "builds": [
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "kvm=1",
+                "cores=8"
+            ],
+            "gn": [
+                "--android",
+                "--android-cpu=x64",
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "android_debug_x64",
+            "ninja": {
+                "config": "android_debug_x64",
+                "targets": [
+                    "flutter/shell/platform/android:flutter_shell_native_unittests",
+                    "flutter/testing/scenario_app"
+                ]
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Android Unit Tests",
+                    "test_dependencies": [
+                        {
+                            "dependency": "android_virtual_device",
+                            "version": "33"
+                        }
+                    ],
+                    "contexts": [
+                        "android_virtual_device"
+                    ],
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--android-variant",
+                        "android_debug_x64",
+                        "--type",
+                        "android"
+                    ]
+                },
+                {
+                    "language": "bash",
+                    "name": "Scenario App Integration Tests",
+                    "test_dependencies": [
+                        {
+                            "dependency": "android_virtual_device",
+                            "version": "33"
+                        }
+                    ],
+                    "contexts": [
+                        "android_virtual_device"
+                    ],
+                    "script": "flutter/testing/scenario_app/run_android_tests.sh",
+                    "parameters": [
+                        "android_debug_x64"
+                    ]
+                }
+            ]
+        }
+    ]
+}
