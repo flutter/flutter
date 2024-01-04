@@ -38,15 +38,13 @@ abstract class TokenTemplate {
   bool tokenAvailable(String tokenName) => _tokens.containsKey(tokenName);
 
   /// Resolve a token while logging its usage.
-  dynamic getToken(String tokenName) {
+  /// There will be no log if [optional] is true and the token doesn't exist.
+  dynamic getToken(String tokenName, {bool optional=false}) {
+    if (optional && !tokenAvailable(tokenName)) {
+      return null;
+    }
     tokenLogger.log(tokenName);
     return _tokens[tokenName];
-  }
-
-  /// Resolve a token if available or null otherwise. Unlike [getToken], this
-  /// method will not log the token lookup if the token doesn't exist.
-  dynamic getTokenOrNull(String tokenName) {
-    return tokenAvailable(tokenName) ? getToken(tokenName) : null;
   }
 
   static const String beginGeneratedComment = '''
@@ -122,9 +120,8 @@ abstract class TokenTemplate {
   /// See also:
   ///   * [componentColor], that provides support for an optional opacity.
   String color(String colorToken, [String? defaultValue]) {
-    final bool logTokenLookup = defaultValue == null;
     final String effectiveDefault = defaultValue ?? 'null';
-    final dynamic tokenVal = logTokenLookup ? getToken(colorToken) : getTokenOrNull(colorToken);
+    final dynamic tokenVal = getToken(colorToken, optional: defaultValue != null);
     return tokenVal == null ? effectiveDefault : '$colorSchemePrefix$tokenVal';
   }
 
@@ -254,7 +251,11 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = (getTokenOrNull('$componentToken.width') ?? getTokenOrNull('$componentToken.height') ?? 1.0) as double;
+    final double width = (
+      getToken('$componentToken.width', optional: true) ??
+      getToken('$componentToken.height', optional: true) ??
+      1.0
+    ) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 
