@@ -818,4 +818,3 @@ void main() {
 Set<MaterialState> enabled = const <MaterialState>{};
 Set<MaterialState> disabled = const <MaterialState>{ MaterialState.disabled };
 Set<MaterialState> selected = const <MaterialState>{ MaterialState.selected };
-
