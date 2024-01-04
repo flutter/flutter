@@ -356,6 +356,40 @@ static final String tokenBar = 'foo';
       expect(printLog, contains('  color_foo_req'));
     }));
 
+    test('border function logs width token when available', overridePrint(() {
+      allTokens['border_foo.color'] = 'red';
+      allTokens['border_foo.width'] = 3.0;
+
+      TestBorderTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ border_foo.color'));
+      expect(printLog, contains('✅ border_foo.width'));
+      expect(printLog, contains('Tokens used: 2/2'));
+    }));
+
+    test('border function logs height token when width token not available', overridePrint(() {
+      allTokens['border_foo.color'] = 'red';
+      allTokens['border_foo.height'] = 3.0;
+
+      TestBorderTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ border_foo.color'));
+      expect(printLog, contains('✅ border_foo.height'));
+      expect(printLog, contains('Tokens used: 2/2'));
+    }));
+
+    test("border function doesn't log when width or height tokens not available", overridePrint(() {
+      allTokens['border_foo.color'] = 'red';
+
+      TestBorderTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ border_foo.color'));
+      expect(printLog, contains('Tokens used: 1/1'));
+    }));
+
     test('can log and dump versions & tokens to a file', overridePrint(() {
       versionMap.addAll(testVersions);
       allTokens['foo'] = 'value';
@@ -402,5 +436,14 @@ class TestColorTemplate extends TokenTemplate {
   String generate() => '''
 static final Color color_1 = '${color('color_foo_req')}';
 static final Color color_2 = '${color('color_foo_opt', 'Colors.red')}';
+''';
+}
+
+class TestBorderTemplate extends TokenTemplate {
+  TestBorderTemplate(super.blockName, super.fileName, super.tokens);
+
+  @override
+  String generate() => '''
+static final BorderSide border = '${border('border_foo')}';
 ''';
 }
