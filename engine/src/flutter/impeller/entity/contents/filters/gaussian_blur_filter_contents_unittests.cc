@@ -381,5 +381,30 @@ TEST(GaussianBlurFilterContentsTest, CalculateSigmaForBlurRadius) {
   EXPECT_NEAR(sigma, derived_sigma, 0.01f);
 }
 
+TEST(GaussianBlurFilterContentsTest, Coefficients) {
+  BlurParameters parameters = {.blur_uv_offset = Point(1, 0),
+                               .blur_sigma = 1,
+                               .blur_radius = 5,
+                               .step_size = 1};
+  KernelPipeline::FragmentShader::KernelSamples samples =
+      GenerateBlurInfo(parameters);
+  EXPECT_EQ(samples.sample_count, 11);
+
+  // Coefficients should add up to 1.
+  Scalar tally = 0;
+  for (int i = 0; i < samples.sample_count; ++i) {
+    tally += samples.samples[i].coefficient;
+  }
+  EXPECT_FLOAT_EQ(tally, 1.0f);
+
+  // Verify the shape of the curve.
+  for (int i = 0; i < 5; ++i) {
+    EXPECT_FLOAT_EQ(samples.samples[i].coefficient,
+                    samples.samples[10 - i].coefficient);
+    EXPECT_TRUE(samples.samples[i + 1].coefficient >
+                samples.samples[i].coefficient);
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

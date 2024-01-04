@@ -28,6 +28,8 @@ impeller_shaders("entity_shaders") {
     "shaders/gaussian_blur/gaussian_blur.vert",
     "shaders/gaussian_blur/gaussian_blur_noalpha_decal.frag",
     "shaders/gaussian_blur/gaussian_blur_noalpha_nodecal.frag",
+    "shaders/gaussian_blur/kernel_decal.frag",
+    "shaders/gaussian_blur/kernel_nodecal.frag",
     "shaders/glyph_atlas.frag",
     "shaders/glyph_atlas_color.frag",
     "shaders/glyph_atlas.vert",
@@ -245,6 +247,7 @@ impeller_component("entity") {
   }
 
   deps = [ "//flutter/fml" ]
+  defines = [ "_USE_MATH_DEFINES" ]
 }
 
 impeller_component("entity_test_helpers") {
