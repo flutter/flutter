@@ -296,9 +296,6 @@ abstract class UnpackIOS extends Target {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await _thinFramework(environment, frameworkBinaryPath, archs);
-    if (buildMode == BuildMode.release) {
-      await _bitcodeStripFramework(environment, frameworkBinaryPath);
-    }
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
@@ -374,26 +371,6 @@ abstract class UnpackIOS extends Target {
 
     if (extractResult.exitCode != 0) {
       throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
-    }
-  }
-
-  /// Destructively strip bitcode from the framework. This can be removed
-  /// when the framework is no longer built with bitcode.
-  Future<void> _bitcodeStripFramework(
-    Environment environment,
-    String frameworkBinaryPath,
-  ) async {
-    final ProcessResult stripResult = await environment.processManager.run(<String>[
-      'xcrun',
-      'bitcode_strip',
-      frameworkBinaryPath,
-      '-r', // Delete the bitcode segment.
-      '-o',
-      frameworkBinaryPath,
-    ]);
-
-    if (stripResult.exitCode != 0) {
-      throw Exception('Failed to strip bitcode for $frameworkBinaryPath.\n${stripResult.stderr}');
     }
   }
 }
