@@ -1344,6 +1344,7 @@
 ../../../fuchsia/sdk/linux/pkg/async_patterns_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/async_patterns_testing_cpp/include/lib/async_patterns/testing
 ../../../fuchsia/sdk/linux/pkg/async_patterns_testing_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/backend_fuchsia_globals/meta.json
 ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/meta.json

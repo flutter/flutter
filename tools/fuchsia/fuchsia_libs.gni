@@ -45,6 +45,10 @@ common_libs = [
     path = rebase_path("$fuchsia_sdk_dist")
   },
   {
+    name = "libbackend_fuchsia_globals.so"
+    path = rebase_path("$fuchsia_sdk_dist")
+  },
+  {
     name = "libvulkan.so"
     path = rebase_path("$fuchsia_sdk_dist")
   },
