@@ -614,19 +614,18 @@ class _DefaultProcessUtils implements ProcessUtils {
 }
 
 Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) async {
-  // Need to get the boolean returned from `messenger.shouldDisplayLicenseTerms()`
-  // before invoking the print welcome method because the print welcome method
-  // will set `messenger.shouldDisplayLicenseTerms()` to false
-  final FirstRunMessenger messenger =
-      FirstRunMessenger(persistentToolState: globals.persistentToolState!);
-  final bool legacyAnalyticsMessageShown =
-      messenger.shouldDisplayLicenseTerms();
-
-  // Prints the welcome message if needed for legacy analytics.
-  globals.flutterUsage.printWelcome();
-
   // Ensure that the consent message has been displayed for unified analytics
   if (globals.analytics.shouldShowMessage) {
+    // Need to get the boolean returned from `messenger.shouldDisplayLicenseTerms()`
+    // before invoking the print welcome method because the print welcome method
+    // will set `messenger.shouldDisplayLicenseTerms()` to false
+    final FirstRunMessenger messenger =
+        FirstRunMessenger(persistentToolState: globals.persistentToolState!);
+    final bool legacyAnalyticsMessageShown =
+        messenger.shouldDisplayLicenseTerms();
+    // Prints the welcome message if needed for legacy analytics.
+    globals.flutterUsage.printWelcome();
+
     globals.logger.printStatus(globals.analytics.getConsentMessage);
     if (!globals.flutterUsage.enabled) {
       globals.printStatus(
