@@ -109,8 +109,7 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
   VS::FrameInfo frame_info;
-  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransform() *
+  frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform() *
                    Matrix::MakeTranslation(positive_rect.GetOrigin());
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 

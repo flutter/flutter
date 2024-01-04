@@ -14,7 +14,8 @@ RenderPass::RenderPass(std::weak_ptr<const Context> context,
       has_stencil_attachment_(target.GetStencilAttachment().has_value()),
       render_target_size_(target.GetRenderTargetSize()),
       render_target_(target),
-      transients_buffer_() {
+      transients_buffer_(),
+      orthographic_(Matrix::MakeOrthographic(render_target_size_)) {
   auto strong_context = context_.lock();
   FML_DCHECK(strong_context);
   transients_buffer_ = strong_context->GetHostBufferPool().Grab();
@@ -45,6 +46,10 @@ const RenderTarget& RenderPass::GetRenderTarget() const {
 
 ISize RenderPass::GetRenderTargetSize() const {
   return render_target_size_;
+}
+
+const Matrix& RenderPass::GetOrthographicTransform() const {
+  return orthographic_;
 }
 
 HostBuffer& RenderPass::GetTransientsBuffer() {

@@ -138,8 +138,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
       src_sampler_descriptor);
   FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, src_sampler);
 
-  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   src_snapshot->transform;
+  frame_info.mvp = pass.GetOrthographicTransform() * src_snapshot->transform;
   frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 

@@ -160,8 +160,7 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
 
     VS::FrameInfo frame_info;
     auto world_matrix = Matrix::MakeScale(GetContentScale());
-    frame_info.mvp =
-        Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
+    frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -363,8 +362,7 @@ TEST_P(ComputeSubgroupTest, LargePath) {
 
     VS::FrameInfo frame_info;
     auto world_matrix = Matrix::MakeScale(GetContentScale());
-    frame_info.mvp =
-        Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
+    frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -446,8 +444,7 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
 
     VS::FrameInfo frame_info;
     auto world_matrix = Matrix::MakeScale(GetContentScale());
-    frame_info.mvp =
-        Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
+    frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
