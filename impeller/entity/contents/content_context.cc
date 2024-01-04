@@ -336,6 +336,8 @@ ContentContext::ContentContext(
                                                        options_trianglestrip);
   gaussian_blur_noalpha_nodecal_pipelines_.CreateDefault(*context_,
                                                          options_trianglestrip);
+  kernel_decal_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  kernel_nodecal_pipelines_.CreateDefault(*context_, options_trianglestrip);
   border_mask_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
   morphology_filter_pipelines_.CreateDefault(*context_, options_trianglestrip,
                                              {supports_decal});

@@ -4,6 +4,8 @@
 
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
 
+#include <cmath>
+
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
@@ -14,8 +16,8 @@
 
 namespace impeller {
 
-using GaussianBlurVertexShader = GaussianBlurPipeline::VertexShader;
-using GaussianBlurFragmentShader = GaussianBlurPipeline::FragmentShader;
+using GaussianBlurVertexShader = KernelPipeline::VertexShader;
+using GaussianBlurFragmentShader = KernelPipeline::FragmentShader;
 
 namespace {
 
@@ -120,7 +122,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
     const RenderTarget& input_pass,
     const SamplerDescriptor& sampler_descriptor,
     Entity::TileMode tile_mode,
-    const GaussianBlurFragmentShader::BlurInfo& blur_info,
+    const BlurParameters& blur_info,
     std::optional<RenderTarget> destination_target,
     const Quad& blur_uvs) {
   if (blur_info.blur_sigma < kEhCloseEnough) {
@@ -147,9 +149,9 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         if (tile_mode == Entity::TileMode::kDecal &&
             !renderer.GetDeviceCapabilities()
                  .SupportsDecalSamplerAddressMode()) {
-          cmd.pipeline = renderer.GetGaussianBlurDecalPipeline(options);
+          cmd.pipeline = renderer.GetKernelDecalPipeline(options);
         } else {
-          cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
+          cmd.pipeline = renderer.GetKernelPipeline(options);
         }
 
         BindVertices<GaussianBlurVertexShader>(cmd, host_buffer,
@@ -169,8 +171,8 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                 linear_sampler_descriptor));
         GaussianBlurVertexShader::BindFrameInfo(
             cmd, host_buffer.EmplaceUniform(frame_info));
-        GaussianBlurFragmentShader::BindBlurInfo(
-            cmd, host_buffer.EmplaceUniform(blur_info));
+        GaussianBlurFragmentShader::BindKernelSamples(
+            cmd, host_buffer.EmplaceUniform(GenerateBlurInfo(blur_info)));
         pass.AddCommand(std::move(cmd));
 
         return true;
@@ -343,16 +345,17 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     }
   }
 
-  fml::StatusOr<RenderTarget> pass2_out =
-      MakeBlurSubpass(renderer, /*input_pass=*/pass1_out.value(),
-                      input_snapshot->sampler_descriptor, tile_mode_,
-                      GaussianBlurFragmentShader::BlurInfo{
-                          .blur_uv_offset = Point(0.0, pass1_pixel_size.y),
-                          .blur_sigma = scaled_sigma.y * effective_scalar.y,
-                          .blur_radius = blur_radius.y * effective_scalar.y,
-                          .step_size = 1.0,
-                      },
-                      /*destination_target=*/std::nullopt, blur_uvs);
+  fml::StatusOr<RenderTarget> pass2_out = MakeBlurSubpass(
+      renderer, /*input_pass=*/pass1_out.value(),
+      input_snapshot->sampler_descriptor, tile_mode_,
+      BlurParameters{
+          .blur_uv_offset = Point(0.0, pass1_pixel_size.y),
+          .blur_sigma = scaled_sigma.y * effective_scalar.y,
+          .blur_radius =
+              static_cast<int>(std::round(blur_radius.y * effective_scalar.y)),
+          .step_size = 1,
+      },
+      /*destination_target=*/std::nullopt, blur_uvs);
 
   if (!pass2_out.ok()) {
     return std::nullopt;
@@ -364,16 +367,17 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                                ? std::optional<RenderTarget>(pass1_out.value())
                                : std::optional<RenderTarget>(std::nullopt);
 
-  fml::StatusOr<RenderTarget> pass3_out =
-      MakeBlurSubpass(renderer, /*input_pass=*/pass2_out.value(),
-                      input_snapshot->sampler_descriptor, tile_mode_,
-                      GaussianBlurFragmentShader::BlurInfo{
-                          .blur_uv_offset = Point(pass1_pixel_size.x, 0.0),
-                          .blur_sigma = scaled_sigma.x * effective_scalar.x,
-                          .blur_radius = blur_radius.x * effective_scalar.x,
-                          .step_size = 1.0,
-                      },
-                      pass3_destination, blur_uvs);
+  fml::StatusOr<RenderTarget> pass3_out = MakeBlurSubpass(
+      renderer, /*input_pass=*/pass2_out.value(),
+      input_snapshot->sampler_descriptor, tile_mode_,
+      BlurParameters{
+          .blur_uv_offset = Point(pass1_pixel_size.x, 0.0),
+          .blur_sigma = scaled_sigma.x * effective_scalar.x,
+          .blur_radius =
+              static_cast<int>(std::round(blur_radius.x * effective_scalar.x)),
+          .step_size = 1,
+      },
+      pass3_destination, blur_uvs);
 
   if (!pass3_out.ok()) {
     return std::nullopt;
@@ -427,6 +431,33 @@ Scalar GaussianBlurFilterContents::ScaleSigma(Scalar sigma) {
   constexpr Scalar c = 1.f;
   Scalar scalar = c + b * clamped + a * clamped * clamped;
   return clamped * scalar;
+}
+
+KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
+    BlurParameters parameters) {
+  KernelPipeline::FragmentShader::KernelSamples result;
+  result.sample_count =
+      ((2 * parameters.blur_radius) / parameters.step_size) + 1;
+  FML_CHECK(result.sample_count < 24);
+
+  Scalar tally = 0.0f;
+  for (int i = 0; i < result.sample_count; ++i) {
+    int x = (i * parameters.step_size) - parameters.blur_radius;
+    result.samples[i] = KernelPipeline::FragmentShader::KernelSample{
+        .uv_offset = parameters.blur_uv_offset * x,
+        .coefficient = expf(-0.5f * (x * x) /
+                            (parameters.blur_sigma * parameters.blur_sigma)) /
+                       (sqrtf(2.0f * M_PI) * parameters.blur_sigma),
+    };
+    tally += result.samples[i].coefficient;
+  }
+
+  // Make sure everything adds up to 1.
+  for (auto& sample : result.samples) {
+    sample.coefficient /= tally;
+  }
+
+  return result;
 }
 
 }  // namespace impeller
