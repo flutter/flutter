@@ -3460,6 +3460,8 @@ class _MenuPanelState extends State<_MenuPanel> {
           child: ScrollConfiguration(
             behavior: ScrollConfiguration.of(context).copyWith(
               scrollbars: false,
+              overscroll: false,
+              physics: const ClampingScrollPhysics(),
             ),
             child: PrimaryScrollController(
               controller: scrollController,
