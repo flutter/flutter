@@ -142,7 +142,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   auto& host_buffer = pass.GetTransientsBuffer();
 
   VS::FrameInfo frame_info;
-  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+  frame_info.mvp = pass.GetOrthographicTransform() *
                    capture.AddMatrix("Transform", entity.GetTransform());
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frame_info.alpha = capture.AddScalar("Alpha", GetOpacity());
