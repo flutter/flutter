@@ -172,7 +172,7 @@ Asset _targetLocationMacOS(Asset asset, Uri? absolutePath) {
 }
 
 /// Copies native assets into a framework per dynamic library.
-/// 
+///
 /// The framework contains symlinks according to
 /// https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
 ///
