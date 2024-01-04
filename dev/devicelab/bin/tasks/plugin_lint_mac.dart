@@ -39,9 +39,6 @@ Future<void> main() async {
             iosintegrationTestPodspec,
             '--use-libraries',
             '--verbose',
-            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
-            // https://github.com/flutter/flutter/issues/125812
-            '--allow-warnings',
           ],
         );
 
@@ -50,9 +47,6 @@ Future<void> main() async {
           macosintegrationTestPodspec,
           <String>[
             '--verbose',
-            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
-            // https://github.com/flutter/flutter/issues/125812
-            '--allow-warnings',
           ],
         );
       });
@@ -529,27 +523,13 @@ Future<void> _tryMacOSLint(
   String podspecPath,
   List<String> extraArguments,
 ) async {
-  final StringBuffer lintStdout = StringBuffer();
-  try {
-    await eval(
-      'pod',
-      <String>[
-        'lib',
-        'lint',
-        podspecPath,
-        ...extraArguments,
-      ],
-      stdout: lintStdout,
-    );
-  } on BuildFailedError {
-    // Temporarily ignore errors due to DT_TOOLCHAIN_DIR if it's the only error.
-    // This error was introduced with Xcode 15. Fix was made in Cocoapods, but
-    // is not in an official release yet.
-    // TODO(vashworth): Stop ignoring when https://github.com/flutter/flutter/issues/133584 is complete.
-    final String lintResult = lintStdout.toString();
-    if (!(lintResult.contains('error: DT_TOOLCHAIN_DIR cannot be used to evaluate') &&
-        lintResult.contains('did not pass validation, due to 1 error'))) {
-      rethrow;
-    }
-  }
+  await eval(
+    'pod',
+    <String>[
+      'lib',
+      'lint',
+      podspecPath,
+      ...extraArguments,
+    ],
+  );
 }

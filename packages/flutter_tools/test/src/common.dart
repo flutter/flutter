@@ -322,6 +322,7 @@ FakeAnalytics getInitializedFakeAnalyticsInstance({
   required FileSystem fs,
   required FakeFlutterVersion fakeFlutterVersion,
   String? clientIde,
+  String? enabledFeatures,
 }) {
   final Directory homeDirectory = fs.directory('/');
   final FakeAnalytics initialAnalytics = FakeAnalytics(
@@ -346,6 +347,7 @@ FakeAnalytics getInitializedFakeAnalyticsInstance({
     flutterChannel: fakeFlutterVersion.channel,
     flutterVersion: fakeFlutterVersion.getVersionString(),
     clientIde: clientIde,
+    enabledFeatures: enabledFeatures,
   );
 }
 

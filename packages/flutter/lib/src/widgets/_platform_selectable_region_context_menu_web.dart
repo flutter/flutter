@@ -6,8 +6,8 @@ import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/rendering.dart';
-import 'package:web/web.dart' as web;
 
+import '../web.dart' as web;
 import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
