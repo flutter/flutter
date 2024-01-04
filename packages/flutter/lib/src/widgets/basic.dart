@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';

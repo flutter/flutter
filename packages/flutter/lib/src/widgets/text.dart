@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, TextHeightBehavior;
 
 import 'package:flutter/rendering.dart';
 
