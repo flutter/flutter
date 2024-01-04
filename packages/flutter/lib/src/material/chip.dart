@@ -2301,10 +2301,10 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get checkmarkColor => null;
+  Color? get checkmarkColor => _colors.primary;
 
   @override
-  Color? get deleteIconColor => null;
+  Color? get deleteIconColor => _colors.primary;
 
   @override
   BorderSide? get side => isEnabled
