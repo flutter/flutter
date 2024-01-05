@@ -142,7 +142,7 @@ const String methodTemplate = '''
 @(tempVars)    return @(message);
   }''';
 
-const String methodWithNamedArgumentTemplate = '''
+const String methodWithNamedParameterTemplate = '''
   @override
   String @(name)({@(parameters)}) {
 @(dateFormatting)
@@ -203,7 +203,7 @@ const String baseClassMethodTemplate = '''
   String @(name)(@(parameters));
 ''';
 
-const String baseClassMethodWithNamedArgumentTemplate = '''
+const String baseClassMethodWithNamedParameterTemplate = '''
 @(comment)
   ///
 @(templateLocaleTranslationComment)

@@ -8,7 +8,7 @@ import '../test_utils.dart';
 import 'project.dart';
 
 class GenL10nProject extends Project {
-  GenL10nProject({required this.useNamedArgument});
+  GenL10nProject({required this.useNamedParameters});
 
   @override
   Future<void> setUpIn(Directory dir, {
@@ -28,7 +28,7 @@ class GenL10nProject extends Project {
     writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), l10nYaml(
       useDeferredLoading: useDeferredLoading,
       useSyntheticPackage: useSyntheticPackage,
-      useNamedArgument: useNamedArgument,
+      useNamedParameters: useNamedParameters,
     ));
     return super.setUpIn(dir);
   }
@@ -52,9 +52,9 @@ dependencies:
 
   @override
   String get main =>
-      _main ??= (useNamedArgument ? _getMainWithNamedArgument() : _getMain());
+      _main ??= (useNamedParameters ? _getMainWithNamedParameters() : _getMain());
 
-  final bool useNamedArgument;
+  final bool useNamedParameters;
 
   final String appEn = r'''
 {
@@ -788,7 +788,7 @@ void main() {
 }
 ''';
 
-  String _getMainWithNamedArgument() => r'''
+  String _getMainWithNamedParameters() => r'''
 import 'package:flutter/material.dart';
 
 import 'l10n/app_localizations.dart';
@@ -1074,7 +1074,7 @@ void main() {
   String l10nYaml({
     required bool useDeferredLoading,
     required bool useSyntheticPackage,
-    required bool useNamedArgument,
+    required bool useNamedParameters,
   }) {
     String l10nYamlString = '';
 
@@ -1086,8 +1086,8 @@ void main() {
       l10nYamlString += 'synthetic-package: false\n';
     }
 
-    if (useNamedArgument) {
-      l10nYamlString += 'use-named-argument: true\n';
+    if (useNamedParameters) {
+      l10nYamlString += 'use-named-parameters: true\n';
     }
 
     return l10nYamlString;

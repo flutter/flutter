@@ -355,7 +355,7 @@ class LocalizationOptions {
     bool? useEscaping,
     bool? suppressWarnings,
     bool? relaxSyntax,
-    bool? useNamedArgument,
+    bool? useNamedParameters,
   }) : templateArbFile = templateArbFile ?? 'app_en.arb',
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
@@ -367,7 +367,7 @@ class LocalizationOptions {
        useEscaping = useEscaping ?? false,
        suppressWarnings = suppressWarnings ?? false,
        relaxSyntax = relaxSyntax ?? false,
-       useNamedArgument = useNamedArgument ?? false;
+       useNamedParameters = useNamedParameters ?? false;
 
   /// The `--arb-dir` argument.
   ///
@@ -470,13 +470,13 @@ class LocalizationOptions {
   /// as it may mask errors.
   final bool relaxSyntax;
 
-  /// The `use-named-argument` argument.
+  /// The `use-named-parameters` argument.
   ///
-  /// Whether or not to use named arguments for the generated localization
+  /// Whether or not to use named parameters for the generated localization
   /// methods.
   ///
   /// Defaults to `false`.
-  final bool useNamedArgument;
+  final bool useNamedParameters;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -521,7 +521,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger),
     suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger),
     relaxSyntax: _tryReadBool(yamlNode, 'relax-syntax', logger),
-    useNamedArgument: _tryReadBool(yamlNode, 'use-named-argument', logger),
+    useNamedParameters: _tryReadBool(yamlNode, 'use-named-parameters', logger),
   );
 }
 
@@ -548,7 +548,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     format: command.boolArg('format'),
     useEscaping: command.boolArg('use-escaping'),
     suppressWarnings: command.boolArg('suppress-warnings'),
-    useNamedArgument: command.boolArg('use-named-argument'),
+    useNamedParameters: command.boolArg('use-named-parameters'),
   );
 }
 

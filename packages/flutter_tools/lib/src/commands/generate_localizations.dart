@@ -208,8 +208,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             'that is treated as a special character.',
     );
     argParser.addFlag(
-      'use-named-argument',
-      help: 'Whether or not to use named arguments for the generated localization methods.',
+      'use-named-parameters',
+      help: 'Whether or not to use named parameters for the generated localization methods.',
     );
   }
 
