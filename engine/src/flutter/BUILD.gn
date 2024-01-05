@@ -53,6 +53,23 @@ config("export_dynamic_symbols") {
   }
 }
 
+config("export_dynamic_test_symbols") {
+  # See comment in :export_dynamic_symbols.
+  # This config exposes an additional symbol meant for flutter_tester.
+  if (is_linux || is_fuchsia) {
+    inputs = [ "//flutter/common/exported_test_symbols.sym" ]
+    ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
+  } else if (is_mac) {
+    inputs = [ "//flutter/common/exported_test_symbols_mac.sym" ]
+    ldflags = [
+      "-Xlinker",
+      "-exported_symbols_list",
+      "-Xlinker",
+      rebase_path(inputs[0], root_build_dir),
+    ]
+  }
+}
+
 group("flutter") {
   testonly = true
 

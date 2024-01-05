@@ -17,6 +17,7 @@ environment:
   sdk: '>=3.2.0-0 <4.0.0'
 
 dependencies:
+  ffi: any
   litetest: any
   path: any
   skia_gold_client: any
@@ -38,6 +39,8 @@ dependency_overrides:
     path: ../../../third_party/dart/pkg/expect
   file:
     path: ../../../third_party/dart/third_party/pkg/file/packages/file
+  ffi:
+    path: ../../../third_party/dart/third_party/pkg/ffi
   fixnum:
     path: ../../../third_party/dart/third_party/pkg/fixnum
   litetest:

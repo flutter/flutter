@@ -83,4 +83,14 @@ DartIsolateGroupData::GetPlatformMessageHandler(
              : it->second;
 }
 
+void DartIsolateGroupData::AddKernelBuffer(
+    const std::shared_ptr<const fml::Mapping>& buffer) {
+  kernel_buffers_.push_back(buffer);
+}
+
+std::vector<std::shared_ptr<const fml::Mapping>>
+DartIsolateGroupData::GetKernelBuffers() const {
+  return kernel_buffers_;
+}
+
 }  // namespace flutter

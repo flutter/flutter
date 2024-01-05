@@ -522,8 +522,8 @@ bool DartIsolate::LoadKernel(const std::shared_ptr<const fml::Mapping>& mapping,
     return false;
   }
 
-  // Mapping must be retained until isolate shutdown.
-  kernel_buffers_.push_back(mapping);
+  // Mapping must be retained until isolate group shutdown.
+  GetIsolateGroupData().AddKernelBuffer(mapping);
 
   Dart_Handle library =
       Dart_LoadLibraryFromKernel(mapping->GetMapping(), mapping->GetSize());
@@ -589,7 +589,8 @@ bool DartIsolate::LoadKernel(const std::shared_ptr<const fml::Mapping>& mapping,
   // executed leads to crashes.
   if (GetIsolateGroupData().GetChildIsolatePreparer() == nullptr) {
     GetIsolateGroupData().SetChildIsolatePreparer(
-        [buffers = kernel_buffers_](DartIsolate* isolate) {
+        [buffers =
+             GetIsolateGroupData().GetKernelBuffers()](DartIsolate* isolate) {
           for (uint64_t i = 0; i < buffers.size(); i++) {
             bool last_piece = i + 1 == buffers.size();
             const std::shared_ptr<const fml::Mapping>& buffer = buffers.at(i);
@@ -1128,6 +1129,30 @@ Dart_Handle DartIsolate::OnDartLoadLibrary(intptr_t loading_unit_id) {
       std::to_string(loading_unit_id) + " was not sent.";
   FML_LOG(ERROR) << error_message;
   return Dart_NewApiError(error_message.c_str());
+}
+
+Dart_Handle DartIsolate::LoadLibraryFromKernel(
+    const std::shared_ptr<const fml::Mapping>& mapping) {
+  if (DartVM::IsRunningPrecompiledCode()) {
+    return Dart_Null();
+  }
+
+  auto* isolate_group_data =
+      static_cast<std::shared_ptr<DartIsolateGroupData>*>(
+          Dart_CurrentIsolateGroupData());
+  // Mapping must be retained until isolate shutdown.
+  (*isolate_group_data)->AddKernelBuffer(mapping);
+
+  auto lib =
+      Dart_LoadLibraryFromKernel(mapping->GetMapping(), mapping->GetSize());
+  if (tonic::CheckAndHandleError(lib)) {
+    return Dart_Null();
+  }
+  auto result = Dart_FinalizeLoading(false);
+  if (Dart_IsError(result)) {
+    return result;
+  }
+  return Dart_GetField(lib, Dart_NewStringFromCString("main"));
 }
 
 DartIsolate::AutoFireClosure::AutoFireClosure(const fml::closure& closure)

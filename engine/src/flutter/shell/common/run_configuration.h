@@ -51,13 +51,16 @@ class RunConfiguration {
   ///                        serial worker is kept alive for the lifetime of the
   ///                        shell associated with the engine that this run
   ///                        configuration is given to.
+  /// @param[in]  launch_type Whether to launch the new isolate into an existing
+  ///                         group or a new one.
   ///
   /// @return     A run configuration. Depending on the completeness of the
   ///             settings, This object may potentially be invalid.
   ///
   static RunConfiguration InferFromSettings(
       const Settings& settings,
-      const fml::RefPtr<fml::TaskRunner>& io_worker = nullptr);
+      const fml::RefPtr<fml::TaskRunner>& io_worker = nullptr,
+      IsolateLaunchType launch_type = IsolateLaunchType::kNewGroup);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a run configuration with only an isolate

@@ -12,12 +12,14 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/unique_fd.h"
 #include "flutter/runtime/dart_vm.h"
+#include "runtime/isolate_configuration.h"
 
 namespace flutter {
 
 RunConfiguration RunConfiguration::InferFromSettings(
     const Settings& settings,
-    const fml::RefPtr<fml::TaskRunner>& io_worker) {
+    const fml::RefPtr<fml::TaskRunner>& io_worker,
+    IsolateLaunchType launch_type) {
   auto asset_manager = std::make_shared<AssetManager>();
 
   if (fml::UniqueFD::traits_type::IsValid(settings.assets_dir)) {
@@ -31,7 +33,7 @@ RunConfiguration RunConfiguration::InferFromSettings(
       true));
 
   return {IsolateConfiguration::InferFromSettings(settings, asset_manager,
-                                                  io_worker),
+                                                  io_worker, launch_type),
           asset_manager};
 }
 
