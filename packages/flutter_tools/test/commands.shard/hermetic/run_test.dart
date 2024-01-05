@@ -431,6 +431,35 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
+      testUsingContext('fails when --flavor is used with an unsupported target platform', () async {
+        const List<String> runCommand = <String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          '--flavor=vanilla',
+          '-d',
+          'all',
+        ];
+
+        // Useful for test readability.
+        // ignore: avoid_redundant_argument_values
+        final FakeDevice deviceWithoutFlavorSupport = FakeDevice(supportsFlavors: false);
+        final FakeDevice deviceWithFlavorSupport = FakeDevice(supportsFlavors: true);
+        testDeviceManager.devices = <Device>[deviceWithoutFlavorSupport, deviceWithFlavorSupport];
+
+        await expectLater(
+          () => createTestCommandRunner(RunCommand()).run(runCommand),
+          throwsToolExit(
+            message: '--flavor is only supported for Android, macOS, and iOS devices.',
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
       testUsingContext('forwards --uninstall-only to DebuggingOptions', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(
@@ -1306,11 +1335,13 @@ class FakeDevice extends Fake implements Device {
     String sdkNameAndVersion = '',
     PlatformType platformType = PlatformType.ios,
     bool isSupported = true,
+    bool supportsFlavors = false,
   }): _isLocalEmulator = isLocalEmulator,
       _targetPlatform = targetPlatform,
       _sdkNameAndVersion = sdkNameAndVersion,
       _platformType = platformType,
-      _isSupported = isSupported;
+      _isSupported = isSupported,
+      _supportsFlavors = supportsFlavors;
 
   static const int kSuccess = 1;
   static const int kFailure = -1;
@@ -1319,6 +1350,7 @@ class FakeDevice extends Fake implements Device {
   final String _sdkNameAndVersion;
   final PlatformType _platformType;
   final bool _isSupported;
+  final bool _supportsFlavors;
 
   @override
   Category get category => Category.mobile;
@@ -1345,6 +1377,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool get supportsFastStart => false;
+
+  @override
+  bool get supportsFlavors => _supportsFlavors;
 
   @override
   bool get ephemeral => true;

@@ -91,6 +91,9 @@ class FlutterTesterDevice extends Device {
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override

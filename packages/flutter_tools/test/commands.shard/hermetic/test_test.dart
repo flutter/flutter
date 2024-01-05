@@ -864,8 +864,13 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-    ]),
+          FakeDevice(
+            'ephemeral',
+            'ephemeral',
+            type: PlatformType.android,
+            supportsFlavors: true,
+          ),
+        ]),
   });
 
   testUsingContext('Builds the asset manifest by default', () async {
