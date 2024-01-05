@@ -9,6 +9,7 @@ import 'package:dds/dap.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/io.dart';
+import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals show fs;
@@ -350,6 +351,16 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // Flutter requests are always wrapped in brackets as an array.
     final String payload = '[$messageString]\n';
     _logTraffic('==> [Flutter] $payload');
+    ProcessUtils.writelnToStdinGuarded(
+      stdin: process.stdin,
+      line: payload,
+      onError: (Object error, StackTrace stackTrace) {
+        throw DebugAdapterException(
+          'Writing "${payload.trim()}" to a Flutter daemon sub-process failed:\n'
+          '$error\n\n$stackTrace\n',
+        );
+      },
+    );
     process.stdin.writeln(payload);
   }
 
