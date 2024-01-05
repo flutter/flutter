@@ -144,8 +144,7 @@ class Step {
     this.state = StepState.indexed,
     this.isActive = false,
     this.label,
-    this.decoration,
-    this.errorPainter,
+    this.stepStyle,
   });
 
   /// The title of the step that typically describes it.
@@ -173,14 +172,8 @@ class Step {
   /// By default, uses the `bodyLarge` theme.
   final Widget? label;
 
-  /// Will define the decoration of the circle.
-  final BoxDecoration? decoration;
-
-  /// By default, the error icon is a triangle with an exclamation point.
-  ///
-  /// This property allows you to override the default error icon with a custom
-  /// painter.
-  final CustomPainter? errorPainter;
+  /// Optional
+  final StepStyle? stepStyle;
 }
 
 /// A material stepper widget that displays progress through a sequence of
@@ -418,6 +411,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return false;
   }
 
+  StepStyle? _stepStyle(int index) {
+    return widget.steps[index].stepStyle;
+  }
+
   Color _connectorColor(bool isActive) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Set<MaterialState> states = <MaterialState>{
@@ -445,12 +442,15 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     if (icon != null) {
       return icon;
     }
+    TextStyle? textStyle = _stepStyle(index)?.indexStyle;
+    textStyle ??= isDarkActive ? _kStepStyle.copyWith(color: Colors.black87) : _kStepStyle;
+
     switch (state) {
       case StepState.indexed:
       case StepState.disabled:
         return Text(
           '${index + 1}',
-          style: isDarkActive ? _kStepStyle.copyWith(color: Colors.black87) : _kStepStyle,
+          style: textStyle,
         );
       case StepState.editing:
         return Icon(
@@ -488,15 +488,18 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildCircle(int index, bool oldState) {
     return Container(
-      margin: stepperProperties?.margin ?? const EdgeInsets.symmetric(vertical: 8.0),
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
       width: stepperProperties?.width ?? _kStepSize,
       height: stepperProperties?.height ?? _kStepSize,
       child: AnimatedContainer(
         curve: Curves.fastOutSlowIn,
         duration: kThemeAnimationDuration,
-        decoration: widget.steps[index].decoration ?? BoxDecoration(
-          color: _circleColor(index),
+        decoration: BoxDecoration(
+          color: _stepStyle(index)?.color ?? _circleColor(index),
           shape: BoxShape.circle,
+          border: _stepStyle(index)?.border,
+          boxShadow: _stepStyle(index)?.boxShadow != null ? <BoxShadow>[_stepStyle(index)!.boxShadow!] : null,
+          gradient: _stepStyle(index)?.gradient,
         ),
         child: Center(
           child: _buildCircleChild(index, oldState && widget.steps[index].state == StepState.error),
@@ -506,8 +509,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildTriangle(int index, bool oldState) {
+    Color? color = _stepStyle(index)?.errorColor;
+    color ??= _isDark() ? _kErrorDark : _kErrorLight;
+
     return Container(
-      margin: stepperProperties?.margin ?? const EdgeInsets.symmetric(vertical: 8.0),
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
       width: stepperProperties?.width ?? _kStepSize,
       height: stepperProperties?.height ?? _kStepSize,
       child: Center(
@@ -515,8 +521,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           width: stepperProperties?.width  ?? _kStepSize,
           height: stepperProperties?.height != null ? stepperProperties!.height! * _kTriangleSqrt : _kTriangleHeight,
           child: CustomPaint(
-            painter: widget.steps[index].errorPainter ?? _TrianglePainter(
-              color: _isDark() ? _kErrorDark : _kErrorLight,
+            painter: _TrianglePainter(
+              color: color,
             ),
             child: Align(
               alignment: const Alignment(0.0, 0.8), // 0.8 looks better than the geometrical 0.33.
@@ -777,7 +783,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: Container(height: 0.0),
           secondChild: Container(
-            margin: widget.margin ??  EdgeInsetsDirectional.only(
+            margin: EdgeInsetsDirectional.only(
               // Adjust the left side of the content so that it is aligned with
               // the labels of the previous and next steps.
               start: 60.0 + (marginLeft ?? 0.0),
@@ -974,32 +980,92 @@ class _TrianglePainter extends CustomPainter {
   }
 }
 
-/// [Stepper] will use these properties to customize some of its parts.
+/// The `StepperProperties` class provides customization options for configuring the appearance of steps in a `Stepper` widget.
+///
+/// To use `StepperProperties`, instantiate a `StepperProperties` object and pass it to the `Stepper` widget using the `stepperProperties` parameter.
+///
+/// Example usage:
+/// ```dart
+/// Stepper(
+///   stepperProperties: const StepperProperties(
+///     height: 48,
+///     width: 48,
+///     margin: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+///   ),
+///   steps: <Step>[
+///     // Your steps here
+///   ],
+/// )
+/// ````
 class StepperProperties {
-  /// Constructs a [StepperProperties] with the given values.
+  /// Constructs a [StepperProperties] object with customizable properties for steps in a stepper.
   const StepperProperties({
     this.height,
     this.width,
     this.margin,
-  })  : assert(height == null || height >= _kStepSize && height <= _kMaxStepSize,
-            'height must be greater than $_kStepSize and less than $_kMaxStepSize'),
-        assert(width == null || width >= _kStepSize && width <= _kMaxStepSize,
-            'width must be greater than $_kStepSize and less than $_kMaxStepSize'),
+  })  : assert(height == null || (height >= _kStepSize && height <= _kMaxStepSize),
+            'height must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
+        assert(width == null || (width >= _kStepSize && width <= _kMaxStepSize),
+            'width must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
         assert(
             height == null || width == null || height == width, 'height and width must be equal if both are not null');
 
-  /// The height of icon in the step.
-  ///
-  /// If null, the default height is used.
+  /// The height of the icon in the step. If null, the default height is used.
   final double? height;
 
-  /// The width of icon in the step.
-  ///
-  /// If null, the default width is used.
+  /// The width of the icon in the step. If null, the default width is used.
   final double? width;
 
-  /// The margin of line and icon in the step.
-  ///
-  /// If null, the default margin is used.
+  /// The margin around the line and icon in the step. If null, the default margin is used.
   final EdgeInsets? margin;
+}
+
+/// The `StepStyle` class provides customization options for configuring the appearance of a step in a stepper widget.
+///
+/// To create a customized step style, instantiate a `StepStyle` object and pass it to the `Step` widget.
+///
+/// Example usage:
+/// ```dart
+/// Step(
+///   title: Text('Step 1'),
+///   content: MyStepContent(),
+///   style: StepStyle(
+///     color: Colors.blue,
+///     errorColor: Colors.red,
+///     border: Border.all(color: Colors.grey),
+///     boxShadow: BoxShadow(blurRadius: 3.0, color: Colors.black26),
+///     gradient: LinearGradient(colors: [Colors.orange, Colors.yellow]),
+///     indexStyle: TextStyle(color: Colors.white),
+///   ),
+/// )
+/// ```
+class StepStyle {
+  /// Constructs a [StepStyle] object with customizable properties for the appearance of a step.
+  const StepStyle({
+    this.color,
+    this.errorColor,
+    this.border,
+    this.boxShadow,
+    this.gradient,
+    this.indexStyle,
+  });
+
+  /// The color of the circle in the step.
+  final Color? color;
+
+  /// The color of the error indicator in the step.
+  final Color? errorColor;
+
+  /// The border of the icon in the step.
+  final BoxBorder? border;
+
+  /// The shadow of the icon in the step.
+  final BoxShadow? boxShadow;
+
+  /// The gradient of the icon in the step.
+  /// If [gradient] is specified, [color] will be ignored.
+  final Gradient? gradient;
+
+  /// The style of the index in the step.
+  final TextStyle? indexStyle;
 }

@@ -1620,21 +1620,26 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(stepper.stepperProperties?.margin, stepperProperties.margin);
   });
 
-  testWidgets('Step boxdecoration test', (WidgetTester tester) async {
-    const BoxDecoration decoration = BoxDecoration(
-      color: Colors.blue,
-      borderRadius: BorderRadius.all(Radius.circular(10)),
+  testWidgets('StepStyle test', (WidgetTester tester) async {
+    final StepStyle stepStyle = StepStyle(
+      color: Colors.white,
+      errorColor: Colors.orange,
+      border: Border.all(),
+      gradient: const LinearGradient(
+        colors: <Color>[Colors.red, Colors.blue],
+      ),
+      indexStyle: const TextStyle(color: Colors.black),
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Stepper(
-            steps: const <Step>[
+            steps: <Step>[
               Step(
-                title: Text('Regular title'),
-                content: Text('Text content'),
-                decoration: decoration,
+                title: const Text('Regular title'),
+                content: const Text('Text content'),
+                stepStyle: stepStyle,
               ),
             ],
           ),
@@ -1642,47 +1647,16 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       ),
     );
 
-    final Stepper stepper = tester.firstWidget<Stepper>(
-      find.descendant(
-        of: find.byType(Material),
-        matching: find.byType(Stepper),
-      ),
-    );
+    final Finder stepperFinder = find.byType(Stepper);
+    final Stepper stepper = tester.widget<Stepper>(stepperFinder);
+    final StepStyle? style = stepper.steps.first.stepStyle;
 
-    expect(stepper.steps.first.decoration, decoration);
+    expect(style?.color, stepStyle.color);
+    expect(style?.errorColor, stepStyle.errorColor);
+    expect(style?.border, stepStyle.border);
+    expect(style?.gradient, stepStyle.gradient);
+    expect(style?.indexStyle, stepStyle.indexStyle);
   });
-
-  testWidgets('Stepper error state test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Stepper(
-            steps:  <Step>[
-              Step(
-                title: const Text('A'),
-                state: StepState.error,
-                errorPainter: _ErrorPainter(),
-                content: const SizedBox(
-                  width: 100.0,
-                  height: 100.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    final CustomPaint customPaint = tester.firstWidget<CustomPaint>(
-      find.descendant(
-        of: find.byType(Stepper),
-        matching: find.byType(CustomPaint),
-      ),
-    );
-
-    expect(customPaint.painter, isNotNull);
-  });
-
 }
 
 class _TappableColorWidget extends StatefulWidget {
@@ -1721,27 +1695,4 @@ class _TappableColorWidgetState extends State<_TappableColorWidget> {
       ),
     );
   }
-}
-
-/// Custom painter for error state.
-/// Will be draw an 'X' in the middle of the step.
-class _ErrorPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = Colors.red
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    final Path path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, size.height)
-      ..moveTo(size.width, 0)
-      ..lineTo(0, size.height);
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
