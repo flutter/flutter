@@ -1070,13 +1070,19 @@ void main() {
           theme: ThemeData(),
           home: const Scaffold(
             body: Material(
-              child: CircularProgressIndicator.adaptive(),
+              child: CircularProgressIndicator.adaptive(
+                value:0.5,
+              ),
             ),
           ),
         ),
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+      expect(
+        find.byType(CupertinoActivityIndicator).evaluate().first.widget.value,
+        0.5,
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
