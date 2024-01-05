@@ -469,6 +469,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           '    sdk: flutter\n',
         );
       }
+
+      if (stringArg('flavor') != null && !integrationTestDevice.supportsFlavors) {
+        throwToolExit('--flavor is only supported for Android, macOS, and iOS devices.');
+      }
     }
 
     final Stopwatch? testRunnerTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.TestRunner);
