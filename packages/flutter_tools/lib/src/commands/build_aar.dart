@@ -77,14 +77,15 @@ class BuildAarCommand extends BuildSubCommand {
     DevelopmentArtifact.androidGenSnapshot,
   };
 
+  late final FlutterProject project = _getProject();
+
   @override
   Future<CustomDimensions> get usageValues async {
-    final FlutterProject flutterProject = _getProject();
 
     String projectType;
-    if (flutterProject.manifest.isModule) {
+    if (project.manifest.isModule) {
       projectType = 'module';
-    } else if (flutterProject.manifest.isPlugin) {
+    } else if (project.manifest.isPlugin) {
       projectType = 'plugin';
     } else {
       projectType = 'app';
