@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
