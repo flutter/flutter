@@ -26,5 +26,6 @@
   "menuDismissLabel": "메뉴 닫기",
   "lookUpButtonLabel": "찾기",
   "searchWebButtonLabel": "웹 검색",
-  "shareButtonLabel": "공유..."
+  "shareButtonLabel": "공유...",
+  "clearButtonLabel": "Clear"
 }
