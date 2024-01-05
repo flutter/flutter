@@ -7,6 +7,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/update_packages.dart';
+import 'package:flutter_tools/src/update_packages_pins.dart';
 
 import '../src/common.dart';
 
