@@ -18,7 +18,7 @@ executable("testing") {
 
   public_configs = [
     "//flutter:config",
-    "//flutter:export_dynamic_symbols",
+    "//flutter:export_dynamic_test_symbols",
   ]
 
   sources = [ "tester_main.cc" ]
@@ -42,6 +42,7 @@ executable("testing") {
     "//flutter/shell/gpu:gpu_surface_software",
     "//flutter/skia",
     "//flutter/third_party/tonic",
+    "//third_party/abseil-cpp/absl/base:no_destructor",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:dart_io_api",
   ]

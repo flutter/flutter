@@ -7414,6 +7414,8 @@ FILE: ../../../flutter/benchmarking/library.h
 FILE: ../../../flutter/common/constants.h
 FILE: ../../../flutter/common/exported_symbols.sym
 FILE: ../../../flutter/common/exported_symbols_mac.sym
+FILE: ../../../flutter/common/exported_test_symbols.sym
+FILE: ../../../flutter/common/exported_test_symbols_mac.sym
 FILE: ../../../flutter/common/graphics/gl_context_switch.cc
 FILE: ../../../flutter/common/graphics/gl_context_switch.h
 FILE: ../../../flutter/common/graphics/msaa_sample_count.h
