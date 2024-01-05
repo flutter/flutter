@@ -1062,7 +1062,7 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1084,7 +1084,7 @@ void main() {
       }),
     );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
