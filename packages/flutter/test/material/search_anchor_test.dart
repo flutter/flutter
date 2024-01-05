@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   // Returns the RenderEditable at the given index, or the first if not given.
   RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
