@@ -8,6 +8,8 @@ import '../test_utils.dart';
 import 'project.dart';
 
 class GenL10nProject extends Project {
+  GenL10nProject({required this.useNamedParameters});
+
   @override
   Future<void> setUpIn(Directory dir, {
     bool useDeferredLoading = false,
@@ -26,9 +28,11 @@ class GenL10nProject extends Project {
     writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), l10nYaml(
       useDeferredLoading: useDeferredLoading,
       useSyntheticPackage: useSyntheticPackage,
+      useNamedParameters: useNamedParameters,
     ));
     return super.setUpIn(dir);
   }
+
 
   @override
   final String pubspec = '''
@@ -44,290 +48,13 @@ dependencies:
   intl: any # Pick up the pinned version from flutter_localizations
 ''';
 
+  String? _main;
+
   @override
-  final String main = r'''
-import 'package:flutter/material.dart';
+  String get main =>
+      _main ??= (useNamedParameters ? _getMainWithNamedParameters() : _getMain());
 
-import 'l10n/app_localizations.dart';
-
-class LocaleBuilder extends StatelessWidget {
-  const LocaleBuilder({
-    Key? key,
-    this.locale,
-    this.test,
-    required this.callback,
-  }) : super(key: key);
-
-  final Locale? locale;
-  final String? test;
-  final void Function (BuildContext context) callback;
-
-  @override build(BuildContext context) {
-    return Localizations.override(
-      locale: locale,
-      context: context,
-      child: ResultBuilder(
-        test: test,
-        callback: callback,
-      ),
-    );
-  }
-}
-
-class ResultBuilder extends StatelessWidget {
-  const ResultBuilder({
-    Key? key,
-    this.test,
-    required this.callback,
-  }) : super(key: key);
-
-  final String? test;
-  final void Function (BuildContext context) callback;
-
-  @override build(BuildContext context) {
-    return Builder(
-      builder: (BuildContext context) {
-        try {
-          callback(context);
-        } on Exception catch (e) {
-          print('#l10n A(n) $e has occurred trying to generate "$test" results.');
-          print('#l10n END');
-        }
-        return Container();
-      },
-    );
-  }
-}
-
-class Home extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final List<String> results = [];
-    return Row(
-      children: <Widget>[
-        LocaleBuilder(
-          test: 'supportedLocales',
-          callback: (BuildContext context) {
-            results.add('--- supportedLocales tests ---');
-            int n = 0;
-            for (Locale locale in AppLocalizations.supportedLocales) {
-              String languageCode = locale.languageCode;
-              String? countryCode = locale.countryCode;
-              String? scriptCode = locale.scriptCode;
-              results.add('supportedLocales[$n]: languageCode: $languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
-              n += 1;
-            }
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale('en', 'CA'),
-          test: 'countryCode - en_CA',
-          callback: (BuildContext context) {
-            results.add('--- countryCode (en_CA) tests ---');
-            results.add(AppLocalizations.of(context)!.helloWorld);
-            results.add(AppLocalizations.of(context)!.hello("CA fallback World"));
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale('en', 'GB'),
-          test: 'countryCode - en_GB',
-          callback: (BuildContext context) {
-            results.add('--- countryCode (en_GB) tests ---');
-            results.add(AppLocalizations.of(context)!.helloWorld);
-            results.add(AppLocalizations.of(context)!.hello("GB fallback World"));
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale('zh'),
-          test: 'zh',
-          callback: (BuildContext context) {
-            results.add('--- zh ---');
-            results.add(AppLocalizations.of(context)!.helloWorld);
-            results.add(AppLocalizations.of(context)!.helloWorlds(0));
-            results.add(AppLocalizations.of(context)!.helloWorlds(1));
-            results.add(AppLocalizations.of(context)!.helloWorlds(2));
-            // Should use the fallback language, in this case,
-            // "Hello 世界" should be displayed.
-            results.add(AppLocalizations.of(context)!.hello("世界"));
-            // helloCost is tested in 'zh' because 'es' currency format contains a
-            // non-breaking space character (U+00A0), which if removed,
-            // makes it hard to decipher why the test is failing.
-            results.add(AppLocalizations.of(context)!.helloCost("价钱", 123));
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
-          test: 'zh',
-          callback: (BuildContext context) {
-            results.add('--- scriptCode: zh_Hans ---');
-            results.add(AppLocalizations.of(context)!.helloWorld);
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
-          test: 'scriptCode - zh_Hant',
-          callback: (BuildContext context) {
-            results.add('--- scriptCode - zh_Hant ---');
-            results.add(AppLocalizations.of(context)!.helloWorld);
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale.fromSubtags(languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant'),
-          test: 'scriptCode - zh_TW_Hant',
-          callback: (BuildContext context) {
-            results.add('--- scriptCode - zh_Hant_TW ---');
-            results.add(AppLocalizations.of(context)!.helloWorld);
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale('en'),
-          test: 'General formatting',
-          callback: (BuildContext context) {
-            results.add('--- General formatting tests ---');
-            final AppLocalizations localizations = AppLocalizations.of(context)!;
-            results.addAll(<String>[
-              '${localizations.helloWorld}',
-              '${localizations.helloNewlineWorld}',
-              '${localizations.testDollarSign}',
-              '${localizations.hello("World")}',
-              '${localizations.greeting("Hello", "World")}',
-              '${localizations.helloWorldOn(DateTime(1960))}',
-              '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
-              '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
-              '${localizations.helloFor(123)}',
-              '${localizations.helloCost("price", 123)}',
-              '${localizations.helloCostWithOptionalParam("price", .5)}',
-              '${localizations.helloCostWithSpecialCharacter1("price", .5)}',
-              '${localizations.helloCostWithSpecialCharacter2("price", .5)}',
-              '${localizations.helloCostWithSpecialCharacter3("price", .5)}',
-              '${localizations.helloDecimalPattern(1200000)}',
-              '${localizations.helloPercentPattern(1200000)}',
-              '${localizations.helloScientificPattern(1200000)}',
-              '${localizations.helloWorlds(0)}',
-              '${localizations.helloWorlds(1)}',
-              '${localizations.helloWorlds(2)}',
-              '${localizations.helloAdjectiveWorlds(0, "new")}',
-              '${localizations.helloAdjectiveWorlds(1, "new")}',
-              '${localizations.helloAdjectiveWorlds(2, "new")}',
-              '${localizations.helloWorldsOn(0, DateTime(1960))}',
-              '${localizations.helloWorldsOn(1, DateTime(1960))}',
-              '${localizations.helloWorldsOn(2, DateTime(1960))}',
-              '${localizations.helloWorldPopulation(0, 100)}',
-              '${localizations.helloWorldPopulation(1, 101)}',
-              '${localizations.helloWorldPopulation(2, 102)}',
-              '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
-              '${localizations.dollarSign}',
-              '${localizations.dollarSignPlural(1)}',
-              '${localizations.singleQuote}',
-              '${localizations.singleQuotePlural(2)}',
-              '${localizations.doubleQuote}',
-              '${localizations.doubleQuotePlural(2)}',
-              "${localizations.vehicleSelect('truck')}",
-              "${localizations.singleQuoteSelect('sedan')}",
-              "${localizations.doubleQuoteSelect('cabriolet')}",
-              "${localizations.pluralInString(1)}",
-              "${localizations.selectInString('he')}",
-              "${localizations.selectWithPlaceholder('male', 'ice cream')}",
-              "${localizations.selectWithPlaceholder('female', 'chocolate')}",
-              "${localizations.selectInPlural('male', 1)}",
-              "${localizations.selectInPlural('male', 2)}",
-              "${localizations.selectInPlural('female', 1)}",
-              '${localizations.datetime1(DateTime(2023, 6, 26))}',
-              '${localizations.datetime2(DateTime(2023, 6, 26, 5, 23))}',
-            ]);
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale('es'),
-          test: '--- es ---',
-          callback: (BuildContext context) {
-            results.add('--- es ---');
-            final AppLocalizations localizations = AppLocalizations.of(context)!;
-            results.addAll(<String>[
-              '${localizations.helloWorld}',
-              '${localizations.helloNewlineWorld}',
-              '${localizations.testDollarSign}',
-              '${localizations.hello("Mundo")}',
-              '${localizations.greeting("Hola", "Mundo")}',
-              '${localizations.helloWorldOn(DateTime(1960))}',
-              '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
-              '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
-              '${localizations.helloFor(123)}',
-              // helloCost is tested in 'zh' because 'es' currency format contains a
-              // non-breaking space character (U+00A0), which if removed,
-              // makes it hard to decipher why the test is failing.
-              '${localizations.helloWorlds(0)}',
-              '${localizations.helloWorlds(1)}',
-              '${localizations.helloWorlds(2)}',
-              '${localizations.helloAdjectiveWorlds(0, "nuevo")}',
-              '${localizations.helloAdjectiveWorlds(1, "nuevo")}',
-              '${localizations.helloAdjectiveWorlds(2, "nuevo")}',
-              '${localizations.helloWorldsOn(0, DateTime(1960))}',
-              '${localizations.helloWorldsOn(1, DateTime(1960))}',
-              '${localizations.helloWorldsOn(2, DateTime(1960))}',
-              '${localizations.helloWorldPopulation(0, 100)}',
-              '${localizations.helloWorldPopulation(1, 101)}',
-              '${localizations.helloWorldPopulation(2, 102)}',
-              '${localizations.helloWorldsInterpolation(123, "Hola", "Mundo")}',
-              '${localizations.dollarSign}',
-              '${localizations.dollarSignPlural(1)}',
-              '${localizations.singleQuote}',
-              '${localizations.singleQuotePlural(2)}',
-              '${localizations.doubleQuote}',
-              '${localizations.doubleQuotePlural(2)}',
-              "${localizations.vehicleSelect('truck')}",
-              "${localizations.singleQuoteSelect('sedan')}",
-              "${localizations.doubleQuoteSelect('cabriolet')}",
-              "${localizations.pluralInString(1)}",
-              "${localizations.selectInString('he')}",
-            ]);
-          },
-        ),
-        LocaleBuilder(
-          locale: Locale.fromSubtags(languageCode: 'es', countryCode: '419'),
-          test: 'countryCode - es_419',
-          callback: (BuildContext context) {
-            results.add('--- es_419 ---');
-            final AppLocalizations localizations = AppLocalizations.of(context)!;
-            results.addAll([
-              '${localizations.helloWorld}',
-              '${localizations.helloWorlds(0)}',
-              '${localizations.helloWorlds(1)}',
-              '${localizations.helloWorlds(2)}',
-            ]);
-          },
-        ),
-        LocaleBuilder(
-          callback: (BuildContext context) {
-            try {
-              int n = 0;
-              for (final String result in results) {
-                // Newline character replacement is necessary because
-                // the stream breaks up stdout by new lines.
-                print('#l10n $n (${result.replaceAll('\n', '_NEWLINE_')})');
-                n += 1;
-              }
-            }
-            finally {
-              print('#l10n END');
-            }
-          },
-        ),
-      ],
-    );
-  }
-}
-
-void main() {
-  runApp(
-    MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Home(),
-    ),
-  );
-}
-''';
+  final bool useNamedParameters;
 
   final String appEn = r'''
 {
@@ -777,9 +504,577 @@ void main() {
 }
 ''';
 
+  String _getMain() => r'''
+import 'package:flutter/material.dart';
+
+import 'l10n/app_localizations.dart';
+
+class LocaleBuilder extends StatelessWidget {
+  const LocaleBuilder({
+    Key? key,
+    this.locale,
+    this.test,
+    required this.callback,
+  }) : super(key: key);
+
+  final Locale? locale;
+  final String? test;
+  final void Function (BuildContext context) callback;
+
+  @override build(BuildContext context) {
+    return Localizations.override(
+      locale: locale,
+      context: context,
+      child: ResultBuilder(
+        test: test,
+        callback: callback,
+      ),
+    );
+  }
+}
+
+class ResultBuilder extends StatelessWidget {
+  const ResultBuilder({
+    Key? key,
+    this.test,
+    required this.callback,
+  }) : super(key: key);
+
+  final String? test;
+  final void Function (BuildContext context) callback;
+
+  @override build(BuildContext context) {
+    return Builder(
+      builder: (BuildContext context) {
+        try {
+          callback(context);
+        } on Exception catch (e) {
+          print('#l10n A(n) $e has occurred trying to generate "$test" results.');
+          print('#l10n END');
+        }
+        return Container();
+      },
+    );
+  }
+}
+
+class Home extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final List<String> results = [];
+    return Row(
+      children: <Widget>[
+        LocaleBuilder(
+          test: 'supportedLocales',
+          callback: (BuildContext context) {
+            results.add('--- supportedLocales tests ---');
+            int n = 0;
+            for (Locale locale in AppLocalizations.supportedLocales) {
+              String languageCode = locale.languageCode;
+              String? countryCode = locale.countryCode;
+              String? scriptCode = locale.scriptCode;
+              results.add('supportedLocales[$n]: languageCode: $languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
+              n += 1;
+            }
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('en', 'CA'),
+          test: 'countryCode - en_CA',
+          callback: (BuildContext context) {
+            results.add('--- countryCode (en_CA) tests ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.hello("CA fallback World"));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('en', 'GB'),
+          test: 'countryCode - en_GB',
+          callback: (BuildContext context) {
+            results.add('--- countryCode (en_GB) tests ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.hello("GB fallback World"));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('zh'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- zh ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorlds(0));
+            results.add(AppLocalizations.of(context)!.helloWorlds(1));
+            results.add(AppLocalizations.of(context)!.helloWorlds(2));
+            // Should use the fallback language, in this case,
+            // "Hello 世界" should be displayed.
+            results.add(AppLocalizations.of(context)!.hello("世界"));
+            // helloCost is tested in 'zh' because 'es' currency format contains a
+            // non-breaking space character (U+00A0), which if removed,
+            // makes it hard to decipher why the test is failing.
+            results.add(AppLocalizations.of(context)!.helloCost("价钱", 123));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode: zh_Hans ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_TW_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant_TW ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('en'),
+          test: 'General formatting',
+          callback: (BuildContext context) {
+            results.add('--- General formatting tests ---');
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
+            results.addAll(<String>[
+              '${localizations.helloWorld}',
+              '${localizations.helloNewlineWorld}',
+              '${localizations.testDollarSign}',
+              '${localizations.hello("World")}',
+              '${localizations.greeting("Hello", "World")}',
+              '${localizations.helloWorldOn(DateTime(1960))}',
+              '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
+              '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
+              '${localizations.helloFor(123)}',
+              '${localizations.helloCost("price", 123)}',
+              '${localizations.helloCostWithOptionalParam("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter1("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter2("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter3("price", .5)}',
+              '${localizations.helloDecimalPattern(1200000)}',
+              '${localizations.helloPercentPattern(1200000)}',
+              '${localizations.helloScientificPattern(1200000)}',
+              '${localizations.helloWorlds(0)}',
+              '${localizations.helloWorlds(1)}',
+              '${localizations.helloWorlds(2)}',
+              '${localizations.helloAdjectiveWorlds(0, "new")}',
+              '${localizations.helloAdjectiveWorlds(1, "new")}',
+              '${localizations.helloAdjectiveWorlds(2, "new")}',
+              '${localizations.helloWorldsOn(0, DateTime(1960))}',
+              '${localizations.helloWorldsOn(1, DateTime(1960))}',
+              '${localizations.helloWorldsOn(2, DateTime(1960))}',
+              '${localizations.helloWorldPopulation(0, 100)}',
+              '${localizations.helloWorldPopulation(1, 101)}',
+              '${localizations.helloWorldPopulation(2, 102)}',
+              '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(1)}',
+              '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(2)}',
+              '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(2)}',
+              "${localizations.vehicleSelect('truck')}",
+              "${localizations.singleQuoteSelect('sedan')}",
+              "${localizations.doubleQuoteSelect('cabriolet')}",
+              "${localizations.pluralInString(1)}",
+              "${localizations.selectInString('he')}",
+              "${localizations.selectWithPlaceholder('male', 'ice cream')}",
+              "${localizations.selectWithPlaceholder('female', 'chocolate')}",
+              "${localizations.selectInPlural('male', 1)}",
+              "${localizations.selectInPlural('male', 2)}",
+              "${localizations.selectInPlural('female', 1)}",
+              '${localizations.datetime1(DateTime(2023, 6, 26))}',
+              '${localizations.datetime2(DateTime(2023, 6, 26, 5, 23))}',
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('es'),
+          test: '--- es ---',
+          callback: (BuildContext context) {
+            results.add('--- es ---');
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
+            results.addAll(<String>[
+              '${localizations.helloWorld}',
+              '${localizations.helloNewlineWorld}',
+              '${localizations.testDollarSign}',
+              '${localizations.hello("Mundo")}',
+              '${localizations.greeting("Hola", "Mundo")}',
+              '${localizations.helloWorldOn(DateTime(1960))}',
+              '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
+              '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
+              '${localizations.helloFor(123)}',
+              // helloCost is tested in 'zh' because 'es' currency format contains a
+              // non-breaking space character (U+00A0), which if removed,
+              // makes it hard to decipher why the test is failing.
+              '${localizations.helloWorlds(0)}',
+              '${localizations.helloWorlds(1)}',
+              '${localizations.helloWorlds(2)}',
+              '${localizations.helloAdjectiveWorlds(0, "nuevo")}',
+              '${localizations.helloAdjectiveWorlds(1, "nuevo")}',
+              '${localizations.helloAdjectiveWorlds(2, "nuevo")}',
+              '${localizations.helloWorldsOn(0, DateTime(1960))}',
+              '${localizations.helloWorldsOn(1, DateTime(1960))}',
+              '${localizations.helloWorldsOn(2, DateTime(1960))}',
+              '${localizations.helloWorldPopulation(0, 100)}',
+              '${localizations.helloWorldPopulation(1, 101)}',
+              '${localizations.helloWorldPopulation(2, 102)}',
+              '${localizations.helloWorldsInterpolation(123, "Hola", "Mundo")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(1)}',
+              '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(2)}',
+              '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(2)}',
+              "${localizations.vehicleSelect('truck')}",
+              "${localizations.singleQuoteSelect('sedan')}",
+              "${localizations.doubleQuoteSelect('cabriolet')}",
+              "${localizations.pluralInString(1)}",
+              "${localizations.selectInString('he')}",
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'es', countryCode: '419'),
+          test: 'countryCode - es_419',
+          callback: (BuildContext context) {
+            results.add('--- es_419 ---');
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
+            results.addAll([
+              '${localizations.helloWorld}',
+              '${localizations.helloWorlds(0)}',
+              '${localizations.helloWorlds(1)}',
+              '${localizations.helloWorlds(2)}',
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          callback: (BuildContext context) {
+            try {
+              int n = 0;
+              for (final String result in results) {
+                // Newline character replacement is necessary because
+                // the stream breaks up stdout by new lines.
+                print('#l10n $n (${result.replaceAll('\n', '_NEWLINE_')})');
+                n += 1;
+              }
+            }
+            finally {
+              print('#l10n END');
+            }
+          },
+        ),
+      ],
+    );
+  }
+}
+
+void main() {
+  runApp(
+    MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Home(),
+    ),
+  );
+}
+''';
+
+  String _getMainWithNamedParameters() => r'''
+import 'package:flutter/material.dart';
+
+import 'l10n/app_localizations.dart';
+
+class LocaleBuilder extends StatelessWidget {
+  const LocaleBuilder({
+    Key? key,
+    this.locale,
+    this.test,
+    required this.callback,
+  }) : super(key: key);
+
+  final Locale? locale;
+  final String? test;
+  final void Function (BuildContext context) callback;
+
+  @override build(BuildContext context) {
+    return Localizations.override(
+      locale: locale,
+      context: context,
+      child: ResultBuilder(
+        test: test,
+        callback: callback,
+      ),
+    );
+  }
+}
+
+class ResultBuilder extends StatelessWidget {
+  const ResultBuilder({
+    Key? key,
+    this.test,
+    required this.callback,
+  }) : super(key: key);
+
+  final String? test;
+  final void Function (BuildContext context) callback;
+
+  @override build(BuildContext context) {
+    return Builder(
+      builder: (BuildContext context) {
+        try {
+          callback(context);
+        } on Exception catch (e) {
+          print('#l10n A(n) $e has occurred trying to generate "$test" results.');
+          print('#l10n END');
+        }
+        return Container();
+      },
+    );
+  }
+}
+
+class Home extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final List<String> results = [];
+    return Row(
+      children: <Widget>[
+        LocaleBuilder(
+          test: 'supportedLocales',
+          callback: (BuildContext context) {
+            results.add('--- supportedLocales tests ---');
+            int n = 0;
+            for (Locale locale in AppLocalizations.supportedLocales) {
+              String languageCode = locale.languageCode;
+              String? countryCode = locale.countryCode;
+              String? scriptCode = locale.scriptCode;
+              results.add('supportedLocales[$n]: languageCode: $languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
+              n += 1;
+            }
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('en', 'CA'),
+          test: 'countryCode - en_CA',
+          callback: (BuildContext context) {
+            results.add('--- countryCode (en_CA) tests ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.hello(world: "CA fallback World"));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('en', 'GB'),
+          test: 'countryCode - en_GB',
+          callback: (BuildContext context) {
+            results.add('--- countryCode (en_GB) tests ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.hello(world: "GB fallback World"));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('zh'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- zh ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorlds(count: 0));
+            results.add(AppLocalizations.of(context)!.helloWorlds(count: 1));
+            results.add(AppLocalizations.of(context)!.helloWorlds(count: 2));
+            // Should use the fallback language, in this case,
+            // "Hello 世界" should be displayed.
+            results.add(AppLocalizations.of(context)!.hello(world: "世界"));
+            // helloCost is tested in 'zh' because 'es' currency format contains a
+            // non-breaking space character (U+00A0), which if removed,
+            // makes it hard to decipher why the test is failing.
+            results.add(AppLocalizations.of(context)!.helloCost(price: "价钱", value: 123));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode: zh_Hans ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_TW_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant_TW ---');
+            results.add(AppLocalizations.of(context)!.helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('en'),
+          test: 'General formatting',
+          callback: (BuildContext context) {
+            results.add('--- General formatting tests ---');
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
+            results.addAll(<String>[
+              '${localizations.helloWorld}',
+              '${localizations.helloNewlineWorld}',
+              '${localizations.testDollarSign}',
+              '${localizations.hello(world: "World")}',
+              '${localizations.greeting(hello: "Hello", world: "World")}',
+              '${localizations.helloWorldOn(date: DateTime(1960))}',
+              '${localizations.helloOn(world: "world argument", date: DateTime(1960), time: DateTime(1960))}',
+              '${localizations.helloWorldDuring(startDate: DateTime(1960), endDate: DateTime(2020))}',
+              '${localizations.helloFor(value: 123)}',
+              '${localizations.helloCost(price: "price", value: 123)}',
+              '${localizations.helloCostWithOptionalParam(price: "price", value: .5)}',
+              '${localizations.helloCostWithSpecialCharacter1(price: "price", value: .5)}',
+              '${localizations.helloCostWithSpecialCharacter2(price: "price", value: .5)}',
+              '${localizations.helloCostWithSpecialCharacter3(price: "price", value: .5)}',
+              '${localizations.helloDecimalPattern(value: 1200000)}',
+              '${localizations.helloPercentPattern(value: 1200000)}',
+              '${localizations.helloScientificPattern(value: 1200000)}',
+              '${localizations.helloWorlds(count: 0)}',
+              '${localizations.helloWorlds(count: 1)}',
+              '${localizations.helloWorlds(count: 2)}',
+              '${localizations.helloAdjectiveWorlds(count: 0, adjective: "new")}',
+              '${localizations.helloAdjectiveWorlds(count: 1, adjective: "new")}',
+              '${localizations.helloAdjectiveWorlds(count: 2, adjective: "new")}',
+              '${localizations.helloWorldsOn(count: 0, date: DateTime(1960))}',
+              '${localizations.helloWorldsOn(count: 1, date: DateTime(1960))}',
+              '${localizations.helloWorldsOn(count: 2, date: DateTime(1960))}',
+              '${localizations.helloWorldPopulation(count: 0, population: 100)}',
+              '${localizations.helloWorldPopulation(count: 1, population: 101)}',
+              '${localizations.helloWorldPopulation(count: 2, population: 102)}',
+              '${localizations.helloWorldsInterpolation(count: 123, hello: "Hello", world: "World")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(count: 1)}',
+              '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(count: 2)}',
+              '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(count: 2)}',
+              "${localizations.vehicleSelect(vehicleType: 'truck')}",
+              "${localizations.singleQuoteSelect(vehicleType: 'sedan')}",
+              "${localizations.doubleQuoteSelect(vehicleType: 'cabriolet')}",
+              "${localizations.pluralInString(count: 1)}",
+              "${localizations.selectInString(gender: 'he')}",
+              "${localizations.selectWithPlaceholder(gender: 'male', preference: 'ice cream')}",
+              "${localizations.selectWithPlaceholder(gender: 'female', preference: 'chocolate')}",
+              "${localizations.selectInPlural(gender: 'male', count: 1)}",
+              "${localizations.selectInPlural(gender: 'male', count: 2)}",
+              "${localizations.selectInPlural(gender: 'female', count: 1)}",
+              '${localizations.datetime1(today: DateTime(2023, 6, 26))}',
+              '${localizations.datetime2(current: DateTime(2023, 6, 26, 5, 23))}',
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('es'),
+          test: '--- es ---',
+          callback: (BuildContext context) {
+            results.add('--- es ---');
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
+            results.addAll(<String>[
+              '${localizations.helloWorld}',
+              '${localizations.helloNewlineWorld}',
+              '${localizations.testDollarSign}',
+              '${localizations.hello(world: "Mundo")}',
+              '${localizations.greeting(hello: "Hola", world: "Mundo")}',
+              '${localizations.helloWorldOn(date: DateTime(1960))}',
+              '${localizations.helloOn(world: "world argument", date: DateTime(1960), time: DateTime(1960))}',
+              '${localizations.helloWorldDuring(startDate: DateTime(1960), endDate: DateTime(2020))}',
+              '${localizations.helloFor(value: 123)}',
+              // helloCost is tested in 'zh' because 'es' currency format contains a
+              // non-breaking space character (U+00A0), which if removed,
+              // makes it hard to decipher why the test is failing.
+              '${localizations.helloWorlds(count: 0)}',
+              '${localizations.helloWorlds(count: 1)}',
+              '${localizations.helloWorlds(count: 2)}',
+              '${localizations.helloAdjectiveWorlds(count: 0, adjective: "nuevo")}',
+              '${localizations.helloAdjectiveWorlds(count: 1, adjective: "nuevo")}',
+              '${localizations.helloAdjectiveWorlds(count: 2, adjective: "nuevo")}',
+              '${localizations.helloWorldsOn(count: 0, date: DateTime(1960))}',
+              '${localizations.helloWorldsOn(count: 1, date: DateTime(1960))}',
+              '${localizations.helloWorldsOn(count: 2, date: DateTime(1960))}',
+              '${localizations.helloWorldPopulation(count: 0, population: 100)}',
+              '${localizations.helloWorldPopulation(count: 1, population: 101)}',
+              '${localizations.helloWorldPopulation(count: 2, population: 102)}',
+              '${localizations.helloWorldsInterpolation(count: 123, hello: "Hola", world: "Mundo")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(count: 1)}',
+              '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(count: 2)}',
+              '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(count: 2)}',
+              "${localizations.vehicleSelect(vehicleType: 'truck')}",
+              "${localizations.singleQuoteSelect(vehicleType: 'sedan')}",
+              "${localizations.doubleQuoteSelect(vehicleType: 'cabriolet')}",
+              "${localizations.pluralInString(count: 1)}",
+              "${localizations.selectInString(gender: 'he')}",
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'es', countryCode: '419'),
+          test: 'countryCode - es_419',
+          callback: (BuildContext context) {
+            results.add('--- es_419 ---');
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
+            results.addAll([
+              '${localizations.helloWorld}',
+              '${localizations.helloWorlds(count: 0)}',
+              '${localizations.helloWorlds(count: 1)}',
+              '${localizations.helloWorlds(count: 2)}',
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          callback: (BuildContext context) {
+            try {
+              int n = 0;
+              for (final String result in results) {
+                // Newline character replacement is necessary because
+                // the stream breaks up stdout by new lines.
+                print('#l10n $n (${result.replaceAll('\n', '_NEWLINE_')})');
+                n += 1;
+              }
+            }
+            finally {
+              print('#l10n END');
+            }
+          },
+        ),
+      ],
+    );
+  }
+}
+
+void main() {
+  runApp(
+    MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Home(),
+    ),
+  );
+}''';
+
   String l10nYaml({
     required bool useDeferredLoading,
     required bool useSyntheticPackage,
+    required bool useNamedParameters,
   }) {
     String l10nYamlString = '';
 
@@ -789,6 +1084,10 @@ void main() {
 
     if (!useSyntheticPackage) {
       l10nYamlString += 'synthetic-package: false\n';
+    }
+
+    if (useNamedParameters) {
+      l10nYamlString += 'use-named-parameters: true\n';
     }
 
     return l10nYamlString;

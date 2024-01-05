@@ -355,6 +355,7 @@ class LocalizationOptions {
     bool? useEscaping,
     bool? suppressWarnings,
     bool? relaxSyntax,
+    bool? useNamedParameters,
   }) : templateArbFile = templateArbFile ?? 'app_en.arb',
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
@@ -365,7 +366,8 @@ class LocalizationOptions {
        format = format ?? false,
        useEscaping = useEscaping ?? false,
        suppressWarnings = suppressWarnings ?? false,
-       relaxSyntax = relaxSyntax ?? false;
+       relaxSyntax = relaxSyntax ?? false,
+       useNamedParameters = useNamedParameters ?? false;
 
   /// The `--arb-dir` argument.
   ///
@@ -467,6 +469,14 @@ class LocalizationOptions {
   /// This was added in for backward compatibility and is not recommended
   /// as it may mask errors.
   final bool relaxSyntax;
+
+  /// The `use-named-parameters` argument.
+  ///
+  /// Whether or not to use named parameters for the generated localization
+  /// methods.
+  ///
+  /// Defaults to `false`.
+  final bool useNamedParameters;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -511,6 +521,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger),
     suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger),
     relaxSyntax: _tryReadBool(yamlNode, 'relax-syntax', logger),
+    useNamedParameters: _tryReadBool(yamlNode, 'use-named-parameters', logger),
   );
 }
 
@@ -537,6 +548,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     format: command.boolArg('format'),
     useEscaping: command.boolArg('use-escaping'),
     suppressWarnings: command.boolArg('suppress-warnings'),
+    useNamedParameters: command.boolArg('use-named-parameters'),
   );
 }
 
