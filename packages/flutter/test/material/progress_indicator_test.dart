@@ -1084,32 +1084,32 @@ void main() {
       }),
     );
 
-  // testWidgets(
-  //   'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
-  //   (WidgetTester tester) async {
-  //     await tester.pumpWidget(
-  //       MaterialApp(
-  //         theme: ThemeData(),
-  //         home: const Scaffold(
-  //           body: Material(
-  //             child: CircularProgressIndicator.adaptive(
-  //               value:0.5,
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     );
+  testWidgets(
+    'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(),
+          home: const Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(
+                value:0.5,
+              ),
+            ),
+          ),
+        ),
+      );
 
-  //     expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-  //     final double actualProgress =tester.widget<CupertinoActivityIndicator>(
-  //       find.byType(CupertinoActivityIndicator)).progress;
-  //     expect(actualProgress, 0.5);
-  //     },
-  //     variant: const TargetPlatformVariant(<TargetPlatform> {
-  //     TargetPlatform.iOS,
-  //     TargetPlatform.macOS,
-  //   }),
-  // );
+      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+      final double actualProgress =tester.widget<CupertinoActivityIndicator>(
+        find.byType(CupertinoActivityIndicator)).progress;
+      expect(actualProgress, 0.5);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
   
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
