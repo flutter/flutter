@@ -3758,7 +3758,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_valueWhenToolbarShowScheduled != null) {
         return;
       }
-      final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+      final bool toolbarIsVisible = _selectionOverlay != null
+                                  && _selectionOverlay!.toolbarIsVisible
+                                  && !_selectionOverlay!.spellCheckToolbarIsVisible;
       _valueWhenToolbarShowScheduled = toolbarIsVisible ? _value : null;
       if (_valueWhenToolbarShowScheduled != null) {
         _selectionOverlay?.hideToolbar();
