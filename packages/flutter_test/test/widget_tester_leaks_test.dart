@@ -13,13 +13,13 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 final _retainer = <InstrumentedDisposable>[];
 
 final List<LeakTestCase> _tests = <LeakTestCase>[
-  // LeakTestCase(
-  //   name: 'no leaks',
-  //   body: (PumpWidgetsCallback? pumpWidgets,
-  //       RunAsyncCallback<dynamic>? runAsync) async {
-  //     await pumpWidgets!(Container());
-  //   },
-  // ),
+  LeakTestCase(
+    name: 'no leaks',
+    body: (PumpWidgetsCallback? pumpWidgets,
+        RunAsyncCallback<dynamic>? runAsync) async {
+      await pumpWidgets!(Container());
+    },
+  ),
   LeakTestCase(
     name: 'not disposed disposable',
     body: (PumpWidgetsCallback? pumpWidgets,
@@ -28,14 +28,14 @@ final List<LeakTestCase> _tests = <LeakTestCase>[
     },
     notDisposedTotal: 1,
   ),
-  // LeakTestCase(
-  //   name: 'not GCed disposable',
-  //   body: (PumpWidgetsCallback? pumpWidgets,
-  //       RunAsyncCallback<dynamic>? runAsync) async {
-  //     _retainer.add(InstrumentedDisposable()..dispose());
-  //   },
-  //   notGCedTotal: 1,
-  // ),
+  LeakTestCase(
+    name: 'not GCed disposable',
+    body: (PumpWidgetsCallback? pumpWidgets,
+        RunAsyncCallback<dynamic>? runAsync) async {
+      _retainer.add(InstrumentedDisposable()..dispose());
+    },
+    notGCedTotal: 1,
+  ),
   // LeakTestCase(
   //   name: 'leaking widget',
   //   body: (PumpWidgetsCallback? pumpWidgets,
