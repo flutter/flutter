@@ -177,6 +177,12 @@ template("embedder_source_set") {
       ]
     }
 
+    # Depend on 'icudtl.dat.S' to avoid dynamic lookups of engine library symbols.
+    if (is_android) {
+      deps += [ "//flutter/shell/platform/android:icudtl_asm" ]
+      sources += [ "$root_build_dir/gen/flutter/shell/platform/android/third_party/icu/flutter/icudtl.dat.S" ]
+    }
+
     public_configs += [
       ":embedder_gpu_configuration_config",
       ":embedder_header_config",
