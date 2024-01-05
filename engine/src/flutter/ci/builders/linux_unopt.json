@@ -83,6 +83,29 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "dependencies": [],
+            "gn": [
+                "--android",
+                "--embedder-for-target",
+                "--target-dir",
+                "android_embedder_debug_unopt",
+                "--unoptimized",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "android_embedder_debug_unopt",
+            "ninja": {
+                "config": "android_embedder_debug_unopt",
+                "targets": [
+                    "flutter/shell/platform/embedder:flutter_engine"
+                ]
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
             "dependencies": [
                 {
                     "dependency": "arm_tools",
