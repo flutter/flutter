@@ -26,6 +26,7 @@ dartdoc:
     - category-order-gives-missing-package-name
     - deprecated
     - ignored-canonical-for
+    - missing-example-file
     - missing-from-search-index
     - no-canonical-found
     - no-documentable-libraries
@@ -33,6 +34,7 @@ dartdoc:
     - orphaned-file
     - reexported-private-api-across-packages
     - unknown-file
+    - unknown-html-fragment
     - unknown-macro
     - unresolved-doc-reference
     ## Ignores that are elevated to errors:

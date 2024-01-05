@@ -196,11 +196,9 @@ class NavigationDrawerDestination extends StatelessWidget {
     this.enabled = true,
   });
 
-  /// Sets the color of the [Material] that holds all of the [Drawer]'s
-  /// contents.
+  /// Sets the color of the destination.
   ///
-  /// If this is null, then [DrawerThemeData.backgroundColor] is used. If that
-  /// is also null, then it falls back to [Material]'s default.
+  /// If this is null, then [NavigationDrawerThemeData.backgroundColor].
   final Color? backgroundColor;
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -286,6 +284,7 @@ class NavigationDrawerDestination extends StatelessWidget {
         );
       },
       enabled: enabled,
+      backgroundColor: backgroundColor,
     );
   }
 }
@@ -308,6 +307,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     required this.buildIcon,
     required this.buildLabel,
     this.enabled = true,
+    this.backgroundColor,
   });
 
   /// Builds the icon for a destination in a [NavigationDrawer].
@@ -339,6 +339,11 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   /// Defaults to true.
   final bool enabled;
 
+  /// Sets the color of navigation destination.
+  ///
+  /// If this is null, then [NavigationDrawerTheme.backgroundColor] is used.
+  final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) {
     final _NavigationDrawerDestinationInfo info = _NavigationDrawerDestinationInfo.of(context);
@@ -354,8 +359,9 @@ class _NavigationDestinationBuilder extends StatelessWidget {
       ],
     );
 
-    return Padding(
+    return Container(
       padding: info.tilePadding,
+      color: backgroundColor ?? navigationDrawerTheme.backgroundColor,
       child: _NavigationDestinationSemantics(
         child: SizedBox(
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,

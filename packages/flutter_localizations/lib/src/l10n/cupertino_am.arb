@@ -26,5 +26,6 @@
   "menuDismissLabel": "ምናሌን አሰናብት",
   "lookUpButtonLabel": "ይመልከቱ",
   "searchWebButtonLabel": "ድርን ፈልግ",
-  "shareButtonLabel": "አጋራ..."
+  "shareButtonLabel": "አጋራ...",
+  "clearButtonLabel": "Clear"
 }

@@ -426,6 +426,7 @@ class SemanticsData with Diagnosticable {
   SemanticsData({
     required this.flags,
     required this.actions,
+    required this.identifier,
     required this.attributedLabel,
     required this.attributedValue,
     required this.attributedIncreasedValue,
@@ -462,6 +463,9 @@ class SemanticsData with Diagnosticable {
 
   /// A bit field of [SemanticsAction]s that apply to this node.
   final int actions;
+
+  /// {@macro flutter.semantics.SemanticsProperties.identifier}
+  final String identifier;
 
   /// A textual description for the current label of the node.
   ///
@@ -704,6 +708,7 @@ class SemanticsData with Diagnosticable {
           flag.name,
     ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
+    properties.add(StringProperty('identifier', identifier, defaultValue: ''));
     properties.add(AttributedStringProperty('label', attributedLabel));
     properties.add(AttributedStringProperty('value', attributedValue));
     properties.add(AttributedStringProperty('increasedValue', attributedIncreasedValue));
@@ -730,6 +735,7 @@ class SemanticsData with Diagnosticable {
     return other is SemanticsData
         && other.flags == flags
         && other.actions == actions
+        && other.identifier == identifier
         && other.attributedLabel == attributedLabel
         && other.attributedValue == attributedValue
         && other.attributedIncreasedValue == attributedIncreasedValue
@@ -759,6 +765,7 @@ class SemanticsData with Diagnosticable {
   int get hashCode => Object.hash(
     flags,
     actions,
+    identifier,
     attributedLabel,
     attributedValue,
     attributedIncreasedValue,
@@ -775,8 +782,8 @@ class SemanticsData with Diagnosticable {
     scrollExtentMax,
     scrollExtentMin,
     platformViewId,
-    maxValueLength,
     Object.hash(
+      maxValueLength,
       currentValueLength,
       transform,
       elevation,
@@ -913,6 +920,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.liveRegion,
     this.maxValueLength,
     this.currentValueLength,
+    this.identifier,
     this.label,
     this.attributedLabel,
     this.value,
@@ -1176,6 +1184,21 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This should only be set when [textField] is true. Must be set when
   /// [maxValueLength] is set.
   final int? currentValueLength;
+
+  /// {@template flutter.semantics.SemanticsProperties.identifier}
+  /// Provides an identifier for the semantics node in native accessibility hierarchy.
+  ///
+  /// This value is not exposed to the users of the app.
+  ///
+  /// It's usually used for UI testing with tools that work by querying the
+  /// native accessibility, like UIAutomator, XCUITest, or Appium.
+  ///
+  /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
+  /// It'll be appear in accessibility hierarchy as `resource-id`.
+  ///
+  /// On iOS, this will set `UIAccessibilityElement.accessibilityIdentifier`.
+  /// {@endtemplate}
+  final String? identifier;
 
   /// Provides a textual description of the widget.
   ///
@@ -1655,6 +1678,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
     properties.add(StringProperty('value', value, defaultValue: null));
@@ -1665,7 +1689,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(AttributedStringProperty('attributedDecreasedValue', attributedDecreasedValue, defaultValue: null));
     properties.add(StringProperty('hint', hint, defaultValue: null));
     properties.add(AttributedStringProperty('attributedHint', attributedHint, defaultValue: null));
-    properties.add(StringProperty('tooltip', tooltip));
+    properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsHintOverrides>('hintOverrides', hintOverrides, defaultValue: null));
@@ -2234,6 +2258,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Whether this node currently has a given [SemanticsFlag].
   bool hasFlag(SemanticsFlag flag) => _flags & flag.index != 0;
 
+  /// {@macro flutter.semantics.SemanticsProperties.identifier}
+  String get identifier => _identifier;
+  String _identifier = _kEmptyConfig.identifier;
+
   /// A textual description of this node.
   ///
   /// The reading direction is given by [textDirection].
@@ -2545,6 +2573,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     final bool mergeAllDescendantsIntoThisNodeValueChanged = _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
 
+    _identifier = config.identifier;
     _attributedLabel = config.attributedLabel;
     _attributedValue = config.attributedValue;
     _attributedIncreasedValue = config.attributedIncreasedValue;
@@ -2601,6 +2630,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // Can't use _effectiveActionsAsBits here. The filtering of action bits
     // must be done after the merging the its descendants.
     int actions = _actionsAsBits;
+    String identifier = _identifier;
     AttributedString attributedLabel = _attributedLabel;
     AttributedString attributedValue = _attributedValue;
     AttributedString attributedIncreasedValue = _attributedIncreasedValue;
@@ -2660,6 +2690,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         currentValueLength ??= node._currentValueLength;
         headingLevel = node._headingLevel;
 
+        if (identifier == '') {
+          identifier = node._identifier;
+        }
         if (attributedValue.string == '') {
           attributedValue = node._attributedValue;
         }
@@ -2717,6 +2750,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return SemanticsData(
       flags: flags,
       actions: _areUserActionsBlocked ? actions & _kUnblockedUserActions : actions,
+      identifier: identifier,
       attributedLabel: attributedLabel,
       attributedValue: attributedValue,
       attributedIncreasedValue: attributedIncreasedValue,
@@ -2786,6 +2820,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       flags: data.flags,
       actions: data.actions,
       rect: data.rect,
+      identifier: data.identifier,
       label: data.attributedLabel.string,
       labelAttributes: data.attributedLabel.attributes,
       value: data.attributedValue.string,
@@ -2941,6 +2976,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
+    properties.add(StringProperty('identifier', _identifier, defaultValue: ''));
     properties.add(AttributedStringProperty('label', _attributedLabel));
     properties.add(AttributedStringProperty('value', _attributedValue));
     properties.add(AttributedStringProperty('increasedValue', _attributedIncreasedValue));
@@ -3318,7 +3354,17 @@ class SemanticsOwner extends ChangeNotifier {
   /// Creates a [SemanticsOwner] that manages zero or more [SemanticsNode] objects.
   SemanticsOwner({
     required this.onSemanticsUpdate,
-  });
+  }){
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/semantics.dart',
+        className: '$SemanticsOwner',
+        object: this,
+      );
+    }
+  }
 
   /// The [onSemanticsUpdate] callback is expected to dispatch [SemanticsUpdate]s
   /// to the [FlutterView] that is associated with this [PipelineOwner] and/or
@@ -3339,6 +3385,9 @@ class SemanticsOwner extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _dirtyNodes.clear();
     _nodes.clear();
     _detachedNodes.clear();
@@ -4225,6 +4274,14 @@ class SemanticsConfiguration {
     }
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.identifier}
+  String get identifier => _identifier;
+  String _identifier = '';
+  set identifier(String identifier) {
+    _identifier = identifier;
+    _hasBeenAnnotated = true;
+  }
+
   /// A textual description of the owning [RenderObject].
   ///
   /// Setting this attribute will override the [attributedLabel].
@@ -4937,6 +4994,9 @@ class SemanticsConfiguration {
 
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
+    if (_identifier == '') {
+      _identifier = child._identifier;
+    }
     _attributedLabel = _concatAttributedString(
       thisAttributedString: _attributedLabel,
       thisTextDirection: textDirection,
@@ -4977,6 +5037,7 @@ class SemanticsConfiguration {
       .._isMergingSemanticsOfDescendants = _isMergingSemanticsOfDescendants
       .._textDirection = _textDirection
       .._sortKey = _sortKey
+      .._identifier = _identifier
       .._attributedLabel = _attributedLabel
       .._attributedIncreasedValue = _attributedIncreasedValue
       .._attributedValue = _attributedValue

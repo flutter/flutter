@@ -595,4 +595,63 @@ void main() {
     expect(TextStyle.lerp(fromStyle, toStyle, 1), toStyle);
   });
 
+  test('lerpFontVariations', () {
+    // nil cases
+    expect(lerpFontVariations(const <FontVariation>[], const <FontVariation>[], 0.0), const <FontVariation>[]);
+    expect(lerpFontVariations(const <FontVariation>[], const <FontVariation>[], 0.5), const <FontVariation>[]);
+    expect(lerpFontVariations(const <FontVariation>[], const <FontVariation>[], 1.0), const <FontVariation>[]);
+    expect(lerpFontVariations(null, const <FontVariation>[], 0.0), null);
+    expect(lerpFontVariations(const <FontVariation>[], null, 0.0), const <FontVariation>[]);
+    expect(lerpFontVariations(null, null, 0.0), null);
+    expect(lerpFontVariations(null, const <FontVariation>[], 0.5), const <FontVariation>[]);
+    expect(lerpFontVariations(const <FontVariation>[], null, 0.5), null);
+    expect(lerpFontVariations(null, null, 0.5), null);
+    expect(lerpFontVariations(null, const <FontVariation>[], 1.0), const <FontVariation>[]);
+    expect(lerpFontVariations(const <FontVariation>[], null, 1.0), null);
+    expect(lerpFontVariations(null, null, 1.0), null);
+
+    const FontVariation w100 = FontVariation.weight(100.0);
+    const FontVariation w120 = FontVariation.weight(120.0);
+    const FontVariation w150 = FontVariation.weight(150.0);
+    const FontVariation w200 = FontVariation.weight(200.0);
+    const FontVariation w300 = FontVariation.weight(300.0);
+    const FontVariation w1000 = FontVariation.weight(1000.0);
+
+    // one axis
+    expect(lerpFontVariations(const <FontVariation>[w100], const <FontVariation>[w200], 0.0), const <FontVariation>[w100]);
+    expect(lerpFontVariations(const <FontVariation>[w100], const <FontVariation>[w200], 0.2), const <FontVariation>[w120]);
+    expect(lerpFontVariations(const <FontVariation>[w100], const <FontVariation>[w200], 0.5), const <FontVariation>[w150]);
+    expect(lerpFontVariations(const <FontVariation>[w100], const <FontVariation>[w200], 2.0), const <FontVariation>[w300]);
+
+    // weird one axis cases
+    expect(lerpFontVariations(const <FontVariation>[w100, w1000], const <FontVariation>[w300], 0.0), const <FontVariation>[w100, w1000]);
+    expect(lerpFontVariations(const <FontVariation>[w100, w1000], const <FontVariation>[w300], 0.5), const <FontVariation>[w200]);
+    expect(lerpFontVariations(const <FontVariation>[w100, w1000], const <FontVariation>[w300], 1.0), const <FontVariation>[w300]);
+    expect(lerpFontVariations(const <FontVariation>[w100, w1000], const <FontVariation>[], 0.5), const <FontVariation>[]);
+
+    const FontVariation sn80 = FontVariation.slant(-80.0);
+    const FontVariation sn40 = FontVariation.slant(-40.0);
+    const FontVariation s0 = FontVariation.slant(0.0);
+    const FontVariation sp40 = FontVariation.slant(40.0);
+    const FontVariation sp80 = FontVariation.slant(80.0);
+
+    // two axis matched order
+    expect(lerpFontVariations(const <FontVariation>[w100, sn80], const <FontVariation>[w300, sp80], 0.5), const <FontVariation>[w200, s0]);
+
+    // two axis unmatched order
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100], const <FontVariation>[w300, sp80], 0.0), const <FontVariation>[sn80, w100]);
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100], const <FontVariation>[w300, sp80], 0.5), unorderedMatches(const <FontVariation>[s0, w200]));
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100], const <FontVariation>[w300, sp80], 1.0), const <FontVariation>[w300, sp80]);
+
+    // two axis with duplicates
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100, sp80], const <FontVariation>[w300, sp80], 0.5), unorderedMatches(const <FontVariation>[sp80, w200]));
+
+    // mixed axis counts
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100], const <FontVariation>[w300], 0.5), const <FontVariation>[w200]);
+    expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 0.0), const <FontVariation>[sn80]);
+    expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 0.1), const <FontVariation>[sn80]);
+    expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 0.9), const <FontVariation>[w300]);
+    expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 1.0), const <FontVariation>[w300]);
+    expect(lerpFontVariations(const <FontVariation>[sn40, s0, w100], const <FontVariation>[sp40, w300, sp80], 0.5), anyOf(equals(const <FontVariation>[s0, w200, sp40]), equals(const <FontVariation>[s0, sp40, w200])));
+  });
 }

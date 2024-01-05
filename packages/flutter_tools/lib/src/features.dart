@@ -5,8 +5,6 @@
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
-///
-/// If not injected, a default implementation is provided.
 FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 
 /// The interface used to determine if a particular [Feature] is enabled.
@@ -158,12 +156,14 @@ const Feature flutterWebWasm = Feature(
   ),
 );
 
+const String kCliAnimationsFeatureName = 'cli-animations';
+
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
 const Feature cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
-  configSetting: 'cli-animations',
+  configSetting: kCliAnimationsFeatureName,
 );
 
 /// Enable native assets compilation and bundling.

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
@@ -100,7 +99,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<void> initialize({String? moduleFormat, bool? soundNullSafety}) async {}
+  Future<void> initialize(CompilerOptions options) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -164,6 +163,8 @@ class WebAssetServer implements AssetReader {
     ChromiumLauncher? chromiumLauncher,
     String hostname,
     int port,
+    String? tlsCertPath,
+    String? tlsCertKeyPath,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -188,7 +189,14 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port);
+        if (tlsCertPath != null && tlsCertKeyPath != null) {
+          final SecurityContext serverContext = SecurityContext()
+             ..useCertificateChain(tlsCertPath)
+             ..usePrivateKey(tlsCertKeyPath);
+          httpServer = await HttpServer.bindSecure(address, port, serverContext);
+        } else {
+          httpServer = await HttpServer.bind(address, port);
+        }
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -278,9 +286,11 @@ class WebAssetServer implements AssetReader {
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        packageConfig.toPackageUri(
+          BuildSettings(
+            appEntrypoint: packageConfig.toPackageUri(
           globals.fs.file(entrypoint).absolute.uri,
-        ),
+            ),
+          ),
       ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
@@ -635,6 +645,8 @@ class WebDevFS implements DevFS {
   WebDevFS({
     required this.hostname,
     required int port,
+    required this.tlsCertPath,
+    required this.tlsCertKeyPath,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -671,6 +683,8 @@ class WebDevFS implements DevFS {
   final bool nativeNullAssertions;
   final int _port;
   final NullSafetyMode nullSafetyMode;
+  final String? tlsCertPath;
+  final String? tlsCertKeyPath;
 
   late WebAssetServer webAssetServer;
 
@@ -757,6 +771,8 @@ class WebDevFS implements DevFS {
       chromiumLauncher,
       hostname,
       _port,
+      tlsCertPath,
+      tlsCertKeyPath,
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
@@ -777,10 +793,13 @@ class WebDevFS implements DevFS {
     } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }
+    String url = '$hostname:$selectedPort';
     if (hostname == 'any') {
-      _baseUri = Uri.http('localhost:$selectedPort', webAssetServer.basePath);
-    } else {
-      _baseUri = Uri.http('$hostname:$selectedPort', webAssetServer.basePath);
+      url ='localhost:$selectedPort';
+    }
+    _baseUri = Uri.http(url, webAssetServer.basePath);
+    if (tlsCertPath != null && tlsCertKeyPath!= null) {
+      _baseUri = Uri.https(url, webAssetServer.basePath);
     }
     return _baseUri!;
   }

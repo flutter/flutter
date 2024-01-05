@@ -1171,7 +1171,7 @@ class WidgetsApp extends StatefulWidget {
   final String? restorationScopeId;
 
   /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
-  /// Deprecated. This setting is not ignored.
+  /// Deprecated. This setting is now ignored.
   ///
   /// The widget never introduces its own [MediaQuery]; the [View] widget takes
   /// care of that.
@@ -1221,6 +1221,7 @@ class WidgetsApp extends StatefulWidget {
     SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
 
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),

@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -70,6 +71,7 @@ void main() {
   late BufferLogger logger;
   late XcodeProjectInterpreter xcodeProjectInterpreter;
   late Artifacts artifacts;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -86,6 +88,10 @@ void main() {
       processManager: fakeProcessManager,
     );
     xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -194,11 +200,21 @@ STDERR STUFF
     await createTestCommandRunner(command).run(
         const <String>['build', 'macos', '--no-pub']
     );
+
+    expect(
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'xcode-macos',
+      ),
+      true,
+    );
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('macOS build fails on non-macOS platform', () async {
@@ -594,6 +610,7 @@ STDERR STUFF
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'macos'),
     ));
+    expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'macos')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -618,5 +635,6 @@ STDERR STUFF
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
   });
 }

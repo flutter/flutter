@@ -26,5 +26,6 @@
   "menuDismissLabel": "Sulge menüü",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Otsi veebist",
-  "shareButtonLabel": "Jaga …"
+  "shareButtonLabel": "Jaga …",
+  "clearButtonLabel": "Clear"
 }

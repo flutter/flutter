@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -462,13 +463,15 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String relativeOutputPath = app.ipaOutputPath;
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
-    final String exportMethod = stringArg('export-method')!;
-    final bool isAppStoreUpload = exportMethod  == 'app-store';
+    String? exportOptions = exportOptionsPlist;
+    String? exportMethod = exportOptions != null ?
+        globals.plistParser.getValueFromFile<String?>(exportOptions, 'method') : null;
+    exportMethod ??= stringArg('export-method')!;
+    final bool isAppStoreUpload = exportMethod == 'app-store';
     File? generatedExportPlist;
     try {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
-      String? exportOptions = exportOptionsPlist;
       if (exportOptions == null) {
         generatedExportPlist = _createExportPlist();
         exportOptions = generatedExportPlist.path;
@@ -492,7 +495,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         ],
       );
     } finally {
-      generatedExportPlist?.deleteSync();
+      if (generatedExportPlist != null) {
+        ErrorHandlingFileSystem.deleteIfExists(generatedExportPlist);
+      }
       status?.stop();
     }
 
