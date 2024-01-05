@@ -36,48 +36,54 @@ final List<LeakTestCase> _tests = <LeakTestCase>[
     },
     notGCedTotal: 1,
   ),
-  // LeakTestCase(
-  //   name: 'leaking widget',
-  //   body: (PumpWidgetsCallback? pumpWidgets,
-  //       RunAsyncCallback<dynamic>? runAsync) async {
-  //     StatelessLeakingWidget();
-  //   },
-  //   notDisposedTotal: 1,
-  //   notGCedTotal: 1,
-  // ),
-  // LeakTestCase(
-  //     name: 'dispose in tear down',
-  //     body: (PumpWidgetsCallback? pumpWidgets,
-  //         RunAsyncCallback<dynamic>? runAsync) async {
-  //       final InstrumentedDisposable myClass = InstrumentedDisposable();
-  //       addTearDown(myClass.dispose);
-  //     }),
-
-  // LeakTestCase(
-  //   name: 'pumped leaking widget',
-  //   body: (PumpWidgetsCallback? pumpWidgets,
-  //       RunAsyncCallback<dynamic>? runAsync) async {
-  //     await pumpWidgets!(StatelessLeakingWidget());
-  //   },
-  // ),
-  // LeakTestCase(
-  //   name: 'leaking widget in runAsync',
-  //   body: (PumpWidgetsCallback? pumpWidgets,
-  //       RunAsyncCallback<dynamic>? runAsync) async {
-  //     await runAsync!(() async {
-  //       await pumpWidgets!(StatelessLeakingWidget());
-  //     });
-  //   },
-  // ),
-  // LeakTestCase(
-  //   name: 'pumped in runAsync',
-  //   body: (PumpWidgetsCallback? pumpWidgets,
-  //       RunAsyncCallback<dynamic>? runAsync) async {
-  //     await runAsync!(() async {
-  //       await pumpWidgets!(StatelessLeakingWidget());
-  //     });
-  //   },
-  // ),
+  LeakTestCase(
+    name: 'leaking widget',
+    body: (PumpWidgetsCallback? pumpWidgets,
+        RunAsyncCallback<dynamic>? runAsync) async {
+      StatelessLeakingWidget();
+    },
+    notDisposedTotal: 1,
+    notGCedTotal: 1,
+  ),
+  LeakTestCase(
+    name: 'dispose in tear down',
+    body: (PumpWidgetsCallback? pumpWidgets,
+        RunAsyncCallback<dynamic>? runAsync) async {
+      final InstrumentedDisposable myClass = InstrumentedDisposable();
+      addTearDown(myClass.dispose);
+    },
+  ),
+  LeakTestCase(
+    name: 'pumped leaking widget',
+    body: (PumpWidgetsCallback? pumpWidgets,
+        RunAsyncCallback<dynamic>? runAsync) async {
+      await pumpWidgets!(StatelessLeakingWidget());
+    },
+    notDisposedTotal: 1,
+    notGCedTotal: 1,
+  ),
+  LeakTestCase(
+    name: 'leaking widget in runAsync',
+    body: (PumpWidgetsCallback? pumpWidgets,
+        RunAsyncCallback<dynamic>? runAsync) async {
+      await runAsync!(() async {
+        StatelessLeakingWidget();
+      });
+    },
+    notDisposedTotal: 1,
+    notGCedTotal: 1,
+  ),
+  LeakTestCase(
+    name: 'pumped in runAsync',
+    body: (PumpWidgetsCallback? pumpWidgets,
+        RunAsyncCallback<dynamic>? runAsync) async {
+      await runAsync!(() async {
+        await pumpWidgets!(StatelessLeakingWidget());
+      });
+    },
+    notDisposedTotal: 1,
+    notGCedTotal: 1,
+  ),
 ];
 
 class _TestExecution {
