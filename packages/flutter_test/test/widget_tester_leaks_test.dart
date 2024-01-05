@@ -9,82 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-/// Objects that should not be GCed during.
-final _retainer = <InstrumentedDisposable>[];
-
-final List<LeakTestCase> _tests = <LeakTestCase>[
-  LeakTestCase(
-    name: 'no leaks',
-    body: (PumpWidgetsCallback? pumpWidgets,
-        RunAsyncCallback<dynamic>? runAsync) async {
-      await pumpWidgets!(Container());
-    },
-  ),
-  LeakTestCase(
-    name: 'not disposed disposable',
-    body: (PumpWidgetsCallback? pumpWidgets,
-        RunAsyncCallback<dynamic>? runAsync) async {
-      InstrumentedDisposable();
-    },
-    notDisposedTotal: 1,
-  ),
-  LeakTestCase(
-    name: 'not GCed disposable',
-    body: (PumpWidgetsCallback? pumpWidgets,
-        RunAsyncCallback<dynamic>? runAsync) async {
-      _retainer.add(InstrumentedDisposable()..dispose());
-    },
-    notGCedTotal: 1,
-  ),
-  LeakTestCase(
-    name: 'leaking widget',
-    body: (PumpWidgetsCallback? pumpWidgets,
-        RunAsyncCallback<dynamic>? runAsync) async {
-      StatelessLeakingWidget();
-    },
-    notDisposedTotal: 1,
-    notGCedTotal: 1,
-  ),
-  LeakTestCase(
-    name: 'dispose in tear down',
-    body: (PumpWidgetsCallback? pumpWidgets,
-        RunAsyncCallback<dynamic>? runAsync) async {
-      final InstrumentedDisposable myClass = InstrumentedDisposable();
-      addTearDown(myClass.dispose);
-    },
-  ),
-  LeakTestCase(
-    name: 'pumped leaking widget',
-    body: (PumpWidgetsCallback? pumpWidgets,
-        RunAsyncCallback<dynamic>? runAsync) async {
-      await pumpWidgets!(StatelessLeakingWidget());
-    },
-    notDisposedTotal: 1,
-    notGCedTotal: 1,
-  ),
-  LeakTestCase(
-    name: 'leaking widget in runAsync',
-    body: (PumpWidgetsCallback? pumpWidgets,
-        RunAsyncCallback<dynamic>? runAsync) async {
-      await runAsync!(() async {
-        StatelessLeakingWidget();
-      });
-    },
-    notDisposedTotal: 1,
-    notGCedTotal: 1,
-  ),
-  LeakTestCase(
-    name: 'pumped in runAsync',
-    body: (PumpWidgetsCallback? pumpWidgets,
-        RunAsyncCallback<dynamic>? runAsync) async {
-      await runAsync!(() async {
-        await pumpWidgets!(StatelessLeakingWidget());
-      });
-    },
-    notDisposedTotal: 1,
-    notGCedTotal: 1,
-  ),
-];
+import 'utils/memory_leak_tests.dart';
 
 class _TestExecution {
   _TestExecution({required this.settings, required this.settingName, required this.test});
@@ -94,12 +19,6 @@ class _TestExecution {
   final LeakTestCase test;
 
   String get name => '${test.name}, $settingName';
-}
-
-String _currentFilePath() {
-  return RegExp(r'#.*main \((.*):.*:.*\)')
-        .firstMatch(StackTrace.current.toString())!
-        .group(1).toString();
 }
 
 final List<_TestExecution> _testExecutions = <_TestExecution>[];
@@ -113,10 +32,10 @@ void main() {
   .withTracked(allNotDisposed: true, allNotGCed: true)
   .withIgnored(
     createdByTestHelpers: true,
-    testHelperExceptions: <RegExp>[RegExp(RegExp.escape(_currentFilePath()))],
+    testHelperExceptions: <RegExp>[RegExp(RegExp.escape(memoryLeakTestsFilePath()))],
   );
 
-  for (final LeakTestCase test in _tests) {
+  for (final LeakTestCase test in memoryLeakTests) {
     for (final  MapEntry<String, LeakTesting Function(LeakTesting settings)> settingsCase in leakTestingSettingsCases.entries) {
       final LeakTesting settings = settingsCase.value(LeakTesting.settings);
       if (settings.leakDiagnosticConfig.collectRetainingPathForNotGCed) {
