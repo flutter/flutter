@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:collection/collection.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -16,6 +17,10 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
+import 'package:unified_analytics/src/enums.dart';
+import 'package:unified_analytics/unified_analytics.dart';
+
+import 'fakes.dart';
 
 export 'package:path/path.dart' show Context; // flutter_ignore: package_path_import
 export 'package:test/test.dart' hide isInstanceOf, test;
