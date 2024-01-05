@@ -172,7 +172,7 @@ class Step {
   /// By default, uses the `bodyLarge` theme.
   final Widget? label;
 
-  /// Optional
+  /// Optional style for the step.
   final StepStyle? stepStyle;
 }
 
