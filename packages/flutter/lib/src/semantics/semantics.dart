@@ -456,7 +456,7 @@ class SemanticsData with Diagnosticable {
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
        assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
        assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
-       assert(headingLevel == -1 || (headingLevel >= 1 && headingLevel <= 6), 'Heading level must be between 1 and 6');
+       assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6');
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
@@ -727,7 +727,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
-    properties.add(IntProperty('headingLevel', headingLevel, defaultValue: -1));
+    properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
   }
 
   @override
@@ -757,8 +757,8 @@ class SemanticsData with Diagnosticable {
         && other.transform == transform
         && other.elevation == elevation
         && other.thickness == thickness
-        && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds)
-        && other.headingLevel == headingLevel;
+        && other.headingLevel == headingLevel
+        && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
   @override
@@ -788,8 +788,8 @@ class SemanticsData with Diagnosticable {
       transform,
       elevation,
       thickness,
-      customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
       headingLevel,
+      customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
     ),
   );
 
@@ -4718,10 +4718,10 @@ class SemanticsConfiguration {
   ///
   /// This is only used for web semantics, and is ignored on other platforms.
   int get headingLevel => _headingLevel;
-  int _headingLevel = -1;
+  int _headingLevel = 0;
 
   set headingLevel(int value) {
-    assert(value == -1 || (value >= 1 && value <= 6));
+    assert(value >= 0 && value <= 6);
     if (value == headingLevel) {
       return;
     }
