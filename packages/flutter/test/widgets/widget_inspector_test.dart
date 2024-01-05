@@ -400,7 +400,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
       // Tap intercepted by the inspector
       expect(log, equals(<String>[]));
-      // ignore: avoid_dynamic_calls
       expect(
         paragraphText(
           WidgetInspectorService.instance.selection.current! as RenderParagraph,
@@ -421,7 +420,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(log, equals(<String>['bottom']));
       log.clear();
       // Ensure the inspector selection has not changed to bottom.
-      // ignore: avoid_dynamic_calls
       expect(
         paragraphText(
           WidgetInspectorService.instance.selection.current! as RenderParagraph,
@@ -437,7 +435,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.tap(find.text('BOTTOM'), warnIfMissed: false);
       expect(log, equals(<String>[]));
       log.clear();
-      // ignore: avoid_dynamic_calls
       expect(
         paragraphText(
           WidgetInspectorService.instance.selection.current! as RenderParagraph,
@@ -608,7 +605,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.longPress(find.byKey(clickTarget), warnIfMissed: false);
       // The object with width 95.0 wins over the object with width 94.0 because
       // the subtree with width 94.0 is offstage.
-      // ignore: avoid_dynamic_calls
       expect(
         WidgetInspectorService.instance.selection.current?.semanticBounds.width,
         equals(95.0),
@@ -616,7 +612,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       // Exactly 2 out of the 3 text elements should be in the candidate list of
       // objects to select as only 2 are onstage.
-      // ignore: avoid_dynamic_calls
       expect(
         WidgetInspectorService.instance.selection.candidates
             .whereType<RenderParagraph>()

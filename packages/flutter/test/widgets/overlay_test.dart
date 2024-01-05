@@ -1193,7 +1193,6 @@ void main() {
 
     // By default, clipBehavior should be Clip.hardEdge
     final RenderObject renderObject = tester.renderObject(find.byType(Overlay));
-    // ignore: avoid_dynamic_calls
     expect((renderObject as dynamic).clipBehavior, equals(Clip.hardEdge));
 
     for (final Clip clip in Clip.values) {
@@ -1211,7 +1210,6 @@ void main() {
         ),
       );
 
-      // ignore: avoid_dynamic_calls
       expect((renderObject as dynamic).clipBehavior, clip);
       bool visited = false;
       renderObject.visitChildren((RenderObject child) {
@@ -1249,7 +1247,6 @@ void main() {
       ),
     );
     final RenderObject renderObject = tester.renderObject(find.byType(Overlay));
-    // ignore: avoid_dynamic_calls
     expect((renderObject as dynamic).paint, paints
       ..save()
       ..clipRect(rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))

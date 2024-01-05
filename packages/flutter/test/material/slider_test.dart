@@ -3418,7 +3418,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, equals(0.5));
     // Get FocusNode from the state of the slider to include auto-generated FocusNode.
-    // ignore: avoid_dynamic_calls, invalid_assignment
+    // ignore: invalid_assignment
     final FocusNode focusNode = (tester.firstState(find.byType(Slider)) as dynamic).focusNode;
     // The slider does not have focus.
     expect(focusNode.hasFocus, false);
