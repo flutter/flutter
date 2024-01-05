@@ -713,7 +713,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       );
     }
     return CupertinoActivityIndicator.partiallyRevealed(
-        key: widget.key,
+      key: widget.key,
       color: tickColor,
       progress: val
     );
