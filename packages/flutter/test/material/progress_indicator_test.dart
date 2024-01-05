@@ -1080,9 +1080,9 @@ void main() {
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
       expect(
-        find.byType(CupertinoActivityIndicator).evaluate().first.widget.value,
-        0.5,
-      );
+      (tester.widget(find.byType(CircularProgressIndicator)) as CircularProgressIndicator).value,
+      0.5,
+    );
     },
     variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
