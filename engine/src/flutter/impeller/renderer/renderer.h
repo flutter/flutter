@@ -8,16 +8,13 @@
 #include <functional>
 #include <memory>
 
-#include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/semaphore.h"
-#include "impeller/geometry/size.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
 class Surface;
-class RenderPass;
 
 class Renderer {
  public:

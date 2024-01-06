@@ -16,7 +16,6 @@
 #include "impeller/entity/texture_fill_external.frag.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {

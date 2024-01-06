@@ -18,7 +18,6 @@
 #include "impeller/entity/runtime_effect.vert.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/shader_function.h"
 
 namespace impeller {

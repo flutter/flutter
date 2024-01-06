@@ -18,6 +18,7 @@
 #include "impeller/image/compressed_image.h"
 #include "impeller/image/decompressed_image.h"
 #include "impeller/playground/switches.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/renderer.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 

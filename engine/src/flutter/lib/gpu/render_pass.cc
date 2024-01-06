@@ -14,7 +14,6 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/color.h"
 #include "impeller/renderer/pipeline_library.h"
-#include "impeller/renderer/sampler_library.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {

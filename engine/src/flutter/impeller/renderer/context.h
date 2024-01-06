@@ -8,18 +8,17 @@
 #include <memory>
 #include <string>
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/capture.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/pool.h"
+#include "impeller/renderer/sampler_library.h"
 
 namespace impeller {
 
 class ShaderLibrary;
-class SamplerLibrary;
 class CommandBuffer;
 class PipelineLibrary;
 

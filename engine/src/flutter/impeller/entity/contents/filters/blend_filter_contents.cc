@@ -18,9 +18,7 @@
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/snapshot.h"
 
 namespace impeller {

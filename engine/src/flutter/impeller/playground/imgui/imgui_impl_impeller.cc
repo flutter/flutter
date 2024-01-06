@@ -32,7 +32,6 @@
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler_library.h"
 
 struct ImGui_ImplImpeller_Data {
   std::shared_ptr<impeller::Context> context;

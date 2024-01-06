@@ -6,7 +6,6 @@
 #define FLUTTER_IMPELLER_RENDERER_COMMAND_H_
 
 #include <cstdint>
-#include <map>
 #include <memory>
 #include <optional>
 #include <string>

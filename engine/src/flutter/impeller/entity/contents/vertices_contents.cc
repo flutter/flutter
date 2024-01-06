@@ -10,7 +10,6 @@
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/geometry/color.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler_library.h"
 
 namespace impeller {
 

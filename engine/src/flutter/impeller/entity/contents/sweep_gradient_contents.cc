@@ -11,7 +11,6 @@
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/gradient.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler_library.h"
 
 namespace impeller {
 

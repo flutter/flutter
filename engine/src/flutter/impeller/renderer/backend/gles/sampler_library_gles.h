@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SAMPLER_LIBRARY_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SAMPLER_LIBRARY_GLES_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 

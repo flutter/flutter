@@ -13,7 +13,6 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {

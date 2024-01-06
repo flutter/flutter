@@ -6,9 +6,7 @@
 
 #include <algorithm>
 
-#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/base/validation.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/surface.h"
 
