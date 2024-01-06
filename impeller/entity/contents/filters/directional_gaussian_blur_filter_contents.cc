@@ -6,10 +6,8 @@
 
 #include <cmath>
 #include <utility>
-#include <valarray>
 
 #include "impeller/base/strings.h"
-#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/content_context.h"
@@ -19,7 +17,6 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
-#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {

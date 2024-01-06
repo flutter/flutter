@@ -4,7 +4,6 @@
 
 #include "impeller/scene/geometry.h"
 
-#include <iostream>
 #include <memory>
 #include <ostream>
 
@@ -14,7 +13,6 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
-#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/shaders/skinned.vert.h"
