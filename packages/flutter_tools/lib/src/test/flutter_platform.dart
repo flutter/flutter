@@ -6,6 +6,8 @@
 
 import 'dart:async';
 
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -503,7 +505,7 @@ class FlutterPlatform extends PlatformPlugin {
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
-        mainDart = createListenerDart(testPath);
+        mainDart = createListenerDart(finalizers, ourTestCount, testPath);
 
         // Integration test device takes care of the compilation.
         if (integrationTestDevice == null) {
@@ -617,14 +619,23 @@ class FlutterPlatform extends PlatformPlugin {
 
   @visibleForTesting
   String createListenerDart(
+    List<Finalizer> finalizers,
+    int ourTestCount,
     String testPath,
   ) {
+    final Digest digest = md5.convert(utf8.encode(testPath));
+    final String testPathHash = hex.encode(digest.bytes);
+
     // Prepare a directory to store the Dart file that will talk to us.
-    final Directory? flutterTestListenerDirectory = flutterProject?.buildDirectory.childDirectory('flutter_test_listener');
-    flutterTestListenerDirectory?.createSync();
+    final Directory flutterTestListenerDirectory = flutterProject!.buildDirectory.childDirectory(testPathHash);
+    flutterTestListenerDirectory.createSync();
+    finalizers.add(() async {
+      globals.printTrace('test $ourTestCount: deleting directory');
+      flutterTestListenerDirectory.deleteSync(recursive: true);
+    });
 
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = globals.fs.file('${flutterTestListenerDirectory?.path}/listener.dart');
+    final File listenerFile = globals.fs.file('${flutterTestListenerDirectory.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath)),
