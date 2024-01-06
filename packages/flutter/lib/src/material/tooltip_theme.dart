@@ -41,6 +41,7 @@ class TooltipThemeData with Diagnosticable {
     this.textAlign,
     this.waitDuration,
     this.showDuration,
+    this.exitDuration,
     this.triggerMode,
     this.enableFeedback,
   });
@@ -96,6 +97,10 @@ class TooltipThemeData with Diagnosticable {
   /// The length of time that the tooltip will be shown once it has appeared.
   final Duration? showDuration;
 
+  /// The length of time that a pointer must have stopped hovering over a
+  /// tooltip's widget before the tooltip will be hidden.
+  final Duration? exitDuration;
+
   /// The [TooltipTriggerMode] that will show the tooltip.
   final TooltipTriggerMode? triggerMode;
 
@@ -126,6 +131,7 @@ class TooltipThemeData with Diagnosticable {
     TextAlign? textAlign,
     Duration? waitDuration,
     Duration? showDuration,
+    Duration? exitDuration,
     TooltipTriggerMode? triggerMode,
     bool? enableFeedback,
   }) {
@@ -181,6 +187,7 @@ class TooltipThemeData with Diagnosticable {
     textAlign,
     waitDuration,
     showDuration,
+    exitDuration,
     triggerMode,
     enableFeedback,
   );
@@ -205,6 +212,7 @@ class TooltipThemeData with Diagnosticable {
         && other.textAlign == textAlign
         && other.waitDuration == waitDuration
         && other.showDuration == showDuration
+        && other.exitDuration == exitDuration
         && other.triggerMode == triggerMode
         && other.enableFeedback == enableFeedback;
   }
@@ -223,6 +231,7 @@ class TooltipThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
     properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
   }

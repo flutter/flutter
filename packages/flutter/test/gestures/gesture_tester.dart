@@ -4,7 +4,7 @@
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/gestures.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
 class GestureTester {
@@ -26,7 +26,7 @@ typedef GestureTest = void Function(GestureTester tester);
 
 @isTest
 void testGesture(String description, GestureTest callback) {
-  testWidgetsWithLeakTracking(description, (_) async {
+  testWidgets(description, (_) async {
     FakeAsync().run((FakeAsync async) {
       callback(GestureTester._(async));
     });

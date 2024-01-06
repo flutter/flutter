@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
@@ -78,6 +79,7 @@ void main() {
   late FakePlistUtils plistUtils;
   late BufferLogger logger;
   late Artifacts artifacts;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -94,6 +96,10 @@ void main() {
       processManager: fakeProcessManager,
     );
     plistUtils = FakePlistUtils();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -371,6 +377,75 @@ void main() {
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build reports method from --export-method when used', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'ad-hoc', '--no-pub']
+    );
+
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building ad-hoc IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build reports method from --export-options-plist when used', () async {
+    final File exportOptions = fileSystem.file('/ExportOptions.plist')
+      ..createSync();
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[exportOptions.path] = <String,String>{
+      'CFBundleIdentifier': 'io.flutter.someProject',
+      'method': 'enterprise'
+    };
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: exportOptions.path),
+    ]);
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--export-options-plist', exportOptions.path, '--no-pub']
+    );
+
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building enterprise IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
   });
 
   testUsingContext('ipa build reports when IPA fails', () async {
@@ -794,6 +869,9 @@ void main() {
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
     expect(fakeProcessManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'ios')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,
@@ -801,6 +879,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -941,7 +1020,7 @@ void main() {
     expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
     expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-    expect(logger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+    expect(logger.warningText, isNot(contains('but the range of supported deployment target versions')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1093,7 +1172,7 @@ void main() {
       'CFBundleDisplayName': 'Awesome Gallery',
       // Will not use CFBundleName since CFBundleDisplayName is present.
       'CFBundleName': 'Awesome Gallery 2',
-      'MinimumOSVersion': '11.0',
+      'MinimumOSVersion': '17.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
     };
@@ -1117,7 +1196,7 @@ void main() {
         '    • Version Number: 12.34.56\n'
         '    • Build Number: 666\n'
         '    • Display Name: Awesome Gallery\n'
-        '    • Deployment Target: 11.0\n'
+        '    • Deployment Target: 17.0\n'
         '    • Bundle Identifier: io.flutter.someProject\n'
       )
     );
@@ -1151,7 +1230,7 @@ void main() {
       'CFBundleIdentifier': 'io.flutter.someProject',
       // Will use CFBundleName since CFBundleDisplayName is absent.
       'CFBundleName': 'Awesome Gallery',
-      'MinimumOSVersion': '11.0',
+      'MinimumOSVersion': '17.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
     };
@@ -1175,7 +1254,7 @@ void main() {
         '    • Version Number: 12.34.56\n'
         '    • Build Number: 666\n'
         '    • Display Name: Awesome Gallery\n'
-        '    • Deployment Target: 11.0\n'
+        '    • Deployment Target: 17.0\n'
         '    • Bundle Identifier: io.flutter.someProject\n'
       ),
     );

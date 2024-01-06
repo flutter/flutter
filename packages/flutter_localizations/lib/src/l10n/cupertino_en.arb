@@ -160,6 +160,11 @@
     "description": "The label for paste buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
 
+  "clearButtonLabel": "Clear",
+  "@clearButtonLabel": {
+    "description": "The label for clear buttons and menu items."
+  },
+
   "selectAllButtonLabel": "Select All",
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."

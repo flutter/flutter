@@ -33,7 +33,17 @@ typedef GestureMultiDragStartCallback = Drag? Function(Offset position);
 abstract class MultiDragPointerState {
   /// Creates per-pointer state for a [MultiDragGestureRecognizer].
   MultiDragPointerState(this.initialPosition, this.kind, this.gestureSettings)
-    : _velocityTracker = VelocityTracker.withKind(kind);
+    : _velocityTracker = VelocityTracker.withKind(kind) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/gestures.dart',
+        className: '$MultiDragPointerState',
+        object: this,
+      );
+    }
+  }
 
   /// Device specific gesture configuration that should be preferred over
   /// framework constants.
@@ -178,6 +188,11 @@ abstract class MultiDragPointerState {
   @protected
   @mustCallSuper
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _arenaEntry?.resolve(GestureDisposition.rejected);
     _arenaEntry = null;
     assert(() {

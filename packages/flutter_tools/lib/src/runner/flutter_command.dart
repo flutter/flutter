@@ -366,6 +366,9 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
+  /// Indicates if the currenet command running has a terminal attached.
+  bool get hasTerminal => globals.stdio.hasTerminal;
+
   /// Path to the Dart's package config file.
   ///
   /// This can be overridden by some of its subclasses.
@@ -1138,16 +1141,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addImpellerForceGLFlag({required bool verboseHelp}) {
-    argParser.addFlag('impeller-force-gl',
-        hide: !verboseHelp,
-        help: 'On platforms that support OpenGL Rendering using Impeller, force '
-              'rendering using OpenGL over other APIs. If Impeller is not '
-              'enabled or the platform does not support OpenGL ES, this flag '
-              'does nothing.',
-    );
-  }
-
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-embedder-api',
         hide: !verboseHelp,
@@ -1358,6 +1351,14 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Additional usage values to be sent with the usage ping.
   Future<CustomDimensions> get usageValues async => const CustomDimensions();
+
+  /// Additional usage values to be sent with the usage ping for
+  /// package:unified_analytics.
+  ///
+  /// Implementations of [FlutterCommand] can override this getter in order
+  /// to add additional parameters in the [Event.commandUsageValues] constructor.
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async =>
+    Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
 
   /// Runs this command.
   ///
@@ -1621,7 +1622,7 @@ abstract class FlutterCommand extends Command<void> {
       commandPath: commandPath,
       result: commandResult.toString(),
       maxRss: maxRss,
-      commandHasTerminal: globals.stdio.hasTerminal,
+      commandHasTerminal: hasTerminal,
     ));
 
     // Send timing.
@@ -1634,16 +1635,26 @@ abstract class FlutterCommand extends Command<void> {
     final String label = labels
         .where((String? label) => label != null && !_isBlank(label))
         .join('-');
+
+    // If the command provides its own end time, use it. Otherwise report
+    // the duration of the entire execution.
+    final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(startTime);
     globals.flutterUsage.sendTiming(
       'flutter',
       name,
-      // If the command provides its own end time, use it. Otherwise report
-      // the duration of the entire execution.
-      (commandResult.endTimeOverride ?? endTime).difference(startTime),
+      elapsedDuration,
       // Report in the form of `success-[parameter1-parameter2]`, all of which
       // can be null if the command doesn't provide a FlutterCommandResult.
       label: label == '' ? null : label,
     );
+    analytics.send(Event.timing(
+      workflow: 'flutter',
+      variableName: name,
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+      // Report in the form of `success-[parameter1-parameter2]`, all of which
+      // can be null if the command doesn't provide a FlutterCommandResult.
+      label: label == '' ? null : label,
+    ));
   }
 
   /// Perform validation then call [runCommand] to execute the command.
@@ -1707,7 +1718,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         processManager: globals.processManager,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        analytics: globals.analytics,
+        analytics: analytics,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );
@@ -1738,9 +1749,17 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     setupApplicationPackages();
 
     if (commandPath != null) {
+      // Until the GA4 migration is complete, we will continue to send to the GA3 instance
+      // as well as GA4. Once migration is complete, we will only make a call for GA4 values
+      final List<Object> pairOfUsageValues = await Future.wait<Object>(<Future<Object>>[
+        usageValues,
+        unifiedAnalyticsUsageValues(commandPath),
+      ]);
+
       Usage.command(commandPath, parameters: CustomDimensions(
-        commandHasTerminal: globals.stdio.hasTerminal,
-      ).merge(await usageValues));
+        commandHasTerminal: hasTerminal,
+      ).merge(pairOfUsageValues[0] as CustomDimensions));
+      analytics.send(pairOfUsageValues[1] as Event);
     }
 
     return runCommand();

@@ -339,6 +339,8 @@ Future<int> exec(
   Map<String, String>? environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String? workingDirectory,
+  StringBuffer? output, // if not null, the stdout will be written here
+  StringBuffer? stderr, // if not null, the stderr will be written here
 }) async {
   return _execute(
     executable,
@@ -346,6 +348,8 @@ Future<int> exec(
     environment: environment,
     canFail : canFail,
     workingDirectory: workingDirectory,
+    output: output,
+    stderr: stderr,
   );
 }
 
@@ -897,4 +901,31 @@ Future<T> retry<T>(
     // Sleep for a delay
     await Future<void>.delayed(delayDuration);
   }
+}
+
+Future<void> createFfiPackage(String name, Directory parent) async {
+  await inDirectory(parent, () async {
+    await flutter(
+      'create',
+      options: <String>[
+        '--no-pub',
+        '--org',
+        'io.flutter.devicelab',
+        '--template=package_ffi',
+        name,
+      ],
+    );
+    await _pinDependencies(
+      File(path.join(parent.path, name, 'pubspec.yaml')),
+    );
+    await _pinDependencies(
+      File(path.join(parent.path, name, 'example', 'pubspec.yaml')),
+    );
+  });
+}
+
+Future<void> _pinDependencies(File pubspecFile) async {
+  final String oldPubspec = await pubspecFile.readAsString();
+  final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
+  await pubspecFile.writeAsString(newPubspec);
 }

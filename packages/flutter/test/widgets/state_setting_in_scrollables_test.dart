@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Foo extends StatefulWidget {
   const Foo({ super.key });
@@ -88,7 +87,7 @@ class FooScrollBehavior extends ScrollBehavior {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Can animate scroll after setState', (WidgetTester tester) async {
+  testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
