@@ -1034,7 +1034,7 @@ class StepperProperties {
 ///     errorColor: Colors.red,
 ///     border: Border.all(color: Colors.grey),
 ///     boxShadow: const BoxShadow(blurRadius: 3.0, color: Colors.black26),
-///     gradient: const LinearGradient(colors: <Color>[Colors.red, Colors.blue],
+///     gradient: const LinearGradient(colors: <Color>[Colors.red, Colors.blue]),
 ///     indexStyle: const TextStyle(color: Colors.white),
 ///   ),
 /// )
