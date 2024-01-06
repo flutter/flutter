@@ -8,7 +8,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"

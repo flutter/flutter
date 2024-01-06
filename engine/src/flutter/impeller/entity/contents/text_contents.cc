@@ -6,7 +6,6 @@
 
 #include <cstring>
 #include <optional>
-#include <type_traits>
 #include <utility>
 
 #include "impeller/core/formats.h"
@@ -14,7 +13,6 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler_library.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/lazy_glyph_atlas.h"
 
