@@ -230,7 +230,8 @@ class ScaleUpdateDetails {
   /// The number of pointers being tracked by the gesture recognizer.
   ///
   /// Typically this is the number of fingers being used to pan the widget using the gesture
-  /// recognizer.
+  /// recognizer. Due to platform limitations, trackpad gestures count as two fingers
+  /// even if more than two fingers are used.
   final int pointerCount;
 
   /// Recorded timestamp of the source pointer event that triggered the scale
