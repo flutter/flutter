@@ -990,9 +990,9 @@ class _TrianglePainter extends CustomPainter {
 ///   stepperProperties: const StepperProperties(
 ///     height: 48,
 ///     width: 48,
-///     margin: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+///     margin: EdgeInsets.zero,
 ///   ),
-///   steps: <Step>[
+///   steps: const <Step>[
 ///     // Your steps here
 ///   ],
 /// )
@@ -1027,15 +1027,15 @@ class StepperProperties {
 /// Example usage:
 /// ```dart
 /// Step(
-///   title: Text('Step 1'),
-///   content: MyStepContent(),
-///   style: StepStyle(
+///   title: const Text('Step 1'),
+///   content: const Text('Content for Step 1'),
+///   stepStyle: StepStyle(
 ///     color: Colors.blue,
 ///     errorColor: Colors.red,
 ///     border: Border.all(color: Colors.grey),
-///     boxShadow: BoxShadow(blurRadius: 3.0, color: Colors.black26),
-///     gradient: LinearGradient(colors: [Colors.orange, Colors.yellow]),
-///     indexStyle: TextStyle(color: Colors.white),
+///     boxShadow: const BoxShadow(blurRadius: 3.0, color: Colors.black26),
+///     gradient: const LinearGradient(colors: <Color>[Colors.red, Colors.blue],
+///     indexStyle: const TextStyle(color: Colors.white),
 ///   ),
 /// )
 /// ```
