@@ -20,7 +20,7 @@ class _TestExecution {
 final List<_TestExecution> _testExecutions = <_TestExecution>[];
 
 void main() {
-  LeakTesting.collectedLeaksReporter = (Leaks leaks) => _verifyLeaks(leaks);
+  LeakTesting.collectedLeaksReporter = _verifyLeaks;
   LeakTesting.enable();
 
   LeakTesting.settings = LeakTesting.settings
