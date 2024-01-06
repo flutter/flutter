@@ -1110,7 +1110,6 @@ void main() {
       TargetPlatform.macOS,
     }),
   );
-  
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
