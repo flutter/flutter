@@ -286,6 +286,8 @@ class BuildInfo {
       'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+      if (flavor != null)
+        'FLAVOR': flavor!,
     };
   }
 
@@ -988,6 +990,9 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 
 /// The define to pass build name
 const String kBuildName = 'BuildName';
+
+/// The app flavor to build.
+const String kFlavor = 'Flavor';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';

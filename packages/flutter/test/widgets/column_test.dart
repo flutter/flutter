@@ -5,12 +5,11 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // DOWN (default)
 
-  testWidgetsWithLeakTracking('Column with one flexible child', (WidgetTester tester) async {
+  testWidgets('Column with one flexible child', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -56,7 +55,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(500.0));
   });
 
-  testWidgetsWithLeakTracking('Column with default main axis parameters', (WidgetTester tester) async {
+  testWidgets('Column with default main axis parameters', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -102,7 +101,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(200.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.center', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.center', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -140,7 +139,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(300.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.end', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.end', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -186,7 +185,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(500.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.spaceBetween', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceBetween', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -232,7 +231,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(500.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.spaceAround', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceAround', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -286,7 +285,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(475.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.spaceEvenly', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceEvenly', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -332,7 +331,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(445.0));
   });
 
-  testWidgetsWithLeakTracking('Column and MainAxisSize.min', (WidgetTester tester) async {
+  testWidgets('Column and MainAxisSize.min', (WidgetTester tester) async {
     const Key flexKey = Key('flexKey');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
@@ -365,7 +364,7 @@ void main() {
     expect(renderBox.size.height, equals(250.0));
   });
 
-  testWidgetsWithLeakTracking('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
+  testWidgets('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(const Center(
@@ -391,7 +390,7 @@ void main() {
 
   // UP
 
-  testWidgetsWithLeakTracking('Column with one flexible child', (WidgetTester tester) async {
+  testWidgets('Column with one flexible child', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -438,7 +437,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('Column with default main axis parameters', (WidgetTester tester) async {
+  testWidgets('Column with default main axis parameters', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -485,7 +484,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(300.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.center', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.center', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -524,7 +523,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(200.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.end', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.end', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -571,7 +570,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.spaceBetween', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceBetween', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -618,7 +617,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.spaceAround', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceAround', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -673,7 +672,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(500.0 - 475.0));
   });
 
-  testWidgetsWithLeakTracking('Column with MainAxisAlignment.spaceEvenly', (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceEvenly', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -720,7 +719,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(600.0 - 445.0 - 20.0));
   });
 
-  testWidgetsWithLeakTracking('Column and MainAxisSize.min', (WidgetTester tester) async {
+  testWidgets('Column and MainAxisSize.min', (WidgetTester tester) async {
     const Key flexKey = Key('flexKey');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
@@ -755,7 +754,7 @@ void main() {
     expect(renderBox.size.height, equals(250.0));
   });
 
-  testWidgetsWithLeakTracking('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
+  testWidgets('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(const Center(
