@@ -88,7 +88,6 @@ final List<LeakTestCase> memoryLeakTests = <LeakTestCase>[
   ),
 ];
 
-
 String memoryLeakTestsFilePath() {
   return RegExp(r'(\/[^\/]*.dart):')
         .firstMatch(StackTrace.current.toString())!
