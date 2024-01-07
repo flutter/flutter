@@ -31,6 +31,7 @@ void main() {
   PrintOverrideTestBinding();
 
   setUp(() {
+    ma.removeAllListeners();
     assert(!ma.hasListeners);
     _checkSdkHandlersNotSet();
   });

@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui;
 
+import 'package:meta/meta.dart';
+
 import 'assertions.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
@@ -188,6 +190,17 @@ class FlutterMemoryAllocations {
       listeners.removeWhere((ObjectEventListener? l) => l == listener);
       _checkListenersForEmptiness();
     }
+  }
+
+  /// Removes all listeners.
+  @visibleForTesting
+  void removeAllListeners(){
+    if (_listeners == null) {
+      return;
+    }
+    _listeners = null;
+    _unSubscribeFromSdkObjects();
+    _listenersContainNulls = false;
   }
 
   void _tryDefragmentListeners() {
