@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import '../flutter_test.dart';
 import 'test_async_utils.dart';
 
 final Map<int, ui.Image> _cache = <int, ui.Image>{};
@@ -42,7 +41,6 @@ Future<ui.Image> createTestImage({
   if (cache) {
     _cache[cacheKey] = image.clone();
   }
-  addTearDown(image.dispose);
   return image;
 });
 
