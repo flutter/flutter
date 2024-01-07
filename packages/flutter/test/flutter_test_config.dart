@@ -43,7 +43,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
     LeakTesting.settings = LeakTesting
       .settings
-      .withTrackedAll()
+      .withIgnored(createdByTestHelpers: true)
       // TODO(polina-c): clean up leaks and stop ignoring them.
       // https://github.com/flutter/flutter/issues/137311
       .withIgnored(
