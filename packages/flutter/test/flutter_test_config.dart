@@ -36,7 +36,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   // Leak tracking is off by default.
   // To enable it, follow doc for [_kLeakTracking].
-  if (_kLeakTracking) {
+  if (_kLeakTracking || true) {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;
