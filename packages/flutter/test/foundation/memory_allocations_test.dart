@@ -58,6 +58,7 @@ void main() {
   });
 
   testWidgets('dispatchObjectEvent handles bad listeners', (WidgetTester tester) async {
+    ma.removeAllListeners(); // This is needed for case when leak tracking is enabled.
     final ObjectEvent event = ObjectDisposed(object: 'object');
     final List<String> log = <String>[];
     void badListener1(ObjectEvent event) {
@@ -94,6 +95,7 @@ void main() {
     expect(ma.hasListeners, isFalse);
     ma.dispatchObjectEvent(event);
     expect(log, <String>[]);
+    ma.removeAllListeners(); // This is needed for case when leak tracking is enabled.
   });
 
   test('dispatchObjectEvent does not invoke concurrently added listeners', () {
