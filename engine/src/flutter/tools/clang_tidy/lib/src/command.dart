@@ -58,6 +58,9 @@ class Command {
   static final RegExp _pathRegex = RegExp(r'\S*clang/bin/clang');
   static final RegExp _argRegex = RegExp(r'-MF \S*');
 
+  // Filter out any extra commands that were appended to the compile command.
+  static final RegExp _extraCommandRegex = RegExp(r'&&.*$');
+
   String? _tidyArgs;
 
   /// The command line arguments of the command.
@@ -66,6 +69,7 @@ class Command {
       String result = command;
       result = result.replaceAll(_pathRegex, '');
       result = result.replaceAll(_argRegex, '');
+      result = result.replaceAll(_extraCommandRegex, '');
       return result;
     })();
   }
