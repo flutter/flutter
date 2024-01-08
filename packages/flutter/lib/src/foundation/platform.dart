@@ -43,7 +43,7 @@ import 'constants.dart';
 // that would mean we'd be stuck with that platform forever emulating the other,
 // and we'd never be able to introduce dedicated behavior for that platform
 // (since doing so would be a big breaking change).
-@pragma("vm:platform-const-if", !kDebugMode)
+@pragma('vm:platform-const-if', !kDebugMode)
 TargetPlatform get defaultTargetPlatform => platform.defaultTargetPlatform;
 
 /// The platform that user interaction should adapt to target.
