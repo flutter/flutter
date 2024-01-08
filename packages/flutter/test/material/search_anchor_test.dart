@@ -2968,7 +2968,6 @@ void main() {
     const String testValue = 'abcdefghi';
     await tester.enterText(find.byType(SearchBar), testValue);
     expect(controller.value.text, initValue);
-
   });
 
   testWidgets('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
