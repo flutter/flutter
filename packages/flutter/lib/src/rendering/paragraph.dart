@@ -428,6 +428,8 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return result;
   }
 
+  List<Selectable>? get selectables => _lastSelectableFragments;
+
   void _disposeSelectableFragments() {
     if (_lastSelectableFragments == null) {
       return;
@@ -1805,11 +1807,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // assert(textBoundary.boundaryStart.offset >= range.start && textBoundary.boundaryEnd.offset <= range.end);
     late final TextRange? intersectRange;
     if ((intersectRange = _intersect(range, TextRange(start: textBoundary.boundaryStart.offset, end: textBoundary.boundaryEnd.offset))) != null) {
-      debugPrint('intersect');
       _textSelectionStart = TextPosition(offset: intersectRange!.start);
       _textSelectionEnd = TextPosition(offset: intersectRange!.end);
       if (range.end < textBoundary.boundaryEnd.offset) {
-        debugPrint('next');
         return SelectionResult.next;
       }
       return SelectionResult.end;
@@ -1852,7 +1852,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   /// located at the globalPosition.
 
   SelectionResult _handleSelectParagraph(Offset globalPosition) {
-    debugPrint('handleSelectParagraph from $fullText');
     final Offset localPosition = paragraph.globalToLocal(globalPosition);
     // final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition)));
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
