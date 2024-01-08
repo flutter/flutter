@@ -44,13 +44,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     LeakTesting.settings = LeakTesting
       .settings
       .withIgnored(createdByTestHelpers: true)
-      // TODO(polina-c): clean up leaks and stop ignoring them.
-      // https://github.com/flutter/flutter/issues/137311
       .withIgnored(
         allNotGCed: true,
-        notDisposed: <String, int?>{
-          'OverlayEntry': null,
-        },
       );
   }
 
