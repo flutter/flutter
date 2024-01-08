@@ -850,6 +850,14 @@ class _PageViewState extends State<PageView> {
     _lastReportedPage = _controller.initialPage;
   }
 
+  @override
+  void dispose() {
+    if (widget.controller != _controller) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
   AxisDirection _getDirection(BuildContext context) {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
