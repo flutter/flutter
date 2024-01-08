@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -218,8 +219,18 @@ class Stepper extends StatefulWidget {
     this.connectorColor,
     this.connectorThickness,
     this.stepIconBuilder,
-    this.stepperProperties,
-  }) : assert(0 <= currentStep && currentStep < steps.length);
+    this.stepIconHeight,
+    this.stepIconWidth,
+    this.stepIconMargin,
+  })  : assert(0 <= currentStep && currentStep < steps.length),
+        assert(stepIconHeight == null || (stepIconHeight >= _kStepSize && stepIconHeight <= _kMaxStepSize),
+            'stepIconHeight must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
+        assert(stepIconWidth == null || (stepIconWidth >= _kStepSize && stepIconWidth <= _kMaxStepSize),
+            'stepIconWidth must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
+        assert(
+            stepIconHeight == null || stepIconWidth == null || stepIconHeight == stepIconWidth,
+            'If either stepIconHeight or stepIconWidth is specified, both must be specified and '
+            'the values must be equal.');
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///
@@ -346,8 +357,14 @@ class Stepper extends StatefulWidget {
   /// If null, the default icons will be used for respective [StepState].
   final StepIconBuilder? stepIconBuilder;
 
-  /// Customize some properties of the stepper.
-  final StepperProperties? stepperProperties;
+  /// The height of the icon in the step.
+  final double? stepIconHeight;
+
+  /// The width of the icon in the step.
+  final double? stepIconWidth;
+
+  /// The margin around the line and icon in the step.
+  final EdgeInsets? stepIconMargin;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -380,10 +397,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  StepperProperties? get stepperProperties => widget.stepperProperties;
+  EdgeInsetsGeometry? get _stepIconMargin => widget.stepIconMargin;
+
+  double? get _stepIconHeight => widget.stepIconHeight;
+
+  double? get _stepIconWidth => widget.stepIconWidth;
 
   double get _heightFactor {
-    return (_isLabel() && stepperProperties?.height != null) ? 2.5 : 2.0;
+    return (_isLabel() && _stepIconHeight != null) ? 2.5 : 2.0;
   }
 
   bool _isFirst(int index) {
@@ -488,9 +509,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildCircle(int index, bool oldState) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      width: stepperProperties?.width ?? _kStepSize,
-      height: stepperProperties?.height ?? _kStepSize,
+      margin:_stepIconMargin ?? const EdgeInsets.symmetric(vertical: 8.0),
+      width: _stepIconWidth ?? _kStepSize,
+      height: _stepIconHeight ?? _kStepSize,
       child: AnimatedContainer(
         curve: Curves.fastOutSlowIn,
         duration: kThemeAnimationDuration,
@@ -514,12 +535,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      width: stepperProperties?.width ?? _kStepSize,
-      height: stepperProperties?.height ?? _kStepSize,
+      width: _stepIconWidth ?? _kStepSize,
+      height: _stepIconHeight ?? _kStepSize,
       child: Center(
         child: SizedBox(
-          width: stepperProperties?.width  ?? _kStepSize,
-          height: stepperProperties?.height != null ? stepperProperties!.height! * _kTriangleSqrt : _kTriangleHeight,
+          width: _stepIconWidth ?? _kStepSize,
+          height: _stepIconHeight != null ? _stepIconHeight! * _kTriangleSqrt : _kTriangleHeight,
           child: CustomPaint(
             painter: _TrianglePainter(
               color: color,
@@ -754,8 +775,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalBody(int index) {
-    final double? marginLeft = stepperProperties?.margin?.resolve(TextDirection.ltr).left;
-    final double? stepWidth = stepperProperties?.width;
+    final double? marginLeft = _stepIconMargin?.resolve(TextDirection.ltr).left;
 
     return Stack(
       children: <Widget>[
@@ -769,7 +789,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             // The line is drawn from the center of the circle vertically until
             // it reaches the bottom and then horizontally to the edge of the
             // stepper.
-            width: stepWidth ?? _kStepSize,
+            width: _stepIconWidth ?? _kStepSize,
             child: Center(
               child: SizedBox(
                 width: widget.connectorThickness ?? 1.0,
@@ -861,7 +881,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 ),
               ),
               Container(
-                margin: stepperProperties?.margin ?? const EdgeInsetsDirectional.only(start: 12.0),
+                margin: _stepIconMargin ?? const EdgeInsetsDirectional.only(start: 12.0),
                 child: _buildHeaderText(i),
               ),
             ],
@@ -871,9 +891,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           Expanded(
             child: Container(
               key: Key('line$i'),
-              margin: stepperProperties?.margin ?? const EdgeInsets.symmetric(horizontal: 8.0),
-              height: widget.connectorThickness ?? 1.0,
-              color: _connectorColor(widget.steps[i+1].isActive),
+              margin: _stepIconMargin ?? const EdgeInsets.symmetric(horizontal: 8.0),
+              height: widget.steps[i].stepStyle?.connectorThickness ?? widget.connectorThickness ?? 1.0,
+              color: widget.steps[i].stepStyle?.connectorColor ?? _connectorColor(widget.steps[i].isActive),
             ),
           ),
       ],
@@ -896,7 +916,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           elevation: widget.elevation ?? 2,
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0),
-            height: stepperProperties?.height != null ? stepperProperties!.height! * _heightFactor : null,
+            height: _stepIconHeight != null ? _stepIconHeight! * _heightFactor : null,
             child: Row(
               children: children,
             ),
@@ -980,46 +1000,6 @@ class _TrianglePainter extends CustomPainter {
   }
 }
 
-/// The `StepperProperties` class provides customization options for configuring the appearance of steps in a `Stepper` widget.
-///
-/// To use `StepperProperties`, instantiate a `StepperProperties` object and pass it to the `Stepper` widget using the `stepperProperties` parameter.
-///
-/// Example usage:
-/// ```dart
-/// Stepper(
-///   stepperProperties: const StepperProperties(
-///     height: 48,
-///     width: 48,
-///     margin: EdgeInsets.zero,
-///   ),
-///   steps: const <Step>[
-///     // Your steps here
-///   ],
-/// )
-/// ```
-class StepperProperties {
-  /// Constructs a [StepperProperties] object with customizable properties for steps in a stepper.
-  const StepperProperties({
-    this.height,
-    this.width,
-    this.margin,
-  })  : assert(height == null || (height >= _kStepSize && height <= _kMaxStepSize),
-            'height must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
-        assert(width == null || (width >= _kStepSize && width <= _kMaxStepSize),
-            'width must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
-        assert(
-            height == null || width == null || height == width, 'height and width must be equal if both are not null');
-
-  /// The height of the icon in the step. If null, the default height is used.
-  final double? height;
-
-  /// The width of the icon in the step. If null, the default width is used.
-  final double? width;
-
-  /// The margin around the line and icon in the step. If null, the default margin is used.
-  final EdgeInsets? margin;
-}
-
 /// The `StepStyle` class provides customization options for configuring the appearance of a step in a stepper widget.
 ///
 /// To create a customized step style, instantiate a `StepStyle` object and pass it to the `Step` widget.
@@ -1039,11 +1019,22 @@ class StepperProperties {
 ///   ),
 /// )
 /// ```
-class StepStyle {
-  /// Constructs a [StepStyle] object with customizable properties for the appearance of a step.
+/// See also:
+/// {@tool dartpad}
+/// An example the shows how to use the [StepStyle], and the [StepStyle] UI
+/// appearance.
+///
+/// ** See code in examples/api/lib/material/stepper/step_style.0.dart **
+/// {@end-tool}
+
+@immutable
+class StepStyle with Diagnosticable {
+  /// Constructs a [StepStyle].
   const StepStyle({
     this.color,
     this.errorColor,
+    this.connectorColor,
+    this.connectorThickness,
     this.border,
     this.boxShadow,
     this.gradient,
@@ -1055,6 +1046,15 @@ class StepStyle {
 
   /// The color of the error indicator in the step.
   final Color? errorColor;
+
+  /// The color of the connector line between two steps.
+  /// If is last step, the connector line will not be displayed.
+  /// Only works when [StepperType] is [StepperType.horizontal].
+  final Color? connectorColor;
+
+  /// The thickness of the connector line between two steps.
+  /// Only works when [StepperType] is [StepperType.horizontal].
+  final double? connectorThickness;
 
   /// The border of the icon in the step.
   final BoxBorder? border;
@@ -1068,4 +1068,98 @@ class StepStyle {
 
   /// The style of the index in the step.
   final TextStyle? indexStyle;
+
+  /// Returns a copy of this ButtonStyle with the given fields replaced with
+  /// the new values.
+  StepStyle copyWith({
+    Color? color,
+    Color? errorColor,
+    Color? connectorColor,
+    double? connectorThickness,
+    BoxBorder? border,
+    BoxShadow? boxShadow,
+    Gradient? gradient,
+    TextStyle? indexStyle,
+  }) {
+    return StepStyle(
+      color: color ?? this.color,
+      errorColor: errorColor ?? this.errorColor,
+      connectorColor: connectorColor ?? this.connectorColor,
+      connectorThickness: connectorThickness ?? this.connectorThickness,
+      border: border ?? this.border,
+      boxShadow: boxShadow ?? this.boxShadow,
+      gradient: gradient ?? this.gradient,
+      indexStyle: indexStyle ?? this.indexStyle,
+    );
+  }
+
+  /// Returns a copy of this StepStyle where the non-null fields in [stepStyle]
+  /// have replaced the corresponding null fields in this StepStyle.
+  ///
+  /// In other words, [stepStyle] is used to fill in unspecified (null) fields
+  /// this StepStyle.
+  StepStyle merge(StepStyle? stepStyle) {
+    if (stepStyle == null) {
+      return this;
+    }
+    return copyWith(
+      color: stepStyle.color,
+      errorColor: stepStyle.errorColor,
+      connectorColor: stepStyle.connectorColor,
+      connectorThickness: stepStyle.connectorThickness,
+      border: stepStyle.border,
+      boxShadow: stepStyle.boxShadow,
+      gradient: stepStyle.gradient,
+      indexStyle: stepStyle.indexStyle,
+    );
+  }
+
+  @override
+  int get hashCode {
+    final List<Object?> values = <Object?>[
+      color,
+      errorColor,
+      connectorColor,
+      connectorThickness,
+      border,
+      boxShadow,
+      gradient,
+      indexStyle,
+    ];
+    return Object.hashAll(values);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is StepStyle &&
+        other.color == color &&
+        other.errorColor == errorColor &&
+        other.connectorColor == connectorColor &&
+        other.connectorThickness == connectorThickness &&
+        other.border == border &&
+        other.boxShadow == boxShadow &&
+        other.gradient == gradient &&
+        other.indexStyle == indexStyle;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final ThemeData theme = ThemeData.fallback();
+    final TextTheme defaultTextTheme = theme.textTheme;
+    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('errorColor', errorColor, defaultValue: null));
+    properties.add(ColorProperty('connectorColor', connectorColor, defaultValue: null));
+    properties.add(DoubleProperty('connectorThickness', connectorThickness, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null));
+    properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('indexStyle', indexStyle, defaultValue: defaultTextTheme.bodyLarge));
+  }
 }

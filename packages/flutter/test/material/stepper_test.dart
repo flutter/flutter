@@ -1588,19 +1588,15 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
   });
 
   testWidgets('StepperProperties test', (WidgetTester tester) async {
-    const StepperProperties stepperProperties = StepperProperties(
-      height: 48,
-      width:48,
-      margin: EdgeInsets.zero,
-    );
-
     const Widget widget = SizedBox.shrink();
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Stepper(
-            stepperProperties: stepperProperties,
+            stepIconHeight: 24,
+            stepIconWidth: 24,
+            stepIconMargin: const EdgeInsets.all(8),
              steps: List<Step>.generate(3, (int index) {
                return Step(
                  title: Text('Step $index'),
@@ -1615,15 +1611,17 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     final Finder stepperFinder = find.byType(Stepper);
     final Stepper stepper = tester.widget<Stepper>(stepperFinder);
 
-    expect(stepper.stepperProperties?.height, stepperProperties.height);
-    expect(stepper.stepperProperties?.width, stepperProperties.width);
-    expect(stepper.stepperProperties?.margin, stepperProperties.margin);
+    expect(stepper.stepIconHeight, 24);
+    expect(stepper.stepIconWidth, 24);
+    expect(stepper.stepIconMargin, const EdgeInsets.all(8));
   });
 
   testWidgets('StepStyle test', (WidgetTester tester) async {
     final StepStyle stepStyle = StepStyle(
       color: Colors.white,
       errorColor: Colors.orange,
+      connectorColor: Colors.red,
+      connectorThickness: 2,
       border: Border.all(),
       gradient: const LinearGradient(
         colors: <Color>[Colors.red, Colors.blue],
@@ -1653,9 +1651,43 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     expect(style?.color, stepStyle.color);
     expect(style?.errorColor, stepStyle.errorColor);
+    expect(style?.connectorColor, stepStyle.connectorColor);
+    expect(style?.connectorThickness, stepStyle.connectorThickness);
     expect(style?.border, stepStyle.border);
     expect(style?.gradient, stepStyle.gradient);
     expect(style?.indexStyle, stepStyle.indexStyle);
+
+    //copyWith
+    final StepStyle newStyle = stepStyle.copyWith(
+      color: Colors.black,
+      errorColor: Colors.red,
+      connectorColor: Colors.blue,
+      connectorThickness: 3,
+      border: Border.all(),
+      gradient: const LinearGradient(
+        colors: <Color>[Colors.red, Colors.blue],
+      ),
+      indexStyle: const TextStyle(color: Colors.black),
+    );
+
+    expect(newStyle.color, Colors.black);
+    expect(newStyle.errorColor, Colors.red);
+    expect(newStyle.connectorColor, Colors.blue);
+    expect(newStyle.connectorThickness, 3);
+    expect(newStyle.border, stepStyle.border);
+    expect(newStyle.gradient, stepStyle.gradient);
+    expect(newStyle.indexStyle, stepStyle.indexStyle);
+
+    //merge
+    final StepStyle mergedStyle = stepStyle.merge(newStyle);
+
+    expect(mergedStyle.color, Colors.black);
+    expect(mergedStyle.errorColor, Colors.red);
+    expect(mergedStyle.connectorColor, Colors.blue);
+    expect(mergedStyle.connectorThickness, 3);
+    expect(mergedStyle.border, stepStyle.border);
+    expect(mergedStyle.gradient, stepStyle.gradient);
+    expect(mergedStyle.indexStyle, stepStyle.indexStyle);
   });
 }
 
