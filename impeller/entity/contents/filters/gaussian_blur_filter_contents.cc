@@ -439,9 +439,17 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
       ((2 * parameters.blur_radius) / parameters.step_size) + 1;
   FML_CHECK(result.sample_count < 24);
 
+  // Chop off the last samples if the radius >= 3 where they account for < 1.56%
+  // of the result.
+  int x_offset = 0;
+  if (parameters.blur_radius >= 3) {
+    result.sample_count -= 2;
+    x_offset = 1;
+  }
+
   Scalar tally = 0.0f;
   for (int i = 0; i < result.sample_count; ++i) {
-    int x = (i * parameters.step_size) - parameters.blur_radius;
+    int x = x_offset + (i * parameters.step_size) - parameters.blur_radius;
     result.samples[i] = KernelPipeline::FragmentShader::KernelSample{
         .uv_offset = parameters.blur_uv_offset * x,
         .coefficient = expf(-0.5f * (x * x) /

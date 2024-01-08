@@ -388,7 +388,7 @@ TEST(GaussianBlurFilterContentsTest, Coefficients) {
                                .step_size = 1};
   KernelPipeline::FragmentShader::KernelSamples samples =
       GenerateBlurInfo(parameters);
-  EXPECT_EQ(samples.sample_count, 11);
+  EXPECT_EQ(samples.sample_count, 9);
 
   // Coefficients should add up to 1.
   Scalar tally = 0;
@@ -398,9 +398,9 @@ TEST(GaussianBlurFilterContentsTest, Coefficients) {
   EXPECT_FLOAT_EQ(tally, 1.0f);
 
   // Verify the shape of the curve.
-  for (int i = 0; i < 5; ++i) {
+  for (int i = 0; i < 4; ++i) {
     EXPECT_FLOAT_EQ(samples.samples[i].coefficient,
-                    samples.samples[10 - i].coefficient);
+                    samples.samples[8 - i].coefficient);
     EXPECT_TRUE(samples.samples[i + 1].coefficient >
                 samples.samples[i].coefficient);
   }
