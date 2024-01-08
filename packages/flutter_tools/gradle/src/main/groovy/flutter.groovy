@@ -461,7 +461,11 @@ class FlutterPlugin implements Plugin<Project> {
         return buildGradle.exists() || buildGradleKts.exists()
     }
 
-    private File settingsGradleFile() {
+    /**
+     * Returns the Gradle script script for the build. Kotlin (settings.gradle.kts)
+     * is preferred over Groovy (settings.gradle).
+     */
+    private File settingsGradleFile(Project project) {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         return settingsGradleKts.exists() ? settingsGradleKts : settingsGradle
