@@ -8,6 +8,7 @@
 #include <codecvt>
 #include <locale>
 #include <map>
+#include <optional>
 #include <string>
 
 #include "flutter/fml/macros.h"
@@ -42,6 +43,29 @@ enum class SourceLanguage {
   kUnknown,
   kGLSL,
   kHLSL,
+};
+
+struct UniformDescription {
+  std::string name;
+  size_t location = 0u;
+  spirv_cross::SPIRType::BaseType type = spirv_cross::SPIRType::BaseType::Float;
+  size_t rows = 0u;
+  size_t columns = 0u;
+  size_t bit_width = 0u;
+  std::optional<size_t> array_elements = std::nullopt;
+};
+
+struct InputDescription {
+  std::string name;
+  size_t location;
+  size_t set;
+  size_t binding;
+  spirv_cross::SPIRType::BaseType type =
+      spirv_cross::SPIRType::BaseType::Unknown;
+  size_t bit_width;
+  size_t vec_size;
+  size_t columns;
+  size_t offset;
 };
 
 /// A shader config parsed as part of a ShaderBundleConfig.

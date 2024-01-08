@@ -67,7 +67,7 @@ class Switches {
   // Use |SelectDefaultTargetPlatform|.
   TargetPlatform target_platform_ = TargetPlatform::kUnknown;
   // Use |PlatformsToCompile|.
-  std::vector<TargetPlatform> runtime_stages_ = {};
+  std::vector<TargetPlatform> runtime_stages_;
 };
 
 }  // namespace compiler

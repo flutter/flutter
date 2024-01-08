@@ -13,6 +13,7 @@
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/compiler_backend.h"
 #include "impeller/compiler/runtime_stage_data.h"
+#include "impeller/compiler/shader_bundle_data.h"
 #include "inja/inja.hpp"
 #include "spirv_msl.hpp"
 #include "spirv_parser.hpp"
@@ -22,7 +23,7 @@ namespace compiler {
 
 struct StructMember {
   std::string type;
-  std::string base_type;
+  spirv_cross::SPIRType::BaseType base_type;
   std::string name;
   size_t offset = 0u;
   size_t size = 0u;
@@ -31,7 +32,7 @@ struct StructMember {
   size_t element_padding = 0u;
 
   StructMember(std::string p_type,
-               std::string p_base_type,
+               spirv_cross::SPIRType::BaseType p_base_type,
                std::string p_name,
                size_t p_offset,
                size_t p_size,
@@ -39,7 +40,7 @@ struct StructMember {
                std::optional<size_t> p_array_elements,
                size_t p_element_padding)
       : type(std::move(p_type)),
-        base_type(std::move(p_base_type)),
+        base_type(p_base_type),
         name(std::move(p_name)),
         offset(p_offset),
         size(p_size),
@@ -74,6 +75,8 @@ class Reflector {
 
   std::shared_ptr<RuntimeStageData::Shader> GetRuntimeStageShaderData() const;
 
+  std::shared_ptr<ShaderBundleData> GetShaderBundleData() const;
+
  private:
   struct StructDefinition {
     std::string name;
@@ -101,6 +104,7 @@ class Reflector {
   std::shared_ptr<fml::Mapping> reflection_header_;
   std::shared_ptr<fml::Mapping> reflection_cc_;
   std::shared_ptr<RuntimeStageData::Shader> runtime_stage_shader_;
+  std::shared_ptr<ShaderBundleData> shader_bundle_data_;
   bool is_valid_ = false;
 
   std::optional<nlohmann::json> GenerateTemplateArguments() const;
@@ -110,6 +114,8 @@ class Reflector {
   std::shared_ptr<fml::Mapping> GenerateReflectionCC() const;
 
   std::shared_ptr<RuntimeStageData::Shader> GenerateRuntimeStageData() const;
+
+  std::shared_ptr<ShaderBundleData> GenerateShaderBundleData() const;
 
   std::shared_ptr<fml::Mapping> InflateTemplate(std::string_view tmpl) const;
 

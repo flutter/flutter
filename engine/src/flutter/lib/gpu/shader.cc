@@ -16,6 +16,19 @@
 namespace flutter {
 namespace gpu {
 
+const impeller::ShaderStructMemberMetadata*
+Shader::UniformBinding::GetMemberMetadata(const std::string& name) const {
+  auto result =
+      std::find_if(metadata.members.begin(), metadata.members.end(),
+                   [&name](const impeller::ShaderStructMemberMetadata& member) {
+                     return member.name == name;
+                   });
+  if (result == metadata.members.end()) {
+    return nullptr;
+  }
+  return &(*result);
+}
+
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, Shader);
 
 Shader::Shader() = default;
@@ -26,31 +39,17 @@ fml::RefPtr<Shader> Shader::Make(
     std::string entrypoint,
     impeller::ShaderStage stage,
     std::shared_ptr<fml::Mapping> code_mapping,
-    std::vector<impeller::RuntimeUniformDescription> uniforms,
-    std::shared_ptr<impeller::VertexDescriptor> vertex_desc) {
-  // Sampler/texture slots start at 0. See runtime_effect_contents.cc
-  // TODO(bdero): I'm skeptical about the correctness of this. Verify what
-  //              happens with multiple texture samplers spaced apart with other
-  //              uniforms in-between.
-  size_t minimum_sampler_index = 100000000;
-  for (const auto& uniform : uniforms) {
-    if (uniform.type == impeller::kSampledImage &&
-        uniform.location < minimum_sampler_index) {
-      minimum_sampler_index = uniform.location;
-    }
-  }
-  for (auto& uniform : uniforms) {
-    if (uniform.type == impeller::kSampledImage) {
-      uniform.location -= minimum_sampler_index;
-    }
-  }
-
+    std::shared_ptr<impeller::VertexDescriptor> vertex_desc,
+    std::unordered_map<std::string, UniformBinding> uniform_structs,
+    std::unordered_map<std::string, impeller::SampledImageSlot>
+        uniform_textures) {
   auto shader = fml::MakeRefCounted<Shader>();
   shader->entrypoint_ = std::move(entrypoint);
   shader->stage_ = stage;
   shader->code_mapping_ = std::move(code_mapping);
-  shader->uniforms_ = std::move(uniforms);
   shader->vertex_desc_ = std::move(vertex_desc);
+  shader->uniform_structs_ = std::move(uniform_structs);
+  shader->uniform_textures_ = std::move(uniform_textures);
   return shader;
 }
 
@@ -93,13 +92,22 @@ impeller::ShaderStage Shader::GetShaderStage() const {
   return stage_;
 }
 
-int Shader::GetUniformSlot(const std::string& name) const {
-  for (const auto& uniform : uniforms_) {
-    if (name == uniform.name) {
-      return uniform.location;
-    }
+const Shader::UniformBinding* Shader::GetUniformStruct(
+    const std::string& name) const {
+  auto uniform = uniform_structs_.find(name);
+  if (uniform == uniform_structs_.end()) {
+    return nullptr;
   }
-  return -1;
+  return &uniform->second;
+}
+
+const impeller::SampledImageSlot* Shader::GetUniformTexture(
+    const std::string& name) const {
+  auto uniform = uniform_textures_.find(name);
+  if (uniform == uniform_textures_.end()) {
+    return nullptr;
+  }
+  return &uniform->second;
 }
 
 }  // namespace gpu
@@ -109,13 +117,33 @@ int Shader::GetUniformSlot(const std::string& name) const {
 /// Exports
 ///
 
-int InternalFlutterGpu_Shader_GetShaderStage(flutter::gpu::Shader* wrapper) {
-  return static_cast<int>(
-      flutter::gpu::FromImpellerShaderStage(wrapper->GetShaderStage()));
+int InternalFlutterGpu_Shader_GetUniformStructSize(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle struct_name_handle) {
+  auto name = tonic::StdStringFromDart(struct_name_handle);
+  const auto* uniform = wrapper->GetUniformStruct(name);
+  if (uniform == nullptr) {
+    return -1;
+  }
+
+  return uniform->size_in_bytes;
 }
 
-int InternalFlutterGpu_Shader_GetUniformSlot(flutter::gpu::Shader* wrapper,
-                                             Dart_Handle name_handle) {
-  auto name = tonic::StdStringFromDart(name_handle);
-  return wrapper->GetUniformSlot(name);
+int InternalFlutterGpu_Shader_GetUniformMemberOffset(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle struct_name_handle,
+    Dart_Handle member_name_handle) {
+  auto struct_name = tonic::StdStringFromDart(struct_name_handle);
+  const auto* uniform = wrapper->GetUniformStruct(struct_name);
+  if (uniform == nullptr) {
+    return -1;
+  }
+
+  auto member_name = tonic::StdStringFromDart(member_name_handle);
+  const auto* member = uniform->GetMemberMetadata(member_name);
+  if (member == nullptr) {
+    return -1;
+  }
+
+  return member->offset;
 }

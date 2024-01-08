@@ -163,8 +163,8 @@ extern void InternalFlutterGpu_RenderPass_BindIndexBufferHost(
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     flutter::gpu::RenderPass* wrapper,
-    int stage,
-    int slot_id,
+    flutter::gpu::Shader* shader,
+    Dart_Handle uniform_name_handle,
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes);
@@ -172,8 +172,8 @@ extern bool InternalFlutterGpu_RenderPass_BindUniformDevice(
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_BindUniformHost(
     flutter::gpu::RenderPass* wrapper,
-    int stage,
-    int slot_id,
+    flutter::gpu::Shader* shader,
+    Dart_Handle uniform_name_handle,
     flutter::gpu::HostBuffer* host_buffer,
     int offset_in_bytes,
     int length_in_bytes);
@@ -181,8 +181,8 @@ extern bool InternalFlutterGpu_RenderPass_BindUniformHost(
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_BindTexture(
     flutter::gpu::RenderPass* wrapper,
-    int stage,
-    int slot_id,
+    flutter::gpu::Shader* shader,
+    Dart_Handle uniform_name_handle,
     flutter::gpu::Texture* texture,
     int min_filter,
     int mag_filter,

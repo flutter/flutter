@@ -162,8 +162,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     }
 
     bool success = _bindTexture(
-        slot.shaderStage.index,
-        slot.slotId,
+        slot.shader,
+        slot.uniformName,
         texture,
         sampler.minFilter.index,
         sampler.magFilter.index,
@@ -266,22 +266,32 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   external void _bindIndexBufferHost(HostBuffer buffer, int offsetInBytes,
       int lengthInBytes, int indexType, int indexCount);
 
-  @Native<Bool Function(Pointer<Void>, Int, Int, Pointer<Void>, Int, Int)>(
-      symbol: 'InternalFlutterGpu_RenderPass_BindUniformDevice')
-  external bool _bindUniformDevice(int stage, int slotId, DeviceBuffer buffer,
-      int offsetInBytes, int lengthInBytes);
-
-  @Native<Bool Function(Pointer<Void>, Int, Int, Pointer<Void>, Int, Int)>(
-      symbol: 'InternalFlutterGpu_RenderPass_BindUniformHost')
-  external bool _bindUniformHost(int stage, int slotId, HostBuffer buffer,
-      int offsetInBytes, int lengthInBytes);
+  @Native<
+      Bool Function(Pointer<Void>, Pointer<Void>, Handle, Pointer<Void>, Int,
+          Int)>(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDevice')
+  external bool _bindUniformDevice(Shader shader, String uniformName,
+      DeviceBuffer buffer, int offsetInBytes, int lengthInBytes);
 
   @Native<
-      Bool Function(Pointer<Void>, Int, Int, Pointer<Void>, Int, Int, Int, Int,
+      Bool Function(Pointer<Void>, Pointer<Void>, Handle, Pointer<Void>, Int,
+          Int)>(symbol: 'InternalFlutterGpu_RenderPass_BindUniformHost')
+  external bool _bindUniformHost(Shader shader, String uniformName,
+      HostBuffer buffer, int offsetInBytes, int lengthInBytes);
+
+  @Native<
+      Bool Function(
+          Pointer<Void>,
+          Pointer<Void>,
+          Handle,
+          Pointer<Void>,
+          Int,
+          Int,
+          Int,
+          Int,
           Int)>(symbol: 'InternalFlutterGpu_RenderPass_BindTexture')
   external bool _bindTexture(
-      int stage,
-      int slotId,
+      Shader shader,
+      String uniformName,
       Texture texture,
       int minFilter,
       int magFilter,

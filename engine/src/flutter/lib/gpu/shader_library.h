@@ -13,7 +13,6 @@
 #include "flutter/lib/gpu/shader.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
-#include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 
 namespace flutter {
 namespace gpu {
@@ -26,12 +25,15 @@ class ShaderLibrary : public RefCountedDartWrappable<ShaderLibrary> {
  public:
   using ShaderMap = std::unordered_map<std::string, fml::RefPtr<Shader>>;
 
-  static fml::RefPtr<ShaderLibrary> MakeFromAsset(const std::string& name,
-                                                  std::string& out_error);
+  static fml::RefPtr<ShaderLibrary> MakeFromAsset(
+      impeller::Context::BackendType backend_type,
+      const std::string& name,
+      std::string& out_error);
 
   static fml::RefPtr<ShaderLibrary> MakeFromShaders(ShaderMap shaders);
 
   static fml::RefPtr<ShaderLibrary> MakeFromFlatbuffer(
+      impeller::Context::BackendType backend_type,
       std::shared_ptr<fml::Mapping> payload);
 
   /// Sets a return override for `MakeFromAsset` for testing purposes.
