@@ -4983,7 +4983,6 @@ targets:
       subshard: "5_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-
   - name: Windows build_tests_6_7
     recipe: flutter/flutter_drone
     timeout: 60
@@ -5068,6 +5067,10 @@ targets:
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "NO_OP": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5126,6 +5129,10 @@ targets:
       subshard: misc
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "NO_OP": "true"
+        }
     runIf:
       - dev/**
       - examples/api/**
@@ -5178,6 +5185,10 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "NO_OP": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
