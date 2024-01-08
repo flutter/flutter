@@ -1061,7 +1061,7 @@ void main() {
       matchesGoldenFile('m3_material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
-
+  
   testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
     (WidgetTester tester) async {
