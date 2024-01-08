@@ -8,24 +8,24 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
-FakeProcessLister OfdRunning() {
+FakeProcessLister ofdRunning() {
   return FakeProcessLister(result: r'Path: "C:\Program Files\Topaz OFD\Warsaw\core.exe"');
 }
 
-FakeProcessLister OfdNotRunning() {
+FakeProcessLister ofdNotRunning() {
   return FakeProcessLister(result: r'Path: "C:\Program Files\Google\Chrome\Application\chrome.exe');
 }
 
 void main() {
   testWithoutContext('Successfully checks for Topaz OFD when it is not running', () async {
-    final FakeProcessLister processLister = OfdNotRunning();
+    final FakeProcessLister processLister = ofdNotRunning();
     final TopazOfdValidator validator = TopazOfdValidator(processLister: processLister);
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.success);
     expect(result.statusInfo, null);
   });
   testWithoutContext('Successfully checks for Topaz OFD when it is running', () async {
-    final FakeProcessLister processLister = OfdRunning();
+    final FakeProcessLister processLister = ofdRunning();
     final TopazOfdValidator validator = TopazOfdValidator(processLister: processLister);
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.partial);
