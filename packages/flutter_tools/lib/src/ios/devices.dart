@@ -359,6 +359,9 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
     String? userIdentifier,

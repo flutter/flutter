@@ -7,14 +7,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   setUp(() {
     assert(!ma.hasListeners);
   });
 
   testWidgets(
-    '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
+    '$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
     (WidgetTester tester) async {
       ObjectEvent? receivedEvent;
       ObjectEvent listener(ObjectEvent event) => receivedEvent = event;

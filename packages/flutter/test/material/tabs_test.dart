@@ -6636,6 +6636,97 @@ void main() {
     expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/140338.
+  testWidgets('Material3 - Scrollable TabBar without a divider does not expand to full width', (WidgetTester tester) async {
+    Widget buildTabBar({
+      Color? dividerColor,
+      double? dividerHeight,
+      TabAlignment? tabAlignment,
+     }) {
+      return boilerplate(
+        child: Center(
+          child: DefaultTabController(
+            length: 3,
+            child: TabBar(
+              dividerColor: dividerColor,
+              dividerHeight: dividerHeight,
+              tabAlignment: tabAlignment,
+              isScrollable: true,
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default tab bar width when there is a divider and tabAlignment
+    // is set to startOffset.
+    await tester.pumpWidget(buildTabBar(tabAlignment: TabAlignment.start));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when there is a divider and tabAlignment
+    // is set to start.
+    await tester.pumpWidget(buildTabBar(tabAlignment: TabAlignment.startOffset));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when there is a divider and tabAlignment
+    // tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(tabAlignment: TabAlignment.center));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider height is set to 0.0
+    // and tabAlignment is set to startOffset.
+    await tester.pumpWidget(buildTabBar(
+      dividerHeight: 0.0,
+      tabAlignment: TabAlignment.startOffset,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 359.5);
+
+    // Test default tab bar width when the divider height is set to 0.0
+    // and tabAlignment is set to start.
+    await tester.pumpWidget(buildTabBar(
+      dividerHeight: 0.0,
+      tabAlignment: TabAlignment.start,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
+
+    // Test default tab bar width when the divider height is set to 0.0
+    // and tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(
+      dividerHeight: 0.0,
+      tabAlignment: TabAlignment.center,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to startOffset.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.startOffset,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 359.5);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to start.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.start,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.center,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

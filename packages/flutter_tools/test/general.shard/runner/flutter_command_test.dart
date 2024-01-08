@@ -1164,7 +1164,12 @@ void main() {
         fileSystem.file('pubspec.yaml').createSync();
         fileSystem.file('.packages').createSync();
 
-        final FakeDevice device = FakeDevice('name', 'id');
+        final FakeDevice device = FakeDevice(
+          'name',
+          'id',
+          type: PlatformType.android,
+          supportsFlavors: true,
+        );
         testDeviceManager.devices = <Device>[device];
         final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
         final CommandRunner<void> runner =  createTestCommandRunner(command);
@@ -1190,7 +1195,12 @@ void main() {
         fileSystem.file('.packages').createSync();
         fileSystem.file('config.json')..createSync()..writeAsStringSync('{"FLUTTER_APP_FLAVOR": "strawberry"}');
 
-        final FakeDevice device = FakeDevice('name', 'id');
+        final FakeDevice device = FakeDevice(
+          'name',
+          'id',
+          type: PlatformType.android,
+          supportsFlavors: true,
+        );
         testDeviceManager.devices = <Device>[device];
         final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
         final CommandRunner<void> runner =  createTestCommandRunner(command);

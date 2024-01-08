@@ -864,8 +864,13 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-    ]),
+          FakeDevice(
+            'ephemeral',
+            'ephemeral',
+            type: PlatformType.android,
+            supportsFlavors: true,
+          ),
+        ]),
   });
 
   testUsingContext('Builds the asset manifest by default', () async {
@@ -881,6 +886,45 @@ dev_dependencies:
 
     final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     expect(fileExists, true);
+
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
+  testUsingContext('builds asset bundle using --flavor', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+    fs.file('vanilla.txt').writeAsStringSync('vanilla');
+    fs.file('orange.txt').writeAsStringSync('orange');
+    fs.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  assets:
+    - path: vanilla.txt
+      flavors:
+        - vanilla
+    - path: orange.txt
+      flavors:
+        - orange
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''');
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--flavor',
+      'vanilla',
+    ]);
+
+    final bool vanillaExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'vanilla.txt'));
+    expect(vanillaExists, true, reason: 'vanilla.txt should be bundled');
+    final bool orangeExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'orange.txt'));
+    expect(orangeExists, false, reason: 'orange.txt should not be bundled');
 
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
@@ -992,6 +1036,23 @@ dev_dependencies:
         '--file-reporter=json:out.jsonl'
       ]);
       expect(testRunner.lastFileReporterValue, 'json:out.jsonl');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Enables Impeller', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--enable-impeller',
+      ]);
+      expect(testRunner.lastDebuggingOptionsValue.enableImpeller, ImpellerStatus.enabled);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),

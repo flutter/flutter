@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -186,7 +186,8 @@
 		24E221AD21A28A0B008ADF09 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1000;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = Flutter.io;
 				TargetAttributes = {
 					24E221B421A28A0B008ADF09 = {

@@ -59,8 +59,15 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
     .decodeMessage(ByteData.sublistView(assetManifestFileData)) as Map<Object?, Object?>;
 
   if (assetManifest.containsKey('assets/free/free.txt')) {
-    return TaskResult.failure('Assets declared with a flavor not equal to the '
-      'argued --flavor value should not be bundled.');
+    return TaskResult.failure('Expected the asset "assets/free/free.txt", which '
+      ' was declared with a flavor of "free" to not be included in the asset bundle '
+      ' because the --flavor was set to "paid".');
+  }
+
+  if (!assetManifest.containsKey('assets/paid/paid.txt')) {
+    return TaskResult.failure('Expected the asset "assets/paid/paid.txt", which '
+      ' was declared with a flavor of "paid" to be included in the asset bundle '
+      ' because the --flavor was set to "paid".');
   }
 
   await flutter(

@@ -335,7 +335,7 @@ class TextSelectionOverlay {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
         className: '$TextSelectionOverlay',
         object: this,
@@ -597,7 +597,7 @@ class TextSelectionOverlay {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _selectionOverlay.dispose();
     renderObject.selectionStartInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
@@ -974,7 +974,7 @@ class SelectionOverlay {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
         className: '$SelectionOverlay',
         object: this,
@@ -1533,7 +1533,7 @@ class SelectionOverlay {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     hide();
     _magnifierInfo.dispose();
@@ -2453,6 +2453,19 @@ class TextSelectionGestureDetectorBuilder {
               from: details.globalPosition,
               cause: SelectionChangedCause.longPress,
             );
+            // Show the floating cursor.
+            final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+              state: FloatingCursorDragState.Start,
+              startLocation: (
+                renderEditable.globalToLocal(details.globalPosition),
+                TextPosition(
+                  offset: editableText.textEditingValue.selection.baseOffset,
+                  affinity: editableText.textEditingValue.selection.affinity,
+                ),
+              ),
+              offset: Offset.zero,
+            );
+            editableText.updateFloatingCursor(cursorPoint);
           }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -2488,7 +2501,6 @@ class TextSelectionGestureDetectorBuilder {
         0.0,
         _scrollPosition - _dragStartScrollOffset,
       );
-
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -2503,6 +2515,12 @@ class TextSelectionGestureDetectorBuilder {
               from: details.globalPosition,
               cause: SelectionChangedCause.longPress,
             );
+            // Update the floating cursor.
+            final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+              state: FloatingCursorDragState.Update,
+              offset: details.offsetFromOrigin,
+            );
+            editableText.updateFloatingCursor(cursorPoint);
           }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -2536,6 +2554,13 @@ class TextSelectionGestureDetectorBuilder {
     _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
+    if (defaultTargetPlatform == TargetPlatform.iOS && delegate.selectionEnabled && editableText.textEditingValue.selection.isCollapsed) {
+      // Update the floating cursor.
+      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+        state: FloatingCursorDragState.End
+      );
+      editableText.updateFloatingCursor(cursorPoint);
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].

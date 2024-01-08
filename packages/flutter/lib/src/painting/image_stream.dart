@@ -442,7 +442,7 @@ class ImageStreamCompleterHandle {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$ImageStreamCompleterHandle',
         object: this,
@@ -467,7 +467,7 @@ class ImageStreamCompleterHandle {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
   }
 }

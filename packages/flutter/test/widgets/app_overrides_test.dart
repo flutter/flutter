@@ -57,7 +57,7 @@ void main() {
     expect(find.byType(PerformanceOverlay), findsOneWidget);
     expect(find.byType(CheckedModeBanner), findsOneWidget);
     WidgetsApp.showPerformanceOverlayOverride = false;
-  });
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/52258
 
   testWidgets('showPerformanceOverlayOverride false', (WidgetTester tester) async {
     WidgetsApp.showPerformanceOverlayOverride = true;

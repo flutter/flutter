@@ -1578,7 +1578,7 @@ void main() {
               children: <Widget>[
                 ElevatedButton(
                   key: key0,
-                  style: TextButton.styleFrom(
+                  style: ElevatedButton.styleFrom(
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(64),
                   ),
@@ -1587,7 +1587,7 @@ void main() {
                 ),
                 ElevatedButton.icon(
                   key: key1,
-                  style: TextButton.styleFrom(
+                  style: ElevatedButton.styleFrom(
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(104),
                   ),

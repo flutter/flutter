@@ -61,21 +61,23 @@ class PointerSignalResolver {
 
   /// Registers interest in handling [event].
   ///
-  /// This method may be called multiple times (typically from different parts of the
-  /// widget hierarchy) for the same `event`, with differenet `callback`s, as the event
-  /// is being dispatched across the tree. Once the dispatching is complete, the
-  /// [GestureBinding] calls [resolve], and the first registered callback is called.
+  /// This method may be called multiple times (typically from different parts
+  /// of the widget hierarchy) for the same `event`, with different `callback`s,
+  /// as the event is being dispatched across the tree. Once the dispatching is
+  /// complete, the [GestureBinding] calls [resolve], and the first registered
+  /// callback is called.
   ///
   /// The `callback` is invoked with one argument, the `event`.
   ///
-  /// Once the [register] method has been called with a particular `event`, it must
-  /// not be called for other `event`s until after [resolve] has been called. Only one
-  /// event disambiguation can be in flight at a time. In normal use this is achieved
-  /// by only registering callbacks for an event as it is actively being dispatched
-  /// (for example, in [Listener.onPointerSignal]).
+  /// Once the [register] method has been called with a particular `event`, it
+  /// must not be called for other `event`s until after [resolve] has been
+  /// called. Only one event disambiguation can be in flight at a time. In
+  /// normal use this is achieved by only registering callbacks for an event as
+  /// it is actively being dispatched (for example, in
+  /// [Listener.onPointerSignal]).
   ///
-  /// See the documentation for the [PointerSignalResolver] class for an example of
-  /// using this method.
+  /// See the documentation for the [PointerSignalResolver] class for an example
+  /// of using this method.
   void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
     assert(_currentEvent == null || _isSameEvent(_currentEvent!, event));
     if (_firstRegisteredCallback != null) {

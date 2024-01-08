@@ -1221,6 +1221,7 @@ class WidgetsApp extends StatefulWidget {
     SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
 
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),

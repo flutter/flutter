@@ -96,6 +96,7 @@ void main() {
       bool areResourceAttributeRequired = false,
       bool suppressWarnings = false,
       bool relaxSyntax = false,
+      bool useNamedParameters = false,
       void Function(Directory)? setup,
     }
   ) {
@@ -128,6 +129,7 @@ void main() {
       areResourceAttributesRequired: areResourceAttributeRequired,
       suppressWarnings: suppressWarnings,
       useRelaxedSyntax: relaxSyntax,
+      useNamedParameters: useNamedParameters,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: isFromYaml);
@@ -2490,5 +2492,44 @@ NumberFormat.decimalPatternDigits(
 }''';
     setupLocalizations(<String, String>{ 'en': dollarSignWithSelect });
     expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifistation #1 $_temp0'));
+  });
+
+  testWithoutContext('can generate method with named parameter', () {
+    const String arbFile = '''
+{
+  "helloName": "Hello {name}!",
+  "@helloName": {
+    "description": "A more personal greeting",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The name of the person to greet"
+      }
+    }
+  },
+  "helloNameAndAge": "Hello {name}! You are {age} years old.",
+  "@helloNameAndAge": {
+    "description": "A more personal greeting",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The name of the person to greet"
+      },
+      "age": {
+        "type": "int",
+        "description": "The age of the person to greet"
+      }
+    }
+  }
+}
+    ''';
+    setupLocalizations(<String, String>{ 'en': arbFile }, useNamedParameters: true);
+    final String localizationsFile = getGeneratedFileContent(locale: 'en');
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String helloName({required String name}) {
+  '''));
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String helloNameAndAge({required String name, required int age}) {
+  '''));
   });
 }

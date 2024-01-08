@@ -7,6 +7,7 @@
   </h1>
 </a>
 
+[![Flutter CI Status](https://flutter-dashboard.appspot.com/api/public/build-status-badge?repo=flutter)](https://flutter-dashboard.appspot.com/#/build?repo=flutter)
 [![Discord badge][]][Discord instructions]
 [![Twitter handle][]][Twitter badge]
 [![codecov](https://codecov.io/gh/flutter/flutter/branch/master/graph/badge.svg?token=11yDrJU2M2)](https://codecov.io/gh/flutter/flutter)

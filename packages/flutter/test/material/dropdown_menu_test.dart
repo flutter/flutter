@@ -1907,6 +1907,31 @@ void main() {
     expect(selectionCount, 1);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Menu shows scrollbar when height is limited', (WidgetTester tester) async {
+    final List<DropdownMenuEntry<TestMenu>> menuItems = <DropdownMenuEntry<TestMenu>>[
+      DropdownMenuEntry<TestMenu>(
+        value: TestMenu.mainMenu0,
+        label: 'Item 0',
+        style: MenuItemButton.styleFrom(
+          minimumSize: const Size.fromHeight(1000),
+        )
+      ),
+    ];
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          dropdownMenuEntries: menuItems,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+  }, variant: TargetPlatformVariant.all());
 }
 
 enum TestMenu {

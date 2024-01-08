@@ -375,6 +375,41 @@ void main() {
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
+  group('didExceedMaxLines', () {
+    RenderParagraph createRenderParagraph({
+      int? maxLines,
+      TextOverflow overflow = TextOverflow.clip,
+    }) {
+      return RenderParagraph(
+        const TextSpan(
+          text: 'Here is a long text, maybe exceed maxlines',
+          style: TextStyle(fontSize: 10.0),
+        ),
+        textDirection: TextDirection.ltr,
+        overflow: overflow,
+        maxLines: maxLines,
+      );
+    }
+
+    test('none limited', () {
+      final RenderParagraph paragraph = createRenderParagraph();
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      expect(paragraph.didExceedMaxLines, false);
+    });
+
+    test('limited by maxLines', () {
+      final RenderParagraph paragraph = createRenderParagraph(maxLines: 1);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      expect(paragraph.didExceedMaxLines, true);
+    });
+
+    test('limited by ellipsis', () {
+      final RenderParagraph paragraph = createRenderParagraph(overflow: TextOverflow.ellipsis);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      expect(paragraph.didExceedMaxLines, true);
+    });
+  });
+
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
@@ -760,6 +795,84 @@ void main() {
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('Basic TextSpan Hit testing', () {
+    final TextSpan textSpanA = TextSpan(text: 'A' * 10);
+    const TextSpan textSpanBC = TextSpan(text: 'BC', style: TextStyle(letterSpacing: 26.0));
+
+    final TextSpan text = TextSpan(
+      style: const TextStyle(fontSize: 10.0),
+      children: <InlineSpan>[textSpanA, textSpanBC],
+    );
+
+    final RenderParagraph paragraph = RenderParagraph(text, textDirection: TextDirection.ltr);
+    layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
+
+    BoxHitTestResult result;
+
+    // Hit-testing the first line
+    // First A
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+    // The last A.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+    // Far away from the line.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(200.0, 5.0)), isFalse);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+
+    // Hit-testing the second line
+    // Tapping on B (startX = letter-spacing / 2 = 13.0).
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(18.0, 15.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+
+    // Between B and C, with large letter-spacing.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(31.0, 15.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+
+    // On C.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(54.0, 15.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+
+    // After C.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(100.0, 15.0)), isFalse);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+
+    // Not even remotely close.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(9999.0, 9999.0)), isFalse);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+  });
+
+  test('TextSpan Hit testing with text justification', () {
+    const TextSpan textSpanA = TextSpan(text: 'A ');      // The space is a word break.
+    const TextSpan textSpanB = TextSpan(text: 'B\u200B'); // The zero-width space is used as a line break.
+    final TextSpan textSpanC = TextSpan(text: 'C' * 10);  // The third span starts a new line since it's too long for the first line.
+
+    // The text should look like:
+    // A        B
+    // CCCCCCCCCC
+    final TextSpan text = TextSpan(
+      text: '',
+      style: const TextStyle(fontSize: 10.0),
+      children: <InlineSpan>[textSpanA, textSpanB, textSpanC],
+    );
+
+    final RenderParagraph paragraph = RenderParagraph(text, textDirection: TextDirection.ltr, textAlign: TextAlign.justify);
+    layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
+    BoxHitTestResult result;
+
+    // Tapping on A.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+
+    // Between A and B.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(50.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+
+    // On B.
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanB]);
+  });
 
   group('Selection', () {
     void selectionParagraph(RenderParagraph paragraph, TextPosition start, TextPosition end) {

@@ -1660,6 +1660,14 @@ void main() {
               );
             }
           }, variant: TargetPlatformVariant.all());
+
+          // Regression test for https://github.com/flutter/flutter/issues/139196.
+          testWidgets('does not create invalid selection', (WidgetTester tester) async {
+            controller.value = const TextEditingValue(text: 'A', selection: TextSelection.collapsed(offset: 1));
+            await tester.pumpWidget(buildEditableText());
+            controller.value = const TextEditingValue(text: 'AA', selection: TextSelection.collapsed(offset: 2));
+            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
+          }, variant: TargetPlatformVariant.all());
         });
       });
     },

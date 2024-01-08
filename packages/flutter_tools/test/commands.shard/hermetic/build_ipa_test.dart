@@ -1020,7 +1020,7 @@ void main() {
     expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
     expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-    expect(logger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+    expect(logger.warningText, isNot(contains('but the range of supported deployment target versions')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1172,7 +1172,7 @@ void main() {
       'CFBundleDisplayName': 'Awesome Gallery',
       // Will not use CFBundleName since CFBundleDisplayName is present.
       'CFBundleName': 'Awesome Gallery 2',
-      'MinimumOSVersion': '11.0',
+      'MinimumOSVersion': '17.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
     };
@@ -1196,7 +1196,7 @@ void main() {
         '    • Version Number: 12.34.56\n'
         '    • Build Number: 666\n'
         '    • Display Name: Awesome Gallery\n'
-        '    • Deployment Target: 11.0\n'
+        '    • Deployment Target: 17.0\n'
         '    • Bundle Identifier: io.flutter.someProject\n'
       )
     );
@@ -1230,7 +1230,7 @@ void main() {
       'CFBundleIdentifier': 'io.flutter.someProject',
       // Will use CFBundleName since CFBundleDisplayName is absent.
       'CFBundleName': 'Awesome Gallery',
-      'MinimumOSVersion': '11.0',
+      'MinimumOSVersion': '17.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
     };
@@ -1254,7 +1254,7 @@ void main() {
         '    • Version Number: 12.34.56\n'
         '    • Build Number: 666\n'
         '    • Display Name: Awesome Gallery\n'
-        '    • Deployment Target: 11.0\n'
+        '    • Deployment Target: 17.0\n'
         '    • Bundle Identifier: io.flutter.someProject\n'
       ),
     );
