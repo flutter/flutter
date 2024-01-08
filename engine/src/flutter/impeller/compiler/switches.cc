@@ -244,14 +244,15 @@ bool Switches::AreValid(std::ostream& explain) const {
   const bool shader_bundle_mode = !shader_bundle.empty();
 
   bool valid = true;
-  if (target_platform_ == TargetPlatform::kUnknown && runtime_stages_.empty()) {
+  if (target_platform_ == TargetPlatform::kUnknown && runtime_stages_.empty() &&
+      !shader_bundle_mode) {
     explain << "Either a target platform was not specified, or no runtime "
                "stages were specified."
             << std::endl;
     valid = false;
   }
 
-  if (source_language == SourceLanguage::kUnknown) {
+  if (source_language == SourceLanguage::kUnknown && !shader_bundle_mode) {
     explain << "Invalid source language type." << std::endl;
     valid = false;
   }
@@ -296,7 +297,8 @@ std::vector<TargetPlatform> Switches::PlatformsToCompile() const {
 }
 
 TargetPlatform Switches::SelectDefaultTargetPlatform() const {
-  if (target_platform_ == TargetPlatform::kUnknown) {
+  if (target_platform_ == TargetPlatform::kUnknown &&
+      !runtime_stages_.empty()) {
     return runtime_stages_.front();
   }
   return target_platform_;

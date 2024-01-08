@@ -8,7 +8,6 @@
 #include "flutter/testing/testing.h"
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/types.h"
-#include "impeller/runtime_stage/runtime_stage_types_flatbuffers.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 
 namespace impeller {
@@ -141,7 +140,7 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   options.target_platform = TargetPlatform::kRuntimeStageMetal;
   options.source_language = SourceLanguage::kGLSL;
 
-  std::optional<fb::ShaderBundleT> bundle =
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
       GenerateShaderBundleFlatbuffer(config, options);
   ASSERT_TRUE(bundle.has_value());
 
@@ -156,57 +155,62 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   /// Verify vertex shader.
   ///
 
-  EXPECT_TRUE(vertex->shader->metal);
-  EXPECT_STREQ(vertex->shader->metal->entrypoint.c_str(),
+  EXPECT_STREQ(vertex->metal_desktop->entrypoint.c_str(),
                "flutter_gpu_unlit_vertex_main");
-  EXPECT_EQ(vertex->shader->metal->stage, fb::Stage::kVertex);
+  EXPECT_EQ(vertex->metal_desktop->stage,
+            fb::shaderbundle::ShaderStage::kVertex);
 
   // Inputs.
-  ASSERT_EQ(vertex->shader->metal->inputs.size(), 1u);
-  const auto& v_in_position = vertex->shader->metal->inputs[0];
+  ASSERT_EQ(vertex->metal_desktop->inputs.size(), 1u);
+  const auto& v_in_position = vertex->metal_desktop->inputs[0];
   EXPECT_STREQ(v_in_position->name.c_str(), "position");
   EXPECT_EQ(v_in_position->location, 0u);
   EXPECT_EQ(v_in_position->set, 0u);
   EXPECT_EQ(v_in_position->binding, 0u);
-  EXPECT_EQ(v_in_position->type, fb::InputDataType::kFloat);
+  EXPECT_EQ(v_in_position->type, fb::shaderbundle::InputDataType::kFloat);
   EXPECT_EQ(v_in_position->bit_width, 32u);
   EXPECT_EQ(v_in_position->vec_size, 2u);
   EXPECT_EQ(v_in_position->columns, 1u);
   EXPECT_EQ(v_in_position->offset, 0u);
 
   // Uniforms.
-  ASSERT_EQ(vertex->shader->metal->uniforms.size(), 2u);
-  const auto* v_mvp = FindByName(vertex->shader->metal->uniforms, "mvp");
-  ASSERT_NE(v_mvp, nullptr);
-  EXPECT_EQ(v_mvp->location, 0u);
-  EXPECT_EQ(v_mvp->type, fb::UniformDataType::kFloat);
-  EXPECT_EQ(v_mvp->bit_width, 32u);
-  EXPECT_EQ(v_mvp->rows, 4u);
-  EXPECT_EQ(v_mvp->columns, 4u);
-  EXPECT_EQ(v_mvp->array_elements, 0u);
-  const auto* v_color = FindByName(vertex->shader->metal->uniforms, "color");
-  ASSERT_NE(v_color, nullptr);
-  EXPECT_EQ(v_color->location, 1u);
-  EXPECT_EQ(v_color->type, fb::UniformDataType::kFloat);
-  EXPECT_EQ(v_color->bit_width, 32u);
-  EXPECT_EQ(v_color->rows, 4u);
-  EXPECT_EQ(v_color->columns, 1u);
-  EXPECT_EQ(v_color->array_elements, 0u);
+  ASSERT_EQ(vertex->metal_desktop->uniform_structs.size(), 1u);
+  const auto* vert_info =
+      FindByName(vertex->metal_desktop->uniform_structs, "VertInfo");
+  ASSERT_NE(vert_info, nullptr);
+  EXPECT_EQ(vert_info->ext_res_0, 0u);
+  EXPECT_EQ(vert_info->set, 0u);
+  EXPECT_EQ(vert_info->binding, 0u);
+  ASSERT_EQ(vert_info->fields.size(), 2u);
+  const auto& mvp = vert_info->fields[0];
+  EXPECT_STREQ(mvp->name.c_str(), "mvp");
+  EXPECT_EQ(mvp->type, fb::shaderbundle::UniformDataType::kFloat);
+  EXPECT_EQ(mvp->offset_in_bytes, 0u);
+  EXPECT_EQ(mvp->element_size_in_bytes, 64u);
+  EXPECT_EQ(mvp->total_size_in_bytes, 64u);
+  EXPECT_EQ(mvp->array_elements, 0u);
+  const auto& color = vert_info->fields[1];
+  EXPECT_STREQ(color->name.c_str(), "color");
+  EXPECT_EQ(color->type, fb::shaderbundle::UniformDataType::kFloat);
+  EXPECT_EQ(color->offset_in_bytes, 64u);
+  EXPECT_EQ(color->element_size_in_bytes, 16u);
+  EXPECT_EQ(color->total_size_in_bytes, 16u);
+  EXPECT_EQ(color->array_elements, 0u);
 
   // --------------------------------------------------------------------------
   /// Verify fragment shader.
   ///
 
-  EXPECT_TRUE(fragment->shader->metal);
-  EXPECT_STREQ(fragment->shader->metal->entrypoint.c_str(),
+  EXPECT_STREQ(fragment->metal_desktop->entrypoint.c_str(),
                "flutter_gpu_unlit_fragment_main");
-  EXPECT_EQ(fragment->shader->metal->stage, fb::Stage::kFragment);
+  EXPECT_EQ(fragment->metal_desktop->stage,
+            fb::shaderbundle::ShaderStage::kFragment);
 
   // Inputs (not recorded for fragment shaders).
-  ASSERT_EQ(fragment->shader->metal->inputs.size(), 0u);
+  ASSERT_EQ(fragment->metal_desktop->inputs.size(), 0u);
 
   // Uniforms.
-  ASSERT_EQ(fragment->shader->metal->inputs.size(), 0u);
+  ASSERT_EQ(fragment->metal_desktop->inputs.size(), 0u);
 }
 
 }  // namespace testing

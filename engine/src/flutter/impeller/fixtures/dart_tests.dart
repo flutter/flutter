@@ -93,9 +93,9 @@ void canCreateTexture() {
   assert(texture!.storageMode == gpu.StorageMode.hostVisible);
   assert(texture!.sampleCount == 1);
   assert(texture!.format == gpu.PixelFormat.r8g8b8a8UNormInt);
-  assert(texture!.enableRenderTargetUsage == true);
-  assert(texture!.enableShaderReadUsage == true);
-  assert(texture!.enableShaderWriteUsage == false);
+  assert(texture!.enableRenderTargetUsage);
+  assert(texture!.enableShaderReadUsage);
+  assert(!texture!.enableShaderWriteUsage);
   assert(texture!.bytesPerTexel == 4);
   assert(texture!.GetBaseMipLevelSizeInBytes() == 40000);
 }
@@ -168,6 +168,24 @@ void canCreateShaderLibrary() {
   assert(shader != null);
 }
 
+@pragma('vm:entry-point')
+void canReflectUniformStructs() {
+  final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+
+  final gpu.UniformSlot vertInfo =
+      pipeline.vertexShader.getUniformSlot('VertInfo');
+  assert(vertInfo.uniformName == 'VertInfo');
+  final int? totalSize = vertInfo.sizeInBytes;
+  assert(totalSize != null);
+  assert(totalSize! == 128);
+  final int? mvpOffset = vertInfo.getMemberOffsetInBytes('mvp');
+  assert(mvpOffset != null);
+  assert(mvpOffset! == 0);
+  final int? colorOffset = vertInfo.getMemberOffsetInBytes('color');
+  assert(colorOffset != null);
+  assert(colorOffset! == 64);
+}
+
 gpu.RenderPipeline createUnlitRenderPipeline() {
   final gpu.ShaderLibrary? library = gpu.ShaderLibrary.fromAsset('playground');
   assert(library != null);
@@ -208,21 +226,18 @@ void canCreateRenderPassAndSubmit() {
     0.5, 0.5, //
     0.5, -0.5, //
   ]));
-  final gpu.BufferView color =
-      transients.emplace(float32(<double>[0, 1, 0, 1])); // rgba
-  final gpu.BufferView mvp = transients.emplace(float32(<double>[
-    1, 0, 0, 0, //
-    0, 1, 0, 0, //
-    0, 0, 1, 0, //
-    0, 0, 0, 1, //
+  final gpu.BufferView vertInfoData = transients.emplace(float32(<double>[
+    1, 0, 0, 0, // mvp
+    0, 1, 0, 0, // mvp
+    0, 0, 1, 0, // mvp
+    0, 0, 0, 1, // mvp
+    0, 1, 0, 1, // color
   ]));
   encoder.bindVertexBuffer(vertices, 3);
 
-  final gpu.UniformSlot? colorSlot =
-      pipeline.vertexShader.getUniformSlot('color');
-  final gpu.UniformSlot? mvpSlot = pipeline.vertexShader.getUniformSlot('mvp');
-  encoder.bindUniform(mvpSlot!, mvp);
-  encoder.bindUniform(colorSlot!, color);
+  final gpu.UniformSlot vertInfo =
+      pipeline.vertexShader.getUniformSlot('VertInfo');
+  encoder.bindUniform(vertInfo, vertInfoData);
   encoder.draw();
 
   commandBuffer.submit();

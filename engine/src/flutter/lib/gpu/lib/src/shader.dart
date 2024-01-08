@@ -7,29 +7,44 @@
 part of flutter_gpu;
 
 base class UniformSlot {
-  const UniformSlot(this.slotId, this.shaderStage);
+  UniformSlot._(this.shader, this.uniformName);
+  final Shader shader;
+  final String uniformName;
 
-  final int slotId;
-  final ShaderStage shaderStage;
+  /// The reflected total size of a shader's uniform struct by name.
+  ///
+  /// Returns [null] if the shader does not contain a uniform struct with the
+  /// given name.
+  int? get sizeInBytes {
+    int size = shader._getUniformStructSize(uniformName);
+    return size < 0 ? null : size;
+  }
+
+  /// Get the reflected offset of a named member in the uniform struct.
+  ///
+  /// Returns [null] if the shader does not contain a uniform struct with the
+  /// given name, or if the uniform struct does not contain a member with the
+  /// given name.
+  int? getMemberOffsetInBytes(String memberName) {
+    int offset = shader._getUniformMemberOffset(uniformName, memberName);
+    return offset < 0 ? null : offset;
+  }
 }
 
 base class Shader extends NativeFieldWrapperClass1 {
   // [Shader] handles are instantiated when interacting with a [ShaderLibrary].
   Shader._();
 
-  UniformSlot? getUniformSlot(String name) {
-    int slot = _getUniformSlot(name);
-    if (slot < 0) {
-      return null;
-    }
-    return UniformSlot(slot, ShaderStage.values[_getShaderStage()]);
+  UniformSlot getUniformSlot(String uniformName) {
+    return UniformSlot._(this, uniformName);
   }
 
-  @Native<Int Function(Pointer<Void>)>(
-      symbol: 'InternalFlutterGpu_Shader_GetShaderStage')
-  external int _getShaderStage();
-
   @Native<Int Function(Pointer<Void>, Handle)>(
-      symbol: 'InternalFlutterGpu_Shader_GetUniformSlot')
-  external int _getUniformSlot(String name);
+      symbol: 'InternalFlutterGpu_Shader_GetUniformStructSize')
+  external int _getUniformStructSize(String uniformStructName);
+
+  @Native<Int Function(Pointer<Void>, Handle, Handle)>(
+      symbol: 'InternalFlutterGpu_Shader_GetUniformMemberOffset')
+  external int _getUniformMemberOffset(
+      String uniformStructName, String memberName);
 }

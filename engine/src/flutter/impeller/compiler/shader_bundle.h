@@ -22,7 +22,7 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
 ///
 /// @note   Exposed only for testing purposes. Use `GenerateShaderBundle`
 ///         directly.
-std::optional<fb::ShaderBundleT> GenerateShaderBundleFlatbuffer(
+std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
     const std::string& bundle_config_json,
     const SourceOptions& options);
 

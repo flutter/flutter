@@ -293,79 +293,92 @@ std::shared_ptr<fml::Mapping> RuntimeStageData::CreateJsonMapping() const {
       json_string->size(), [json_string](auto, auto) {});
 }
 
-std::unique_ptr<fb::RuntimeStagesT> RuntimeStageData::CreateFlatbuffer() const {
+std::unique_ptr<fb::RuntimeStageT> RuntimeStageData::CreateStageFlatbuffer(
+    impeller::RuntimeStageBackend backend) const {
+  auto kvp = data_.find(backend);
+  if (kvp == data_.end()) {
+    return nullptr;
+  }
+
+  auto runtime_stage = std::make_unique<fb::RuntimeStageT>();
+  runtime_stage->entrypoint = kvp->second->entrypoint;
+  const auto stage = ToStage(kvp->second->stage);
+  if (!stage.has_value()) {
+    VALIDATION_LOG << "Invalid runtime stage.";
+    return nullptr;
+  }
+  runtime_stage->stage = stage.value();
+  if (!kvp->second->shader) {
+    VALIDATION_LOG << "No shader specified for runtime stage.";
+    return nullptr;
+  }
+  if (kvp->second->shader->GetSize() > 0u) {
+    runtime_stage->shader = {
+        kvp->second->shader->GetMapping(),
+        kvp->second->shader->GetMapping() + kvp->second->shader->GetSize()};
+  }
+  for (const auto& uniform : kvp->second->uniforms) {
+    auto desc = std::make_unique<fb::UniformDescriptionT>();
+
+    desc->name = uniform.name;
+    if (desc->name.empty()) {
+      VALIDATION_LOG << "Uniform name cannot be empty.";
+      return nullptr;
+    }
+    desc->location = uniform.location;
+    desc->rows = uniform.rows;
+    desc->columns = uniform.columns;
+    auto uniform_type = ToUniformType(uniform.type);
+    if (!uniform_type.has_value()) {
+      VALIDATION_LOG << "Invalid uniform type for runtime stage.";
+      return nullptr;
+    }
+    desc->type = uniform_type.value();
+    desc->bit_width = uniform.bit_width;
+    if (uniform.array_elements.has_value()) {
+      desc->array_elements = uniform.array_elements.value();
+    }
+
+    runtime_stage->uniforms.emplace_back(std::move(desc));
+  }
+
+  for (const auto& input : kvp->second->inputs) {
+    auto desc = std::make_unique<fb::StageInputT>();
+
+    desc->name = input.name;
+
+    if (desc->name.empty()) {
+      VALIDATION_LOG << "Stage input name cannot be empty.";
+      return nullptr;
+    }
+    desc->location = input.location;
+    desc->set = input.set;
+    desc->binding = input.binding;
+    auto input_type = ToInputType(input.type);
+    if (!input_type.has_value()) {
+      VALIDATION_LOG << "Invalid uniform type for runtime stage.";
+      return nullptr;
+    }
+    desc->type = input_type.value();
+    desc->bit_width = input.bit_width;
+    desc->vec_size = input.vec_size;
+    desc->columns = input.columns;
+    desc->offset = input.offset;
+
+    runtime_stage->inputs.emplace_back(std::move(desc));
+  }
+
+  return runtime_stage;
+}
+
+std::unique_ptr<fb::RuntimeStagesT>
+RuntimeStageData::CreateMultiStageFlatbuffer() const {
   // The high level object API is used here for writing to the buffer. This is
   // just a convenience.
   auto runtime_stages = std::make_unique<fb::RuntimeStagesT>();
 
   for (const auto& kvp : data_) {
-    auto runtime_stage = std::make_unique<fb::RuntimeStageT>();
-    runtime_stage->entrypoint = kvp.second->entrypoint;
-    const auto stage = ToStage(kvp.second->stage);
-    if (!stage.has_value()) {
-      VALIDATION_LOG << "Invalid runtime stage.";
-      return nullptr;
-    }
-    runtime_stage->stage = stage.value();
-    if (!kvp.second->shader) {
-      VALIDATION_LOG << "No shader specified for runtime stage.";
-      return nullptr;
-    }
-    if (kvp.second->shader->GetSize() > 0u) {
-      runtime_stage->shader = {
-          kvp.second->shader->GetMapping(),
-          kvp.second->shader->GetMapping() + kvp.second->shader->GetSize()};
-    }
-    for (const auto& uniform : kvp.second->uniforms) {
-      auto desc = std::make_unique<fb::UniformDescriptionT>();
-
-      desc->name = uniform.name;
-      if (desc->name.empty()) {
-        VALIDATION_LOG << "Uniform name cannot be empty.";
-        return nullptr;
-      }
-      desc->location = uniform.location;
-      desc->rows = uniform.rows;
-      desc->columns = uniform.columns;
-      auto uniform_type = ToUniformType(uniform.type);
-      if (!uniform_type.has_value()) {
-        VALIDATION_LOG << "Invalid uniform type for runtime stage.";
-        return nullptr;
-      }
-      desc->type = uniform_type.value();
-      desc->bit_width = uniform.bit_width;
-      if (uniform.array_elements.has_value()) {
-        desc->array_elements = uniform.array_elements.value();
-      }
-
-      runtime_stage->uniforms.emplace_back(std::move(desc));
-    }
-
-    for (const auto& input : kvp.second->inputs) {
-      auto desc = std::make_unique<fb::StageInputT>();
-
-      desc->name = input.name;
-
-      if (desc->name.empty()) {
-        VALIDATION_LOG << "Stage input name cannot be empty.";
-        return nullptr;
-      }
-      desc->location = input.location;
-      desc->set = input.set;
-      desc->binding = input.binding;
-      auto input_type = ToInputType(input.type);
-      if (!input_type.has_value()) {
-        VALIDATION_LOG << "Invalid uniform type for runtime stage.";
-        return nullptr;
-      }
-      desc->type = input_type.value();
-      desc->bit_width = input.bit_width;
-      desc->vec_size = input.vec_size;
-      desc->columns = input.columns;
-      desc->offset = input.offset;
-
-      runtime_stage->inputs.emplace_back(std::move(desc));
-    }
+    auto runtime_stage = CreateStageFlatbuffer(kvp.first);
     switch (kvp.first) {
       case RuntimeStageBackend::kSkSL:
         runtime_stages->sksl = std::move(runtime_stage);
@@ -385,7 +398,7 @@ std::unique_ptr<fb::RuntimeStagesT> RuntimeStageData::CreateFlatbuffer() const {
 }
 
 std::shared_ptr<fml::Mapping> RuntimeStageData::CreateMapping() const {
-  auto runtime_stages = CreateFlatbuffer();
+  auto runtime_stages = CreateMultiStageFlatbuffer();
   if (!runtime_stages) {
     return nullptr;
   }

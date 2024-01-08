@@ -48,6 +48,8 @@ impeller_component("compiler_lib") {
     "runtime_stage_data.h",
     "shader_bundle.cc",
     "shader_bundle.h",
+    "shader_bundle_data.cc",
+    "shader_bundle_data.h",
     "source_options.cc",
     "source_options.h",
     "spirv_compiler.cc",

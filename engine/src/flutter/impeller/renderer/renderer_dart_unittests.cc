@@ -9,7 +9,6 @@
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/lib/gpu/context.h"
-#include "flutter/lib/gpu/shader.h"
 #include "flutter/lib/gpu/shader_library.h"
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
@@ -17,11 +16,8 @@
 #include "flutter/testing/dart_isolate_runner.h"
 #include "flutter/testing/testing.h"
 #include "fml/memory/ref_ptr.h"
-#include "impeller/core/shader_types.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/vertex_descriptor.h"
-#include "impeller/runtime_stage/runtime_stage.h"
 
 #include "gtest/gtest.h"
 #include "third_party/imgui/imgui.h"
@@ -29,11 +25,11 @@
 namespace impeller {
 namespace testing {
 
-static void InstantiateTestShaderLibrary() {
+static void InstantiateTestShaderLibrary(Context::BackendType backend_type) {
   auto fixture =
       flutter::testing::OpenFixtureAsMapping("playground.shaderbundle");
-  auto library =
-      flutter::gpu::ShaderLibrary::MakeFromFlatbuffer(std::move(fixture));
+  auto library = flutter::gpu::ShaderLibrary::MakeFromFlatbuffer(
+      backend_type, std::move(fixture));
   flutter::gpu::ShaderLibrary::SetOverride(library);
 }
 
@@ -57,7 +53,7 @@ class RendererDartTest : public PlaygroundTest,
     assert(GetContext() != nullptr);
     flutter::gpu::Context::SetOverrideContext(GetContext());
 
-    InstantiateTestShaderLibrary();
+    InstantiateTestShaderLibrary(GetContext()->GetBackendType());
 
     return isolate_.get();
   }
@@ -148,6 +144,7 @@ DART_TEST_CASE(textureAsImageReturnsAValidUIImageHandle);
 DART_TEST_CASE(textureAsImageThrowsWhenNotShaderReadable);
 
 DART_TEST_CASE(canCreateShaderLibrary);
+DART_TEST_CASE(canReflectUniformStructs);
 
 DART_TEST_CASE(canCreateRenderPassAndSubmit);
 

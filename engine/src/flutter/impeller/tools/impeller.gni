@@ -289,6 +289,7 @@ template("_impellerc") {
 #                                       --vulkan
 #                                       --runtime-stage-metal
 #                                       --runtime-stage-gles
+#                                   Not required for --shader_bundle mode.
 # Required: sl_file_extension       The file extension to use for output files.
 #                                   Not required for --shader_bundle mode.
 # Optional: iplr                    Causes --sl output to be in iplr/runtime
@@ -306,7 +307,7 @@ template("_impellerc") {
 #                                   flatbuffer.
 template("impellerc") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
-  assert(defined(invoker.shader_target_flags),
+  assert(defined(invoker.shader_target_flags) || defined(invoker.shader_bundle),
          "The flag to impellerc for target selection must be specified.")
   assert(defined(invoker.sl_file_extension) || defined(invoker.shader_bundle),
          "The extension of the SL file must be specified (metal, glsl, etc..).")
@@ -316,8 +317,14 @@ template("impellerc") {
         "When shader_bundle is specified, shader_output_bundle must also be specified.")
   }
 
+  if (defined(invoker.shader_target_flags)) {
+    shader_target_flags = invoker.shader_target_flags
+  } else {
+    shader_target_flags = []
+  }
+
   sksl = false
-  foreach(shader_target_flag, invoker.shader_target_flags) {
+  foreach(shader_target_flag, shader_target_flags) {
     sksl = shader_target_flag == "--sksl"
   }
   iplr = false
@@ -351,8 +358,6 @@ template("impellerc") {
       generated_dir = "$target_gen_dir"
     }
 
-    shader_target_flags = invoker.shader_target_flags
-
     shader_lib_dir = rebase_path("//flutter/impeller/compiler/shader_lib")
     args = [ "--include=$shader_lib_dir" ] + shader_target_flags
 
@@ -366,6 +371,10 @@ template("impellerc") {
         "--include={{source_dir}}",
         "--depfile=$depfile_intermediate_path",
       ]
+
+      if (defined(invoker.shader_target_flag)) {
+        args += [ "${invoker.shader_target_flag}" ]
+      }
     }
 
     if (defined(invoker.gles_language_version)) {

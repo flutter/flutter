@@ -130,7 +130,7 @@ impellerc("flutter_gpu_shaders") {
     "flutter_gpu_texture.frag",
     "flutter_gpu_texture.vert",
   ]
-  shader_target_flags = [ "--runtime-stage-metal" ]
+
   shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"../../flutter/impeller/fixtures/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"../../flutter/impeller/fixtures/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"../../flutter/impeller/fixtures/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"../../flutter/impeller/fixtures/flutter_gpu_texture.vert\"}}"
   shader_bundle_output = "playground.shaderbundle"
 }
