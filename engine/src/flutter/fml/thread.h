@@ -9,12 +9,13 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <thread>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
 
 namespace fml {
+
+class ThreadHandle;
 
 class Thread {
  public:
@@ -59,8 +60,10 @@ class Thread {
 
   static void SetCurrentThreadName(const ThreadConfig& config);
 
+  static size_t GetDefaultStackSize();
+
  private:
-  std::unique_ptr<std::thread> thread_;
+  std::unique_ptr<ThreadHandle> thread_;
 
   fml::RefPtr<fml::TaskRunner> task_runner_;
 
