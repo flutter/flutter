@@ -1329,6 +1329,7 @@ void main() {
       final RenderBox child1Box = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
       final RenderBox child2Box = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
       final RenderBox overlayChildBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
+      addTearDown(overlayChildBox.dispose);
 
       late StateSetter setState;
       bool swapped = false;
@@ -2077,11 +2078,14 @@ void main() {
     testWidgets('OverlayPortal overlay child clipping', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
+      late final OverlayEntry entry;
+      addTearDown(() { entry.remove(); entry.dispose(); });
+
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return DefaultTextStyle(
                   style: const TextStyle(fontSize: 10),
