@@ -17,6 +17,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:meta/meta.dart';
 
 import '../image_data.dart';
 import 'semantics_tester.dart';
@@ -804,7 +806,9 @@ void main() {
     expect(renderer.opacity, opacity);
   });
 
-  testWidgets('Precache', (WidgetTester tester) async {
+  testWidgets('Precache',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
     await tester.pumpWidget(
@@ -826,7 +830,9 @@ void main() {
     expect(isSync, isTrue);
   });
 
-  testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143', (WidgetTester tester) async {
+  testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);
 
@@ -1023,7 +1029,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Image invokes frameBuilder with correct frameNumber argument', (WidgetTester tester) async {
+  testWidgets('Image invokes frameBuilder with correct frameNumber argument',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
     }))!;
@@ -1088,7 +1096,9 @@ void main() {
     expect(lastFrameWasSync, isFalse);
   });
 
-  testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=true', (WidgetTester tester) async {
+  testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=true',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(ImageInfo(image: image10x10.clone()));
     final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
     int? lastFrame;
@@ -1146,7 +1156,9 @@ void main() {
     expect(tester.state(find.byType(Image)), same(state));
   });
 
-  testWidgets('Image state handles enabling and disabling of tickers', (WidgetTester tester) async {
+  testWidgets('Image state handles enabling and disabling of tickers',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
     }))!;
@@ -1450,6 +1462,7 @@ void main() {
     const int gridCells = 1000;
     final List<_TestImageProvider> imageProviders = <_TestImageProvider>[];
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: GridView.builder(
@@ -1549,7 +1562,9 @@ void main() {
     expect(imageCache.liveImageCount, 0);
   });
 
-  testWidgets('precacheImage does not hold weak ref for more than a frame', (WidgetTester tester) async {
+  testWidgets('precacheImage does not hold weak ref for more than a frame',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     imageCache.maximumSize = 0;
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
@@ -1600,7 +1615,9 @@ void main() {
     expect(provider.loadCallCount, 1);
   });
 
-  testWidgets('precacheImage allows time to take over weak reference', (WidgetTester tester) async {
+  testWidgets('precacheImage allows time to take over weak reference',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
     await tester.pumpWidget(
@@ -1651,7 +1668,9 @@ void main() {
     expect(provider.loadCallCount, 1);
   });
 
-  testWidgets('evict an image during precache', (WidgetTester tester) async {
+  testWidgets('evict an image during precache',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     // This test checks that the live image tracking does not hold on to a
     // pending image that will never complete because it has been evicted from
     // the cache.
@@ -1766,6 +1785,7 @@ void main() {
 
   testWidgets(
     'Rotated images',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
     (WidgetTester tester) async {
       await testRotatedImage(tester, true);
       await testRotatedImage(tester, false);
@@ -1775,6 +1795,7 @@ void main() {
 
   testWidgets(
     'Image opacity',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
     (WidgetTester tester) async {
       final Key key = UniqueKey();
       await tester.pumpWidget(RepaintBoundary(
@@ -1932,7 +1953,9 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
-  testWidgets('Load a good image after a bad image was loaded should not call errorBuilder', (WidgetTester tester) async {
+  testWidgets('Load a good image after a bad image was loaded should not call errorBuilder',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final UniqueKey errorKey = UniqueKey();
     final ui.Image image = (await tester.runAsync(() => createTestImage()))!;
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
