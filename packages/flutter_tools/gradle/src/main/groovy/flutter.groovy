@@ -426,11 +426,11 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private configureLegacyPluginEachProjects(Project project) {
         try {
-            if (!settingsGradleFile().text.contains("'.flutter-plugins'")) {
+            if (!settingsGradleFile(project).text.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
-            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${settingsGradleFile().absolutePath}")
+            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${settingsGradleFile(project).absolutePath}")
         }
         List<Map<String, Object>> deps = getPluginDependencies(project)
         List<String> plugins = getPluginList(project).collect { it.name as String }
