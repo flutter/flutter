@@ -7,7 +7,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../widgets.dart';
+import 'basic.dart';
+import 'framework.dart';
+import 'navigator.dart';
+import 'pop_scope.dart';
+import 'restoration.dart';
+import 'restoration_properties.dart';
+import 'routes.dart';
+import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
 const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
@@ -586,9 +593,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       }
     }
     Form.maybeOf(context)?._register(this);
-    return SizeChangedLayoutNotifier(
-      child: widget.builder(this),
-    );
+    return widget.builder(this);
   }
 }
 
