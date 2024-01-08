@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -923,9 +924,8 @@ void main() {
                   key: overlayKey,
                   initialEntries: <OverlayEntry>[
                     // Overlay.performLayout calls layoutCounter.layout.
-                    OverlayEntry(builder: (BuildContext context) => WidgetToRenderBoxAdapter(renderBox: overlayLayoutCounter)),
-                    OverlayEntry(
-                      builder: (BuildContext outerEntryContext) {
+                    _buildOverlayEntry((BuildContext context) => WidgetToRenderBoxAdapter(renderBox: overlayLayoutCounter)),
+                    _buildOverlayEntry((BuildContext outerEntryContext) {
                         return Center(
                           child: _ManyRelayoutBoundaries(
                             levels: 50,
@@ -979,7 +979,8 @@ void main() {
     verifyTreeIsClean();
   });
 
-  testWidgets('Can target the root overlay', (WidgetTester tester) async {
+  testWidgets('Can target the root overlay',
+  (WidgetTester tester) async {
     final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget outer');
     final GlobalKey rootOverlayKey = GlobalKey(debugLabel: 'root overlay');
     final GlobalKey localOverlayKey = GlobalKey(debugLabel: 'local overlay');
@@ -989,14 +990,6 @@ void main() {
     int layoutCount = 0;
     OverlayPortal Function({ Widget? child, required OverlayPortalController controller, Key? key, required WidgetBuilder overlayChildBuilder, }) constructorToUse = OverlayPortal.new;
     late StateSetter setState;
-
-    final List<OverlayEntry?> entries = List<OverlayEntry?>.filled(4, null);
-    addTearDown((){
-      //entries[0]?.remove();
-      for (final OverlayEntry? entry in entries) {
-        entry?.dispose();
-      }
-    });
 
     // This tree has 3 nested Overlays.
     await tester.pumpWidget(
@@ -1009,16 +1002,16 @@ void main() {
               child: Overlay(
                 key: rootOverlayKey,
                 initialEntries: <OverlayEntry>[
-                  entries[0] = OverlayEntry(builder: (BuildContext context) {
+                  _buildOverlayEntry((BuildContext context) {
                     return Overlay(
                       initialEntries: <OverlayEntry>[
-                        entries[1] = OverlayEntry(builder: (BuildContext context) {
+                        _buildOverlayEntry((BuildContext context) {
                           return Overlay(
                             key: localOverlayKey,
                             initialEntries: <OverlayEntry>[
                               // Overlay.performLayout calls layoutCounter.layout.
-                              entries[2] = OverlayEntry(builder: (BuildContext context) => WidgetToRenderBoxAdapter(renderBox: overlayLayoutCounter)),
-                              entries[3] = OverlayEntry(builder: (BuildContext outerEntryContext) {
+                              _buildOverlayEntry((BuildContext context) => WidgetToRenderBoxAdapter(renderBox: overlayLayoutCounter)),
+                              _buildOverlayEntry((BuildContext outerEntryContext) {
                                 return Center(
                                   child: Builder(builder: (BuildContext context) {
                                     return constructorToUse(
@@ -1140,20 +1133,12 @@ void main() {
       int layoutCount1 = 0;
       int layoutCount2 = 0;
 
-      final List<OverlayEntry?> entries = List<OverlayEntry?>.filled(3, null);
-      addTearDown((){
-        for (final OverlayEntry? entry in entries) {
-          entry?.remove();
-          entry?.dispose();
-        }
-      });
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              entries[0] = OverlayEntry(builder: (BuildContext context) {
+              _buildOverlayEntry((BuildContext context) {
                 return _ManyRelayoutBoundaries(
                   levels: 50,
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
@@ -1173,8 +1158,8 @@ void main() {
                   }),
                 );
               }),
-              entries[1] = OverlayEntry(builder: (BuildContext context) => const Placeholder()),
-              entries[2] = OverlayEntry(builder: (BuildContext context) {
+              _buildOverlayEntry((BuildContext context) => const Placeholder()),
+              _buildOverlayEntry((BuildContext context) {
                 return SizedBox(
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                     setState2 = stateSetter;
@@ -2198,6 +2183,7 @@ void main() {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       final ScrollController controller = ScrollController(initialScrollOffset: 10);
+      addTearDown(controller.dispose);
 
       late final OverlayEntry entry;
       addTearDown(() { entry.remove(); entry.dispose(); });
@@ -2290,6 +2276,9 @@ class _RenderLayoutCounter extends RenderProxyBox {
     }
   }
 }
+
+/// This helper makes leak tracker forgiving the entry is not disposed.
+OverlayEntry _buildOverlayEntry(WidgetBuilder builder) => OverlayEntry(builder: builder);
 
 class _PaintOrder extends SingleChildRenderObjectWidget {
   const _PaintOrder();
