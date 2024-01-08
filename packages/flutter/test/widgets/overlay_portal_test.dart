@@ -313,11 +313,13 @@ void main() {
 
   testWidgets('Throws when the same controller is attached to multiple OverlayPortal', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
+    late final OverlayEntry entry;
+    addTearDown(() { entry.remove(); entry.dispose(); });
     final Widget widget = Directionality(
       textDirection: TextDirection.ltr,
       child: Overlay(
         initialEntries: <OverlayEntry>[
-          OverlayEntry(
+          entry = OverlayEntry(
             builder: (BuildContext context) {
               return Column(
                 children: <Widget>[
@@ -988,6 +990,14 @@ void main() {
     OverlayPortal Function({ Widget? child, required OverlayPortalController controller, Key? key, required WidgetBuilder overlayChildBuilder, }) constructorToUse = OverlayPortal.new;
     late StateSetter setState;
 
+    final List<OverlayEntry?> entries = List<OverlayEntry?>.filled(4, null);
+    addTearDown((){
+      //entries[0]?.remove();
+      for (final OverlayEntry? entry in entries) {
+        entry?.dispose();
+      }
+    });
+
     // This tree has 3 nested Overlays.
     await tester.pumpWidget(
       StatefulBuilder(
@@ -999,16 +1009,16 @@ void main() {
               child: Overlay(
                 key: rootOverlayKey,
                 initialEntries: <OverlayEntry>[
-                  OverlayEntry(builder: (BuildContext context) {
+                  entries[0] = OverlayEntry(builder: (BuildContext context) {
                     return Overlay(
                       initialEntries: <OverlayEntry>[
-                        OverlayEntry(builder: (BuildContext context) {
+                        entries[1] = OverlayEntry(builder: (BuildContext context) {
                           return Overlay(
                             key: localOverlayKey,
                             initialEntries: <OverlayEntry>[
                               // Overlay.performLayout calls layoutCounter.layout.
-                              OverlayEntry(builder: (BuildContext context) => WidgetToRenderBoxAdapter(renderBox: overlayLayoutCounter)),
-                              OverlayEntry(builder: (BuildContext outerEntryContext) {
+                              entries[2] = OverlayEntry(builder: (BuildContext context) => WidgetToRenderBoxAdapter(renderBox: overlayLayoutCounter)),
+                              entries[3] = OverlayEntry(builder: (BuildContext outerEntryContext) {
                                 return Center(
                                   child: Builder(builder: (BuildContext context) {
                                     return constructorToUse(
@@ -1130,12 +1140,20 @@ void main() {
       int layoutCount1 = 0;
       int layoutCount2 = 0;
 
+      final List<OverlayEntry?> entries = List<OverlayEntry?>.filled(3, null);
+      addTearDown((){
+        for (final OverlayEntry? entry in entries) {
+          entry?.remove();
+          entry?.dispose();
+        }
+      });
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(builder: (BuildContext context) {
+              entries[0] = OverlayEntry(builder: (BuildContext context) {
                 return _ManyRelayoutBoundaries(
                   levels: 50,
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
@@ -1155,8 +1173,8 @@ void main() {
                   }),
                 );
               }),
-              OverlayEntry(builder: (BuildContext context) => const Placeholder()),
-              OverlayEntry(builder: (BuildContext context) {
+              entries[1] = OverlayEntry(builder: (BuildContext context) => const Placeholder()),
+              entries[2] = OverlayEntry(builder: (BuildContext context) {
                 return SizedBox(
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                     setState2 = stateSetter;
@@ -1320,12 +1338,15 @@ void main() {
       final Widget child2 = WidgetToRenderBoxAdapter(renderBox: child2Box);
       final Widget child3 = WidgetToRenderBoxAdapter(renderBox: overlayChildBox);
 
+      late final OverlayEntry entry;
+      addTearDown(() { entry.remove(); entry.dispose(); });
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(builder: (BuildContext context) {
+              entry = OverlayEntry(builder: (BuildContext context) {
                 return StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                   setState = stateSetter;
                   return OverlayPortal(
@@ -1985,11 +2006,14 @@ void main() {
 
       final double rowOriginY = TestSemantics.fullScreen.height - 10;
 
+      late final OverlayEntry entry;
+      addTearDown(() { entry.remove(); entry.dispose(); });
+
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return DefaultTextStyle(
                   style: const TextStyle(fontSize: 10),
@@ -2113,11 +2137,14 @@ void main() {
     testWidgets("OverlayPortal's semantics node is hidden", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
+      late final OverlayEntry entry;
+      addTearDown(() { entry.remove(); entry.dispose(); });
+
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return DefaultTextStyle(
                   style: const TextStyle(fontSize: 10),
@@ -2167,11 +2194,15 @@ void main() {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       final ScrollController controller = ScrollController(initialScrollOffset: 10);
+
+      late final OverlayEntry entry;
+      addTearDown(() { entry.remove(); entry.dispose(); });
+
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return DefaultTextStyle(
                   style: const TextStyle(fontSize: 10),
