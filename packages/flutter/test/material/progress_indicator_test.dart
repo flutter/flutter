@@ -1104,8 +1104,8 @@ void main() {
       final double actualProgress =tester.widget<CupertinoActivityIndicator>(
         find.byType(CupertinoActivityIndicator)).progress;
       expect(actualProgress, 0.5);
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform> {
+   },
+   variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
