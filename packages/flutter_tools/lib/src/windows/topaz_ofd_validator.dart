@@ -4,15 +4,15 @@ import '../doctor_validator.dart';
 const String kCoreProcessPattern = r'Topaz OFD\\Warsaw\\core.exe';
 
 class TopazOfdValidator extends DoctorValidator {
-  const TopazOfdValidator() : super('Topaz OFD');
+  const TopazOfdValidator({required this.processLister}) : super('Topaz OFD');
+
+  final ProcessLister processLister;
 
   @override
   Future<ValidationResult> validate() async {
-    final ProcessResult tasksResult = await Process.run('powershell', ['-command', 'Get-Process core | Format-List Path']);
-    String tasks = tasksResult.stdout as String;
+    final String tasks = await processLister.getProcessesWithPath('core');
     final RegExp pattern = RegExp(kCoreProcessPattern, multiLine: true, caseSensitive: false);
     final bool matches = pattern.hasMatch(tasks);
-    tasks = '$tasks: $kCoreProcessPattern: $matches';
     if (matches) {
       return const ValidationResult(
         ValidationType.partial,
@@ -25,5 +25,13 @@ class TopazOfdValidator extends DoctorValidator {
         ValidationType.success,
         <ValidationMessage>[]);
     }
+  }
+}
+
+class ProcessLister {
+  Future<String> getProcessesWithPath(String? filter) async {
+    final String argument = filter == null ? 'Get-Process $filter | Format-List Path' : 'Get-Process | Format-List Path';
+    final ProcessResult taskResult = await Process.run('powershell', <String>['-command', argument]);
+    return taskResult.stdout as String;
   }
 }

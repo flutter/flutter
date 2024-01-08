@@ -145,7 +145,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           WindowsVersionValidator(
             operatingSystemUtils: globals.os,
           ),
-          const TopazOfdValidator(),
+          TopazOfdValidator(
+            processLister: ProcessLister(),
+          ),
         ],
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
