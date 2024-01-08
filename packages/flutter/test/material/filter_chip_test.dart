@@ -371,111 +371,6 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('Material2 - FilterChip.elevated defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
-    const String label = 'filter chip';
-
-    // Test enabled FilterChip.elevated defaults.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Material(
-          child: Center(
-            child: FilterChip.elevated(
-              onSelected: (bool valueChanged) { },
-              label: const Text(label),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Test default chip size.
-    expect(tester.getSize(find.byType(FilterChip)), const Size(178.0, 48.0));
-
-    // Test default label style.
-    expect(
-      getLabelStyle(tester, 'filter chip').style.color,
-      theme.textTheme.bodyLarge!.color!.withAlpha(0xde),
-    );
-
-    Material chipMaterial = getMaterial(tester);
-    expect(chipMaterial.elevation, 0);
-    expect(chipMaterial.shadowColor, Colors.black);
-    expect(chipMaterial.shape, const StadiumBorder());
-
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, Colors.black.withAlpha(0x1f));
-
-    // Test disabled FilterChip.elevated defaults.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: const Material(
-          child: FilterChip.elevated(
-            onSelected: null,
-            label: Text(label),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    chipMaterial = getMaterial(tester);
-    expect(chipMaterial.elevation, 0);
-    expect(chipMaterial.shadowColor, Colors.black);
-    expect(chipMaterial.shape, const StadiumBorder());
-
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, Colors.black38);
-
-    // Test selected enabled FilterChip.elevated defaults.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Material(
-          child: FilterChip.elevated(
-            selected: true,
-            onSelected: (bool valueChanged) { },
-            label: const Text(label),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    chipMaterial = getMaterial(tester);
-    expect(chipMaterial.elevation, 0);
-    expect(chipMaterial.shadowColor, Colors.black);
-    expect(chipMaterial.shape, const StadiumBorder());
-
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, Colors.black.withAlpha(0x3d));
-
-    // Test selected disabled FilterChip.elevated defaults.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: const Material(
-          child: FilterChip.elevated(
-            selected: true,
-            onSelected: null,
-            label: Text(label),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    chipMaterial = getMaterial(tester);
-    expect(chipMaterial.elevation, 0);
-    expect(chipMaterial.shadowColor, Colors.black);
-    expect(chipMaterial.shape, const StadiumBorder());
-
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, Colors.black.withAlpha(0x3d));
-  });
-
   testWidgets('Material3 - FilterChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     const String label = 'filter chip';
@@ -801,11 +696,10 @@ void main() {
   });
 
   testWidgets('Material2 - Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      useMaterial3: theme.useMaterial3,
+      useMaterial3: false,
     );
 
     expectCheckmarkColor(find.byType(FilterChip), Colors.black.withAlpha(0xde));
@@ -826,12 +720,11 @@ void main() {
   });
 
   testWidgets('Material2 - Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      brightness: theme.brightness,
-      useMaterial3: theme.useMaterial3,
+      brightness: Brightness.dark,
+      useMaterial3: false,
     );
 
     expectCheckmarkColor(

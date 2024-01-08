@@ -202,64 +202,6 @@ void main() {
     expect(decoration.color, null);
   });
 
-  testWidgets('Material2 - ActionChip.elevated defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
-    const String label = 'action chip';
-
-    // Test enabled ActionChip defaults.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Material(
-          child: Center(
-            child: ActionChip.elevated(
-              onPressed: () {},
-              label: const Text(label),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Test default chip size.
-    expect(tester.getSize(find.byType(ActionChip)), const Size(178.0, 48.0));
-
-    // Test default label style.
-    expect(
-      getLabelStyle(tester, label).style.color,
-      theme.textTheme.bodyLarge!.color!.withAlpha(0xde),
-    );
-
-    Material chipMaterial = getMaterial(tester);
-    expect(chipMaterial.elevation, 0);
-    expect(chipMaterial.shadowColor, Colors.black);
-    expect(chipMaterial.shape, const StadiumBorder());
-
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, Colors.black.withAlpha(0x1f));
-
-    // Test disabled ActionChip.elevated defaults.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: const Material(
-          child: ActionChip.elevated(
-            label: Text(label),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    chipMaterial = getMaterial(tester);
-    expect(chipMaterial.elevation, 0);
-    expect(chipMaterial.shadowColor, Colors.black);
-    expect(chipMaterial.shape, const StadiumBorder());
-
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, Colors.black38);
-  });
-
   testWidgets('Material3 - ActionChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     const String label = 'action chip';
