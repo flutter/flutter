@@ -575,5 +575,16 @@ Future<int> main(List<String> args) async {
     expect(lintAction, equals(LintAction.lint));
   });
 
+  test('Command filters out sed command after a compile command', () {
+    final Command command = Command.fromMap(<String, String>{
+        'directory': '/unused',
+        'command':
+          '../../buildtools/mac-x64/clang/bin/clang filename '
+          "&& sed -i 's@/b/f/w@../..@g' filename",
+        'file': 'unused',
+    });
+    expect(command.tidyArgs.trim(), 'filename');
+  });
+
   return 0;
 }
