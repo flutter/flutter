@@ -24,6 +24,71 @@
 
 namespace fml {
 
+typedef std::function<void()> ThreadFunction;
+
+class ThreadHandle {
+ public:
+  explicit ThreadHandle(ThreadFunction&& function);
+  ~ThreadHandle();
+
+  void Join();
+
+ private:
+#if defined(FML_OS_WIN)
+  HANDLE thread_;
+#else
+  pthread_t thread_;
+#endif
+};
+
+#if defined(FML_OS_WIN)
+ThreadHandle::ThreadHandle(ThreadFunction&& function) {
+  thread_ = (HANDLE*)_beginthreadex(
+      nullptr, Thread::GetDefaultStackSize(),
+      [](void* arg) -> unsigned {
+        std::unique_ptr<ThreadFunction> function(
+            reinterpret_cast<ThreadFunction*>(arg));
+        (*function)();
+        return 0;
+      },
+      new ThreadFunction(std::move(function)), 0, nullptr);
+  FML_CHECK(thread_ != nullptr);
+}
+
+void ThreadHandle::Join() {
+  WaitForSingleObjectEx(thread_, INFINITE, FALSE);
+}
+
+ThreadHandle::~ThreadHandle() {
+  CloseHandle(thread_);
+}
+#else
+ThreadHandle::ThreadHandle(ThreadFunction&& function) {
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  int result = pthread_attr_setstacksize(&attr, Thread::GetDefaultStackSize());
+  FML_CHECK(result == 0);
+  result = pthread_create(
+      &thread_, &attr,
+      [](void* arg) -> void* {
+        std::unique_ptr<ThreadFunction> function(
+            reinterpret_cast<ThreadFunction*>(arg));
+        (*function)();
+        return nullptr;
+      },
+      new ThreadFunction(std::move(function)));
+  FML_CHECK(result == 0);
+  result = pthread_attr_destroy(&attr);
+  FML_CHECK(result == 0);
+}
+
+void ThreadHandle::Join() {
+  pthread_join(thread_, nullptr);
+}
+
+ThreadHandle::~ThreadHandle() {}
+#endif
+
 #if defined(FML_OS_WIN)
 // The information on how to set the thread name comes from
 // a MSDN article: http://msdn2.microsoft.com/en-us/library/xcb2z8hs.aspx
@@ -75,7 +140,7 @@ Thread::Thread(const ThreadConfigSetter& setter, const ThreadConfig& config)
   fml::AutoResetWaitableEvent latch;
   fml::RefPtr<fml::TaskRunner> runner;
 
-  thread_ = std::make_unique<std::thread>(
+  thread_ = std::make_unique<ThreadHandle>(
       [&latch, &runner, setter, config]() -> void {
         setter(config);
         fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -102,7 +167,11 @@ void Thread::Join() {
   }
   joined_ = true;
   task_runner_->PostTask([]() { MessageLoop::GetCurrent().Terminate(); });
-  thread_->join();
+  thread_->Join();
+}
+
+size_t Thread::GetDefaultStackSize() {
+  return 1024 * 1024 * 2;
 }
 
 }  // namespace fml
