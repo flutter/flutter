@@ -369,7 +369,10 @@ void main() {
         ],
       );
 
-      buildTextSpanWithSpellCheckSuggestions(
+      const TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
+        TextSpan(text: 'Hello, *ãresaa'),
+      ]);
+      final TextSpan textSpanTree = buildTextSpanWithSpellCheckSuggestions(
         value,
         composingRegionOutOfRange,
         null,
@@ -378,6 +381,7 @@ void main() {
       );
 
       expect(tester.takeException(), null);
+      expect(textSpanTree, equals(expectedTextSpanTree));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
   );
 }
