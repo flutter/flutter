@@ -559,24 +559,50 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Gets top-level Gradle build file.
   /// See https://developer.android.com/build#top-level.
   ///
-  /// It can be written in Groovy (build.gradle) or Kotlin (build.gradle.kts).
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
   File get hostAppGradleFile {
-    if (hostAppGradleRoot.childFile('build.gradle.kts').existsSync()) {
-      return hostAppGradleRoot.childFile('build.gradle.kts');
+    final File buildGroovy = hostAppGradleRoot.childFile('build.gradle');
+    final File buildKotlin = hostAppGradleRoot.childFile('build.gradle.kts');
+
+    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+      throwToolExit('Both build.gradle and build.gradle.kts exist. Only once can be used.');
     }
-    return hostAppGradleRoot.childFile('build.gradle');
+
+    if (buildKotlin.existsSync()) {
+      return buildKotlin;
+    }
+
+    if (buildGroovy.existsSync()) {
+      return buildGroovy;
+    }
+
+    throwToolExit('Neither build.gradle nor build.gradle.kts exist.');
   }
 
   /// Gets the module-level build.gradle file.
   /// See https://developer.android.com/build#module-level.
   ///
-  /// It can be written in Groovy (build.gradle) or Kotlin (build.gradle.kts).
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
   File get appGradleFile {
     final Directory appDir = hostAppGradleRoot.childDirectory('app');
-    if (appDir.childFile('build.gradle.kts').existsSync()) {
-      return appDir.childFile('build.gradle.kts');
+    final File buildGroovy = appDir.childFile('build.gradle');
+    final File buildKotlin = appDir.childFile('build.gradle.kts');
+
+    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+      throwToolExit('Both app/build.gradle and app/build.gradle.kts exist. Only once can be used.');
     }
-    return appDir.childFile('build.gradle');
+
+    if (buildKotlin.existsSync()) {
+      return buildKotlin;
+    }
+
+    if (buildGroovy.existsSync()) {
+      return buildGroovy;
+    }
+
+    throwToolExit('Neither app/build.gradle nor app/build.gradle.kts exist.');
   }
 
   File get appManifestFile {
