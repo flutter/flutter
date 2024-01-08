@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/profiling/sampling_profiler.h"
+#include <thread>
+
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/thread.h"
+#include "flutter/shell/profiling/sampling_profiler.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 
