@@ -373,6 +373,9 @@ class AndroidDevice extends Device {
   String get name => modelID;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
     String? userIdentifier,
