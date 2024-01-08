@@ -1077,12 +1077,12 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform> {
-        TargetPlatform.iOS,
-        TargetPlatform.macOS,
-      }),
-    );
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
 
   testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
@@ -1110,6 +1110,7 @@ void main() {
       TargetPlatform.macOS,
     }),
   );
+  
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
