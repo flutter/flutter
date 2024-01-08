@@ -640,7 +640,6 @@ class Text extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _SelectableTextContainerDelegate _selectionDelegate = _SelectableTextContainerDelegate();
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = style;
     if (style == null || style!.inherit) {
@@ -657,8 +656,10 @@ class Text extends StatelessWidget {
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
     final bool isRootText = context.findAncestorWidgetOfExactType<Text>() == null;
-
+    final GlobalKey _textKey = GlobalKey();
+    final _SelectableTextContainerDelegate? _selectionDelegate = isRootText ? _SelectableTextContainerDelegate(_textKey) : null;
     Widget result = RichText(
+      key: isRootText ? _textKey : null,
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -679,7 +680,7 @@ class Text extends StatelessWidget {
     );
     if (registrar != null) {
       if (isRootText) {
-        result = SelectionContainer(delegate: _selectionDelegate, child: result);
+        result = SelectionContainer(delegate: _selectionDelegate!, child: result);
       }
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
@@ -722,17 +723,16 @@ class Text extends StatelessWidget {
 }
 
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  _SelectableTextContainerDelegate(GlobalKey textKey) : _textKey = textKey;
+
+  final GlobalKey _textKey;
+  late final RenderParagraph paragraph = _textKey.currentContext!.findRenderObject()! as RenderParagraph;
+  
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
 
   Offset? _lastStartEdgeUpdateGlobalPosition;
   Offset? _lastEndEdgeUpdateGlobalPosition;
-
-  @override
-  void add(Selectable selectable) {
-    debugPrint('adding from selectabletext $selectable');
-    super.add(selectable);
-  }
 
   @override
   void remove(Selectable selectable) {
@@ -772,7 +772,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   /// [SelectWordSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
-    debugPrint('select word from text container');
     final SelectionResult result = super.handleSelectWord(event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
@@ -816,33 +815,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   /// [SelectParagraphSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    debugPrint('select paragraph from text container');
-    // final SelectionResult result = super.handleSelectParagraph(event);
-    SelectionResult? lastSelectionResult;
-    bool allSwitch = false;
-    for (int index = 0; index < selectables.length; index += 1) {
-      final SelectionGeometry existingGeometry = selectables[index].value;
-      lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
-      if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
-        return SelectionResult.next;
-      }
-      if (lastSelectionResult == SelectionResult.next) {
-        if (selectables[index].value != existingGeometry && !allSwitch) {
-          currentSelectionStartIndex = index;
-          allSwitch = true;
-        }
-        continue;
-      }
-      if (index == 0 && lastSelectionResult == SelectionResult.previous) {
-        return SelectionResult.previous;
-      }
-      if (selectables[index].value != existingGeometry) {
-        // Geometry has changed as a result of select paragraph, need to clear the
-        // selection of other selectables to keep selection in sync.
-        _flushInactiveSelections();
-        currentSelectionEndIndex = index;
-      }
-    }
+    final SelectionResult result = _handleSelectParagraph(event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
     }
@@ -850,7 +823,65 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
     }
     _updateLastEdgeEventsFromGeometries();
-    return lastSelectionResult!;
+    return result;
+  }
+
+  SelectionResult _handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    // First pass, if the position is on a placeholder then dispatch the selection
+    // event to the [Selectable] at the location and terminate.
+    for (int index = 0; index < selectables.length; index += 1) {
+      bool globalRectsContainsPosition = false;
+      if (selectables[index].boundingBoxes.isNotEmpty) {
+        for (final Rect rect in selectables[index].boundingBoxes) {
+          final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
+          if (globalRect.contains(event.globalPosition)) {
+            globalRectsContainsPosition = true;
+            break;
+          }
+        }
+      }
+      if (globalRectsContainsPosition) {
+        if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[index])) {
+          return dispatchSelectionEventToChild(selectables[index], event);
+        }
+        break;
+      }
+    }
+
+    SelectionResult? lastSelectionResult;
+    bool foundStart = false;
+    for (int index = 0; index < selectables.length; index += 1) {
+      if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[index])) {
+        if (foundStart) {
+          dispatchSelectionEventToChild(selectables[index], SelectAllSelectionEvent());
+        }
+        continue;
+      }
+      final SelectionGeometry existingGeometry = selectables[index].value;
+      lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+      if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
+        return SelectionResult.next;
+      }
+      if (lastSelectionResult == SelectionResult.next) {
+        if (selectables[index].value != existingGeometry && !foundStart) {
+          currentSelectionStartIndex = index;
+          foundStart = true;
+        }
+        continue;
+      }
+      if (index == 0 && lastSelectionResult == SelectionResult.previous) {
+        return SelectionResult.previous;
+      }
+      if (selectables[index].value != existingGeometry) {
+        currentSelectionEndIndex = index;
+        // Geometry has changed as a result of select paragraph, need to clear the
+        // selection of other selectables to keep selection in sync.
+        _flushInactiveSelections();
+      }
+      return SelectionResult.end;
+    }
+    assert(lastSelectionResult == null);
+    return SelectionResult.end;
   }
 
   @override
@@ -925,12 +956,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       }
       selectable.dispatchSelectionEvent(synthesizedEvent);
     }
-  }
-
-  @override
-  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    debugPrint('some $selectables');
-    return super.dispatchSelectionEvent(event);
   }
 
   @override

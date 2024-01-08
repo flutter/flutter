@@ -650,7 +650,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleRightClickDown(TapDownDetails details) {
-    debugPrint('handle right click down');
     final Offset? previousSecondaryTapDownPosition = lastSecondaryTapDownPosition;
     final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
     lastSecondaryTapDownPosition = details.globalPosition;
@@ -673,11 +672,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         _showToolbar(location: lastSecondaryTapDownPosition);
       case TargetPlatform.macOS:
         if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
-          debugPrint('woah');
           hideToolbar();
           return;
         }
-        debugPrint('weoa');
         _selectWordAt(offset: lastSecondaryTapDownPosition!);
         _showHandles();
         _showToolbar(location: lastSecondaryTapDownPosition);
@@ -1635,7 +1632,6 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   /// [SelectWordSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
-    debugPrint('select wordzzzzzz');
     final SelectionResult result = super.handleSelectWord(event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
@@ -1651,7 +1647,6 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   /// [SelectParagraphSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    debugPrint('select paragraphzzzzzz');
     final SelectionResult result = super.handleSelectParagraph(event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
@@ -2278,7 +2273,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
     }
     SelectionResult? lastSelectionResult;
-    debugPrint('handleselect word multiverse');
     for (int index = 0; index < selectables.length; index += 1) {
       bool globalRectsContainsPosition = false;
       if (selectables[index].boundingBoxes.isNotEmpty) {
@@ -2292,7 +2286,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       }
       if (globalRectsContainsPosition) {
         final SelectionGeometry existingGeometry = selectables[index].value;
-        debugPrint('dispatching event to child');
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
           return SelectionResult.next;
@@ -2444,7 +2437,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    debugPrint('from main $selectables $this');
     final bool selectionWillbeInProgress = event is! ClearSelectionEvent;
     if (!_selectionInProgress && selectionWillbeInProgress) {
       // Sort the selectable every time a selection start.
