@@ -77,11 +77,10 @@ Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  ThemeData? theme,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    theme: theme,
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -146,11 +145,11 @@ Widget chipWithOptionalDeleteButton({
   String? chipTooltip,
   String? deleteButtonTooltipMessage,
   VoidCallback? onPressed = doNothing,
-  bool? useMaterial3,
+  ThemeData? themeData,
 }) {
   return wrapForChip(
     textDirection: textDirection,
-    useMaterial3: useMaterial3,
+    theme: themeData,
     child: Wrap(
       children: <Widget>[
         RawChip(
@@ -584,7 +583,7 @@ void main() {
     const TextStyle style = TextStyle(fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
-        useMaterial3: false,
+        theme: ThemeData(useMaterial3: false),
         child: const Row(
           children: <Widget>[
             Chip(label: Text('Test'), labelStyle: style),
@@ -663,7 +662,7 @@ void main() {
   testWidgets('Material2 - Chip responds to materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
-        useMaterial3: false,
+        theme: ThemeData(useMaterial3: false),
         child: const Column(
           children: <Widget>[
             Chip(
@@ -808,7 +807,7 @@ void main() {
   testWidgets('Material2 - Chip responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
-        useMaterial3: false,
+        theme: ThemeData(useMaterial3: false),
         child: const Column(
           children: <Widget>[
             Chip(
@@ -965,7 +964,7 @@ void main() {
     final Key keyB = GlobalKey();
     await tester.pumpWidget(
       wrapForChip(
-        useMaterial3: false,
+        theme: ThemeData(useMaterial3: false),
         child: Column(
           children: <Widget>[
             Chip(
@@ -1138,7 +1137,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar }) async {
       return tester.pumpWidget(
         wrapForChip(
-          useMaterial3: false,
+          theme: ThemeData(useMaterial3: false),
           child: Wrap(
             children: <Widget>[
               RawChip(
@@ -1386,7 +1385,7 @@ void main() {
     Future<void> pushChip({ bool deletable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
-          useMaterial3: false,
+          theme: ThemeData(useMaterial3: false),
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1668,7 +1667,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
-        useMaterial3: false,
+        themeData: ThemeData(useMaterial3: false),
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
@@ -1796,7 +1795,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
-        useMaterial3: false,
+        themeData: ThemeData(useMaterial3: false),
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
@@ -1899,7 +1898,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
-        useMaterial3: false,
+        themeData: ThemeData(useMaterial3: false),
         labelKey: labelKey,
         onPressed: null,
         deleteButtonKey: deleteButtonKey,
@@ -2040,7 +2039,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
-        useMaterial3: false,
+        themeData: ThemeData(useMaterial3: false),
         labelKey: labelKey,
         deletable: false,
       ),
@@ -2151,7 +2150,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
-          useMaterial3: false,
+          theme: ThemeData(useMaterial3: false),
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -2318,7 +2317,7 @@ void main() {
     Future<void> pushChip({ bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
-          useMaterial3: false,
+          theme: ThemeData(useMaterial3: false),
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -2471,7 +2470,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
-          useMaterial3: false,
+          theme: ThemeData(useMaterial3: false),
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -3448,10 +3447,8 @@ void main() {
 
     Widget buildChip() {
       return wrapForChip(
-        child: Theme(
-          data: theme,
-          child: inputChip,
-        ),
+        theme: theme,
+        child: inputChip,
       );
     }
 
@@ -3544,7 +3541,7 @@ void main() {
   testWidgets('Material2 - selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
-        useMaterial3: false,
+        theme: ThemeData(useMaterial3: false),
         child: const FilterChip(
           avatar: CircleAvatar(child: Text('t')),
           label: Text('test'),
@@ -4751,7 +4748,7 @@ void main() {
     const OutlinedBorder shape = ContinuousRectangleBorder();
 
     await tester.pumpWidget(wrapForChip(
-      useMaterial3: false,
+      theme: ThemeData(useMaterial3: false),
       child: const RawChip(
         label: Text('text'),
         backgroundColor: backgroundColor,
@@ -4774,6 +4771,7 @@ void main() {
     final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(wrapForChip(
+      theme: theme,
       child: const RawChip(
         label: Text('text'),
         backgroundColor: backgroundColor,
