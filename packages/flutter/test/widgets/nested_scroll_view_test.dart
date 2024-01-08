@@ -212,7 +212,7 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgetsWithLeakTracking('NestedScrollView always scrolls outer scrollable first', (WidgetTester tester) async {
+  testWidgets('NestedScrollView always scrolls outer scrollable first', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/136199
     final Key innerKey = UniqueKey();
     final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
@@ -324,7 +324,7 @@ void main() {
     expect(inner.offset, 0.0);
   });
 
-  testWidgetsWithLeakTracking('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
+  testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
