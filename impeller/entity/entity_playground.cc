@@ -50,7 +50,10 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
     return false;
   }
   SinglePassCallback callback = [&](RenderPass& pass) -> bool {
-    return entity.Render(*content_context, pass);
+    content_context->GetRenderTargetCache()->Start();
+    bool result = entity.Render(*content_context, pass);
+    content_context->GetRenderTargetCache()->End();
+    return result;
   };
   return Playground::OpenPlaygroundHere(callback);
 }
@@ -70,7 +73,10 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
       wireframe = !wireframe;
       content_context.SetWireframe(wireframe);
     }
-    return callback(content_context, pass);
+    content_context.GetRenderTargetCache()->Start();
+    bool result = callback(content_context, pass);
+    content_context.GetRenderTargetCache()->End();
+    return result;
   };
   return Playground::OpenPlaygroundHere(pass_callback);
 }
