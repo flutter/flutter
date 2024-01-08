@@ -60,9 +60,12 @@ void main() {
       fakeVisualStudio.isPrerelease = true;
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage(userMessages.visualStudioIsPrerelease);
+      const ValidationMessage expectedMessage = ValidationMessage(
+        'The current Visual Studio installation is a pre-release version. '
+        'It may not be supported by Flutter yet.',
+      );
 
-      expect(result.messages.contains(expectedMessage), true);
+      expect(result.messages, contains(expectedMessage));
     });
 
     testWithoutContext('Emits a partial status when Visual Studio installation is incomplete', () async {
@@ -74,9 +77,12 @@ void main() {
       fakeVisualStudio.isComplete = false;
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(userMessages.visualStudioIsIncomplete);
+      const ValidationMessage expectedMessage = ValidationMessage.error(
+        'The current Visual Studio installation is incomplete.\n'
+        'Please use Visual Studio Installer to complete the installation or reinstall Visual Studio.',
+      );
 
-      expect(result.messages.contains(expectedMessage), true);
+      expect(result.messages, contains(expectedMessage));
       expect(result.type, ValidationType.partial);
     });
 
@@ -89,9 +95,11 @@ void main() {
       fakeVisualStudio.isRebootRequired = true;
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(userMessages.visualStudioRebootRequired);
+      const ValidationMessage expectedMessage = ValidationMessage.error(
+        'Visual Studio requires a reboot of your system to complete installation.',
+      );
 
-      expect(result.messages.contains(expectedMessage), true);
+      expect(result.messages, contains(expectedMessage));
       expect(result.type, ValidationType.partial);
     });
 
@@ -104,9 +112,11 @@ void main() {
       fakeVisualStudio.isLaunchable = false;
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(userMessages.visualStudioNotLaunchable);
+      const ValidationMessage expectedMessage = ValidationMessage.error(
+        'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.',
+      );
 
-      expect(result.messages.contains(expectedMessage), true);
+      expect(result.messages, contains(expectedMessage));
       expect(result.type, ValidationType.partial);
     });
 
@@ -118,14 +128,13 @@ void main() {
       configureMockVisualStudioAsTooOld();
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(
-        userMessages.visualStudioTooOld(
-          fakeVisualStudio.minimumVersionDescription,
-          fakeVisualStudio.workloadDescription,
-        ),
+      const ValidationMessage expectedMessage = ValidationMessage.error(
+        'Visual Studio 2019 or later is required.\n'
+        'Download at https://visualstudio.microsoft.com/downloads/.\n'
+        'Please install the "Desktop development" workload, including all of its default components',
       );
 
-      expect(result.messages.contains(expectedMessage), true);
+      expect(result.messages, contains(expectedMessage));
       expect(result.type, ValidationType.partial);
     });
 
@@ -161,10 +170,11 @@ void main() {
       configureMockVisualStudioAsInstalled();
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedDisplayNameMessage = ValidationMessage(
-        userMessages.visualStudioVersion(fakeVisualStudio.displayName!, fakeVisualStudio.fullVersion!));
+      const ValidationMessage expectedDisplayNameMessage = ValidationMessage(
+        'Visual Studio Community 2019 version 16.2',
+      );
 
-      expect(result.messages.contains(expectedDisplayNameMessage), true);
+      expect(result.messages, contains(expectedDisplayNameMessage));
       expect(result.type, ValidationType.success);
     });
 
@@ -176,13 +186,13 @@ void main() {
       configureMockVisualStudioAsNotInstalled();
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(
-        userMessages.visualStudioMissing(
-          fakeVisualStudio.workloadDescription,
-        ),
+      const ValidationMessage expectedMessage = ValidationMessage.error(
+        'Visual Studio not installed; this is necessary to develop Windows apps.\n'
+        'Download at https://visualstudio.microsoft.com/downloads/.\n'
+        'Please install the "Desktop development" workload, including all of its default components'
       );
 
-      expect(result.messages.contains(expectedMessage), true);
+      expect(result.messages, contains(expectedMessage));
       expect(result.type, ValidationType.missing);
     });
   });

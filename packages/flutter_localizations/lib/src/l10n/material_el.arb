@@ -51,7 +51,6 @@
   "reorderItemRight": "Μετακίνηση δεξιά",
   "expandedIconTapHint": "Σύμπτυξη",
   "collapsedIconTapHint": "Ανάπτυξη",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "απομένει 1 χαρακτήρας",
   "remainingTextFieldCharacterCountOther": "απομένουν $remainingCount χαρακτήρες",
   "refreshIndicatorSemanticLabel": "Ανανέωση",
@@ -144,6 +143,6 @@
   "collapsedHint": "Αναπτύχθηκε",
   "menuDismissLabel": "Παράβλεψη μενού",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Αναζήτηση στον ιστό",
+  "shareButtonLabel": "Κοινοποίηση…"
 }

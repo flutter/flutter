@@ -188,6 +188,12 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.leading], the intended use for the return value of this method.
   Widget? buildLeading(BuildContext context);
 
+  /// {@macro flutter.material.appbar.automaticallyImplyLeading}
+  bool? automaticallyImplyLeading;
+
+  /// {@macro flutter.material.appbar.leadingWidth}
+  double? leadingWidth;
+
   /// Widgets to display after the search query in the [AppBar].
   ///
   /// If the [query] is not empty, this should typically contain a button to
@@ -377,6 +383,15 @@ abstract class SearchDelegate<T> {
   }
 
   _SearchPageRoute<T>? _route;
+
+  /// Releases the resources.
+  @mustCallSuper
+  void dispose() {
+    _currentBodyNotifier.dispose();
+    _focusNode?.dispose();
+    _queryTextController.dispose();
+    _proxyAnimation.parent = null;
+  }
 }
 
 /// Describes the body that is currently shown under the [AppBar] in the
@@ -583,6 +598,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         data: theme,
         child: Scaffold(
           appBar: AppBar(
+            leadingWidth: widget.delegate.leadingWidth,
+            automaticallyImplyLeading: widget.delegate.automaticallyImplyLeading ?? true,
             leading: widget.delegate.buildLeading(context),
             title: TextField(
               controller: widget.delegate._queryTextController,

@@ -566,7 +566,7 @@ class TextInputConfiguration {
   /// [autocorrect], so that suggestions are only shown when [autocorrect] is
   /// true. On Android autocorrection and suggestion are controlled separately.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -580,7 +580,7 @@ class TextInputConfiguration {
   /// change is sent through semantics actions and is directly disabled from
   /// the widget side.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   final bool enableInteractiveSelection;
 
   /// What text to display in the text input control's action button.
@@ -612,7 +612,7 @@ class TextInputConfiguration {
   ///
   /// This flag only affects Android. On iOS, there is no equivalent flag.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -684,7 +684,7 @@ class TextInputConfiguration {
   ///  * If [TextInputClient] is implemented then updates for the editing
   ///    state will come through [TextInputClient.updateEditingValue].
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to false.
   final bool enableDeltaModel;
 
   /// Returns a representation of this object as a JSON object.
@@ -764,11 +764,17 @@ class RawFloatingCursorPoint {
   /// [FloatingCursorDragState.Update].
   RawFloatingCursorPoint({
     this.offset,
+    this.startLocation,
     required this.state,
   }) : assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset? offset;
+
+  /// Represents the starting location when initiating a floating cursor via long press.
+  /// This is a tuple where the first item is the local offset and the second item is the new caret position.
+  /// This is only non-null when a floating cursor is started.
+  final (Offset, TextPosition)? startLocation;
 
   /// The state of the floating cursor.
   final FloatingCursorDragState state;
@@ -781,9 +787,6 @@ class TextEditingValue {
   ///
   /// The selection and composing range must be within the text. This is not
   /// checked during construction, and must be guaranteed by the caller.
-  ///
-  /// The [text], [selection], and [composing] arguments must not be null but
-  /// each have default values.
   ///
   /// The default value of [selection] is `TextSelection.collapsed(offset: -1)`.
   /// This indicates that there is no selection at all.
@@ -912,7 +915,7 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= replacementRange.start && originalIndex < replacementRange.end ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start;
       return originalIndex + replacedLength - removedLength;
     }
 
@@ -1423,8 +1426,8 @@ class TextInputConnection {
   /// Send the smallest rect that covers the text in the client that's currently
   /// being composed.
   ///
-  /// The given `rect` can not be null. If any of the 4 coordinates of the given
-  /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
+  /// If any of the 4 coordinates of the given [Rect] is not finite, a [Rect] of
+  /// size (-1, -1) will be sent instead.
   ///
   /// This information is used for positioning the IME candidates menu on each
   /// platform.
@@ -2254,7 +2257,15 @@ class _PlatformTextInputControl with TextInputControl {
   Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
     final Map<String, dynamic> json = configuration.toJson();
     if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
-      json['inputType'] = TextInputType.none.toJson();
+      final Map<String, dynamic> none = TextInputType.none.toJson();
+      // See: https://github.com/flutter/flutter/issues/125875
+      // On Web engine, use isMultiline to create <input> or <textarea> element
+      // When there's a custom [TextInputControl] installed.
+      // It's only needed When there's a custom [TextInputControl] installed.
+      if (kIsWeb) {
+        none['isMultiline'] = configuration.inputType == TextInputType.multiline;
+      }
+      json['inputType'] = none;
     }
     return json;
   }

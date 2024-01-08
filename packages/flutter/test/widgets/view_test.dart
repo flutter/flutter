@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'multi_view_testing.dart';
+
 void main() {
   testWidgets('Widgets running with runApp can find View', (WidgetTester tester) async {
     FlutterView? viewOf;
@@ -138,8 +140,8 @@ void main() {
     );
   });
 
-  testWidgets('ViewCollection must have one view', (WidgetTester tester) async {
-    expect(() => ViewCollection(views: const <Widget>[]), throwsAssertionError);
+  testWidgets('ViewCollection may start with zero views', (WidgetTester tester) async {
+    expect(() => const ViewCollection(views: <Widget>[]), returnsNormally);
   });
 
   testWidgets('ViewAnchor.child does not see surrounding view', (WidgetTester tester) async {
@@ -453,17 +455,6 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
-}
-
-class FakeView extends TestFlutterView{
-  FakeView(FlutterView view, { this.viewId = 100 }) : super(
-    view: view,
-    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
-    display: view.display as TestDisplay,
-  );
-
-  @override
-  final int viewId;
 }
 
 class SpyRenderWidget extends SizedBox {

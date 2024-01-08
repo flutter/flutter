@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
@@ -346,6 +347,7 @@ void main() {
     final ScrollController controller = ScrollController(
       initialScrollOffset: 50.0,
     );
+    addTearDown(controller.dispose);
 
     late double scrollOffset;
     controller.addListener(() {
@@ -421,6 +423,7 @@ void main() {
 
   testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
+    addTearDown(controller.dispose);
     expect(controller.mostRecentlyUpdatedPosition, isNull);
     expect(controller.initialScrollOffset, 0.0);
 
@@ -1187,6 +1190,7 @@ void main() {
       (WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
         final ScrollController scrollController = ScrollController();
+        addTearDown(scrollController.dispose);
 
         await tester.pumpWidget(buildTest(
           controller: scrollController,
@@ -2293,6 +2297,7 @@ void main() {
       // Dragging into an overscroll and holding so that when released, the
       // ballistic scroll activity has a 0 velocity.
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(buildBallisticTest(controller));
       // Last item of the inner scroll view.
       expect(find.text('Item 49'), findsNothing);
@@ -2320,6 +2325,7 @@ void main() {
       // Tapping while an inner ballistic scroll activity is in progress will
       // trigger a secondary ballistic scroll activity with a 0 velocity.
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(buildBallisticTest(controller));
       // Last item of the inner scroll view.
       expect(find.text('Item 49'), findsNothing);
@@ -2406,6 +2412,7 @@ void main() {
 
   testWidgets('Scroll pointer signal should not cause overscroll.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildTest(controller: controller));
 
     final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
@@ -2472,6 +2479,7 @@ void main() {
       ScrollDirection? lastUserScrollingDirection;
 
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(buildTest(controller: controller));
 
       controller.addListener(() {
@@ -2548,6 +2556,7 @@ void main() {
   // Regression test of https://github.com/flutter/flutter/issues/74372
   testWidgets('ScrollPosition can be accessed during `_updatePosition()`', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     late ScrollPosition position;
 
     Widget buildFrame({ScrollPhysics? physics}) {
@@ -2997,6 +3006,7 @@ void main() {
         )
       );
     }
+
     testWidgets('when headerSliverBuilder is empty', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/117316
       // Regression test for https://github.com/flutter/flutter/issues/46089
@@ -3199,6 +3209,13 @@ void main() {
         }
       }
     });
+  });
+
+  testWidgets('$SliverOverlapAbsorberHandle dispatches creation in constructor', (WidgetTester widgetTester) async {
+    await expectLater(
+      await memoryEvents(() => SliverOverlapAbsorberHandle().dispose(), SliverOverlapAbsorberHandle),
+      areCreateAndDispose,
+    );
   });
 }
 

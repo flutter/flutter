@@ -58,7 +58,6 @@
   "reorderItemRight": "Переместить вправо",
   "expandedIconTapHint": "Свернуть",
   "collapsedIconTapHint": "Развернуть",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Остался 1 символ",
   "remainingTextFieldCharacterCountOther": "Осталось $remainingCount символа",
   "refreshIndicatorSemanticLabel": "Обновление",
@@ -150,7 +149,7 @@
   "expandedHint": "Свернуто",
   "collapsedHint": "Развернуто",
   "menuDismissLabel": "Закрыть меню",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Найти",
+  "searchWebButtonLabel": "Искать в интернете",
+  "shareButtonLabel": "Поделиться"
 }

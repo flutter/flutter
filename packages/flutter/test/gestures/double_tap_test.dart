@@ -33,6 +33,7 @@ void main() {
 
   setUp(() {
     tap = DoubleTapGestureRecognizer();
+    addTearDown(tap.dispose);
 
     doubleTapRecognized = false;
     tap.onDoubleTap = () {
@@ -156,6 +157,7 @@ void main() {
     final DoubleTapGestureRecognizer tapSecondary = DoubleTapGestureRecognizer(
       allowedButtonsFilter: (int buttons) => buttons == kSecondaryButton,
     );
+    addTearDown(tapSecondary.dispose);
     tapSecondary.onDoubleTap = () {
       doubleTapRecognized = true;
     };
@@ -545,6 +547,7 @@ void main() {
       final DoubleTapGestureRecognizer tapPrimary = DoubleTapGestureRecognizer(
         allowedButtonsFilter: (int buttons) => buttons == kPrimaryButton,
       );
+      addTearDown(tapPrimary.dispose);
       tapPrimary.onDoubleTap = () {
         doubleTapRecognized = true;
       };
@@ -647,14 +650,17 @@ void main() {
         ..onTapDown = (TapDownDetails details) {
           recognized.add('tapPrimary');
         };
+      addTearDown(tapPrimary.dispose);
       tapSecondary = TapGestureRecognizer()
         ..onSecondaryTapDown = (TapDownDetails details) {
           recognized.add('tapSecondary');
         };
+      addTearDown(tapSecondary.dispose);
       doubleTap = DoubleTapGestureRecognizer()
         ..onDoubleTap = () {
           recognized.add('doubleTap');
         };
+      addTearDown(doubleTap.dispose);
     });
 
     tearDown(() {
@@ -692,6 +698,7 @@ void main() {
       ..onDoubleTap = () {
         recognized.add('primary');
       };
+    addTearDown(doubleTap.dispose);
 
     // Down/up pair 7: normal tap sequence close to pair 6
     const PointerDownEvent down7 = PointerDownEvent(
@@ -730,6 +737,7 @@ void main() {
       ..onDoubleTap = () {
         recognized.add('primary');
       };
+    addTearDown(doubleTap.dispose);
 
     // Down/up pair 7: normal tap sequence close to pair 6
     const PointerDownEvent down7 = PointerDownEvent(
@@ -765,8 +773,10 @@ void main() {
     int tapCount = 0;
     final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()
       ..onDoubleTap = () {};
+    addTearDown(doubleTap.dispose);
     final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTap = () => tapCount++;
+    addTearDown(tap.dispose);
 
     // Open a arena with 2 members and holding.
     doubleTap.addPointer(down1);

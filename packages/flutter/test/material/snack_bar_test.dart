@@ -264,6 +264,101 @@ void main() {
     );
   });
 
+  testWidgets('SnackBar dismissDirection can be customised from SnackBarThemeData', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    late double width;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(
+          dismissDirection: DismissDirection.startToEnd,
+        )
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            width = MediaQuery.sizeOf(context).width;
+
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('swipe ltr'),
+                  duration: Duration(seconds: 2),
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    expect(find.text('swipe ltr'), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text('swipe ltr'), findsNothing);
+    await tester.pump(); // schedule animation for snack bar
+    expect(find.text('swipe ltr'), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text('swipe ltr'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.drag(find.text('swipe ltr'), Offset(width, 0.0));
+    await tester.pump(); // snack bar dismissed
+    expect(find.text('swipe ltr'), findsNothing);
+  });
+
+  testWidgets('dismissDirection from SnackBar should be preferred over SnackBarThemeData', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    late double width;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+          snackBarTheme: const SnackBarThemeData(
+            dismissDirection: DismissDirection.startToEnd,
+          )
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            width = MediaQuery.sizeOf(context).width;
+
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('swipe rtl'),
+                  duration: Duration(seconds: 2),
+                  dismissDirection: DismissDirection.endToStart,
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    expect(find.text('swipe rtl'), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text('swipe rtl'), findsNothing);
+    await tester.pump(); // schedule animation for snack bar
+    expect(find.text('swipe rtl'), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text('swipe rtl'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.drag(find.text('swipe rtl'), Offset(-width, 0.0));
+    await tester.pump(); // snack bar dismissed
+    expect(find.text('swipe rtl'), findsNothing);
+  });
+
   testWidgets('SnackBar cannot be tapped twice', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(MaterialApp(
@@ -2261,6 +2356,44 @@ void main() {
       },
     );
 
+    testWidgets(
+      '${SnackBarBehavior.floating} should align SnackBar with the top of BottomNavigationBar '
+          'when Scaffold has both BottomNavigationBar and FloatingActionButton and '
+          'BottomNavigationBar.top is higher than FloatingActionButton.top',
+          (WidgetTester tester) async {
+        final UniqueKey boxKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Container(),
+              bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 200),
+              floatingActionButton: FloatingActionButton(onPressed: () {}),
+              floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+            ),
+          ),
+        );
+
+        final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+        scaffoldMessengerState.showSnackBar(
+          const SnackBar(
+            content: Text('SnackBar text'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+        final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+        final Offset fabTopRight = tester.getTopRight(find.byType(FloatingActionButton));
+        final Offset navBarTopRight = tester.getTopRight(find.byKey(boxKey));
+
+        // Test the top of the navigation bar is higher than the top of the floating action button.
+        expect(fabTopRight.dy, greaterThan(navBarTopRight.dy));
+
+        expect(snackBarBottomRight.dy, equals(navBarTopRight.dy));
+      },
+    );
+
     Future<void> openFloatingSnackBar(WidgetTester tester) async {
       final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
       scaffoldMessengerState.showSnackBar(
@@ -2471,6 +2604,49 @@ void main() {
         expect(snackBarTopRight.dx - actionTopRight.dx, 8.0 + 15.0); // button margin + horizontal scaffold outside margin
       },
     );
+
+    testWidgets('Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/140125.
+      const double customWidth = 400.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          width: customWidth,
+                          content: Text('Feeling super snackish'),
+                        ),
+                      );
+                    },
+                    child: const Text('X'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pump(); // start animation
+      await tester.pump(const Duration(milliseconds: 750));
+
+      final Finder materialFinder = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
+      final Offset snackBarBottomRight = tester.getBottomRight(materialFinder);
+      expect(snackBarBottomLeft.dx, (800 - customWidth) / 2); // Device width is 800.
+      expect(snackBarBottomRight.dx, (800 + customWidth) / 2); // Device width is 800.
+    });
   });
 
   testWidgets('SnackBars hero across transitions when using ScaffoldMessenger', (WidgetTester tester) async {
@@ -2542,7 +2718,8 @@ void main() {
     expect(find.text(secondHeader), findsOneWidget);
   });
 
-  testWidgets('Should have only one SnackBar during back swipe navigation', (WidgetTester tester) async {
+  testWidgets('Should have only one SnackBar during back swipe navigation',
+  (WidgetTester tester) async {
     const String snackBarText = 'hello snackbar';
     const Key snackTarget = Key('snack-target');
     const Key transitionTarget = Key('transition-target');
@@ -2606,7 +2783,7 @@ void main() {
     expect(find.text(snackBarText), findsOneWidget);
 
     // Start the gesture at the edge of the screen.
-    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
     // Trigger the swipe.
     await gesture.moveBy(const Offset(100.0, 0.0));
 

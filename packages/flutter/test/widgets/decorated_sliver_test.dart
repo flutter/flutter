@@ -202,6 +202,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -238,6 +239,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -277,6 +279,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -314,6 +317,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -353,6 +357,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -391,6 +396,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -429,6 +435,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(

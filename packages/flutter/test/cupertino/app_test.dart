@@ -152,6 +152,7 @@ void main() {
         uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -163,6 +164,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     await tester.pumpWidget(CupertinoApp.router(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
@@ -189,6 +191,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(CupertinoApp.router(
       routerDelegate: delegate,
@@ -214,12 +217,14 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     await tester.pumpWidget(CupertinoApp.router(
       routeInformationProvider: provider,
       routerDelegate: delegate,
@@ -239,6 +244,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(CupertinoApp.router(
@@ -249,14 +255,18 @@ void main() {
   });
 
   testWidgets('CupertinoApp.router router config works', (WidgetTester tester) async {
+    late SimpleNavigatorRouterDelegate delegate;
+    addTearDown(() => delegate.dispose());
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
+      ),
+    );
+    addTearDown(provider.dispose);
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
-        routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: RouteInformation(
-            uri: Uri.parse('initial'),
-          ),
-        ),
+        routeInformationProvider: provider,
         routeInformationParser: SimpleRouteInformationParser(),
-        routerDelegate: SimpleNavigatorRouterDelegate(
+        routerDelegate: delegate = SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
             return Text(information.uri.toString());
           },
@@ -394,6 +404,11 @@ void main() {
       return renderEditable!;
     }
 
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
@@ -405,8 +420,8 @@ void main() {
               return EditableText(
                 backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor!,
                 cursorColor: DefaultSelectionStyle.of(context).cursorColor!,
-                controller: TextEditingController(),
-                focusNode: FocusNode(),
+                controller: controller,
+                focusNode: focusNode,
                 style: const TextStyle(),
               );
             },
@@ -474,7 +489,7 @@ class MockScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {

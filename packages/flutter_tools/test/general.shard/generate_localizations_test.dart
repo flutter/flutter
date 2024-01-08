@@ -96,6 +96,7 @@ void main() {
       bool areResourceAttributeRequired = false,
       bool suppressWarnings = false,
       bool relaxSyntax = false,
+      bool useNamedParameters = false,
       void Function(Directory)? setup,
     }
   ) {
@@ -128,6 +129,7 @@ void main() {
       areResourceAttributesRequired: areResourceAttributeRequired,
       suppressWarnings: suppressWarnings,
       useRelaxedSyntax: relaxSyntax,
+      useNamedParameters: useNamedParameters,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: isFromYaml);
@@ -1239,6 +1241,34 @@ class AppLocalizationsEn extends AppLocalizations {
           'message',
           contains('Arb file for a fallback, en, does not exist'),
         )),
+      );
+    });
+
+    testWithoutContext('AppResourceBundle throws if file contains non-string value', () {
+      const String inputPathString = 'lib/l10n';
+      const String templateArbFileName = 'app_en.arb';
+      const String outputFileString = 'app_localizations.dart';
+      const String classNameString = 'AppLocalizations';
+
+      fs.file(fs.path.join(inputPathString, templateArbFileName))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "helloWorld": "Hello World!" }');
+      fs.file(fs.path.join(inputPathString, 'app_es.arb'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "helloWorld": {} }');
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: inputPathString,
+        templateArbFileName: templateArbFileName,
+        outputFileString: outputFileString,
+        classNameString: classNameString,
+        logger: logger,
+      );
+      expect(
+          () => generator.loadResources(),
+          throwsToolExit(message: 'Localized message for key "helloWorld" in '
+            '"lib/l10n/app_es.arb" is not a string.'),
       );
     });
   });
@@ -2462,5 +2492,44 @@ NumberFormat.decimalPatternDigits(
 }''';
     setupLocalizations(<String, String>{ 'en': dollarSignWithSelect });
     expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifistation #1 $_temp0'));
+  });
+
+  testWithoutContext('can generate method with named parameter', () {
+    const String arbFile = '''
+{
+  "helloName": "Hello {name}!",
+  "@helloName": {
+    "description": "A more personal greeting",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The name of the person to greet"
+      }
+    }
+  },
+  "helloNameAndAge": "Hello {name}! You are {age} years old.",
+  "@helloNameAndAge": {
+    "description": "A more personal greeting",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The name of the person to greet"
+      },
+      "age": {
+        "type": "int",
+        "description": "The age of the person to greet"
+      }
+    }
+  }
+}
+    ''';
+    setupLocalizations(<String, String>{ 'en': arbFile }, useNamedParameters: true);
+    final String localizationsFile = getGeneratedFileContent(locale: 'en');
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String helloName({required String name}) {
+  '''));
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String helloNameAndAge({required String name, required int age}) {
+  '''));
   });
 }

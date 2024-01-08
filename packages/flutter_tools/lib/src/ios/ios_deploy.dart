@@ -129,6 +129,7 @@ class IOSDeploy {
     required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
     required bool uninstallFirst,
+    bool skipInstall = false,
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
@@ -148,6 +149,8 @@ class IOSDeploy {
       ],
       if (uninstallFirst)
         '--uninstall',
+      if (skipInstall)
+        '--noinstall',
       '--debug',
       if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
@@ -327,6 +330,14 @@ class IOSDeployDebugger {
   /// The future should be completed once the backtraces are logged.
   Completer<void>? _processResumeCompleter;
 
+  // Process 525 exited with status = -1 (0xffffffff) lost connection
+  static final RegExp _lostConnectionPattern = RegExp(r'exited with status = -1 \(0xffffffff\) lost connection');
+
+  /// Whether ios-deploy received a message matching [_lostConnectionPattern],
+  /// indicating that it lost connection to the device.
+  bool get lostConnection => _lostConnection;
+  bool _lostConnection = false;
+
   /// Launch the app on the device, and attach the debugger.
   ///
   /// Returns whether or not the debugger successfully attached.
@@ -448,6 +459,9 @@ class IOSDeployDebugger {
           // The app exited or crashed, so exit. Continue passing debugging
           // messages to the log reader until it exits to capture crash dumps.
           _logger.printTrace(line);
+          if (line.contains(_lostConnectionPattern)) {
+            _lostConnection = true;
+          }
           exit();
           return;
         }
@@ -584,29 +598,66 @@ class IOSDeployDebugger {
     if (!debuggerAttached) {
       return;
     }
-    try {
-      // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
-      _iosDeployProcess?.stdin.writeln(_signalStop);
-    } on SocketException catch (error) {
-      // Best effort, try to detach, but maybe the app already exited or already detached.
-      _logger.printTrace('Could not stop app from debugger: $error');
-    }
+    // Stop the app, which will prompt the backtrace to be printed for all
+    // threads in the stdoutSubscription handler.
+    await stdinWriteln(
+      _signalStop,
+      onError: (Object error, _) {
+        _logger.printTrace('Could not stop the app: $error');
+      },
+    );
+
     // Wait for logging to finish on process exit.
     return logLines.drain();
   }
 
-  void detach() {
+  Future<void>? _stdinWriteFuture;
+
+  /// Queue write of [line] to STDIN of [_iosDeployProcess].
+  ///
+  /// No-op if [_iosDeployProcess] is null.
+  ///
+  /// This write will not happen until the flush of any previous writes have
+  /// completed, because calling [IOSink.flush()] before a previous flush has
+  /// completed will throw a [StateError].
+  ///
+  /// This method needs to keep track of the [_stdinWriteFuture] from previous
+  /// calls because the future returned by [detach] is not always await-ed.
+  Future<void> stdinWriteln(String line, {required void Function(Object, StackTrace) onError}) async {
+    final Process? process = _iosDeployProcess;
+    if (process == null) {
+      return;
+    }
+
+    Future<void> writeln() {
+      return ProcessUtils.writelnToStdinGuarded(
+        stdin: process.stdin,
+        line: line,
+        onError: onError,
+      );
+    }
+
+    if (_stdinWriteFuture != null) {
+      _stdinWriteFuture = _stdinWriteFuture!.then<void>((_) => writeln());
+    } else {
+      _stdinWriteFuture = writeln();
+    }
+
+    return _stdinWriteFuture;
+  }
+
+  Future<void> detach() async {
     if (!debuggerAttached) {
       return;
     }
 
-    try {
-      // Detach lldb from the app process.
-      _iosDeployProcess?.stdin.writeln('process detach');
-    } on SocketException catch (error) {
-      // Best effort, try to detach, but maybe the app already exited or already detached.
-      _logger.printTrace('Could not detach from debugger: $error');
-    }
+    return stdinWriteln(
+      'process detach',
+      onError: (Object error, _) {
+        // Best effort, try to detach, but maybe the app already exited or already detached.
+        _logger.printTrace('Could not detach from debugger: $error');
+      }
+    );
   }
 }
 

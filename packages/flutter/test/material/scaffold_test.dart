@@ -20,6 +20,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/103741
   testWidgets('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     Widget buildFrame({required bool extendBodyBehindAppBar}) {
       return MediaQuery(
         data: const MediaQueryData(),
@@ -270,6 +272,7 @@ void main() {
 
   testWidgets('Floating action button shrinks when bottom sheet becomes dominant', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     const double kBottomSheetDominatesPercentage = 0.3;
 
     await tester.pumpWidget(MaterialApp(home: Scaffold(
@@ -309,6 +312,7 @@ void main() {
 
   testWidgets('Scaffold shows scrim when bottom sheet becomes dominant', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     const double kBottomSheetDominatesPercentage = 0.3;
     const double kMinBottomSheetScrimOpacity = 0.1;
     const double kMaxBottomSheetScrimOpacity = 0.6;
@@ -448,6 +452,7 @@ void main() {
     const double appBarHeight = 256.0;
 
     final ScrollController scrollOffset = ScrollController();
+    addTearDown(scrollOffset.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -590,7 +595,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
+                  Scaffold.of(context).showBottomSheet((BuildContext context) {
                     return Container(
                       key: sheetKey,
                       color: Colors.blue[500],
@@ -850,7 +855,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
 
     testWidgets('Back arrow uses correct default', (WidgetTester tester) async {
-      await expectBackIcon(tester, kIsWeb ? Icons.arrow_back : Icons.arrow_back_ios);
+      await expectBackIcon(tester, kIsWeb ? Icons.arrow_back : Icons.arrow_back_ios_new_rounded);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
 
@@ -2167,7 +2172,7 @@ void main() {
         );
         late FlutterError error;
         try {
-          key.currentState!.showBottomSheet<void>((BuildContext context) {
+          key.currentState!.showBottomSheet((BuildContext context) {
             final ThemeData themeData = Theme.of(context);
             return Container(
               decoration: BoxDecoration(
@@ -2228,7 +2233,7 @@ void main() {
             ),
           ),
         );
-        key.currentState!.showBottomSheet<void>((_) => Container());
+        key.currentState!.showBottomSheet((_) => Container());
         await tester.tap(find.byKey(buttonKey));
         await tester.pump();
         expect(errors, isNotEmpty);
@@ -2260,7 +2265,7 @@ void main() {
         MaterialApp(
           home: Builder(
             builder: (BuildContext context) {
-              Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
+              Scaffold.of(context).showBottomSheet((BuildContext context) {
                 return Container();
               });
               return Container();
@@ -2758,8 +2763,9 @@ void main() {
 
   testWidgets('showBottomSheet removes scrim when draggable sheet is dismissed', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
-    PersistentBottomSheetController<void>? sheetController;
+    PersistentBottomSheetController? sheetController;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2768,7 +2774,7 @@ void main() {
       ),
     ));
 
-    sheetController = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    sheetController = scaffoldKey.currentState!.showBottomSheet((_) {
       return DraggableScrollableSheet(
         expand: false,
         controller: draggableController,
@@ -2804,7 +2810,7 @@ void main() {
 
   testWidgets("Closing bottom sheet & removing FAB at the same time doesn't throw assertion", (WidgetTester tester) async {
       final Key bottomSheetKey = UniqueKey();
-      PersistentBottomSheetController<void>? controller;
+      PersistentBottomSheetController? controller;
       bool show = true;
 
       await tester.pumpWidget(StatefulBuilder(

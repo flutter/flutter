@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "تلاش کریں",
   "noSpellCheckReplacementsLabel": "کوئی تبدیلیاں نہیں ملیں",
   "menuDismissLabel": "مینو برخاست کریں",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "تفصیل دیکھیں",
+  "searchWebButtonLabel": "ویب تلاش کریں",
+  "shareButtonLabel": "اشتراک کریں...",
+  "clearButtonLabel": "Clear"
 }

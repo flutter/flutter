@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -192,7 +194,8 @@ void main() {
     // The following line will send the layer to engine and cause crash if an
     // empty opacity layer is sent.
     final OffsetLayer offsetLayer = element.renderObject!.debugLayer! as OffsetLayer;
-    await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
+    final ui.Image image = await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
+    image.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
 
   testWidgets('Child shows up in the right spot when opacity is disabled', (WidgetTester tester) async {

@@ -17,6 +17,10 @@ void main() {
     testImage = await createTestImage(width: 10, height: 10);
   });
 
+  tearDownAll(() {
+    testImage.dispose();
+  });
+
   tearDown(() {
     imageCache.clear();
   });
@@ -34,6 +38,7 @@ void main() {
     await tester.pumpWidget(TestWidget(key));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
+    addTearDown(context.dispose);
     final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -69,6 +74,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
+    addTearDown(context.dispose);
     final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -95,6 +101,7 @@ void main() {
   testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -109,6 +116,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
+    addTearDown(context.dispose);
     final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -152,6 +160,7 @@ void main() {
   testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast', (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -166,6 +175,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
+    addTearDown(context.dispose);
     final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -219,6 +229,7 @@ void main() {
   testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed', (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -233,6 +244,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
+    addTearDown(context.dispose);
     final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -288,6 +300,7 @@ void main() {
   testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: SingleChildScrollView(
@@ -298,6 +311,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
+    addTearDown(context.dispose);
     final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -339,6 +353,7 @@ void main() {
 
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: SingleChildScrollView(
@@ -349,6 +364,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
+    addTearDown(context.dispose);
     final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,

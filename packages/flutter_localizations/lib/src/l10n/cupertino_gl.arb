@@ -25,6 +25,7 @@
   "noSpellCheckReplacementsLabel": "Non se encontrou ningunha substitución",
   "menuDismissLabel": "Pechar menú",
   "lookUpButtonLabel": "Mirar cara arriba",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Buscar na Web",
+  "shareButtonLabel": "Compartir…",
+  "clearButtonLabel": "Clear"
 }

@@ -48,6 +48,30 @@ enum DragStartBehavior {
   start,
 }
 
+/// Configuration of multi-finger drag strategy on multi-touch devices.
+///
+/// When dragging with only one finger, there's no difference in behavior
+/// between the two settings.
+///
+/// Used by [DragGestureRecognizer.multitouchDragStrategy].
+enum MultitouchDragStrategy {
+  /// Only the latest active pointer is tracked by the recognizer.
+  ///
+  /// If the tracked pointer is released, the latest of the remaining active
+  /// pointers will continue to be tracked.
+  ///
+  /// This is the behavior typically seen on Android.
+  latestPointer,
+
+  /// All active pointers will be tracked together. The scrolling offset
+  /// is the sum of the offsets of all active pointers.
+  ///
+  /// When a [Scrollable] drives scrolling by this drag strategy, the scrolling
+  /// speed will double or triple, depending on how many fingers are dragging
+  /// at the same time.
+  sumAllPointers,
+}
+
 /// Signature for `allowedButtonsFilter` in [GestureRecognizer].
 /// Used to filter the input buttons of incoming pointer events.
 /// The parameter `buttons` comes from [PointerEvent.buttons].
@@ -80,7 +104,17 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     this.debugOwner,
     this.supportedDevices,
     AllowedButtonsFilter? allowedButtonsFilter,
-  }) : _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
+  }) : _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/gestures.dart',
+        className: '$GestureRecognizer',
+        object: this,
+      );
+    }
+  }
 
   /// The recognizer's owner.
   ///
@@ -242,7 +276,13 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// recognizer is being unregistered from a [GestureDetector], the
   /// GestureDetector widget calls this method).
   @mustCallSuper
-  void dispose() { }
+  void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+  }
 
   /// Returns a very short pretty description of the gesture that the
   /// recognizer looks for, like 'tap' or 'horizontal drag'.

@@ -19,7 +19,7 @@ void verifyPropertyFaked<TProperty>({
   required TProperty realValue,
   required TProperty fakeValue,
   required TProperty Function() propertyRetriever,
-  required Function(TestWidgetsFlutterBinding, TProperty fakeValue) propertyFaker,
+  required void Function(TestWidgetsFlutterBinding, TProperty fakeValue) propertyFaker,
   Matcher Function(TProperty) matcher = equals,
 }) {
   TProperty propertyBeforeFaking;
@@ -45,8 +45,8 @@ void verifyPropertyReset<TProperty>({
   required WidgetTester tester,
   required TProperty fakeValue,
   required TProperty Function() propertyRetriever,
-  required Function() propertyResetter,
-  required Function(TProperty fakeValue) propertyFaker,
+  required VoidCallback propertyResetter,
+  required ValueSetter<TProperty> propertyFaker,
   Matcher Function(TProperty) matcher = equals,
 }) {
   TProperty propertyBeforeFaking;

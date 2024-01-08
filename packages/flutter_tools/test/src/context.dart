@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
@@ -35,6 +36,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'common.dart';
 import 'fake_http_client.dart';
@@ -120,6 +122,7 @@ void testUsingContext(
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
           CrashReporter: () => const NoopCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
+          Analytics: () => NoOpAnalytics(),
         },
         body: () {
           return runZonedGuarded<Future<dynamic>>(() {
@@ -289,7 +292,8 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
 }
 
 class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger) : super(logger: logger);
+  FakeDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   // True for testing.
   @override
@@ -371,7 +375,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   List<String> xcrunCommand() => <String>['xcrun'];
 }
 
-/// Prevent test crashest from being reported to the crash backend.
+/// Prevent test crashes from being reported to the crash backend.
 class NoopCrashReporter implements CrashReporter {
   const NoopCrashReporter();
 
@@ -380,9 +384,9 @@ class NoopCrashReporter implements CrashReporter {
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
-  LocalFileSystemBlockingSetCurrentDirectory() : super.test(
-    signals: LocalSignals.instance,
-  );
+  // Use [FakeSignals] so developers running the test suite can kill the test
+  // runner.
+  LocalFileSystemBlockingSetCurrentDirectory() : super.test(signals: FakeSignals());
 
   @override
   set currentDirectory(dynamic value) {

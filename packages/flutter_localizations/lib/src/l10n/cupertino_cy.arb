@@ -39,12 +39,13 @@
   "cutButtonLabel": "Torri",
   "copyButtonLabel": "Copïo",
   "pasteButtonLabel": "Gludo",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Dewis y Cyfan",
   "searchTextFieldPlaceholderLabel": "Chwilio",
   "modalBarrierDismissLabel": "Diystyru",
   "noSpellCheckReplacementsLabel": "Dim Ailosodiadau wedi'u Canfod",
   "menuDismissLabel": "Diystyru'r ddewislen",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Chwilio",
+  "searchWebButtonLabel": "Chwilio'r We",
+  "shareButtonLabel": "Rhannu..."
 }

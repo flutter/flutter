@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ffi_package/ffi_package.dart';
 
 import 'marquee.dart';
 
@@ -116,10 +117,15 @@ class _MyHomePageState extends State<MyHomePage> {
   // button on the Flutter page has been tapped.
   int _counter = 0;
 
+  late int sumResult;
+  late Future<int> sumAsyncResult;
+
   @override
   void initState() {
     super.initState();
     _platform.setMessageHandler(_handlePlatformIncrement);
+    sumResult = sum(1, 2);
+    sumAsyncResult = sumAsync(3, 4);
   }
 
   /// Directly increments our internal counter and rebuilds the UI.

@@ -18,6 +18,7 @@ void main() {
       vsync: const TestVSync(),
       duration: const Duration(seconds: 2),
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(FadeTransition(
       opacity: controller,
       child: const Placeholder(),

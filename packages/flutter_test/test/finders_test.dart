@@ -331,6 +331,100 @@ void main() {
     });
   });
 
+  group('text range finders', () {
+    testWidgets('basic text span test', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const IndexedStack(
+          sizing: StackFit.expand,
+          children: <Widget>[
+            Text.rich(TextSpan(
+              text: 'sub',
+              children: <InlineSpan>[
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+              ],
+            )),
+            Text('substringsub'),
+          ],
+        )),
+      );
+
+      expect(find.textRange.ofSubstring('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
+      expect(find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+
+      expect(
+        find.textRange.ofSubstring('substringsub').first.evaluate().single.renderObject,
+        find.textRange.ofSubstring('substringsub').last.evaluate().single.renderObject,
+      );
+
+      expect(find.textRange.ofSubstring('substringsub', skipOffstage: false), findsExactly(3));
+    });
+
+    testWidgets('basic text span test', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const IndexedStack(
+          sizing: StackFit.expand,
+          children: <Widget>[
+            Text.rich(TextSpan(
+              text: 'sub',
+              children: <InlineSpan>[
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+              ],
+            )),
+            Text('substringsub'),
+          ],
+        )),
+      );
+
+      expect(find.textRange.ofSubstring('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
+      expect(find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+
+      expect(
+        find.textRange.ofSubstring('substringsub').first.evaluate().single.renderObject,
+        find.textRange.ofSubstring('substringsub').last.evaluate().single.renderObject,
+      );
+
+      expect(find.textRange.ofSubstring('substringsub', skipOffstage: false), findsExactly(3));
+    });
+
+    testWidgets('descendentOf', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          const Column(
+            children: <Widget>[
+              Text.rich(TextSpan(text: 'text')),
+              Text.rich(TextSpan(text: 'text')),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.textRange.ofSubstring('text'), findsExactly(2));
+      expect(find.textRange.ofSubstring('text', descendentOf: find.text('text').first), findsOne);
+    });
+
+    testWidgets('finds only static text for now', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          EditableText(
+            controller: TextEditingController(text: 'text'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: const Color(0x00000000),
+            backgroundCursorColor: const Color(0x00000000),
+          )
+        ),
+      );
+
+      expect(find.textRange.ofSubstring('text'), findsNothing);
+    });
+  });
+
   testWidgets('ChainedFinders chain properly', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     await tester.pumpWidget(
@@ -986,6 +1080,110 @@ void main() {
         }
 
         expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader, SemanticsFlag.isTextField]:'));
+      });
+    });
+
+    group('scrollable', () {
+      testWidgets('can find node that can scroll up', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController();
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            controller: controller,
+            child: const SizedBox(width: 100, height: 1000),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollUpAction: true,
+          hasScrollDownAction: false,
+        ));
+      });
+
+      testWidgets('can find node that can scroll down', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController(initialScrollOffset: 400);
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            controller: controller,
+            child: const SizedBox(width: 100, height: 1000),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollUpAction: false,
+          hasScrollDownAction: true,
+        ));
+      });
+
+      testWidgets('can find node that can scroll left', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController();
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            child: const SizedBox(width: 1000, height: 100),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollLeftAction: true,
+          hasScrollRightAction: false,
+        ));
+      });
+
+      testWidgets('can find node that can scroll right', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController(initialScrollOffset: 200);
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            child: const SizedBox(width: 1000, height: 100),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollLeftAction: false,
+          hasScrollRightAction: true,
+        ));
+      });
+
+      testWidgets('can exclusively find node that scrolls horizontally', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Column(
+            children: <Widget>[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(width: 1000, height: 100),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SizedBox(width: 100, height: 1000),
+                ),
+              ),
+            ],
+          )
+        ));
+
+        expect(find.semantics.scrollable(axis: Axis.horizontal), findsOne);
+      });
+
+      testWidgets('can exclusively find node that scrolls vertically', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Column(
+            children: <Widget>[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(width: 1000, height: 100),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SizedBox(width: 100, height: 1000),
+                ),
+              ),
+            ],
+          )
+        ));
+
+        expect(find.semantics.scrollable(axis: Axis.vertical), findsOne);
       });
     });
   });

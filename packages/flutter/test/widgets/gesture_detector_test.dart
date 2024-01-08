@@ -363,7 +363,7 @@ void main() {
       // to a point (400,300) below it. This should never call onTap.
       Future<void> dragOut(Duration timeout) async {
         final TestGesture gesture =
-        await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
+            await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
         // If the timeout is less than kPressTimeout the recognizer will not
         // trigger any callbacks. If the timeout is greater than kLongPressTimeout
         // then onTapDown, onLongPress, and onCancel will be called.

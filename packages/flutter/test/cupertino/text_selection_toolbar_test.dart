@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +16,7 @@ import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 // These constants are copied from cupertino/text_selection_toolbar.dart.
 const double _kArrowScreenPadding = 26.0;
 const double _kToolbarContentDistance = 8.0;
-const double _kToolbarHeight = 45.0;
+const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
 // A custom text selection menu that just displays a single custom button.
 class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
@@ -270,7 +275,7 @@ void main() {
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = _kToolbarHeight;
+    const double height = 50.0;
     const double anchorBelowY = 500.0;
     double anchorAboveY = 0.0;
     const double paddingAbove = 12.0;
@@ -331,7 +336,7 @@ void main() {
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
+    expect(toolbarY, equals(anchorAboveY - height + _kToolbarArrowSize.height - _kToolbarContentDistance));
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
@@ -428,7 +433,7 @@ void main() {
 
   testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = _kToolbarHeight;
+    const double height = 50.0;
     double anchorAboveY = 0.0;
 
     await tester.pumpWidget(
@@ -467,20 +472,15 @@ void main() {
       ),
     );
 
-    // When the toolbar is below the content, the shadow hangs below the entire
-    // toolbar.
-    final Finder finder = find.descendant(
-      of: find.byType(CupertinoTextSelectionToolbar),
-      matching: find.byType(DecoratedBox),
+    final double dividerWidth = 1.0 / tester.view.devicePixelRatio;
+
+    expect(
+      find.byType(CupertinoTextSelectionToolbar),
+      paints..rrect(
+        rrect: RRect.fromLTRBR(8.0, 515.0, 158.0 + 2 * dividerWidth, 558.0, const Radius.circular(8.0)),
+        color: const Color(0x33000000),
+      ),
     );
-    expect(finder, findsOneWidget);
-    DecoratedBox decoratedBox = tester.widget(finder.first);
-    BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
-    List<BoxShadow>? shadows = boxDecoration.boxShadow;
-    expect(shadows, isNotNull);
-    expect(shadows, hasLength(1));
-    BoxShadow shadow = boxDecoration.boxShadow!.first;
-    expect(shadow.offset.dy, equals(7.0));
 
     // When the toolbar is above the content, the shadow sits around the arrow
     // with no offset.
@@ -488,12 +488,60 @@ void main() {
       anchorAboveY = 80.0;
     });
     await tester.pump();
-    decoratedBox = tester.widget(finder.first);
-    boxDecoration = decoratedBox.decoration as BoxDecoration;
-    shadows = boxDecoration.boxShadow;
-    expect(shadows, isNotNull);
-    expect(shadows, hasLength(1));
-    shadow = boxDecoration.boxShadow!.first;
-    expect(shadow.offset.dy, equals(0.0));
+
+    expect(
+      find.byType(CupertinoTextSelectionToolbar),
+      paints..rrect(
+        rrect: RRect.fromLTRBR(8.0, 29.0, 158.0 + 2 * dividerWidth, 72.0, const Radius.circular(8.0)),
+        color: const Color(0x33000000),
+      ),
+    );
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  testWidgets('Basic golden tests', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    Widget buildToolbar(Brightness brightness, Offset offset) {
+      final Widget toolbar = CupertinoTextSelectionToolbar(
+        anchorAbove: offset,
+        anchorBelow: offset,
+        children: <Widget>[
+          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'Lorem ipsum'),
+          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'dolor sit amet'),
+          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'Lorem ipsum \ndolor sit amet'),
+          CupertinoTextSelectionToolbarButton.buttonItem(buttonItem: ContextMenuButtonItem(onPressed: () {}, type: ContextMenuButtonType.copy)),
+        ],
+      );
+      return CupertinoApp(
+        theme: CupertinoThemeData(brightness: brightness),
+        home: Center(
+          child: SizedBox(
+            height: 200,
+            child: RepaintBoundary(key: key, child: toolbar),
+          ),
+        ),
+      );
+    }
+
+    // The String describes the location of the toolbar in relation to the
+    // content the arrow points to.
+    const List<(String, Offset)> toolbarLocation = <(String, Offset)>[
+      ('BottomRight', Offset.zero),
+      ('BottomLeft', Offset(100000, 0)),
+      ('TopRight', Offset(0, 100)),
+      ('TopLeft', Offset(100000, 100)),
+    ];
+
+    debugDisableShadows = false;
+    addTearDown(() => debugDisableShadows = true);
+    for (final Brightness brightness in Brightness.values) {
+      for (final (String location, Offset offset) in toolbarLocation) {
+        await tester.pumpWidget(buildToolbar(brightness, offset));
+        await expectLater(
+          find.byKey(key),
+          matchesGoldenFile('cupertino_selection_toolbar.$location.$brightness.png'),
+        );
+      }
+    }
+    debugDisableShadows = true;
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }

@@ -44,8 +44,6 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 ///  * [MouseTracker], which uses [MouseTrackerAnnotation].
 class MouseTrackerAnnotation with Diagnosticable {
   /// Creates an immutable [MouseTrackerAnnotation].
-  ///
-  /// All arguments are optional. The [cursor] must not be null.
   const MouseTrackerAnnotation({
     this.onEnter,
     this.onExit,

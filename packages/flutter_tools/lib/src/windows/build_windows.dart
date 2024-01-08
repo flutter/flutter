@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -18,6 +20,8 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
+import '../migrations/cmake_native_assets_migration.dart';
+import 'migrations/build_architecture_migration.dart';
 import 'migrations/show_window_migration.dart';
 import 'migrations/version_migration.dart';
 import 'visual_studio.dart';
@@ -52,10 +56,19 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       'to learn about adding Windows support to a project.');
   }
 
+  // TODO(pbo-linaro): Add support for windows-arm64 platform, https://github.com/flutter/flutter/issues/129807
+  const TargetPlatform targetPlatform = TargetPlatform.windows_x64;
+  final Directory buildDirectory = globals.fs.directory(globals.fs.path.join(
+    projectPath,
+    getWindowsBuildDirectory(targetPlatform),
+  ));
+
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
+    CmakeNativeAssetsMigration(windowsProject, 'windows', globals.logger),
     VersionMigration(windowsProject, globals.logger),
     ShowWindowMigration(windowsProject, globals.logger),
+    BuildArchitectureMigration(windowsProject, buildDirectory, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -79,7 +92,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 
   final String buildModeName = buildInfo.mode.cliName;
-  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
   );
@@ -89,6 +101,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       generator: cmakeGenerator,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
+      targetPlatform: targetPlatform,
     );
     if (visualStudio.displayVersion == '17.1.0') {
       _fixBrokenCmakeGeneration(buildDirectory);
@@ -124,7 +137,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
-        globals.fs.path.join(getWindowsBuildDirectory(), 'runner', 'Release'),
+        globals.fs.path.join(
+          buildDirectory.path,
+          'runner',
+          'Release'
+        ),
       ),
       precompilerTrace: precompilerTrace,
       type: 'windows',
@@ -153,11 +170,18 @@ Future<void> _runCmakeGeneration({
   required String generator,
   required Directory buildDir,
   required Directory sourceDir,
+  required TargetPlatform targetPlatform,
 }) async {
+  if (targetPlatform != TargetPlatform.windows_x64) {
+    throwToolExit('Windows build supports only x64 target architecture');
+  }
+
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
   int result;
+  const String arch = 'x64';
+  const String flutterTargetPlatform = 'windows-x64';
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -168,6 +192,9 @@ Future<void> _runCmakeGeneration({
         buildDir.path,
         '-G',
         generator,
+        '-A',
+        arch,
+        '-DFLUTTER_TARGET_PLATFORM=$flutterTargetPlatform',
       ],
       trace: true,
     );
@@ -177,7 +204,13 @@ Future<void> _runCmakeGeneration({
   if (result != 0) {
     throwToolExit('Unable to generate build files');
   }
-  globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', Duration(milliseconds: sw.elapsedMilliseconds));
+  final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', elapsedDuration);
+  globals.analytics.send(Event.timing(
+    workflow: 'build',
+    variableName: 'windows-cmake-generation',
+    elapsedMilliseconds: elapsedDuration.inMilliseconds,
+  ));
 }
 
 Future<void> _runBuild(
@@ -228,7 +261,13 @@ Future<void> _runBuild(
   if (result != 0) {
     throwToolExit('Build process failed.');
   }
-  globals.flutterUsage.sendTiming('build', 'windows-cmake-build', Duration(milliseconds: sw.elapsedMilliseconds));
+  final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'windows-cmake-build', elapsedDuration);
+  globals.analytics.send(Event.timing(
+    workflow: 'build',
+    variableName: 'windows-cmake-build',
+    elapsedMilliseconds: elapsedDuration.inMilliseconds,
+  ));
 }
 
 /// Writes the generated CMake file with the configuration for the given build.

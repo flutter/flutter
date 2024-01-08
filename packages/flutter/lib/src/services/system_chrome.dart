@@ -388,7 +388,7 @@ abstract final class SystemChrome {
   /// }
   ///
   /// class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  ///   ui.Display? _display;
+  ///   ui.FlutterView? _view;
   ///   static const double kOrientationLockBreakpoint = 600;
   ///
   ///   @override
@@ -400,19 +400,19 @@ abstract final class SystemChrome {
   ///   @override
   ///   void didChangeDependencies() {
   ///     super.didChangeDependencies();
-  ///     _display = View.maybeOf(context)?.display;
+  ///     _view = View.maybeOf(context);
   ///   }
   ///
   ///   @override
   ///   void dispose() {
   ///     WidgetsBinding.instance.removeObserver(this);
-  ///     _display = null;
+  ///     _view = null;
   ///     super.dispose();
   ///   }
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     final ui.Display? display = _display;
+  ///     final ui.Display? display = _view?.display;
   ///     if (display == null) {
   ///       return;
   ///     }

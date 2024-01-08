@@ -1024,13 +1024,16 @@ void main() {
   });
 
   testWidgets('GlobalKey - detach and re-attach child to different parents', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
         child: SizedBox(
           height: 100,
           child: CustomScrollView(
-            controller: ScrollController(),
+            controller: scrollController,
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildListDelegate(<Widget>[
@@ -1065,6 +1068,7 @@ void main() {
     late StateSetter setState;
     int tabBarViewCnt = 2;
     TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
+    addTearDown(tabController.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1097,6 +1101,7 @@ void main() {
     setState(() {
       tabBarViewCnt = 1;
       tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
+      addTearDown(tabController.dispose);
     });
 
     await tester.pump(const Duration(seconds: 1)); // finish the animation
@@ -1461,6 +1466,7 @@ void main() {
       bool? debugDoingBuildOnUpdateRenderObject;
       bool? debugDoingBuildOnDidUnmountRenderObject;
       final ValueNotifier<int> notifier = ValueNotifier<int>(0);
+      addTearDown(notifier.dispose);
 
       late BuildContext spyContext;
 
@@ -1546,7 +1552,9 @@ void main() {
     final int pointerRouterCount = GestureBinding.instance.pointerRouter.debugGlobalRouteCount;
     final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
     expect(rawKeyEventHandler, isNotNull);
-    BuildOwner(focusManager: FocusManager());
+    final FocusManager focusManager = FocusManager();
+    addTearDown(focusManager.dispose);
+    BuildOwner(focusManager: focusManager);
     expect(GestureBinding.instance.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
@@ -1571,10 +1579,10 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Placeholder(),
     ));
-    final _TestInheritedElement buttonBarTheme =
-        _TestInheritedElement(const ButtonBarTheme(
-        data: ButtonBarThemeData(
-          alignment: MainAxisAlignment.center,
+    final _TestInheritedElement navigationBarTheme =
+        _TestInheritedElement(const NavigationBarTheme(
+        data: NavigationBarThemeData(
+          indicatorColor: Color(0xff00ff00),
         ),
       child: Placeholder(),
     ));
@@ -1583,7 +1591,7 @@ void main() {
     element
       ..dependOnInheritedElement(focusTraversalOrder)
       ..dependOnInheritedElement(directionality)
-      ..dependOnInheritedElement(buttonBarTheme);
+      ..dependOnInheritedElement(navigationBarTheme);
 
     // Dependencies will be sorted by [debugFillProperties].
     element.debugFillProperties(builder);
@@ -1598,7 +1606,7 @@ void main() {
 
     final Set<InheritedElement> dependencies = dependenciesProperty.value!;
     expect(dependencies.length, equals(3));
-    expect(dependenciesProperty.toDescription(), '[ButtonBarTheme, Directionality, FocusTraversalOrder]');
+    expect(dependenciesProperty.toDescription(), '[Directionality, FocusTraversalOrder, NavigationBarTheme]');
   });
 
   testWidgets('BuildOwner.globalKeyCount keeps track of in-use global keys', (WidgetTester tester) async {
@@ -1685,6 +1693,56 @@ void main() {
     expect(states, <String>['deactivate', 'activate', 'didUpdateWidget', 'build']);
     await pumpWidget(Container());
     expect(states, <String>['deactivate', 'dispose']);
+  });
+
+  testWidgets('Element.deactivate reports its deactivation to the InheritedElement it depends on', (WidgetTester tester) async {
+    final List<Key> removedDependentWidgetKeys = <Key>[];
+
+    InheritedElement elementCreator(InheritedWidget widget) {
+      return _InheritedElementSpy(
+        widget,
+        onRemoveDependent: (Element dependent) {
+          removedDependentWidgetKeys.add(dependent.widget.key!);
+        },
+      );
+    }
+
+    Widget builder(BuildContext context) {
+      context.dependOnInheritedWidgetOfExactType<Inherited>();
+      return Container();
+    }
+
+    await tester.pumpWidget(
+      Inherited(
+        0,
+        elementCreator: elementCreator,
+        child: Column(
+          children: <Widget>[
+            Builder(
+              key: const Key('dependent'),
+              builder: builder,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(removedDependentWidgetKeys, isEmpty);
+
+    await tester.pumpWidget(
+      Inherited(
+        0,
+        elementCreator: elementCreator,
+        child: Column(
+          children: <Widget>[
+            Container(),
+          ],
+        ),
+      ),
+    );
+
+    expect(removedDependentWidgetKeys, hasLength(1));
+    expect(removedDependentWidgetKeys.first, const Key('dependent'));
   });
 
   testWidgets('RenderObjectElement.unmount disposes of its renderObject', (WidgetTester tester) async {
@@ -1893,12 +1951,33 @@ class DirtyElementWithCustomBuildOwner extends Element {
 }
 
 class Inherited extends InheritedWidget {
-  const Inherited(this.value, {super.key, required super.child});
+  const Inherited(this.value, {super.key, required super.child, this.elementCreator});
 
   final int? value;
+  final InheritedElement Function(Inherited widget)? elementCreator;
 
   @override
   bool updateShouldNotify(Inherited oldWidget) => oldWidget.value != value;
+
+  @override
+  InheritedElement createElement() {
+    if (elementCreator != null) {
+      return elementCreator!(this);
+    }
+    return super.createElement();
+  }
+}
+
+class _InheritedElementSpy extends InheritedElement {
+  _InheritedElementSpy(super.widget, {this.onRemoveDependent});
+
+  final void Function(Element element)? onRemoveDependent;
+
+  @override
+  void removeDependent(Element dependent) {
+    super.removeDependent(dependent);
+    onRemoveDependent?.call(dependent);
+  }
 }
 
 class DependentStatefulWidget extends StatefulWidget {

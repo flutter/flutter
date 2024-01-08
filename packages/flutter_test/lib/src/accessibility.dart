@@ -329,7 +329,9 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
           // the last transform layer.
           final double ratio = 1 / renderView.flutterView.devicePixelRatio;
           image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
-          return image.toByteData();
+          final ByteData? data = await image.toByteData();
+          image.dispose();
+          return data;
         },
       );
 

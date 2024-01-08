@@ -112,39 +112,6 @@ void main() {
       );
     });
 
-    testWidgets('can fake physicalGeometry', (WidgetTester tester) async {
-      verifyPropertyFaked<Rect>(
-        tester: tester,
-        realValue: trueImplicitView().physicalGeometry,
-        fakeValue: const Rect.fromLTWH(0, 0, 550, 850),
-        propertyRetriever: () => boundImplicitView().physicalGeometry,
-        propertyFaker: (_, Rect fakeValue) {
-          tester.view.physicalGeometry = fakeValue;
-        },
-      );
-    });
-
-    testWidgets('can reset physicalGeometry', (WidgetTester tester) async {
-      verifyPropertyReset<Rect>(
-        tester: tester,
-        fakeValue: const Rect.fromLTWH(0, 0, 35, 475),
-        propertyRetriever: () => boundImplicitView().physicalGeometry,
-        propertyResetter: () {
-          tester.view.resetPhysicalGeometry();
-        },
-        propertyFaker: (Rect fakeValue) {
-          tester.view.physicalGeometry = fakeValue;
-        },
-      );
-    });
-
-    testWidgets('updating physicalGeometry also updates physicalSize', (WidgetTester tester) async {
-      const Rect testGeometry = Rect.fromLTWH(0, 0, 450, 575);
-      tester.view.physicalGeometry = testGeometry;
-
-      expect(tester.view.physicalSize, testGeometry.size);
-    });
-
     testWidgets('can fake physicalSize', (WidgetTester tester) async {
       verifyPropertyFaked<Size>(
         tester: tester,
@@ -169,17 +136,6 @@ void main() {
           tester.view.physicalSize = fakeValue;
         },
       );
-    });
-
-    testWidgets('updating physicalSize also updates physicalGeometry', (WidgetTester tester) async {
-      const Rect testGeometry = Rect.fromLTWH(0, 0, 450, 575);
-      const Size testSize = Size(50, 50);
-      const Rect expectedGeometry = Rect.fromLTWH(0, 0, 50, 50);
-
-      tester.view.physicalGeometry = testGeometry;
-      tester.view.physicalSize = testSize;
-
-      expect(tester.view.physicalGeometry, expectedGeometry);
     });
 
     testWidgets('can fake systemGestureInsets', (WidgetTester tester) async {
@@ -272,7 +228,6 @@ void main() {
       tester.view.devicePixelRatio = 7;
       tester.view.displayFeatures = <DisplayFeature>[const DisplayFeature(bounds: Rect.fromLTWH(0, 0, 20, 300), type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)];
       tester.view.padding = FakeViewPadding.zero;
-      tester.view.physicalGeometry = const Rect.fromLTWH(0, 0, 505, 805);
       tester.view.systemGestureInsets = FakeViewPadding.zero;
       tester.view.viewInsets = FakeViewPadding.zero;
       tester.view.viewPadding = FakeViewPadding.zero;
@@ -356,9 +311,6 @@ class _FlutterViewSnapshotMatcher extends Matcher {
       paddingMatcher.describeMismatch(actual.padding, mismatchDescription, matchState, verbose);
     }
 
-    if (actual.physicalGeometry != expected.physicalGeometry) {
-      mismatchDescription.add('actual.physicalGeometry (${actual.physicalGeometry}) did not match expected.physicalGeometry (${expected.physicalGeometry})');
-    }
     if (actual.physicalSize != expected.physicalSize) {
       mismatchDescription.add('actual.physicalSize (${actual.physicalSize}) did not match expected.physicalSize (${expected.physicalSize})');
     }
@@ -397,7 +349,6 @@ class _FlutterViewSnapshotMatcher extends Matcher {
       actual.displayFeatures.equals(expected.displayFeatures) &&
       actual.gestureSettings == expected.gestureSettings &&
       matchesViewPadding(expected.padding).matches(actual.padding, matchState) &&
-      actual.physicalGeometry == expected.physicalGeometry &&
       actual.physicalSize == expected.physicalSize &&
       matchesViewPadding(expected.systemGestureInsets).matches(actual.padding, matchState) &&
       actual.viewId == expected.viewId &&
@@ -412,7 +363,6 @@ class FlutterViewSnapshot {
     displayFeatures = <DisplayFeature>[...view.displayFeatures],
     gestureSettings = view.gestureSettings,
     padding = view.padding,
-    physicalGeometry = view.physicalGeometry,
     physicalSize = view.physicalSize,
     systemGestureInsets = view.systemGestureInsets,
     viewId = view.viewId,
@@ -423,7 +373,6 @@ class FlutterViewSnapshot {
   final List<DisplayFeature> displayFeatures;
   final GestureSettings  gestureSettings;
   final ViewPadding  padding;
-  final Rect physicalGeometry;
   final Size physicalSize;
   final ViewPadding systemGestureInsets;
   final Object viewId;
@@ -441,7 +390,7 @@ class _FakeFlutterView extends Fake implements FlutterView {
   }
 
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
     lastRenderedScene = scene;
   }
 }

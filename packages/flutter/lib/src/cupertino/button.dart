@@ -95,7 +95,7 @@ class CupertinoButton extends StatefulWidget {
   /// Ignored if the [CupertinoButton] doesn't also have a [color].
   ///
   /// Defaults to [CupertinoColors.quaternarySystemFill] when [color] is
-  /// specified. Must not be null.
+  /// specified.
   final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.

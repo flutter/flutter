@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
@@ -95,6 +97,30 @@ class BuildApkCommand extends BuildSubCommand {
       commandBuildApkTargetPlatform: stringsArg('target-platform').join(','),
       commandBuildApkBuildMode: buildMode,
       commandBuildApkSplitPerAbi: boolArg('split-per-abi'),
+    );
+  }
+
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final String buildMode;
+
+    if (boolArg('release')) {
+      buildMode = 'release';
+    } else if (boolArg('debug')) {
+      buildMode = 'debug';
+    } else if (boolArg('profile')) {
+      buildMode = 'profile';
+    } else {
+      // The build defaults to release.
+      buildMode = 'release';
+    }
+
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      buildApkTargetPlatform: stringsArg('target-platform').join(','),
+      buildApkBuildMode: buildMode,
+      buildApkSplitPerAbi: boolArg('split-per-abi'),
     );
   }
 

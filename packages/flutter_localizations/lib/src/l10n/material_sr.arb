@@ -54,7 +54,6 @@
   "reorderItemRight": "Померите удесно",
   "expandedIconTapHint": "Скупи",
   "collapsedIconTapHint": "Прошири",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Преостао је 1 знак",
   "remainingTextFieldCharacterCountOther": "Преостало је $remainingCount знакова",
   "refreshIndicatorSemanticLabel": "Освежи",
@@ -146,7 +145,7 @@
   "expandedHint": "Скупљено је",
   "collapsedHint": "Проширено је",
   "menuDismissLabel": "Одбаците мени",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Поглед нагоре",
+  "searchWebButtonLabel": "Претражи веб",
+  "shareButtonLabel": "Дели…"
 }

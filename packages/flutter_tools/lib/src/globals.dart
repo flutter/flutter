@@ -49,6 +49,9 @@ import 'runner/flutter_command.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
+// TODO(ianh): We should remove all the global variables and replace them with
+// arguments (to constructors, methods, etc, as appropriate).
+
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>()!;
 Cache get cache => context.get<Cache>()!;
@@ -88,7 +91,7 @@ final BotDetector _defaultBotDetector = BotDetector(
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
-// Analytics instance for package:unified_analytics for telemetry
+// Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling
 Analytics get analytics => context.get<Analytics>()!;
 

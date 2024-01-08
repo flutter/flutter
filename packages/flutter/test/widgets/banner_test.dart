@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
@@ -278,5 +279,20 @@ void main() {
       ..restore(),
     );
     debugDisableShadows = true;
+  });
+
+  test('BannerPainter dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => BannerPainter(
+          message: 'foo',
+          textDirection: TextDirection.rtl,
+          location: BannerLocation.topStart,
+          layoutDirection: TextDirection.ltr,
+        ).dispose(),
+        BannerPainter,
+      ),
+      areCreateAndDispose,
+    );
   });
 }

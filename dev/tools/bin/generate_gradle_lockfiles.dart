@@ -86,13 +86,11 @@ void main(List<String> arguments) {
 
     // Verify that the Gradlew wrapper exists.
     final File gradleWrapper = androidDirectory.childFile('gradlew');
-    // Generate Gradle wrapper if it doesn't exists.
-    // This logic is embedded within the Flutter tool.
-    // To generate the wrapper, build a flavor that doesn't exist.
+    // Generate Gradle wrapper if it doesn't exist.
     if (!gradleWrapper.existsSync()) {
       Process.runSync(
         'flutter',
-        <String>['build', 'apk', '--debug', '--flavor=does-not-exist'],
+        <String>['build', 'apk', '--config-only'],
         workingDirectory: appDirectory,
       );
     }
@@ -195,15 +193,24 @@ const String settingGradleFile = r'''
 // To update all the settings.gradle files in the Flutter repo,
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
-include ':app'
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }
+    settings.ext.flutterSdkPath = flutterSdkPath()
 
-def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
-def properties = new Properties()
+    includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
 
-assert localPropertiesFile.exists()
-localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+    plugins {
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    }
+}
 
-def flutterSdkPath = properties.getProperty("flutter.sdk")
-assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+include ":app"
+
+apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
 ''';

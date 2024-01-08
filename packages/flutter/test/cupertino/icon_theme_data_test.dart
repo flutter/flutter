@@ -14,7 +14,8 @@ void main() {
       grade: 0.0,
       opticalSize: 48.0,
       color: Color(0xAAAAAAAA),
-      opacity: 0.5
+      opacity: 0.5,
+      applyTextScaling: true,
     );
 
     late IconThemeData retrieved;

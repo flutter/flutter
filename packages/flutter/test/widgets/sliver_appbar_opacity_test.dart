@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('!pinned && !floating && !bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
         _TestWidget(
           pinned: false,
@@ -28,6 +29,7 @@ void main() {
 
   testWidgets('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
         _TestWidget(
           pinned: false,
@@ -47,6 +49,7 @@ void main() {
 
   testWidgets('!pinned && floating && !bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
         _TestWidget(
           pinned: false,
@@ -66,6 +69,7 @@ void main() {
 
   testWidgets('!pinned && floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
         _TestWidget(
           pinned: false,
@@ -85,6 +89,7 @@ void main() {
 
   testWidgets('pinned && !floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
         _TestWidget(
           pinned: true,
@@ -104,6 +109,7 @@ void main() {
 
   testWidgets('pinned && !floating && bottom ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
         _TestWidget(
           pinned: true,
@@ -125,6 +131,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/25000.
 
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
         _TestWidget(
           pinned: true,
@@ -146,6 +153,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/25993.
 
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       _TestWidget(
         pinned: true,
@@ -165,6 +173,7 @@ void main() {
 
   testWidgets('pinned && floating && bottom && extraToolbarHeight != 0.0 ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       _TestWidget(
         pinned: true,
@@ -185,6 +194,7 @@ void main() {
 
   testWidgets('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     const double collapsedHeight = 100.0;
     await tester.pumpWidget(
         _TestWidget(

@@ -52,7 +52,6 @@
   "reorderItemRight": "Nach rechts verschieben",
   "expandedIconTapHint": "Minimieren",
   "collapsedIconTapHint": "Maximieren",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Noch 1 Zeichen",
   "remainingTextFieldCharacterCountOther": "Noch $remainingCount Zeichen",
   "refreshIndicatorSemanticLabel": "Aktualisieren",
@@ -144,7 +143,7 @@
   "expandedHint": "Minimiert",
   "collapsedHint": "Maximiert",
   "menuDismissLabel": "Menü schließen",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Nachschlagen",
+  "searchWebButtonLabel": "Im Web suchen",
+  "shareButtonLabel": "Teilen…"
 }

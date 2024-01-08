@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -45,6 +46,7 @@ void main() {
   late FileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage usage;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -55,6 +57,10 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     usage = TestUsage();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -82,9 +88,12 @@ void main() {
         '-S',
         fileSystem.path.absolute(fileSystem.path.dirname(buildFilePath)),
         '-B',
-        r'build\windows',
+        r'C:\build\windows\x64',
         '-G',
         generator,
+        '-A',
+        'x64',
+        '-DFLUTTER_TARGET_PLATFORM=windows-x64',
       ],
       onRun: onRun,
     );
@@ -100,7 +109,7 @@ void main() {
       command: <String>[
         _cmakePath,
         '--build',
-        r'build\windows',
+        r'C:\build\windows\x64',
         '--config',
         buildMode,
         ...<String>['--target', 'INSTALL'],
@@ -206,6 +215,46 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
+  testUsingContext('Windows build sends timing events', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub']
+    );
+
+    expect(
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'windows-cmake-generation',
+      ),
+      true,
+    );
+    expect(
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'windows-cmake-build',
+      ),
+      true,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Analytics: () => fakeAnalytics,
+  });
+
+
   testUsingContext('Windows build extracts errors from stdout', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
@@ -222,21 +271,21 @@ Microsoft (R) Build Engine version 16.6.0+5ff7b0c9e for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
   Checking Build System
-  Generating C:/foo/windows/flutter/ephemeral/flutter_windows.dll, [etc], _phony_
-  Building Custom Rule C:/foo/windows/flutter/CMakeLists.txt
+  Generating C:/foo/windows/x64/flutter/ephemeral/flutter_windows.dll, [etc], _phony_
+  Building Custom Rule C:/foo/windows/x64/flutter/CMakeLists.txt
   standard_codec.cc
   Generating Code...
-  flutter_wrapper_plugin.vcxproj -> C:\foo\build\windows\flutter\Debug\flutter_wrapper_plugin.lib
-C:\foo\windows\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\runner\test.vcxproj]
-C:\foo\windows\runner\main.cpp(18): warning C4706: assignment within conditional expression [C:\foo\build\windows\runner\test.vcxproj]
-main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\runner\test.vcxproj]
-C:\foo\build\windows\runner\Debug\test.exe : fatal error LNK1120: 1 unresolved externals [C:\foo\build\windows\runner\test.vcxproj]
-  Building Custom Rule C:/foo/windows/runner/CMakeLists.txt
+  flutter_wrapper_plugin.vcxproj -> C:\foo\build\windows\x64\flutter\Debug\flutter_wrapper_plugin.lib
+C:\foo\windows\x64\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\x64\runner\test.vcxproj]
+C:\foo\windows\x64\runner\main.cpp(18): warning C4706: assignment within conditional expression [C:\foo\build\windows\x64\runner\test.vcxproj]
+main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\x64\runner\test.vcxproj]
+C:\foo\build\windows\x64\runner\Debug\test.exe : fatal error LNK1120: 1 unresolved externals [C:\foo\build\windows\x64\runner\test.vcxproj]
+  Building Custom Rule C:/foo/windows/x64/runner/CMakeLists.txt
   flutter_window.cpp
   main.cpp
-C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier [C:\foo\build\windows\runner\test.vcxproj]
+C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier [C:\foo\build\windows\x64\runner\test.vcxproj]
   -- Install configuration: "Debug"
-  -- Installing: C:/foo/build/windows/runner/Debug/data/icudtl.dat
+  -- Installing: C:/foo/build/windows/x64/runner/Debug/data/icudtl.dat
 ''';
 
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -251,11 +300,11 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     );
     // Just the warnings and errors should be surfaced.
     expect(testLogger.errorText, r'''
-C:\foo\windows\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\runner\test.vcxproj]
-C:\foo\windows\runner\main.cpp(18): warning C4706: assignment within conditional expression [C:\foo\build\windows\runner\test.vcxproj]
-main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\runner\test.vcxproj]
-C:\foo\build\windows\runner\Debug\test.exe : fatal error LNK1120: 1 unresolved externals [C:\foo\build\windows\runner\test.vcxproj]
-C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier [C:\foo\build\windows\runner\test.vcxproj]
+C:\foo\windows\x64\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\x64\runner\test.vcxproj]
+C:\foo\windows\x64\runner\main.cpp(18): warning C4706: assignment within conditional expression [C:\foo\build\windows\x64\runner\test.vcxproj]
+main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\x64\runner\test.vcxproj]
+C:\foo\build\windows\x64\runner\Debug\test.exe : fatal error LNK1120: 1 unresolved externals [C:\foo\build\windows\x64\runner\test.vcxproj]
+C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier [C:\foo\build\windows\x64\runner\test.vcxproj]
 ''');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -311,7 +360,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="somepath\build\windows\CMakeFiles\8b570225f626c250e12bc1ede88babae\flutter_windows.dll.rule">
+    <CustomBuild Include="somepath\build\windows\x64\CMakeFiles\8b570225f626c250e12bc1ede88babae\flutter_windows.dll.rule">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating some files</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
 "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
@@ -391,6 +440,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     final File assembleProject = fileSystem.currentDirectory
       .childDirectory('build')
       .childDirectory('windows')
+      .childDirectory('x64')
       .childDirectory('flutter')
       .childFile('flutter_assemble.vcxproj');
     assembleProject.createSync(recursive: true);
@@ -892,7 +942,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
-    fileSystem.file(r'build\windows\runner\Release\app.so')
+    fileSystem.file(r'build\windows\x64\runner\Release\app.so')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
@@ -925,6 +975,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     expect(usage.events, contains(
         const TestUsageEvent('code-size-analysis', 'windows'),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'windows')
+    ));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
@@ -932,6 +985,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     Platform: () => windowsPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
   });
 
   // Confirms that running for Windows in a directory with a

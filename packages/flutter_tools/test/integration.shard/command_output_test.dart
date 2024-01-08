@@ -71,11 +71,12 @@ void main() {
     expect(result.stdout, contains('Shutdown hooks complete'));
   });
 
-  testWithoutContext('flutter config contains all features', () async {
+  testWithoutContext('flutter config --list contains all features', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'config',
+      '--list'
     ]);
 
     // contains all of the experiments in features.dart

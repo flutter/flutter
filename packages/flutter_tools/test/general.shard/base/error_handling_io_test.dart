@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
@@ -112,7 +111,7 @@ void main() {
       exceptionHandler = FileExceptionHandler();
     });
 
-    testWithoutContext('bypasses error handling when withAllowedFailure is used', () {
+    testWithoutContext('bypasses error handling when noExitOnFailure is used', () {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -124,9 +123,9 @@ void main() {
         FileSystemOp.write,
         FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
       );
-
+      final Matcher throwsNonToolExit = throwsA(isNot(isA<ToolExit>()));
       expect(() => ErrorHandlingFileSystem.noExitOnFailure(
-        () => file.writeAsStringSync('')), throwsException);
+        () => file.writeAsStringSync('')), throwsNonToolExit);
 
       // nesting does not unconditionally re-enable errors.
       expect(() {
@@ -134,7 +133,7 @@ void main() {
           ErrorHandlingFileSystem.noExitOnFailure(() { });
           file.writeAsStringSync('');
         });
-      }, throwsException);
+      }, throwsNonToolExit);
 
       // Check that state does not leak.
       expect(() => file.writeAsStringSync(''), throwsToolExit());
@@ -1293,7 +1292,7 @@ class FakeExistsFile extends Fake implements File {
 
 class FakeFileSystem extends Fake implements FileSystem {
   @override
-  p.Context get path => p.Context();
+  Context get path => Context();
 
   @override
   Directory get currentDirectory {

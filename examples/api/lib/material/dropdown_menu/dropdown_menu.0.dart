@@ -2,13 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// which is the default configuration, and the second one has a filled input decoration.
-
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [DropdownMenu]s. The first dropdown menu has an outlined border.
+// Flutter code sample for [DropdownMenu]s. The first dropdown menu
+// has the default outlined border and demos using the
+// [DropdownMenuEntry] style parameter to customize its appearance.
+// The second dropdown menu customizes the appearance of the dropdown
+// menu's text field with its [InputDecorationTheme] parameter.
 
-void main() => runApp(const DropdownMenuExample());
+void main() {
+  runApp(const DropdownMenuExample());
+}
+
+// DropdownMenuEntry labels and values for the first dropdown menu.
+enum ColorLabel {
+  blue('Blue', Colors.blue),
+  pink('Pink', Colors.pink),
+  green('Green', Colors.green),
+  yellow('Orange', Colors.orange),
+  grey('Grey', Colors.grey);
+
+  const ColorLabel(this.label, this.color);
+  final String label;
+  final Color color;
+}
+
+// DropdownMenuEntry labels and values for the second dropdown menu.
+enum IconLabel {
+  smile('Smile', Icons.sentiment_satisfied_outlined),
+  cloud(
+    'Cloud',
+    Icons.cloud_outlined,
+  ),
+  brush('Brush', Icons.brush_outlined),
+  heart('Heart', Icons.favorite);
+
+  const IconLabel(this.label, this.icon);
+  final String label;
+  final IconData icon;
+}
 
 class DropdownMenuExample extends StatefulWidget {
   const DropdownMenuExample({super.key});
@@ -25,18 +57,6 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
 
   @override
   Widget build(BuildContext context) {
-    final List<DropdownMenuEntry<ColorLabel>> colorEntries = <DropdownMenuEntry<ColorLabel>>[];
-    for (final ColorLabel color in ColorLabel.values) {
-      colorEntries.add(
-        DropdownMenuEntry<ColorLabel>(value: color, label: color.label, enabled: color.label != 'Grey'),
-      );
-    }
-
-    final List<DropdownMenuEntry<IconLabel>> iconEntries = <DropdownMenuEntry<IconLabel>>[];
-    for (final IconLabel icon in IconLabel.values) {
-      iconEntries.add(DropdownMenuEntry<IconLabel>(value: icon, label: icon.label));
-    }
-
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -54,21 +74,37 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                     DropdownMenu<ColorLabel>(
                       initialSelection: ColorLabel.green,
                       controller: colorController,
+                      // requestFocusOnTap is enabled/disabled by platforms when it is null.
+                      // On mobile platforms, this is false by default. Setting this to true will
+                      // trigger focus request on the text field and virtual keyboard will appear
+                      // afterward. On desktop platforms however, this defaults to true.
+                      requestFocusOnTap: true,
                       label: const Text('Color'),
-                      dropdownMenuEntries: colorEntries,
                       onSelected: (ColorLabel? color) {
                         setState(() {
                           selectedColor = color;
                         });
                       },
+                      dropdownMenuEntries: ColorLabel.values.map<DropdownMenuEntry<ColorLabel>>(
+                        (ColorLabel color) {
+                          return DropdownMenuEntry<ColorLabel>(
+                            value: color,
+                            label: color.label,
+                            enabled: color.label != 'Grey',
+                            style: MenuItemButton.styleFrom(
+                              foregroundColor: color.color,
+                            ),
+                          );
+                        }
+                      ).toList(),
                     ),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 24),
                     DropdownMenu<IconLabel>(
                       controller: iconController,
                       enableFilter: true,
+                      requestFocusOnTap: true,
                       leadingIcon: const Icon(Icons.search),
                       label: const Text('Icon'),
-                      dropdownMenuEntries: iconEntries,
                       inputDecorationTheme: const InputDecorationTheme(
                         filled: true,
                         contentPadding: EdgeInsets.symmetric(vertical: 5.0),
@@ -78,7 +114,16 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                           selectedIcon = icon;
                         });
                       },
-                    )
+                      dropdownMenuEntries: IconLabel.values.map<DropdownMenuEntry<IconLabel>>(
+                        (IconLabel icon) {
+                          return DropdownMenuEntry<IconLabel>(
+                            value: icon,
+                            label: icon.label,
+                            leadingIcon: Icon(icon.icon),
+                          );
+                        },
+                      ).toList(),
+                    ),
                   ],
                 ),
               ),
@@ -104,30 +149,4 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
       ),
     );
   }
-}
-
-enum ColorLabel {
-  blue('Blue', Colors.blue),
-  pink('Pink', Colors.pink),
-  green('Green', Colors.green),
-  yellow('Yellow', Colors.yellow),
-  grey('Grey', Colors.grey);
-
-  const ColorLabel(this.label, this.color);
-  final String label;
-  final Color color;
-}
-
-enum IconLabel {
-  smile('Smile', Icons.sentiment_satisfied_outlined),
-  cloud(
-    'Cloud',
-    Icons.cloud_outlined,
-  ),
-  brush('Brush', Icons.brush_outlined),
-  heart('Heart', Icons.favorite);
-
-  const IconLabel(this.label, this.icon);
-  final String label;
-  final IconData icon;
 }

@@ -21,14 +21,15 @@ import 'media_query.dart';
 /// The provided [child] is wrapped in a [MediaQuery] constructed from the given
 /// [view].
 ///
-/// For most use cases, using [MediaQuery.of] is a more appropriate way of
-/// obtaining the information that a [FlutterView] exposes. For example, using
-/// [MediaQuery] will expose the _logical_ device size ([MediaQueryData.size])
-/// rather than the physical size ([FlutterView.physicalSize]). Similarly, while
-/// [FlutterView.padding] conveys the information from the operating system, the
-/// [MediaQueryData.padding] further adjusts this information to be aware of the
-/// context of the widget; e.g. the [Scaffold] widget adjusts the values for its
-/// various children.
+/// For most use cases, using [MediaQuery.of], or its associated "...Of" methods
+/// are a more appropriate way of obtaining the information that a [FlutterView]
+/// exposes. For example, using [MediaQuery.sizeOf] will expose the _logical_
+/// device size ([MediaQueryData.size]) rather than the physical size
+/// ([FlutterView.physicalSize]). Similarly, while [FlutterView.padding] conveys
+/// the information from the operating system, the [MediaQueryData.padding]
+/// attribute (obtained from [MediaQuery.paddingOf]) further adjusts this
+/// information to be aware of the context of the widget; e.g. the [Scaffold]
+/// widget adjusts the values for its various children.
 ///
 /// Each [FlutterView] can be associated with at most one [View] widget in the
 /// widget tree. Two or more [View] widgets configured with the same
@@ -123,9 +124,10 @@ class View extends StatelessWidget {
   /// when the identity of the [FlutterView] changes (i.e. the `context` is
   /// moved to render into a different [FlutterView] then before). The context
   /// will not be informed when the _properties_ on the [FlutterView] itself
-  /// change their values. To access the property values of a [FlutterView] it
-  /// is best practise to use [MediaQuery.of] instead, which will ensure that
-  /// the `context` is informed when the view properties change.
+  /// change their values. To access the property values of a [FlutterView]
+  /// prefer using the access methods on [MediaQuery], such as
+  /// [MediaQuery.sizeOf], which will ensure that the `context` is informed when
+  /// the view properties change.
   ///
   /// See also:
   ///
@@ -473,9 +475,7 @@ class _MultiChildComponentWidget extends Widget {
 ///  * [WidgetsBinding] for an explanation of rendering and non-rendering zones.
 class ViewCollection extends _MultiChildComponentWidget {
   /// Creates a [ViewCollection] widget.
-  ///
-  /// The provided list of [views] must contain at least one widget.
-  const ViewCollection({super.key, required super.views}) : assert(views.length > 0);
+  const ViewCollection({super.key, required super.views});
 
   /// The [View] descendants of this widget.
   ///

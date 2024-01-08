@@ -68,8 +68,6 @@ class ShapeDecoration extends Decoration {
   ///
   /// The [color] and [gradient] properties are mutually exclusive, one (or
   /// both) of them must be null.
-  ///
-  /// The [shape] must not be null.
   const ShapeDecoration({
     this.color,
     this.image,
@@ -157,8 +155,7 @@ class ShapeDecoration extends Decoration {
   /// Shapes can be stacked (using the `+` operator). The color, gradient, and
   /// image are drawn into the inner-most shape specified.
   ///
-  /// The [shape] property specifies the outline (border) of the decoration. The
-  /// shape must not be null.
+  /// The [shape] property specifies the outline (border) of the decoration.
   ///
   /// ## Directionality-dependent shapes
   ///

@@ -67,12 +67,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     requiresPubspecYaml();
     usesPubOption();
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
     usesWebRendererOption();
     usesDeviceUserOption();
     usesFlavorOption();
+    addEnableImpellerFlag(verboseHelp: verboseHelp);
 
     argParser
       ..addMultiOption('name',
@@ -345,7 +347,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     String? testAssetDirectory;
     if (buildTestAssets) {
-      await _buildTestAsset();
+      await _buildTestAsset(flavor: buildInfo.flavor);
       testAssetDirectory = globals.fs.path.
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
@@ -435,6 +437,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableDds: enableDds,
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
       usingCISystem: usingCISystem,
+      enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
     );
 
     Device? integrationTestDevice;
@@ -465,6 +468,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           '  integration_test:\n'
           '    sdk: flutter\n',
         );
+      }
+
+      if (stringArg('flavor') != null && !integrationTestDevice.supportsFlavors) {
+        throwToolExit('--flavor is only supported for Android, macOS, and iOS devices.');
       }
     }
 
@@ -560,9 +567,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         .replace(query: queryPart.isEmpty ? null : queryPart);
   }
 
-  Future<void> _buildTestAsset() async {
+  Future<void> _buildTestAsset({
+    required String? flavor,
+  }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build(packagesPath: '.packages');
+    final int build = await assetBundle.build(
+      packagesPath: '.packages',
+      flavor: flavor,
+    );
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }

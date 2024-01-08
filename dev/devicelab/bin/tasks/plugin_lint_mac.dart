@@ -39,23 +39,14 @@ Future<void> main() async {
             iosintegrationTestPodspec,
             '--use-libraries',
             '--verbose',
-            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
-            // https://github.com/flutter/flutter/issues/125812
-            '--allow-warnings',
           ],
         );
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
-        await exec(
-          'pod',
+        await _tryMacOSLint(
+          macosintegrationTestPodspec,
           <String>[
-            'lib',
-            'lint',
-            macosintegrationTestPodspec,
             '--verbose',
-            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
-            // https://github.com/flutter/flutter/issues/125812
-            '--allow-warnings',
           ],
         );
       });
@@ -164,12 +155,9 @@ Future<void> main() async {
 
       final String macOSPodspecPath = path.join(swiftPluginPath, 'macos', '$swiftPluginName.podspec');
       await inDirectory(tempDir, () async {
-        await exec(
-          'pod',
+        await _tryMacOSLint(
+          macOSPodspecPath,
           <String>[
-            'lib',
-            'lint',
-            macOSPodspecPath,
             '--allow-warnings',
             '--verbose',
           ],
@@ -179,12 +167,9 @@ Future<void> main() async {
       section('Lint Swift macOS podspec plugin as library');
 
       await inDirectory(tempDir, () async {
-        await exec(
-          'pod',
+        await _tryMacOSLint(
+          macOSPodspecPath,
           <String>[
-            'lib',
-            'lint',
-            macOSPodspecPath,
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
@@ -532,4 +517,19 @@ void _validateMacOSPodfile(String appPath) {
     'test_plugin_swift',
     'macos',
   ));
+}
+
+Future<void> _tryMacOSLint(
+  String podspecPath,
+  List<String> extraArguments,
+) async {
+  await eval(
+    'pod',
+    <String>[
+      'lib',
+      'lint',
+      podspecPath,
+      ...extraArguments,
+    ],
+  );
 }

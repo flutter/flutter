@@ -57,7 +57,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   );
   static const double _kButtonHeight = 43;
   static const TextStyle _kActionSheetActionStyle = TextStyle(
-    fontFamily: '.SF UI Text',
+    fontFamily: 'CupertinoSystemText',
     inherit: false,
     fontSize: 16.0,
     fontWeight: FontWeight.w400,

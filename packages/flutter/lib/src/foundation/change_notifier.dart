@@ -148,7 +148,7 @@ mixin class ChangeNotifier implements Listenable {
   bool _debugDisposed = false;
 
   /// If true, the event [ObjectCreated] for this instance was dispatched to
-  /// [MemoryAllocations].
+  /// [FlutterMemoryAllocations].
   ///
   /// As [ChangedNotifier] is used as mixin, it does not have constructor,
   /// so we use [addListener] to dispatch the event.
@@ -207,6 +207,39 @@ mixin class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners => _count > 0;
 
+  /// Dispatches event of the [object] creation to [FlutterMemoryAllocations.instance].
+  ///
+  /// If the event was already dispatched or [kFlutterMemoryAllocationsEnabled]
+  /// is false, the method is noop.
+  ///
+  /// Tools like leak_tracker use the event of object creation to help
+  /// developers identify the owner of the object, for troubleshooting purposes,
+  /// by taking stack trace at the moment of the event.
+  ///
+  /// But, as [ChangeNotifier] is mixin, it does not have its own constructor. So, it
+  /// communicates object creation in first `addListener`, that results
+  /// in the stack trace pointing to `addListener`, not to constructor.
+  ///
+  /// To make debugging easier, invoke [ChangeNotifier.maybeDispatchObjectCreation]
+  /// in constructor of the class. It will help
+  /// to identify the owner.
+  ///
+  /// Make sure to invoke it with condition `if (kFlutterMemoryAllocationsEnabled) ...`
+  /// so that the method is tree-shaken away when the flag is false.
+  @protected
+  static void maybeDispatchObjectCreation(ChangeNotifier object) {
+    // Tree shaker does not include this method and the class MemoryAllocations
+    // if kFlutterMemoryAllocationsEnabled is false.
+    if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ChangeNotifier',
+        object: object,
+      );
+      object._creationDispatched = true;
+    }
+  }
+
   /// Register a closure to be called when the object changes.
   ///
   /// If the given closure is already registered, an additional instance is
@@ -236,14 +269,11 @@ mixin class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterFoundationLibrary,
-        className: '$ChangeNotifier',
-        object: this,
-      );
-      _creationDispatched = true;
+
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation(this);
     }
+
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -354,7 +384,7 @@ mixin class ChangeNotifier implements Listenable {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _listeners = _emptyListeners;
     _count = 0;
@@ -505,13 +535,8 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterFoundationLibrary,
-        className: '$ValueNotifier',
-        object: this,
-      );
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    _creationDispatched = true;
   }
 
   /// The current value stored in this notifier.

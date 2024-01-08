@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   Future<void> setAppLifeCycleState(AppLifecycleState state) async {
@@ -22,6 +23,7 @@ void main() {
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
 
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isFalse);
@@ -99,6 +101,7 @@ void main() {
 
   testWidgets('Ticker control test', (WidgetTester tester) async {
     late Ticker ticker;
+    addTearDown(() => ticker.dispose());
 
     void testFunction() {
       ticker = Ticker((Duration _) { });
@@ -153,6 +156,7 @@ void main() {
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
     ticker.start();
 
     expect(ticker.isTicking, isTrue);
@@ -178,6 +182,7 @@ void main() {
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
     ticker.start();
 
     expect(tickCount, equals(0));
@@ -196,5 +201,12 @@ void main() {
     expect(ticker.isTicking, isTrue);
 
     ticker.stop();
+  });
+
+  test('Ticker dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => Ticker((_) {}).dispose(), Ticker,),
+      areCreateAndDispose,
+    );
   });
 }

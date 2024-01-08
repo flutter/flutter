@@ -30,13 +30,12 @@ class DataTableExample extends StatefulWidget {
 }
 
 class _DataTableExampleState extends State<DataTableExample> {
-  static const int numItems = 10;
+  static const int numItems = 20;
   List<bool> selected = List<bool>.generate(numItems, (int index) => false);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
+    return SingleChildScrollView(
       child: DataTable(
         columns: const <DataColumn>[
           DataColumn(
