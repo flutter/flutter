@@ -43,7 +43,9 @@ void main() {
     final _TestImageProvider imageProvider2 = _TestImageProvider();
 
     final ValueNotifier<_TestImageProvider> imageListenable = ValueNotifier<_TestImageProvider>(imageProvider1);
+    addTearDown(imageListenable.dispose);
     final ValueNotifier<int> innerListenable = ValueNotifier<int>(0);
+    addTearDown(innerListenable.dispose);
 
     bool imageLoaded = false;
 
