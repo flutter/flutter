@@ -9,6 +9,7 @@ import 'platform.dart' as platform;
 export 'platform.dart' show TargetPlatform;
 
 /// The dart:io implementation of [platform.defaultTargetPlatform].
+@pragma("vm:platform-const-if", !kDebugMode)
 platform.TargetPlatform get defaultTargetPlatform {
   platform.TargetPlatform? result;
   if (Platform.isAndroid) {
@@ -30,7 +31,7 @@ platform.TargetPlatform get defaultTargetPlatform {
     }
     return true;
   }());
-  if (platform.debugDefaultTargetPlatformOverride != null) {
+  if (kDebugMode && platform.debugDefaultTargetPlatformOverride != null) {
     result = platform.debugDefaultTargetPlatformOverride;
   }
   if (result == null) {
