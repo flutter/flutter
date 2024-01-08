@@ -272,7 +272,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.colorScheme.onSurfaceVariant.value
+      theme.colorScheme.onSurfaceVariant.value,
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -849,7 +849,7 @@ void main() {
     // Test default icon theme.
     await tester.pumpWidget(buildChip());
 
-    expect(getIconData(tester).color, ThemeData().colorScheme.primary);
+    expect(getIconData(tester).color, theme.colorScheme.primary);
 
     // Test provided icon theme.
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
@@ -1094,8 +1094,11 @@ void main() {
     expect(findTooltipContainer('Delete'), findsNothing);
   });
 
-  testWidgets('Material3 - FilterChip icon colors', (WidgetTester tester) async {
-    const IconData avatarIcon = Icons.house;
+  testWidgets('Material3 - Default FilterChip icon colors', (WidgetTester tester) async {
+    const IconData flatAvatar = Icons.favorite;
+    const IconData flatDeleteIcon = Icons.delete;
+    const IconData elevatedAvatar = Icons.house;
+    const IconData elevatedDeleteIcon = Icons.clear_all;
     final ThemeData theme = ThemeData();
 
     Widget buildChips({
@@ -1107,14 +1110,16 @@ void main() {
           child: Column(
             children: <Widget>[
               FilterChip(
-                avatar: const Icon(avatarIcon),
+                avatar: const Icon(flatAvatar),
+                deleteIcon: const Icon(flatDeleteIcon),
                 onSelected: (bool valueChanged) { },
                 label: const Text('FilterChip'),
                 selected: selected,
                 onDeleted: () { },
               ),
               FilterChip.elevated(
-                avatar: const Icon(avatarIcon),
+                avatar: const Icon(elevatedAvatar),
+                deleteIcon: const Icon(elevatedDeleteIcon),
                 onSelected: (bool valueChanged) { },
                 label: const Text('Elevated FilterChip'),
                 selected: selected,
@@ -1126,33 +1131,49 @@ void main() {
       );
     }
 
-    IconThemeData getIconDataForIcon(WidgetTester tester, IconData icon, {required bool elevatedChip}) {
-      final List<Icon> icons = tester.widgetList<Icon>(
-         find.byIcon(icon),
-      ).toList();
-      // Based on the order of the chips in the column
-      final Icon foundIcon = elevatedChip ? icons[1] : icons[0];
-      final IconTheme iconTheme = tester.firstWidget<IconTheme>(
+    Color getIconColor(WidgetTester tester, IconData icon) {
+      return tester.firstWidget<IconTheme>(
         find.ancestor(
-          of: find.byWidget(foundIcon),
+          of: find.byIcon(icon),
           matching: find.byType(IconTheme),
         ),
-      );
-      return iconTheme.data;
+      ).data.color!;
     }
 
-    // Unselected state
+    // Test unselected state.
     await tester.pumpWidget(buildChips(selected: false));
-    expect(getIconDataForIcon(elevatedChip: false, tester, avatarIcon).color, theme.colorScheme.primary);
-    expect(getIconDataForIcon(elevatedChip: false, tester, Icons.clear).color, theme.colorScheme.onSurfaceVariant);
-    expect(getIconDataForIcon(elevatedChip: true, tester, avatarIcon).color, theme.colorScheme.primary);
-    expect(getIconDataForIcon(elevatedChip: true, tester, Icons.clear).color, theme.colorScheme.onSurfaceVariant);
+    // Check the flat chip icon colors.
+    expect(getIconColor(tester, flatAvatar), theme.colorScheme.primary);
+    expect(
+      getIconColor(tester, flatDeleteIcon),
+      theme.colorScheme.onSurfaceVariant,
+    );
+    // Check the elevated chip icon colors.
+    expect(getIconColor(tester, elevatedAvatar), theme.colorScheme.primary);
+    expect(
+      getIconColor(tester, elevatedDeleteIcon),
+      theme.colorScheme.onSurfaceVariant,
+    );
 
-    // Selected state
+    // Test selected state.
     await tester.pumpWidget(buildChips(selected: true));
-    expect(getIconDataForIcon(elevatedChip: false, tester, avatarIcon).color, theme.colorScheme.onSecondaryContainer);
-    expect(getIconDataForIcon(elevatedChip: false, tester, Icons.clear).color, theme.colorScheme.onSecondaryContainer);
-    expect(getIconDataForIcon(elevatedChip: true, tester, avatarIcon).color, theme.colorScheme.onSecondaryContainer);
-    expect(getIconDataForIcon(elevatedChip: true, tester, Icons.clear).color, theme.colorScheme.onSecondaryContainer);
+    // Check the flat chip icon colors.
+    expect(
+      getIconColor(tester, flatAvatar),
+      theme.colorScheme.onSecondaryContainer,
+    );
+    expect(
+      getIconColor(tester, flatDeleteIcon),
+      theme.colorScheme.onSecondaryContainer,
+    );
+    // Check the elevated chip icon colors.
+    expect(
+      getIconColor(tester, elevatedAvatar),
+      theme.colorScheme.onSecondaryContainer,
+    );
+    expect(
+      getIconColor(tester, elevatedDeleteIcon),
+      theme.colorScheme.onSecondaryContainer,
+    );
   });
 }

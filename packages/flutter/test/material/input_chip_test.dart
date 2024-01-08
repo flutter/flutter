@@ -419,7 +419,7 @@ void main() {
     // Test default icon theme.
     await tester.pumpWidget(buildChip());
 
-    expect(getIconData(tester).color, ThemeData().colorScheme.onSurfaceVariant);
+    expect(getIconData(tester).color, theme.colorScheme.onSurfaceVariant);
 
     // Test provided icon theme.
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
