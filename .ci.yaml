@@ -275,8 +275,6 @@ targets:
     recipe: flutter/android_views
     dimensions:
       kvm: "1"
-      cores: "8"
-      machine_type: "n1-standard-8"
     properties:
       device_type: "none"
       dependencies: >-
