@@ -731,14 +731,12 @@ TextAffinity? _toTextAffinity(String? affinity) {
 /// This feature works out-of-the-box with Flutter. Support is built into
 /// [EditableText].
 ///
-/// ![Animation of the native iOS floating cursor feature on an iPhone 14 simulator running iOS 17.0](
-/// https://flutter.github.io/assets-for-api-docs/assets/services/floating_cursor.gif)
-///
 /// See also:
 ///
 ///  * [EditableText.backgroundCursorColor], which configures the color of the
 ///    placeholder cursor that appear in the original cursor location while the
 ///    floating cursor is being dragged.
+///  * <https://developer.apple.com/documentation/uikit/uitextinput/1614557-beginfloatingcursor>
 enum FloatingCursorDragState {
   /// A user has just activated a floating cursor by long pressing on the
   /// spacebar.
