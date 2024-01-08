@@ -20,7 +20,10 @@ class Context : public RefCountedDartWrappable<Context> {
  public:
   static void SetOverrideContext(std::shared_ptr<impeller::Context> context);
 
-  static std::shared_ptr<impeller::Context> GetDefaultContext();
+  static std::shared_ptr<impeller::Context> GetOverrideContext();
+
+  static std::shared_ptr<impeller::Context> GetDefaultContext(
+      std::optional<std::string>& out_error);
 
   explicit Context(std::shared_ptr<impeller::Context> context);
   ~Context() override;

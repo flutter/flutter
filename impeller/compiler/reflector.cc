@@ -15,6 +15,7 @@
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/compiler/code_gen_template.h"
+#include "impeller/compiler/shader_bundle_data.h"
 #include "impeller/compiler/types.h"
 #include "impeller/compiler/uniform_sorter.h"
 #include "impeller/compiler/utilities.h"
@@ -131,6 +132,11 @@ Reflector::Reflector(Options options,
 
   runtime_stage_shader_ = GenerateRuntimeStageData();
 
+  shader_bundle_data_ = GenerateShaderBundleData();
+  if (!shader_bundle_data_) {
+    return;
+  }
+
   is_valid_ = true;
 }
 
@@ -164,6 +170,10 @@ std::shared_ptr<fml::Mapping> Reflector::GetReflectionCC() const {
 std::shared_ptr<RuntimeStageData::Shader> Reflector::GetRuntimeStageShaderData()
     const {
   return runtime_stage_shader_;
+}
+
+std::shared_ptr<ShaderBundleData> Reflector::GetShaderBundleData() const {
+  return shader_bundle_data_;
 }
 
 std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
@@ -407,6 +417,103 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
   return data;
 }
 
+std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
+  const auto& entrypoints = compiler_->get_entry_points_and_stages();
+  if (entrypoints.size() != 1u) {
+    VALIDATION_LOG << "Single entrypoint not found.";
+    return nullptr;
+  }
+  auto data = std::make_shared<ShaderBundleData>(
+      options_.entry_point_name,            //
+      entrypoints.front().execution_model,  //
+      options_.target_platform              //
+  );
+  data->SetShaderData(shader_data_);
+
+  const auto uniforms = compiler_->get_shader_resources().uniform_buffers;
+  for (const auto& uniform : uniforms) {
+    ShaderBundleData::ShaderUniformStruct uniform_struct;
+    uniform_struct.name = uniform.name;
+    uniform_struct.ext_res_0 = compiler_.GetExtendedMSLResourceBinding(
+        CompilerBackend::ExtendedResourceIndex::kPrimary, uniform.id);
+    uniform_struct.set = compiler_->get_decoration(
+        uniform.id, spv::Decoration::DecorationDescriptorSet);
+    uniform_struct.binding = compiler_->get_decoration(
+        uniform.id, spv::Decoration::DecorationBinding);
+
+    const auto type = compiler_->get_type(uniform.type_id);
+    if (type.basetype != spirv_cross::SPIRType::BaseType::Struct) {
+      std::cerr << "Error: Uniform \"" << uniform.name
+                << "\" is not a struct. All Flutter GPU shader uniforms must "
+                   "be structs."
+                << std::endl;
+      return nullptr;
+    }
+
+    size_t size_in_bytes = 0;
+    for (const auto& struct_member : ReadStructMembers(uniform.type_id)) {
+      size_in_bytes += struct_member.byte_length;
+      if (StringStartsWith(struct_member.name, "_PADDING_")) {
+        continue;
+      }
+      ShaderBundleData::ShaderUniformStructField uniform_struct_field;
+      uniform_struct_field.name = struct_member.name;
+      uniform_struct_field.type = struct_member.base_type;
+      uniform_struct_field.offset_in_bytes = struct_member.offset;
+      uniform_struct_field.element_size_in_bytes = struct_member.size;
+      uniform_struct_field.total_size_in_bytes = struct_member.byte_length;
+      uniform_struct_field.array_elements = struct_member.array_elements;
+      uniform_struct.fields.push_back(uniform_struct_field);
+    }
+    uniform_struct.size_in_bytes = size_in_bytes;
+
+    data->AddUniformStruct(uniform_struct);
+  }
+
+  const auto sampled_images = compiler_->get_shader_resources().sampled_images;
+  for (const auto& image : sampled_images) {
+    ShaderBundleData::ShaderUniformTexture uniform_texture;
+    uniform_texture.name = image.name;
+    uniform_texture.ext_res_0 = compiler_.GetExtendedMSLResourceBinding(
+        CompilerBackend::ExtendedResourceIndex::kPrimary, image.id);
+    uniform_texture.set = compiler_->get_decoration(
+        image.id, spv::Decoration::DecorationDescriptorSet);
+    uniform_texture.binding =
+        compiler_->get_decoration(image.id, spv::Decoration::DecorationBinding);
+    data->AddUniformTexture(uniform_texture);
+  }
+
+  // We only need to worry about storing vertex attributes.
+  if (entrypoints.front().execution_model == spv::ExecutionModelVertex) {
+    const auto inputs = compiler_->get_shader_resources().stage_inputs;
+    auto input_offsets = ComputeOffsets(inputs);
+    for (const auto& input : inputs) {
+      auto location = compiler_->get_decoration(
+          input.id, spv::Decoration::DecorationLocation);
+      std::optional<size_t> offset = input_offsets[location];
+
+      const auto type = compiler_->get_type(input.type_id);
+
+      InputDescription input_description;
+      input_description.name = input.name;
+      input_description.location = compiler_->get_decoration(
+          input.id, spv::Decoration::DecorationLocation);
+      input_description.set = compiler_->get_decoration(
+          input.id, spv::Decoration::DecorationDescriptorSet);
+      input_description.binding = compiler_->get_decoration(
+          input.id, spv::Decoration::DecorationBinding);
+      input_description.type = type.basetype;
+      input_description.bit_width = type.width;
+      input_description.vec_size = type.vecsize;
+      input_description.columns = type.columns;
+      input_description.offset = offset.value_or(0u);
+      data->AddInputDescription(std::move(input_description));
+    }
+  }
+
+  return data;
+}
+
 std::optional<uint32_t> Reflector::GetArrayElements(
     const spirv_cross::SPIRType& type) const {
   if (type.array.empty()) {
@@ -530,7 +637,7 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectType(
       auto member = nlohmann::json::object_t{};
       member["name"] = struct_member.name;
       member["type"] = struct_member.type;
-      member["base_type"] = struct_member.base_type;
+      member["base_type"] = BaseTypeToString(struct_member.base_type);
       member["offset"] = struct_member.offset;
       member["size"] = struct_member.size;
       member["byte_length"] = struct_member.byte_length;
@@ -657,8 +764,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
     if (struct_member_offset > current_byte_offset) {
       const auto alignment_pad = struct_member_offset - current_byte_offset;
       result.emplace_back(StructMember{
-          TypeNameWithPaddingOfSize(alignment_pad),                 // type
-          BaseTypeToString(spirv_cross::SPIRType::BaseType::Void),  // basetype
+          TypeNameWithPaddingOfSize(alignment_pad),  // type
+          spirv_cross::SPIRType::BaseType::Void,     // basetype
           SPrintF("_PADDING_%s_",
                   GetMemberNameAtIndex(struct_type, i).c_str()),  // name
           current_byte_offset,                                    // offset
@@ -687,7 +794,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - size;
       result.emplace_back(StructMember{
           compiler_->get_name(member.self),      // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           size,                                  // size
@@ -710,7 +817,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(Matrix);
       result.emplace_back(StructMember{
           "Matrix",                              // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(Matrix),                        // size
@@ -733,7 +840,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(UintPoint32);
       result.emplace_back(StructMember{
           "UintPoint32",                         // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(UintPoint32),                   // size
@@ -756,7 +863,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(IPoint32);
       result.emplace_back(StructMember{
           "IPoint32",                            // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(IPoint32),                      // size
@@ -778,7 +885,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(Point);
       result.emplace_back(StructMember{
           "Point",                               // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(Point),                         // size
@@ -800,7 +907,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(Vector3);
       result.emplace_back(StructMember{
           "Vector3",                             // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(Vector3),                       // size
@@ -822,7 +929,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(Vector4);
       result.emplace_back(StructMember{
           "Vector4",                             // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(Vector4),                       // size
@@ -845,7 +952,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(HalfVector2);
       result.emplace_back(StructMember{
           "HalfVector2",                         // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(HalfVector2),                   // size
@@ -868,7 +975,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(HalfVector3);
       result.emplace_back(StructMember{
           "HalfVector3",                         // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(HalfVector3),                   // size
@@ -891,7 +998,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t element_padding = stride - sizeof(HalfVector4);
       result.emplace_back(StructMember{
           "HalfVector4",                         // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(HalfVector4),                   // size
@@ -918,7 +1025,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
         // Add the type directly.
         result.emplace_back(StructMember{
             maybe_known_type.value().name,         // type
-            BaseTypeToString(member.basetype),     // basetype
+            member.basetype,                       // basetype
             GetMemberNameAtIndex(struct_type, i),  // name
             struct_member_offset,                  // offset
             maybe_known_type.value().byte_size,    // size
@@ -942,7 +1049,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       auto element_padding = stride - size;
       result.emplace_back(StructMember{
           TypeNameWithPaddingOfSize(size),       // type
-          BaseTypeToString(member.basetype),     // basetype
+          member.basetype,                       // basetype
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           size,                                  // size
@@ -962,15 +1069,14 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       if (excess != 0) {
         const auto padding = max_member_alignment - excess;
         result.emplace_back(StructMember{
-            TypeNameWithPaddingOfSize(padding),  // type
-            BaseTypeToString(
-                spirv_cross::SPIRType::BaseType::Void),  // basetype
-            "_PADDING_",                                 // name
-            current_byte_offset,                         // offset
-            padding,                                     // size
-            padding,                                     // byte_length
-            std::nullopt,                                // array_elements
-            0,                                           // element_padding
+            TypeNameWithPaddingOfSize(padding),     // type
+            spirv_cross::SPIRType::BaseType::Void,  // basetype
+            "_PADDING_",                            // name
+            current_byte_offset,                    // offset
+            padding,                                // size
+            padding,                                // byte_length
+            std::nullopt,                           // array_elements
+            0,                                      // element_padding
         });
       }
     }
@@ -1011,7 +1117,7 @@ nlohmann::json::object_t Reflector::EmitStructDefinition(
     auto& member = members.emplace_back(nlohmann::json::object_t{});
     member["name"] = struct_member.name;
     member["type"] = struct_member.type;
-    member["base_type"] = struct_member.base_type;
+    member["base_type"] = BaseTypeToString(struct_member.base_type);
     member["offset"] = struct_member.offset;
     member["byte_length"] = struct_member.byte_length;
     if (struct_member.array_elements.has_value()) {
@@ -1026,7 +1132,7 @@ nlohmann::json::object_t Reflector::EmitStructDefinition(
 
 struct VertexType {
   std::string type_name;
-  std::string base_type_name;
+  spirv_cross::SPIRType::BaseType base_type;
   std::string variable_name;
   size_t byte_length = 0u;
 };
@@ -1037,7 +1143,7 @@ static VertexType VertexTypeFromInputResource(
   VertexType result;
   result.variable_name = resource->name;
   const auto type = compiler.get_type(resource->type_id);
-  result.base_type_name = BaseTypeToString(type.basetype);
+  result.base_type = type.basetype;
   const auto total_size = type.columns * type.vecsize * type.width / 8u;
   result.byte_length = total_size;
 
@@ -1126,14 +1232,14 @@ Reflector::ReflectPerVertexStructDefinition(
         VertexTypeFromInputResource(*compiler_.GetCompiler(), resource);
 
     auto member = StructMember{
-        vertex_type.type_name,       // type
-        vertex_type.base_type_name,  // base type
-        vertex_type.variable_name,   // name
-        struc.byte_length,           // offset
-        vertex_type.byte_length,     // size
-        vertex_type.byte_length,     // byte_length
-        std::nullopt,                // array_elements
-        0,                           // element_padding
+        vertex_type.type_name,      // type
+        vertex_type.base_type,      // base type
+        vertex_type.variable_name,  // name
+        struc.byte_length,          // offset
+        vertex_type.byte_length,    // size
+        vertex_type.byte_length,    // byte_length
+        std::nullopt,               // array_elements
+        0,                          // element_padding
     };
     struc.byte_length += vertex_type.byte_length;
     struc.members.emplace_back(std::move(member));

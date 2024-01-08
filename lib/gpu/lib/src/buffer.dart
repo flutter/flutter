@@ -78,8 +78,8 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 with Buffer {
   @override
   bool _bindAsUniform(RenderPass renderPass, UniformSlot slot,
       int offsetInBytes, int lengthInBytes) {
-    return renderPass._bindUniformDevice(slot.shaderStage.index, slot.slotId,
-        this, offsetInBytes, lengthInBytes);
+    return renderPass._bindUniformDevice(
+        slot.shader, slot.uniformName, this, offsetInBytes, lengthInBytes);
   }
 
   /// Wrap with native counterpart.
@@ -156,8 +156,8 @@ base class HostBuffer extends NativeFieldWrapperClass1 with Buffer {
   @override
   bool _bindAsUniform(RenderPass renderPass, UniformSlot slot,
       int offsetInBytes, int lengthInBytes) {
-    return renderPass._bindUniformHost(slot.shaderStage.index, slot.slotId,
-        this, offsetInBytes, lengthInBytes);
+    return renderPass._bindUniformHost(
+        slot.shader, slot.uniformName, this, offsetInBytes, lengthInBytes);
   }
 
   /// Wrap with native counterpart.

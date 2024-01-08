@@ -9,7 +9,6 @@
 #include <memory>
 #include <string>
 
-#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
 #include "flutter/impeller/core/runtime_types.h"
