@@ -1135,12 +1135,10 @@ void main() {
     }
 
     Color getIconColor(WidgetTester tester, IconData icon) {
-      return tester.firstWidget<IconTheme>(
-        find.ancestor(
-          of: find.byIcon(icon),
-          matching: find.byType(IconTheme),
-        ),
-      ).data.color!;
+      return tester.firstWidget<IconTheme>(find.ancestor(
+        of: find.byIcon(icon),
+        matching: find.byType(IconTheme),
+      )).data.color!;
     }
 
     // Test unselected state.
