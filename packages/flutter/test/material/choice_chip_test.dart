@@ -691,8 +691,11 @@ void main() {
   });
 
   testWidgets('ChoiceChip uses provided iconTheme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+
     Widget buildChip({ IconThemeData? iconTheme }) {
       return MaterialApp(
+        theme: theme,
         home: Material(
           child: ChoiceChip(
             iconTheme: iconTheme,

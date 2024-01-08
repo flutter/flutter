@@ -404,8 +404,11 @@ void main() {
   });
 
   testWidgets('InputChip uses provided iconTheme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+
     Widget buildChip({ IconThemeData? iconTheme }) {
       return MaterialApp(
+        theme: theme,
         home: Material(
           child: InputChip(
             iconTheme: iconTheme,
