@@ -537,6 +537,7 @@ targets:
 
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -3280,6 +3281,7 @@ targets:
 
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -3292,6 +3294,7 @@ targets:
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -5939,6 +5942,7 @@ targets:
 
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
