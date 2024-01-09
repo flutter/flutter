@@ -96,6 +96,7 @@ void main() {
   });
 
   testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final ErrorImageProvider errorImage = ErrorImageProvider();

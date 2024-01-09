@@ -22,6 +22,7 @@ import 'semantics_tester.dart';
 void main() {
   group('RawImage', () {
     testWidgets('properties',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
     experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
     (WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;

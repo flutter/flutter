@@ -46,7 +46,7 @@ void main() {
 
   testWidgets(
     _test2TrackingOffLeaks = 'test2, tracking-off, leaks',
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // this test is not tracked by design
   (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, null);

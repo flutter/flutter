@@ -228,6 +228,7 @@ void main() {
   });
 
   testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
@@ -301,6 +302,7 @@ void main() {
   });
 
   testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
@@ -353,6 +355,7 @@ void main() {
   });
 
   testWidgets('ScrollAwareImageProvider does not block LRU updates to image cache',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final int oldSize = imageCache.maximumSize;

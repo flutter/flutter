@@ -19,6 +19,7 @@ Future<void> main() async {
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
 
   testWidgets('ShapeDecoration.image',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -12,6 +12,7 @@ void main() {
   final TestWidgetsFlutterBinding binding = _GestureBindingSpy();
 
   testWidgets('attach and detach correctly handle gesture',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (_) async {
     expect(WidgetsBinding.instance, binding);
