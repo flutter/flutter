@@ -1484,6 +1484,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean validateDeferredComponents
     @Optional @Input
     Boolean skipDependencyChecks
+    @Optional @Input
     String flavor
 
     @OutputFiles
