@@ -1563,6 +1563,16 @@ Future<void> _runCustomerTesting() async {
     ],
     workingDirectory: flutterRoot,
   );
+  await runCommand(
+    'git',
+    <String>[
+      'branch',
+      '-f',
+      'master',
+      'origin/master',
+    ],
+    workingDirectory: flutterRoot,
+  );
   final Map<String, String> env = Platform.environment;
   final String? revision = env['REVISION'];
   if (revision != null) {
