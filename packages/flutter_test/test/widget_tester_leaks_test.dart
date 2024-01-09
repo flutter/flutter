@@ -82,11 +82,11 @@ void main() {
   );
 
   testWidgets(_test6TrackingOnNoLeaks = 'test6, tracking-on, no leaks', (_) async {
-    LeakTrackedClass().dispose();
+    InstrumentedDisposable().dispose();
   });
 
   testWidgets(_test7TrackingOnNoLeaks = 'test7, tracking-on, tear down, no leaks', (_) async {
-    final LeakTrackedClass myClass = LeakTrackedClass();
+    final InstrumentedDisposable myClass = InstrumentedDisposable();
     addTearDown(myClass.dispose);
   });
 
@@ -94,7 +94,7 @@ void main() {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, _test8TrackingOnNotDisposed);
     expect(LeakTracking.phase.ignoreLeaks, false);
-    LeakTrackedClass();
+    InstrumentedDisposable();
   });
 }
 
@@ -204,7 +204,7 @@ void _verifyLeakList(
   expect(list.length, expectedCount, reason: testDescription);
 
   for (final LeakReport leak in list) {
-    expect(leak.trackedClass, contains(LeakTrackedClass.library));
-    expect(leak.trackedClass, contains('$LeakTrackedClass'));
+    expect(leak.trackedClass, contains(InstrumentedDisposable.library));
+    expect(leak.trackedClass, contains('$InstrumentedDisposable'));
   }
 }
