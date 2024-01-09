@@ -109,9 +109,21 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   final Map<Asset, Asset> assetTargetLocations = _assetTargetLocations(nativeAssets, absolutePath);
   final Map<AssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets, absolutePath);
   if (flutterTester) {
-    await _copyNativeAssetsMacOSFlutterTester(buildUri, fatAssetTargetLocations, codesignIdentity, buildMode, fileSystem);
+    await _copyNativeAssetsMacOSFlutterTester(
+      buildUri,
+      fatAssetTargetLocations,
+      codesignIdentity,
+      buildMode,
+      fileSystem,
+    );
   } else {
-    await _copyNativeAssetsMacOS(buildUri, fatAssetTargetLocations, codesignIdentity, buildMode, fileSystem);
+    await _copyNativeAssetsMacOS(
+      buildUri,
+      fatAssetTargetLocations,
+      codesignIdentity,
+      buildMode,
+      fileSystem,
+    );
   }
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(assetTargetLocations.values, yamlParentDirectory ?? buildUri, fileSystem);
   return (nativeAssetsUri, dependencies.toList());
@@ -195,7 +207,10 @@ Future<void> _copyNativeAssetsMacOS(
     globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
     for (final MapEntry<AssetPath, List<Asset>> assetMapping in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
-      final List<Uri> sources = <Uri>[for (final Asset source in assetMapping.value) (source.path as AssetAbsolutePath).uri];
+      final List<Uri> sources = <Uri>[
+        for (final Asset source in assetMapping.value)
+          (source.path as AssetAbsolutePath).uri,
+      ];
       final Uri targetUri = buildUri.resolveUri(target);
       final String name = targetUri.pathSegments.last;
       final Directory frameworkDir = fileSystem.file(targetUri).parent;
@@ -217,12 +232,21 @@ Future<void> _copyNativeAssetsMacOS(
       await resourcesDir.create(recursive: true);
       final File dylibFile = versionADir.childFile(name);
       final Link currentLink = versionsDir.childLink('Current');
-      await currentLink.create(fileSystem.path.relative(versionADir.path, from: currentLink.parent.path));
+      await currentLink.create(fileSystem.path.relative(
+        versionADir.path,
+        from: currentLink.parent.path,
+      ));
       final Link resourcesLink = frameworkDir.childLink('Resources');
-      await resourcesLink.create(fileSystem.path.relative(resourcesDir.path, from: resourcesLink.parent.path));
+      await resourcesLink.create(fileSystem.path.relative(
+        resourcesDir.path,
+        from: resourcesLink.parent.path,
+      ));
       await lipoDylibs(dylibFile, sources);
       final Link dylibLink = frameworkDir.childLink(name);
-      await dylibLink.create(fileSystem.path.relative(versionsDir.childDirectory('Current').childFile(name).path, from: dylibLink.parent.path));
+      await dylibLink.create(fileSystem.path.relative(
+        versionsDir.childDirectory('Current').childFile(name).path,
+        from: dylibLink.parent.path,
+      ));
       await setInstallNameDylib(dylibFile);
       await createInfoPlist(name, resourcesDir);
       await codesignDylib(codesignIdentity, buildMode, frameworkDir);
@@ -237,8 +261,7 @@ Future<void> _copyNativeAssetsMacOS(
 /// For `flutter run -release` a multi-architecture solution is needed. So,
 /// `lipo` is used to combine all target architectures into a single file.
 ///
-/// The install name is set so that it matches what the place it will
-/// be bundled in the final app.
+/// In contrast to [_copyNativeAssetsMacOS], it does not set the install name.
 ///
 /// Code signing is also done here.
 Future<void> _copyNativeAssetsMacOSFlutterTester(
@@ -252,7 +275,10 @@ Future<void> _copyNativeAssetsMacOSFlutterTester(
     globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
     for (final MapEntry<AssetPath, List<Asset>> assetMapping in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
-      final List<Uri> sources = <Uri>[for (final Asset source in assetMapping.value) (source.path as AssetAbsolutePath).uri];
+      final List<Uri> sources = <Uri>[
+        for (final Asset source in assetMapping.value)
+          (source.path as AssetAbsolutePath).uri,
+      ];
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);
       final Directory targetParent = dylibFile.parent;
