@@ -33,6 +33,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
@@ -192,6 +193,7 @@ void main() {
       late Artifacts artifacts;
       late TestUsage usage;
       late FakeAnsiTerminal fakeTerminal;
+      late analytics.FakeAnalytics fakeAnalytics;
 
       setUpAll(() {
         Cache.disableLocking();
@@ -211,6 +213,10 @@ void main() {
         libDir.createSync();
         final File mainFile = libDir.childFile('main.dart');
         mainFile.writeAsStringSync('void main() {}');
+        fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fs,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
       });
 
       testUsingContext('exits with a user message when no supported devices attached', () async {
@@ -478,6 +484,23 @@ void main() {
             'cd58': 'false',
           })
         )));
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            analytics.Event.commandUsageValues(
+              workflow: 'run',
+              commandHasTerminal: globals.stdio.hasTerminal,
+              runIsEmulator: false,
+              runTargetName: 'ios',
+              runTargetOsVersion: 'iOS 13',
+              runModeName: 'debug',
+              runProjectModule: false,
+              runProjectHostLanguage: 'swift',
+              runIOSInterfaceType: 'usb',
+              runIsTest: false,
+            ),
+          ),
+        );
       }, overrides: <Type, Generator>{
         AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
@@ -487,6 +510,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
         Usage: () => usage,
+        analytics.Analytics: () => fakeAnalytics,
       });
 
       testUsingContext('correctly reports tests to usage', () async {
@@ -513,6 +537,23 @@ void main() {
             'cd58': 'true',
           })),
         ));
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            analytics.Event.commandUsageValues(
+              workflow: 'run',
+              commandHasTerminal: globals.stdio.hasTerminal,
+              runIsEmulator: false,
+              runTargetName: 'ios',
+              runTargetOsVersion: 'iOS 13',
+              runModeName: 'debug',
+              runProjectModule: false,
+              runProjectHostLanguage: 'swift',
+              runIOSInterfaceType: 'usb',
+              runIsTest: true,
+            ),
+          ),
+        );
       }, overrides: <Type, Generator>{
         AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
@@ -522,6 +563,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
         Usage: () => usage,
+        analytics.Analytics: () => fakeAnalytics,
       });
 
       group('--machine', () {

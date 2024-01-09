@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -33,20 +34,25 @@ void main() {
   late FakeBundleBuilder fakeBundleBuilder;
   final FileSystemStyle fileSystemStyle = globals.fs.path.separator == '/' ?
     FileSystemStyle.posix : FileSystemStyle.windows;
+  late FakeAnalytics fakeAnalytics;
+
+  MemoryFileSystem fsFactory() {
+    return MemoryFileSystem.test(style: fileSystemStyle);
+  }
 
   setUp(() {
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
 
     fakeBundleBuilder = FakeBundleBuilder();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fsFactory(),
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   tearDown(() {
     tryToDelete(tempDir);
   });
-
-  MemoryFileSystem fsFactory() {
-    return MemoryFileSystem.test(style: fileSystemStyle);
-  }
 
   Future<BuildBundleCommand> runCommandIn(String projectPath, { List<String>? arguments }) async {
     final BuildBundleCommand command = BuildBundleCommand(
@@ -70,6 +76,19 @@ void main() {
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
     expect((await command.usageValues).commandBuildBundleIsModule, true);
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'bundle',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'android-arm',
+          buildBundleIsModule: true,
+        ),
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('bundle getUsage indicate that project is not a module', () async {
@@ -79,6 +98,19 @@ void main() {
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
     expect((await command.usageValues).commandBuildBundleIsModule, false);
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'bundle',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'android-arm',
+          buildBundleIsModule: false,
+        ),
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('bundle getUsage indicate the target platform', () async {

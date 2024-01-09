@@ -61,6 +61,7 @@ import 'persistent_tool_state.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
+import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
@@ -88,11 +89,10 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
-      Analytics: () => Analytics(
-        tool: DashTool.flutterTool,
-        flutterChannel: globals.flutterVersion.channel,
-        flutterVersion: globals.flutterVersion.frameworkVersion,
-        dartVersion: globals.flutterVersion.dartSdkVersion,
+      Analytics: () => getAnalytics(
+        runningOnBot: runningOnBot,
+        flutterVersion: globals.flutterVersion,
+        environment: globals.platform.environment,
       ),
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
