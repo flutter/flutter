@@ -1093,7 +1093,7 @@ void main() {
           home: const Scaffold(
             body: Material(
               child: CircularProgressIndicator.adaptive(
-                value:0.5,
+                value: 0.5,
               ),
             ),
           ),
@@ -1101,8 +1101,9 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-      final double actualProgress =tester.widget<CupertinoActivityIndicator>(
-        find.byType(CupertinoActivityIndicator)).progress;
+      final double actualProgress = tester.widget<CupertinoActivityIndicator>(
+        find.byType(CupertinoActivityIndicator),
+      ).progress;
       expect(actualProgress, 0.5);
    },
    variant: const TargetPlatformVariant(<TargetPlatform> {
