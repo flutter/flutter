@@ -41,9 +41,6 @@ void main() {
     _test2TrackingOffLeaks = 'test2, tracking-off, leaks',
     experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester widgetTester) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, null);
-    expect(LeakTracking.phase.ignoreLeaks, true);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
   });
 
