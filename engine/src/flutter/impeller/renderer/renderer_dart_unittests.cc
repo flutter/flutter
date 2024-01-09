@@ -145,6 +145,7 @@ DART_TEST_CASE(textureAsImageThrowsWhenNotShaderReadable);
 
 DART_TEST_CASE(canCreateShaderLibrary);
 DART_TEST_CASE(canReflectUniformStructs);
+DART_TEST_CASE(uniformBindFailsForInvalidHostBufferOffset);
 
 DART_TEST_CASE(canCreateRenderPassAndSubmit);
 
