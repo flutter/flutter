@@ -262,7 +262,6 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-
   testWidgets('EndDrawerButton color with ButtonStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
