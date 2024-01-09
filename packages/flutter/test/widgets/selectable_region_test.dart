@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
+import 'process_text_utils.dart';
 import 'semantics_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
@@ -3363,6 +3364,60 @@ void main() {
 
     expect(buttonTypes, contains(ContextMenuButtonType.copy));
     expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
+    final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+    Set<String?> buttonLabels = <String?>{};
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonLabels = selectableRegionState.contextMenuButtonItems
+              .map((ContextMenuButtonItem buttonItem) => buttonItem.label)
+              .toSet();
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.text('How are you?'),
+        matching: find.byType(RichText),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The text processing actions are available on Android only.
+    final bool areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
+    expect(buttonLabels.contains(fakeAction1Label), areTextActionsSupported);
+    expect(buttonLabels.contains(fakeAction2Label), areTextActionsSupported);
   },
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended]
