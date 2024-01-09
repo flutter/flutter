@@ -164,8 +164,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       calculatedHeight = _kTextAndIconTabHeight;
       final EdgeInsetsGeometry effectiveIconMargin = iconMargin ?? (
         Theme.of(context).useMaterial3
-          ? const EdgeInsets.only(bottom: 2)
-          : const EdgeInsets.only(bottom: 10)
+          ? _TabsPrimaryDefaultsM3.iconMargin
+          : _TabsDefaultsM2.iconMargin
       );
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -2262,6 +2262,8 @@ class _TabsDefaultsM2 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
+
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 10);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Tabs
@@ -2336,6 +2338,8 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 
   static double indicatorWeight = 3.0;
+
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
 class _TabsSecondaryDefaultsM3 extends TabBarTheme {

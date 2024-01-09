@@ -77,6 +77,8 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 
   static double indicatorWeight = ${getToken('md.comp.primary-navigation-tab.active-indicator.height')};
+
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
 class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
