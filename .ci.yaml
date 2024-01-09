@@ -5064,7 +5064,7 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
       env_variables: >-
         {
-          "NO_OP": "true"
+          "LEAK_TRACKING": "true"
         }
     runIf:
       - dev/**
@@ -5126,7 +5126,7 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
       env_variables: >-
         {
-          "NO_OP": "true"
+          "LEAK_TRACKING": "true"
         }
     runIf:
       - dev/**
@@ -5182,7 +5182,7 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
       env_variables: >-
         {
-          "NO_OP": "true"
+          "LEAK_TRACKING": "true"
         }
     runIf:
       - dev/**
