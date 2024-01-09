@@ -421,7 +421,10 @@ void main() {
     expect(find.text('ddd1'), findsOneWidget);
   });
 
-  testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
+  testWidgets('Three NestedScrollViews with one ScrollController',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  // TODO: Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
     addTearDown(controller.dispose);
     expect(controller.mostRecentlyUpdatedPosition, isNull);
