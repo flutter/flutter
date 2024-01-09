@@ -61,7 +61,7 @@ Future<void> pageRight(WidgetTester tester) {
 
 void main() {
   testWidgets('PageView default control',
-  // TODO: Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     await tester.pumpWidget(

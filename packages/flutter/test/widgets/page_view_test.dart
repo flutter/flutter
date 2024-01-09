@@ -16,7 +16,7 @@ import 'states.dart';
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback',
-  // TODO: Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     bool finderCalled = false;

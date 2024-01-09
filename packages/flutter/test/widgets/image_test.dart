@@ -18,7 +18,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
-import 'package:meta/meta.dart';
 
 import '../image_data.dart';
 import 'semantics_tester.dart';
