@@ -357,13 +357,13 @@ class Stepper extends StatefulWidget {
   /// If null, the default icons will be used for respective [StepState].
   final StepIconBuilder? stepIconBuilder;
 
-  /// The height of the icon in the step.
+  /// Overrides the default step icon size height.
   final double? stepIconHeight;
 
-  /// The width of the icon in the step.
+  /// Overrides the default step icon size width.
   final double? stepIconWidth;
 
-  /// The margin around the line and icon in the step.
+  /// Overrides the default step icon margin.
   final EdgeInsets? stepIconMargin;
 
   @override
@@ -1041,32 +1041,33 @@ class StepStyle with Diagnosticable {
     this.indexStyle,
   });
 
-  /// The color of the circle in the step.
+  /// Overrides the default color of the circle in the step.
   final Color? color;
 
-  /// The color of the error indicator in the step.
+  /// Overrides the default color of the error indicator in the step.
   final Color? errorColor;
 
-  /// The color of the connector line between two steps.
-  /// If is last step, the connector line will not be displayed.
+  /// Overrides the default color of the connector line between two steps.
+  ///
   /// Only works when [StepperType] is [StepperType.horizontal].
   final Color? connectorColor;
 
-  /// The thickness of the connector line between two steps.
+  /// Overrides the default thickness of the connector line between two steps.
   /// Only works when [StepperType] is [StepperType.horizontal].
   final double? connectorThickness;
 
-  /// The border of the icon in the step.
+  /// Add a border around the step.
+  /// Only works to circle step.
   final BoxBorder? border;
 
-  /// The shadow of the icon in the step.
+  /// Add a shadow around the step.
   final BoxShadow? boxShadow;
 
-  /// The gradient of the icon in the step.
+  /// Add a gradient around the step.
   /// If [gradient] is specified, [color] will be ignored.
   final Gradient? gradient;
 
-  /// The style of the index in the step.
+  /// Overrides the default style of the index in the step.
   final TextStyle? indexStyle;
 
   /// Returns a copy of this ButtonStyle with the given fields replaced with

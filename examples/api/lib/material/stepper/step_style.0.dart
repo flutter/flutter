@@ -14,11 +14,13 @@ class StepStyleExampleApp extends StatelessWidget {
 
    @override
    Widget build(BuildContext context) {
-       return Scaffold(
-           appBar: AppBar(title: const Text('Step Style Example')),
-           body: const Center(
-               child: StepStyleExample(),
-           ),
+       return MaterialApp(
+         home: Scaffold(
+             appBar: AppBar(title: const Text('Step Style Example')),
+             body: const Center(
+                 child: StepStyleExample(),
+             ),
+         ),
        );
   }
 }
@@ -54,46 +56,39 @@ class _StepStyleExampleState extends State<StepStyleExample> {
               fontSize: 20,
             ),
             border: Border.all(
-              color: Colors.black,
-              width: 2,
+              width: 2
             ),
           ),
         ),
-        Step(
-          title: const SizedBox.shrink(),
-          content: const SizedBox.shrink(),
+        const Step(
+          title: SizedBox.shrink(),
+          content: SizedBox.shrink(),
           isActive: true,
-          stepStyle: const StepStyle(
-            color: Colors.white,
+          stepStyle: StepStyle(
             connectorColor: Colors.orange,
             connectorThickness: 10,
-          ).merge(
-            StepStyle(
-              indexStyle: const TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-              ),
-              border: Border.all(
-                color: Colors.black,
-                width: 2,
-              ),
+            gradient: LinearGradient(
+              colors: <Color>[
+                Colors.white,
+                Colors.black,
+              ],
             ),
-          ),
+
+          )
         ),
         Step(
           title: const SizedBox.shrink(),
           content: const SizedBox.shrink(),
           isActive: true,
           stepStyle: StepStyle(
+            color: Colors.white,
             connectorColor: Colors.blue,
             connectorThickness: 10,
-            color: Colors.white,
             indexStyle: const TextStyle(
               color: Colors.black,
               fontSize: 20,
             ),
             border: Border.all(
-              color: Colors.black,
               width: 2,
             ),
           ),
@@ -109,7 +104,6 @@ class _StepStyleExampleState extends State<StepStyleExample> {
               fontSize: 20,
             ),
             border: Border.all(
-              color: Colors.black,
               width: 2,
             ),
           ),
