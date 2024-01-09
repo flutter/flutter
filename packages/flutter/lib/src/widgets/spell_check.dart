@@ -134,7 +134,8 @@ List<SuggestionSpan> _correctSpellCheckResults(
     final int spanLength = currentSpan.range.end - currentSpan.range.start;
 
     // Try finding SuggestionSpan from resultsText in new text.
-    final RegExp currentSpanTextRegexp = RegExp('\\b$currentSpanText\\b');
+    final String escapedText = RegExp.escape(currentSpanText);
+    final RegExp currentSpanTextRegexp = RegExp('\\b$escapedText\\b');
     final int foundIndex = newText.substring(searchStart).indexOf(currentSpanTextRegexp);
 
     // Check whether word was found exactly where expected or elsewhere in the newText.
