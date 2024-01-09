@@ -5065,6 +5065,10 @@ targets:
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5123,6 +5127,10 @@ targets:
       subshard: misc
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - examples/api/**
@@ -5175,6 +5183,10 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
