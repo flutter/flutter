@@ -331,6 +331,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @visibleForTesting
   SelectionOverlay? get selectionOverlay => _selectionOverlay;
 
+  /// The text processing service used to retrieve the native text processing actions.
+  final ProcessTextService _processTextService = DefaultProcessTextService();
+
+  /// The list of native text processing actions provided by the engine.
+  final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
+
   @override
   void initState() {
     super.initState();
@@ -359,6 +365,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
+    _initProcessTextActions();
+  }
+
+  /// Query the engine to initialize the list of text processing actions to show
+  /// in the text selection toolbar.
+  Future<void> _initProcessTextActions() async {
+    _processTextActions.clear();
+    _processTextActions.addAll(await _processTextService.queryTextActions());
   }
 
   @override
@@ -1203,7 +1217,29 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             hideToolbar();
         }
       },
-    );
+    )..addAll(_textProcessingActionButtonItems);
+  }
+
+  List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final SelectedContent? data = _selectable?.getSelectedContent();
+    if (data == null) {
+      return buttonItems;
+    }
+
+    for (final ProcessTextAction action in _processTextActions) {
+      buttonItems.add(ContextMenuButtonItem(
+        label: action.label,
+        onPressed: () async {
+          final String selectedText = data.plainText;
+          if (selectedText.isNotEmpty) {
+            await _processTextService.processTextAction(action.id, selectedText, true);
+            hideToolbar();
+          }
+        },
+      ));
+    }
+    return buttonItems;
   }
 
   /// The line height at the start of the current selection.
