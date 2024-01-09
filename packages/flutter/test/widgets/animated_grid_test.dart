@@ -250,6 +250,145 @@ void main() {
       expect(itemRight(2), 300.0);
     });
 
+    testWidgets('insert with optional itemBuilder', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedGridState> gridKey = GlobalKey<SliverAnimatedGridState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedGrid(
+                key: gridKey,
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 100.0,
+                ),
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return ScaleTransition(
+                    scale: animation,
+                    child: SizedBox(
+                      key: ValueKey<int>(index),
+                      height: 100.0,
+                      child: Center(child: Text('item $index')),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      double itemHeight(int index) => tester.getSize(find.byKey(ValueKey<int>(index), skipOffstage: false)).height;
+      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemRight(int index) => tester.getTopRight(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
+      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemLeft(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
+
+      double itemScale(int index) =>
+          tester.widget<ScaleTransition>(find.byType(ScaleTransition, skipOffstage: false)).scale.value;
+
+      gridKey.currentState!.insertItem(
+        0,
+        duration: const Duration(milliseconds: 100),
+      );
+      await tester.pump();
+
+      // Newly inserted item 0's scale should animate from 0 to 1
+      expect(itemScale(0), 0.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemScale(0), 0.5);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemScale(0), 1.0);
+
+      // The list now contains one fully expanded item at the top:
+      expect(find.text('item 0'), findsOneWidget);
+      expect(itemTop(0), 0.0);
+      expect(itemBottom(0), 100.0);
+
+      gridKey.currentState!.insertItem(
+        0,
+        duration: const Duration(milliseconds: 100),
+        itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 1.0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: SizedBox(
+              key: ValueKey<int>(index),
+              height: 100.0,
+              child: Center(child: Text('item $index')),
+            ),
+          );
+        },
+      );
+      gridKey.currentState!.insertItem(
+        1,
+        duration: const Duration(milliseconds: 100),
+        itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, -1.0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: SizedBox(
+              key: ValueKey<int>(index),
+              height: 100.0,
+              child: Center(child: Text('item $index')),
+            ),
+          );
+        },
+      );
+
+      //Checks that const values do not change, they are not part of the animation
+      void checkConstValues() {
+        expect(itemHeight(0), 100.0);
+        expect(itemHeight(1), 100.0);
+        expect(itemHeight(2), 100.0);
+
+        expect(itemLeft(0), 0.0);
+        expect(itemLeft(1), 100.0);
+        expect(itemLeft(2), 200.0);
+
+        expect(itemRight(0), 100.0);
+        expect(itemRight(1), 200.0);
+        expect(itemRight(2), 300.0);
+      }
+
+      await tester.pump();
+      checkConstValues();
+      expect(itemTop(0), 100.0);
+      expect(itemTop(1), -100.0);
+      expect(itemTop(2), 0.0);
+      expect(itemBottom(0), 200.0);
+      expect(itemBottom(1), 0.0);
+      expect(itemBottom(2), 100.0);
+
+      await tester.pump(const Duration(milliseconds: 50));
+      checkConstValues();
+      expect(itemTop(0), 50.0);
+      expect(itemTop(1), -50.0);
+      expect(itemTop(2), 0.0);
+      expect(itemBottom(0), 150.0);
+      expect(itemBottom(1), 50.0);
+      expect(itemBottom(2), 100.0);
+
+      await tester.pump(const Duration(milliseconds: 50));
+      checkConstValues();
+      expect(itemTop(0), 0.0);
+      expect(itemTop(1), 0.0);
+      expect(itemTop(2), 0.0);
+      expect(itemBottom(0), 100.0);
+      expect(itemBottom(1), 100.0);
+      expect(itemBottom(2), 100.0);
+
+      //Check that the items are visible
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(find.text('item 2'), findsOneWidget);
+    });
+
     testWidgets('insertAll', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
 
@@ -304,6 +443,130 @@ void main() {
       expect(itemRight(0), 100.0);
       expect(itemLeft(1), 100.0);
       expect(itemRight(1), 200.0);
+    });
+
+    testWidgets('insertAll with optional itemBuilder', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedGridState> gridKey = GlobalKey<SliverAnimatedGridState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedGrid(
+                key: gridKey,
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 100.0,
+                ),
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return ScaleTransition(
+                    scale: animation,
+                    child: SizedBox(
+                      key: ValueKey<int>(index),
+                      height: 100.0,
+                      child: Center(child: Text('item $index')),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      double itemHeight(int index) => tester.getSize(find.byKey(ValueKey<int>(index), skipOffstage: false)).height;
+      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemRight(int index) => tester.getTopRight(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
+      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemLeft(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
+
+      double itemScale(int index) =>
+          tester.widget<ScaleTransition>(find.byType(ScaleTransition, skipOffstage: false)).scale.value;
+
+      gridKey.currentState!.insertItem(
+        0,
+        duration: const Duration(milliseconds: 100),
+      );
+      await tester.pump();
+
+      // Newly inserted item 0's scale should animate from 0 to 1
+      expect(itemScale(0), 0.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemScale(0), 0.5);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemScale(0), 1.0);
+
+      // The list now contains one fully expanded item at the top:
+      expect(find.text('item 0'), findsOneWidget);
+      expect(itemTop(0), 0.0);
+      expect(itemBottom(0), 100.0);
+
+      gridKey.currentState!.insertAllItems(
+        0,
+        2,
+        duration: const Duration(milliseconds: 100),
+        itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 1.0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: SizedBox(
+              key: ValueKey<int>(index),
+              height: 100.0,
+              child: Center(child: Text('item $index')),
+            ),
+          );
+        },
+      );
+
+      //Checks that const values do not change, they are not part of the animation
+      void checkConstValues() {
+        expect(itemHeight(0), 100.0);
+        expect(itemHeight(1), 100.0);
+        expect(itemHeight(2), 100.0);
+
+        expect(itemLeft(0), 0.0);
+        expect(itemLeft(1), 100.0);
+        expect(itemLeft(2), 200.0);
+
+        expect(itemRight(0), 100.0);
+        expect(itemRight(1), 200.0);
+        expect(itemRight(2), 300.0);
+      }
+
+      //Check the steps of the animation and that they are different
+      await tester.pump();
+      checkConstValues();
+      expect(itemTop(0), 100.0);
+      expect(itemTop(1), 100.0);
+      expect(itemTop(2), 0.0);
+      expect(itemBottom(0), 200.0);
+      expect(itemBottom(1), 200.0);
+      expect(itemBottom(2), 100.0);
+
+      await tester.pump(const Duration(milliseconds: 50));
+      checkConstValues();
+      expect(itemTop(0), 50.0);
+      expect(itemTop(1), 50.0);
+      expect(itemTop(2), 0.0);
+      expect(itemBottom(0), 150.0);
+      expect(itemBottom(1), 150.0);
+      expect(itemBottom(2), 100.0);
+
+      await tester.pump(const Duration(milliseconds: 50));
+      checkConstValues();
+      expect(itemTop(0), 0.0);
+      expect(itemTop(1), 0.0);
+      expect(itemTop(2), 0.0);
+      expect(itemBottom(0), 100.0);
+      expect(itemBottom(1), 100.0);
+      expect(itemBottom(2), 100.0);
+
+      //Check that the items are visible
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(find.text('item 2'), findsOneWidget);
     });
 
     testWidgets('remove', (WidgetTester tester) async {

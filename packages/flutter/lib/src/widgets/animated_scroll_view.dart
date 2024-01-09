@@ -542,22 +542,22 @@ abstract class _AnimatedScrollView extends StatefulWidget {
 abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends State<T> with TickerProviderStateMixin {
   final GlobalKey<_SliverAnimatedMultiBoxAdaptorState<_SliverAnimatedMultiBoxAdaptor>> _sliverAnimatedMultiBoxKey = GlobalKey();
 
-  /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the item
-  /// is visible.
+  /// Insert an item at [index] and start an animation. Both will be passed
+  /// to the optional [itemBuilder] or to the default [SliverAnimatedGrid.itemBuilder]
+  /// or [SliverAnimatedList.itemBuilder] when the item is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method: it
   /// increases the length of the list of items by one and shifts
   /// all items at or after [index] towards the end of the list of items.
-  void insertItem(int index, { Duration duration = _kDuration }) {
-    _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
+  void insertItem(int index, { AnimatedItemBuilder? itemBuilder, Duration duration = _kDuration }) {
+    _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, itemBuilder: itemBuilder, duration: duration);
   }
 
-  /// Insert multiple items at [index] and start an animation that will be passed
-  /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
-  /// are visible.
-  void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
-    _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
+  /// Insert multiple items at [index] and start an animation. Both will be passed
+  /// to the optional [itemBuilder] or to the default [AnimatedGrid.itemBuilder]
+  /// or [AnimatedList.itemBuilder] when the items are visible.
+  void insertAllItems(int index, int length, { AnimatedItemBuilder? itemBuilder, Duration duration = _kDuration, bool isAsync = false }) {
+    _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, itemBuilder: itemBuilder, duration: duration);
   }
 
   /// Remove the item at `index` and start an animation that will be passed to
@@ -687,14 +687,16 @@ const Duration _kDuration = Duration(milliseconds: 300);
 
 // Incoming and outgoing animated items.
 class _ActiveItem implements Comparable<_ActiveItem> {
-  _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
-  _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
+  _ActiveItem.incoming(this.controller, this.itemIndex, this.insertedItemBuilder) : removedItemBuilder = null;
+  _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder) : insertedItemBuilder = null;
   _ActiveItem.index(this.itemIndex)
       : controller = null,
-        removedItemBuilder = null;
+        removedItemBuilder = null,
+        insertedItemBuilder = null;
 
   final AnimationController? controller;
   final AnimatedRemovedItemBuilder? removedItemBuilder;
+  final AnimatedItemBuilder? insertedItemBuilder;
   int itemIndex;
 
   @override
@@ -1103,21 +1105,23 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
 
     final _ActiveItem? incomingItem = _activeItemAt(_incomingItems, itemIndex);
     final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
-    return widget.itemBuilder(
+    final AnimatedItemBuilder itemBuilder = incomingItem?.insertedItemBuilder ?? widget.itemBuilder;
+
+    return itemBuilder(
       context,
       _itemIndexToIndex(itemIndex),
       animation,
     );
   }
 
-  /// Insert an item at [index] and start an animation that will be passed to
-  /// [SliverAnimatedGrid.itemBuilder] or [SliverAnimatedList.itemBuilder] when
-  /// the item is visible.
+  /// Insert an item at [index] and start an animation. Both will be passed
+  /// to the optional [itemBuilder] or to the default [SliverAnimatedGrid.itemBuilder]
+  /// or [SliverAnimatedList.itemBuilder] when the item is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method: it
   /// increases the length of the list of items by one and shifts
   /// all items at or after [index] towards the end of the list of items.
-  void insertItem(int index, { Duration duration = _kDuration }) {
+  void insertItem(int index, { AnimatedItemBuilder? itemBuilder, Duration duration = _kDuration }) {
     assert(index >= 0);
 
     final int itemIndex = _indexToItemIndex(index);
@@ -1143,6 +1147,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     final _ActiveItem incomingItem = _ActiveItem.incoming(
       controller,
       itemIndex,
+      itemBuilder,
     );
     setState(() {
       _incomingItems
@@ -1156,12 +1161,12 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
   }
 
-  /// Insert multiple items at [index] and start an animation that will be passed
-  /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
-  /// are visible.
-  void insertAllItems(int index, int length, { Duration duration = _kDuration }) {
+  /// Insert multiple items at [index] and start an animation. Both will be passed
+  /// to the optional [itemBuilder] or to the default [AnimatedGrid.itemBuilder]
+  /// or [AnimatedList.itemBuilder] when the items are visible.
+  void insertAllItems(int index, int length, { AnimatedItemBuilder? itemBuilder, Duration duration = _kDuration }) {
     for (int i = 0; i < length; i++) {
-      insertItem(index + i, duration: duration);
+      insertItem(index + i, itemBuilder: itemBuilder, duration: duration);
     }
   }
 
