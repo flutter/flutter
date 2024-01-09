@@ -16,6 +16,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.Image;
+import android.view.Surface;
 import android.view.View;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -78,7 +79,9 @@ public class ImageReaderPlatformViewRenderTargetTest {
     assertNull(textureEntry.acquireLatestImage());
 
     // Start rendering a frame.
-    final Canvas targetCanvas = renderTarget.lockHardwareCanvas();
+    final Surface s = renderTarget.getSurface();
+    assertNotNull(s);
+    final Canvas targetCanvas = s.lockHardwareCanvas();
     assertNotNull(targetCanvas);
 
     try {
@@ -89,7 +92,7 @@ public class ImageReaderPlatformViewRenderTargetTest {
       platformView.draw(targetCanvas);
     } finally {
       // Finish rendering a frame.
-      renderTarget.unlockCanvasAndPost(targetCanvas);
+      s.unlockCanvasAndPost(targetCanvas);
     }
 
     // Pump the UI thread task loop. This is needed so that the OnImageAvailable callback

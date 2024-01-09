@@ -3,26 +3,15 @@ package io.flutter.plugin.platform;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 
 import android.annotation.TargetApi;
-import android.graphics.Canvas;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.view.Surface;
-import io.flutter.Log;
 import io.flutter.view.TextureRegistry;
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
-import java.util.concurrent.atomic.AtomicLong;
 
 @TargetApi(26)
 public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRenderTarget {
   private static final String TAG = "SurfaceTexturePlatformViewRenderTarget";
-
-  private final AtomicLong pendingFramesCount = new AtomicLong(0L);
-
-  private void onFrameProduced() {
-    if (Build.VERSION.SDK_INT == 29) {
-      pendingFramesCount.incrementAndGet();
-    }
-  }
 
   private final SurfaceTextureEntry surfaceTextureEntry;
 
@@ -30,16 +19,6 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
   private Surface surface;
   private int bufferWidth = 0;
   private int bufferHeight = 0;
-
-  private final TextureRegistry.OnFrameConsumedListener frameConsumedListener =
-      new TextureRegistry.OnFrameConsumedListener() {
-        @Override
-        public void onFrameConsumed() {
-          if (Build.VERSION.SDK_INT == 29) {
-            pendingFramesCount.decrementAndGet();
-          }
-        }
-      };
 
   private boolean shouldRecreateSurfaceForLowMemory = false;
   private final TextureRegistry.OnTrimMemoryListener trimMemoryListener =
@@ -63,6 +42,7 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
 
   private void recreateSurfaceIfNeeded() {
     if (surface != null && !shouldRecreateSurfaceForLowMemory) {
+      // No need to recreate the surface.
       return;
     }
     if (surface != null) {
@@ -86,33 +66,7 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
     }
     this.surfaceTextureEntry = surfaceTextureEntry;
     this.surfaceTexture = surfaceTextureEntry.surfaceTexture();
-    surfaceTextureEntry.setOnFrameConsumedListener(frameConsumedListener);
     surfaceTextureEntry.setOnTrimMemoryListener(trimMemoryListener);
-  }
-
-  public Canvas lockHardwareCanvas() {
-    recreateSurfaceIfNeeded();
-
-    // We've observed on Android Q that we have to wait for the consumer of {@link
-    // SurfaceTexture}
-    // to consume the last image before continuing to draw, otherwise subsequent
-    // calls to
-    // {@code dequeueBuffer} to request a free buffer from the {@link BufferQueue}
-    // will fail.
-    // See https://github.com/flutter/flutter/issues/98722
-    if (Build.VERSION.SDK_INT == 29 && pendingFramesCount.get() > 0L) {
-      return null;
-    }
-    if (surfaceTexture == null || surfaceTexture.isReleased()) {
-      Log.e(TAG, "Invalid RenderTarget: null or already released SurfaceTexture");
-      return null;
-    }
-    onFrameProduced();
-    return surface.lockHardwareCanvas();
-  }
-
-  public void unlockCanvasAndPost(Canvas canvas) {
-    surface.unlockCanvasAndPost(canvas);
   }
 
   public void resize(int width, int height) {
@@ -150,6 +104,9 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
 
   public Surface getSurface() {
     recreateSurfaceIfNeeded();
+    if (surfaceTexture == null || surfaceTexture.isReleased()) {
+      return null;
+    }
     return surface;
   }
 }

@@ -1,7 +1,6 @@
 package io.flutter.plugin.platform;
 
 import android.annotation.TargetApi;
-import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
@@ -120,14 +119,6 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
 
   public int getHeight() {
     return this.bufferHeight;
-  }
-
-  public Canvas lockHardwareCanvas() {
-    return getSurface().lockHardwareCanvas();
-  }
-
-  public void unlockCanvasAndPost(Canvas canvas) {
-    getSurface().unlockCanvasAndPost(canvas);
   }
 
   public long getId() {

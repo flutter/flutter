@@ -13,6 +13,7 @@ import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
@@ -151,7 +152,8 @@ public class PlatformViewWrapper extends FrameLayout {
       Log.e(TAG, "Platform view cannot be composed without a RenderTarget.");
       return;
     }
-    final Canvas targetCanvas = renderTarget.lockHardwareCanvas();
+    final Surface targetSurface = renderTarget.getSurface();
+    final Canvas targetCanvas = targetSurface.lockHardwareCanvas();
     if (targetCanvas == null) {
       // Cannot render right now.
       invalidate();
@@ -165,7 +167,7 @@ public class PlatformViewWrapper extends FrameLayout {
       // Override the canvas that this subtree of views will use to draw.
       super.draw(targetCanvas);
     } finally {
-      renderTarget.unlockCanvasAndPost(targetCanvas);
+      targetSurface.unlockCanvasAndPost(targetCanvas);
     }
   }
 
