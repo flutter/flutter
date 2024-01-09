@@ -162,11 +162,10 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       label = icon!;
     } else {
       calculatedHeight = _kTextAndIconTabHeight;
-      final EdgeInsetsGeometry effectiveIconMargin = iconMargin ?? (
-        Theme.of(context).useMaterial3
+      final EdgeInsetsGeometry effectiveIconMargin = iconMargin ??
+        (Theme.of(context).useMaterial3
           ? _TabsPrimaryDefaultsM3.iconMargin
-          : _TabsDefaultsM2.iconMargin
-      );
+          : _TabsDefaultsM2.iconMargin);
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

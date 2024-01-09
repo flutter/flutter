@@ -386,35 +386,38 @@ void main() {
       material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
   });
 
-  testWidgets('Tab icon-label margin', (WidgetTester tester) async {
-    Widget buildApp({required bool useMaterial3}) {
-      final ThemeData theme = ThemeData(fontFamily: 'FlutterTest', useMaterial3: useMaterial3);
-      return MaterialApp(theme: theme, home: const Center(child: Material(
-        child: Tab(
-          icon: Icon(Icons.house),
-          text: 'x',
-        )
-      )));
+  testWidgets('Material2 - Tab icon-label margin', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+    Widget buildApp() {
+      const Tab tab = Tab(icon: Icon(Icons.house), text: 'x');
+      return MaterialApp(theme: theme, home: const Center(child: Material(child: tab)));
     }
 
-    double getMarginBetweenIconAndLabel() {
+    double getIconMargin() {
       final Rect iconRect = tester.getRect(find.byIcon(Icons.house));
       final Rect labelRect = tester.getRect(find.text('x'));
       return labelRect.top - iconRect.bottom;
     }
 
-    // Material 2
-    await tester.pumpWidget(
-      buildApp(useMaterial3: false),
-    );
-    expect(getMarginBetweenIconAndLabel(), 10);
+    await tester.pumpWidget(buildApp());
+    expect(getIconMargin(), 10);
+  });
 
-    // Material 3
-    await tester.pumpWidget(
-      buildApp(useMaterial3: true),
-    );
-    await tester.pumpAndSettle();
-    expect(getMarginBetweenIconAndLabel(), 2);
+  testWidgets('Material3 - Tab icon-label margin', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    Widget buildApp() {
+      const Tab tab = Tab(icon: Icon(Icons.house), text: 'x');
+      return MaterialApp(theme: theme, home: const Center(child: Material(child: tab)));
+    }
+
+    double getIconMargin() {
+      final Rect iconRect = tester.getRect(find.byIcon(Icons.house));
+      final Rect labelRect = tester.getRect(find.text('x'));
+      return labelRect.top - iconRect.bottom;
+    }
+
+    await tester.pumpWidget(buildApp());
+    expect(getIconMargin(), 2);
   });
 
   testWidgets('Tab color - normal', (WidgetTester tester) async {
