@@ -573,11 +573,10 @@ class AndroidProject extends FlutterProjectPlatform {
       return buildKotlin;
     }
 
-    if (buildGroovy.existsSync()) {
-      return buildGroovy;
-    }
-
-    throwToolExit('Neither build.gradle nor build.gradle.kts exist.');
+    // TODO(bartekpacia): An exception should be thrown when neither
+    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // Groovy file.
+    return buildGroovy;
   }
 
   /// Gets the module-level build.gradle file.
@@ -598,11 +597,10 @@ class AndroidProject extends FlutterProjectPlatform {
       return buildKotlin;
     }
 
-    if (buildGroovy.existsSync()) {
-      return buildGroovy;
-    }
-
-    throwToolExit('Neither app/build.gradle nor app/build.gradle.kts exist.');
+    // TODO(bartekpacia): An exception should be thrown when neither
+    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // Groovy file.
+    return buildGroovy;
   }
 
   File get appManifestFile {
