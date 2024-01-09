@@ -577,8 +577,6 @@ class AndroidProject extends FlutterProjectPlatform {
       return buildGroovy;
     }
 
-    // return buildGroovy;
-
     throwToolExit('Neither build.gradle nor build.gradle.kts exist.');
   }
 
@@ -603,8 +601,6 @@ class AndroidProject extends FlutterProjectPlatform {
     if (buildGroovy.existsSync()) {
       return buildGroovy;
     }
-
-    // return buildGroovy;
 
     throwToolExit('Neither app/build.gradle nor app/build.gradle.kts exist.');
   }
