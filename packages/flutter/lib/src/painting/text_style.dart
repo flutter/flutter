@@ -893,8 +893,10 @@ class TextStyle with Diagnosticable {
     assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
     String? newDebugLabel;
     assert(() {
-      if (this.debugLabel != null) {
-        newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
+      if (debugLabel != null) {
+        newDebugLabel = debugLabel;
+      } else if (this.debugLabel != null) {
+        newDebugLabel = '(${this.debugLabel}).copyWith';
       }
       return true;
     }());

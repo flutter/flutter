@@ -374,6 +374,7 @@ void main() {
     expect(unknown.debugLabel, null);
     expect(unknown.toString(), 'TextStyle(<all styles inherited>)');
     expect(unknown.copyWith().debugLabel, null);
+    expect(unknown.copyWith(debugLabel: '123').debugLabel, '123');
     expect(unknown.apply().debugLabel, null);
 
     expect(foo.debugLabel, 'foo');
