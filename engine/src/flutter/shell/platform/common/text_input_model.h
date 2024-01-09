@@ -57,12 +57,17 @@ class TextInputModel {
   // are restricted to the composing range.
   void BeginComposing();
 
-  // Replaces the composing range with new UTF-16 text.
+  // Replaces the composing range with new UTF-16 text, and sets the selection.
   //
-  // If a selection of non-zero length exists, it is deleted if the composing
-  // text is non-empty. The composing range is adjusted to the length of
-  // |text| and the selection base and offset are set to the end of the
-  // composing range.
+  // The given |text| replaces text within the current composing range, or the
+  // current selection if the text wasn't composing. The composing range is
+  // adjusted to the length of |text|, and the |selection| describes the new
+  // selection range, relative to the start of the new composing range.
+  void UpdateComposingText(const std::u16string& text,
+                           const TextRange& selection);
+
+  // Replaces the composing range with new UTF-16 text and sets the selection to
+  // the end of the composing text.
   void UpdateComposingText(const std::u16string& text);
 
   // Replaces the composing range with new UTF-8 text.

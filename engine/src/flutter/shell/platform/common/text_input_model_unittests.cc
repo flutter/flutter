@@ -403,6 +403,17 @@ TEST(TextInputModel, UpdateComposingRemovesLastComposingCharacter) {
   model->SetText("ACDE");
 }
 
+TEST(TextInputModel, UpdateSelectionWhileComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  model->SetComposingRange(TextRange(4, 5), 1);
+  model->UpdateComposingText(u"ぴょんぴょん", TextRange(3, 6));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDぴょんぴょん");
+  EXPECT_EQ(model->selection(), TextRange(7, 10));
+  EXPECT_EQ(model->composing_range(), TextRange(4, 10));
+}
+
 TEST(TextInputModel, AddCodePoint) {
   auto model = std::make_unique<TextInputModel>();
   model->AddCodePoint('A');
