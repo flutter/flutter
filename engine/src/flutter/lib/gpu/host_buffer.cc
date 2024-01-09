@@ -25,7 +25,14 @@ size_t HostBuffer::EmplaceBytes(const tonic::DartByteData& byte_data) {
   auto view =
       host_buffer_->Emplace(byte_data.data(), byte_data.length_in_bytes(),
                             impeller::DefaultUniformAlignment());
+  emplacements_[current_offset_] = view;
+  current_offset_ += view.range.length;
   return view.range.offset;
+}
+
+std::optional<impeller::BufferView> HostBuffer::GetBufferViewForOffset(
+    size_t offset) {
+  return emplacements_[offset];
 }
 
 }  // namespace gpu
