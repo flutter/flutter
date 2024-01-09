@@ -1085,7 +1085,7 @@ void main() {
   );
 
   testWidgets(
-    'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
+    'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS/macOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
