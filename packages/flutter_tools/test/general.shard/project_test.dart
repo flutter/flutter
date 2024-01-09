@@ -759,6 +759,37 @@ plugins {
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
+
+    testUsingContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+''';
+        });
+        addAndroidGradleFile(project.directory,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+}
+''';
+        }, kotlinDsl: true);
+
+        expect(project.android.isKotlin, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
     });
 
     group('With mocked context', () {

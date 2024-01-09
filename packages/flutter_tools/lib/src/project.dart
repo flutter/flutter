@@ -566,7 +566,8 @@ class AndroidProject extends FlutterProjectPlatform {
     final File buildKotlin = hostAppGradleRoot.childFile('build.gradle.kts');
 
     if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
-      throwToolExit('Both build.gradle and build.gradle.kts exist. Only once can be used.');
+      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
+      return buildGroovy;
     }
 
     if (buildKotlin.existsSync()) {
@@ -575,7 +576,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
     // TODO(bartekpacia): An exception should be thrown when neither
     // build.gradle nor build.gradle.kts exist, instead of falling back to the
-    // Groovy file.
+    // Groovy file. See #141180.
     return buildGroovy;
   }
 
@@ -590,7 +591,8 @@ class AndroidProject extends FlutterProjectPlatform {
     final File buildKotlin = appDir.childFile('build.gradle.kts');
 
     if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
-      throwToolExit('Both app/build.gradle and app/build.gradle.kts exist. Only once can be used.');
+      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
+      return buildGroovy;
     }
 
     if (buildKotlin.existsSync()) {
@@ -599,7 +601,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
     // TODO(bartekpacia): An exception should be thrown when neither
     // build.gradle nor build.gradle.kts exist, instead of falling back to the
-    // Groovy file.
+    // Groovy file. See #141180.
     return buildGroovy;
   }
 
