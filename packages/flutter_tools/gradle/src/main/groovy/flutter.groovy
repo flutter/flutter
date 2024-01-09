@@ -458,6 +458,13 @@ class FlutterPlugin implements Plugin<Project> {
     private Boolean doesSupportAndroidPlatform(String path) {
         File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
         File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+        if (settingsGradle.exists() && settingsGradleKts.exists()) {
+            logger.error(
+                "Both build.gradle and build.gradle.kts exist. " +
+                "This is not supported and will result in an error in the future."
+            )
+        }
+
         return buildGradle.exists() || buildGradleKts.exists()
     }
 
@@ -468,6 +475,13 @@ class FlutterPlugin implements Plugin<Project> {
     private File settingsGradleFile(Project project) {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
+        if (settingsGradle.exists() && settingsGradleKts.exists()) {
+            logger.error(
+                "Both settings.gradle and settings.gradle.kts exist. " +
+                "This is not supported and will result in an error in the future."
+            )
+        }
+
         return settingsGradleKts.exists() ? settingsGradleKts : settingsGradle
     }
 
