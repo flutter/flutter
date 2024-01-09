@@ -123,7 +123,9 @@ abstract interface class ChipAttributes {
   /// Otherwise, [StadiumBorder] is used.
   ///
   /// This shape is combined with [side] to create a shape decorated with an
-  /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
+  /// outline. If [side] is not null or side of [shape] is [BorderSide.none],
+  /// side of [shape] is ignored. To omit the outline entirely,
+  /// pass [BorderSide.none] to [side].
   ///
   /// If it is a [MaterialStateOutlinedBorder], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
