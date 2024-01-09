@@ -47,11 +47,12 @@ class TopazOfdValidator extends DoctorValidator {
 }
 
 class ProcessLister {
-  const ProcessLister();
+  ProcessLister(this.processManager);
+
+  final ProcessManager processManager;
 
   Future<ProcessResult> getProcessesWithPath(String? filter) async {
     final String argument = filter != null ? 'Get-Process $filter | Format-List Path' : 'Get-Process | Format-List Path';
-    const ProcessManager processManager = LocalProcessManager();
     return processManager.run(<String>['powershell', '-command', argument]);
   }
 }

@@ -146,7 +146,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
             operatingSystemUtils: globals.os,
           ),
           TopazOfdValidator(
-            processLister: ProcessLister(),
+            processLister: ProcessLister(const LocalProcessManager()),
           ),
         ],
       if (androidWorkflow!.appliesToHostPlatform)
