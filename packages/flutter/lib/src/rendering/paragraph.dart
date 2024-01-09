@@ -1437,7 +1437,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           case TextGranularity.word:
             result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getWordBoundaryAtPosition);
           case TextGranularity.paragraph:
-            result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getParagraphBoundaryAtPosition2);
+            result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getClampedParagraphBoundaryAtPosition);
           case TextGranularity.document:
           case TextGranularity.line:
             assert(false, 'Moving the selection edge by line or document is not supported.');
@@ -1853,11 +1853,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return result;
   }
 
-  // _TextBoundaryRecord _clampTextBoundaryRecord(_TextBoundaryRecord record) {
-  //   final TextRange intersectRange = _intersect(range, TextRange(start: record.boundaryStart.offset, end: record.boundaryEnd.offset));
-  //   return (boundaryStart: intersectRange.start, boundaryEnd: intersectRange.end);
-  // }
-
   _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position) {
     final ParagraphBoundary paragraphBoundary = ParagraphBoundary(fullText);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
@@ -1871,7 +1866,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return _adjustTextBoundaryAtPosition(paragraphRange, position);
   }
 
-  _TextBoundaryRecord _getParagraphBoundaryAtPosition2(TextPosition position) {
+  _TextBoundaryRecord _getClampedParagraphBoundaryAtPosition(TextPosition position) {
     final ParagraphBoundary paragraphBoundary = ParagraphBoundary(fullText);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.

@@ -5,7 +5,6 @@
 import 'dart:math';
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -723,11 +722,6 @@ class Text extends StatelessWidget {
   }
 }
 
-// In practice some selectables like widgetspan shift several pixels. So when
-// the vertical position diff is within the threshold, compare the horizontal
-// position to make the compareScreenOrder function more robust.
-const double _kSelectableVerticalComparingThreshold = 3.0;
-
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _SelectableTextContainerDelegate(GlobalKey textKey) : _textKey = textKey;
 
@@ -739,14 +733,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
   Offset? _lastStartEdgeUpdateGlobalPosition;
   Offset? _lastEndEdgeUpdateGlobalPosition;
-
-  Rect _getBoundingBox(Selectable selectable) {
-    Rect result = selectable.boundingBoxes.first;
-    for (int index = 1; index < selectable.boundingBoxes.length; index += 1) {
-      result = result.expandToInclude(selectable.boundingBoxes[index]);
-    }
-    return result;
-  }
 
   @override
   void remove(Selectable selectable) {
