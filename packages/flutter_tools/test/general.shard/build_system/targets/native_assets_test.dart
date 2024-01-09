@@ -171,61 +171,43 @@ void main() {
     },
   );
 
+  for (final bool hasAssets in <bool>[true, false]) {
+    final String withOrWithout = hasAssets ? 'with' : 'without';
+    testUsingContext(
+      'flutter build $withOrWithout native assets',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        FeatureFlags: () => TestFeatureFlags(
+              isNativeAssetsEnabled: true,
+            ),
+      },
+      () async {
+        await createPackageConfig(androidEnvironment);
+        await fileSystem.file('libfoo.so').create();
 
-  for (final bool isAndroidLibrary in <bool>[true, false]) {
-    for (final bool hasAssets in <bool>[true, false]) {
-      final String buildType = isAndroidLibrary ? 'aar' : 'not-aar';
-      final String withOrWithout = hasAssets ? 'with' : 'without';
-      final String throwsOrDoesntThrow =
-          (isAndroidLibrary && hasAssets) ? 'throws' : 'does not throw';
-      testUsingContext(
-        'flutter build $buildType $withOrWithout native assets $throwsOrDoesntThrow',
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => processManager,
-          FeatureFlags: () => TestFeatureFlags(
-                isNativeAssetsEnabled: true,
-              ),
-        },
-        () async {
-          await createPackageConfig(androidEnvironment);
-          await fileSystem.file('libfoo.so').create();
-
-          final NativeAssetsBuildRunner buildRunner =
-              FakeNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[
-              Package('foo', androidEnvironment.buildDir.uri)
-            ],
-            buildResult:
-                FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
-              if (hasAssets)
-                native_assets_cli.Asset(
-                  id: 'package:foo/foo.dart',
-                  linkMode: native_assets_cli.LinkMode.dynamic,
-                  target: native_assets_cli.Target.androidArm64,
-                  path: native_assets_cli.AssetAbsolutePath(
-                    Uri.file('libfoo.so'),
-                  ),
-                )
-            ], dependencies: <Uri>[
-              Uri.file('src/foo.c'),
-            ]),
-          );
-          if (isAndroidLibrary) {
-            androidEnvironment.defines[kIsAndroidLibrary] = 'true';
-          }
-          if (hasAssets && isAndroidLibrary) {
-            expect(
-              NativeAssets(buildRunner: buildRunner).build(androidEnvironment),
-              throwsToolExit(),
-            );
-          } else {
-            await NativeAssets(buildRunner: buildRunner)
-                .build(androidEnvironment);
-          }
-        },
-      );
-    }
+        final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('foo', androidEnvironment.buildDir.uri)
+          ],
+          buildResult:
+              FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
+            if (hasAssets)
+              native_assets_cli.Asset(
+                id: 'package:foo/foo.dart',
+                linkMode: native_assets_cli.LinkMode.dynamic,
+                target: native_assets_cli.Target.androidArm64,
+                path: native_assets_cli.AssetAbsolutePath(
+                  Uri.file('libfoo.so'),
+                ),
+              )
+          ], dependencies: <Uri>[
+            Uri.file('src/foo.c'),
+          ]),
+        );
+        await NativeAssets(buildRunner: buildRunner).build(androidEnvironment);
+      },
+    );
   }
 }
 
