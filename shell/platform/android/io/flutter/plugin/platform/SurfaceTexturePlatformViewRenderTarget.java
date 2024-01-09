@@ -4,8 +4,6 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 
 import android.annotation.TargetApi;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.view.Surface;
@@ -64,7 +62,7 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
       };
 
   private void recreateSurfaceIfNeeded() {
-    if (!shouldRecreateSurfaceForLowMemory) {
+    if (surface != null && !shouldRecreateSurfaceForLowMemory) {
       return;
     }
     if (surface != null) {
@@ -79,27 +77,6 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
     return new Surface(surfaceTexture);
   }
 
-  private void init() {
-    if (bufferWidth > 0 && bufferHeight > 0) {
-      surfaceTexture.setDefaultBufferSize(bufferWidth, bufferHeight);
-    }
-    if (surface != null) {
-      surface.release();
-      surface = null;
-    }
-    surface = createSurface();
-
-    // Fill the entire canvas with a transparent color.
-    // As a result, the background color of the platform view container is displayed
-    // to the user until the platform view draws its first frame.
-    final Canvas canvas = lockHardwareCanvas();
-    try {
-      canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-    } finally {
-      unlockCanvasAndPost(canvas);
-    }
-  }
-
   /** Implementation of PlatformViewRenderTarget */
   public SurfaceTexturePlatformViewRenderTarget(SurfaceTextureEntry surfaceTextureEntry) {
     if (Build.VERSION.SDK_INT < 23) {
@@ -111,7 +88,6 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
     this.surfaceTexture = surfaceTextureEntry.surfaceTexture();
     surfaceTextureEntry.setOnFrameConsumedListener(frameConsumedListener);
     surfaceTextureEntry.setOnTrimMemoryListener(trimMemoryListener);
-    init();
   }
 
   public Canvas lockHardwareCanvas() {
