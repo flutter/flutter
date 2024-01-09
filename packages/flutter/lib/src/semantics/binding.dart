@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: deprecated_member_use
-import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilderNew;
+import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
 
-// ignore: deprecated_member_use
-export 'dart:ui' show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilderNew;
+export 'dart:ui' show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 /// The glue between the semantics layer and the Flutter engine.
 mixin SemanticsBinding on BindingBase {
@@ -162,10 +160,8 @@ mixin SemanticsBinding on BindingBase {
   ///
   /// This method is used by the [SemanticsOwner] to create builder for all its
   /// semantics updates.
-  // ignore: deprecated_member_use
-  ui.SemanticsUpdateBuilderNew createSemanticsUpdateBuilder() {
-    // ignore: deprecated_member_use
-    return ui.SemanticsUpdateBuilderNew();
+  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
+    return ui.SemanticsUpdateBuilder();
   }
 
   /// The platform is requesting that animations be disabled or simplified.
@@ -199,7 +195,7 @@ class SemanticsHandle {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/semantics.dart',
         className: '$SemanticsHandle',
         object: this,
@@ -218,7 +214,7 @@ class SemanticsHandle {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
 
     _onDispose();

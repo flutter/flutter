@@ -14,10 +14,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('ImageDecoration.lerp', (WidgetTester tester) async {
+  testWidgets('ImageDecoration.lerp', (WidgetTester tester) async {
     final MemoryImage green = MemoryImage(Uint8List.fromList(<int>[
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
       0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,  0x01, 0x03, 0x00, 0x00, 0x00, 0x25, 0xdb, 0x56,
@@ -191,7 +190,7 @@ void main() {
     }
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
-  testWidgetsWithLeakTracking('ImageDecoration.lerp', (WidgetTester tester) async {
+  testWidgets('ImageDecoration.lerp', (WidgetTester tester) async {
     final MemoryImage cmyk = MemoryImage(Uint8List.fromList(<int>[
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
       0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,  0x02, 0x03, 0x00, 0x00, 0x00, 0xd4, 0x9f, 0x76,
@@ -409,7 +408,7 @@ void main() {
     }
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
-  testWidgetsWithLeakTracking('ImageDecoration.lerp with colored background', (WidgetTester tester) async {
+  testWidgets('ImageDecoration.lerp with colored background', (WidgetTester tester) async {
     final MemoryImage cmyk = MemoryImage(Uint8List.fromList(<int>[
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
       0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,  0x02, 0x03, 0x00, 0x00, 0x00, 0xd4, 0x9f, 0x76,

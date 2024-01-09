@@ -18,6 +18,7 @@
   "cutButtonLabel": "কাট করুন",
   "copyButtonLabel": "কপি করুন",
   "pasteButtonLabel": "পেস্ট করুন",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "সব বেছে নিন",
   "tabSemanticsLabel": "$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব",
   "modalBarrierDismissLabel": "খারিজ করুন",

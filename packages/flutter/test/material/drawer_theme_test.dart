@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
@@ -19,7 +18,7 @@ void main() {
     expect(identical(DrawerThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData().debugFillProperties(builder);
 
@@ -31,7 +30,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData(
       backgroundColor: Color(0x00000099),
@@ -59,7 +58,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
@@ -83,7 +82,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgetsWithLeakTracking('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
@@ -110,7 +109,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgetsWithLeakTracking('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
+  testWidgets('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
@@ -134,7 +133,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgetsWithLeakTracking('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
+  testWidgets('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
@@ -161,7 +160,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgetsWithLeakTracking('DrawerThemeData values are used when no Drawer properties are specified', (WidgetTester tester) async {
+  testWidgets('DrawerThemeData values are used when no Drawer properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -202,7 +201,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgetsWithLeakTracking('Drawer values take priority over DrawerThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('Drawer values take priority over DrawerThemeData values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -249,7 +248,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgetsWithLeakTracking('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
