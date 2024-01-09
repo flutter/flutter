@@ -133,9 +133,9 @@ void main() {
           native_assets_cli.Asset(
             id: 'package:foo/foo.dart',
             linkMode: native_assets_cli.LinkMode.dynamic,
-            target: native_assets_cli.Target.windowsX64,
+            target: native_assets_cli.Target.iOSArm64,
             path: native_assets_cli.AssetAbsolutePath(
-              Uri.file('foo.dll'),
+              Uri.file('foo.framework/foo'),
             ),
           )
         ], dependencies: <Uri>[
@@ -165,7 +165,7 @@ void main() {
         nativeAssetsYaml.readAsStringSync(),
         stringContainsInOrder(<String>[
           'package:foo/foo.dart',
-          'foo.dll',
+          'foo.framework${fileSystem.path.separator}foo',
         ]),
       );
     },
