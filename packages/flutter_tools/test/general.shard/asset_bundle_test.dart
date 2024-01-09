@@ -164,7 +164,7 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       expect(() => bundle.build(packagesPath: '.packages'), throwsToolExit(
-        message: 'Unable to search for asset files in directory path "https://mywebsite.com/images/". '
+        message: 'Unable to search for asset files in directory path "https%3A//mywebsite.com/images/". '
         'Please ensure that this is valid URI that points to a directory that is '
         'available on the local file system.\n'
         'Error details:\n'

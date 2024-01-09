@@ -918,7 +918,7 @@ class ManifestAssetBundle implements AssetBundle {
           .join(assetBase, assetUri.toFilePath(windows: _platform.isWindows));
       } on UnsupportedError catch (e) {
         throwToolExit(
-          'Unable to search for asset files in directory path "${Uri.decodeFull(assetUri.path)}". '
+          'Unable to search for asset files in directory path "${assetUri.path}". '
           'Please ensure that this is valid URI that points to a directory '
           'that is available on the local file system.\nError details:\n$e');
       }
