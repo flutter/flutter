@@ -27,6 +27,8 @@ class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
 }
 
 void main() {
+  // LeakTesting is turned off because it adds subscriptions to
+  // [FlutterMemoryAllocations], that may interfere with the tests.
   LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
   final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
