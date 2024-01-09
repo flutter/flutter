@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const Size _kTestViewSize = Size(800.0, 600.0);
-
 class ScheduledFrameTrackingPlatformDispatcher extends TestPlatformDispatcher {
   ScheduledFrameTrackingPlatformDispatcher({ required super.platformDispatcher });
 
@@ -36,7 +34,7 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView({required super.view}) : super(
-    configuration: const ViewConfiguration(size: _kTestViewSize),
+    configuration: TestViewConfiguration.fromView(view: view),
   );
 
   @override
