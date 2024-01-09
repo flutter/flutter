@@ -69,15 +69,22 @@ void TextInputModel::BeginComposing() {
   composing_range_ = TextRange(selection_.start());
 }
 
-void TextInputModel::UpdateComposingText(const std::u16string& text) {
+void TextInputModel::UpdateComposingText(const std::u16string& text,
+                                         const TextRange& selection) {
   // Preserve selection if we get a no-op update to the composing region.
   if (text.length() == 0 && composing_range_.collapsed()) {
     return;
   }
-  DeleteSelected();
-  text_.replace(composing_range_.start(), composing_range_.length(), text);
+  const TextRange& rangeToDelete =
+      composing_range_.collapsed() ? selection_ : composing_range_;
+  text_.replace(rangeToDelete.start(), rangeToDelete.length(), text);
   composing_range_.set_end(composing_range_.start() + text.length());
-  selection_ = TextRange(composing_range_.end());
+  selection_ = TextRange(selection.start() + composing_range_.start(),
+                         selection.extent() + composing_range_.start());
+}
+
+void TextInputModel::UpdateComposingText(const std::u16string& text) {
+  UpdateComposingText(text, TextRange(text.length()));
 }
 
 void TextInputModel::UpdateComposingText(const std::string& text) {
