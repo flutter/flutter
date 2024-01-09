@@ -489,13 +489,12 @@ String generateDDCMainModule({
   // Use a dummy UUID since multi-apps are not supported on Flutter Web.
   let uuid = "00000000-0000-0000-0000-000000000000";
 
-  let dart = dart_library.import('dart_sdk', appName).dart;
-  dart.nonNullAsserts($nullAssertions);
-  dart.nativeNonNullAsserts($nativeNullAssertions);
-
   let child = {};
   child.main = function() {
-    dart_library.start(appName, uuid, moduleName, "$entrypointMainName");
+    let dart = self.dart_library.import('dart_sdk', appName).dart;
+    dart.nonNullAsserts($nullAssertions);
+    dart.nativeNonNullAsserts($nativeNullAssertions);
+    self.dart_library.start(appName, uuid, moduleName, "$entrypointMainName");
   }
 
   /* MAIN_EXTENSION_MARKER */
