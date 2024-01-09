@@ -170,8 +170,8 @@ void main() {
 
 void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator input/label text layout',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     // The label appears above the input text
     await tester.pumpWidget(
