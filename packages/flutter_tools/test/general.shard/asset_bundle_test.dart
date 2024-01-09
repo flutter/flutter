@@ -171,14 +171,9 @@ flutter:
         'Unsupported operation: Illegal character in path: https:',
       ));
     }, overrides: <Type, Generator>{
-      FileSystem: () {
-        final FileSystem result = MemoryFileSystem(
-          style: FileSystemStyle.windows,
-        );
-        result.currentDirectory = result.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
-        return result;
-      },
+      FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('handle removal of wildcard directories', () async {
