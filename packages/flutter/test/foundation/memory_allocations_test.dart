@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
@@ -26,12 +27,12 @@ class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
 }
 
 void main() {
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
   final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   PrintOverrideTestBinding();
 
   setUp(() {
-    ma.removeAllListeners();
     assert(!ma.hasListeners);
     _checkSdkHandlersNotSet();
   });
@@ -58,7 +59,6 @@ void main() {
   });
 
   testWidgets('dispatchObjectEvent handles bad listeners', (WidgetTester tester) async {
-    ma.removeAllListeners(); // This is needed for case when leak tracking is enabled.
     final ObjectEvent event = ObjectDisposed(object: 'object');
     final List<String> log = <String>[];
     void badListener1(ObjectEvent event) {
@@ -95,7 +95,6 @@ void main() {
     expect(ma.hasListeners, isFalse);
     ma.dispatchObjectEvent(event);
     expect(log, <String>[]);
-    ma.removeAllListeners(); // This is needed for case when leak tracking is enabled.
   });
 
   test('dispatchObjectEvent does not invoke concurrently added listeners', () {
