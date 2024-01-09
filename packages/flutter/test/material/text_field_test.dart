@@ -23,7 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../cupertino/text_field_restoration_test.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
@@ -6548,7 +6547,7 @@ void main() {
           dragStartBehavior: DragStartBehavior.down,
           key: textFieldKey,
           controller: controller,
-          ignorePointer: false,
+          ignorePointers: false,
           enabled: false,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 2,
@@ -6570,9 +6569,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
     await tester.pump();
     await gesture.moveBy(const Offset(0.0, -1000.0));
-    await tester.pump(const Duration(seconds: 1));
-    // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
-    // (No idea why this is necessary, but the bug wouldn't repro without it.)
+    await tester.pumpAndSettle();
     await gesture.moveBy(const Offset(0.0, -1000.0));
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
@@ -6580,12 +6577,12 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Now the first line is scrolled up, and the fourth line is visible.
-    final Offset newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
-    final Offset newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    final Offset finalFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    final Offset finalFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
 
-    expect(newFirstPos.dy, lessThan(firstPos.dy));
-    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
-    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
+    expect(finalFirstPos.dy, lessThan(firstPos.dy));
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(finalFirstPos)), isFalse);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(finalFourthPos)), isTrue);
   });
 
   testWidgets('Disabled text field does not have tap action', (WidgetTester tester) async {

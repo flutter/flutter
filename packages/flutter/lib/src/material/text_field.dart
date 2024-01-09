@@ -285,7 +285,7 @@ class TextField extends StatefulWidget {
     this.onAppPrivateCommand,
     this.inputFormatters,
     this.enabled,
-    this.ignorePointer,
+    this.ignorePointers,
     this.cursorWidth = 2.0,
     this.cursorHeight,
     this.cursorRadius,
@@ -599,9 +599,11 @@ class TextField extends StatefulWidget {
   /// [InputDecoration.enabled] property.
   final bool? enabled;
 
-  /// If false the text field is "disabled" but still scrollable.
-  /// However, if [enabled] is true, then the text field is "active" and still scrollable.
-  final bool? ignorePointer;
+  /// Determines whether this widget ignores pointer events.
+  ///
+  /// If true, this widget does not respond to pointer events,
+  /// If false this widget responds to all pointer events.
+  final bool? ignorePointers;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
@@ -1564,7 +1566,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       onExit: (PointerExitEvent event) => _handleHover(false),
       child: TextFieldTapRegion(
         child: IgnorePointer(
-          ignoring: widget.ignorePointer ?? !_isEnabled,
+          ignoring: widget.ignorePointers ?? !_isEnabled,
           child: AnimatedBuilder(
             animation: controller, // changes the _currentLength
             builder: (BuildContext context, Widget? child) {
