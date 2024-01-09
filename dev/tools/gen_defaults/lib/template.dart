@@ -39,7 +39,7 @@ abstract class TokenTemplate {
 
   /// Resolve a token while logging its usage.
   /// There will be no log if [optional] is true and the token doesn't exist.
-  dynamic getToken(String tokenName, {bool optional=false}) {
+  dynamic getToken(String tokenName, {bool optional = false}) {
     if (optional && !tokenAvailable(tokenName)) {
       return null;
     }
@@ -114,7 +114,7 @@ abstract class TokenTemplate {
   ///
   /// Otherwise it will return [defaultValue] if provided or 'null' if not.
   ///
-  /// If a [defaultValue] is not provided and the token does's exist, the token
+  /// If a [defaultValue] is not provided and the token doesn't exist, the token
   /// lookup is logged and a warning will be shown at the end of the process.
   ///
   /// See also:
