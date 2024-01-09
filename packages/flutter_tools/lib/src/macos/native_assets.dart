@@ -173,9 +173,7 @@ Asset _targetLocationMacOS(Asset asset, Uri? absolutePath) {
         // Flutter Desktop needs "absolute" paths inside the app.
         // "relative" in the context of native assets would be relative to the
         // kernel or aot snapshot.
-        final String name =
-            fileName.replaceFirst('lib', '').replaceFirst('.dylib', '');
-        uri = Uri(path: '$name.framework/$name');
+        uri = frameworkUri(fileName);
 
       }
       return asset.copyWith(path: AssetAbsolutePath(uri));

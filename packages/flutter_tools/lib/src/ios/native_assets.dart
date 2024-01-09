@@ -168,10 +168,8 @@ Asset _targetLocationIOS(Asset asset) {
       return asset;
     case AssetAbsolutePath _:
       final String fileName = path.uri.pathSegments.last;
-      final String name =
-          fileName.replaceFirst('lib', '').replaceFirst('.dylib', '');
       return asset.copyWith(
-        path: AssetAbsolutePath(Uri(path: '$name.framework/$name')),
+        path: AssetAbsolutePath(frameworkUri(fileName)),
       );
   }
   throw Exception(

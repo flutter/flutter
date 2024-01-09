@@ -142,3 +142,27 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
     ld: Uri.file('$installPath/ld'),
   );
 }
+
+/// On MacOS and iOS, dylibs need to be packaged in a framework.
+///
+/// In order for resolution to work, the file name inside the framework must be
+/// equal to the framework name.
+///
+/// Dylib names on MacOS/iOS usually have a dylib extension. If so, remove it.
+///
+/// Dylib names on MacOS/iOS are usually prefixed with 'lib'. So, if the file is
+/// a dylib, try to remove the prefix.
+Uri frameworkUri(String fileName) {
+  final List<String> splitFileName = fileName.split('.');
+  final bool isDylib;
+  if (splitFileName.length >= 2) {
+    isDylib = splitFileName.last == 'dylib';
+    fileName = splitFileName.sublist(0, splitFileName.length - 1).join('.');
+  } else {
+    isDylib = false;
+  }
+  if (isDylib && fileName.startsWith('lib')) {
+    fileName = fileName.replaceFirst('lib', '');
+  }
+  return Uri(path: '$fileName.framework/$fileName');
+}
