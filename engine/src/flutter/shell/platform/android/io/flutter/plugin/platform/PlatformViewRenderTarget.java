@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.platform;
 
-import android.graphics.Canvas;
 import android.view.Surface;
 
 /**
@@ -21,15 +20,6 @@ public interface PlatformViewRenderTarget {
 
   // Returns the currently specified height.
   public int getHeight();
-
-  // Forwards call to Surface returned by getSurface.
-  // NOTE: If this returns null the RenderTarget is "full" and has no room for a
-  // new frame.
-  Canvas lockHardwareCanvas();
-
-  // Forwards call to Surface returned by getSurface.
-  // NOTE: Must be called if lockHardwareCanvas returns a non-null Canvas.
-  void unlockCanvasAndPost(Canvas canvas);
 
   // The id of this render target.
   public long getId();

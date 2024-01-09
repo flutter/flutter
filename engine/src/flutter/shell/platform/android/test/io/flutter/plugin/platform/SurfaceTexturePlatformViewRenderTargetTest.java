@@ -59,9 +59,10 @@ public class SurfaceTexturePlatformViewRenderTargetTest {
     platformView.layout(0, 0, size, size);
 
     // Test.
-    final Canvas c = renderTarget.lockHardwareCanvas();
+    final Surface s = renderTarget.getSurface();
+    final Canvas c = s.lockHardwareCanvas();
     platformView.draw(c);
-    renderTarget.unlockCanvasAndPost(c);
+    s.unlockCanvasAndPost(c);
 
     // Verify.
     verify(canvas, times(1)).drawColor(Color.RED);
@@ -88,8 +89,9 @@ public class SurfaceTexturePlatformViewRenderTargetTest {
           }
         };
 
-    final Canvas c = renderTarget.lockHardwareCanvas();
-    renderTarget.unlockCanvasAndPost(c);
+    final Surface s = renderTarget.getSurface();
+    final Canvas c = s.lockHardwareCanvas();
+    s.unlockCanvasAndPost(c);
 
     reset(surface);
     reset(surfaceTexture);
