@@ -34,7 +34,7 @@ class TopazOfdValidator extends DoctorValidator {
 
 class ProcessLister {
   Future<String> getProcessesWithPath(String? filter) async {
-    final String argument = filter == null ? 'Get-Process $filter | Format-List Path' : 'Get-Process | Format-List Path';
+    final String argument = filter != null ? 'Get-Process $filter | Format-List Path' : 'Get-Process | Format-List Path';
     final ProcessResult taskResult = await Process.run('powershell', <String>['-command', argument]);
     return taskResult.stdout as String;
   }
