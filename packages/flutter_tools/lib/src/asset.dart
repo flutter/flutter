@@ -1260,7 +1260,7 @@ class _AssetDirectoryCache {
   List<String> variantsFor(String assetPath) {
     final String directory = _fileSystem.path.dirname(assetPath);
 
-    if (!_fileSystem.directory(directory).existsSync()) { // HERE
+    if (!_fileSystem.directory(directory).existsSync()) {
       return const <String>[];
     }
 
