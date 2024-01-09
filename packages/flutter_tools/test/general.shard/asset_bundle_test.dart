@@ -163,7 +163,7 @@ flutter:
     - https://mywebsite.com/images/
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      expect (() => bundle.build(packagesPath: '.packages'), throwsToolExit(
+      expect(() => bundle.build(packagesPath: '.packages'), throwsToolExit(
         message: 'Unable to search for asset files in directory path "https://mywebsite.com/images/". '
         'Please ensure that this is valid URI that points to a directory that is '
         'available on the local file system.\n'
@@ -171,7 +171,13 @@ flutter:
         'Unsupported operation: Illegal character in path: https:',
       ));
     }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
+      FileSystem: () {
+        final FileSystem result = MemoryFileSystem(
+          style: FileSystemStyle.windows,
+        );
+        result.currentDirectory = result.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+        return result;
+      },
       ProcessManager: () => FakeProcessManager.any(),
     });
 
