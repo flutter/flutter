@@ -1,4 +1,4 @@
-Signature: a6891068b682c05072b8aad9a8baba61
+Signature: f7b14939d0814a28d8a809b417ec34b7
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8754,6 +8754,7 @@ ORIGIN: ../../../flutter/third_party/skia/include/android/SkCanvasAndroid.h + ..
 ORIGIN: ../../../flutter/third_party/skia/include/android/SkHeifDecoder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/android/SkImageAndroid.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/android/SkSurfaceAndroid.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/android/graphite/SurfaceAndroid.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/codec/SkAvifDecoder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/codec/SkBmpDecoder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/codec/SkGifDecoder.h + ../../../flutter/third_party/skia/LICENSE
@@ -8962,6 +8963,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/render/CoverageMaskRe
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/render/GraphiteVertexFiller.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/render/PerEdgeAAQuadRenderStep.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/render/PerEdgeAAQuadRenderStep.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/surface/Surface_AndroidFactories.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanDescriptorSet.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9043,6 +9045,7 @@ FILE: ../../../flutter/third_party/skia/include/android/SkCanvasAndroid.h
 FILE: ../../../flutter/third_party/skia/include/android/SkHeifDecoder.h
 FILE: ../../../flutter/third_party/skia/include/android/SkImageAndroid.h
 FILE: ../../../flutter/third_party/skia/include/android/SkSurfaceAndroid.h
+FILE: ../../../flutter/third_party/skia/include/android/graphite/SurfaceAndroid.h
 FILE: ../../../flutter/third_party/skia/include/codec/SkAvifDecoder.h
 FILE: ../../../flutter/third_party/skia/include/codec/SkBmpDecoder.h
 FILE: ../../../flutter/third_party/skia/include/codec/SkGifDecoder.h
@@ -9251,6 +9254,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/render/CoverageMaskRend
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/render/GraphiteVertexFiller.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/render/PerEdgeAAQuadRenderStep.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/render/PerEdgeAAQuadRenderStep.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/surface/Surface_AndroidFactories.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanDescriptorSet.cpp
