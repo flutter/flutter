@@ -347,12 +347,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// using `flutter run`.
   @protected
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    final FlutterView view = renderView.flutterView;
-    final double devicePixelRatio = view.devicePixelRatio;
-    return ViewConfiguration(
-      size: view.physicalSize / devicePixelRatio,
-      devicePixelRatio: devicePixelRatio,
-    );
+    return ViewConfiguration.fromView(renderView.flutterView);
   }
 
   /// Called when the system metrics change.
