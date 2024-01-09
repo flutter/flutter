@@ -1,0 +1,36 @@
+// This file only exists to provide IDE support to Android Studio.
+//
+// See ./README.md for details.
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.0.4"
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+apply plugin: "com.android.library"
+
+android {
+    compileSdk 34
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs './'
+            java.include './io.flutter/**'
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.annotation:annotation-jvm:1.7.1'
+}
