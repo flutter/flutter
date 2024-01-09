@@ -125,14 +125,6 @@ class BuildAarCommand extends BuildSubCommand {
       'This cannot currently be configured.';
 
   @override
-  Future<void> validateCommand() async {
-    if (!project.manifest.isModule) {
-      throwToolExit('AARs can only be built from modules.');
-    }
-    await super.validateCommand();
-  }
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     if (_androidSdk == null) {
       exitWithNoSdkMessage();
