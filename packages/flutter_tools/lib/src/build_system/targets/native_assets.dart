@@ -306,8 +306,6 @@ class NativeAssets extends Target {
       Uri projectUri,
       FileSystem fileSystem,
       NativeAssetsBuildRunner buildRunner) {
-    final bool isAndroidLibrary =
-        environment.defines[kIsAndroidLibrary] == 'true';
     final String? androidArchsEnvironment = environment.defines[kAndroidArchs];
     final List<AndroidArch> androidArchs = _androidArchs(
       targetPlatform,
@@ -323,7 +321,6 @@ class NativeAssets extends Target {
       buildRunner: buildRunner,
       androidArchs: androidArchs,
       targetAndroidNdkApi: targetAndroidNdkApi,
-      isAndroidLibrary: isAndroidLibrary,
     );
   }
 

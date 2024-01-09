@@ -1083,7 +1083,6 @@ class FlutterPlugin implements Plugin<Project> {
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
-            boolean isAndroidLibraryValue = isBuildingAar || isUsedAsSubproject
 
             String variantBuildMode = buildModeFor(variant.buildType)
             String flavorValue = variant.getFlavorName()
@@ -1123,11 +1122,10 @@ class FlutterPlugin implements Plugin<Project> {
                 codeSizeDirectory(codeSizeDirectoryValue)
                 deferredComponents(deferredComponentsValue)
                 validateDeferredComponents(validateDeferredComponentsValue)
-                isAndroidLibrary(isAndroidLibraryValue)
                 flavor(flavorValue)
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
-            Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1140,10 +1138,20 @@ class FlutterPlugin implements Plugin<Project> {
                             return "lib/${abi}/lib${filename}"
                         }
                     }
+                    // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
+                    // The `$project.buildDir` is '.android/Flutter/build/' instead of 'build/'.
+                    def buildDir = "${getFlutterSourceDirectory()}/build"
+                    def nativeAssetsDir = "${buildDir}/native_assets/android/jniLibs/lib"
+                    from("${nativeAssetsDir}/${abi}") {
+                        include "*.so"
+                        rename { String filename ->
+                            return "lib/${abi}/${filename}"
+                        }
+                    }
                 }
             }
             addApiDependencies(project, variant.name, project.files {
-                packFlutterAppAotTask
+                packJniLibsTask
             })
             Task copyFlutterAssetsTask = project.tasks.create(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
@@ -1413,8 +1421,6 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean validateDeferredComponents
     @Optional @Input
-    Boolean isAndroidLibrary
-    @Optional @Input
     String flavor
 
     @OutputFiles
@@ -1510,9 +1516,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args("-dAndroidArchs=${targetPlatformValues.join(' ')}")
             args("-dMinSdkVersion=${minSdkVersion}")
-            if (isAndroidLibrary != null) {
-                args("-dIsAndroidLibrary=${isAndroidLibrary ? "true" : "false"}")
-            }
             args(ruleNames)
         }
     }
