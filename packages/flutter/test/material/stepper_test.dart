@@ -1530,7 +1530,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(circleColor('1'), selectedColor);
     expect(circleColor('2'), disabledColor);
     // in two steps case there will be single line
-    expect(lineColor('line0'), disabledColor);
+    expect(lineColor('line0'), selectedColor);
 
     // now hitting step two
     await tester.tap(find.text('step2'));
