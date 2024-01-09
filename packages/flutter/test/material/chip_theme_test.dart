@@ -159,11 +159,11 @@ void main() {
       labelStyle: TextStyle(fontSize: 32),
       iconTheme: IconThemeData(color: Color(0xff332211)),
     );
-    final ThemeData theme = ThemeData(chipTheme: chipTheme, useMaterial3: true);
+    final ThemeData theme = ThemeData(chipTheme: chipTheme);
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(chipTheme: chipTheme, useMaterial3: true),
+        theme: ThemeData(chipTheme: chipTheme),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
@@ -239,7 +239,7 @@ void main() {
       shape: RoundedRectangleBorder(),
       iconTheme: IconThemeData(color: Color(0xff332211)),
     );
-    final ThemeData theme = ThemeData(chipTheme: const ChipThemeData(), useMaterial3: true);
+    final ThemeData theme = ThemeData(chipTheme: const ChipThemeData());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -389,7 +389,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Builder(
           builder: (BuildContext context) {
             return Directionality(
@@ -773,7 +772,7 @@ void main() {
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
         theme: ThemeData(
-          chipTheme: ThemeData.light().chipTheme.copyWith(
+          chipTheme: ThemeData().chipTheme.copyWith(
             labelStyle: labelStyle,
             secondaryLabelStyle: labelStyle,
           ),
@@ -831,7 +830,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
+  testWidgets('Material2 - Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);
 
@@ -872,7 +871,47 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
   });
 
-  testWidgets('Chip uses stateful border side from chip theme', (WidgetTester tester) async {
+  testWidgets('Material3 - Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
+    const Color selectedColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+
+    BorderSide getBorderSide(Set<MaterialState> states) {
+      Color color = defaultColor;
+
+      if (states.contains(MaterialState.selected)) {
+        color = selectedColor;
+      }
+
+      return BorderSide(color: color);
+    }
+
+    Widget chipWidget({ bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ChipThemeData(
+            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+          ),
+        ),
+        home: Scaffold(
+          body: ChoiceChip(
+            label: const Text('Chip'),
+            selected: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+    }
+
+    // Default.
+    await tester.pumpWidget(chipWidget());
+    expect(find.byType(RawChip), paints..drrect(color: defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(find.byType(RawChip), paints..drrect(color: selectedColor));
+  });
+
+  testWidgets('Material2 - Chip uses stateful border side from chip theme', (WidgetTester tester) async {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);
 
@@ -914,12 +953,49 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
   });
 
-  testWidgets('Chip uses stateful shape from chip theme', (WidgetTester tester) async {
+  testWidgets('Material3 - Chip uses stateful border side from chip theme', (WidgetTester tester) async {
+    const Color selectedColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+
+    BorderSide getBorderSide(Set<MaterialState> states) {
+      Color color = defaultColor;
+      if (states.contains(MaterialState.selected)) {
+        color = selectedColor;
+      }
+      return BorderSide(color: color);
+    }
+
+    final ChipThemeData chipTheme = ChipThemeData(
+      side: _MaterialStateBorderSide(getBorderSide),
+    );
+
+    Widget chipWidget({ bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(chipTheme: chipTheme),
+        home: Scaffold(
+          body: ChoiceChip(
+            label: const Text('Chip'),
+            selected: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+    }
+
+    // Default.
+    await tester.pumpWidget(chipWidget());
+    expect(find.byType(RawChip), paints..drrect(color: defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(find.byType(RawChip), paints..drrect(color: selectedColor));
+  });
+
+  testWidgets('Material2 - Chip uses stateful shape from chip theme', (WidgetTester tester) async {
     OutlinedBorder? getShape(Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return const RoundedRectangleBorder();
       }
-
       return null;
     }
 
@@ -930,7 +1006,6 @@ void main() {
     ).copyWith(
       shape: _MaterialStateOutlinedBorder(getShape),
     );
-
 
     Widget chipWidget({ bool selected = false }) {
       return MaterialApp(
@@ -952,6 +1027,41 @@ void main() {
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
     expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
+  });
+
+  testWidgets('Material3 - Chip uses stateful shape from chip theme', (WidgetTester tester) async {
+    OutlinedBorder? getShape(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return const StadiumBorder();
+      }
+      return null;
+    }
+
+    final ChipThemeData chipTheme = ChipThemeData(
+      shape: _MaterialStateOutlinedBorder(getShape),
+
+    );
+
+    Widget chipWidget({ bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(chipTheme: chipTheme),
+        home: Scaffold(
+          body: ChoiceChip(
+            label: const Text('Chip'),
+            selected: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+    }
+
+    // Default.
+    await tester.pumpWidget(chipWidget());
+    expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(getMaterial(tester).shape, isA<StadiumBorder>());
   });
 
   testWidgets('RawChip uses material state color from ChipTheme', (WidgetTester tester) async {
@@ -977,7 +1087,6 @@ void main() {
               return backgroundColor;
             }),
           ),
-          useMaterial3: true,
         ),
         home: Material(
           child: RawChip(
@@ -1026,7 +1135,7 @@ void main() {
     );
     Widget buildApp({ required bool enabled, required bool selected }) {
       return MaterialApp(
-        theme: ThemeData(chipTheme: chipTheme, useMaterial3: true),
+        theme: ThemeData(chipTheme: chipTheme),
         home: Material(
           child: RawChip(
             isEnabled: enabled,
@@ -1063,7 +1172,7 @@ void main() {
   testWidgets('RawChip respects checkmark properties from ChipTheme', (WidgetTester tester) async {
     Widget buildRawChip({ChipThemeData? chipTheme}) {
       return MaterialApp(
-        theme: ThemeData.light(useMaterial3: false).copyWith(
+        theme: ThemeData(
           chipTheme: chipTheme,
         ),
         home: Directionality(
@@ -1120,7 +1229,6 @@ void main() {
     Widget buildChip({ OutlinedBorder? shape, BorderSide? side }) {
       return MaterialApp(
         theme: ThemeData(
-          useMaterial3: true,
           chipTheme: ChipThemeData(
             shape: shape,
             side: side,
@@ -1177,7 +1285,7 @@ void main() {
   testWidgets('Material3 - ChipThemeData.iconTheme respects default iconTheme.size', (WidgetTester tester) async {
     Widget buildChip({ IconThemeData? iconTheme }) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true, chipTheme: ChipThemeData(iconTheme: iconTheme)),
+        theme: ThemeData(chipTheme: ChipThemeData(iconTheme: iconTheme)),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
