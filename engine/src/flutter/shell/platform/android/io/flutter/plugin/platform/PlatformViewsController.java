@@ -968,12 +968,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private static PlatformViewRenderTarget makePlatformViewRenderTarget(
       TextureRegistry textureRegistry) {
-    if (enableSurfaceProducerRenderTarget && Build.VERSION.SDK_INT >= 33) {
+    if (enableSurfaceProducerRenderTarget && Build.VERSION.SDK_INT >= 29) {
       final TextureRegistry.SurfaceProducer textureEntry = textureRegistry.createSurfaceProducer();
       Log.i(TAG, "PlatformView is using SurfaceProducer backend");
       return new SurfaceProducerPlatformViewRenderTarget(textureEntry);
     }
-    if (enableImageRenderTarget && Build.VERSION.SDK_INT >= 33) {
+    if (enableImageRenderTarget && Build.VERSION.SDK_INT >= 29) {
       final TextureRegistry.ImageTextureEntry textureEntry = textureRegistry.createImageTexture();
       Log.i(TAG, "PlatformView is using ImageReader backend");
       return new ImageReaderPlatformViewRenderTarget(textureEntry);
