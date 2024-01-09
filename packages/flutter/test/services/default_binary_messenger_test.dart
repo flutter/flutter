@@ -2,53 +2,54 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  ByteData _makeByteData(String str) {
-    final List<int> list = utf8.encode(str);
-    final ByteBuffer buffer =
-        list is Uint8List ? list.buffer : Uint8List.fromList(list).buffer;
-    return ByteData.view(buffer);
+  ByteData makeByteData(String str) {
+    return ByteData.sublistView(utf8.encode(str));
   }
 
   test('default binary messenger calls callback once', () async {
-    int count = 0;
+    int countInbound = 0;
+    int countOutbound = 0;
     const String channel = 'foo';
-    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        channel, _makeByteData('bar'), (ByteData message) async {
-      count += 1;
-      return null;
-    });
-    expect(count, equals(0));
-    await ui.channelBuffers.drain(channel,
-        (ByteData data, ui.PlatformMessageResponseCallback callback) {
-      callback(null);
-      return null;
-    });
-    expect(count, equals(1));
-  });
-
-  test('can check the handler', () {
-    Future<ByteData> handler(ByteData call) => Future<ByteData>.value(null);
-    final BinaryMessenger messenger = ServicesBinding.instance.defaultBinaryMessenger;
-
-    expect(messenger.checkMessageHandler('test_channel', null), true);
-    expect(messenger.checkMessageHandler('test_channel', handler), false);
-    messenger.setMessageHandler('test_channel', handler);
-    expect(messenger.checkMessageHandler('test_channel', handler), true);
-    messenger.setMessageHandler('test_channel', null);
+    final ByteData bar = makeByteData('bar');
+    final Completer<void> done = Completer<void>();
+    ServicesBinding.instance.channelBuffers.push(
+      channel,
+      bar,
+      (ByteData? message) async {
+        expect(message, isNull);
+        countOutbound += 1;
+        done.complete();
+      },
+    );
+    expect(countInbound, equals(0));
+    expect(countOutbound, equals(0));
+    ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler(
+      channel,
+      (ByteData? message) async {
+        expect(message, bar);
+        countInbound += 1;
+        return null;
+      },
+    );
+    expect(countInbound, equals(0));
+    expect(countOutbound, equals(0));
+    await done.future;
+    expect(countInbound, equals(1));
+    expect(countOutbound, equals(1));
   });
 
   test('can check the mock handler', () {
-    Future<ByteData> handler(ByteData call) => Future<ByteData>.value(null);
-    final BinaryMessenger messenger = ServicesBinding.instance.defaultBinaryMessenger;
+    Future<ByteData?> handler(ByteData? call) => Future<ByteData?>.value();
+    final TestDefaultBinaryMessenger messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
     expect(messenger.checkMockMessageHandler('test_channel', null), true);
     expect(messenger.checkMockMessageHandler('test_channel', handler), false);

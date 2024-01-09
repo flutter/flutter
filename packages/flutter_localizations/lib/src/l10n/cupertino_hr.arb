@@ -24,6 +24,13 @@
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Zalijepi",
   "selectAllButtonLabel": "Odaberi sve",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Odbaci"
+  "tabSemanticsLabel": "Kartica $tabIndex od $tabCount",
+  "modalBarrierDismissLabel": "Odbaci",
+  "searchTextFieldPlaceholderLabel": "Pretraživanje",
+  "noSpellCheckReplacementsLabel": "Nema pronađenih zamjena",
+  "menuDismissLabel": "Odbacivanje izbornika",
+  "lookUpButtonLabel": "Pogled prema gore",
+  "searchWebButtonLabel": "Pretraži web",
+  "shareButtonLabel": "Dijeli...",
+  "clearButtonLabel": "Clear"
 }

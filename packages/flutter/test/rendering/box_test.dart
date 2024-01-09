@@ -36,7 +36,21 @@ class MissingSetSizeRenderBox extends RenderBox {
   void performLayout() { }
 }
 
+class BadBaselineRenderBox extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    throw Exception();
+  }
+}
+
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('should size to render view', () {
     final RenderBox root = RenderDecoratedBox(
       decoration: BoxDecoration(
@@ -44,7 +58,7 @@ void main() {
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.8,
-          colors: <Color>[Colors.yellow[500], Colors.blue[500]],
+          colors: <Color>[Colors.yellow[500]!, Colors.blue[500]!],
         ),
         boxShadow: kElevationToShadow[3],
       ),
@@ -55,7 +69,7 @@ void main() {
   });
 
   test('performLayout error message', () {
-    FlutterError result;
+    late FlutterError result;
     try {
       MissingPerformLayoutRenderBox().performLayout();
     }  on FlutterError catch (e) {
@@ -69,7 +83,7 @@ void main() {
         '   MissingPerformLayoutRenderBox did not implement performLayout().\n'
         '   RenderBox subclasses need to either override performLayout() to\n'
         '   set a size and lay out any children, or, set sizedByParent to\n'
-        '   true so that performResize() sizes the render object.\n'
+        '   true so that performResize() sizes the render object.\n',
       ),
     );
     expect(
@@ -93,7 +107,7 @@ void main() {
     // BoxParentData.
     paddingBox.parentData = ParentData();
 
-    FlutterError result;
+    late FlutterError result;
     try {
       root.applyPaintTransform(paddingBox, Matrix4.identity());
     } on FlutterError catch (e) {
@@ -123,7 +137,7 @@ void main() {
         '   use that ParentData class for its children, it must provide an\n'
         '   implementation of applyPaintTransform that supports the specific\n'
         '   ParentData subclass used by its children (which apparently is\n'
-        '   ParentData).\n'
+        '   ParentData).\n',
       ),
     );
 
@@ -149,7 +163,7 @@ void main() {
 
     final MissingPerformLayoutRenderBox testBox = MissingPerformLayoutRenderBox();
     {
-      FlutterError result;
+      late FlutterError result;
       try {
         testBox.triggerExceptionSettingSizeOutsideOfLayout();
       } on FlutterError catch (e) {
@@ -165,13 +179,13 @@ void main() {
           '   performResize() nor performLayout() were being run for this\n'
           '   object).\n'
           '   Because this RenderBox has sizedByParent set to false, it must\n'
-          '   set its size in performLayout().\n'
+          '   set its size in performLayout().\n',
         ),
       );
       expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint), isEmpty);
     }
     {
-      FlutterError result;
+      late FlutterError result;
       try {
         testBox.debugAdoptSize(root.size);
       } on FlutterError catch (e) {
@@ -206,7 +220,7 @@ void main() {
           '   entirely different part of the render tree, then there is no way\n'
           '   to be notified when the size changes and therefore attempts to\n'
           '   read that size are almost certainly a source of bugs. A different\n'
-          '   approach should be used.\n'
+          '   approach should be used.\n',
         ),
       );
       expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).length, 2);
@@ -260,15 +274,16 @@ void main() {
 
     expect(coloredBox, hasAGoodToStringDeep);
     expect(
-        coloredBox.toStringDeep(minLevel: DiagnosticLevel.info),
-        equalsIgnoringHashCodes(
-          'RenderDecoratedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
-          '   parentData: MISSING\n'
-          '   constraints: MISSING\n'
-          '   size: MISSING\n'
-          '   decoration: BoxDecoration:\n'
-          '     <no decorations specified>\n'
-          '   configuration: ImageConfiguration()\n'),
+      coloredBox.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+        'RenderDecoratedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        '   parentData: MISSING\n'
+        '   constraints: MISSING\n'
+        '   size: MISSING\n'
+        '   decoration: BoxDecoration:\n'
+        '     <no decorations specified>\n'
+        '   configuration: ImageConfiguration()\n',
+      ),
     );
 
     final RenderBox paddingBox = RenderPadding(
@@ -308,21 +323,21 @@ void main() {
       padding: const EdgeInsets.all(10.0),
     );
     layout(paddedBox);
-    final BoxParentData parentData = coloredBox.parentData as BoxParentData;
+    final BoxParentData parentData = coloredBox.parentData! as BoxParentData;
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
-    final RenderConstrainedBox constraintedBox = RenderConstrainedBox(
+    final RenderConstrainedBox constrainedBox = RenderConstrainedBox(
       child: coloredBox,
       additionalConstraints: const BoxConstraints(),
     );
-    layout(constraintedBox);
+    layout(constrainedBox);
     expect(coloredBox.parentData?.runtimeType, ParentData);
   });
 
   test('UnconstrainedBox expands to fit children', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
-      constrainedAxis: Axis.horizontal, // This is reset to null below.
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
@@ -339,15 +354,16 @@ void main() {
       ),
     );
     // Check that we can update the constrained axis to null.
-    unconstrained.constrainedAxis = null;
-    renderer.reassembleApplication();
+    unconstrained.constraintsTransform = ConstraintsTransformBox.unconstrained;
+    TestRenderingFlutterBinding.instance.reassembleApplication();
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
     expect(unconstrained.size.height, equals(200.0), reason: 'unconstrained height');
   });
 
   test('UnconstrainedBox handles vertical overflow', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 200.0),
@@ -363,7 +379,8 @@ void main() {
   });
 
   test('UnconstrainedBox handles horizontal overflow', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0),
@@ -378,8 +395,119 @@ void main() {
     expect(unconstrained.getMaxIntrinsicWidth(100.0), equals(200.0));
   });
 
-  test ('getMinInstrinsicWidth error handling', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+  group('ConstraintsTransformBox', () {
+    FlutterErrorDetails? firstErrorDetails;
+    void exhaustErrors() {
+      FlutterErrorDetails? next;
+      do {
+        next = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
+        firstErrorDetails ??= next;
+      } while (next != null);
+    }
+
+    tearDown(() {
+      firstErrorDetails = null;
+      RenderObject.debugCheckingIntrinsics = false;
+    });
+
+    test('throws if the resulting constraints are not normalized', () {
+      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 0));
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => const BoxConstraints(maxHeight: -1, minHeight: 200),
+        child: child,
+      );
+
+      layout(box, constraints: const BoxConstraints(), onErrors: exhaustErrors);
+
+      expect(firstErrorDetails?.toString(), contains('is not normalized'));
+    });
+
+    test('overflow is reported when insufficient size is given and clipBehavior is Clip.none', () {
+      bool hadErrors = false;
+      void expectOverflowedErrors() {
+        absorbOverflowedErrors();
+        hadErrors = true;
+      }
+
+      final TestClipPaintingContext context = TestClipPaintingContext();
+      for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+        final RenderConstraintsTransformBox box;
+        switch (clip) {
+          case Clip.none:
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            box = RenderConstraintsTransformBox(
+              alignment: Alignment.center,
+              textDirection: TextDirection.ltr,
+              constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              clipBehavior: clip!,
+              child: RenderConstrainedBox(
+                additionalConstraints: const BoxConstraints.tightFor(
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                ),
+              ),
+            );
+          case null:
+            box = RenderConstraintsTransformBox(
+              alignment: Alignment.center,
+              textDirection: TextDirection.ltr,
+              constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              child: RenderConstrainedBox(
+                additionalConstraints: const BoxConstraints.tightFor(
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                ),
+              ),
+            );
+        }
+        layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+        context.paintChild(box, Offset.zero);
+        // By default, clipBehavior should be Clip.none
+        expect(context.clipBehavior, equals(clip ?? Clip.none));
+        switch (clip) {
+          case null:
+          case Clip.none:
+            expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
+        }
+        hadErrors = false;
+      }
+    });
+
+    test('handles flow layout', () {
+      final RenderParagraph child = RenderParagraph(
+        TextSpan(text: 'a' * 100),
+        textDirection: TextDirection.ltr,
+      );
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        child: child,
+      );
+
+      // With a width of 30, the RenderParagraph would have wrapped, but the
+      // RenderConstraintsTransformBox allows the paragraph to expand regardless
+      // of the width constraint:
+      // unconstrainedHeight * numberOfLines = constrainedHeight.
+      final double constrainedHeight = child.getMinIntrinsicHeight(30);
+      final double unconstrainedHeight = box.getMinIntrinsicHeight(30);
+
+      // At least 2 lines.
+      expect(constrainedHeight, greaterThanOrEqualTo(2 * unconstrainedHeight));
+    });
+  });
+
+  test ('getMinIntrinsicWidth error handling', () {
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0),
@@ -390,32 +518,7 @@ void main() {
     layout(unconstrained, constraints: viewport);
 
     {
-      FlutterError result;
-      try {
-        unconstrained.getMinIntrinsicWidth(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The height argument to getMinIntrinsicWidth was null.\n'
-          '   The argument to getMinIntrinsicWidth must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific height in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific height in mind, then pass double.infinity instead.',
-      );
-    }
-
-    {
-      FlutterError result;
+      late FlutterError result;
       try {
         unconstrained.getMinIntrinsicWidth(-1);
       } on FlutterError catch (e) {
@@ -431,7 +534,7 @@ void main() {
           '   null.\n'
           '   If you perform computations on another height before passing it\n'
           '   to getMinIntrinsicWidth, consider using math.max() or\n'
-          '   double.clamp() to force the value into the valid range.\n'
+          '   double.clamp() to force the value into the valid range.\n',
         ),
       );
       expect(
@@ -443,32 +546,7 @@ void main() {
     }
 
     {
-      FlutterError result;
-      try {
-        unconstrained.getMinIntrinsicHeight(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The width argument to getMinIntrinsicHeight was null.\n'
-          '   The argument to getMinIntrinsicHeight must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific width in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific width in mind, then pass double.infinity instead.',
-      );
-    }
-
-    {
-      FlutterError result;
+      late FlutterError result;
       try {
         unconstrained.getMinIntrinsicHeight(-1);
       } on FlutterError catch (e) {
@@ -484,7 +562,7 @@ void main() {
           '   null.\n'
           '   If you perform computations on another width before passing it to\n'
           '   getMinIntrinsicHeight, consider using math.max() or\n'
-          '   double.clamp() to force the value into the valid range.\n'
+          '   double.clamp() to force the value into the valid range.\n',
         ),
       );
       expect(
@@ -496,32 +574,7 @@ void main() {
     }
 
     {
-      FlutterError result;
-      try {
-        unconstrained.getMaxIntrinsicWidth(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The height argument to getMaxIntrinsicWidth was null.\n'
-          '   The argument to getMaxIntrinsicWidth must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific height in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific height in mind, then pass double.infinity instead.',
-      );
-    }
-
-    {
-      FlutterError result;
+      late FlutterError result;
       try {
         unconstrained.getMaxIntrinsicWidth(-1);
       } on FlutterError catch (e) {
@@ -537,7 +590,7 @@ void main() {
           '   null.\n'
           '   If you perform computations on another height before passing it\n'
           '   to getMaxIntrinsicWidth, consider using math.max() or\n'
-          '   double.clamp() to force the value into the valid range.\n'
+          '   double.clamp() to force the value into the valid range.\n',
         ),
       );
       expect(
@@ -549,32 +602,7 @@ void main() {
     }
 
     {
-      FlutterError result;
-      try {
-        unconstrained.getMaxIntrinsicHeight(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The width argument to getMaxIntrinsicHeight was null.\n'
-          '   The argument to getMaxIntrinsicHeight must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific width in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific width in mind, then pass double.infinity instead.',
-      );
-    }
-
-    {
-      FlutterError result;
+      late FlutterError result;
       try {
         unconstrained.getMaxIntrinsicHeight(-1);
       } on FlutterError catch (e) {
@@ -590,7 +618,7 @@ void main() {
           '   null.\n'
           '   If you perform computations on another width before passing it to\n'
           '   getMaxIntrinsicHeight, consider using math.max() or\n'
-          '   double.clamp() to force the value into the valid range.\n'
+          '   double.clamp() to force the value into the valid range.\n',
         ),
       );
       expect(
@@ -603,7 +631,8 @@ void main() {
   });
 
   test('UnconstrainedBox.toStringDeep returns useful information', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.unconstrained,
       textDirection: TextDirection.ltr,
       alignment: Alignment.center,
     );
@@ -613,29 +642,29 @@ void main() {
     expect(
       unconstrained.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderUnconstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        'RenderConstraintsTransformBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
           '   parentData: MISSING\n'
           '   constraints: MISSING\n'
           '   size: MISSING\n'
-          '   alignment: center\n'
-          '   textDirection: ltr\n'),
+          '   alignment: Alignment.center\n'
+          '   textDirection: ltr\n',
+      ),
     );
   });
 
   test('UnconstrainedBox honors constrainedAxis=Axis.horizontal', () {
     final RenderConstrainedBox flexible =
         RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(height: 200.0));
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
-      constrainedAxis: Axis.horizontal,
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.heightUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderFlex(
-        direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
         children: <RenderBox>[flexible],
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
+    final FlexParentData flexParentData = flexible.parentData! as FlexParentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
@@ -649,8 +678,8 @@ void main() {
   test('UnconstrainedBox honors constrainedAxis=Axis.vertical', () {
     final RenderConstrainedBox flexible =
     RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(width: 200.0));
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
-      constrainedAxis: Axis.vertical,
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderFlex(
         direction: Axis.vertical,
@@ -659,7 +688,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
+    final FlexParentData flexParentData = flexible.parentData! as FlexParentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
@@ -668,6 +697,55 @@ void main() {
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
     expect(unconstrained.size.height, equals(100.0), reason: 'constrained height');
+  });
+
+  test('clipBehavior is respected', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    bool hadErrors = false;
+    void expectOverflowedErrors() {
+      absorbOverflowedErrors();
+      hadErrors = true;
+    }
+
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      final RenderConstraintsTransformBox box;
+      switch (clip) {
+        case Clip.none:
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          box = RenderConstraintsTransformBox(
+            constraintsTransform: ConstraintsTransformBox.unconstrained,
+            alignment: Alignment.center,
+            textDirection: TextDirection.ltr,
+            child: box200x200,
+            clipBehavior: clip!,
+          );
+        case null:
+          box = RenderConstraintsTransformBox(
+            constraintsTransform: ConstraintsTransformBox.unconstrained,
+            alignment: Alignment.center,
+            textDirection: TextDirection.ltr,
+            child: box200x200,
+          );
+      }
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      switch (clip) {
+        case null:
+        case Clip.none:
+          expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
+      }
+      hadErrors = false;
+      context.paintChild(box, Offset.zero);
+      // By default, clipBehavior should be Clip.none
+      expect(context.clipBehavior, equals(clip ?? Clip.none), reason: 'for $clip');
+    }
   });
 
   group('hit testing', () {
@@ -704,7 +782,7 @@ void main() {
 
       bool isHit = result.addWithPaintTransform(
         transform: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -712,12 +790,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithPaintTransform(
         transform: Matrix4.translationValues(20, 30, 0),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -725,7 +803,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(-20.0, -30.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -788,7 +866,7 @@ void main() {
 
       bool isHit = result.addWithPaintOffset(
         offset: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -796,12 +874,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithPaintOffset(
         offset: const Offset(55, 32),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -809,7 +887,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(-55.0, -32.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -859,7 +937,7 @@ void main() {
 
       bool isHit = result.addWithRawTransform(
         transform: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -867,12 +945,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithRawTransform(
         transform: Matrix4.translationValues(20, 30, 0),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -880,7 +958,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(20.0, 30.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -924,12 +1002,99 @@ void main() {
       positions.clear();
     });
 
+    test('addWithOutOfBandPosition', () {
+      final BoxHitTestResult result = BoxHitTestResult();
+      bool ran = false;
+
+      bool isHit = result.addWithOutOfBandPosition(
+        paintOffset: const Offset(20, 30),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        paintTransform: Matrix4.translationValues(20, 30, 0),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        rawTransform: Matrix4.translationValues(20, 30, 0),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        rawTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      isHit = false;
+      ran = false;
+
+      expect(
+        () {
+          isHit = result.addWithOutOfBandPosition(
+            paintTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
+            hitTest: (BoxHitTestResult result) {
+              fail('non-invertible transform should be caught');
+            },
+          );
+        },
+        throwsA(isAssertionError.having(
+          (AssertionError error) => error.message,
+          'message',
+          'paintTransform must be invertible.',
+        )),
+      );
+      expect(isHit, isFalse);
+
+      expect(
+        () {
+          isHit = result.addWithOutOfBandPosition(
+            hitTest: (BoxHitTestResult result) {
+              fail('addWithOutOfBandPosition should need some transformation of some sort');
+            },
+          );
+        },
+        throwsA(isAssertionError.having(
+          (AssertionError error) => error.message,
+          'message',
+          'Exactly one transform or offset argument must be provided.',
+        )),
+      );
+      expect(isHit, isFalse);
+    });
+
     test('error message', () {
       {
         final RenderBox renderObject = RenderConstrainedBox(
           additionalConstraints: const BoxConstraints().tighten(height: 100.0),
         );
-        FlutterError result;
+        late FlutterError result;
         try {
           final BoxHitTestResult result = BoxHitTestResult();
           renderObject.hitTest(result, position: Offset.zero);
@@ -953,7 +1118,7 @@ void main() {
             '   If you are trying to perform a hit test during the layout phase\n'
             '   itself, make sure you only hit test nodes that have completed\n'
             "   layout (e.g. the node's children, after their layout() method has\n"
-            '   been called).\n'
+            '   been called).\n',
           ),
         );
         expect(
@@ -966,7 +1131,7 @@ void main() {
       }
 
       {
-        FlutterError result;
+        late FlutterError result;
         final FakeMissingSizeRenderBox renderObject = FakeMissingSizeRenderBox();
         layout(renderObject);
         renderObject.fakeMissingSize = true;
@@ -990,7 +1155,7 @@ void main() {
             '   not set.\n'
             '   A RenderBox object must have an explicit size before it can be\n'
             '   hit-tested. Make sure that the RenderBox in question sets its\n'
-            '   size during layout.\n'
+            '   size during layout.\n',
           ),
         );
         expect(
@@ -1004,9 +1169,9 @@ void main() {
 
     test('localToGlobal with ancestor', () {
       final RenderConstrainedBox innerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 50, height: 50));
-      final RenderPositionedBox innerCenter = RenderPositionedBox(alignment: Alignment.center, child: innerConstrained);
+      final RenderPositionedBox innerCenter = RenderPositionedBox(child: innerConstrained);
       final RenderConstrainedBox outerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100, height: 100), child: innerCenter);
-      final RenderPositionedBox outerCentered = RenderPositionedBox(alignment: Alignment.center, child: outerConstrained);
+      final RenderPositionedBox outerCentered = RenderPositionedBox(child: outerConstrained);
 
       layout(outerCentered);
 
@@ -1014,16 +1179,9 @@ void main() {
     });
   });
 
-  test('BoxConstraints parameters should be non-null', () {
-    expect(() => BoxConstraints(minWidth: null), throwsAssertionError);
-    expect(() => BoxConstraints(maxWidth: null), throwsAssertionError);
-    expect(() => BoxConstraints(minHeight: null), throwsAssertionError);
-    expect(() => BoxConstraints(maxHeight: null), throwsAssertionError);
-  });
-
   test('Error message when size has not been set in RenderBox performLayout should be well versed', () {
-    FlutterErrorDetails errorDetails;
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    late FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails = details;
     };
@@ -1044,9 +1202,30 @@ void main() {
           'The following assertion was thrown during performLayout():\n'
           'RenderBox did not set its size during layout.\n'
           'Because this RenderBox has sizedByParent set to false, it must\n'
-          'set its size in performLayout().'
+          'set its size in performLayout().',
       ),
     );
+  });
+
+  test('debugDoingBaseline flag is cleared after exception', () {
+    final BadBaselineRenderBox badChild = BadBaselineRenderBox();
+    final RenderBox badRoot = RenderBaseline(
+      child: badChild,
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+    );
+    final List<dynamic> exceptions = <dynamic>[];
+    layout(badRoot, onErrors: () {
+      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
+    });
+    expect(exceptions, isNotEmpty);
+
+    final RenderBox goodRoot = RenderBaseline(
+      child: RenderDecoratedBox(decoration: const BoxDecoration()),
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+    );
+    layout(goodRoot, onErrors: () { assert(false); });
   });
 }
 

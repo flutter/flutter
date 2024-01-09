@@ -12,15 +12,9 @@ pushd flutterapp
 popd
 
 pod install
-os_version=$(xcrun --show-sdk-version --sdk iphonesimulator)
 
-PRETTY="cat"
-if which xcpretty; then
-  PRETTY="xcpretty"
-fi
-
-set -o pipefail && xcodebuild \
+xcrun xcodebuild \
   -workspace ios_add2app.xcworkspace \
   -scheme ios_add2app \
-  -sdk "iphonesimulator$os_version" \
-  -destination "OS=$os_version,name=iPhone X" test | $PRETTY
+  -sdk "iphonesimulator" \
+  -destination "OS=latest,name=iPhone 12" test

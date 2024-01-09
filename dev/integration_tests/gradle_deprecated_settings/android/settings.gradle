@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This is the `settings.gradle` file that apps currently use.
-// This file has changed, so it must be migrated in existing projects.
+// This is the `settings.gradle` file that apps were created with until Flutter
+// v1.22.0. This file has changed, so it must be migrated in existing projects.
 
 include ':app'
 

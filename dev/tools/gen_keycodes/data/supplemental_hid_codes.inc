@@ -1,5 +1,11 @@
-  // These are supplemental key codes to be added to those that Chromium
-  // defines. Since the web doesn't have game controller buttons defined in the
+  // These are supplemental code data to be added to those that Chromium
+  // defines.
+
+  // ============================================================
+  // Game controller buttons
+  // ============================================================
+
+  // Since the web doesn't have game controller buttons defined in the
   // same way, these map USB HID codes for game controller buttons to
   // Android/Linux button names.
   //
@@ -44,8 +50,17 @@
   DOM_CODE(0x05ff1e, 0x0000, 0x0000, 0x0000, 0xffff, "GameButtonY", BUTTON_Y),
   DOM_CODE(0x05ff1f, 0x0000, 0x0000, 0x0000, 0xffff, "GameButtonZ", BUTTON_Z),
 
+  // Sometimes the Escape key produces "Esc" instead of "Escape". This includes
+  // older IE and Firefox browsers, and the current Cobalt browser.
+  // See: https://github.com/flutter/flutter/issues/106062
+  DOM_CODE(0x070029, 0x0000, 0x0000, 0x0000, 0xffff, "Esc", ESCAPE),
+
+  // ============================================================
+  // Fn key for Mac
+  // ============================================================
+
   // The Mac defines a key code for the Fn key on Mac keyboards, but it's not
   // defined on other platforms. Chromium does define an "Fn" row, but doesn't
   // give it a Mac keycode. This overrides their definition.
   //        USB HID    evdev    XKB     Win    Mac  DOMKey         Code
-   DOM_CODE(0x000012, 0x0000, 0x0000, 0x0000, 0x003f, "Fn", FN),
+  DOM_CODE(0x000012, 0x0000, 0x0000, 0x0000, 0x003f, "Fn", FN),

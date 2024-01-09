@@ -19,6 +19,13 @@
   "copyButtonLabel": "Хуулах",
   "pasteButtonLabel": "Буулгах",
   "selectAllButtonLabel": "Бүгдийг сонгох",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Үл хэрэгсэх"
+  "tabSemanticsLabel": "$tabCount-н $tabIndex-р таб",
+  "modalBarrierDismissLabel": "Үл хэрэгсэх",
+  "searchTextFieldPlaceholderLabel": "Хайх",
+  "noSpellCheckReplacementsLabel": "Ямар ч орлуулалт олдсонгүй",
+  "menuDismissLabel": "Цэсийг хаах",
+  "lookUpButtonLabel": "Дээшээ харах",
+  "searchWebButtonLabel": "Вебээс хайх",
+  "shareButtonLabel": "Хуваалцах...",
+  "clearButtonLabel": "Clear"
 }

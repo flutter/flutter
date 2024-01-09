@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const double kHeight = 10.0;
 const double kFlingOffset = kHeight * 20.0;
@@ -27,10 +27,11 @@ void main() {
 
     await tester.fling(find.byType(ListView), const Offset(0.0, -kFlingOffset), 1000.0);
     expect(getCurrentOffset(), kFlingOffset);
+    await tester.pump(); // process the up event
     while (tester.binding.transientCallbackCount > 0) {
       final double lastOffset = getCurrentOffset();
       await tester.pump(const Duration(milliseconds: 20));
       expect(getCurrentOffset(), greaterThan(lastOffset));
     }
-  }, skip: true); // see https://github.com/flutter/flutter/issues/5339
+  });
 }

@@ -29,6 +29,13 @@
   "copyButtonLabel": "העתקה",
   "pasteButtonLabel": "הדבקה",
   "selectAllButtonLabel": "בחירת הכול",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "סגירה"
+  "tabSemanticsLabel": "כרטיסייה $tabIndex מתוך $tabCount",
+  "modalBarrierDismissLabel": "סגירה",
+  "searchTextFieldPlaceholderLabel": "חיפוש",
+  "noSpellCheckReplacementsLabel": "לא נמצאו חלופות",
+  "menuDismissLabel": "סגירת התפריט",
+  "lookUpButtonLabel": "חיפוש",
+  "searchWebButtonLabel": "חיפוש באינטרנט",
+  "shareButtonLabel": "שיתוף…",
+  "clearButtonLabel": "Clear"
 }

@@ -9,7 +9,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -18,8 +18,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
+      driver.close();
     });
 
     Future<void> testScrollPerf(String listKey, String summaryName) async {
@@ -50,18 +49,17 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile(summaryName, pretty: true);
-      summary.writeTimelineToFile(summaryName, pretty: true);
+      await summary.writeTimelineToFile(summaryName, pretty: true);
     }
 
     test('complex_layout_scroll_perf', () async {
       await testScrollPerf('complex-scroll', 'complex_layout_scroll_perf');
-    });
+    }, timeout: Timeout.none);
 
     test('tiles_scroll_perf', () async {
       await driver.tap(find.byTooltip('Open navigation menu'));
       await driver.tap(find.byValueKey('scroll-switcher'));
       await testScrollPerf('tiles-scroll', 'tiles_scroll_perf');
-    });
+    }, timeout: Timeout.none);
   });
 }

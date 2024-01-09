@@ -6,7 +6,7 @@
   "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "PG",
-  "postMeridiemAbbreviation": "PTG",
+  "postMeridiemAbbreviation": "P/M",
   "todayLabel": "Hari ini",
   "alertDialogLabel": "Makluman",
   "timerPickerHourLabelOne": "jam",
@@ -19,6 +19,13 @@
   "copyButtonLabel": "Salin",
   "pasteButtonLabel": "Tampal",
   "selectAllButtonLabel": "Pilih Semua",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Tolak"
+  "tabSemanticsLabel": "Tab $tabIndex daripada $tabCount",
+  "modalBarrierDismissLabel": "Tolak",
+  "searchTextFieldPlaceholderLabel": "Cari",
+  "noSpellCheckReplacementsLabel": "Tiada Penggantian Ditemukan",
+  "menuDismissLabel": "Ketepikan menu",
+  "lookUpButtonLabel": "Lihat ke Atas",
+  "searchWebButtonLabel": "Buat carian pada Web",
+  "shareButtonLabel": "Kongsi...",
+  "clearButtonLabel": "Clear"
 }

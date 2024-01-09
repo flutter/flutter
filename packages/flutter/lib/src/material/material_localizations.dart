@@ -2,51 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'reorderable_list.dart';
-import 'text_theme.dart';
+import 'debug.dart';
 import 'time.dart';
 import 'typography.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 // ADDING A NEW STRING
 //
-// If you (someone contributing to the Flutter framework) want to add a new
-// string to the MaterialLocalizations object (e.g. because you've added a new
-// widget and it has a tooltip), follow these steps:
-//
-// 1. Add the new getter to MaterialLocalizations below.
-//
-// 2. Implement a default value in DefaultMaterialLocalizations below.
-//
-// 3. Add a test to test/material/localizations_test.dart that verifies that
-//    this new value is implemented.
-//
-// 4. Update the flutter_localizations package. To add a new string to the
-//    flutter_localizations package, you must first add it to the English
-//    translations (lib/src/l10n/material_en.arb), including a description.
-//
-//    Then you need to add new entries for the string to all of the other
-//    language locale files by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_missing_localizations.dart
-//    ```
-//    Which will copy the english strings into the other locales as placeholders
-//    until they can be translated.
-//
-//    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
-//
-//    There is a README file with further information in the lib/src/l10n/
-//    directory.
-//
-// 5. If you are a Google employee, you should then also follow the instructions
-//    at go/flutter-l10n. If you're not, don't worry about it.
+// Please refer to instructions in this markdown file
+// (packages/flutter_localizations/README.md)
 
 /// Defines the localized resource values used by the Material widgets.
 ///
@@ -72,11 +41,17 @@ abstract class MaterialLocalizations {
   /// The tooltip for the more button on an overflowing text selection menu.
   String get moreButtonTooltip;
 
-  /// The tooltip for the [MonthPicker]'s "next month" button.
+  /// The tooltip for the [CalendarDatePicker]'s "next month" button.
   String get nextMonthTooltip;
 
-  /// The tooltip for the [MonthPicker]'s "previous month" button.
+  /// The tooltip for the [CalendarDatePicker]'s "previous month" button.
   String get previousMonthTooltip;
+
+  /// The tooltip for the [PaginatedDataTable]'s "first page" button.
+  String get firstPageTooltip;
+
+  /// The tooltip for the [PaginatedDataTable]'s "last page" button.
+  String get lastPageTooltip;
 
   /// The tooltip for the [PaginatedDataTable]'s "next page" button.
   String get nextPageTooltip;
@@ -93,6 +68,9 @@ abstract class MaterialLocalizations {
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
 
+  /// Subtitle for a package in the [LicensePage] widget.
+  String licensesPackageDetailText(int licenseCount);
+
   /// Title for the [PaginatedDataTable]'s row info footer.
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate);
 
@@ -105,7 +83,7 @@ abstract class MaterialLocalizations {
   /// there are, e.g. 'Tab 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabLabel({ int tabIndex, int tabCount });
+  String tabLabel({ required int tabIndex, required int tabCount });
 
   /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
@@ -125,6 +103,9 @@ abstract class MaterialLocalizations {
   /// Label for "cut" edit buttons and menu items.
   String get cutButtonLabel;
 
+  /// Label for "scan text" OCR edit buttons and menu items.
+  String get scanTextButtonLabel;
+
   /// Label for OK buttons and menu items.
   String get okButtonLabel;
 
@@ -133,6 +114,15 @@ abstract class MaterialLocalizations {
 
   /// Label for "select all" edit buttons and menu items.
   String get selectAllButtonLabel;
+
+  /// Label for "look up" edit buttons and menu items.
+  String get lookUpButtonLabel;
+
+  /// Label for "search web" edit buttons and menu items.
+  String get searchWebButtonLabel;
+
+  /// Label for "share" edit buttons and menu items.
+  String get shareButtonLabel;
 
   /// Label for the [AboutDialog] button that shows the [LicensePage].
   String get viewLicensesButtonLabel;
@@ -158,6 +148,10 @@ abstract class MaterialLocalizations {
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
 
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) for a
+  /// context menu to indicate that a tap dismisses the context menu.
+  String get menuDismissLabel;
+
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// drawer widget is opened.
   String get drawerLabel;
@@ -165,6 +159,10 @@ abstract class MaterialLocalizations {
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// popup menu widget is opened.
   String get popupMenuLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
+  /// MenuBarMenu widget is opened.
+  String get menuBarMenuLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// dialog widget is opened.
@@ -177,6 +175,20 @@ abstract class MaterialLocalizations {
   /// Label indicating that a text field is a search field. This will be used
   /// as a hint text in the text field.
   String get searchFieldLabel;
+
+  /// Label indicating that a given date is the current date.
+  String get currentDateLabel;
+
+  /// Label for the scrim rendered underneath a [BottomSheet].
+  String get scrimLabel;
+
+  /// Label for a [BottomSheet], used as the `modalRouteContentName` of the
+  /// [scrimOnTapHint].
+  String get bottomSheetLabel;
+
+  /// Hint text announced when tapping on the scrim underneath the content of
+  /// a modal route.
+  String scrimOnTapHint(String modalRouteContentName);
 
   /// The format used to lay out the time picker.
   ///
@@ -289,7 +301,7 @@ abstract class MaterialLocalizations {
   ///
   /// See also:
   ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
-  DateTime parseCompactDate(String inputString);
+  DateTime? parseCompactDate(String? inputString);
 
   /// List of week day names in narrow format, usually 1- or 2-letter
   /// abbreviations of full names.
@@ -311,9 +323,9 @@ abstract class MaterialLocalizations {
   /// This getter is compatible with [narrowWeekdays]. For example:
   ///
   /// ```dart
-  /// var localizations = MaterialLocalizations.of(context);
+  ///  MaterialLocalizations localizations = MaterialLocalizations.of(context);
   /// // The name of the first day of week for the current locale.
-  /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
+  /// String firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
 
@@ -389,7 +401,33 @@ abstract class MaterialLocalizations {
   /// Tooltip used for the text input mode button of the date pickers.
   String get inputDateModeButtonLabel;
 
-  /// The semantics label used to indicate which account is signed in in the
+  /// Label used in the header of the time picker dialog created with
+  /// [showTimePicker] when in [TimePickerEntryMode.dial].
+  String get timePickerDialHelpText;
+
+  /// Label used in the header of the time picker dialog created with
+  /// [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerInputHelpText;
+
+  /// Label used below the hour text field of the time picker dialog created
+  /// with [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerHourLabel;
+
+  /// Label used below the minute text field of the time picker dialog created
+  /// with [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerMinuteLabel;
+
+  /// Error message for the time picker dialog created with [showTimePicker]
+  /// when in [TimePickerEntryMode.input].
+  String get invalidTimeLabel;
+
+  /// Tooltip used to put the time picker into [TimePickerEntryMode.dial].
+  String get dialModeButtonLabel;
+
+  /// Tooltip used to put the time picker into [TimePickerEntryMode.input].
+  String get inputTimeModeButtonLabel;
+
+  /// The semantics label used to indicate which account is signed in the
   /// [UserAccountsDrawerHeader] widget.
   String get signedInLabel;
 
@@ -403,26 +441,50 @@ abstract class MaterialLocalizations {
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list to the start of the list.
+  @Deprecated(
+    'Use the reorderItemToStart from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemToStart;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list to the end of the list.
+  @Deprecated(
+    'Use the reorderItemToEnd from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemToEnd;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space up the list.
+  @Deprecated(
+    'Use the reorderItemUp from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemUp;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space down the list.
+  @Deprecated(
+    'Use the reorderItemDown from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemDown;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space left in the list.
+  @Deprecated(
+    'Use the reorderItemLeft from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemLeft;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space right in the list.
+  @Deprecated(
+    'Use the reorderItemRight from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemRight;
 
   /// The semantics hint to describe the tap action on an expanded [ExpandIcon].
@@ -431,17 +493,185 @@ abstract class MaterialLocalizations {
   /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
   String get collapsedIconTapHint => 'Expand';
 
+  /// The semantics hint to describe the tap action on an expanded
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [collapsedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Expanded
+  /// double tap to collapse".
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [expandedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Collapsed
+  /// double tap to expand".
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  /// The semantics hint to describe the tap action on an expanded [ExpansionTile].
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpansionTile].
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  /// The semantics hint to describe the [ExpansionTile] expanded state.
+  String get expandedHint => 'Collapsed';
+
+  /// The semantics hint to describe the [ExpansionTile] collapsed state.
+  String get collapsedHint => 'Expanded';
+
   /// The label for the [TextField]'s character counter.
   String remainingTextFieldCharacterCount(int remaining);
 
   /// The default semantics label for a [RefreshIndicator].
   String get refreshIndicatorSemanticLabel;
 
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.alt].
+  String get keyboardKeyAlt;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.altGraph].
+  String get keyboardKeyAltGraph;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.backspace].
+  String get keyboardKeyBackspace;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.capsLock].
+  String get keyboardKeyCapsLock;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.channelDown].
+  String get keyboardKeyChannelDown;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.channelUp].
+  String get keyboardKeyChannelUp;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.control].
+  String get keyboardKeyControl;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.delete].
+  String get keyboardKeyDelete;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.eject].
+  String get keyboardKeyEject;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.end].
+  String get keyboardKeyEnd;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.escape].
+  String get keyboardKeyEscape;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.fn].
+  String get keyboardKeyFn;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.home].
+  String get keyboardKeyHome;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.insert].
+  String get keyboardKeyInsert;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.meta].
+  String get keyboardKeyMeta;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.meta] on macOS.
+  String get keyboardKeyMetaMacOs;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.meta] on Windows.
+  String get keyboardKeyMetaWindows;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numLock].
+  String get keyboardKeyNumLock;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad1].
+  String get keyboardKeyNumpad1;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad2].
+  String get keyboardKeyNumpad2;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad3].
+  String get keyboardKeyNumpad3;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad4].
+  String get keyboardKeyNumpad4;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad5].
+  String get keyboardKeyNumpad5;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad6].
+  String get keyboardKeyNumpad6;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad7].
+  String get keyboardKeyNumpad7;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad8].
+  String get keyboardKeyNumpad8;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad9].
+  String get keyboardKeyNumpad9;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad0].
+  String get keyboardKeyNumpad0;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadAdd].
+  String get keyboardKeyNumpadAdd;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadComma].
+  String get keyboardKeyNumpadComma;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadDecimal].
+  String get keyboardKeyNumpadDecimal;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadDivide].
+  String get keyboardKeyNumpadDivide;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadEnter].
+  String get keyboardKeyNumpadEnter;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadEqual].
+  String get keyboardKeyNumpadEqual;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadMultiply].
+  String get keyboardKeyNumpadMultiply;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadParenLeft].
+  String get keyboardKeyNumpadParenLeft;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadParenRight].
+  String get keyboardKeyNumpadParenRight;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadSubtract].
+  String get keyboardKeyNumpadSubtract;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.pageDown].
+  String get keyboardKeyPageDown;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.pageUp].
+  String get keyboardKeyPageUp;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.power].
+  String get keyboardKeyPower;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.powerOff].
+  String get keyboardKeyPowerOff;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.printScreen].
+  String get keyboardKeyPrintScreen;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.scrollLock].
+  String get keyboardKeyScrollLock;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.select].
+  String get keyboardKeySelect;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.shift].
+  String get keyboardKeyShift;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.space].
+  String get keyboardKeySpace;
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
+  /// If no [MaterialLocalizations] are available in the given `context`, this
+  /// method throws an exception.
+  ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)`.
+  /// `Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -450,7 +680,8 @@ abstract class MaterialLocalizations {
   /// tooltip: MaterialLocalizations.of(context).backButtonTooltip,
   /// ```
   static MaterialLocalizations of(BuildContext context) {
-    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
+    assert(debugCheckHasMaterialLocalizations(context));
+    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!;
   }
 }
 
@@ -557,8 +788,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
           (year % 400 == 0);
-      if (isLeapYear)
+      if (isLeapYear) {
         return 29;
+      }
       return 28;
     }
     const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -573,7 +805,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
         return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
       case TimeOfDayFormat.HH_colon_mm:
         return _formatTwoDigitZeroPad(timeOfDay.hour);
-      default:
+      case TimeOfDayFormat.a_space_h_colon_mm:
+      case TimeOfDayFormat.frenchCanadian:
+      case TimeOfDayFormat.H_colon_mm:
+      case TimeOfDayFormat.HH_dot_mm:
         throw AssertionError('$runtimeType does not support $format.');
     }
   }
@@ -583,8 +818,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String _formatTwoDigitZeroPad(int number) {
     assert(0 <= number && number < 100);
 
-    if (number < 10)
+    if (number < 10) {
       return '0$number';
+    }
 
     return '$number';
   }
@@ -640,28 +876,37 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  DateTime parseCompactDate(String inputString) {
+  DateTime? parseCompactDate(String? inputString) {
+    if (inputString == null) {
+      return null;
+    }
+
     // Assumes US mm/dd/yyyy format
     final List<String> inputParts = inputString.split('/');
     if (inputParts.length != 3) {
       return null;
     }
 
-    final int year = int.tryParse(inputParts[2], radix: 10);
+    final int? year = int.tryParse(inputParts[2], radix: 10);
     if (year == null || year < 1) {
       return null;
     }
 
-    final int month = int.tryParse(inputParts[0], radix: 10);
+    final int? month = int.tryParse(inputParts[0], radix: 10);
     if (month == null || month < 1 || month > 12) {
       return null;
     }
 
-    final int day = int.tryParse(inputParts[1], radix: 10);
+    final int? day = int.tryParse(inputParts[1], radix: 10);
     if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
       return null;
     }
-    return DateTime(year, month, day);
+
+    try {
+      return DateTime(year, month, day);
+    } on ArgumentError {
+      return null;
+    }
   }
 
   @override
@@ -695,10 +940,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndLabel => 'End Date';
 
   @override
-  String dateRangeStartDateSemanticLabel(String fullDate) => 'Start date $fullDate';
+  String dateRangeStartDateSemanticLabel(String formattedDate) => 'Start date $formattedDate';
 
   @override
-  String dateRangeEndDateSemanticLabel(String fullDate) => 'End date $fullDate';
+  String dateRangeEndDateSemanticLabel(String formattedDate) => 'End date $formattedDate';
 
   @override
   String get invalidDateFormatLabel => 'Invalid format.';
@@ -710,19 +955,40 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateOutOfRangeLabel => 'Out of range.';
 
   @override
-  String get saveButtonLabel => 'SAVE';
+  String get saveButtonLabel => 'Save';
 
   @override
-  String get datePickerHelpText => 'SELECT DATE';
+  String get datePickerHelpText => 'Select date';
 
   @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
+  String get dateRangePickerHelpText => 'Select range';
 
   @override
   String get calendarModeButtonLabel => 'Switch to calendar';
 
   @override
   String get inputDateModeButtonLabel => 'Switch to input';
+
+  @override
+  String get timePickerDialHelpText => 'Select time';
+
+  @override
+  String get timePickerInputHelpText => 'Enter time';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
 
   String _formatDayPeriod(TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
@@ -731,21 +997,22 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
       case DayPeriod.pm:
         return postMeridiemAbbreviation;
     }
-    return null;
   }
 
   @override
   String formatDecimal(int number) {
-    if (number > -1000 && number < 1000)
+    if (number > -1000 && number < 1000) {
       return number.toString();
+    }
 
     final String digits = number.abs().toString();
     final StringBuffer result = StringBuffer(number < 0 ? '-' : '');
     final int maxDigitIndex = digits.length - 1;
     for (int i = 0; i <= maxDigitIndex; i += 1) {
       result.write(digits[i]);
-      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0)
+      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0) {
         result.write(',');
+      }
     }
     return result.toString();
   }
@@ -808,10 +1075,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get previousPageTooltip => 'Previous page';
 
   @override
+  String get firstPageTooltip => 'First page';
+
+  @override
+  String get lastPageTooltip => 'Last page';
+
+  @override
   String get showMenuTooltip => 'Show menu';
 
   @override
   String get drawerLabel => 'Navigation menu';
+
+  @override
+  String get menuBarMenuLabel => 'Menu bar menu';
 
   @override
   String get popupMenuLabel => 'Popup menu';
@@ -826,10 +1102,35 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get searchFieldLabel => 'Search';
 
   @override
+  String get currentDateLabel => 'Today';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
+  String scrimOnTapHint(String modalRouteContentName) => 'Close $modalRouteContentName';
+
+  @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';
 
   @override
   String get licensesPageTitle => 'Licenses';
+
+  @override
+  String licensesPackageDetailText(int licenseCount) {
+    assert(licenseCount >= 0);
+    switch (licenseCount) {
+      case 0:
+        return 'No licenses.';
+      case 1:
+        return '1 license.';
+      default:
+        return '$licenseCount licenses.';
+    }
+  }
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
@@ -842,7 +1143,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
-  String tabLabel({ int tabIndex, int tabCount }) {
+  String tabLabel({ required int tabIndex, required int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';
@@ -861,31 +1162,43 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String get cancelButtonLabel => 'CANCEL';
+  String get cancelButtonLabel => 'Cancel';
 
   @override
-  String get closeButtonLabel => 'CLOSE';
+  String get closeButtonLabel => 'Close';
 
   @override
-  String get continueButtonLabel => 'CONTINUE';
+  String get continueButtonLabel => 'Continue';
 
   @override
-  String get copyButtonLabel => 'COPY';
+  String get copyButtonLabel => 'Copy';
 
   @override
-  String get cutButtonLabel => 'CUT';
+  String get cutButtonLabel => 'Cut';
+
+  @override
+  String get scanTextButtonLabel => 'Scan text';
 
   @override
   String get okButtonLabel => 'OK';
 
   @override
-  String get pasteButtonLabel => 'PASTE';
+  String get pasteButtonLabel => 'Paste';
 
   @override
-  String get selectAllButtonLabel => 'SELECT ALL';
+  String get selectAllButtonLabel => 'Select all';
 
   @override
-  String get viewLicensesButtonLabel => 'VIEW LICENSES';
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
+  String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get shareButtonLabel => 'Share';
+
+  @override
+  String get viewLicensesButtonLabel => 'View licenses';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
@@ -901,6 +1214,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -946,6 +1262,24 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get collapsedIconTapHint => 'Expand';
 
   @override
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get refreshIndicatorSemanticLabel => 'Refresh';
 
   /// Creates an object that provides US English resource values for the material
@@ -976,4 +1310,145 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
         return '$remaining characters remaining';
     }
   }
+
+  @override
+  String get keyboardKeyAlt => 'Alt';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyBackspace => 'Backspace';
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps Lock';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel Down';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel Up';
+
+  @override
+  String get keyboardKeyControl => 'Ctrl';
+
+  @override
+  String get keyboardKeyDelete => 'Del';
+
+  @override
+  String get keyboardKeyEject => 'Eject';
+
+  @override
+  String get keyboardKeyEnd => 'End';
+
+  @override
+  String get keyboardKeyEscape => 'Esc';
+
+  @override
+  String get keyboardKeyFn => 'Fn';
+
+  @override
+  String get keyboardKeyHome => 'Home';
+
+  @override
+  String get keyboardKeyInsert => 'Insert';
+
+  @override
+  String get keyboardKeyMeta => 'Meta';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'Command';
+
+  @override
+  String get keyboardKeyMetaWindows => 'Win';
+
+  @override
+  String get keyboardKeyNumLock => 'Num Lock';
+
+  @override
+  String get keyboardKeyNumpad1 => 'Num 1';
+
+  @override
+  String get keyboardKeyNumpad2 => 'Num 2';
+
+  @override
+  String get keyboardKeyNumpad3 => 'Num 3';
+
+  @override
+  String get keyboardKeyNumpad4 => 'Num 4';
+
+  @override
+  String get keyboardKeyNumpad5 => 'Num 5';
+
+  @override
+  String get keyboardKeyNumpad6 => 'Num 6';
+
+  @override
+  String get keyboardKeyNumpad7 => 'Num 7';
+
+  @override
+  String get keyboardKeyNumpad8 => 'Num 8';
+
+  @override
+  String get keyboardKeyNumpad9 => 'Num 9';
+
+  @override
+  String get keyboardKeyNumpad0 => 'Num 0';
+
+  @override
+  String get keyboardKeyNumpadAdd => 'Num +';
+
+  @override
+  String get keyboardKeyNumpadComma => 'Num ,';
+
+  @override
+  String get keyboardKeyNumpadDecimal => 'Num .';
+
+  @override
+  String get keyboardKeyNumpadDivide => 'Num /';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
+
+  @override
+  String get keyboardKeyNumpadEqual => 'Num =';
+
+  @override
+  String get keyboardKeyNumpadMultiply => 'Num *';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => 'Num (';
+
+  @override
+  String get keyboardKeyNumpadParenRight => 'Num )';
+
+  @override
+  String get keyboardKeyNumpadSubtract => 'Num -';
+
+  @override
+  String get keyboardKeyPageDown => 'PgDown';
+
+  @override
+  String get keyboardKeyPageUp => 'PgUp';
+
+  @override
+  String get keyboardKeyPower => 'Power';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power Off';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print Screen';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll Lock';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
+  String get keyboardKeySpace => 'Space';
 }

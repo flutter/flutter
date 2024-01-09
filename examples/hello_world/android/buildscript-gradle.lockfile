@@ -1,0 +1,29 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+org.jetbrains.intellij.deps:trove4j:1.0.20200330=classpath
+org.jetbrains.kotlin:kotlin-android-extensions:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-build-tools-api:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-compiler-runner:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-daemon-client:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-daemon-embeddable:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-idea-proto:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-idea:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin-model:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-klib-commonizer-api:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-native-utils:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-project-model:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-scripting-common:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-scripting-compiler-impl-embeddable:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-scripting-jvm:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-tooling-core:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-util-io:1.9.0=classpath
+org.jetbrains.kotlin:kotlin-util-klib:1.9.0=classpath
+org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.5.0=classpath
+empty=

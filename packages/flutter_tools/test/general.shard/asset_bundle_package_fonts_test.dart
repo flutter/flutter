@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -11,12 +10,10 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/pubspec_schema.dart';
 
 void main() {
   String fixPath(String path) {
@@ -25,9 +22,9 @@ void main() {
     // fixed we fix them here.
     // TODO(dantup): Remove this function once the above issue is fixed and
     // rolls into Flutter.
-    return path?.replaceAll('/', globals.fs.path.separator);
+    return path.replaceAll('/', globals.fs.path.separator);
   }
-  void writePubspecFile(String path, String name, { String fontsSection }) {
+  void writePubspecFile(String path, String name, { String? fontsSection }) {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
@@ -49,12 +46,6 @@ $fontsSection
 ''');
   }
 
-  void establishFlutterRoot() {
-    // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-    // path separator.
-    Cache.flutterRoot = getFlutterRoot();
-  }
-
   void writePackagesFile(String packages) {
     globals.fs.file('.packages')
       ..createSync()
@@ -68,14 +59,14 @@ $fontsSection
     String expectedAssetManifest,
   ) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(manifestPath: 'pubspec.yaml');
+    await bundle.build(packagesPath: '.packages');
 
     for (final String packageName in packages) {
       for (final String packageFont in packageFonts) {
         final String entryKey = 'packages/$packageName/$packageFont';
         expect(bundle.entries.containsKey(entryKey), true);
         expect(
-          utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+          utf8.decode(await bundle.entries[entryKey]!.contentsAsBytes()),
           packageFont,
         );
       }
@@ -83,14 +74,14 @@ $fontsSection
       for (final String localFont in localFonts) {
         expect(bundle.entries.containsKey(localFont), true);
         expect(
-          utf8.decode(await bundle.entries[localFont].contentsAsBytes()),
+          utf8.decode(await bundle.entries[localFont]!.contentsAsBytes()),
           localFont,
         );
       }
     }
 
     expect(
-      json.decode(utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes())),
+      json.decode(utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes())),
       json.decode(expectedAssetManifest),
     );
   }
@@ -102,7 +93,7 @@ $fontsSection
   }
 
   group('AssetBundle fonts from packages', () {
-    FileSystem testFileSystem;
+    FileSystem? testFileSystem;
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
@@ -110,30 +101,24 @@ $fontsSection
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem!.currentDirectory = testFileSystem!.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
 
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
-      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
-      expect(bundle.entries.containsKey('FontManifest.json'), isTrue);
+      await bundle.build(packagesPath: '.packages');
+      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin',
+        'AssetManifest.json', 'FontManifest.json', 'NOTICES.Z']));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('App font uses font file from package', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       const String fontsSection = '''
        - family: foo
          fonts:
@@ -160,9 +145,6 @@ $fontsSection
     });
 
     testUsingContext('App font uses local font file and package font file', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       const String fontsSection = '''
        - family: foo
          fonts:
@@ -193,9 +175,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with own font file', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       const String fontsSection = '''
@@ -227,9 +206,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with font file from another package', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
       const String fontsSection = '''
@@ -262,9 +238,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with properties and own font file', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -298,9 +271,6 @@ $fontsSection
     });
 
     testUsingContext('App uses local font and package font with own font file.', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       const String fontsSection = '''
        - family: foo
          fonts:

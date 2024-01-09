@@ -1,0 +1,11 @@
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+
+<resources>
+  <dimen name="edge_margin">16dp</dimen>
+  <dimen name="fab_elevation_resting">6dp</dimen>
+  <dimen name="fab_elevation_pressed">12dp</dimen>
+  <dimen name="font_size">17sp</dimen>
+  <dimen name="platform_label_font_size">30sp</dimen>
+</resources>

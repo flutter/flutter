@@ -3,10 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-
-import '../flutter_test_alternative.dart';
-
-typedef GestureArenaCallback = void Function(Object key);
+import 'package:flutter_test/flutter_test.dart';
 
 const int primaryKey = 4;
 
@@ -32,12 +29,12 @@ class GestureTester {
   TestGestureArenaMember first = TestGestureArenaMember();
   TestGestureArenaMember second = TestGestureArenaMember();
 
-  GestureArenaEntry firstEntry;
+  late GestureArenaEntry firstEntry;
   void addFirst() {
     firstEntry = arena.add(primaryKey, first);
   }
 
-  GestureArenaEntry secondEntry;
+  late GestureArenaEntry secondEntry;
   void addSecond() {
     secondEntry = arena.add(primaryKey, second);
   }

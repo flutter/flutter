@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import '../../src/common.dart';
 
 void main() {
-  FileSystem fileSystem;
-  DepfileService depfileService;
+  late FileSystem fileSystem;
+  late DepfileService depfileService;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -105,7 +105,7 @@ C:\\a.txt: C:\\b.txt
   });
 
 
-  testWithoutContext('Resillient to weird whitespace', () {
+  testWithoutContext('Resilient to weird whitespace', () {
     final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
 a.txt
   : b.txt    c.txt
@@ -118,7 +118,7 @@ a.txt
     expect(depfile.outputs.single.path, 'a.txt');
   });
 
-  testWithoutContext('Resillient to duplicate files', () {
+  testWithoutContext('Resilient to duplicate files', () {
     final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
 a.txt: b.txt b.txt
 ''');
@@ -128,7 +128,7 @@ a.txt: b.txt b.txt
     expect(depfile.outputs.single.path, 'a.txt');
   });
 
-  testWithoutContext('Resillient to malformed file, missing :', () {
+  testWithoutContext('Resilient to malformed file, missing :', () {
     final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
 a.text b.txt
 ''');

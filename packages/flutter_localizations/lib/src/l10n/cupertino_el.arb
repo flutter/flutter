@@ -18,7 +18,14 @@
   "cutButtonLabel": "Αποκοπή",
   "copyButtonLabel": "Αντιγραφή",
   "pasteButtonLabel": "Επικόλληση",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Επιλογή όλων",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Παράβλεψη"
+  "tabSemanticsLabel": "Καρτέλα $tabIndex από $tabCount",
+  "modalBarrierDismissLabel": "Παράβλεψη",
+  "searchTextFieldPlaceholderLabel": "Αναζήτηση",
+  "noSpellCheckReplacementsLabel": "Δεν βρέθηκαν αντικαταστάσεις",
+  "menuDismissLabel": "Παράβλεψη μενού",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Αναζήτηση στον ιστό",
+  "shareButtonLabel": "Κοινοποίηση…"
 }

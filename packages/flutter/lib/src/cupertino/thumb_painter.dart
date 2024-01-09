@@ -47,7 +47,7 @@ class CupertinoThumbPainter {
   const CupertinoThumbPainter({
     this.color = CupertinoColors.white,
     this.shadows = _kSliderBoxShadows,
-  }) : assert(shadows != null);
+  });
 
   /// Creates an object that paints an iOS-style switch thumb.
   const CupertinoThumbPainter.switchThumb({
@@ -59,8 +59,6 @@ class CupertinoThumbPainter {
   final Color color;
 
   /// The list of [BoxShadow] to paint below the thumb.
-  ///
-  /// Must not be null.
   final List<BoxShadow> shadows;
 
   /// Half the default diameter of the thumb.
@@ -79,8 +77,9 @@ class CupertinoThumbPainter {
       Radius.circular(rect.shortestSide / 2.0),
     );
 
-    for (final BoxShadow shadow in shadows)
+    for (final BoxShadow shadow in shadows) {
       canvas.drawRRect(rrect.shift(shadow.offset), shadow.toPaint());
+    }
 
     canvas.drawRRect(
       rrect.inflate(0.5),

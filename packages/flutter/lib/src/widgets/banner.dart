@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -23,6 +22,8 @@ const TextStyle _kTextStyle = TextStyle(
   fontWeight: FontWeight.w900,
   height: 1.0,
 );
+
+const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 
 /// Where to show a [Banner].
 ///
@@ -55,22 +56,24 @@ enum BannerLocation {
 /// Paints a [Banner].
 class BannerPainter extends CustomPainter {
   /// Creates a banner painter.
-  ///
-  /// The [message], [textDirection], [location], and [layoutDirection]
-  /// arguments must not be null.
   BannerPainter({
-    @required this.message,
-    @required this.textDirection,
-    @required this.location,
-    @required this.layoutDirection,
+    required this.message,
+    required this.textDirection,
+    required this.location,
+    required this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : assert(message != null),
-       assert(textDirection != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null),
-       super(repaint: PaintingBinding.instance.systemFonts);
+  }) : super(repaint: PaintingBinding.instance.systemFonts) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterWidgetsLibrary,
+        className: '$BannerPainter',
+        object: this,
+      );
+    }
+  }
 
   /// The message to show in the banner.
   final String message;
@@ -118,14 +121,28 @@ class BannerPainter extends CustomPainter {
   );
 
   bool _prepared = false;
-  TextPainter _textPainter;
-  Paint _paintShadow;
-  Paint _paintBanner;
+  TextPainter? _textPainter;
+  late Paint _paintShadow;
+  late Paint _paintBanner;
+
+  /// Release resources held by this painter.
+  ///
+  /// After calling this method, this object is no longer usable.
+  void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+    _textPainter?.dispose();
+    _textPainter = null;
+  }
 
   void _prepare() {
     _paintShadow = _shadow.toPaint();
     _paintBanner = Paint()
       ..color = color;
+    _textPainter?.dispose();
     _textPainter = TextPainter(
       text: TextSpan(style: textStyle, text: message),
       textAlign: TextAlign.center,
@@ -136,16 +153,17 @@ class BannerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!_prepared)
+    if (!_prepared) {
       _prepare();
+    }
     canvas
       ..translate(_translationX(size.width), _translationY(size.height))
       ..rotate(_rotation)
       ..drawRect(_kRect, _paintShadow)
       ..drawRect(_kRect, _paintBanner);
     const double width = _kOffset * 2.0;
-    _textPainter.layout(minWidth: width, maxWidth: width);
-    _textPainter.paint(canvas, _kRect.topLeft + Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
+    _textPainter!.layout(minWidth: width, maxWidth: width);
+    _textPainter!.paint(canvas, _kRect.topLeft + Offset(0.0, (_kRect.height - _textPainter!.height) / 2.0));
   }
 
   @override
@@ -160,8 +178,6 @@ class BannerPainter extends CustomPainter {
   bool hitTest(Offset position) => false;
 
   double _translationX(double width) {
-    assert(location != null);
-    assert(layoutDirection != null);
     switch (layoutDirection) {
       case TextDirection.rtl:
         switch (location) {
@@ -174,7 +190,6 @@ class BannerPainter extends CustomPainter {
           case BannerLocation.topStart:
             return width;
         }
-        break;
       case TextDirection.ltr:
         switch (location) {
           case BannerLocation.bottomEnd:
@@ -186,13 +201,10 @@ class BannerPainter extends CustomPainter {
           case BannerLocation.topStart:
             return 0.0;
         }
-        break;
     }
-    return null;
   }
 
   double _translationY(double height) {
-    assert(location != null);
     switch (location) {
       case BannerLocation.bottomStart:
       case BannerLocation.bottomEnd:
@@ -201,12 +213,9 @@ class BannerPainter extends CustomPainter {
       case BannerLocation.topEnd:
         return 0.0;
     }
-    return null;
   }
 
   double get _rotation {
-    assert(location != null);
-    assert(layoutDirection != null);
     switch (layoutDirection) {
       case TextDirection.rtl:
         switch (location) {
@@ -217,7 +226,6 @@ class BannerPainter extends CustomPainter {
           case BannerLocation.topStart:
             return math.pi / 4.0;
         }
-        break;
       case TextDirection.ltr:
         switch (location) {
           case BannerLocation.bottomStart:
@@ -227,9 +235,7 @@ class BannerPainter extends CustomPainter {
           case BannerLocation.topStart:
             return -math.pi / 4.0;
         }
-        break;
     }
-    return null;
   }
 }
 
@@ -242,29 +248,23 @@ class BannerPainter extends CustomPainter {
 ///
 ///  * [CheckedModeBanner], which the [WidgetsApp] widget includes by default in
 ///    debug mode, to show a banner that says "DEBUG".
-class Banner extends StatelessWidget {
+class Banner extends StatefulWidget {
   /// Creates a banner.
-  ///
-  /// The [message] and [location] arguments must not be null.
   const Banner({
-    Key key,
+    super.key,
     this.child,
-    @required this.message,
+    required this.message,
     this.textDirection,
-    @required this.location,
+    required this.location,
     this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : assert(message != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null),
-       super(key: key);
+  });
 
   /// The widget to show behind the banner.
   ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
 
   /// The message to show in the banner.
   final String message;
@@ -283,7 +283,7 @@ class Banner extends StatelessWidget {
   /// See also:
   ///
   ///  * [layoutDirection], which controls the interpretation of the [location].
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   /// Where to show the banner (e.g., the upper right corner).
   final BannerLocation location;
@@ -297,7 +297,7 @@ class Banner extends StatelessWidget {
   /// See also:
   ///
   ///  * [textDirection], which controls the reading direction of the [message].
-  final TextDirection layoutDirection;
+  final TextDirection? layoutDirection;
 
   /// The color of the banner.
   final Color color;
@@ -306,46 +306,64 @@ class Banner extends StatelessWidget {
   final TextStyle textStyle;
 
   @override
+  State<Banner> createState() => _BannerState();
+}
+
+class _BannerState extends State<Banner> {
+  BannerPainter? _painter;
+
+  @override
+  void dispose() {
+    _painter?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    assert((textDirection != null && layoutDirection != null) || debugCheckHasDirectionality(context));
+    assert((widget.textDirection != null && widget.layoutDirection != null) || debugCheckHasDirectionality(context));
+
+    _painter?.dispose();
+    _painter = BannerPainter(
+      message: widget.message,
+      textDirection: widget.textDirection ?? Directionality.of(context),
+      location: widget.location,
+      layoutDirection: widget.layoutDirection ?? Directionality.of(context),
+      color: widget.color,
+      textStyle: widget.textStyle,
+    );
+
     return CustomPaint(
-      foregroundPainter: BannerPainter(
-        message: message,
-        textDirection: textDirection ?? Directionality.of(context),
-        location: location,
-        layoutDirection: layoutDirection ?? Directionality.of(context),
-        color: color,
-        textStyle: textStyle,
-      ),
-      child: child,
+      foregroundPainter: _painter,
+      child: widget.child,
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('message', message, showName: false));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(EnumProperty<BannerLocation>('location', location));
-    properties.add(EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
-    properties.add(ColorProperty('color', color, showName: false));
-    textStyle?.debugFillProperties(properties, prefix: 'text ');
+    properties.add(StringProperty('message', widget.message, showName: false));
+    properties.add(EnumProperty<TextDirection>('textDirection', widget.textDirection, defaultValue: null));
+    properties.add(EnumProperty<BannerLocation>('location', widget.location));
+    properties.add(EnumProperty<TextDirection>('layoutDirection', widget.layoutDirection, defaultValue: null));
+    properties.add(ColorProperty('color', widget.color, showName: false));
+    widget.textStyle.debugFillProperties(properties, prefix: 'text ');
   }
 }
 
-/// Displays a [Banner] saying "DEBUG" when running in checked mode.
+/// Displays a [Banner] saying "DEBUG" when running in debug mode.
 /// [MaterialApp] builds one of these by default.
+///
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
-  /// Creates a const checked mode banner.
+  /// Creates a const debug mode banner.
   const CheckedModeBanner({
-    Key key,
-    @required this.child,
-  }) : super(key: key);
+    super.key,
+    required this.child,
+  });
 
   /// The widget to show behind the banner.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -353,10 +371,10 @@ class CheckedModeBanner extends StatelessWidget {
     Widget result = child;
     assert(() {
       result = Banner(
-        child: result,
         message: 'DEBUG',
         textDirection: TextDirection.ltr,
         location: BannerLocation.topEnd,
+        child: result,
       );
       return true;
     }());

@@ -2,31 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Process, ProcessResult;
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' hide FakeFlutterProjectFactory;
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
 
-  Future<BuildAarCommand> runCommandIn(String target, { List<String> arguments }) async {
-    final BuildAarCommand command = BuildAarCommand();
+  Future<BuildAarCommand> runCommandIn(String target, { List<String>? arguments }) async {
+    final BuildAarCommand command = BuildAarCommand(
+      androidSdk: FakeAndroidSdk(),
+      fileSystem: globals.fs,
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'aar',
@@ -38,11 +46,11 @@ void main() {
   }
 
   group('Usage', () {
-    Directory tempDir;
-    Usage mockUsage;
+    late Directory tempDir;
+    late TestUsage testUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
@@ -55,20 +63,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=module']);
 
       final BuildAarCommand command = await runCommandIn(projectPath);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarProjectType, 'module'));
-
-    }, overrides: <Type, Generator>{
-      AndroidBuilder: () => FakeAndroidBuilder(),
-    });
-
-    testUsingContext('indicate that project is a plugin', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=plugin', '--project-name=aar_test']);
-
-      final BuildAarCommand command = await runCommandIn(projectPath);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarProjectType, 'plugin'));
+      expect((await command.usageValues).commandBuildAarProjectType, 'module');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -80,8 +75,7 @@ void main() {
 
       final BuildAarCommand command = await runCommandIn(projectPath,
           arguments: <String>['--target-platform=android-arm']);
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAarTargetPlatform, 'android-arm'));
+      expect((await command.usageValues).commandBuildAarTargetPlatform, 'android-arm');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -94,26 +88,26 @@ void main() {
       await runCommandIn(projectPath,
           arguments: <String>['--target-platform=android-arm']);
 
-      verify(mockUsage.sendEvent(
-        'tool-command-result',
-        'aar',
-        label: 'success',
-        value: anyNamed('value'),
-        parameters: anyNamed('parameters'),
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'tool-command-result',
+          'aar',
+          label: 'success',
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 
   group('flag parsing', () {
-    Directory tempDir;
-    MockAndroidBuilder mockAndroidBuilder;
+    late Directory tempDir;
+    late FakeAndroidBuilder fakeAndroidBuilder;
 
     setUp(() {
-      mockAndroidBuilder = MockAndroidBuilder();
+      fakeAndroidBuilder = FakeAndroidBuilder();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_build_aar_test.');
     });
 
@@ -123,21 +117,14 @@ void main() {
 
     testUsingContext('defaults', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
+        arguments: <String>['--no-pub', '--template=module']);
       await runCommandIn(projectPath);
 
-      final Set<AndroidBuildInfo> androidBuildInfos = verify(mockAndroidBuilder.buildAar(
-        project: anyNamed('project'),
-        target: anyNamed('target'),
-        androidBuildInfo: captureAnyNamed('androidBuildInfo'),
-        outputDirectoryPath: anyNamed('outputDirectoryPath'),
-        buildNumber: '1.0',
-      )).captured[0] as Set<AndroidBuildInfo>;
-
-      expect(androidBuildInfos.length, 3);
+      expect(fakeAndroidBuilder.buildNumber, '1.0');
+      expect(fakeAndroidBuilder.androidBuildInfo.length, 3);
 
       final List<BuildMode> buildModes = <BuildMode>[];
-      for (final AndroidBuildInfo androidBuildInfo in androidBuildInfos) {
+      for (final AndroidBuildInfo androidBuildInfo in fakeAndroidBuilder.androidBuildInfo) {
         final BuildInfo buildInfo = androidBuildInfo.buildInfo;
         buildModes.add(buildInfo.mode);
         if (buildInfo.mode.isPrecompiled) {
@@ -155,12 +142,12 @@ void main() {
       expect(buildModes.length, 3);
       expect(buildModes, containsAll(<BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]));
     }, overrides: <Type, Generator>{
-      AndroidBuilder: () => mockAndroidBuilder,
+      AndroidBuilder: () => fakeAndroidBuilder,
     });
 
     testUsingContext('parses flags', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
+        arguments: <String>['--no-pub', '--template=module']);
       await runCommandIn(
         projectPath,
         arguments: <String>[
@@ -176,18 +163,13 @@ void main() {
           '--split-debug-info',
           '/project-name/v1.2.3/',
           '--obfuscate',
+          '--dart-define=foo=bar',
         ],
       );
 
-      final Set<AndroidBuildInfo> androidBuildInfos = verify(mockAndroidBuilder.buildAar(
-        project: anyNamed('project'),
-        target: anyNamed('target'),
-        androidBuildInfo: captureAnyNamed('androidBuildInfo'),
-        outputDirectoryPath: anyNamed('outputDirectoryPath'),
-        buildNumber: '200',
-      )).captured[0] as Set<AndroidBuildInfo>;
+      expect(fakeAndroidBuilder.buildNumber, '200');
 
-      final AndroidBuildInfo androidBuildInfo = androidBuildInfos.single;
+      final AndroidBuildInfo androidBuildInfo = fakeAndroidBuilder.androidBuildInfo.single;
       expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
@@ -196,38 +178,27 @@ void main() {
       expect(buildInfo.flavor, 'free');
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
+      expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
+      expect(buildInfo.nullSafetyMode, NullSafetyMode.sound);
     }, overrides: <Type, Generator>{
-      AndroidBuilder: () => mockAndroidBuilder,
+      AndroidBuilder: () => fakeAndroidBuilder,
     });
   });
 
   group('Gradle', () {
-    ProcessManager mockProcessManager;
-    Directory tempDir;
-    AndroidSdk mockAndroidSdk;
-    Usage mockUsage;
+    late Directory tempDir;
+    late AndroidSdk mockAndroidSdk;
+    late String gradlew;
+    late FakeProcessManager processManager;
+    late String flutterRoot;
 
     setUp(() {
-      mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(true);
-
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-
-      mockProcessManager = MockProcessManager();
-      when(mockProcessManager.run(any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'assembleRelease', '')));
-      // Fallback with error.
-      final Process process = createMockProcess(exitCode: 1);
-      when(mockProcessManager.start(any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<Process>.value(process));
-      when(mockProcessManager.canRun(any)).thenReturn(false);
-
-      mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      mockAndroidSdk = FakeAndroidSdk();
+      gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', '.android',
+          globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
+      processManager = FakeProcessManager.empty();
+      flutterRoot = getFlutterRoot();
     });
 
     tearDown(() {
@@ -235,27 +206,6 @@ void main() {
     });
 
     group('AndroidSdk', () {
-      testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
-        final String projectPath = await createProject(tempDir,
-            arguments: <String>['--no-pub', '--template=module']);
-
-        await expectLater(
-          runBuildAarCommand(
-            projectPath,
-            arguments: <String>['--no-pub'],
-          ),
-          throwsToolExit(),
-        );
-
-        verifyNever(mockAndroidSdk.validateSdkWellFormed());
-        verify(mockAndroidSdk.reinitialize()).called(1);
-      },
-      overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        ProcessManager: () => mockProcessManager,
-      });
-
       testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
         final String projectPath = await createProject(tempDir,
             arguments: <String>['--no-pub', '--template=module']);
@@ -263,6 +213,7 @@ void main() {
         await expectLater(() async {
           await runBuildAarCommand(
             projectPath,
+            null,
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
@@ -270,19 +221,88 @@ void main() {
         ));
       },
       overrides: <Type, Generator>{
-        AndroidSdk: () => null,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
+    });
+
+    group('throws ToolExit', () {
+      testUsingContext('main.dart not found', () async {
+        await expectLater(() async {
+          await runBuildAarCommand(
+            'missing_project',
+            mockAndroidSdk,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'main.dart does not exist',
+        ));
+      });
+
+      testUsingContext('flutter project not valid', () async {
+        await expectLater(() async {
+          await runCommandIn(
+            tempDir.path,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'is not a valid flutter project',
+        ));
+      });
+    });
+
+    testUsingContext('support ExtraDartFlagOptions', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=module']);
+
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          gradlew,
+          '-I=${globals.fs.path.join(flutterRoot, 'packages', 'flutter_tools', 'gradle','aar_init_script.gradle')}',
+          '-Pflutter-root=$flutterRoot',
+          '-Poutput-dir=${globals.fs.path.join(tempDir.path, 'flutter_project', 'build', 'host')}',
+          '-Pis-plugin=false',
+          '-PbuildNumber=1.0',
+          '-q',
+          '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
+          '-Pdart-obfuscation=false',
+          '-Pextra-front-end-options=foo,bar',
+          '-Ptrack-widget-creation=true',
+          '-Ptree-shake-icons=true',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          'assembleAarRelease',
+        ],
+        exitCode: 1,
+      ));
+
+      await expectLater(() => runBuildAarCommand(projectPath, mockAndroidSdk, arguments: <String>[
+        '--no-debug',
+        '--no-profile',
+        '--extra-front-end-options=foo',
+        '--extra-front-end-options=bar',
+      ]), throwsToolExit(message: 'Gradle task assembleAarRelease failed with exit code 1'));
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      Java: () => null,
+      ProcessManager: () => processManager,
+      FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
+      AndroidStudio: () => FakeAndroidStudio(),
     });
   });
 }
 
 Future<BuildAarCommand> runBuildAarCommand(
-  String target, {
-  List<String> arguments,
+  String target, AndroidSdk? androidSdk, {
+  List<String>? arguments,
 }) async {
-  final BuildAarCommand command = BuildAarCommand();
+  final BuildAarCommand command = BuildAarCommand(
+    androidSdk: androidSdk,
+    fileSystem: globals.fs,
+    logger: BufferLogger.test(),
+    verboseHelp: false,
+  );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'aar',
@@ -293,8 +313,33 @@ Future<BuildAarCommand> runBuildAarCommand(
   return command;
 }
 
-class MockAndroidBuilder extends Mock implements AndroidBuilder {}
-class MockAndroidSdk extends Mock implements AndroidSdk {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
-class MockUsage extends Mock implements Usage {}
+class FakeAndroidBuilder extends Fake implements AndroidBuilder {
+  late FlutterProject project;
+  late Set<AndroidBuildInfo> androidBuildInfo;
+  late String target;
+  String? outputDirectoryPath;
+  late String buildNumber;
+
+  @override
+  Future<void> buildAar({
+    required FlutterProject project,
+    required Set<AndroidBuildInfo> androidBuildInfo,
+    required String target,
+    String? outputDirectoryPath,
+    required String buildNumber,
+  }) async {
+    this.project = project;
+    this.androidBuildInfo = androidBuildInfo;
+    this.target = target;
+    this.outputDirectoryPath = outputDirectoryPath;
+    this.buildNumber = buildNumber;
+  }
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
+}

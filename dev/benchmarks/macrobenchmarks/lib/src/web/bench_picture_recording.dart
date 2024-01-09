@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:macrobenchmarks/src/web/recorder.dart';
+import 'recorder.dart';
 
 /// Measure the performance of paint bounds estimation by recording a picture
 /// without actually rendering it.
@@ -26,12 +26,12 @@ class BenchPictureRecording extends RawRecorder {
   /// Cached paint used for drawing.
   ///
   /// We want to avoid polluting the results with paint initialization logic.
-  Paint paint;
+  late Paint paint;
 
   /// A prelaid out and cached paragraph.
   ///
   /// This is cached to remove text layout time from the benchmark time.
-  Paragraph paragraph;
+  late Paragraph paragraph;
 
   @override
   Future<void> setUpAll() async {

@@ -31,18 +31,15 @@ class ExpandIcon extends StatefulWidget {
   /// Creates an [ExpandIcon] with the given padding, and a callback that is
   /// triggered when the icon is pressed.
   const ExpandIcon({
-    Key key,
+    super.key,
     this.isExpanded = false,
     this.size = 24.0,
-    @required this.onPressed,
+    required this.onPressed,
     this.padding = const EdgeInsets.all(8.0),
     this.color,
     this.disabledColor,
     this.expandedColor,
-  }) : assert(isExpanded != null),
-       assert(size != null),
-       assert(padding != null),
-       super(key: key);
+  });
 
   /// Whether the icon is in an expanded state.
   ///
@@ -52,22 +49,22 @@ class ExpandIcon extends StatefulWidget {
 
   /// The size of the icon.
   ///
-  /// This property must not be null. It defaults to 24.0.
+  /// Defaults to 24.
   final double size;
 
   /// The callback triggered when the icon is pressed and the state changes
   /// between expanded and collapsed. The value passed to the current state.
   ///
   /// If this is set to null, the button will be disabled.
-  final ValueChanged<bool> onPressed;
+  final ValueChanged<bool>? onPressed;
 
   /// The padding around the icon. The entire padded icon will react to input
   /// gestures.
   ///
-  /// This property must not be null. It defaults to 8.0 padding on all sides.
+  /// Defaults to a padding of 8 on all sides.
   final EdgeInsetsGeometry padding;
 
-
+  /// {@template flutter.material.ExpandIcon.color}
   /// The color of the icon.
   ///
   /// Defaults to [Colors.black54] when the theme's
@@ -75,7 +72,8 @@ class ExpandIcon extends StatefulWidget {
   /// [Colors.white60] when it is [Brightness.dark]. This adheres to the
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
-  final Color color;
+  /// {@endtemplate}
+  final Color? color;
 
   /// The color of the icon when it is disabled,
   /// i.e. if [onPressed] is null.
@@ -85,7 +83,7 @@ class ExpandIcon extends StatefulWidget {
   /// [Colors.white38] when it is [Brightness.dark]. This adheres to the
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
-  final Color disabledColor;
+  final Color? disabledColor;
 
   /// The color of the icon when the icon is expanded.
   ///
@@ -94,15 +92,15 @@ class ExpandIcon extends StatefulWidget {
   /// [Colors.white] when it is [Brightness.dark]. This adheres to the
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
-  final Color expandedColor;
+  final Color? expandedColor;
 
   @override
-  _ExpandIconState createState() => _ExpandIconState();
+  State<ExpandIcon> createState() => _ExpandIconState();
 }
 
 class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<double> _iconTurns;
+  late AnimationController _controller;
+  late Animation<double> _iconTurns;
 
   static final Animatable<double> _iconTurnTween = Tween<double>(begin: 0.0, end: 0.5)
     .chain(CurveTween(curve: Curves.fastOutSlowIn));
@@ -137,8 +135,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   void _handlePressed() {
-    if (widget.onPressed != null)
-      widget.onPressed(widget.isExpanded);
+    widget.onPressed?.call(widget.isExpanded);
   }
 
   /// Default icon colors and opacities for when [Theme.brightness] is set to
@@ -148,22 +145,19 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   /// [Material Design dark theme specifications](https://material.io/design/color/dark-theme.html#ui-application)
   Color get _iconColor {
     if (widget.isExpanded && widget.expandedColor != null) {
-      return widget.expandedColor;
+      return widget.expandedColor!;
     }
 
     if (widget.color != null) {
-      return widget.color;
+      return widget.color!;
     }
 
-    switch(Theme.of(context).brightness) {
+    switch (Theme.of(context).brightness) {
       case Brightness.light:
         return Colors.black54;
       case Brightness.dark:
         return Colors.white60;
     }
-
-    assert(false);
-    return null;
   }
 
   @override

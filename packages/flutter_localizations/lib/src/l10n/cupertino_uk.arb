@@ -29,6 +29,13 @@
   "copyButtonLabel": "Копіювати",
   "pasteButtonLabel": "Вставити",
   "selectAllButtonLabel": "Вибрати все",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Закрити"
+  "tabSemanticsLabel": "Вкладка $tabIndex з $tabCount",
+  "modalBarrierDismissLabel": "Закрити",
+  "searchTextFieldPlaceholderLabel": "Шукайте",
+  "noSpellCheckReplacementsLabel": "Замін не знайдено",
+  "menuDismissLabel": "Закрити меню",
+  "lookUpButtonLabel": "Шукати",
+  "searchWebButtonLabel": "Пошук в Інтернеті",
+  "shareButtonLabel": "Поділитися…",
+  "clearButtonLabel": "Clear"
 }

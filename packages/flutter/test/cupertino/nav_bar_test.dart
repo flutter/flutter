@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 int count = 0;
@@ -17,7 +21,10 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
-          leading: CupertinoButton(child: Text('Something'), onPressed: null,),
+          leading: CupertinoButton(
+            onPressed: null,
+            child: Text('Something'),
+          ),
           middle: Text('Title'),
         ),
       ),
@@ -45,7 +52,7 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     // Expect the middle of the title to be exactly in the middle of the screen.
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
@@ -93,6 +100,36 @@ void main() {
     expect(find.byType(BackdropFilter), findsOneWidget);
   });
 
+  testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigator,
+        home: const CupertinoNavigationBar(
+          middle: Text('Page 1'),
+        ),
+      ),
+    );
+    navigator.currentState!.push<void>(CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoNavigationBar(
+          middle: Text('Page 2'),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoNavigationBarBackButton), findsOneWidget);
+    // Pops the page 2
+    navigator.currentState!.pop();
+    await tester.pump();
+    // Needs another pump to trigger the rebuild;
+    await tester.pump();
+    // The back button should still persist;
+    expect(find.byType(CupertinoNavigationBarBackButton), findsOneWidget);
+    // The app does not crash
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Can specify custom padding', (WidgetTester tester) async {
     final Key middleBox = GlobalKey();
     await tester.pumpWidget(
@@ -100,16 +137,15 @@ void main() {
         home: Align(
           alignment: Alignment.topCenter,
           child: CupertinoNavigationBar(
-            leading: const CupertinoButton(child: Text('Cheetah'), onPressed: null),
+            leading: const CupertinoButton(onPressed: null, child: Text('Cheetah')),
             // Let the box take all the vertical space to test vertical padding but let
             // the nav bar position it horizontally.
             middle: Align(
               key: middleBox,
-              alignment: Alignment.center,
               widthFactor: 1.0,
               child: const Text('Title'),
             ),
-            trailing: const CupertinoButton(child: Text('Puma'), onPressed: null),
+            trailing: const CupertinoButton(onPressed: null, child: Text('Puma')),
             padding: const EdgeInsetsDirectional.only(
               start: 10.0,
               end: 20.0,
@@ -136,6 +172,32 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
+  // Assert that two SystemUiOverlayStyle instances have the same values for
+  // status bar properties and that the first instance has no system navigation
+  // bar properties set.
+  void expectSameStatusBarStyle(SystemUiOverlayStyle style, SystemUiOverlayStyle expectedStyle) {
+    expect(style.statusBarColor, expectedStyle.statusBarColor);
+    expect(style.statusBarBrightness, expectedStyle.statusBarBrightness);
+    expect(style.statusBarIconBrightness, expectedStyle.statusBarIconBrightness);
+    expect(style.systemStatusBarContrastEnforced, expectedStyle.systemStatusBarContrastEnforced);
+    expect(style.systemNavigationBarColor, isNull);
+    expect(style.systemNavigationBarContrastEnforced, isNull);
+    expect(style.systemNavigationBarDividerColor, isNull);
+    expect(style.systemNavigationBarIconBrightness, isNull);
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/119270
+  testWidgets('System navigation bar properties are not overridden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoNavigationBar(
+          backgroundColor: Color(0xF0F9F9F9),
+        ),
+      ),
+    );
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
+  });
+
   testWidgets('Can specify custom brightness', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -145,11 +207,7 @@ void main() {
         ),
       ),
     );
-
-    final AnnotatedRegion<SystemUiOverlayStyle> region1 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
-    expect(region1.value, SystemUiOverlayStyle.light);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.light);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -159,11 +217,7 @@ void main() {
         ),
       ),
     );
-
-    final AnnotatedRegion<SystemUiOverlayStyle> region2 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
-    expect(region2.value, SystemUiOverlayStyle.dark);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -173,16 +227,12 @@ void main() {
               largeTitle: Text('Title'),
               backgroundColor: Color(0xF0F9F9F9),
               brightness: Brightness.dark,
-            )
+            ),
           ],
         ),
       ),
     );
-
-    final AnnotatedRegion<SystemUiOverlayStyle> region3 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
-    expect(region3.value, SystemUiOverlayStyle.light);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.light);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -192,16 +242,12 @@ void main() {
               largeTitle: Text('Title'),
               backgroundColor: Color(0xF01D1D1D),
               brightness: Brightness.light,
-            )
+            ),
           ],
         ),
       ),
     );
-
-    final AnnotatedRegion<SystemUiOverlayStyle> region4 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
-    expect(region4.value, SystemUiOverlayStyle.dark);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
   });
 
   testWidgets('Padding works in RTL', (WidgetTester tester) async {
@@ -212,11 +258,11 @@ void main() {
           child: Align(
             alignment: Alignment.topCenter,
             child: CupertinoNavigationBar(
-              leading: CupertinoButton(child: Text('Cheetah'), onPressed: null),
+              leading: CupertinoButton(onPressed: null, child: Text('Cheetah')),
               // Let the box take all the vertical space to test vertical padding but let
               // the nav bar position it horizontally.
               middle: Text('Title'),
-              trailing: CupertinoButton(child: Text('Puma'), onPressed: null),
+              trailing: CupertinoButton(onPressed: null, child: Text('Puma')),
               padding: EdgeInsetsDirectional.only(
                 start: 10.0,
                 end: 20.0,
@@ -275,10 +321,11 @@ void main() {
     expect(count, 0x010101);
   });
 
-  testWidgets('Theme active color can be overriden', (WidgetTester tester) async {
+  testWidgets('Theme active color can be overridden', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(
+        theme: const CupertinoThemeData(primaryColor: Color(0xFF001122)),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },
@@ -289,7 +336,6 @@ void main() {
             onPressed: () { },
             child: const _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
           ),
-          actionsForegroundColor: const Color(0xFF001122),
         ),
       ),
     );
@@ -313,6 +359,7 @@ void main() {
 
   testWidgets('Media padding is applied to CupertinoSliverNavigationBar', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final Key leadingKey = GlobalKey();
     final Key middleKey = GlobalKey();
     final Key trailingKey = GlobalKey();
@@ -361,6 +408,7 @@ void main() {
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -390,13 +438,13 @@ void main() {
     List<Element> titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
-          return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
     Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
@@ -405,8 +453,8 @@ void main() {
       1.0, // The larger font title is visible.
     ]);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -415,13 +463,13 @@ void main() {
     titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
-          return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
     opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
@@ -434,13 +482,14 @@ void main() {
     expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
     // The OverflowBox is squished with the text in it.
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 0.0);
   });
 
   testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final Key segmentedControlsKey = UniqueKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -481,8 +530,8 @@ void main() {
     expect(find.text('Title'), findsOneWidget);
     expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -491,15 +540,61 @@ void main() {
     expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
     // The large title is invisible now.
     expect(
-      tester.renderObject<RenderAnimatedOpacity>(
-        find.widgetWithText(AnimatedOpacity, 'Title')
-      ).opacity.value,
+      tester.renderObject<RenderAnimatedOpacity>(find.widgetWithText(AnimatedOpacity, 'Title')).opacity.value,
       0.0,
     );
   });
 
+  testWidgets('User specified middle is only visible when sliver is collapsed if alwaysShowMiddle is false', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large'),
+                middle: Text('Middle'),
+                alwaysShowMiddle: false,
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+    expect(find.text('Middle'), findsOneWidget);
+
+    // Initially (in expanded state) middle widget is not visible.
+    RenderAnimatedOpacity middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    expect(middleOpacity.opacity.value, 0.0);
+
+    scrollController.jumpTo(600.0);
+    await tester.pumpAndSettle();
+
+    // Middle widget is visible when nav bar is collapsed.
+    middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    expect(middleOpacity.opacity.value, 1.0);
+
+    scrollController.jumpTo(0.0);
+    await tester.pumpAndSettle();
+
+    // Middle widget is not visible when nav bar is again expanded.
+    middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    expect(middleOpacity.opacity.value, 0.0);
+  });
+
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -529,7 +624,7 @@ void main() {
     expect(find.text('Different title'), findsOneWidget);
 
     RenderAnimatedOpacity largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title initially visible.
     expect(
       largeTitleOpacity.opacity.value,
@@ -548,7 +643,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,
@@ -559,7 +654,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
 
-    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 - 8.0); // Extension gone, (static part - padding) left.
+    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0); // Extension gone.
   });
 
   testWidgets('Auto back/close button', (WidgetTester tester) async {
@@ -582,7 +677,7 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
@@ -597,7 +692,7 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.widgetWithText(CupertinoButton, 'Close'), findsOneWidget);
 
@@ -605,14 +700,14 @@ void main() {
     await tester.tap(find.text('Close'));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Page 2'), findsOneWidget);
 
     await tester.tap(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Home page'), findsOneWidget);
   });
@@ -633,8 +728,8 @@ void main() {
             ),
             child: Placeholder(),
           );
-        }
-      )
+        },
+      ),
     );
 
     await tester.pump();
@@ -651,8 +746,8 @@ void main() {
             ),
             child: Placeholder(),
           );
-        }
-      )
+        },
+      ),
     );
 
     await tester.pump();
@@ -678,7 +773,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide side = decoration.border.bottom;
+    final BorderSide side = decoration.border!.bottom;
     expect(side, isNotNull);
   });
 
@@ -706,7 +801,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide side = decoration.border.bottom;
+    final BorderSide side = decoration.border!.bottom;
     expect(side, isNotNull);
     expect(side.color, const Color(0xFFAABBCC));
   });
@@ -755,7 +850,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide bottom = decoration.border.bottom;
+    final BorderSide bottom = decoration.border!.bottom;
     expect(bottom, isNotNull);
   });
 
@@ -861,10 +956,10 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide top = decoration.border.top;
+    final BorderSide top = decoration.border!.top;
     expect(top, isNotNull);
     expect(top, BorderSide.none);
-    final BorderSide bottom = decoration.border.bottom;
+    final BorderSide bottom = decoration.border!.bottom;
     expect(bottom, isNotNull);
     expect(bottom.color, const Color(0xFFAABBCC));
   });
@@ -923,7 +1018,6 @@ void main() {
     },
   );
 
-
   testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
     await tester.pumpWidget(
       WidgetsApp(
@@ -941,7 +1035,7 @@ void main() {
         },
       ),
     );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.light);
   });
 
   testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
@@ -961,13 +1055,11 @@ void main() {
         },
       ),
     );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
   });
 
   testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const CupertinoNavigationBarBackButton()
-    );
+    await tester.pumpWidget(const CupertinoNavigationBarBackButton());
 
     final dynamic exception = tester.takeException();
     expect(exception, isAssertionError);
@@ -1069,7 +1161,7 @@ void main() {
       );
 
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 600));
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
         CupertinoPageRoute<void>(
@@ -1088,11 +1180,11 @@ void main() {
       );
 
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 600));
 
       await tester.tap(find.byType(CupertinoNavigationBarBackButton));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 600));
 
       // The second page is still on top and didn't pop.
       expect(find.text('A Phone'), findsOneWidget);
@@ -1107,19 +1199,17 @@ void main() {
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
-            child: CupertinoPageScaffold(
+            child: const CupertinoPageScaffold(
               child: CustomScrollView(
                 slivers: <Widget>[
-                  const CupertinoSliverNavigationBar(
+                  CupertinoSliverNavigationBar(
                     leading: Text('leading'),
                     middle: Text('middle'),
                     largeTitle: Text('Large Title'),
                     trailing: Text('trailing'),
                   ),
                   SliverToBoxAdapter(
-                    child: Container(
-                      child: const Text('content'),
-                    ),
+                    child: Text('content'),
                   ),
                 ],
               ),
@@ -1144,10 +1234,10 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems, isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))));
 
     expect(contents.length, greaterThan(0));
-    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+    expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
 
     // Also works with implicitly added widgets.
     tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
@@ -1155,17 +1245,13 @@ void main() {
       builder: (BuildContext context) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
-          child: Container(
-            child: const CupertinoPageScaffold(
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  CupertinoSliverNavigationBar(
-                    automaticallyImplyLeading: true,
-                    automaticallyImplyTitle: true,
-                    previousPageTitle: 'previous title',
-                  ),
-                ],
-              ),
+          child: const CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverNavigationBar(
+                  previousPageTitle: 'previous title',
+                ),
+              ],
             ),
           ),
         );
@@ -1185,10 +1271,307 @@ void main() {
     expect(barItems2.length, greaterThan(0));
     expect(barItems2.any((RichText t) => t.textScaleFactor != 1), isFalse);
   });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends',
+    (WidgetTester tester) async {
+      const Text trailingText = Text('Bar Button');
+      const Text titleText = Text('Large Title');
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  trailing: trailingText,
+                  largeTitle: titleText,
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder trailingTextFinder = find.byWidget(trailingText).first;
+      final Finder titleTextFinder = find.byWidget(titleText).first;
+
+      final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
+
+      final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+      expect(
+        stretchedTrailingTextToLargeTitleOffset.dy.abs(),
+        greaterThan(initialTrailingTextToLargeTitleOffset.dy.abs()),
+      );
+
+      // Ensure overscroll retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
+
+      final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+      expect(
+        finalTrailingTextToLargeTitleOffset.dy.abs(),
+        initialTrailingTextToLargeTitleOffset.dy.abs(),
+      );
+    },
+  );
+
+  testWidgets(
+    'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false',
+    (WidgetTester tester) async {
+      const Text trailingText = Text('Bar Button');
+      const Text titleText = Text('Large Title');
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  trailing: trailingText,
+                  largeTitle: titleText,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder trailingTextFinder = find.byWidget(trailingText).first;
+      final Finder titleTextFinder = find.byWidget(titleText).first;
+
+      final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
+
+      final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+      expect(
+        stretchedTrailingTextToLargeTitleOffset.dy.abs(),
+        initialTrailingTextToLargeTitleOffset.dy.abs(),
+      );
+
+      // Ensure overscroll is zero after releasing gesture
+      await tester.pumpAndSettle();
+
+      final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+      expect(
+        finalTrailingTextToLargeTitleOffset.dy.abs(),
+        initialTrailingTextToLargeTitleOffset.dy.abs(),
+      );
+    },
+  );
+
+  testWidgets('Null NavigationBar border transition', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/71389
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: Text('Page 1'),
+            border: null,
+          ),
+          child: Placeholder(),
+        ),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: Text('Page 2'),
+              border: null,
+            ),
+            child: Placeholder(),
+          );
+        },
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    await tester.tap(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar magnifies upon over-scroll and shrinks back once over-scroll ends',
+    (WidgetTester tester) async {
+      const Text titleText = Text('Large Title');
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  largeTitle: titleText,
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder titleTextFinder = find.byWidget(titleText).first;
+
+      // Gets the height of the large title
+      final Offset initialLargeTitleTextOffset =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getTopLeft(titleTextFinder);
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
+
+      final Offset magnifiedTitleTextOffset =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getTopLeft(titleTextFinder);
+
+      expect(
+        magnifiedTitleTextOffset.dy.abs(),
+        greaterThan(initialLargeTitleTextOffset.dy.abs()),
+      );
+
+      // Ensure title text retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
+
+      final Offset finalTitleTextOffset = tester.getBottomLeft(titleTextFinder) -
+          tester.getTopLeft(titleTextFinder);
+
+      expect(
+        finalTitleTextOffset.dy.abs(),
+        initialLargeTitleTextOffset.dy.abs(),
+      );
+    },
+  );
+
+  testWidgets(
+    'CupertinoSliverNavigationBar large title text does not get clipped when magnified',
+    (WidgetTester tester) async {
+      const Text titleText = Text('Very very very long large title');
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  largeTitle: titleText,
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder titleTextFinder = find.byWidget(titleText).first;
+
+      // Gets the width of the large title
+      final Offset initialLargeTitleTextOffset =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getBottomRight(titleTextFinder);
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
+
+      final Offset magnifiedTitleTextOffset =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getBottomRight(titleTextFinder);
+
+      expect(
+        magnifiedTitleTextOffset.dx.abs(),
+        equals(initialLargeTitleTextOffset.dx.abs()),
+      );
+    },
+  );
+
+  testWidgets(
+    'CupertinoSliverNavigationBar large title can be hit tested when magnified',
+    (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  largeTitle: Text('Large title'),
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder largeTitleFinder = find.text('Large title').first;
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 250.0));
+
+      // Hold position of the scroll view, so the Scrollable unblocks the hit-testing
+      scrollController.position.hold(() {});
+      await tester.pumpAndSettle();
+
+      expect(largeTitleFinder.hitTestable(), findsOneWidget);
+    },
+  );
 }
 
 class _ExpectStyles extends StatelessWidget {
-  const _ExpectStyles({ this.color, this.index });
+  const _ExpectStyles({
+    required this.color,
+    required this.index,
+  });
 
   final Color color;
   final int index;
@@ -1197,7 +1580,7 @@ class _ExpectStyles extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextStyle style = DefaultTextStyle.of(context).style;
     expect(style.color, isSameColorAs(color));
-    expect(style.fontFamily, '.SF Pro Text');
+    expect(style.fontFamily, 'CupertinoSystemText');
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);
     count += index;

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file contains tests that are only supported by the Dart VM. For
-// example, on the Web there's no way to express large integers.
 @TestOn('!chrome')
+library;
 
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import 'message_codecs_testing.dart';
 
 void main() {
@@ -20,7 +20,7 @@ void main() {
       checkEncodeDecode<dynamic>(json, -9223372036854775807);
     });
     test('should encode and decode list with a big number', () {
-      final List<dynamic> message = <dynamic>[-7000000000000000007];
+      final List<dynamic> message = <dynamic>[-7000000000000000007]; // ignore: avoid_js_rounded_ints, since we check for round-tripping, the actual value doesn't matter!
       checkEncodeDecode<dynamic>(json, message);
     });
   });
@@ -74,11 +74,10 @@ void main() {
     });
     test('should encode and decode a list containing big numbers', () {
       final List<dynamic> message = <dynamic>[
-        -7000000000000000007,
-        Int64List.fromList(
-            <int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
+        -7000000000000000007, // ignore: avoid_js_rounded_ints, browsers are skipped below
+        Int64List.fromList(<int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
       ];
       checkEncodeDecode<dynamic>(standard, message);
     });
-  });
+  }, skip: isBrowser); // [intended] Javascript can't handle the big integer literals used here.
 }

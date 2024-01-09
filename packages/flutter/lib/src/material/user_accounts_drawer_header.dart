@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/foundation.dart';
 
 import 'colors.dart';
 import 'debug.dart';
@@ -17,13 +16,16 @@ import 'theme.dart';
 
 class _AccountPictures extends StatelessWidget {
   const _AccountPictures({
-    Key key,
     this.currentAccountPicture,
     this.otherAccountsPictures,
-  }) : super(key: key);
+    this.currentAccountPictureSize,
+    this.otherAccountsPicturesSize,
+  });
 
-  final Widget currentAccountPicture;
-  final List<Widget> otherAccountsPictures;
+  final Widget? currentAccountPicture;
+  final List<Widget>? otherAccountsPictures;
+  final Size? currentAccountPictureSize;
+  final Size? otherAccountsPicturesSize;
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +40,13 @@ class _AccountPictures extends StatelessWidget {
                 padding: const EdgeInsetsDirectional.only(start: 8.0),
                 child: Semantics(
                   container: true,
-                  child: Container(
-                  padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                    width: 48.0,
-                    height: 48.0,
-                    child: picture,
-                 ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    child: SizedBox.fromSize(
+                      size: otherAccountsPicturesSize,
+                      child: picture,
+                    ),
+                  ),
                 ),
               );
             }).toList(),
@@ -53,9 +56,8 @@ class _AccountPictures extends StatelessWidget {
           top: 0.0,
           child: Semantics(
             explicitChildNodes: true,
-            child: SizedBox(
-              width: 72.0,
-              height: 72.0,
+            child: SizedBox.fromSize(
+              size: currentAccountPictureSize,
               child: currentAccountPicture,
             ),
           ),
@@ -67,27 +69,26 @@ class _AccountPictures extends StatelessWidget {
 
 class _AccountDetails extends StatefulWidget {
   const _AccountDetails({
-    Key key,
-    @required this.accountName,
-    @required this.accountEmail,
+    required this.accountName,
+    required this.accountEmail,
     this.onTap,
-    this.isOpen,
+    required this.isOpen,
     this.arrowColor,
-  }) : super(key: key);
+  });
 
-  final Widget accountName;
-  final Widget accountEmail;
-  final VoidCallback onTap;
+  final Widget? accountName;
+  final Widget? accountEmail;
+  final VoidCallback? onTap;
   final bool isOpen;
-  final Color arrowColor;
+  final Color? arrowColor;
 
   @override
   _AccountDetailsState createState() => _AccountDetailsState();
 }
 
 class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
-  Animation<double> _animation;
-  AnimationController _controller;
+  late Animation<double> _animation;
+  late AnimationController _controller;
   @override
   void initState () {
     super.initState();
@@ -147,9 +148,9 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 2.0),
               child: DefaultTextStyle(
-                style: theme.primaryTextTheme.bodyText1,
+                style: theme.primaryTextTheme.bodyLarge!,
                 overflow: TextOverflow.ellipsis,
-                child: widget.accountName,
+                child: widget.accountName!,
               ),
             ),
           ),
@@ -159,9 +160,9 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 2.0),
               child: DefaultTextStyle(
-                style: theme.primaryTextTheme.bodyText2,
+                style: theme.primaryTextTheme.bodyMedium!,
                 overflow: TextOverflow.ellipsis,
-                child: widget.accountEmail,
+                child: widget.accountEmail!,
               ),
             ),
           ),
@@ -182,8 +183,8 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
                       Icons.arrow_drop_down,
                       color: widget.arrowColor,
                       semanticLabel: widget.isOpen
-                        ? localizations.hideAccountsLabel
-                        : localizations.showAccountsLabel,
+                          ? localizations.hideAccountsLabel
+                          : localizations.showAccountsLabel,
                     ),
                   ),
                 ),
@@ -196,8 +197,8 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     if (widget.onTap != null) {
       accountDetails = InkWell(
         onTap: widget.onTap,
-        child: accountDetails,
         excludeFromSemantics: true,
+        child: accountDetails,
       );
     }
 
@@ -212,7 +213,7 @@ const double _kAccountDetailsHeight = 56.0;
 
 class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 
-  _AccountDetailsLayout({ @required this.textDirection });
+  _AccountDetailsLayout({ required this.textDirection });
 
   static const String accountName = 'accountName';
   static const String accountEmail = 'accountEmail';
@@ -222,14 +223,14 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
-    Size iconSize;
+    Size? iconSize;
     if (hasChild(dropdownIcon)) {
       // place the dropdown icon in bottom right (LTR) or bottom left (RTL)
       iconSize = layoutChild(dropdownIcon, BoxConstraints.loose(size));
       positionChild(dropdownIcon, _offsetForIcon(size, iconSize));
     }
 
-    final String bottomLine = hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
+    final String? bottomLine = hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
       final Size constraintSize = iconSize == null ? size : Size(size.width - iconSize.width, size.height);
@@ -258,8 +259,6 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
       case TextDirection.rtl:
         return Offset(0.0, size.height - iconSize.height);
     }
-    assert(false, 'Unreachable');
-    return null;
   }
 
   Offset _offsetForBottomLine(Size size, Size iconSize, Size bottomLineSize) {
@@ -270,8 +269,6 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
       case TextDirection.rtl:
         return Offset(size.width - bottomLineSize.width, y);
     }
-    assert(false, 'Unreachable');
-    return null;
   }
 
   Offset _offsetForName(Size size, Size nameSize, Offset bottomLineOffset) {
@@ -282,12 +279,10 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
       case TextDirection.rtl:
         return Offset(size.width - nameSize.width, y);
     }
-    assert(false, 'Unreachable');
-    return null;
   }
 }
 
-/// A material design [Drawer] header that identifies the app's user.
+/// A Material Design [Drawer] header that identifies the app's user.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -296,54 +291,62 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 ///  * [DrawerHeader], for a drawer header that doesn't show user accounts.
 ///  * <https://material.io/design/components/navigation-drawer.html#anatomy>
 class UserAccountsDrawerHeader extends StatefulWidget {
-  /// Creates a material design drawer header.
+  /// Creates a Material Design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const UserAccountsDrawerHeader({
-    Key key,
+    super.key,
     this.decoration,
     this.margin = const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
     this.otherAccountsPictures,
-    @required this.accountName,
-    @required this.accountEmail,
+    this.currentAccountPictureSize = const Size.square(72.0),
+    this.otherAccountsPicturesSize = const Size.square(40.0),
+    required this.accountName,
+    required this.accountEmail,
     this.onDetailsPressed,
     this.arrowColor = Colors.white,
-  }) : super(key: key);
+  });
 
   /// The header's background. If decoration is null then a [BoxDecoration]
   /// with its background color set to the current theme's primaryColor is used.
-  final Decoration decoration;
+  final Decoration? decoration;
 
   /// The margin around the drawer header.
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? margin;
 
   /// A widget placed in the upper-left corner that represents the current
   /// user's account. Normally a [CircleAvatar].
-  final Widget currentAccountPicture;
+  final Widget? currentAccountPicture;
 
   /// A list of widgets that represent the current user's other accounts.
   /// Up to three of these widgets will be arranged in a row in the header's
   /// upper-right corner. Normally a list of [CircleAvatar] widgets.
-  final List<Widget> otherAccountsPictures;
+  final List<Widget>? otherAccountsPictures;
+
+  /// The size of the [currentAccountPicture].
+  final Size currentAccountPictureSize;
+
+  /// The size of each widget in [otherAccountsPicturesSize].
+  final Size otherAccountsPicturesSize;
 
   /// A widget that represents the user's current account name. It is
   /// displayed on the left, below the [currentAccountPicture].
-  final Widget accountName;
+  final Widget? accountName;
 
   /// A widget that represents the email address of the user's current account.
   /// It is displayed on the left, below the [accountName].
-  final Widget accountEmail;
+  final Widget? accountEmail;
 
   /// A callback that is called when the horizontal area which contains the
   /// [accountName] and [accountEmail] is tapped.
-  final VoidCallback onDetailsPressed;
+  final VoidCallback? onDetailsPressed;
 
   /// The [Color] of the arrow icon.
   final Color arrowColor;
 
   @override
-  _UserAccountsDrawerHeaderState createState() => _UserAccountsDrawerHeaderState();
+  State<UserAccountsDrawerHeader> createState() => _UserAccountsDrawerHeaderState();
 }
 
 class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
@@ -353,7 +356,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
     setState(() {
       _isOpen = !_isOpen;
     });
-    widget.onDetailsPressed();
+    widget.onDetailsPressed!();
   }
 
   @override
@@ -364,9 +367,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,
       child: DrawerHeader(
-        decoration: widget.decoration ?? BoxDecoration(
-          color: Theme.of(context).primaryColor,
-        ),
+        decoration: widget.decoration ?? BoxDecoration(color: Theme.of(context).colorScheme.primary),
         margin: widget.margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
         child: SafeArea(
@@ -380,6 +381,8 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                   child: _AccountPictures(
                     currentAccountPicture: widget.currentAccountPicture,
                     otherAccountsPictures: widget.otherAccountsPictures,
+                    currentAccountPictureSize: widget.currentAccountPictureSize,
+                    otherAccountsPicturesSize: widget.otherAccountsPicturesSize,
                   ),
                 ),
               ),

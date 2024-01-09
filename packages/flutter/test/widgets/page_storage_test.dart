@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('PageStorage read and write', (WidgetTester tester) async {
     const Key builderKey = PageStorageKey<String>('builderKey');
-    StateSetter setState;
+    late StateSetter setState;
     int storedValue = 0;
 
     await tester.pumpWidget(
@@ -38,7 +38,7 @@ void main() {
   });
 
   testWidgets('PageStorage read and write by identifier', (WidgetTester tester) async {
-    StateSetter setState;
+    late StateSetter setState;
     int storedValue = 0;
 
     Widget buildWidthKey(Key key) {

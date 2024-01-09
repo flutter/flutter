@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -29,16 +29,16 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]),
-    );
+      actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+    ));
 
-    final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollRight);
+    final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollLeft);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollRight);
     expect(callCount, 0);
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollUp);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollUp);
     expect(callCount, 1);
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollDown);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollDown);
     expect(callCount, 2);
 
     semantics.dispose();
@@ -63,16 +63,16 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]),
-    );
+      actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
+    ));
 
-    final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollUp);
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollDown);
+    final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollUp);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollDown);
     expect(callCount, 0);
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollLeft);
     expect(callCount, 1);
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollRight);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollRight);
     expect(callCount, 2);
 
     semantics.dispose();
@@ -95,8 +95,8 @@ void main() {
       ),
     );
 
-    final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
+    final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollLeft);
     expect(logs, <String>{'horizontal', 'pan'});
 
     semantics.dispose();
@@ -117,8 +117,8 @@ void main() {
 
     final Set<String> logs = <String>{};
     final GlobalKey<RawGestureDetectorState> detectorKey = GlobalKey();
-    final VoidCallback performLayout = () {
-      detectorKey.currentState.replaceGestureRecognizers(<Type, GestureRecognizerFactory>{
+    void performLayout() {
+      detectorKey.currentState!.replaceGestureRecognizers(<Type, GestureRecognizerFactory>{
         TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
           (TapGestureRecognizer instance) {
@@ -126,10 +126,10 @@ void main() {
           },
         ),
       });
-    };
+    }
 
     bool hasLayoutPerformer = false;
-    VoidCallback introduceLayoutPerformer;
+    late VoidCallback introduceLayoutPerformer;
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
@@ -156,16 +156,16 @@ void main() {
       ),
     );
 
-    final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
+    final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollLeft);
     expect(logs, <String>{'horizontal'});
     logs.clear();
 
     introduceLayoutPerformer();
     await tester.pumpAndSettle();
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollLeft);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.tap);
     expect(logs, <String>{'tap'});
     logs.clear();
 
@@ -188,8 +188,8 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.longPress, SemanticsAction.tap]),
-      );
+        actions: <SemanticsAction>[SemanticsAction.longPress, SemanticsAction.tap],
+      ));
 
       await tester.pumpWidget(
         Center(
@@ -202,8 +202,8 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap]),
-      );
+        actions: <SemanticsAction>[SemanticsAction.tap],
+      ));
 
       semantics.dispose();
     });
@@ -224,8 +224,8 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap]),
-      );
+        actions: <SemanticsAction>[SemanticsAction.tap],
+      ));
 
       await tester.pumpWidget(
         Center(
@@ -237,8 +237,8 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.longPress, SemanticsAction.tap]),
-      );
+        actions: <SemanticsAction>[SemanticsAction.longPress, SemanticsAction.tap],
+      ));
 
       semantics.dispose();
     });
@@ -259,8 +259,8 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap]),
-      );
+        actions: <SemanticsAction>[SemanticsAction.tap],
+      ));
 
       await tester.pumpWidget(
         Center(
@@ -273,8 +273,8 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.longPress]),
-      );
+        actions: <SemanticsAction>[SemanticsAction.longPress],
+      ));
 
       semantics.dispose();
     });
@@ -287,7 +287,6 @@ void main() {
         Center(
           child: RawGestureDetector(
             key: detectorKey,
-            gestures: const <Type, GestureRecognizerFactory>{},
             semantics: _TestSemanticsGestureDelegate(
               onTap: () { logs.add('tap'); },
               onLongPress: () { logs.add('longPress'); },
@@ -299,20 +298,20 @@ void main() {
         ),
       );
 
-      final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
+      final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.tap);
       expect(logs, <String>['tap']);
       logs.clear();
 
-      tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.longPress);
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.longPress);
       expect(logs, <String>['longPress']);
       logs.clear();
 
-      tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollLeft);
       expect(logs, <String>['horizontal']);
       logs.clear();
 
-      tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollUp);
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollUp);
       expect(logs, <String>['vertical']);
       logs.clear();
 
@@ -377,7 +376,8 @@ void main() {
                     ..onTapUp = (_) {logs.add('tapUp');}
                     ..onTapDown = (_) {logs.add('tapDown');}
                     ..onTapCancel = () {logs.add('WRONG');}
-                    ..onSecondaryTapDown = (_) {logs.add('WRONG');};
+                    ..onSecondaryTapDown = (_) {logs.add('WRONG');}
+                    ..onTertiaryTapDown = (_) {logs.add('WRONG');};
                 },
               ),
               child: Container(),
@@ -385,8 +385,8 @@ void main() {
           ),
         );
 
-        final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
+        final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+        tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.tap);
         expect(logs, <String>['tapDown', 'tapUp', 'tap']);
 
         semantics.dispose();
@@ -457,8 +457,8 @@ void main() {
           ),
         );
 
-        final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.longPress);
+        final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+        tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.longPress);
         expect(logs, <String>['LPStart', 'LP', 'LPEnd', 'LPUp']);
 
         semantics.dispose();
@@ -515,8 +515,12 @@ void main() {
         );
 
         expect(semantics, includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight,
-            SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+          actions: <SemanticsAction>[
+            SemanticsAction.scrollLeft,
+            SemanticsAction.scrollRight,
+            SemanticsAction.scrollDown,
+            SemanticsAction.scrollUp,
+          ],
         ));
 
         semantics.dispose();
@@ -557,13 +561,13 @@ void main() {
           ),
         );
 
-        final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
+        final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+        tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollLeft);
         expect(logs, <String>['HDown', 'HStart', 'HUpdate', 'HEnd',
           'PDown', 'PStart', 'PUpdate', 'PEnd',]);
         logs.clear();
 
-        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
+        tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollLeft);
         expect(logs, <String>['HDown', 'HStart', 'HUpdate', 'HEnd',
           'PDown', 'PStart', 'PUpdate', 'PEnd',]);
 
@@ -648,13 +652,13 @@ void main() {
           ),
         );
 
-        final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollUp);
+        final int detectorId = detectorKey.currentContext!.findRenderObject()!.debugSemantics!.id;
+        tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollUp);
         expect(logs, <String>['VDown', 'VStart', 'VUpdate', 'VEnd',
           'PDown', 'PStart', 'PUpdate', 'PEnd',]);
         logs.clear();
 
-        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollDown);
+        tester.binding.pipelineOwner.semanticsOwner!.performAction(detectorId, SemanticsAction.scrollDown);
         expect(logs, <String>['VDown', 'VStart', 'VUpdate', 'VEnd',
           'PDown', 'PStart', 'PUpdate', 'PEnd',]);
 
@@ -674,8 +678,8 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.longPress]),
-      );
+        actions: <SemanticsAction>[SemanticsAction.longPress],
+      ));
 
       await tester.pumpWidget(
         Center(
@@ -687,8 +691,8 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap]),
-      );
+        actions: <SemanticsAction>[SemanticsAction.tap],
+      ));
 
       semantics.dispose();
     });
@@ -697,9 +701,8 @@ void main() {
 
 class _TestLayoutPerformer extends SingleChildRenderObjectWidget {
   const _TestLayoutPerformer({
-    Key key,
-    this.performLayout,
-  }) : super(key: key);
+    required this.performLayout,
+  });
 
   final VoidCallback performLayout;
 
@@ -710,24 +713,29 @@ class _TestLayoutPerformer extends SingleChildRenderObjectWidget {
 }
 
 class _RenderTestLayoutPerformer extends RenderBox {
-  _RenderTestLayoutPerformer({VoidCallback performLayout}) : _performLayout = performLayout;
+  _RenderTestLayoutPerformer({required VoidCallback performLayout}) : _performLayout = performLayout;
 
   final VoidCallback _performLayout;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return const Size(1, 1);
+  }
+
+  @override
   void performLayout() {
     size = const Size(1, 1);
-    if (_performLayout != null)
-      _performLayout();
+    _performLayout();
   }
 }
 
 Map<Type, GestureRecognizerFactory> _buildGestureMap<T extends GestureRecognizer>(
-  GestureRecognizerFactoryConstructor<T> constructor,
-  GestureRecognizerFactoryInitializer<T> initializer,
+  GestureRecognizerFactoryConstructor<T>? constructor,
+  GestureRecognizerFactoryInitializer<T>? initializer,
 ) {
-  if (constructor == null)
+  if (constructor == null) {
     return <Type, GestureRecognizerFactory>{};
+  }
   return <Type, GestureRecognizerFactory>{
     T: GestureRecognizerFactoryWithHandlers<T>(
       constructor,
@@ -744,10 +752,10 @@ class _TestSemanticsGestureDelegate extends SemanticsGestureDelegate {
     this.onVerticalDragUpdate,
   });
 
-  final GestureTapCallback onTap;
-  final GestureLongPressCallback onLongPress;
-  final GestureDragUpdateCallback onHorizontalDragUpdate;
-  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureTapCallback? onTap;
+  final GestureLongPressCallback? onLongPress;
+  final GestureDragUpdateCallback? onHorizontalDragUpdate;
+  final GestureDragUpdateCallback? onVerticalDragUpdate;
 
   @override
   void assignSemantics(RenderSemanticsGestureHandler renderObject) {

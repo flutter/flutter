@@ -21,8 +21,9 @@ import 'package:path/path.dart' as path;
 import '../localizations_utils.dart';
 
 Map<String, dynamic> _loadBundle(File file) {
-  if (!FileSystemEntity.isFileSync(file.path))
+  if (!FileSystemEntity.isFileSync(file.path)) {
     exitWithError('Unable to find input file: ${file.path}');
+  }
   return json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
@@ -30,8 +31,9 @@ void _encodeBundleTranslations(Map<String, dynamic> bundle) {
   for (final String key in bundle.keys) {
     // The ARB file resource "attributes" for foo are called @foo. Don't need
     // to encode them.
-    if (key.startsWith('@'))
+    if (key.startsWith('@')) {
       continue;
+    }
     final String translation = bundle[key] as String;
     // Rewrite the string as a series of unicode characters in JSON format.
     // Like "\u0012\u0123\u1234".
@@ -51,8 +53,9 @@ void _checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, d
       errorFound = true;
     }
   }
-  if (errorFound)
+  if (errorFound) {
     exitWithError('JSON unicode translation encoding failed');
+  }
 }
 
 void _rewriteBundle(File file, Map<String, dynamic> bundle) {
@@ -66,18 +69,23 @@ void _rewriteBundle(File file, Map<String, dynamic> bundle) {
 }
 
 void encodeKnArbFiles(Directory directory) {
+  final File widgetsArbFile = File(path.join(directory.path, 'widgets_kn.arb'));
   final File materialArbFile = File(path.join(directory.path, 'material_kn.arb'));
   final File cupertinoArbFile = File(path.join(directory.path, 'cupertino_kn.arb'));
 
+  final Map<String, dynamic> widgetsBundle = _loadBundle(widgetsArbFile);
   final Map<String, dynamic> materialBundle = _loadBundle(materialArbFile);
   final Map<String, dynamic> cupertinoBundle = _loadBundle(cupertinoArbFile);
 
+  _encodeBundleTranslations(widgetsBundle);
   _encodeBundleTranslations(materialBundle);
   _encodeBundleTranslations(cupertinoBundle);
 
+  _checkEncodedTranslations(widgetsBundle, _loadBundle(widgetsArbFile));
   _checkEncodedTranslations(materialBundle, _loadBundle(materialArbFile));
   _checkEncodedTranslations(cupertinoBundle, _loadBundle(cupertinoArbFile));
 
+  _rewriteBundle(widgetsArbFile, widgetsBundle);
   _rewriteBundle(materialArbFile, materialBundle);
   _rewriteBundle(cupertinoArbFile, cupertinoBundle);
 }

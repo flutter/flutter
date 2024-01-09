@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui show Codec;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +25,8 @@ const String kBlueSquare = 'iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAASEl'
 /// A 10x10 grid of animated looping placeholder gifts that fade into a
 /// blue square.
 class AnimatedPlaceholderPage extends StatelessWidget {
+  const AnimatedPlaceholderPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
@@ -56,11 +58,11 @@ class DelayedBase64Image extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: Future<ui.Codec>.delayed(
         delay,
-        () => decode(base64.decode(data)),
+        () async => decode(await ImmutableBuffer.fromUint8List(base64.decode(data))),
       ),
       scale: 1.0,
     );

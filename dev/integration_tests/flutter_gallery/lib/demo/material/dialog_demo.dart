@@ -21,25 +21,23 @@ const String _alertWithTitleText =
   'data to Google, even when no apps are running.';
 
 class DialogDemoItem extends StatelessWidget {
-  const DialogDemoItem({ Key key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);
+  const DialogDemoItem({ super.key, this.icon, this.color, this.text, this.onPressed });
 
-  final IconData icon;
-  final Color color;
-  final String text;
-  final VoidCallback onPressed;
+  final IconData? icon;
+  final Color? color;
+  final String? text;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return SimpleDialogOption(
       onPressed: onPressed,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Icon(icon, size: 36.0, color: color),
           Padding(
             padding: const EdgeInsets.only(left: 16.0),
-            child: Text(text),
+            child: Text(text!),
           ),
         ],
       ),
@@ -48,6 +46,8 @@ class DialogDemoItem extends StatelessWidget {
 }
 
 class DialogDemo extends StatefulWidget {
+  const DialogDemo({super.key});
+
   static const String routeName = '/material/dialog';
 
   @override
@@ -55,9 +55,8 @@ class DialogDemo extends StatefulWidget {
 }
 
 class DialogDemoState extends State<DialogDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  TimeOfDay _selectedTime;
+  TimeOfDay? _selectedTime;
 
   @override
   void initState() {
@@ -66,14 +65,14 @@ class DialogDemoState extends State<DialogDemo> {
     _selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
-  void showDemoDialog<T>({ BuildContext context, Widget child }) {
+  void showDemoDialog<T>({ required BuildContext context, Widget? child }) {
     showDialog<T>(
       context: context,
-      builder: (BuildContext context) => child,
+      builder: (BuildContext context) => child!,
     )
-    .then<void>((T value) { // The value passed to Navigator.pop() or null.
+    .then((T? value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('You selected: $value'),
         ));
       }
@@ -83,10 +82,9 @@ class DialogDemoState extends State<DialogDemo> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.textTheme.subtitle1.copyWith(color: theme.textTheme.caption.color);
+    final TextStyle dialogTextStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Dialogs'),
         actions: <Widget>[MaterialDemoDocumentationButton(DialogDemo.routeName)],
@@ -94,7 +92,7 @@ class DialogDemoState extends State<DialogDemo> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
-          RaisedButton(
+          ElevatedButton(
             child: const Text('ALERT'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
@@ -105,11 +103,11 @@ class DialogDemoState extends State<DialogDemo> {
                     style: dialogTextStyle,
                   ),
                   actions: <Widget>[
-                    FlatButton(
+                    TextButton(
                       child: const Text('CANCEL'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); },
                     ),
-                    FlatButton(
+                    TextButton(
                       child: const Text('DISCARD'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.discard); },
                     ),
@@ -118,7 +116,7 @@ class DialogDemoState extends State<DialogDemo> {
               );
             },
           ),
-          RaisedButton(
+          ElevatedButton(
             child: const Text('ALERT WITH TITLE'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
@@ -130,11 +128,11 @@ class DialogDemoState extends State<DialogDemo> {
                     style: dialogTextStyle,
                   ),
                   actions: <Widget>[
-                    FlatButton(
+                    TextButton(
                       child: const Text('DISAGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); },
                     ),
-                    FlatButton(
+                    TextButton(
                       child: const Text('AGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.agree); },
                     ),
@@ -143,7 +141,7 @@ class DialogDemoState extends State<DialogDemo> {
               );
             },
           ),
-          RaisedButton(
+          ElevatedButton(
             child: const Text('SIMPLE'),
             onPressed: () {
               showDemoDialog<String>(
@@ -173,28 +171,28 @@ class DialogDemoState extends State<DialogDemo> {
               );
             },
           ),
-          RaisedButton(
+          ElevatedButton(
             child: const Text('CONFIRMATION'),
             onPressed: () {
               showTimePicker(
                 context: context,
-                initialTime: _selectedTime,
+                initialTime: _selectedTime!,
               )
-              .then<void>((TimeOfDay value) {
+              .then((TimeOfDay? value) {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
-                  _scaffoldKey.currentState.showSnackBar(SnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text('You selected: ${value.format(context)}'),
                   ));
                 }
               });
             },
           ),
-          RaisedButton(
+          ElevatedButton(
             child: const Text('FULLSCREEN'),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute<DismissDialogAction>(
-                builder: (BuildContext context) => FullScreenDialogDemo(),
+                builder: (BuildContext context) => const FullScreenDialogDemo(),
                 fullscreenDialog: true,
               ));
             },

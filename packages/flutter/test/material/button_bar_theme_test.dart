@@ -8,6 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 
+  test('ButtonBarThemeData lerp special cases', () {
+    expect(ButtonBarThemeData.lerp(null, null, 0), null);
+    const ButtonBarThemeData data = ButtonBarThemeData();
+    expect(identical(ButtonBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('ButtonBarThemeData null fields by default', () {
     const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData();
     expect(buttonBarTheme.alignment, null);
@@ -54,7 +60,7 @@ void main() {
       overflowDirection: VerticalDirection.up,
     );
 
-    final ButtonBarThemeData lerp = ButtonBarThemeData.lerp(barThemePrimary, barThemeAccent, 0.5);
+    final ButtonBarThemeData lerp = ButtonBarThemeData.lerp(barThemePrimary, barThemeAccent, 0.5)!;
     expect(lerp.alignment, equals(MainAxisAlignment.center));
     expect(lerp.mainAxisSize, equals(MainAxisSize.max));
     expect(lerp.buttonTextTheme, equals(ButtonTextTheme.accent));
@@ -112,7 +118,7 @@ void main() {
 
   testWidgets('ButtonBarTheme.of falls back to ThemeData.buttonBarTheme', (WidgetTester tester) async {
     const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
-    BuildContext capturedContext;
+    late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(buttonBarTheme: buttonBarTheme),
@@ -120,7 +126,7 @@ void main() {
           builder: (BuildContext context) {
             capturedContext = context;
             return Container();
-          }
+          },
         ),
       ),
     );
@@ -131,7 +137,7 @@ void main() {
   testWidgets('ButtonBarTheme overrides ThemeData.buttonBarTheme', (WidgetTester tester) async {
     const ButtonBarThemeData defaultBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
     const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 84.0);
-    BuildContext capturedContext;
+    late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(buttonBarTheme: defaultBarTheme),
@@ -146,7 +152,7 @@ void main() {
                 },
               ),
             );
-          }
+          },
         ),
       ),
     );

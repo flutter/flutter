@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'states.dart';
 
 void main() {
   testWidgets('ScrollController control test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -17,7 +21,7 @@ void main() {
         child: ListView(
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return Container(
+            return SizedBox(
               height: 200.0,
               child: Text(state),
             );
@@ -44,7 +48,7 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     controller.animateTo(326.0, duration: const Duration(milliseconds: 300), curve: Curves.ease);
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(controller.offset, equals(326.0));
     expect(realOffset(), equals(controller.offset));
@@ -56,7 +60,7 @@ void main() {
           key: const Key('second'),
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return Container(
+            return SizedBox(
               height: 200.0,
               child: Text(state),
             );
@@ -74,6 +78,7 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -82,7 +87,7 @@ void main() {
           key: const Key('second'),
           controller: controller2,
           children: kStates.map<Widget>((String state) {
-            return Container(
+            return SizedBox(
               height: 200.0,
               child: Text(state),
             );
@@ -106,7 +111,7 @@ void main() {
           controller: controller2,
           physics: const BouncingScrollPhysics(),
           children: kStates.map<Widget>((String state) {
-            return Container(
+            return SizedBox(
               height: 200.0,
               child: Text(state),
             );
@@ -133,6 +138,7 @@ void main() {
     final ScrollController controller = ScrollController(
       initialScrollOffset: 209.0,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -176,6 +182,7 @@ void main() {
 
   testWidgets('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -197,12 +204,15 @@ void main() {
 
   testWidgets('Read operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     expect(() => controller.offset, throwsAssertionError);
     expect(() => controller.position, throwsAssertionError);
   });
 
   testWidgets('Read operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -213,7 +223,7 @@ void main() {
               child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return Container(height: 200.0, child: Text(state));
+                  return SizedBox(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -222,7 +232,7 @@ void main() {
               child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return Container(height: 200.0, child: Text(state));
+                  return SizedBox(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -237,12 +247,15 @@ void main() {
 
   testWidgets('Write operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
     expect(() => controller.jumpTo(1.0), throwsAssertionError);
   });
 
   testWidgets('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -253,7 +266,7 @@ void main() {
               child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return Container(height: 200.0, child: Text(state));
+                  return SizedBox(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -262,7 +275,7 @@ void main() {
               child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return Container(height: 200.0, child: Text(state));
+                  return SizedBox(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -291,7 +304,7 @@ void main() {
         child: ListView(
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return Container(height: 200.0, child: Text(state));
+            return SizedBox(height: 200.0, child: Text(state));
           }).toList(),
         ),
       ),
@@ -324,7 +337,7 @@ void main() {
               key: UniqueKey(), // it's a different ListView every time
               controller: controller,
               children: List<Widget>.generate(50, (int index) {
-                return Container(height: 100.0, child: Text('Item $index'));
+                return SizedBox(height: 100.0, child: Text('Item $index'));
               }).toList(),
             ),
           ),
@@ -338,28 +351,68 @@ void main() {
     // The initialScrollOffset is used in this case, because there's no saved
     // scroll offset.
     ScrollController controller = ScrollController(initialScrollOffset: 200.0);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildFrame(controller));
-    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 2')), Offset.zero);
+    expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 2')), Offset.zero);
 
     controller.jumpTo(2000.0);
     await tester.pump();
-    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
+    expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 20')), Offset.zero);
 
     // The initialScrollOffset isn't used in this case, because the scrolloffset
     // can be restored.
     controller = ScrollController(initialScrollOffset: 25.0);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 2000.0);
-    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
+    expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 20')), Offset.zero);
 
     // keepScrollOffset: false. The scroll offset is -not- restored
     // when the ListView is recreated with a new ScrollController and
     // the initialScrollOffset is used.
 
     controller = ScrollController(keepScrollOffset: false, initialScrollOffset: 100.0);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 100.0);
-    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 1')), Offset.zero);
+    expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 1')), Offset.zero);
 
+  });
+
+  testWidgets('isScrollingNotifier works with pointer scroll', (WidgetTester tester) async {
+    Widget buildFrame(ScrollController controller) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          children: List<Widget>.generate(50, (int index) {
+            return SizedBox(height: 100.0, child: Text('Item $index'));
+          }).toList(),
+        ),
+      );
+    }
+
+    bool isScrolling = false;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    controller.addListener((){
+      isScrolling = controller.position.isScrollingNotifier.value;
+    });
+    await tester.pumpWidget(buildFrame(controller));
+    final Offset scrollEventLocation = tester.getCenter(find.byType(ListView));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+    // When the listener was notified, the value of the isScrollingNotifier
+    // should have been true
+    expect(isScrolling, isTrue);
+  });
+
+  test('$ScrollController dispatches object creation in constructor', () async {
+    await expectLater(
+      await memoryEvents(() => ScrollController().dispose(), ScrollController),
+      areCreateAndDispose,
+    );
   });
 }

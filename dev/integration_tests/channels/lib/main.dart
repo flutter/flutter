@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/basic_messaging.dart';
 import 'src/method_calls.dart';
@@ -14,13 +14,14 @@ import 'src/pair.dart';
 import 'src/test_step.dart';
 
 void main() {
-  enableFlutterDriverExtension();
-  runApp(TestApp());
+  runApp(const TestApp());
 }
 
 class TestApp extends StatefulWidget {
+  const TestApp({super.key});
+
   @override
-  _TestAppState createState() => _TestAppState();
+  State<TestApp> createState() => _TestAppState();
 }
 
 class _TestAppState extends State<TestApp> {
@@ -58,6 +59,17 @@ class _TestAppState extends State<TestApp> {
     -0x7fffffffffffffff - 1,
     0,
     0x7fffffffffffffff,
+  ]);
+  static final Float32List someFloat32s = Float32List.fromList(<double>[
+    double.nan,
+    double.negativeInfinity,
+    -double.maxFinite,
+    -double.minPositive,
+    -0.0,
+    0.0,
+    double.minPositive,
+    double.maxFinite,
+    double.infinity,
   ]);
   static final Float64List someFloat64s =
       Float64List.fromList(<double>[
@@ -97,11 +109,17 @@ class _TestAppState extends State<TestApp> {
     () => methodCallStandardErrorHandshake('world'),
     () => methodCallStandardNotImplementedHandshake(),
     () => basicBinaryHandshake(null),
-    () => basicBinaryHandshake(ByteData(0)),
+    if (!Platform.isMacOS)
+      // Note, it was decided that this will function differently on macOS. See
+      // also: https://github.com/flutter/flutter/issues/110865.
+      () => basicBinaryHandshake(ByteData(0)),
     () => basicBinaryHandshake(ByteData(4)..setUint32(0, 0x12345678)),
     () => basicStringHandshake('hello, world'),
     () => basicStringHandshake('hello \u263A \u{1f602} unicode'),
-    () => basicStringHandshake(''),
+    if (!Platform.isMacOS)
+      // Note, it was decided that this will function differently on macOS. See
+      // also: https://github.com/flutter/flutter/issues/110865.
+      () => basicStringHandshake(''),
     () => basicStringHandshake(null),
     () => basicJsonHandshake(null),
     () => basicJsonHandshake(true),
@@ -140,6 +158,7 @@ class _TestAppState extends State<TestApp> {
     () => basicStandardHandshake(someUint8s),
     () => basicStandardHandshake(someInt32s),
     () => basicStandardHandshake(someInt64s),
+    () => basicStandardHandshake(someFloat32s),
     () => basicStandardHandshake(someFloat64s),
     () => basicStandardHandshake(<dynamic>[]),
     () => basicStandardHandshake(aList),
@@ -152,16 +171,19 @@ class _TestAppState extends State<TestApp> {
     () => basicStringMessageToUnknownChannel(),
     () => basicJsonMessageToUnknownChannel(),
     () => basicStandardMessageToUnknownChannel(),
+    if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS)
+      () => basicBackgroundStandardEcho(123),
   ];
-  Future<TestStepResult> _result;
+  Future<TestStepResult>? _result;
   int _step = 0;
 
   void _executeNextStep() {
     setState(() {
-      if (_step < steps.length)
+      if (_step < steps.length) {
         _result = steps[_step++]();
-      else
+      } else {
         _result = Future<TestStepResult>.value(TestStepResult.complete);
+      }
     });
   }
 

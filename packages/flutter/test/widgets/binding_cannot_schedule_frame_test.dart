@@ -2,25 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Can only schedule frames after widget binding attaches the root widget', () async {
-    final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+    final WidgetsFlutterBindingWithTestBinaryMessenger binding = WidgetsFlutterBindingWithTestBinaryMessenger();
     expect(SchedulerBinding.instance.framesEnabled, isFalse);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     // Sends a message to notify that the engine is ready to accept frames.
-    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
 
     // Enables the semantics should not schedule any frames if the root widget
     // has not been attached.
-    binding.setSemanticsEnabled(true);
+    expect(binding.semanticsEnabled, isFalse);
+    binding.ensureSemantics();
+    expect(binding.semanticsEnabled, isTrue);
     expect(SchedulerBinding.instance.framesEnabled, isFalse);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
 
@@ -31,3 +31,5 @@ void main() {
     expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
   });
 }
+
+class WidgetsFlutterBindingWithTestBinaryMessenger extends WidgetsFlutterBinding with TestDefaultBinaryMessengerBinding { }

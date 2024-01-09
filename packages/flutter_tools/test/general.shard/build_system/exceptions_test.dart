@@ -63,12 +63,8 @@ void main() {
 }
 
 class TestTarget extends Target {
-  TestTarget([this._build]);
-
-  final Future<void> Function(Environment environment) _build;
-
   @override
-  Future<void> build(Environment environment) => _build(environment);
+  Future<void> build(Environment environment) async {}
 
   @override
   List<Target> dependencies = <Target>[];

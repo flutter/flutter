@@ -10,9 +10,7 @@ const double kSectionIndicatorWidth = 32.0;
 
 // The card for a single section. Displays the section's gradient and background image.
 class SectionCard extends StatelessWidget {
-  const SectionCard({ Key key, @required this.section })
-    : assert(section != null),
-      super(key: key);
+  const SectionCard({ super.key, required this.section });
 
   final Section section;
 
@@ -24,16 +22,14 @@ class SectionCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
             colors: <Color>[
-              section.leftColor,
-              section.rightColor,
+              section.leftColor!,
+              section.rightColor!,
             ],
           ),
         ),
         child: Image.asset(
-          section.backgroundAsset,
+          section.backgroundAsset!,
           package: section.backgroundAssetPackage,
           color: const Color.fromRGBO(255, 255, 255, 0.075),
           colorBlendMode: BlendMode.modulate,
@@ -48,14 +44,11 @@ class SectionCard extends StatelessWidget {
 // offset a little. It's supposed to look sort-of 3D.
 class SectionTitle extends StatelessWidget {
   const SectionTitle({
-    Key key,
-    @required this.section,
-    @required this.scale,
-    @required this.opacity,
-  }) : assert(section != null),
-       assert(scale != null),
-       assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       super(key: key);
+    super.key,
+    required this.section,
+    required this.scale,
+    required this.opacity,
+  }) : assert(opacity >= 0.0 && opacity <= 1.0);
 
   final Section section;
   final double scale;
@@ -86,9 +79,9 @@ class SectionTitle extends StatelessWidget {
             children: <Widget>[
               Positioned(
                 top: 4.0,
-                child: Text(section.title, style: sectionTitleShadowStyle),
+                child: Text(section.title!, style: sectionTitleShadowStyle),
               ),
-              Text(section.title, style: sectionTitleStyle),
+              Text(section.title!, style: sectionTitleStyle),
             ],
           ),
         ),
@@ -99,7 +92,7 @@ class SectionTitle extends StatelessWidget {
 
 // Small horizontal bar that indicates the selected section.
 class SectionIndicator extends StatelessWidget {
-  const SectionIndicator({ Key key, this.opacity = 1.0 }) : super(key: key);
+  const SectionIndicator({ super.key, this.opacity = 1.0 });
 
   final double opacity;
 
@@ -117,10 +110,9 @@ class SectionIndicator extends StatelessWidget {
 
 // Display a single SectionDetail.
 class SectionDetailView extends StatelessWidget {
-  SectionDetailView({ Key key, @required this.detail })
-    : assert(detail != null && detail.imageAsset != null),
-      assert((detail.imageAsset ?? detail.title) != null),
-      super(key: key);
+  SectionDetailView({ super.key, required this.detail })
+    : assert(detail.imageAsset != null),
+      assert((detail.imageAsset ?? detail.title) != null);
 
   final SectionDetail detail;
 
@@ -131,11 +123,10 @@ class SectionDetailView extends StatelessWidget {
         borderRadius: BorderRadius.circular(6.0),
         image: DecorationImage(
           image: AssetImage(
-            detail.imageAsset,
+            detail.imageAsset!,
             package: detail.imageAssetPackage,
           ),
           fit: BoxFit.cover,
-          alignment: Alignment.center,
         ),
       ),
     );
@@ -153,8 +144,8 @@ class SectionDetailView extends StatelessWidget {
       );
     } else {
       item = ListTile(
-        title: Text(detail.title),
-        subtitle: Text(detail.subtitle),
+        title: Text(detail.title!),
+        subtitle: Text(detail.subtitle!),
         leading: SizedBox(width: 32.0, height: 32.0, child: image),
       );
     }

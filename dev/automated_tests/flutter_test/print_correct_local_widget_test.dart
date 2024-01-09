@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,19 +10,20 @@ void main() {
     // This should fail with user created widget = Row.
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(
             title: const Text('RenderFlex OverFlow'),
           ),
-          body: Container(
+          body: const SizedBox(
             width: 400.0,
             child: Row(
               children: <Widget>[
-                const Icon(Icons.message),
+                Icon(Icons.message),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('Title'),
                     Text(
                       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed '

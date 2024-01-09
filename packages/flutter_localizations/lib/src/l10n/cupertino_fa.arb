@@ -19,6 +19,13 @@
   "copyButtonLabel": "کپی",
   "pasteButtonLabel": "جای‌گذاری",
   "selectAllButtonLabel": "انتخاب همه",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "نپذیرفتن"
+  "tabSemanticsLabel": "برگه $tabIndex از $tabCount",
+  "modalBarrierDismissLabel": "نپذیرفتن",
+  "searchTextFieldPlaceholderLabel": "جستجو",
+  "noSpellCheckReplacementsLabel": "جایگزینی پیدا نشد",
+  "menuDismissLabel": "بستن منو",
+  "lookUpButtonLabel": "جستجو",
+  "searchWebButtonLabel": "جستجو در وب",
+  "shareButtonLabel": "هم‌رسانی…",
+  "clearButtonLabel": "Clear"
 }

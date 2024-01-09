@@ -19,6 +19,13 @@
   "copyButtonLabel": "کاپی کریں",
   "pasteButtonLabel": "پیسٹ کریں",
   "selectAllButtonLabel": "سبھی منتخب کریں",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "برخاست کریں"
+  "tabSemanticsLabel": "$tabCount میں سے $tabIndex ٹیب",
+  "modalBarrierDismissLabel": "برخاست کریں",
+  "searchTextFieldPlaceholderLabel": "تلاش کریں",
+  "noSpellCheckReplacementsLabel": "کوئی تبدیلیاں نہیں ملیں",
+  "menuDismissLabel": "مینو برخاست کریں",
+  "lookUpButtonLabel": "تفصیل دیکھیں",
+  "searchWebButtonLabel": "ویب تلاش کریں",
+  "shareButtonLabel": "اشتراک کریں...",
+  "clearButtonLabel": "Clear"
 }

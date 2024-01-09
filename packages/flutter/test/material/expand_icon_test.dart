@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget wrap({ Widget child, ThemeData theme }) {
+Widget wrap({ required Widget child, ThemeData? theme }) {
   return MaterialApp(
     theme: theme,
     home: Center(
@@ -24,7 +24,7 @@ void main() {
       child: ExpandIcon(
         onPressed: (bool isExpanded) {
           expanded = !expanded;
-        }
+        },
       ),
     ));
     await tester.pumpAndSettle();
@@ -77,6 +77,7 @@ void main() {
     IconTheme iconTheme;
     // Light mode test
     await tester.pumpWidget(wrap(
+      theme: ThemeData(useMaterial3: false),
       child: const ExpandIcon(onPressed: null),
     ));
     await tester.pumpAndSettle();
@@ -87,7 +88,7 @@ void main() {
     // Dark mode test
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(onPressed: null),
-      theme: ThemeData(brightness: Brightness.dark),
+      theme: ThemeData(useMaterial3: false, brightness: Brightness.dark),
     ));
     await tester.pumpAndSettle();
 
@@ -100,7 +101,6 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
-        isExpanded: false,
         onPressed: (bool isExpanded) {
           expanded = !expanded;
         },
@@ -140,7 +140,7 @@ void main() {
     );
 
     await tester.pumpWidget(wrap(
-      child: expandIcon
+      child: expandIcon,
     ));
 
     final ExpandIcon icon = tester.firstWidget(find.byWidget(expandIcon));
@@ -154,7 +154,7 @@ void main() {
     );
 
     await tester.pumpWidget(wrap(
-      child: expandIcon
+      child: expandIcon,
     ));
 
     ExpandIcon icon = tester.firstWidget(find.byWidget(expandIcon));
@@ -166,7 +166,7 @@ void main() {
     );
 
     await tester.pumpWidget(wrap(
-      child: expandIcon
+      child: expandIcon,
     ));
 
     icon = tester.firstWidget(find.byWidget(expandIcon));
@@ -177,6 +177,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(wrap(
+      theme: ThemeData(useMaterial3: false),
       child: ExpandIcon(
         isExpanded: true,
         onPressed: (bool _) { },
@@ -194,7 +195,6 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
-        isExpanded: false,
         onPressed: (bool _) { },
       ),
     ));
@@ -276,7 +276,6 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(
-        isExpanded: false,
         onPressed: null,
         disabledColor: Colors.cyan,
       ),
@@ -287,7 +286,6 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(
-        isExpanded: false,
         onPressed: null,
         color: Colors.indigo,
         disabledColor: Colors.cyan,

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestStatusTransitionWidget extends StatusTransitionWidget {
   const TestStatusTransitionWidget({
-    Key key,
-    this.builder,
-    Animation<double> animation,
-  }) : super(key: key, animation: animation);
+    super.key,
+    required this.builder,
+    required super.animation,
+  });
 
   final WidgetBuilder builder;
 
@@ -25,6 +25,7 @@ void main() {
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(TestStatusTransitionWidget(
       animation: controller,
@@ -62,6 +63,7 @@ void main() {
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
+    addTearDown(anotherController.dispose);
 
     await tester.pumpWidget(TestStatusTransitionWidget(
       animation: anotherController,

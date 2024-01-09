@@ -19,6 +19,13 @@
   "copyButtonLabel": "कॉपी करा",
   "pasteButtonLabel": "पेस्ट करा",
   "selectAllButtonLabel": "सर्व निवडा",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "डिसमिस करा"
+  "tabSemanticsLabel": "$tabCount पैकी $tabIndex टॅब",
+  "modalBarrierDismissLabel": "डिसमिस करा",
+  "searchTextFieldPlaceholderLabel": "शोधा",
+  "noSpellCheckReplacementsLabel": "कोणतेही बदल आढळले नाहीत",
+  "menuDismissLabel": "मेनू डिसमिस करा",
+  "lookUpButtonLabel": "शोध घ्या",
+  "searchWebButtonLabel": "वेबवर शोधा",
+  "shareButtonLabel": "शेअर करा...",
+  "clearButtonLabel": "Clear"
 }

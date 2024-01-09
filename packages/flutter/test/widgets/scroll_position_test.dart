@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:ui';
-
-import 'package:meta/meta.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 ScrollController _controller = ScrollController(
   initialScrollOffset: 110.0,
@@ -15,9 +11,9 @@ ScrollController _controller = ScrollController(
 
 class ThePositiveNumbers extends StatelessWidget {
   const ThePositiveNumbers({
-    Key key,
-    @required this.from,
-  }) : super(key: key);
+    super.key,
+    required this.from,
+  });
   final int from;
   @override
   Widget build(BuildContext context) {
@@ -37,24 +33,27 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
   await tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
-      child: Navigator(
-        key: navigatorKey,
-        onGenerateRoute: (RouteSettings settings) {
-          if (settings.name == '/') {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (_) => Container(child: const ThePositiveNumbers(from: 0)),
-              maintainState: maintainState,
-            );
-          } else if (settings.name == '/second') {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (_) => Container(child: const ThePositiveNumbers(from: 10000)),
-              maintainState: maintainState,
-            );
-          }
-          return null;
-        },
+      child: MediaQuery(
+        data: MediaQueryData.fromView(tester.view),
+        child: Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (RouteSettings settings) {
+            if (settings.name == '/') {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (_) => const ThePositiveNumbers(from: 0),
+                maintainState: maintainState,
+              );
+            } else if (settings.name == '/second') {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (_) => const ThePositiveNumbers(from: 10000),
+                maintainState: maintainState,
+              );
+            }
+            return null;
+          },
+        ),
       ),
     ),
   );
@@ -92,7 +91,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('16'), findsNothing, reason: 'with maintainState: $maintainState');
   expect(find.text('100'), findsNothing, reason: 'with maintainState: $maintainState');
 
-  navigatorKey.currentState.pushNamed('/second');
+  navigatorKey.currentState!.pushNamed('/second');
   await tester.pump(); // navigating always takes two frames, one to start...
   await tester.pump(const Duration(seconds: 1)); // ...and one to end the transition
 
@@ -113,7 +112,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('10010'), findsNothing, reason: 'with maintainState: $maintainState');
   expect(find.text('10100'), findsNothing, reason: 'with maintainState: $maintainState');
 
-  navigatorKey.currentState.pop();
+  navigatorKey.currentState!.pop();
   await tester.pump(); // again, navigating always takes two frames
 
   // Ensure we don't clamp the scroll offset even during the navigation.
@@ -141,7 +140,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
-  testWidgets('ScrollPosition jumpTo() doesn\'t call notifyListeners twice', (WidgetTester tester) async {
+  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
@@ -168,11 +167,17 @@ void main() {
   testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
     final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+    addTearDown(() {
+      for (final FocusNode node in nodes) {
+        node.dispose();
+      }
+    });
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
-          scrollDirection: Axis.vertical,
           controller: controller,
           children: items.map<Widget>((int item) {
             return Focus(
@@ -226,5 +231,42 @@ void main() {
       alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
     );
     expect(controller.position.pixels, equals(0.0));
+  });
+
+  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
+    int loadedWithDeferral = 0;
+    int buildCount = 0;
+    const double height = 500;
+    await tester.pumpWidget(MaterialApp(
+      home: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          buildCount += 1;
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            loadedWithDeferral += 1;
+          }
+          return const SizedBox(height: height);
+        },
+      ),
+    ));
+
+    // The two visible on screen should have loaded without deferral.
+    expect(buildCount, 2);
+    expect(loadedWithDeferral, 0);
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(height * 100);
+    await tester.pump();
+
+    // All but the first two that were loaded normally should have gotten a
+    // recommendation to defer.
+    expect(buildCount, 102);
+    expect(loadedWithDeferral, 100);
+
+    position.jumpTo(height * 102);
+    await tester.pump();
+
+    // The smaller jump should not have recommended deferral.
+    expect(buildCount, 104);
+    expect(loadedWithDeferral, 100);
   });
 }

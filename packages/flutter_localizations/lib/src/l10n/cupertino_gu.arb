@@ -19,6 +19,13 @@
   "copyButtonLabel": "કૉપિ કરો",
   "pasteButtonLabel": "પેસ્ટ કરો",
   "selectAllButtonLabel": "બધા પસંદ કરો",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "છોડી દો"
+  "tabSemanticsLabel": "$tabCountમાંથી $tabIndex ટૅબ",
+  "modalBarrierDismissLabel": "છોડી દો",
+  "searchTextFieldPlaceholderLabel": "શોધો",
+  "noSpellCheckReplacementsLabel": "બદલવા માટે કોઈ શબ્દ મળ્યો નથી",
+  "menuDismissLabel": "મેનૂ છોડી દો",
+  "lookUpButtonLabel": "શોધો",
+  "searchWebButtonLabel": "વેબ પર શોધો",
+  "shareButtonLabel": "શેર કરો…",
+  "clearButtonLabel": "Clear"
 }

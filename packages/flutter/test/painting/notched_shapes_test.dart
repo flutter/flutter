@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('CircularNotchedRectangle', () {
@@ -115,8 +115,9 @@ bool pathDoesNotContainCircle(Path path, Rect circleBounds) {
     for (double i = 0.0; i < 1; i += 0.01) {
       final double x = i * radius * math.cos(theta);
       final double y = i * radius * math.sin(theta);
-      if (path.contains(Offset(x,y) + circleBounds.center))
+      if (path.contains(Offset(x,y) + circleBounds.center)) {
         return false;
+      }
     }
   }
   return true;

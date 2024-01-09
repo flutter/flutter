@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/mocks_for_image_cache.dart';
-import '../rendering/mock_canvas.dart';
+import '../image_data.dart';
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
@@ -23,11 +24,11 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Center)), Offset.zero);
   });
 
   testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
-    BuildContext childContext;
+    late BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -65,7 +66,7 @@ void main() {
       darkColor: Color(0xFF000000),
     );
 
-    BuildContext childContext;
+    late BuildContext childContext;
     Widget scaffoldWithBrightness(Brightness brightness) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -118,7 +119,7 @@ void main() {
 
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
 
-    BuildContext childContext;
+    late BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -159,7 +160,7 @@ void main() {
     expect(tester.getSize(find.byType(Container)).height, 600.0);
   });
 
-  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
     const Widget child = CupertinoPageScaffold(
       resizeToAvoidBottomInset: false,
       navigationBar: CupertinoNavigationBar(
@@ -186,7 +187,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: MediaQueryData(
-            padding: EdgeInsets.zero,
             viewPadding: EdgeInsets.only(bottom: 20),
             viewInsets: EdgeInsets.only(bottom: 300),
           ),
@@ -206,14 +206,14 @@ void main() {
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             backgroundColor: CupertinoColors.white,
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -226,7 +226,7 @@ void main() {
                   ),
                   child: page1Center,
                 )
-                : Stack();
+                : const Stack();
           },
         ),
       ),
@@ -246,14 +246,14 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: CupertinoTabBar(
-              items: const <BottomNavigationBarItem>[
+              items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24)),
-                  title: Text('Tab 1'),
+                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                  label: 'Tab 1',
                 ),
                 BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24)),
-                  title: Text('Tab 2'),
+                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                  label: 'Tab 2',
                 ),
               ],
             ),
@@ -269,7 +269,7 @@ void main() {
                       ],
                     ),
                   )
-                  : Stack();
+                  : const Stack();
             },
           ),
         ),
@@ -280,7 +280,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidget(content)).dy, 20.0 + 44.0);
 
     // Overscroll to the bottom.
-    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0));
+    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0), warnIfMissed: false); // can't be hit (it's empty) but we're aiming for the list really so it doesn't matter
     // Let it bounce back.
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -296,14 +296,14 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -363,7 +363,7 @@ void main() {
     // Navigate in tab 2.
     await tester.tap(find.text('Next'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Page 2 of tab 2'), isOnstage);
     expect(find.text('Page 1 of tab 1', skipOffstage: false), isOffstage);
@@ -378,7 +378,7 @@ void main() {
     // Navigate in tab 1.
     await tester.tap(find.text('Next'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Page 2 of tab 1'), isOnstage);
     expect(find.text('Page 2 of tab 2', skipOffstage: false), isOffstage);
@@ -392,7 +392,7 @@ void main() {
     // Pop in tab 2
     await tester.tap(find.text('Back'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Page 1 of tab 2'), isOnstage);
     expect(find.text('Page 2 of tab 1', skipOffstage: false), isOffstage);
@@ -418,8 +418,8 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
-          child: Center(),
           backgroundColor: Color(0xFF010203),
+          child: Center(),
         ),
       ),
     );
@@ -434,11 +434,11 @@ void main() {
   testWidgets('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           // Acts as a 20px status bar at the root of the app.
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
-            child: child,
+            child: child!,
           );
         },
         home: CupertinoPageScaffold(
@@ -488,12 +488,10 @@ void main() {
       return CupertinoApp(
         home: MediaQuery(
           data: MediaQueryData(
-            padding: EdgeInsets.zero,
             viewPadding: const EdgeInsets.only(bottom: 20),
             viewInsets: EdgeInsets.only(bottom: showKeyboard ? 300 : 20),
           ),
           child: CupertinoPageScaffold(
-            resizeToAvoidBottomInset: true,
             navigationBar: showNavigationBar ? const CupertinoNavigationBar(
               middle: Text('Title'),
             ) : null,
@@ -555,6 +553,6 @@ void main() {
     expect(richTextList.length, greaterThan(0));
     expect(richTextList.any((RichText text) => text.textScaleFactor != 1), isFalse);
 
-    expect(tester.widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText))).textScaleFactor, 99);
+    expect(tester.widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText))).textScaler, const TextScaler.linear(99.0));
   });
 }

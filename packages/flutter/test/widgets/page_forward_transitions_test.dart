@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestTransition extends AnimatedWidget {
   const TestTransition({
-    Key key,
-    this.childFirstHalf,
-    this.childSecondHalf,
-    Animation<double> animation,
-  }) : super(key: key, listenable: animation);
+    super.key,
+    required this.childFirstHalf,
+    required this.childSecondHalf,
+    required Animation<double> animation,
+  }) : super(listenable: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
@@ -20,14 +19,19 @@ class TestTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable as Animation<double>;
-    if (animation.value >= 0.5)
+    if (animation.value >= 0.5) {
       return childSecondHalf;
+    }
     return childFirstHalf;
   }
 }
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({ this.child, RouteSettings settings, this.barrierColor }) : super(settings: settings);
+  TestRoute({
+    required this.child,
+    required RouteSettings settings,
+    this.barrierColor,
+  }) : super(settings: settings);
 
   final Widget child;
 
@@ -35,10 +39,10 @@ class TestRoute<T> extends PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 150);
 
   @override
-  final Color barrierColor;
+  final Color? barrierColor;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   bool get maintainState => false;
@@ -59,20 +63,27 @@ void main() {
 
     String state({ bool skipOffstage = true }) {
       String result = '';
-      if (tester.any(find.text('A', skipOffstage: skipOffstage)))
+      if (tester.any(find.text('A', skipOffstage: skipOffstage))) {
         result += 'A';
-      if (tester.any(find.text('B', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('B', skipOffstage: skipOffstage))) {
         result += 'B';
-      if (tester.any(find.text('C', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('C', skipOffstage: skipOffstage))) {
         result += 'C';
-      if (tester.any(find.text('D', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('D', skipOffstage: skipOffstage))) {
         result += 'D';
-      if (tester.any(find.text('E', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('E', skipOffstage: skipOffstage))) {
         result += 'E';
-      if (tester.any(find.text('F', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('F', skipOffstage: skipOffstage))) {
         result += 'F';
-      if (tester.any(find.text('G', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('G', skipOffstage: skipOffstage))) {
         result += 'G';
+      }
       return result;
     }
 
@@ -86,18 +97,18 @@ void main() {
                 child: Builder(
                   key: insideKey,
                   builder: (BuildContext context) {
-                    final PageRoute<void> route = ModalRoute.of(context) as PageRoute<void>;
+                    final PageRoute<void> route = ModalRoute.of(context)! as PageRoute<void>;
                     return Column(
                       children: <Widget>[
                         TestTransition(
                           childFirstHalf: const Text('A'),
                           childSecondHalf: const Text('B'),
-                          animation: route.animation,
+                          animation: route.animation!,
                         ),
                         TestTransition(
                           childFirstHalf: const Text('C'),
                           childSecondHalf: const Text('D'),
-                          animation: route.secondaryAnimation,
+                          animation: route.secondaryAnimation!,
                         ),
                       ],
                     );
@@ -109,11 +120,11 @@ void main() {
             case '/4': return TestRoute<void>(settings: settings, child: const Text('G'));
           }
           return null;
-        }
-      )
+        },
+      ),
     );
 
-    final NavigatorState navigator = insideKey.currentContext.findAncestorStateOfType<NavigatorState>();
+    final NavigatorState navigator = insideKey.currentContext!.findAncestorStateOfType<NavigatorState>()!;
 
     expect(state(), equals('BC')); // transition ->1 is at 1.0
 
@@ -194,8 +205,8 @@ void main() {
             case '/1': return TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
           }
           return null;
-        }
-      )
+        },
+      ),
     );
     expect(find.byType(ModalBarrier), findsOneWidget);
 

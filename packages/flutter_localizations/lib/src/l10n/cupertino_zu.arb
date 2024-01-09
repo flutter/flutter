@@ -19,6 +19,13 @@
   "copyButtonLabel": "Kopisha",
   "pasteButtonLabel": "Namathisela",
   "selectAllButtonLabel": "Khetha konke",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Cashisa"
+  "tabSemanticsLabel": "Ithebhu $tabIndex kwangu-$tabCount",
+  "modalBarrierDismissLabel": "Cashisa",
+  "searchTextFieldPlaceholderLabel": "Sesha",
+  "noSpellCheckReplacementsLabel": "Akukho Okuzofakwa Esikhundleni Okutholakele",
+  "menuDismissLabel": "Chitha imenyu",
+  "lookUpButtonLabel": "Bheka Phezulu",
+  "searchWebButtonLabel": "Sesha Iwebhu",
+  "shareButtonLabel": "Yabelana...",
+  "clearButtonLabel": "Clear"
 }

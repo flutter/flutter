@@ -19,6 +19,13 @@
   "copyButtonLabel": "Kopiëren",
   "pasteButtonLabel": "Plakken",
   "selectAllButtonLabel": "Alles selecteren",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Sluiten"
+  "tabSemanticsLabel": "Tabblad $tabIndex van $tabCount",
+  "modalBarrierDismissLabel": "Sluiten",
+  "searchTextFieldPlaceholderLabel": "Zoeken",
+  "noSpellCheckReplacementsLabel": "Geen vervangingen gevonden",
+  "menuDismissLabel": "Menu sluiten",
+  "lookUpButtonLabel": "Opzoeken",
+  "searchWebButtonLabel": "Op internet zoeken",
+  "shareButtonLabel": "Delen...",
+  "clearButtonLabel": "Clear"
 }

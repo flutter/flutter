@@ -8,7 +8,7 @@ The following functionality is currently implemented:
 
 1. A regular iOS view controller (UIViewController), similar to the default
    `flutter create` template (NativeViewController.m).
-1. A FlutterViewController subclass that takes over full screen. Demos showing
+1. A FlutterViewController subclass that takes over the full screen. Demos showing
    this both from a cold/fresh engine state and a warm engine state
    (FullScreenViewController.m).
 1. A demo of pushing a FlutterViewController on as a child view.
@@ -19,7 +19,7 @@ The following functionality is currently implemented:
 
 A few key things are tested here (IntegrationTests.m):
 
-1. The ability to pre-warm the engine and attach/detatch a ViewController from
+1. The ability to pre-warm the engine and attach/detach a ViewController from
    it.
 1. The ability to use platform channels to communicate between views.
 1. The ability to simultaneously run two instances of the engine.

@@ -14,8 +14,8 @@ enum TabsDemoStyle {
 
 class _Page {
   const _Page({ this.icon, this.text });
-  final IconData icon;
-  final String text;
+  final IconData? icon;
+  final String? text;
 }
 
 const List<_Page> _allPages = <_Page>[
@@ -36,6 +36,8 @@ const List<_Page> _allPages = <_Page>[
 ];
 
 class ScrollableTabsDemo extends StatefulWidget {
+  const ScrollableTabsDemo({super.key});
+
   static const String routeName = '/material/scrollable-tabs';
 
   @override
@@ -43,7 +45,7 @@ class ScrollableTabsDemo extends StatefulWidget {
 }
 
 class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTickerProviderStateMixin {
-  TabController _controller;
+  TabController? _controller;
   TabsDemoStyle _demoStyle = TabsDemoStyle.iconsAndText;
   bool _customIndicator = false;
 
@@ -55,7 +57,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller!.dispose();
     super.dispose();
   }
 
@@ -65,11 +67,12 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
     });
   }
 
-  Decoration getIndicator() {
-    if (!_customIndicator)
+  Decoration? getIndicator() {
+    if (!_customIndicator) {
       return const UnderlineTabIndicator();
+    }
 
-    switch(_demoStyle) {
+    switch (_demoStyle) {
       case TabsDemoStyle.iconsAndText:
         return ShapeDecoration(
           shape: const RoundedRectangleBorder(
@@ -117,12 +120,11 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           ),
         );
     }
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color iconColor = Theme.of(context).accentColor;
+    final Color iconColor = Theme.of(context).colorScheme.secondary;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scrollable tabs'),
@@ -161,17 +163,12 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           isScrollable: true,
           indicator: getIndicator(),
           tabs: _allPages.map<Tab>((_Page page) {
-            assert(_demoStyle != null);
-            switch (_demoStyle) {
-              case TabsDemoStyle.iconsAndText:
-                return Tab(text: page.text, icon: Icon(page.icon));
-              case TabsDemoStyle.iconsOnly:
-                return Tab(icon: Icon(page.icon));
-              case TabsDemoStyle.textOnly:
-                return Tab(text: page.text);
-            }
-            return null;
-          }).toList(),
+            return switch (_demoStyle) {
+              TabsDemoStyle.iconsAndText => Tab(text: page.text, icon: Icon(page.icon)),
+              TabsDemoStyle.iconsOnly    => Tab(icon: Icon(page.icon)),
+              TabsDemoStyle.textOnly     => Tab(text: page.text),
+            };
+          }).toList()
         ),
       ),
       body: TabBarView(

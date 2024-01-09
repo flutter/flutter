@@ -3,14 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+
 import 'text_input.dart';
+
+export 'text_input.dart' show TextEditingValue, TextInputClient, TextInputConfiguration, TextInputConnection;
 
 /// A collection of commonly used autofill hint strings on different platforms.
 ///
-/// Each hint may not be supported on every platform, and may get translated to
-/// different strings on different platforms. Please refer to their documentation
-/// for what each value corresponds to on different platforms.
+/// Each hint is pre-defined on at least one supported platform. See their
+/// documentation for their availability on each platform, and the platform
+/// values each autofill hint corresponds to.
 class AutofillHints {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
   AutofillHints._();
 
   /// The input field expects an address locality (city/town).
@@ -44,7 +49,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_BIRTH_DATE_FULL](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_BIRTH_DATE_FULL).
-  /// * web: ["bday"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["bday"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String birthday = 'birthday';
 
@@ -53,7 +58,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_BIRTH_DATE_DAY](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_BIRTH_DATE_DAY).
-  /// * web: ["bday-day"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["bday-day"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String birthdayDay = 'birthdayDay';
 
@@ -62,7 +67,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_BIRTH_DATE_MONTH](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_BIRTH_DATE_MONTH).
-  /// * web: ["bday-month"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["bday-month"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String birthdayMonth = 'birthdayMonth';
 
@@ -71,7 +76,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_BIRTH_DATE_YEAR](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_BIRTH_DATE_YEAR).
-  /// * web: ["bday-year"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["bday-year"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String birthdayYear = 'birthdayYear';
 
@@ -80,7 +85,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["country"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["country"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String countryCode = 'countryCode';
 
@@ -90,7 +95,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_COUNTRY](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_ADDRESS_COUNTRY).
   /// * iOS: [countryName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["country-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["country-name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String countryName = 'countryName';
 
@@ -99,7 +104,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_CREDIT_CARD_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_NUMBER).
-  /// * web: ["cc-exp"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-exp"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardExpirationDate = 'creditCardExpirationDate';
 
@@ -116,7 +121,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH).
-  /// * web: ["cc-exp-month"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-exp-month"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardExpirationMonth = 'creditCardExpirationMonth';
 
@@ -125,7 +130,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR).
-  /// * web: ["cc-exp-year"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-exp-year"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardExpirationYear = 'creditCardExpirationYear';
 
@@ -134,7 +139,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["cc-family-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-family-name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardFamilyName = 'creditCardFamilyName';
 
@@ -143,7 +148,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["cc-given-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-given-name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardGivenName = 'creditCardGivenName';
 
@@ -152,7 +157,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["cc-additional-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-additional-name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardMiddleName = 'creditCardMiddleName';
 
@@ -160,7 +165,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["cc-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardName = 'creditCardName';
 
@@ -170,7 +175,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_CREDIT_CARD_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_NUMBER).
   /// * iOS: [creditCardNumber](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["cc-number"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-number"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardNumber = 'creditCardNumber';
 
@@ -179,7 +184,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE).
-  /// * web: ["cc-csc"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-csc"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardSecurityCode = 'creditCardSecurityCode';
 
@@ -187,7 +192,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["cc-type"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["cc-type"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String creditCardType = 'creditCardType';
 
@@ -197,7 +202,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_EMAIL_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_EMAIL_ADDRESS).
   /// * iOS: [emailAddress](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["email"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["email"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String email = 'email';
 
@@ -207,7 +212,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_PERSON_NAME_FAMILY](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PERSON_NAME_FAMILY).
   /// * iOS: [familyName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["family-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["family-name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String familyName = 'familyName';
 
@@ -217,7 +222,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_STREET_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_ADDRESS_STREET_ADDRESS).
   /// * iOS: [fullStreetAddress](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["street-address"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["street-address"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String fullStreetAddress = 'fullStreetAddress';
 
@@ -226,7 +231,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_GENDER](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_GENDER).
-  /// * web: ["sex"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["sex"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String gender = 'gender';
 
@@ -236,7 +241,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_PERSON_NAME_GIVEN](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PERSON_NAME_GIVEN).
   /// * iOS: [givenName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["given-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["given-name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String givenName = 'givenName';
 
@@ -245,7 +250,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["impp"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["impp"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String impp = 'impp';
 
@@ -254,7 +259,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [jobTitle](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["organization-title"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["organization-title"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String jobTitle = 'jobTitle';
 
@@ -262,7 +267,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["language"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["language"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String language = 'language';
 
@@ -289,7 +294,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_PERSON_NAME_MIDDLE](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PERSON_NAME_MIDDLE).
   /// * iOS: [middleName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["additional-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["additional-name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String middleName = 'middleName';
 
@@ -299,7 +304,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_PERSON_NAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PERSON_NAME).
   /// * iOS: [name](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["name"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String name = 'name';
 
@@ -309,7 +314,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_PERSON_NAME_PREFIX](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PERSON_NAME_PREFIX).
   /// * iOS: [namePrefix](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["honorific-prefix"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["honorific-prefix"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String namePrefix = 'namePrefix';
 
@@ -319,7 +324,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_PERSON_NAME_SUFFIX](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PERSON_NAME_SUFFIX).
   /// * iOS: [nameSuffix](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["honorific-suffix"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["honorific-suffix"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String nameSuffix = 'nameSuffix';
 
@@ -329,7 +334,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_NEW_PASSWORD](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_NEW_PASSWORD).
   /// * iOS: [newPassword](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["new-password"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["new-password"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String newPassword = 'newPassword';
 
@@ -346,17 +351,17 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [nickname](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["nickname"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["nickname"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String nickname = 'nickname';
 
-  /// The input field expects a single-factor SMS login code.
+  /// The input field expects a SMS one-time code.
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_SMS_OTP](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_SMS_OTP).
   /// * iOS: [oneTimeCode](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["one-time-code"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["one-time-code"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String oneTimeCode = 'oneTimeCode';
 
@@ -367,7 +372,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [organizationName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["organization"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["organization"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String organizationName = 'organizationName';
 
@@ -377,7 +382,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_PASSWORD](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PASSWORD).
   /// * iOS: [password](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["current-password"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["current-password"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String password = 'password';
 
@@ -387,7 +392,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["photo"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["photo"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String photo = 'photo';
 
@@ -421,7 +426,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_POSTAL_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_CODE).
   /// * iOS: [postalCode](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["postal-code"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["postal-code"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String postalCode = 'postalCode';
 
@@ -432,7 +437,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["address-level1"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["address-level1"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLevel1 = 'streetAddressLevel1';
 
@@ -442,7 +447,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["address-level2"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["address-level2"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLevel2 = 'streetAddressLevel2';
 
@@ -451,7 +456,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["address-level3"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["address-level3"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLevel3 = 'streetAddressLevel3';
 
@@ -460,7 +465,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["address-level4"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["address-level4"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLevel4 = 'streetAddressLevel4';
 
@@ -469,7 +474,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [streetAddressLine1](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["address-line1"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["address-line1"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLine1 = 'streetAddressLine1';
 
@@ -478,7 +483,8 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [streetAddressLine2](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["address-line2"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  ///   As of iOS 14.2 this hint does not trigger autofill.
+  /// * web: ["address-line2"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLine2 = 'streetAddressLine2';
 
@@ -486,7 +492,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["address-line3"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["address-line3"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLine3 = 'streetAddressLine3';
 
@@ -504,7 +510,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_PHONE_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PHONE_NUMBER).
   /// * iOS: [telephoneNumber](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["tel"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["tel"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String telephoneNumber = 'telephoneNumber';
 
@@ -513,7 +519,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["tel-area-code"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["tel-area-code"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String telephoneNumberAreaCode = 'telephoneNumberAreaCode';
 
@@ -522,7 +528,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_PHONE_COUNTRY_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PHONE_COUNTRY_CODE).
-  /// * web: ["tel-country-code"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["tel-country-code"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String telephoneNumberCountryCode = 'telephoneNumberCountryCode';
 
@@ -539,7 +545,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["tel-extension"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["tel-extension"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String telephoneNumberExtension = 'telephoneNumberExtension';
 
@@ -548,7 +554,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["tel-local"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["tel-local"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String telephoneNumberLocal = 'telephoneNumberLocal';
 
@@ -558,7 +564,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["tel-local-prefix"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["tel-local-prefix"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String telephoneNumberLocalPrefix = 'telephoneNumberLocalPrefix';
 
@@ -568,7 +574,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["tel-local-suffix"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["tel-local-suffix"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String telephoneNumberLocalSuffix = 'telephoneNumberLocalSuffix';
 
@@ -577,7 +583,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * Android: [AUTOFILL_HINT_PHONE_NATIONAL](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PHONE_NATIONAL).
-  /// * web: ["tel-national"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["tel-national"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String telephoneNumberNational = 'telephoneNumberNational';
 
@@ -586,7 +592,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["transaction-amount"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["transaction-amount"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String transactionAmount = 'transactionAmount';
 
@@ -595,7 +601,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * web: ["transaction-currency"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["transaction-currency"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String transactionCurrency = 'transactionCurrency';
 
@@ -604,7 +610,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [URL](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["url"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["url"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String url = 'url';
 
@@ -612,9 +618,9 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * Android: [AUTOFILL_HINT_NEW_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_NEW_USERNAME).
+  /// * Android: [AUTOFILL_HINT_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_USERNAME).
   /// * iOS: [username](https://developer.apple.com/documentation/uikit/uitextcontenttype).
-  /// * web: ["username"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * web: ["username"](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String username = 'username';
 }
@@ -627,31 +633,54 @@ class AutofillConfiguration {
   /// Creates autofill related configuration information that can be sent to the
   /// platform.
   const AutofillConfiguration({
-    @required this.uniqueIdentifier,
-    @required this.autofillHints,
-    this.currentEditingValue,
-  }) : assert(uniqueIdentifier != null),
-       assert(autofillHints != null);
+    required String uniqueIdentifier,
+    required List<String> autofillHints,
+    required TextEditingValue currentEditingValue,
+    String? hintText,
+  }) : this._(
+    enabled: true,
+    uniqueIdentifier: uniqueIdentifier,
+    autofillHints: autofillHints,
+    currentEditingValue: currentEditingValue,
+    hintText: hintText,
+  );
+
+  const AutofillConfiguration._({
+    required this.enabled,
+    required this.uniqueIdentifier,
+    this.autofillHints = const <String>[],
+    this.hintText,
+    required this.currentEditingValue,
+  });
+
+  /// An [AutofillConfiguration] that indicates the [AutofillClient] does not
+  /// wish to be autofilled.
+  static const AutofillConfiguration disabled = AutofillConfiguration._(
+    enabled: false,
+    uniqueIdentifier: '',
+    currentEditingValue: TextEditingValue.empty,
+  );
+
+  /// Whether autofill should be enabled for the [AutofillClient].
+  ///
+  /// To retrieve a disabled [AutofillConfiguration], use [disabled].
+  final bool enabled;
 
   /// A string that uniquely identifies the current [AutofillClient].
   ///
   /// The identifier needs to be unique within the [AutofillScope] for the
   /// [AutofillClient] to receive the correct autofill value.
-  ///
-  /// Must not be null.
   final String uniqueIdentifier;
 
   /// A list of strings that helps the autofill service identify the type of the
   /// [AutofillClient].
   ///
-  /// Must not be null or empty.
-  ///
-  /// {@template flutter.services.autofill.autofillHints}
+  /// {@template flutter.services.AutofillConfiguration.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
   /// autofill service. The common values of hint strings can be found in
-  /// [AutofillHints], as well as the platforms that understand each of them.
+  /// [AutofillHints], as well as their availability on different platforms.
   ///
-  /// If an autofillable input field needs to use a custom hint that translate to
+  /// If an autofillable input field needs to use a custom hint that translates to
   /// different strings on different platforms, the easiest way to achieve that
   /// is to return different hint strings based on the value of
   /// [defaultTargetPlatform].
@@ -667,6 +696,12 @@ class AutofillConfiguration {
   ///
   /// * On web, only the first hint is accounted for and will be translated to
   ///   an "autocomplete" string.
+  ///
+  /// Providing an autofill hint that is predefined on the platform does not
+  /// automatically grant the input field eligibility for autofill. Ultimately,
+  /// it comes down to the autofill service currently in charge to determine
+  /// whether an input field is suitable for autofill and what the autofill
+  /// candidates are.
   ///
   /// See also:
   ///
@@ -687,14 +722,23 @@ class AutofillConfiguration {
   /// The current [TextEditingValue] of the [AutofillClient].
   final TextEditingValue currentEditingValue;
 
+  /// The optional hint text placed on the view that typically suggests what
+  /// sort of input the field accepts, for example "enter your password here".
+  ///
+  /// If the developer does not specify any [autofillHints], the [hintText] can
+  /// be a useful indication to the platform autofill service.
+  final String? hintText;
+
   /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJson() {
-    assert(autofillHints.isNotEmpty);
-    return <String, dynamic>{
-      'uniqueIdentifier': uniqueIdentifier,
-      'hints': autofillHints,
-      'editingValue': currentEditingValue.toJSON(),
-    };
+  Map<String, dynamic>? toJson() {
+    return enabled
+      ? <String, dynamic>{
+          'uniqueIdentifier': uniqueIdentifier,
+          'hints': autofillHints,
+          'editingValue': currentEditingValue.toJSON(),
+          if (hintText != null) 'hintText': hintText,
+        }
+      : null;
   }
 }
 
@@ -705,7 +749,7 @@ class AutofillConfiguration {
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// Must not be null;
+  /// The identifier must not be changed.
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].
@@ -714,23 +758,23 @@ abstract class AutofillClient {
   /// [TextInputConfiguration.autofillConfiguration] must not be null.
   TextInputConfiguration get textInputConfiguration;
 
-  /// Requests this [AutofillClient] update its [TextEditingState] to the given
-  /// state.
-  void updateEditingValue(TextEditingValue newEditingValue);
+  /// Requests this [AutofillClient] update its [TextEditingValue] to the given
+  /// value.
+  void autofill(TextEditingValue newEditingValue);
 }
 
 /// An ordered group within which [AutofillClient]s are logically connected.
 ///
-/// {@template flutter.services.autofill.AutofillScope}
+/// {@template flutter.services.AutofillScope}
 /// [AutofillClient]s within the same [AutofillScope] are isolated from other
 /// input fields during autofill. That is, when an autofillable [TextInputClient]
 /// gains focus, only the [AutofillClient]s within the same [AutofillScope] will
 /// be visible to the autofill service, in the same order as they appear in
-/// [autofillClients].
+/// [AutofillScope.autofillClients].
 ///
 /// [AutofillScope] also allows [TextInput] to redirect autofill values from the
 /// platform to the [AutofillClient] with the given identifier, by calling
-/// [getAutofillClient].
+/// [AutofillScope.getAutofillClient].
 ///
 /// An [AutofillClient] that's not tied to any [AutofillScope] will only
 /// participate in autofill if the autofill is directly triggered by its own
@@ -741,7 +785,7 @@ abstract class AutofillScope {
   /// this [AutofillScope].
   ///
   /// Returns null if there's no matching [AutofillClient].
-  AutofillClient getAutofillClient(String autofillId);
+  AutofillClient? getAutofillClient(String autofillId);
 
   /// The collection of [AutofillClient]s currently tied to this [AutofillScope].
   ///
@@ -759,11 +803,9 @@ abstract class AutofillScope {
 @immutable
 class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
-    @required this.allConfigurations,
-    @required TextInputConfiguration currentClientConfiguration,
-  }) : assert(allConfigurations != null),
-       assert(currentClientConfiguration != null),
-       super(inputType: currentClientConfiguration.inputType,
+    required this.allConfigurations,
+    required TextInputConfiguration currentClientConfiguration,
+  }) : super(inputType: currentClientConfiguration.inputType,
          obscureText: currentClientConfiguration.obscureText,
          autocorrect: currentClientConfiguration.autocorrect,
          smartDashesType: currentClientConfiguration.smartDashesType,
@@ -794,18 +836,15 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
 mixin AutofillScopeMixin implements AutofillScope {
   @override
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration) {
-    assert(trigger != null);
     assert(
-      !autofillClients.any((AutofillClient client) => client.textInputConfiguration.autofillConfiguration == null),
+      !autofillClients.any((AutofillClient client) => !client.textInputConfiguration.autofillConfiguration.enabled),
       'Every client in AutofillScope.autofillClients must enable autofill',
     );
-    return TextInput.attach(
-      trigger,
-      _AutofillScopeTextInputConfiguration(
-        allConfigurations: autofillClients
-          .map((AutofillClient client) => client.textInputConfiguration),
-        currentClientConfiguration: configuration,
-      ),
+
+    final TextInputConfiguration inputConfiguration = _AutofillScopeTextInputConfiguration(
+      allConfigurations: autofillClients.map((AutofillClient client) => client.textInputConfiguration),
+      currentClientConfiguration: configuration,
     );
+    return TextInput.attach(trigger, inputConfiguration);
   }
 }

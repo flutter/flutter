@@ -28,26 +28,43 @@ import 'framework.dart';
 ///
 /// See also:
 ///
-///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
+///  * [TextureRegistry](/javadoc/io/flutter/view/TextureRegistry.html)
 ///    for how to create and manage backend textures on Android.
-///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * [TextureRegistry Protocol](/ios-embedder/protocol_flutter_texture_registry-p.html)
 ///    for how to create and manage backend textures on iOS.
 class Texture extends LeafRenderObjectWidget {
-  /// Creates a widget backed by the texture identified by [textureId].
+  /// Creates a widget backed by the texture identified by [textureId], and use
+  /// [filterQuality] to set texture's [FilterQuality].
   const Texture({
-    Key key,
-    @required this.textureId,
-  }) : assert(textureId != null),
-       super(key: key);
+    super.key,
+    required this.textureId,
+    this.freeze = false,
+    this.filterQuality = FilterQuality.low,
+  });
 
   /// The identity of the backend texture.
   final int textureId;
 
+  /// When true the texture will not be updated with new frames.
+  final bool freeze;
+
+  /// {@template flutter.widgets.Texture.filterQuality}
+  /// The quality of sampling the texture and rendering it on screen.
+  ///
+  /// When the texture is scaled, a default [FilterQuality.low] is used for a higher quality but slower
+  /// interpolation (typically bilinear). It can be changed to [FilterQuality.none] for a lower quality but
+  /// faster interpolation (typically nearest-neighbor). See also [FilterQuality.medium] and
+  /// [FilterQuality.high] for more options.
+  /// {@endtemplate}
+  final FilterQuality filterQuality;
+
   @override
-  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, freeze: freeze, filterQuality: filterQuality);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {
     renderObject.textureId = textureId;
+    renderObject.freeze = freeze;
+    renderObject.filterQuality = filterQuality;
   }
 }

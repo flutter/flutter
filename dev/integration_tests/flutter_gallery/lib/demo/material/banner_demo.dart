@@ -13,12 +13,12 @@ enum BannerDemoAction {
 }
 
 class BannerDemo extends StatefulWidget {
-  const BannerDemo({ Key key }) : super(key: key);
+  const BannerDemo({ super.key });
 
   static const String routeName = '/material/banner';
 
   @override
-  _BannerDemoState createState() => _BannerDemoState();
+  State<BannerDemo> createState() => _BannerDemoState();
 }
 
 class _BannerDemoState extends State<BannerDemo> {
@@ -34,13 +34,10 @@ class _BannerDemoState extends State<BannerDemo> {
           _displayBanner = true;
           _showMultipleActions = true;
           _showLeading = true;
-          break;
         case BannerDemoAction.showMultipleActions:
           _showMultipleActions = !_showMultipleActions;
-          break;
         case BannerDemoAction.showLeading:
           _showLeading = !_showLeading;
-          break;
       }
     });
   }
@@ -51,7 +48,7 @@ class _BannerDemoState extends State<BannerDemo> {
       content: const Text('Your password was updated on your other device. Please sign in again.'),
       leading: _showLeading ? const CircleAvatar(child: Icon(Icons.access_alarm)) : null,
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: const Text('SIGN IN'),
           onPressed: () {
             setState(() {
@@ -60,7 +57,7 @@ class _BannerDemoState extends State<BannerDemo> {
           },
         ),
         if (_showMultipleActions)
-          FlatButton(
+          TextButton(
             child: const Text('DISMISS'),
             onPressed: () {
               setState(() {

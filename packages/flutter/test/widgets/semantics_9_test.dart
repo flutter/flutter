@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -137,14 +137,14 @@ void main() {
 }
 
 class BoundaryBlockSemantics extends SingleChildRenderObjectWidget {
-  const BoundaryBlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const BoundaryBlockSemantics({ super.key, required Widget super.child });
 
   @override
   RenderBoundaryBlockSemantics createRenderObject(BuildContext context) => RenderBoundaryBlockSemantics();
 }
 
 class RenderBoundaryBlockSemantics extends RenderProxyBox {
-  RenderBoundaryBlockSemantics({ RenderBox child }) : super(child);
+  RenderBoundaryBlockSemantics();
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {

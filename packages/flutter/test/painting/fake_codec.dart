@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui show Codec, FrameInfo, instantiateImageCodec;
 
 import 'package:flutter/foundation.dart';
@@ -20,6 +18,7 @@ class FakeCodec implements ui.Codec {
   final int _repetitionCount;
   final List<ui.FrameInfo> _frameInfos;
   int _nextFrame = 0;
+  int _numFramesAsked = 0;
 
   /// Creates a FakeCodec from encoded image data.
   ///
@@ -27,9 +26,10 @@ class FakeCodec implements ui.Codec {
   static Future<FakeCodec> fromData(Uint8List data) async {
     final ui.Codec codec = await ui.instantiateImageCodec(data);
     final int frameCount = codec.frameCount;
-    final List<ui.FrameInfo> frameInfos = List<ui.FrameInfo>(frameCount);
-    for (int i = 0; i < frameCount; i += 1)
-      frameInfos[i] = await codec.getNextFrame();
+    final List<ui.FrameInfo> frameInfos = <ui.FrameInfo>[];
+    for (int i = 0; i < frameCount; i += 1) {
+      frameInfos.add(await codec.getNextFrame());
+    }
     return FakeCodec._(frameCount, codec.repetitionCount, frameInfos);
   }
 
@@ -39,8 +39,11 @@ class FakeCodec implements ui.Codec {
   @override
   int get repetitionCount => _repetitionCount;
 
+  int get numFramesAsked => _numFramesAsked;
+
   @override
   Future<ui.FrameInfo> getNextFrame() {
+    _numFramesAsked += 1;
     final SynchronousFuture<ui.FrameInfo> result =
       SynchronousFuture<ui.FrameInfo>(_frameInfos[_nextFrame]);
     _nextFrame = (_nextFrame + 1) % _frameCount;

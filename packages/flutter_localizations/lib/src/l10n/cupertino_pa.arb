@@ -19,6 +19,13 @@
   "copyButtonLabel": "ਕਾਪੀ ਕਰੋ",
   "pasteButtonLabel": "ਪੇਸਟ ਕਰੋ",
   "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "ਖਾਰਜ ਕਰੋ"
+  "tabSemanticsLabel": "$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ",
+  "modalBarrierDismissLabel": "ਖਾਰਜ ਕਰੋ",
+  "searchTextFieldPlaceholderLabel": "ਖੋਜੋ",
+  "noSpellCheckReplacementsLabel": "ਕੋਈ ਸੁਝਾਅ ਨਹੀਂ ਮਿਲਿਆ",
+  "menuDismissLabel": "ਮੀਨੂ ਖਾਰਜ ਕਰੋ",
+  "lookUpButtonLabel": "ਖੋਜੋ",
+  "searchWebButtonLabel": "ਵੈੱਬ 'ਤੇ ਖੋਜੋ",
+  "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ...",
+  "clearButtonLabel": "Clear"
 }

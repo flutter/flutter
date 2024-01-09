@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   group(GlobalMaterialLocalizations, () {
@@ -29,28 +29,13 @@ void main() {
       }, throwsAssertionError);
     });
 
-    // Regression test for https://github.com/flutter/flutter/issues/53036.
-    test('`nb` uses `no` as a synonym when `nb` arb file is not present', () async {
-      final File nbMaterialArbFile = File('lib/src/l10n/material_nb.arb');
-      final File noMaterialArbFile = File('lib/src/l10n/material_no.arb');
-
-      // No need to run test if `nb` arb file exists or if `no` arb file does not exist.
-      if (noMaterialArbFile.existsSync() && !nbMaterialArbFile.existsSync()) {
-        final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate
-          .load(const Locale('nb')) as GlobalMaterialLocalizations;
-        expect(localizations.formatMediumDate(DateTime(2020, 4, 3)), 'fre. 3. apr.');
-      }
-    });
-
     group('formatHour', () {
       Future<String> formatHour(WidgetTester tester, Locale locale, TimeOfDay timeOfDay) async {
         final Completer<String> completer = Completer<String>();
         await tester.pumpWidget(MaterialApp(
           supportedLocales: <Locale>[locale],
           locale: locale,
-          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-            GlobalMaterialLocalizations.delegate,
-          ],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: Builder(builder: (BuildContext context) {
             completer.complete(MaterialLocalizations.of(context).formatHour(timeOfDay));
             return Container();
@@ -95,9 +80,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(
           supportedLocales: <Locale>[locale],
           locale: locale,
-          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-            GlobalMaterialLocalizations.delegate,
-          ],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: Builder(builder: (BuildContext context) {
             completer.complete(MaterialLocalizations.of(context).formatTimeOfDay(timeOfDay));
             return Container();
@@ -124,12 +107,19 @@ void main() {
         expect(await formatTimeOfDay(tester, const Locale('ja'), const TimeOfDay(hour: 20, minute: 32)), '20:32');
       });
 
+      testWidgets('formats ${TimeOfDayFormat.HH_dot_mm}', (WidgetTester tester) async {
+        expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 20, minute: 32)), '20.32');
+        expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 9, minute: 32)), '09.32');
+        expect(await formatTimeOfDay(tester, const Locale('da'), const TimeOfDay(hour: 9, minute: 32)), '09.32');
+      });
+
       testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('fr', 'CA'), const TimeOfDay(hour: 9, minute: 32)), '09 h 32');
       });
 
       testWidgets('formats ${TimeOfDayFormat.a_space_h_colon_mm}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('zh'), const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
+        expect(await formatTimeOfDay(tester, const Locale('ta'), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
       });
     });
 
@@ -139,9 +129,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(
           supportedLocales: <Locale>[locale],
           locale: locale,
-          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-            GlobalMaterialLocalizations.delegate,
-          ],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: Builder(builder: (BuildContext context) {
             final MaterialLocalizations localizations = MaterialLocalizations.of(context);
             completer.complete(<DateType, String>{
@@ -157,7 +145,7 @@ void main() {
       }
 
       testWidgets('formats dates in English', (WidgetTester tester) async {
-        final Map<DateType, String> formatted = await formatDate(tester, const Locale('en'), DateTime(2018, 8, 1));
+        final Map<DateType, String> formatted = await formatDate(tester, const Locale('en'), DateTime(2018, 8));
         expect(formatted[DateType.year], '2018');
         expect(formatted[DateType.medium], 'Wed, Aug 1');
         expect(formatted[DateType.full], 'Wednesday, August 1, 2018');
@@ -165,13 +153,62 @@ void main() {
       });
 
       testWidgets('formats dates in German', (WidgetTester tester) async {
-        final Map<DateType, String> formatted = await formatDate(tester, const Locale('de'), DateTime(2018, 8, 1));
+        final Map<DateType, String> formatted = await formatDate(tester, const Locale('de'), DateTime(2018, 8));
         expect(formatted[DateType.year], '2018');
         expect(formatted[DateType.medium], 'Mi., 1. Aug.');
         expect(formatted[DateType.full], 'Mittwoch, 1. August 2018');
         expect(formatted[DateType.monthYear], 'August 2018');
       });
+
+      testWidgets('formats dates in Serbian', (WidgetTester tester) async {
+        final Map<DateType, String> formatted = await formatDate(tester, const Locale('sr'), DateTime(2018, 8));
+        expect(formatted[DateType.year], '2018.');
+        expect(formatted[DateType.medium], 'сре 1. авг');
+        expect(formatted[DateType.full], 'среда, 1. август 2018.');
+        expect(formatted[DateType.monthYear], 'август 2018.');
+      });
+
+      testWidgets('formats dates in Serbian (Latin)', (WidgetTester tester) async {
+        final Map<DateType, String> formatted = await formatDate(tester,
+          const Locale.fromSubtags(languageCode:'sr', scriptCode: 'Latn'), DateTime(2018, 8));
+        expect(formatted[DateType.year], '2018.');
+        expect(formatted[DateType.medium], 'sre 1. avg');
+        expect(formatted[DateType.full], 'sreda, 1. avgust 2018.');
+        expect(formatted[DateType.monthYear], 'avgust 2018.');
+      });
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/67644.
+  testWidgets('en_US is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
+    late DateFormat dateFormat;
+
+    await tester.pumpWidget(MaterialApp(
+      locale: const Locale('en', 'US'),
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      home: Builder(builder: (BuildContext context) {
+        dateFormat = DateFormat('EEE, d MMM yyyy HH:mm:ss', 'en_US');
+        return Container();
+      }),
+    ));
+
+    expect(dateFormat.locale, 'en_US');
+  });
+
+  testWidgets('cy is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
+    late DateFormat dateFormat;
+
+    await tester.pumpWidget(MaterialApp(
+      locale: const Locale('cy'),
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      home: Builder(builder: (BuildContext context) {
+        dateFormat = DateFormat.yMMMd('cy');
+        return Container();
+      }),
+    ));
+
+    expect(dateFormat.locale, 'cy');
+    expect(dateFormat.format(DateTime(2023, 4, 10, 2, 32)), equals('10 Ebr 2023'));
   });
 }
 

@@ -19,6 +19,13 @@
   "copyButtonLabel": "Kopyahin",
   "pasteButtonLabel": "I-paste",
   "selectAllButtonLabel": "Piliin Lahat",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "I-dismiss"
+  "tabSemanticsLabel": "Tab $tabIndex ng $tabCount",
+  "modalBarrierDismissLabel": "I-dismiss",
+  "searchTextFieldPlaceholderLabel": "Hanapin",
+  "noSpellCheckReplacementsLabel": "Walang Nahanap na Kapalit",
+  "menuDismissLabel": "I-dismiss ang menu",
+  "lookUpButtonLabel": "Tumingin sa Itaas",
+  "searchWebButtonLabel": "Maghanap sa Web",
+  "shareButtonLabel": "Ibahagi...",
+  "clearButtonLabel": "Clear"
 }

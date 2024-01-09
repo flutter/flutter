@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show window;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // This is a regression test for https://github.com/flutter/flutter/issues/5840.
 
 class Bar extends StatefulWidget {
-  const Bar({ Key key }) : super(key: key);
+  const Bar({ super.key });
   @override
   BarState createState() => BarState();
 }
@@ -47,7 +45,7 @@ class BarState extends State<Bar> {
 }
 
 class StatefulCreationCounter extends StatefulWidget {
-  const StatefulCreationCounter({ Key key }) : super(key: key);
+  const StatefulCreationCounter({ super.key });
 
   @override
   StatefulCreationCounterState createState() => StatefulCreationCounterState();
@@ -80,9 +78,9 @@ void main() {
   testWidgets('Clean then reparent with dependencies', (WidgetTester tester) async {
     int layoutBuilderBuildCount = 0;
 
-    StateSetter keyedSetState;
-    StateSetter layoutBuilderSetState;
-    StateSetter childSetState;
+    late StateSetter keyedSetState;
+    late StateSetter layoutBuilderSetState;
+    late StateSetter childSetState;
 
     final GlobalKey key = GlobalKey();
     final Widget keyedWidget = StatefulBuilder(
@@ -98,7 +96,7 @@ void main() {
     Widget deepChild = Container();
 
     await tester.pumpWidget(MediaQuery(
-      data: MediaQueryData.fromWindow(ui.window),
+      data: MediaQueryData.fromView(tester.view),
       child: Column(
         children: <Widget>[
           StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -110,12 +108,18 @@ void main() {
               },
             );
           }),
-          Container(
-            child: Container(
-              child: Container(
-                child: Container(
-                  child: Container(
-                    child: Container(
+          ColoredBox(
+            color: Colors.green,
+            child: ColoredBox(
+              color: Colors.green,
+              child: ColoredBox(
+                color: Colors.green,
+                child: ColoredBox(
+                  color: Colors.green,
+                  child: ColoredBox(
+                    color: Colors.green,
+                    child: ColoredBox(
+                      color: Colors.green,
                       child: StatefulBuilder(
                         builder: (BuildContext context, StateSetter setState) {
                           childSetState = setState;

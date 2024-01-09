@@ -5,16 +5,17 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 RenderBox sizedBox(double width, double height) {
   return RenderConstrainedBox(
-    additionalConstraints: BoxConstraints.tight(Size(width, height))
+    additionalConstraints: BoxConstraints.tight(Size(width, height)),
   );
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Table control test; tight', () {
     RenderTable table;
     layout(table = RenderTable(textDirection: TextDirection.ltr));
@@ -44,7 +45,7 @@ void main() {
     RenderTable table;
     layout(RenderPositionedBox(child: table = RenderTable(textDirection: TextDirection.ltr)));
 
-    expect(table.size, equals(const Size(0.0, 0.0)));
+    expect(table.size, equals(Size.zero));
   });
 
   test('Table control test: constrained flex columns', () {
@@ -71,7 +72,7 @@ void main() {
       textBaseline: TextBaseline.alphabetic,
     )));
 
-    expect(table.size, equals(const Size(0.0, 0.0)));
+    expect(table.size, equals(Size.zero));
 
     table.setChild(2, 4, sizedBox(100.0, 200.0));
 
@@ -240,7 +241,7 @@ void main() {
         ),
       ],
       columnWidths: const <int, TableColumnWidth>{
-        0: FlexColumnWidth(1.0),
+        0: FlexColumnWidth(),
         1: FlexColumnWidth(0.123),
         2: FlexColumnWidth(0.123),
         3: FlexColumnWidth(0.123),
@@ -252,5 +253,89 @@ void main() {
 
     layout(table, constraints: BoxConstraints.tight(const Size(800.0, 600.0)));
     expect(table.hasSize, true);
+  });
+
+  test('Table paints a borderRadius', () {
+    final RenderTable table = RenderTable(
+      textDirection: TextDirection.ltr,
+      border: TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0))),
+    );
+    layout(table);
+    table.setFlatChildren(2, <RenderBox>[
+      RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(), RenderPositionedBox(),
+    ]);
+    pumpFrame();
+    expect(table, paints
+      ..path()
+      ..path()
+      ..drrect(
+        outer: RRect.fromLTRBR(0.0, 0.0, 800.0, 0.0, const Radius.circular(8.0)),
+        inner: RRect.fromLTRBR(1.0, 1.0, 799.0, -1.0, const Radius.circular(7.0)),
+      )
+    );
+  });
+
+  test('MaxColumnWidth.flex returns the correct result', () {
+    MaxColumnWidth columnWidth = const MaxColumnWidth(
+      FixedColumnWidth(100), // returns null from .flex
+      FlexColumnWidth(), // returns 1 from .flex
+    );
+    final double? flexValue = columnWidth.flex(<RenderBox>[]);
+    expect(flexValue, 1.0);
+
+    // Swap a and b, check for same result.
+    columnWidth = const MaxColumnWidth(
+      FlexColumnWidth(), // returns 1 from .flex
+      FixedColumnWidth(100), // returns null from .flex
+    );
+    // Same result.
+    expect(columnWidth.flex(<RenderBox>[]), flexValue);
+  });
+
+  test('MinColumnWidth.flex returns the correct result', () {
+    MinColumnWidth columnWidth = const MinColumnWidth(
+      FixedColumnWidth(100), // returns null from .flex
+      FlexColumnWidth(), // returns 1 from .flex
+    );
+    final double? flexValue = columnWidth.flex(<RenderBox>[]);
+    expect(flexValue, 1.0);
+
+    // Swap a and b, check for same result.
+    columnWidth = const MinColumnWidth(
+      FlexColumnWidth(), // returns 1 from .flex
+      FixedColumnWidth(100), // returns null from .flex
+    );
+    // Same result.
+    expect(columnWidth.flex(<RenderBox>[]), flexValue);
+  });
+
+  test('TableRows with differents constraints, but vertically with intrisicHeight', () {
+    const BoxConstraints firstConstraints = BoxConstraints.tightFor(width: 100, height: 100);
+    const BoxConstraints secondConstraints = BoxConstraints.tightFor(width: 200, height: 200);
+
+    final RenderTable table = RenderTable(
+      textDirection: TextDirection.rtl,
+      defaultVerticalAlignment: TableCellVerticalAlignment.intrinsicHeight,
+      children: <List<RenderBox>>[
+        <RenderBox>[
+          RenderConstrainedBox(additionalConstraints: firstConstraints),
+          RenderConstrainedBox(additionalConstraints: secondConstraints),
+        ]
+      ],
+      columnWidths: const <int, TableColumnWidth>{
+        0: FlexColumnWidth(),
+        1: FlexColumnWidth(),
+      },
+    );
+
+    const Size size = Size(300.0, 300.0);
+
+    // Layout the table with a fixed size.
+    layout(table, constraints: BoxConstraints.tight(size));
+
+    // Make sure the table has a size and that the children are filled vertically to the highest cell.
+    expect(table.size, equals(size));
+    expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.intrinsicHeight);
   });
 }

@@ -4,12 +4,20 @@
 
 import 'package:meta/meta.dart';
 
+/// Represents the version of some piece of software.
+///
+/// While a [Version] object has fields resembling semver, it does not
+/// necessarily represent a semver version.
 @immutable
 class Version implements Comparable<Version> {
   /// Creates a new [Version] object.
-  factory Version(int major, int minor, int patch, {String text}) {
+  ///
+  /// A null [minor] or [patch] version is logically equivalent to 0. Using null
+  /// for these parameters only affects the generation of [text], if no value
+  /// for it is provided.
+  factory Version(int major, int? minor, int? patch, {String? text}) {
     if (text == null) {
-      text = major == null ? '0' : '$major';
+      text = '$major';
       if (minor != null) {
         text = '$text.$minor';
       }
@@ -18,8 +26,11 @@ class Version implements Comparable<Version> {
       }
     }
 
-    return Version._(major ?? 0, minor ?? 0, patch ?? 0, text);
+    return Version._(major, minor ?? 0, patch ?? 0, text);
   }
+
+  /// Public constant constructor when all fields are non-null, without default value fallbacks.
+  const Version.withText(this.major, this.minor, this.patch, this._text);
 
   Version._(this.major, this.minor, this.patch, this._text) {
     if (major < 0) {
@@ -34,8 +45,8 @@ class Version implements Comparable<Version> {
   }
 
   /// Creates a new [Version] by parsing [text].
-  factory Version.parse(String text) {
-    final Match match = versionPattern.firstMatch(text ?? '');
+  static Version? parse(String? text) {
+    final Match? match = versionPattern.firstMatch(text ?? '');
     if (match == null) {
       return null;
     }
@@ -44,7 +55,7 @@ class Version implements Comparable<Version> {
       final int major = int.parse(match[1] ?? '0');
       final int minor = int.parse(match[3] ?? '0');
       final int patch = int.parse(match[5] ?? '0');
-      return Version._(major, minor, patch, text);
+      return Version._(major, minor, patch, text ?? '');
     } on FormatException {
       return null;
     }
@@ -53,8 +64,8 @@ class Version implements Comparable<Version> {
   /// Returns the primary version out of a list of candidates.
   ///
   /// This is the highest-numbered stable version.
-  static Version primary(List<Version> versions) {
-    Version primary;
+  static Version? primary(List<Version> versions) {
+    Version? primary;
     for (final Version version in versions) {
       if (primary == null || (version > primary)) {
         primary = version;
@@ -62,9 +73,6 @@ class Version implements Comparable<Version> {
     }
     return primary;
   }
-
-
-  static Version get unknown => Version(0, 0, 0, text: 'unknown');
 
   /// The major version number: "1" in "1.2.3".
   final int major;
@@ -95,7 +103,7 @@ class Version implements Comparable<Version> {
   }
 
   @override
-  int get hashCode => major ^ minor ^ patch;
+  int get hashCode => Object.hash(major, minor, patch);
 
   bool operator <(Version other) => compareTo(other) < 0;
   bool operator >(Version other) => compareTo(other) > 0;
@@ -115,4 +123,36 @@ class Version implements Comparable<Version> {
 
   @override
   String toString() => _text;
+}
+
+/// Returns true if [targetVersion] is within the range [min] and [max]
+/// inclusive by default.
+///
+/// [min] and [max] are evaluated by [Version.parse(text)].
+///
+/// Pass [inclusiveMin] = false for greater than and not equal to min.
+/// Pass [inclusiveMax] = false for less than and not equal to max.
+bool isWithinVersionRange(
+  String targetVersion, {
+  required String min,
+  required String max,
+  bool inclusiveMax = true,
+  bool inclusiveMin = true,
+}) {
+  final Version? parsedTargetVersion = Version.parse(targetVersion);
+  final Version? minVersion = Version.parse(min);
+  final Version? maxVersion = Version.parse(max);
+
+  final bool withinMin = minVersion != null &&
+      parsedTargetVersion != null &&
+      (inclusiveMin
+      ? parsedTargetVersion >= minVersion
+      : parsedTargetVersion > minVersion);
+
+  final bool withinMax = maxVersion != null &&
+      parsedTargetVersion != null &&
+      (inclusiveMax
+          ? parsedTargetVersion <= maxVersion
+          : parsedTargetVersion < maxVersion);
+  return withinMin && withinMax;
 }

@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/semantics_tester.dart';
 
 const Key avatarA = Key('A');
@@ -14,12 +13,20 @@ const Key avatarD = Key('D');
 
 Future<void> pumpTestWidget(
   WidgetTester tester, {
-  bool withName = true,
-  bool withEmail = true,
-  bool withOnDetailsPressedHandler = true,
-}) async {
+      bool withName = true,
+      bool withEmail = true,
+      bool withOnDetailsPressedHandler = true,
+      Size otherAccountsPictureSize = const Size.square(40.0),
+      Size currentAccountPictureSize  = const Size.square(72.0),
+      Color? primaryColor,
+      Color? colorSchemePrimary,
+    }) async {
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(
+        primaryColor: primaryColor,
+        colorScheme: const ColorScheme.light().copyWith(primary: colorSchemePrimary),
+      ),
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -33,6 +40,8 @@ Future<void> pumpTestWidget(
           child: Center(
             child: UserAccountsDrawerHeader(
               onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
+              currentAccountPictureSize: currentAccountPictureSize,
+              otherAccountsPicturesSize: otherAccountsPictureSize,
               currentAccountPicture: const ExcludeSemantics(
                 child: CircleAvatar(
                   key: avatarA,
@@ -66,6 +75,25 @@ Future<void> pumpTestWidget(
 }
 
 void main() {
+  // Find the exact transform which is the descendant of [UserAccountsDrawerHeader].
+  final Finder findTransform = find.descendant(
+    of: find.byType(UserAccountsDrawerHeader),
+    matching: find.byType(Transform),
+  );
+
+  testWidgets('UserAccountsDrawerHeader inherits ColorScheme.primary', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xff00ff00);
+    const Color colorSchemePrimary = Color(0xff0000ff);
+
+    await pumpTestWidget(tester, primaryColor: primaryColor, colorSchemePrimary: colorSchemePrimary);
+
+    final BoxDecoration? boxDecoration = tester.widget<DrawerHeader>(
+      find.byType(DrawerHeader),
+    ).decoration as BoxDecoration?;
+    expect(boxDecoration?.color == primaryColor, false);
+    expect(boxDecoration?.color == colorSchemePrimary, true);
+  });
+
   testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
 
@@ -104,9 +132,26 @@ void main() {
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
+  testWidgets('UserAccountsDrawerHeader change default size test', (WidgetTester tester) async {
+    const Size currentAccountPictureSize = Size.square(60.0);
+    const Size otherAccountsPictureSize = Size.square(30.0);
+
+    await pumpTestWidget(
+      tester,
+      currentAccountPictureSize: currentAccountPictureSize,
+      otherAccountsPictureSize: otherAccountsPictureSize,
+    );
+
+    final RenderBox currentAccountRenderBox = tester.renderObject(find.byKey(avatarA));
+    final RenderBox otherAccountRenderBox = tester.renderObject(find.byKey(avatarC));
+
+    expect(currentAccountRenderBox.size, currentAccountPictureSize);
+    expect(otherAccountRenderBox.size, otherAccountsPictureSize);
+  });
+
   testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
-    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+    Transform transformWidget = tester.firstWidget(findTransform);
 
     // Icon is right side up.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -119,7 +164,7 @@ void main() {
 
     await tester.pumpAndSettle();
     await tester.pump();
-    transformWidget = tester.firstWidget(find.byType(Transform));
+    transformWidget = tester.firstWidget(findTransform);
 
     // Icon has rotated 180 degrees.
     expect(transformWidget.transform.getRotation()[0], -1.0);
@@ -132,7 +177,7 @@ void main() {
 
     await tester.pumpAndSettle();
     await tester.pump();
-    transformWidget = tester.firstWidget(find.byType(Transform));
+    transformWidget = tester.firstWidget(findTransform);
 
     // Icon has rotated 180 degrees back to the original position.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -141,7 +186,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/25801.
   testWidgets('UserAccountsDrawerHeader icon does not rotate after setState', (WidgetTester tester) async {
-    StateSetter testSetState;
+    late StateSetter testSetState;
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: StatefulBuilder(
@@ -157,7 +202,7 @@ void main() {
       ),
     ));
 
-    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+    Transform transformWidget = tester.firstWidget(findTransform);
 
     // Icon is right side up.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -168,7 +213,7 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
 
     expect(await tester.pumpAndSettle(), 1);
-    transformWidget = tester.firstWidget(find.byType(Transform));
+    transformWidget = tester.firstWidget(findTransform);
 
     // Icon has not rotated.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -177,7 +222,7 @@ void main() {
 
   testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
     await pumpTestWidget(tester);
-    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+    Transform transformWidget = tester.firstWidget(findTransform);
 
     // Icon is right side up.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -209,7 +254,7 @@ void main() {
 
     await tester.pumpAndSettle();
     await tester.pump();
-    transformWidget = tester.firstWidget(find.byType(Transform));
+    transformWidget = tester.firstWidget(findTransform);
 
     // Icon has rotated 180 degrees back to the original position.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -249,12 +294,12 @@ void main() {
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({
-      Widget currentAccountPicture,
-      List<Widget> otherAccountsPictures,
-      Widget accountName,
-      Widget accountEmail,
-      VoidCallback onDetailsPressed,
-      EdgeInsets margin,
+      Widget? currentAccountPicture,
+      List<Widget>? otherAccountsPictures,
+      Widget? accountName,
+      Widget? accountEmail,
+      VoidCallback? onDetailsPressed,
+      EdgeInsets? margin,
     }) {
       return MaterialApp(
         home: Material(
@@ -357,12 +402,12 @@ void main() {
 
   testWidgets('UserAccountsDrawerHeader null parameters RTL', (WidgetTester tester) async {
     Widget buildFrame({
-      Widget currentAccountPicture,
-      List<Widget> otherAccountsPictures,
-      Widget accountName,
-      Widget accountEmail,
-      VoidCallback onDetailsPressed,
-      EdgeInsets margin,
+      Widget? currentAccountPicture,
+      List<Widget>? otherAccountsPictures,
+      Widget? accountName,
+      Widget? accountEmail,
+      VoidCallback? onDetailsPressed,
+      EdgeInsets? margin,
     }) {
       return MaterialApp(
         home: Directionality(
@@ -478,30 +523,34 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                      label: 'Signed in\nname\nemail',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: r'B',
+                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                          label: 'Signed in\nname\nemail',
                           textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'C',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'D',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                          label: r'Show accounts',
-                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: r'B',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'C',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'D',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: r'Show accounts',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -556,23 +605,27 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Signed in',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: r'B',
+                          label: 'Signed in',
                           textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'C',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'D',
-                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: r'B',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'C',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'D',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),

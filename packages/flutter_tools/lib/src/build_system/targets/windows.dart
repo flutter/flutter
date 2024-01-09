@@ -9,9 +9,10 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// The only files/subdirectories we care about.
 const List<String> _kWindowsArtifacts = <String>[
@@ -22,6 +23,7 @@ const List<String> _kWindowsArtifacts = <String>[
   'flutter_export.h',
   'flutter_messenger.h',
   'flutter_plugin_registrar.h',
+  'flutter_texture_registrar.h',
   'flutter_windows.h',
 ];
 
@@ -50,7 +52,11 @@ class UnpackWindows extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsDesktopPath,
@@ -82,11 +88,7 @@ class UnpackWindows extends Target {
         platform: TargetPlatform.windows_x64
       )
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile(_kWindowsDepfile),
     );
@@ -117,10 +119,11 @@ abstract class BundleWindowsAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_windows_assets');
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
@@ -132,12 +135,13 @@ abstract class BundleWindowsAssets extends Target {
       environment.buildDir.childFile('app.dill')
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final Depfile depfile = await copyAssets(environment, outputDirectory);
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
+    final Depfile depfile = await copyAssets(
+      environment,
+      outputDirectory,
+      targetPlatform: TargetPlatform.windows_x64,
+      shaderTarget: ShaderTarget.sksl,
     );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
@@ -161,9 +165,10 @@ class WindowsAotBundle extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/windows/app.so'),
-  ];
+  List<Source> get outputs =>
+    const <Source>[
+      Source.pattern('{OUTPUT_DIR}/windows/app.so'),
+    ];
 
   @override
   List<Target> get dependencies => <Target>[

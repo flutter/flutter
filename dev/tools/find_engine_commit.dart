@@ -29,7 +29,7 @@ Future<void> main(List<String> args) async {
   _validate(args);
   await _fetchUpstream();
   await _fetchUpstream(engineRepo);
-  String flutterRevision;
+  String? flutterRevision;
   await for (final FlutterEngineRevision revision in _logEngineVersions()) {
     if (!await containsRevision(args[0], revision.engineRevision)) {
       if (flutterRevision == null) {

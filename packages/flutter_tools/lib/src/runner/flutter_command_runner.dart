@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -20,16 +17,35 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
-import '../device.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
+import '../version.dart';
+import '../web/web_device.dart';
 
-const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
-const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
-const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
-const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
-const String kFlutterEnginePackageName = 'sky_engine';
+/// Common flutter command line options.
+abstract final class FlutterGlobalOptions {
+  static const String kColorFlag = 'color';
+  static const String kContinuousIntegrationFlag = 'ci';
+  static const String kDeviceIdOption = 'device-id';
+  static const String kDisableAnalyticsFlag = 'disable-analytics';
+  static const String kEnableAnalyticsFlag = 'enable-analytics';
+  static const String kLocalEngineOption = 'local-engine';
+  static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
+  static const String kLocalEngineHostOption = 'local-engine-host';
+  static const String kLocalWebSDKOption = 'local-web-sdk';
+  static const String kMachineFlag = 'machine';
+  static const String kPackagesOption = 'packages';
+  static const String kPrefixedErrorsFlag = 'prefixed-errors';
+  static const String kQuietFlag = 'quiet';
+  static const String kShowTestDeviceFlag = 'show-test-device';
+  static const String kShowWebServerDeviceFlag = 'show-web-server-device';
+  static const String kSuppressAnalyticsFlag = 'suppress-analytics';
+  static const String kVerboseFlag = 'verbose';
+  static const String kVersionCheckFlag = 'version-check';
+  static const String kVersionFlag = 'version';
+  static const String kWrapColumnOption = 'wrap-column';
+  static const String kWrapFlag = 'wrap';
+}
 
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({ bool verboseHelp = false }) : super(
@@ -44,95 +60,111 @@ class FlutterCommandRunner extends CommandRunner<void> {
       '  flutter run [options]\n'
       '    Run your Flutter application on an attached device or in an emulator.',
   ) {
-    argParser.addFlag('verbose',
+    argParser.addFlag(FlutterGlobalOptions.kVerboseFlag,
         abbr: 'v',
         negatable: false,
         help: 'Noisy logging, including all shell commands executed.\n'
-              'If used with --help, shows hidden options.');
-    argParser.addFlag('quiet',
+              'If used with "--help", shows hidden options. '
+              'If used with "flutter doctor", shows additional diagnostic information. '
+              '(Use "-vv" to force verbose logging in those cases.)');
+    argParser.addFlag(FlutterGlobalOptions.kPrefixedErrorsFlag,
+        negatable: false,
+        help: 'Causes lines sent to stderr to be prefixed with "ERROR:".',
+        hide: !verboseHelp);
+    argParser.addFlag(FlutterGlobalOptions.kQuietFlag,
         negatable: false,
         hide: !verboseHelp,
         help: 'Reduce the amount of output from some commands.');
-    argParser.addFlag('wrap',
-        negatable: true,
+    argParser.addFlag(FlutterGlobalOptions.kWrapFlag,
         hide: !verboseHelp,
         help: 'Toggles output word wrapping, regardless of whether or not the output is a terminal.',
         defaultsTo: true);
-    argParser.addOption('wrap-column',
+    argParser.addOption(FlutterGlobalOptions.kWrapColumnOption,
         hide: !verboseHelp,
         help: 'Sets the output wrap column. If not set, uses the width of the terminal. No '
-            'wrapping occurs if not writing to a terminal. Use --no-wrap to turn off wrapping '
-            'when connected to a terminal.',
-        defaultsTo: null);
-    argParser.addOption('device-id',
+              'wrapping occurs if not writing to a terminal. Use "--no-wrap" to turn off wrapping '
+              'when connected to a terminal.');
+    argParser.addOption(FlutterGlobalOptions.kDeviceIdOption,
         abbr: 'd',
         help: 'Target device id or name (prefixes allowed).');
-    argParser.addFlag('version',
+    argParser.addFlag(FlutterGlobalOptions.kVersionFlag,
         negatable: false,
         help: 'Reports the version of this tool.');
-    argParser.addFlag('machine',
+    argParser.addFlag(FlutterGlobalOptions.kMachineFlag,
         negatable: false,
         hide: !verboseHelp,
-        help: 'When used with the --version flag, outputs the information using JSON.');
-    argParser.addFlag('color',
-        negatable: true,
+        help: 'When used with the "--version" flag, outputs the information using JSON.');
+    argParser.addFlag(FlutterGlobalOptions.kColorFlag,
         hide: !verboseHelp,
         help: 'Whether to use terminal colors (requires support for ANSI escape sequences).',
         defaultsTo: true);
-    argParser.addFlag('version-check',
-        negatable: true,
+    argParser.addFlag(FlutterGlobalOptions.kVersionCheckFlag,
         defaultsTo: true,
         hide: !verboseHelp,
         help: 'Allow Flutter to check for updates when this command runs.');
-    argParser.addFlag('suppress-analytics',
+    argParser.addFlag(FlutterGlobalOptions.kEnableAnalyticsFlag,
         negatable: false,
-        help: 'Suppress analytics reporting when this command runs.');
-
-    String packagesHelp;
-    bool showPackagesCommand;
-    if (globals.fs.isFileSync(kPackagesFileName)) {
-      packagesHelp = '(defaults to "$kPackagesFileName")';
-      showPackagesCommand = verboseHelp;
-    } else {
-      packagesHelp = '(required, since the current directory does not contain a "$kPackagesFileName" file)';
-      showPackagesCommand = true;
-    }
-    argParser.addOption('packages',
-        hide: !showPackagesCommand,
-        help: 'Path to your ".packages" file.\n$packagesHelp');
-
-    argParser.addOption('flutter-root',
+        help: 'Enable telemetry reporting each time a flutter or dart '
+              'command runs.');
+    argParser.addFlag(FlutterGlobalOptions.kDisableAnalyticsFlag,
+        negatable: false,
+        help: 'Disable telemetry reporting each time a flutter or dart '
+              'command runs, until it is re-enabled.');
+    argParser.addFlag(FlutterGlobalOptions.kSuppressAnalyticsFlag,
+        negatable: false,
+        help: 'Suppress analytics reporting for the current CLI invocation.');
+    argParser.addOption(FlutterGlobalOptions.kPackagesOption,
         hide: !verboseHelp,
-        help: 'The root directory of the Flutter repository.\n'
-              'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent '
-              'of the directory that the "flutter" script itself is in.');
-
+        help: 'Path to your "package_config.json" file.');
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
 
-    argParser.addOption('local-engine-src-path',
+    argParser.addOption(FlutterGlobalOptions.kLocalEngineSrcPathOption,
         hide: !verboseHelp,
         help: 'Path to your engine src directory, if you are building Flutter locally.\n'
               'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to '
               'the path given in your pubspec.yaml dependency_overrides for $kFlutterEnginePackageName, '
-              'if any, or, failing that, tries to guess at the location based on the value of the '
-              '--flutter-root option.');
+              'if any.');
 
-    argParser.addOption('local-engine',
+    argParser.addOption(FlutterGlobalOptions.kLocalEngineOption,
         hide: !verboseHelp,
         help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
               'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
-              'This path is relative to --local-engine-src-path/out.');
+              'This path is relative to "--local-engine-src-path" (see above).');
+
+    argParser.addOption(FlutterGlobalOptions.kLocalEngineHostOption,
+        hide: !verboseHelp,
+        help: 'The host operating system for which engine artifacts should be selected, if you are building Flutter locally.\n'
+              'This is only used when "--local-engine" is also specified.\n'
+              'By default, the host is determined automatically, but you may need to specify this if you are building on one '
+              'platform (e.g. MacOS ARM64) but intend to run Flutter on another (e.g. Android).');
+
+    argParser.addOption(FlutterGlobalOptions.kLocalWebSDKOption,
+        hide: !verboseHelp,
+        help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
+              'Use this to select a specific version of the web sdk if you have built multiple engine targets.\n'
+              'This path is relative to "--local-engine-src-path" (see above).');
 
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
     }
-    argParser.addFlag('show-test-device',
+    argParser.addFlag(FlutterGlobalOptions.kShowTestDeviceFlag,
         negatable: false,
         hide: !verboseHelp,
-        help: "List the special 'flutter-tester' device in device listings. "
-              'This headless device is used to\ntest Flutter tooling.');
+        help: 'List the special "flutter-tester" device in device listings. '
+              'This headless device is used to test Flutter tooling.');
+    argParser.addFlag(FlutterGlobalOptions.kShowWebServerDeviceFlag,
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'List the special "web-server" device in device listings.',
+    );
+    argParser.addFlag(
+      FlutterGlobalOptions.kContinuousIntegrationFlag,
+      negatable: false,
+      help: 'Enable a set of CI-specific test debug settings.',
+      hide: !verboseHelp,
+    );
   }
 
   @override
@@ -160,43 +192,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return '$prefix\n\n$usageWithoutDescription';
   }
 
-  static String get defaultFlutterRoot {
-    if (globals.platform.environment.containsKey(kFlutterRootEnvironmentVariableName)) {
-      return globals.platform.environment[kFlutterRootEnvironmentVariableName];
-    }
-    try {
-      if (globals.platform.script.scheme == 'data') {
-        return '../..'; // we're running as a test
-      }
-
-      if (globals.platform.script.scheme == 'package') {
-        final String packageConfigPath = Uri.parse(globals.platform.packageConfig).toFilePath();
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(packageConfigPath)));
-      }
-
-      final String script = globals.platform.script.toFilePath();
-      if (globals.fs.path.basename(script) == kSnapshotFileName) {
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(script)));
-      }
-      if (globals.fs.path.basename(script) == kFlutterToolsScriptFileName) {
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(script))));
-      }
-
-      // If run from a bare script within the repo.
-      if (script.contains('flutter/packages/')) {
-        return script.substring(0, script.indexOf('flutter/packages/') + 8);
-      }
-      if (script.contains('flutter/examples/')) {
-        return script.substring(0, script.indexOf('flutter/examples/') + 8);
-      }
-    } on Exception catch (error) {
-      // we don't have a logger at the time this is run
-      // (which is why we don't use printTrace here)
-      print(userMessages.runnerNoRoot('$error'));
-    }
-    return '.';
-  }
-
   @override
   ArgResults parse(Iterable<String> args) {
     try {
@@ -210,22 +205,28 @@ class FlutterCommandRunner extends CommandRunner<void> {
         usageException(error.message);
       }
 
-      Command<void> command = commands[error.commands.first];
+      Command<void>? command = commands[error.commands.first];
       for (final String commandName in error.commands.skip(1)) {
-        command = command.subcommands[commandName];
+        command = command?.subcommands[commandName];
       }
 
-      command.usageException(error.message);
-      return null;
+      command!.usageException(error.message);
     }
   }
 
   @override
   Future<void> run(Iterable<String> args) {
-    // Have an invocation of 'build' print out it's sub-commands.
+    // Have invocations of 'build', 'custom-devices', and 'pub' print out
+    // their sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
-    if (args.length == 1 && args.first == 'build') {
-      args = <String>['build', '-h'];
+    if (args.length == 1) {
+      if (args.first == 'build') {
+        args = <String>['build', '-h'];
+      } else if (args.first == 'custom-devices') {
+        args = <String>['custom-devices', '-h'];
+      } else if (args.first == 'pub') {
+        args = <String>['pub', '-h'];
+      }
     }
 
     return super.run(args);
@@ -233,201 +234,132 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{};
+    final Map<Type, Object?> contextOverrides = <Type, Object?>{};
+
+    // If the flag for enabling or disabling telemetry is passed in,
+    // we will return out
+    if (topLevelResults.wasParsed(FlutterGlobalOptions.kDisableAnalyticsFlag) ||
+        topLevelResults.wasParsed(FlutterGlobalOptions.kEnableAnalyticsFlag)) {
+      return;
+    }
 
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the
     // terminal size changes during a run.
-    int wrapColumn;
-    if (topLevelResults.wasParsed('wrap-column')) {
+    int? wrapColumn;
+    if (topLevelResults.wasParsed(FlutterGlobalOptions.kWrapColumnOption)) {
       try {
-        wrapColumn = int.parse(topLevelResults['wrap-column'] as String);
+        wrapColumn = int.parse(topLevelResults[FlutterGlobalOptions.kWrapColumnOption] as String);
         if (wrapColumn < 0) {
-          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults['wrap-column']));
+          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
         }
       } on FormatException {
-        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults['wrap-column']));
+        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
       }
     }
 
     // If we're not writing to a terminal with a defined width, then don't wrap
     // anything, unless the user explicitly said to.
-    final bool useWrapping = topLevelResults.wasParsed('wrap')
-        ? topLevelResults['wrap'] as bool
-        : globals.stdio.terminalColumns != null && topLevelResults['wrap'] as bool;
+    final bool useWrapping = topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)
+        ? topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool
+        : globals.stdio.terminalColumns != null && topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
-      showColor: topLevelResults['color'] as bool,
+      showColor: topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?,
       wrapColumn: wrapColumn,
     );
 
-    if (topLevelResults['show-test-device'] as bool ||
-        topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
+    if (((topLevelResults[FlutterGlobalOptions.kShowTestDeviceFlag] as bool?) ?? false)
+        || topLevelResults[FlutterGlobalOptions.kDeviceIdOption] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
-
-    // We must set Cache.flutterRoot early because other features use it (e.g.
-    // enginePath's initializer uses it).
-    final String flutterRoot = topLevelResults['flutter-root'] as String ?? defaultFlutterRoot;
-    Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(flutterRoot));
+    if (((topLevelResults[FlutterGlobalOptions.kShowWebServerDeviceFlag] as bool?) ?? false)
+        || topLevelResults[FlutterGlobalOptions.kDeviceIdOption] == WebServerDevice.kWebServerDeviceId) {
+      WebServerDevice.showWebServerDevice = true;
+    }
 
     // Set up the tooling configuration.
-    final String enginePath = await _findEnginePath(topLevelResults);
-    if (enginePath != null) {
-      contextOverrides.addAll(<Type, dynamic>{
-        Artifacts: Artifacts.getLocalEngine(_findEngineBuildPath(topLevelResults, enginePath)),
+    final EngineBuildPaths? engineBuildPaths = await globals.localEngineLocator?.findEnginePath(
+      engineSourcePath: topLevelResults[FlutterGlobalOptions.kLocalEngineSrcPathOption] as String?,
+      localEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineOption] as String?,
+      localHostEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineHostOption] as String?,
+      localWebSdk: topLevelResults[FlutterGlobalOptions.kLocalWebSDKOption] as String?,
+      packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
+    );
+    if (engineBuildPaths != null) {
+      contextOverrides.addAll(<Type, Object?>{
+        Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
       });
     }
 
     await context.run<void>(
-      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+      overrides: contextOverrides.map<Type, Generator>((Type type, Object? value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
-        globals.logger.quiet = topLevelResults['quiet'] as bool;
+        globals.logger.quiet = (topLevelResults[FlutterGlobalOptions.kQuietFlag] as bool?) ?? false;
 
         if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-          await Cache.lock();
+          await globals.cache.lock();
         }
 
-        if (topLevelResults['suppress-analytics'] as bool) {
+        if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
           globals.flutterUsage.suppressAnalytics = true;
+          globals.analytics.suppressTelemetry();
         }
 
-        try {
-          await globals.flutterVersion.ensureVersionFile();
-        } on FileSystemException catch (e) {
-          globals.printError('Failed to write the version file to the artifact cache: "$e".');
-          globals.printError('Please ensure you have permissions in the artifact cache directory.');
-          throwToolExit('Failed to write the version file');
-        }
-        final bool machineFlag = topLevelResults['machine'] as bool;
-        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
+        globals.flutterVersion.ensureVersionFile();
+        final bool machineFlag = topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
+        final bool ci = await globals.botDetector.isRunningOnBot;
+        final bool redirectedCompletion = !globals.stdio.hasTerminal &&
+            (topLevelResults.command?.name ?? '').endsWith('-completion');
+        final bool isMachine = machineFlag || ci || redirectedCompletion;
+        final bool versionCheckFlag = topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
+        final bool explicitVersionCheckPassed = topLevelResults.wasParsed(FlutterGlobalOptions.kVersionCheckFlag) && versionCheckFlag;
+
+        if (topLevelResults.command?.name != 'upgrade' &&
+            (explicitVersionCheckPassed || (versionCheckFlag && !isMachine))) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 
-        if (topLevelResults.wasParsed('packages')) {
-          globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(topLevelResults['packages'] as String));
+        // See if the user specified a specific device.
+        final String? specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
+        if (specifiedDeviceId != null) {
+          globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }
 
-        // See if the user specified a specific device.
-        deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
-
-        if (topLevelResults['version'] as bool) {
-          globals.flutterUsage.sendCommand('version');
-          globals.flutterVersion.fetchTagsAndUpdate();
-          String status;
+        if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
+          globals.flutterUsage.sendCommand(FlutterGlobalOptions.kVersionFlag);
+          globals.analytics.send(Event.flutterCommandResult(
+            commandPath: 'version',
+            result: 'success',
+            commandHasTerminal: globals.stdio.hasTerminal,
+          ));
+          final FlutterVersion version = globals.flutterVersion.fetchTagsAndGetVersion(
+            clock: globals.systemClock,
+          );
+          final String status;
           if (machineFlag) {
-            status = const JsonEncoder.withIndent('  ').convert(globals.flutterVersion.toJson());
+            final Map<String, Object> jsonOut = version.toJson();
+            jsonOut['flutterRoot'] = Cache.flutterRoot!;
+            status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
-            status = globals.flutterVersion.toString();
+            status = version.toString();
           }
           globals.printStatus(status);
           return;
         }
-
-        if (machineFlag) {
-          throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
+        if (machineFlag && topLevelResults.command?.name != 'analyze') {
+          throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);
       },
     );
   }
 
-  String _tryEnginePath(String enginePath) {
-    if (globals.fs.isDirectorySync(globals.fs.path.join(enginePath, 'out'))) {
-      return enginePath;
-    }
-    return null;
-  }
-
-  Future<String> _findEnginePath(ArgResults globalResults) async {
-    String engineSourcePath = globalResults['local-engine-src-path'] as String
-      ?? globals.platform.environment[kFlutterEngineEnvironmentVariableName];
-
-    if (engineSourcePath == null && globalResults['local-engine'] != null) {
-      try {
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          globals.fs.file(globalPackagesPath),
-          logger: globals.logger,
-          throwOnError: false,
-        );
-        Uri engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
-        // Skip if sky_engine is the self-contained one.
-        if (engineUri != null && globals.fs.identicalSync(globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib'), engineUri.path)) {
-          engineUri = null;
-        }
-        // If sky_engine is specified and the engineSourcePath not set, try to determine the engineSourcePath by sky_engine setting.
-        // A typical engineUri looks like: file://flutter-engine-local-path/src/out/host_debug_unopt/gen/dart-pkg/sky_engine/lib/
-        if (engineUri?.path != null) {
-          engineSourcePath = globals.fs.directory(engineUri.path)?.parent?.parent?.parent?.parent?.parent?.parent?.path;
-          if (engineSourcePath != null && (engineSourcePath == globals.fs.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
-            engineSourcePath = null;
-            throwToolExit(userMessages.runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
-              exitCode: 2);
-          }
-        }
-      } on FileSystemException {
-        engineSourcePath = null;
-      } on FormatException {
-        engineSourcePath = null;
-      }
-      // If engineSourcePath is still not set, try to determine it by flutter root.
-      engineSourcePath ??= _tryEnginePath(globals.fs.path.join(globals.fs.directory(Cache.flutterRoot).parent.path, 'engine', 'src'));
-    }
-
-    if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
-      throwToolExit(userMessages.runnerNoEngineBuildDirInPath(engineSourcePath),
-        exitCode: 2);
-    }
-
-    return engineSourcePath;
-  }
-
-  String _getHostEngineBasename(String localEngineBasename) {
-    // Determine the host engine directory associated with the local engine:
-    // Strip '_sim_' since there are no host simulator builds.
-    String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
-    tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
-    // Strip suffix for various archs.
-    final List<String> suffixes = <String>['_arm', '_arm64', '_x86', '_x64'];
-    for (final String suffix in suffixes) {
-      tmpBasename = tmpBasename.replaceFirst(RegExp('$suffix\$'), '');
-    }
-    return 'host_' + tmpBasename;
-  }
-
-  EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
-    String localEngine;
-    if (globalResults['local-engine'] != null) {
-      localEngine = globalResults['local-engine'] as String;
-    } else {
-      throwToolExit(userMessages.runnerLocalEngineRequired, exitCode: 2);
-    }
-
-    final String engineBuildPath = globals.fs.path.normalize(globals.fs.path.join(enginePath, 'out', localEngine));
-    if (!globals.fs.isDirectorySync(engineBuildPath)) {
-      throwToolExit(userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
-    }
-
-    final String basename = globals.fs.path.basename(engineBuildPath);
-    final String hostBasename = _getHostEngineBasename(basename);
-    final String engineHostBuildPath = globals.fs.path.normalize(globals.fs.path.join(globals.fs.path.dirname(engineBuildPath), hostBasename));
-    if (!globals.fs.isDirectorySync(engineHostBuildPath)) {
-      throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
-    }
-
-    return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
-  }
-
-  @visibleForTesting
-  static void initFlutterRoot() {
-    Cache.flutterRoot ??= defaultFlutterRoot;
-  }
-
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
-    final String root = globals.fs.path.absolute(Cache.flutterRoot);
+    final String root = globals.fs.path.absolute(Cache.flutterRoot!);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return globals.fs.path.join(root, item);
@@ -446,7 +378,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (globals.fs.isFileSync(globals.fs.path.join(rootPath, '.dartignore'))) {
       return <String>[];
     }
-
 
     final List<String> projectPaths = globals.fs.directory(rootPath)
       .listSync(followLinks: false)

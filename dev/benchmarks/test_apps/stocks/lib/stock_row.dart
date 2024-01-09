@@ -11,20 +11,20 @@ typedef StockRowActionCallback = void Function(Stock stock);
 
 class StockRow extends StatelessWidget {
   StockRow({
-    this.stock,
+    required this.stock,
     this.onPressed,
     this.onDoubleTap,
     this.onLongPressed,
   }) : super(key: ObjectKey(stock));
 
   final Stock stock;
-  final StockRowActionCallback onPressed;
-  final StockRowActionCallback onDoubleTap;
-  final StockRowActionCallback onLongPressed;
+  final StockRowActionCallback? onPressed;
+  final StockRowActionCallback? onDoubleTap;
+  final StockRowActionCallback? onLongPressed;
 
   static const double kHeight = 79.0;
 
-  GestureTapCallback _getHandler(StockRowActionCallback callback) {
+  GestureTapCallback? _getHandler(StockRowActionCallback? callback) {
     return callback == null ? null : () => callback(stock);
   }
 
@@ -32,8 +32,9 @@ class StockRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
-    if (stock.percentChange > 0)
-      changeInPrice = '+' + changeInPrice;
+    if (stock.percentChange > 0) {
+      changeInPrice = '+$changeInPrice';
+    }
     return InkWell(
       key: ValueKey<String>(stock.symbol),
       onTap: _getHandler(onPressed),
@@ -57,6 +58,8 @@ class StockRow extends StatelessWidget {
             ),
             Expanded(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
                 children: <Widget>[
                   Expanded(
                     flex: 2,
@@ -77,8 +80,6 @@ class StockRow extends StatelessWidget {
                     ),
                   ),
                 ],
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
               ),
             ),
           ],

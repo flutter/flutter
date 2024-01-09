@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "$hour時",
   "datePickerMinuteSemanticsLabelOne": "1分",
   "datePickerMinuteSemanticsLabelOther": "$minute分",
-  "datePickerDateOrder": "mdy",
+  "datePickerDateOrder": "ymd",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
@@ -18,7 +18,14 @@
   "cutButtonLabel": "切り取り",
   "copyButtonLabel": "コピー",
   "pasteButtonLabel": "貼り付け",
-  "selectAllButtonLabel": "すべて選択",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "閉じる"
+  "selectAllButtonLabel": "すべてを選択",
+  "tabSemanticsLabel": "タブ: $tabIndex/$tabCount",
+  "modalBarrierDismissLabel": "閉じる",
+  "searchTextFieldPlaceholderLabel": "検索",
+  "noSpellCheckReplacementsLabel": "置き換えるものがありません",
+  "menuDismissLabel": "メニューを閉じる",
+  "lookUpButtonLabel": "調べる",
+  "searchWebButtonLabel": "ウェブを検索",
+  "shareButtonLabel": "共有...",
+  "clearButtonLabel": "Clear"
 }

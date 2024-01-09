@@ -2,102 +2,95 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
-import '../../../src/mocks.dart' as mocks;
+import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 
-final Platform kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
 const List<int> _kTtfHeaderBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
 
-const String dartPath = '/flutter/dart';
-const String constFinderPath = '/flutter/const_finder.snapshot.dart';
-const String fontSubsetPath = '/flutter/font-subset';
+const String inputPath = '/input/fonts/MaterialIcons-Regular.otf';
+const String outputPath = '/output/fonts/MaterialIcons-Regular.otf';
+const String relativePath = 'fonts/MaterialIcons-Regular.otf';
 
-const String inputPath = '/input/fonts/MaterialIcons-Regular.ttf';
-const String outputPath = '/output/fonts/MaterialIcons-Regular.ttf';
-const String relativePath = 'fonts/MaterialIcons-Regular.ttf';
-
-List<String> getConstFinderArgs(String appDillPath) => <String>[
-  dartPath,
-  constFinderPath,
-  '--kernel-file', appDillPath,
-  '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
-  '--class-name', 'IconData',
-];
-
-const List<String> fontSubsetArgs = <String>[
-  fontSubsetPath,
-  outputPath,
-  inputPath,
-];
+final RegExp whitespace = RegExp(r'\s+');
 
 void main() {
-  BufferLogger logger;
-  MemoryFileSystem fileSystem;
-  MockProcessManager mockProcessManager;
-  MockProcess fontSubsetProcess;
-  MockArtifacts mockArtifacts;
-  DevFSStringContent fontManifestContent;
+  late BufferLogger logger;
+  late MemoryFileSystem fileSystem;
+  late FakeProcessManager processManager;
+  late Artifacts artifacts;
+  late DevFSStringContent fontManifestContent;
 
-  void _addConstFinderInvocation(
+  late String dartPath;
+  late String constFinderPath;
+  late String fontSubsetPath;
+  late List<String> fontSubsetArgs;
+
+  List<String> getConstFinderArgs(String appDillPath) => <String>[
+    dartPath,
+    '--disable-dart-dev',
+    constFinderPath,
+    '--kernel-file', appDillPath,
+    '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
+    '--class-name', 'IconData',
+    '--annotation-class-name', '_StaticIconProvider',
+    '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
+  ];
+
+  void addConstFinderInvocation(
     String appDillPath, {
     int exitCode = 0,
     String stdout = '',
     String stderr = '',
   }) {
-    when(mockProcessManager.run(getConstFinderArgs(appDillPath))).thenAnswer((_) async {
-      return ProcessResult(0, exitCode, stdout, stderr);
-    });
+    processManager.addCommand(FakeCommand(
+      command: getConstFinderArgs(appDillPath),
+      exitCode: exitCode,
+      stdout: stdout,
+      stderr: stderr,
+    ));
   }
 
-  void _resetFontSubsetInvocation({
+  void resetFontSubsetInvocation({
     int exitCode = 0,
     String stdout = '',
     String stderr = '',
-    @required mocks.CompleterIOSink stdinSink,
+    required CompleterIOSink stdinSink,
   }) {
-    assert(stdinSink != null);
-    stdinSink.writes.clear();
-    when(fontSubsetProcess.exitCode).thenAnswer((_) async => exitCode);
-    when(fontSubsetProcess.stdout).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stdout)]));
-    when(fontSubsetProcess.stderr).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stderr)]));
-    when(fontSubsetProcess.stdin).thenReturn(stdinSink);
-    when(mockProcessManager.start(fontSubsetArgs)).thenAnswer((_) async {
-      return fontSubsetProcess;
-    });
+    stdinSink.clear();
+    processManager.addCommand(FakeCommand(
+      command: fontSubsetArgs,
+      exitCode: exitCode,
+      stdout: stdout,
+      stderr: stderr,
+      stdin: stdinSink,
+    ));
   }
 
   setUp(() {
+    processManager = FakeProcessManager.empty();
     fontManifestContent = DevFSStringContent(validFontManifestJson);
+    artifacts = Artifacts.test();
+    fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
+    dartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    constFinderPath = artifacts.getArtifactPath(Artifact.constFinder);
+    fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
 
-    mockProcessManager = MockProcessManager();
-    fontSubsetProcess = MockProcess();
-    mockArtifacts = MockArtifacts();
-    fileSystem = MemoryFileSystem();
-    logger = BufferLogger(
-      terminal: AnsiTerminal(
-        stdio: mocks.MockStdio(),
-        platform: kNoAnsiPlatform,
-      ),
-      outputPreferences: OutputPreferences.test(showColor: false),
-    );
+    fontSubsetArgs = <String>[
+      fontSubsetPath,
+      outputPath,
+      inputPath,
+    ];
 
     fileSystem.file(constFinderPath).createSync(recursive: true);
     fileSystem.file(dartPath).createSync(recursive: true);
@@ -105,16 +98,13 @@ void main() {
     fileSystem.file(inputPath)
       ..createSync(recursive: true)
       ..writeAsBytesSync(_kTtfHeaderBytes);
-    when(mockArtifacts.getArtifactPath(Artifact.constFinder)).thenReturn(constFinderPath);
-    when(mockArtifacts.getArtifactPath(Artifact.fontSubset)).thenReturn(fontSubsetPath);
-    when(mockArtifacts.getArtifactPath(Artifact.engineDartBinary)).thenReturn(dartPath);
   });
 
-  Environment _createEnvironment(Map<String, String> defines) {
+  Environment createEnvironment(Map<String, String> defines) {
     return Environment.test(
       fileSystem.directory('/icon_test')..createSync(recursive: true),
       defines: defines,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -122,7 +112,7 @@ void main() {
   }
 
   testWithoutContext('Prints error in debug mode environment', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'debug',
     });
@@ -131,14 +121,15 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(
       logger.errorText,
-      'Font subetting is not supported in debug mode. The --tree-shake-icons'
+      'Font subsetting is not supported in debug mode. The --tree-shake-icons'
       ' flag will be ignored.\n',
     );
     expect(iconTreeShaker.enabled, false);
@@ -149,13 +140,11 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsets, false);
-
-    verifyNever(mockProcessManager.run(any));
-    verifyNever(mockProcessManager.start(any));
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Does not get enabled without font manifest', () {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -164,9 +153,10 @@ void main() {
       environment,
       null,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -174,12 +164,11 @@ void main() {
       isEmpty,
     );
     expect(iconTreeShaker.enabled, false);
-    verifyNever(mockProcessManager.run(any));
-    verifyNever(mockProcessManager.start(any));
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Gets enabled', () {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -188,9 +177,10 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -198,12 +188,11 @@ void main() {
       isEmpty,
     );
     expect(iconTreeShaker.enabled, true);
-    verifyNever(mockProcessManager.run(any));
-    verifyNever(mockProcessManager.start(any));
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   test('No app.dill throws exception', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -212,23 +201,25 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Can subset a font', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -239,22 +230,28 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
-
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(stdinSink: stdinSink);
-
+    final CompleterIOSink stdinSink = CompleterIOSink();
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+    // Font starts out 2500 bytes long
+    final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+    // after subsetting, font is 1200 bytes long
+    fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
     bool subsetted = await iconTreeShaker.subsetFont(
-      input: fileSystem.file(inputPath),
+      input: inputFont,
       outputPath: outputPath,
       relativePath: relativePath,
     );
-    expect(stdinSink.writes, <List<int>>[utf8.encode('59470\n')]);
-    _resetFontSubsetInvocation(stdinSink: stdinSink);
+    expect(stdinSink.getAndClear(), '59470\n');
+    resetFontSubsetInvocation(stdinSink: stdinSink);
 
     expect(subsetted, true);
     subsetted = await iconTreeShaker.subsetFont(
@@ -263,14 +260,16 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsetted, true);
-    expect(stdinSink.writes, <List<int>>[utf8.encode('59470\n')]);
-
-    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
-    verify(mockProcessManager.start(fontSubsetArgs)).called(2);
+    expect(stdinSink.getAndClear(), '59470\n');
+    expect(processManager, hasNoRemainingExpectations);
+    expect(
+      logger.statusText,
+      contains('Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 2500 to 1200 bytes (52.0% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.'),
+    );
   });
 
-  testWithoutContext('Does not subset a non-ttf font', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+  testWithoutContext('Does not subset a non-supported font', () async {
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -281,14 +280,15 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(stdinSink: stdinSink);
+    final CompleterIOSink stdinSink = CompleterIOSink();
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
 
     final File notAFont = fileSystem.file('input/foo/bar.txt')
       ..createSync(recursive: true)
@@ -299,13 +299,10 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsetted, false);
-
-    verifyNever(mockProcessManager.run(getConstFinderArgs(appDill.path)));
-    verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
   testWithoutContext('Does not subset an invalid ttf font', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -316,14 +313,15 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(stdinSink: stdinSink);
+    final CompleterIOSink stdinSink = CompleterIOSink();
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
 
     final File notAFont = fileSystem.file(inputPath)
       ..writeAsBytesSync(<int>[0, 1, 2]);
@@ -334,12 +332,47 @@ void main() {
     );
 
     expect(subsetted, false);
-    verifyNever(mockProcessManager.run(getConstFinderArgs(appDill.path)));
-    verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
-  testWithoutContext('Non-constant instances', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+  for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android_arm, TargetPlatform.web_javascript]) {
+    testWithoutContext('Non-constant instances $platform', () async {
+      final Environment environment = createEnvironment(<String, String>{
+        kIconTreeShakerFlag: 'true',
+        kBuildMode: 'release',
+      });
+      final File appDill = environment.buildDir.childFile('app.dill')
+        ..createSync(recursive: true);
+
+      final IconTreeShaker iconTreeShaker = IconTreeShaker(
+        environment,
+        fontManifestContent,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        targetPlatform: platform,
+      );
+
+      addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
+
+      await expectLater(
+        () => iconTreeShaker.subsetFont(
+          input: fileSystem.file(inputPath),
+          outputPath: outputPath,
+          relativePath: relativePath,
+        ),
+        throwsToolExit(
+          message:
+            'Avoid non-constant invocations of IconData or try to build'
+            ' again with --no-tree-shake-icons.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+  }
+
+  testWithoutContext('Does not add 0x32 for non-web builds', () async {
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -350,32 +383,86 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android_arm64,
     );
 
-    _addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
+    addConstFinderInvocation(
+      appDill.path,
+      // Does not contain space char
+      stdout: validConstFinderResult,
+    );
+    final CompleterIOSink stdinSink = CompleterIOSink();
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+    expect(processManager.hasRemainingExpectations, isTrue);
+    final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+    fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
 
-    await expectLater(
-      () async => await iconTreeShaker.subsetFont(
-        input: fileSystem.file(inputPath),
-        outputPath: outputPath,
-        relativePath: relativePath,
-      ),
-      throwsToolExit(
-        message:
-          'Avoid non-constant invocations of IconData or try to build'
-          ' again with --no-tree-shake-icons.',
-      ),
+    final bool result = await iconTreeShaker.subsetFont(
+      input: inputFont,
+      outputPath: outputPath,
+      relativePath: relativePath,
     );
 
-    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
-    verifyNever(mockProcessManager.start(fontSubsetArgs));
+    expect(result, isTrue);
+    final List<String> codePoints = stdinSink.getAndClear().trim().split(whitespace);
+    expect(codePoints, isNot(contains('optional:32')));
+
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('Ensures 0x32 is included for web builds', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')
+      ..createSync(recursive: true);
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.web_javascript,
+    );
+
+    addConstFinderInvocation(
+      appDill.path,
+      // Does not contain space char
+      stdout: validConstFinderResult,
+    );
+    final CompleterIOSink stdinSink = CompleterIOSink();
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+    expect(processManager.hasRemainingExpectations, isTrue);
+    final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+    fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+    final bool result = await iconTreeShaker.subsetFont(
+      input: inputFont,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(result, isTrue);
+    final List<String> codePoints = stdinSink.getAndClear().trim().split(whitespace);
+    expect(codePoints, containsAllInOrder(const <String>['59470', 'optional:32']));
+
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Non-zero font-subset exit code', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -387,30 +474,29 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
+    final CompleterIOSink stdinSink = CompleterIOSink();
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-
-    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
-    verify(mockProcessManager.start(fontSubsetArgs)).called(1);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('font-subset throws on write to sdtin', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -421,30 +507,29 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink(throwOnAdd: true);
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
+    final CompleterIOSink stdinSink = CompleterIOSink(throwOnAdd: true);
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-
-    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
-    verify(mockProcessManager.start(fontSubsetArgs)).called(1);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Invalid font manifest', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -457,28 +542,27 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-
-    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
-    verifyNever(mockProcessManager.start(fontSubsetArgs));
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('ConstFinder non-zero exit', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -491,24 +575,23 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: mockProcessManager,
+      processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: mockArtifacts,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
-    _addConstFinderInvocation(appDill.path, exitCode: -1);
+    addConstFinderInvocation(appDill.path, exitCode: -1);
 
     await expectLater(
-      () async => await iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-
-    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
-    verifyNever(mockProcessManager.start(fontSubsetArgs));
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
 
@@ -552,7 +635,7 @@ const String validFontManifestJson = '''
     "family": "MaterialIcons",
     "fonts": [
       {
-        "asset": "fonts/MaterialIcons-Regular.ttf"
+        "asset": "fonts/MaterialIcons-Regular.otf"
       }
     ]
   },
@@ -580,12 +663,8 @@ const String invalidFontManifestJson = '''
   "famly": "MaterialIcons",
   "fonts": [
     {
-      "asset": "fonts/MaterialIcons-Regular.ttf"
+      "asset": "fonts/MaterialIcons-Regular.otf"
     }
   ]
 }
 ''';
-
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
-class MockArtifacts extends Mock implements Artifacts {}

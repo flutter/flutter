@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:complex_layout/main.dart';
+import 'package:complex_layout/src/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,8 +27,7 @@ Future<void> main() async {
       ready.complete();
     },
     behavior: HitTestBehavior.opaque,
-    child: IgnorePointer(
-      ignoring: true,
+    child: const IgnorePointer(
       child: ComplexLayoutApp(),
     ),
   ));
@@ -45,7 +44,7 @@ Future<void> main() async {
 
   // remove onTap handler, enable pointer events for app
   runApp(GestureDetector(
-    child: IgnorePointer(
+    child: const IgnorePointer(
       ignoring: false,
       child: ComplexLayoutApp(),
     ),

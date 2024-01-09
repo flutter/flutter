@@ -41,10 +41,10 @@ class BenchClippedOutPictures extends SceneBuilderRecorder {
 
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {
-    final Size screenSize = window.physicalSize / window.devicePixelRatio;
+    final Size viewSize = view.physicalSize / view.devicePixelRatio;
     final Size pictureSize = Size(
-      screenSize.width / kColumns,
-      screenSize.height / kRows,
+      viewSize.width / kColumns,
+      viewSize.height / kRows,
     );
 
     // Fills a single cell with random text.
@@ -71,8 +71,8 @@ class BenchClippedOutPictures extends SceneBuilderRecorder {
 
     // Starting with the top-left cell, fill every cell.
     sceneBuilder.pushClipRect(Rect.fromCircle(
-      center: Offset(screenSize.width / 2, screenSize.height / 2),
-      radius: math.min(screenSize.width, screenSize.height) / 6,
+      center: Offset(viewSize.width / 2, viewSize.height / 2),
+      radius: math.min(viewSize.width, viewSize.height) / 6,
     ));
     sceneBuilder.pushOffset(
       5.0 * math.cos(angle),

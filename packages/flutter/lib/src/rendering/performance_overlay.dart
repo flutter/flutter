@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -59,19 +61,12 @@ enum PerformanceOverlayOption {
 /// to true.
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
-  ///
-  /// The [optionsMask], [rasterizerThreshold], [checkerboardRasterCacheImages],
-  /// and [checkerboardOffscreenLayers] arguments must not be null.
   RenderPerformanceOverlay({
     int optionsMask = 0,
     int rasterizerThreshold = 0,
     bool checkerboardRasterCacheImages = false,
     bool checkerboardOffscreenLayers = false,
-  }) : assert(optionsMask != null),
-       assert(rasterizerThreshold != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       _optionsMask = optionsMask,
+  }) : _optionsMask = optionsMask,
        _rasterizerThreshold = rasterizerThreshold,
        _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
        _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
@@ -81,9 +76,9 @@ class RenderPerformanceOverlay extends RenderBox {
   int get optionsMask => _optionsMask;
   int _optionsMask;
   set optionsMask(int value) {
-    assert(value != null);
-    if (value == _optionsMask)
+    if (value == _optionsMask) {
       return;
+    }
     _optionsMask = value;
     markNeedsPaint();
   }
@@ -94,9 +89,9 @@ class RenderPerformanceOverlay extends RenderBox {
   int get rasterizerThreshold => _rasterizerThreshold;
   int _rasterizerThreshold;
   set rasterizerThreshold(int value) {
-    assert(value != null);
-    if (value == _rasterizerThreshold)
+    if (value == _rasterizerThreshold) {
       return;
+    }
     _rasterizerThreshold = value;
     markNeedsPaint();
   }
@@ -105,9 +100,9 @@ class RenderPerformanceOverlay extends RenderBox {
   bool get checkerboardRasterCacheImages => _checkerboardRasterCacheImages;
   bool _checkerboardRasterCacheImages;
   set checkerboardRasterCacheImages(bool value) {
-    assert(value != null);
-    if (value == _checkerboardRasterCacheImages)
+    if (value == _checkerboardRasterCacheImages) {
       return;
+    }
     _checkerboardRasterCacheImages = value;
     markNeedsPaint();
   }
@@ -116,9 +111,9 @@ class RenderPerformanceOverlay extends RenderBox {
   bool get checkerboardOffscreenLayers => _checkerboardOffscreenLayers;
   bool _checkerboardOffscreenLayers;
   set checkerboardOffscreenLayers(bool value) {
-    assert(value != null);
-    if (value == _checkerboardOffscreenLayers)
+    if (value == _checkerboardOffscreenLayers) {
       return;
+    }
     _checkerboardOffscreenLayers = value;
     markNeedsPaint();
   }
@@ -143,11 +138,13 @@ class RenderPerformanceOverlay extends RenderBox {
     const double kDefaultGraphHeight = 80.0;
     double result = 0.0;
     if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0))
+        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0)) {
       result += kDefaultGraphHeight;
+    }
     if ((optionsMask | (1 << PerformanceOverlayOption.displayEngineStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0))
+        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0)) {
       result += kDefaultGraphHeight;
+    }
     return result;
   }
 
@@ -162,8 +159,9 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   @override
-  void performResize() {
-    size = constraints.constrain(Size(double.infinity, _intrinsicHeight));
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return constraints.constrain(Size(double.infinity, _intrinsicHeight));
   }
 
   @override

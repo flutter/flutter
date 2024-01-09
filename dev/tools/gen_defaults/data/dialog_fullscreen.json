@@ -1,0 +1,27 @@
+{
+  "version": "v0_162",
+
+  "md.comp.full-screen-dialog.container.color": "surface",
+  "md.comp.full-screen-dialog.container.elevation": "md.sys.elevation.level0",
+  "md.comp.full-screen-dialog.container.shape": "md.sys.shape.corner.none",
+  "md.comp.full-screen-dialog.header.action.focus.label-text.color": "primary",
+  "md.comp.full-screen-dialog.header.action.focus.state-layer.color": "primary",
+  "md.comp.full-screen-dialog.header.action.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
+  "md.comp.full-screen-dialog.header.action.hover.label-text.color": "primary",
+  "md.comp.full-screen-dialog.header.action.hover.state-layer.color": "primary",
+  "md.comp.full-screen-dialog.header.action.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
+  "md.comp.full-screen-dialog.header.action.label-text.color": "primary",
+  "md.comp.full-screen-dialog.header.action.label-text.text-style": "labelLarge",
+  "md.comp.full-screen-dialog.header.action.pressed.label-text.color": "primary",
+  "md.comp.full-screen-dialog.header.action.pressed.state-layer.color": "primary",
+  "md.comp.full-screen-dialog.header.action.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
+  "md.comp.full-screen-dialog.header.container.color": "surface",
+  "md.comp.full-screen-dialog.header.container.elevation": "md.sys.elevation.level0",
+  "md.comp.full-screen-dialog.header.container.height": 56.0,
+  "md.comp.full-screen-dialog.header.container.surface-tint-layer.color": "surfaceTint",
+  "md.comp.full-screen-dialog.header.headline.color": "onSurface",
+  "md.comp.full-screen-dialog.header.headline.text-style": "titleLarge",
+  "md.comp.full-screen-dialog.header.icon.color": "onSurface",
+  "md.comp.full-screen-dialog.header.icon.size": 24.0,
+  "md.comp.full-screen-dialog.header.on-scroll.container.elevation": "md.sys.elevation.level2"
+}

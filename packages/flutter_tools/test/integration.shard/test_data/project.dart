@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../test_utils.dart';
+import 'deferred_components_config.dart';
 
 const String _kDefaultHtml  = '''
 <html>
@@ -22,24 +19,49 @@ const String _kDefaultHtml  = '''
 ''';
 
 abstract class Project {
-  Directory dir;
+  /// Creates a flutter Project for testing.
+  ///
+  /// If passed, `indexHtml` is used as the contents of the web/index.html file.
+  Project({this.indexHtml = _kDefaultHtml});
+
+  late Directory dir;
 
   String get pubspec;
-  String get main;
-  String get test => null;
+  String? get main => null;
+  String? get test => null;
+  String? get generatedFile => null;
+  DeferredComponentsConfig? get deferredComponents => null;
 
   Uri get mainDart => Uri.parse('package:test/main.dart');
 
+  /// The contents for the index.html file of this `Project`.
+  ///
+  /// Defaults to [_kDefaultHtml] via the Project constructor.
+  ///
+  /// (Used by [HotReloadProject].)
+  final String indexHtml;
+
   Future<void> setUpIn(Directory dir) async {
     this.dir = dir;
-    writeFile(globals.fs.path.join(dir.path, 'pubspec.yaml'), pubspec);
+    writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspec);
+    final String? main = this.main;
     if (main != null) {
-      writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), main);
+      writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), main);
     }
+    final String? test = this.test;
     if (test != null) {
-      writeFile(globals.fs.path.join(dir.path, 'test', 'test.dart'), test);
+      writeFile(fileSystem.path.join(dir.path, 'test', 'test.dart'), test);
     }
-    writeFile(globals.fs.path.join(dir.path, 'web', 'index.html'), _kDefaultHtml);
+    final String? generatedFile = this.generatedFile;
+    if (generatedFile != null) {
+      writeFile(fileSystem.path.join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'), generatedFile);
+    }
+    deferredComponents?.setUpIn(dir);
+
+    // Setup for different flutter web initializations
+    writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
+    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
+    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
     writePackages(dir.path);
     await getPackages(dir.path);
   }

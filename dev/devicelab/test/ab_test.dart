@@ -3,15 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:flutter_devicelab/framework/ab.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 
 import 'common.dart';
 
 void main() {
   test('ABTest', () {
-    final ABTest ab = ABTest('engine', 'test');
+    final ABTest ab = ABTest(localEngine: 'engine', localEngineHost: 'engine', taskName: 'test');
 
     for (int i = 0; i < 5; i++) {
-      ab.addAResult(<String, dynamic>{
+      final TaskResult aResult = TaskResult.fromJson(<String, dynamic>{
+        'success': true,
         'data': <String, dynamic>{
           'i': i,
           'j': 10 * i,
@@ -19,14 +21,16 @@ void main() {
         },
         'benchmarkScoreKeys': <String>['i', 'j'],
       });
-
-      ab.addBResult(<String, dynamic>{
+      ab.addAResult(aResult);
+      final TaskResult bResult = TaskResult.fromJson(<String, dynamic>{
+        'success': true,
         'data': <String, dynamic>{
           'i': i + 1,
           'k': 10 * i + 1,
         },
         'benchmarkScoreKeys': <String>['i', 'k'],
       });
+      ab.addBResult(bResult);
     }
     ab.finalize();
 

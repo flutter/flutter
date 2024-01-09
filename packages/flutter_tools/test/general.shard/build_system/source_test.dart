@@ -8,12 +8,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/build_system/source.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
 
 final Platform windowsPlatform = FakePlatform(
@@ -21,9 +19,9 @@ final Platform windowsPlatform = FakePlatform(
 );
 
 void main() {
-  Testbed testbed;
-  SourceVisitor visitor;
-  Environment environment;
+  late Testbed testbed;
+  late SourceVisitor visitor;
+  late Environment environment;
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -33,18 +31,18 @@ void main() {
       environment = Environment.test(
         globals.fs.currentDirectory,
         outputDir: outputs,
-        artifacts: globals.artifacts, // using real artifacts
+        artifacts: globals.artifacts!, // using real artifacts
         processManager: FakeProcessManager.any(),
         fileSystem: globals.fs,
+        // engineVersion being null simulates a local engine.
         logger: globals.logger,
-        engineVersion: null, // simulate a local engine.
       );
       visitor = SourceVisitor(environment);
       environment.buildDir.createSync(recursive: true);
     });
   });
 
-  test('configures implicit vs explict correctly', () => testbed.run(() {
+  test('configures implicit vs explicit correctly', () => testbed.run(() {
     expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
     expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
   }));
@@ -217,10 +215,10 @@ void main() {
   }));
 
   test('Non-local engine builds use the engine.version file as an Artifact dependency', () => testbed.run(() {
-    final MockArtifacts artifacts = MockArtifacts();
+    final Artifacts artifacts = Artifacts.test();
     final Environment environment = Environment.test(
       globals.fs.currentDirectory,
-      artifacts: artifacts, // using real artifacts
+      artifacts: artifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -232,9 +230,5 @@ void main() {
     fizzSource.accept(visitor);
 
     expect(visitor.sources.single.path, contains('engine.version'));
-    verifyNever(artifacts.getArtifactPath(
-      any, platform: anyNamed('platform'), mode: anyNamed('mode')));
   }));
 }
-
-class MockArtifacts extends Mock implements Artifacts {}

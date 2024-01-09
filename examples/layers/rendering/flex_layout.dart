@@ -7,6 +7,7 @@
 
 import 'package:flutter/rendering.dart';
 
+import 'src/binding.dart';
 import 'src/solid_color_box.dart';
 
 void main() {
@@ -48,7 +49,7 @@ void main() {
     subrow.add(RenderSolidColorBox(const Color(0x7FCCFFFF), desiredSize: const Size(30.0, 40.0)));
     row.add(subrow);
     table.add(row);
-    final FlexParentData rowParentData = row.parentData as FlexParentData;
+    final FlexParentData rowParentData = row.parentData! as FlexParentData;
     rowParentData.flex = 1;
   }
 
@@ -65,13 +66,13 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     table.add(RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
-    final RenderFlex row = RenderFlex(direction: Axis.horizontal, textDirection: TextDirection.ltr);
+    final RenderFlex row = RenderFlex(textDirection: TextDirection.ltr);
     row.add(RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: const Size(80.0, 60.0)));
     row.add(RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: const Size(64.0, 60.0)));
     row.add(RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: const Size(160.0, 60.0)));
     row.mainAxisAlignment = justify;
     table.add(row);
-    final FlexParentData rowParentData = row.parentData as FlexParentData;
+    final FlexParentData rowParentData = row.parentData! as FlexParentData;
     rowParentData.flex = 1;
   }
 
@@ -86,5 +87,5 @@ void main() {
     child: RenderPadding(child: table, padding: const EdgeInsets.symmetric(vertical: 50.0)),
   );
 
-  RenderingFlutterBinding(root: root);
+  ViewRenderingFlutterBinding(root: root).scheduleFrame();
 }

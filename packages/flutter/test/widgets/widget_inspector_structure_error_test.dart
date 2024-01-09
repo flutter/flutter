@@ -2,87 +2,85 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widget_inspector_test_utils.dart';
 
 void main() {
   StructureErrorTestWidgetInspectorService.runTests();
 }
 
-typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object>> Function(Map<String, String> parameters);
-
-class StructureErrorTestWidgetInspectorService extends Object with WidgetInspectorService {
-  final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
-
-  final Map<String, List<Map<Object, Object>>> eventsDispatched = <String, List<Map<Object, Object>>>{};
-
-  @override
-  void registerServiceExtension({
-    @required String name,
-    @required FutureOr<Map<String, Object>> callback(Map<String, String> parameters),
-  }) {
-    assert(!extensions.containsKey(name));
-    extensions[name] = callback;
-  }
-
-  @override
-  void postEvent(String eventKind, Map<Object, Object> eventData) {
-    getEventsDispatched(eventKind).add(eventData);
-  }
-
-  List<Map<Object, Object>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object>>[]);
-  }
-
-  Iterable<Map<Object, Object>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
-      .where((Map<Object, Object> event) => event['extension'] == extensionName);
-  }
-
-  Future<String> testBoolExtension(String name, Map<String, String> arguments) async {
-    expect(extensions, contains(name));
-    // Encode and decode to JSON to match behavior using a real service
-    // extension where only JSON is allowed.
-    return json.decode(json.encode(await extensions[name](arguments)))['enabled'] as String;
-  }
-
-
+class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorService {
   static void runTests() {
     final StructureErrorTestWidgetInspectorService service = StructureErrorTestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
-    test('ext.flutter.inspector.structuredErrors still report error to original on error', () async {
-      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    test('ext.flutter.inspector.structuredErrors - custom FlutterError.onError', () async {
+      // Regression test for https://github.com/flutter/flutter/issues/41540
 
-      FlutterErrorDetails actualError;
-      // Creates a spy onError. This spy needs to be set before widgets binding
-      // initializes.
-      FlutterError.onError = (FlutterErrorDetails details) {
-        actualError = details;
-      };
+      // Ensures that
+      //  * structured errors are enabled by default
+      //  * FlutterError.onError without FlutterError.presentError doesn't present structured errors
+      //  * FlutterError.onError with FlutterError.presentError does present structured errors
+      //  * disabling structured errors sets the default FlutterError.presentError
 
-      WidgetsFlutterBinding.ensureInitialized();
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+
       try {
-        // Enables structured errors.
-        expect(await service.testBoolExtension(
-          'structuredErrors', <String, String>{'enabled': 'true'}),
-          equals('true'));
+        expect(service.dispatchedEvents('Flutter.Error'), isEmpty);
 
-        // Creates an error.
-        final FlutterErrorDetails expectedError = FlutterErrorDetailsForRendering(
+        // Set callback that doesn't call presentError.
+        bool onErrorCalled = false;
+        FlutterError.onError = (FlutterErrorDetails details) {
+          onErrorCalled = true;
+        };
+
+        // Get the service registered.
+        WidgetsFlutterBinding.ensureInitialized();
+
+        final FlutterErrorDetails expectedError = FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
         );
         FlutterError.reportError(expectedError);
 
-        // Validates the spy still received an error.
-        expect(actualError, expectedError);
+        // Verify structured errors are not shown.
+        expect(onErrorCalled, true);
+        expect(service.dispatchedEvents('Flutter.Error'), isEmpty);
+
+        // Set callback that calls presentError.
+        onErrorCalled = false;
+        FlutterError.onError = (FlutterErrorDetails details) {
+          FlutterError.presentError(details);
+          onErrorCalled = true;
+        };
+
+        FlutterError.reportError(expectedError);
+
+        // Verify structured errors are shown.
+        expect(onErrorCalled, true);
+        // Structured errors are not supported on web.
+        if (!kIsWeb) {
+          expect(service.dispatchedEvents('Flutter.Error'), hasLength(1));
+        } else {
+          expect(service.dispatchedEvents('Flutter.Error'), isEmpty);
+        }
+
+        // Verify disabling structured errors sets the default FlutterError.presentError
+        expect(
+          await service.testBoolExtension('structuredErrors', <String, String>{'enabled': 'true'}),
+          equals('true'),
+        );
+        expect(FlutterError.presentError, isNot(equals(oldHandler)));
+
+        expect(
+          await service.testBoolExtension('structuredErrors', <String, String>{'enabled': 'false'}),
+          equals('false'),
+        );
+        expect(FlutterError.presentError, equals(oldHandler));
       } finally {
         FlutterError.onError = oldHandler;
       }

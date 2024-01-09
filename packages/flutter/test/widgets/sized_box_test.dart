@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -46,7 +47,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -56,18 +57,16 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
-        child: SizedBox(
+        child: SizedBox.shrink(
           key: patient,
-          width: 0.0,
-          height: 0.0,
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -78,7 +77,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
+    expect(patient.currentContext!.size, equals(const Size(100.0, 100.0)));
 
     await tester.pumpWidget(
       Center(
@@ -89,7 +88,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -98,7 +97,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -107,7 +106,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
@@ -121,7 +120,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -132,19 +131,17 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
-        child: SizedBox(
+        child: SizedBox.shrink(
           key: patient,
-          width: 0.0,
-          height: 0.0,
           child: Container(),
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -156,7 +153,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
+    expect(patient.currentContext!.size, equals(const Size(100.0, 100.0)));
 
     await tester.pumpWidget(
       Center(
@@ -168,7 +165,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -178,7 +175,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -188,6 +185,20 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
+  });
+
+  testWidgets('SizedBox.square tests', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const SizedBox.square(
+          dimension: 100,
+          child: SizedBox.shrink(),
+        )
+    );
+
+    expect(
+      tester.renderObject<RenderConstrainedBox>(find.byType(SizedBox).first).additionalConstraints,
+      BoxConstraints.tight(const Size.square(100)),
+    );
   });
 }

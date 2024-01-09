@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import io.flutter.plugin.common.MethodCall;
@@ -20,13 +21,13 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
 public class SimplePlatformView implements PlatformView, MethodChannel.MethodCallHandler {
-    private final View view;
+    private final FrameLayout view;
     private final MethodChannel methodChannel;
-    private final io.flutter.integration.platformviews.TouchPipe touchPipe;
+    private final TouchPipe touchPipe;
 
     SimplePlatformView(Context context, MethodChannel methodChannel) {
         this.methodChannel = methodChannel;
-        view = new View(context) {
+        view = new FrameLayout(context) {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
                 return true;
@@ -34,7 +35,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
         };
         view.setBackgroundColor(0xff0000ff);
         this.methodChannel.setMethodCallHandler(this);
-        touchPipe = new io.flutter.integration.platformviews.TouchPipe(this.methodChannel, view);
+        touchPipe = new TouchPipe(this.methodChannel, view);
     }
 
     @Override
@@ -48,7 +49,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        switch(methodCall.method) {
+         switch (methodCall.method) {
             case "pipeTouchEvents":
                 touchPipe.enable();
                 result.success(null);

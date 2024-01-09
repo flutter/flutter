@@ -19,6 +19,13 @@
   "copyButtonLabel": "Nusxa olish",
   "pasteButtonLabel": "Joylash",
   "selectAllButtonLabel": "Barchasini tanlash",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Yopish"
+  "tabSemanticsLabel": "$tabCount varaqdan $tabIndex",
+  "modalBarrierDismissLabel": "Yopish",
+  "searchTextFieldPlaceholderLabel": "Qidiruv",
+  "noSpellCheckReplacementsLabel": "Almashtirish uchun soʻz topilmadi",
+  "menuDismissLabel": "Menyuni yopish",
+  "lookUpButtonLabel": "Tepaga qarang",
+  "searchWebButtonLabel": "Internetdan qidirish",
+  "shareButtonLabel": "Ulashish…",
+  "clearButtonLabel": "Clear"
 }

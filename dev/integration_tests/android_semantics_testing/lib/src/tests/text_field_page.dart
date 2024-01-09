@@ -10,6 +10,8 @@ export 'text_field_constants.dart';
 
 /// A page with a normal text field and a password field.
 class TextFieldPage extends StatefulWidget {
+  const TextFieldPage({super.key});
+
   @override
   State<StatefulWidget> createState() => _TextFieldPageState();
 }
@@ -30,14 +32,12 @@ class _TextFieldPageState extends State<TextFieldPage> {
           TextField(
             key: normalTextFieldKey,
             controller: _normalController,
-            autofocus: false,
           ),
           const Spacer(),
           TextField(
             key: passwordTextFieldKey,
             controller: _passwordController,
             obscureText: true,
-            autofocus: false,
           ),
         ],
       ),

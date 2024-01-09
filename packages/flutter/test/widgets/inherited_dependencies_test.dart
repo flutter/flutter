@@ -17,14 +17,13 @@ void main() {
         return const SizedBox();
       }),
     ));
-    final InheritedElement element = key.currentContext as InheritedElement;
+    final InheritedElement element = key.currentContext! as InheritedElement;
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'Directionality-[GlobalKey#00000](textDirection: ltr)\n'
         '└Builder(dependencies: [Directionality-[GlobalKey#00000]])\n'
-        ' └SizedBox(renderObject: RenderConstrainedBox#00000)\n'
-        ''
+        ' └SizedBox(renderObject: RenderConstrainedBox#00000)\n',
       ),
     );
 
@@ -41,8 +40,7 @@ void main() {
       equalsIgnoringHashCodes(
         'Directionality-[GlobalKey#00000](textDirection: rtl)\n'
         '└Builder(dependencies: [Directionality-[GlobalKey#00000]])\n'
-        ' └SizedBox(renderObject: RenderConstrainedBox#00000)\n'
-        ''
+        ' └SizedBox(renderObject: RenderConstrainedBox#00000)\n',
       ),
     );
   });

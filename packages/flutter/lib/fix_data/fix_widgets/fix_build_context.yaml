@@ -1,0 +1,169 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are for BuildContext from the Widgets library. *
+#   For fixes to
+#     * Actions: fix_actions.yaml
+#     * Element: fix_element.yaml
+#     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
+#     * Widgets (general): fix_widgets.yaml
+version: 1
+transforms:
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Rename to 'dependOnInheritedElement'"
+    date: 2019-11-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      inClass: 'BuildContext'
+      method: 'inheritFromElement'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedElement'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Migrate to 'dependOnInheritedWidgetOfExactType'"
+    date: 2019-11-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      inClass: 'BuildContext'
+      method: 'inheritFromWidgetOfExactType'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedWidgetOfExactType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Migrate to 'getElementForInheritedWidgetOfExactType'"
+    date: 2019-11-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      inClass: 'BuildContext'
+      method: 'ancestorInheritedElementForWidgetOfExactType'
+    changes:
+      - kind: 'rename'
+        newName: 'getElementForInheritedWidgetOfExactType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Migrate to 'findAncestorWidgetOfExactType'"
+    date: 2019-11-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      inClass: 'BuildContext'
+      method: 'ancestorWidgetOfExactType'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorWidgetOfExactType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Migrate to 'findAncestorStateOfType'"
+    date: 2019-11-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      inClass: 'BuildContext'
+      method: 'ancestorStateOfType'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorStateOfType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0].typeArguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Migrate to 'rootAncestorStateOfType'"
+    date: 2019-11-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      inClass: 'BuildContext'
+      method: 'rootAncestorStateOfType'
+    changes:
+      - kind: 'rename'
+        newName: 'findRootAncestorStateOfType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0].typeArguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: "Migrate to 'ancestorRenderObjectOfType'"
+    date: 2019-11-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      inClass: 'BuildContext'
+      method: 'ancestorRenderObjectOfType'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorRenderObjectOfType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0].typeArguments[0]'
+
+# Before adding a new fix: read instructions at the top of this file.

@@ -17,8 +17,15 @@
   "timerPickerSecondLabelOther": "sek.",
   "cutButtonLabel": "Klip",
   "copyButtonLabel": "Kopiér",
-  "pasteButtonLabel": "Sæt ind",
-  "selectAllButtonLabel": "Vælg alle",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Afvis"
+  "pasteButtonLabel": "Indsæt",
+  "clearButtonLabel": "Clear",
+  "selectAllButtonLabel": "Vælg alt",
+  "tabSemanticsLabel": "Fane $tabIndex af $tabCount",
+  "modalBarrierDismissLabel": "Afvis",
+  "searchTextFieldPlaceholderLabel": "Søg",
+  "noSpellCheckReplacementsLabel": "Der blev ikke fundet nogen erstatninger",
+  "menuDismissLabel": "Luk menu",
+  "lookUpButtonLabel": "Slå op",
+  "searchWebButtonLabel": "Søg på nettet",
+  "shareButtonLabel": "Del…"
 }

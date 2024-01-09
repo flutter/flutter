@@ -2,34 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
+import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
-  const FirstWidget({ Key key }) : super(key: key);
+  const FirstWidget({ super.key });
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/second');
       },
-      child: Container(
-        color: const Color(0xFFFFFF00),
-        child: const Text('X'),
+      child: const ColoredBox(
+        color: Color(0xFFFFFF00),
+        child: Text('X'),
       ),
     );
   }
 }
 
 class SecondWidget extends StatefulWidget {
-  const SecondWidget({ Key key }) : super(key: key);
+  const SecondWidget({ super.key });
   @override
   SecondWidgetState createState() => SecondWidgetState();
 }
@@ -39,9 +42,9 @@ class SecondWidgetState extends State<SecondWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.pop(context),
-      child: Container(
-        color: const Color(0xFFFF00FF),
-        child: const Text('Y'),
+      child: const ColoredBox(
+        color: Color(0xFFFF00FF),
+        child: Text('Y'),
       ),
     );
   }
@@ -50,7 +53,7 @@ class SecondWidgetState extends State<SecondWidget> {
 typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
-  const ThirdWidget({ Key key, this.targetKey, this.onException }) : super(key: key);
+  const ThirdWidget({ super.key, required this.targetKey, required this.onException });
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -72,10 +75,10 @@ class ThirdWidget extends StatelessWidget {
 }
 
 class OnTapPage extends StatelessWidget {
-  const OnTapPage({ Key key, this.id, this.onTap }) : super(key: key);
+  const OnTapPage({ super.key, required this.id, this.onTap });
 
   final String id;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +87,8 @@ class OnTapPage extends StatelessWidget {
       body: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Container(
-          child: Center(
-            child: Text(id, style: Theme.of(context).textTheme.headline3),
-          ),
+        child: Center(
+          child: Text(id, style: Theme.of(context).textTheme.displaySmall),
         ),
       ),
     );
@@ -95,8 +96,7 @@ class OnTapPage extends StatelessWidget {
 }
 
 class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
-  SlideInOutPageRoute({WidgetBuilder bodyBuilder, RouteSettings settings}) : super(
-    settings: settings,
+  SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings}) : super(
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
     transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
         return SlideTransition(
@@ -116,7 +116,7 @@ class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
   );
 
   @override
-  AnimationController get controller => super.controller;
+  AnimationController? get controller => super.controller;
 }
 
 void main() {
@@ -185,6 +185,99 @@ void main() {
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
+  testWidgets('Navigator can push Route created through page class as Pageless route', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: nav,
+        home: const Scaffold(
+          body: Text('home'),
+        )
+      )
+    );
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    nav.currentState!.push<void>(page.createRoute(nav.currentContext!));
+    await tester.pumpAndSettle();
+    expect(find.text('page'), findsOneWidget);
+
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromView(tester.view),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: const <Page<void>>[page],
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      ),
+    );
+    // Default to hard edge.
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromView(tester.view),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: const <Page<void>>[page],
+            clipBehavior: Clip.none,
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
+  });
+
+  testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
+    final List<Page<void>> pages = <Page<void>>[
+      const ZeroTransitionPage(name: 'Page 1'),
+      const ZeroTransitionPage(name: 'Page 2'),
+    ];
+    final List<NavigatorObservation> observations = <NavigatorObservation>[];
+
+    final TestObserver observer = TestObserver()
+      ..onPopped = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'pop',
+          ),
+        );
+      };
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          key: navigator,
+          pages: pages,
+          observers: <NavigatorObserver>[observer],
+          onPopPage: (Route<dynamic> route, dynamic result) {
+            pages.removeLast();
+            return route.didPop(result);
+          },
+        ),
+      ),
+    );
+
+    navigator.currentState!.pop();
+    await tester.pump();
+
+    expect(observations.length, 1);
+    expect(observations[0].current, 'Page 2');
+    expect(observations[0].previous, 'Page 1');
+  });
+
   testWidgets('Navigator.of rootNavigator finds root Navigator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -201,25 +294,25 @@ void main() {
                   if (settings.name == '/') {
                     return MaterialPageRoute<void>(
                       builder: (BuildContext context) {
-                        return RaisedButton(
+                        return ElevatedButton(
                           child: const Text('Next'),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (BuildContext context) {
-                                  return RaisedButton(
+                                  return ElevatedButton(
                                     child: const Text('Inner page'),
                                     onPressed: () {
                                       Navigator.of(context, rootNavigator: true).push(
                                         MaterialPageRoute<void>(
                                           builder: (BuildContext context) {
                                             return const Text('Dialog');
-                                          }
+                                          },
                                         ),
                                       );
                                     },
                                   );
-                                }
+                                },
                               ),
                             );
                           },
@@ -279,52 +372,93 @@ void main() {
     expect(log, isEmpty);
     await tester.tap(find.text('left'));
     expect(log, equals(<String>['left']));
-    await tester.tap(find.text('right'));
+    await tester.tap(find.text('right'), warnIfMissed: false);
     expect(log, equals(<String>['left']));
   });
 
-   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
-     final List<String> log = <String>[];
-     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) {
-         return Row(
-           children: <Widget>[
-             GestureDetector(
-               onTap: () {
-                 log.add('left');
-                 Navigator.pushNamed(context, '/second');
-               },
-               child: const Text('left')
-             ),
-             GestureDetector(
-               onTap: () { log.add('right'); },
-               child: const Text('right'),
-             ),
-           ]
-         );
-       },
-       '/second': (BuildContext context) => Container(),
-     };
-     await tester.pumpWidget(MaterialApp(routes: routes));
-     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
-     expect(log, isEmpty);
-     await tester.tap(find.text('left'));
-     expect(log, equals(<String>['left']));
-     await gesture.up();
-     expect(log, equals(<String>['left']));
+  testWidgets('pushnamed can handle Object as type', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+    await tester.pumpWidget(MaterialApp(navigatorKey: nav, routes: routes));
+    expect(find.text('/'), findsOneWidget);
+    Error? error;
+    try {
+      nav.currentState!.pushNamed<Object>('/second');
+    } on Error catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+  });
 
-     // This test doesn't work because it relies on part of the pointer event
-     // dispatching mechanism that is mocked out in testing. We should use the real
-     // mechanism even during testing and enable this test.
-     // TODO(abarth): Test more of the real code and enable this test.
-     // See https://github.com/flutter/flutter/issues/4771.
-   }, skip: true);
+  testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) {
+        return Row(
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                log.add('left');
+                Navigator.pushNamed(context, '/second');
+              },
+              child: const Text('left'),
+            ),
+            GestureDetector(
+              onTap: () { log.add('right'); },
+              child: const Text('right'),
+            ),
+          ],
+        );
+      },
+      '/second': (BuildContext context) => Container(),
+    };
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
+    expect(log, isEmpty);
+    await tester.tap(find.text('left'), pointer: 1);
+    expect(log, equals(<String>['left']));
+    await gesture.up();
+    expect(log, equals(<String>['left']));
+  });
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed(context, '/B'); }),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop(context); }),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+  });
+
+  testWidgets('popAndPushNamed with explicit void type parameter', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed<void>(context, '/A'); }),
+      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed<void, void>(context, '/B'); }),
+      '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop<void>(context); }),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -355,13 +489,13 @@ void main() {
     bool isPushed = false;
     bool isPopped = false;
     final TestObserver observer = TestObserver()
-      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         // Pushes the initial route.
         expect(route is PageRoute && route.settings.name == '/', isTrue);
         expect(previousRoute, isNull);
         isPushed = true;
       }
-      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onPopped = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         isPopped = true;
       };
 
@@ -376,7 +510,7 @@ void main() {
 
     isPushed = false;
     isPopped = false;
-    observer.onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+    observer.onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
       expect(route is PageRoute && route.settings.name == '/A', isTrue);
       expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
       isPushed = true;
@@ -392,7 +526,7 @@ void main() {
 
     isPushed = false;
     isPopped = false;
-    observer.onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+    observer.onPopped = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
       expect(route is PageRoute && route.settings.name == '/A', isTrue);
       expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
       isPopped = true;
@@ -416,10 +550,10 @@ void main() {
     bool isPopped = false;
     final TestObserver observer1 = TestObserver();
     final TestObserver observer2 = TestObserver()
-      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         isPushed = true;
       }
-      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onPopped = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         isPopped = true;
       };
 
@@ -462,14 +596,14 @@ void main() {
     };
     final List<NavigatorObservation> observations = <NavigatorObservation>[];
     final TestObserver observer = TestObserver()
-      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         // Pushes the initial route.
         observations.add(
           NavigatorObservation(
-            current: route?.settings?.name,
-            previous: previousRoute?.settings?.name,
-            operation: 'push'
-          )
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'push',
+          ),
         );
       };
 
@@ -491,6 +625,159 @@ void main() {
     expect(observations[2].operation, 'push');
     expect(observations[2].current, '/A/B');
     expect(observations[2].previous, '/A');
+  });
+
+  testWidgets('$Route  dispatches memory events', (WidgetTester tester) async {
+    Future<void> createAndDisposeRoute() async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          home: const Scaffold(
+            body: Text('home'),
+          )
+        )
+      );
+
+      nav.currentState!.push(MaterialPageRoute<void>(builder: (_) => const Placeholder())); // This should create a route
+      await tester.pumpAndSettle();
+
+      nav.currentState!.pop();
+      await tester.pumpAndSettle(); // this should dispose the route.
+    }
+
+    final List<ObjectEvent> events = <ObjectEvent>[];
+    void listener(ObjectEvent event) {
+      if (event.object.runtimeType == MaterialPageRoute<void>) {
+        events.add(event);
+      }
+    }
+    FlutterMemoryAllocations.instance.addListener(listener);
+
+    await createAndDisposeRoute();
+    expect(events, hasLength(2));
+    expect(events.first, isA<ObjectCreated>());
+    expect(events.last, isA<ObjectDisposed>());
+
+    FlutterMemoryAllocations.instance.removeListener(listener);
+  });
+
+  testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
+    // Regression Test for https://github.com/flutter/flutter/issues/61346.
+    Widget buildNavigator() {
+      return Navigator(
+        pages: const <Page<void>>[
+          MaterialPage<void>(
+            child: Placeholder(),
+          ),
+        ],
+        onPopPage: (Route<dynamic> route, dynamic result) => false,
+      );
+    }
+    final TabController controller = TabController(length: 3, vsync: tester);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestDependencies(
+        child: TabBarView(
+          controller: controller,
+          children: <Widget>[
+            buildNavigator(),
+            buildNavigator(),
+            buildNavigator(),
+          ],
+        ),
+      ),
+    );
+
+    // This test should finish without crashing.
+    controller.index = 2;
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Page-based route pop before push finishes', (WidgetTester tester) async {
+    List<Page<void>> pages = <Page<void>>[const MaterialPage<void>(child: Text('Page 1'))];
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    Widget buildNavigator() {
+      return Navigator(
+        key: navigator,
+        pages: pages,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          pages.removeLast();
+          return route.didPop(result);
+        },
+      );
+    }
+    await tester.pumpWidget(
+      TestDependencies(
+        child: buildNavigator(),
+      ),
+    );
+    expect(find.text('Page 1'), findsOneWidget);
+    pages = pages.toList();
+    pages.add(const MaterialPage<void>(child: Text('Page 2')));
+
+    await tester.pumpWidget(
+      TestDependencies(
+        child: buildNavigator(),
+      ),
+    );
+    // This test should finish without crashing.
+    await tester.pump();
+    await tester.pump();
+
+    navigator.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsOneWidget);
+  });
+
+  testWidgets('Pages update does update overlay correctly', (WidgetTester tester) async {
+    // Regression Test for https://github.com/flutter/flutter/issues/64941.
+    List<Page<void>> pages = const <Page<void>>[
+      MaterialPage<void>(
+        key:  ValueKey<int>(0),
+        child: Text('page 0'),
+      ),
+      MaterialPage<void>(
+        key: ValueKey<int>(1),
+        child: Text('page 1'),
+      ),
+    ];
+    Widget buildNavigator() {
+      return Navigator(
+        pages: pages,
+        onPopPage: (Route<dynamic> route, dynamic result) => false,
+      );
+    }
+    await tester.pumpWidget(
+      TestDependencies(
+        child: buildNavigator(),
+      ),
+    );
+
+    expect(find.text('page 1'), findsOneWidget);
+    expect(find.text('page 0'), findsNothing);
+
+    // Removes the first page.
+    pages = const <Page<void>>[
+      MaterialPage<void>(
+        key: ValueKey<int>(1),
+        child: Text('page 1'),
+      ),
+    ];
+
+    await tester.pumpWidget(
+      TestDependencies(
+        child: buildNavigator(),
+      ),
+    );
+    // Overlay updates correctly.
+    expect(find.text('page 1'), findsOneWidget);
+    expect(find.text('page 0'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.text('page 1'), findsOneWidget);
+    expect(find.text('page 0'), findsNothing);
   });
 
   testWidgets('replaceNamed replaces', (WidgetTester tester) async {
@@ -522,13 +809,13 @@ void main() {
         id: '/',
         onTap: () {
           Navigator.pushNamed(context, '/A');
-        }
+        },
       ),
       '/A': (BuildContext context) => OnTapPage(
         id: 'A',
         onTap: () {
           Navigator.pushNamed(context, '/B');
-        }
+        },
       ),
       '/B': (BuildContext context) => OnTapPage(
         id: 'B',
@@ -539,67 +826,67 @@ void main() {
       '/C': (BuildContext context) => OnTapPage(
         id: 'C',
         onTap: () {
-          Navigator.removeRoute(context, routes['/']);
+          Navigator.removeRoute(context, routes['/']!);
         },
       ),
     };
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        final SlideInOutPageRoute<dynamic> ret = SlideInOutPageRoute<dynamic>(bodyBuilder: builders[settings.name], settings: settings);
-        routes[settings.name] = ret;
+        final SlideInOutPageRoute<dynamic> ret = SlideInOutPageRoute<dynamic>(bodyBuilder: builders[settings.name]!, settings: settings);
+        routes[settings.name!] = ret;
         return ret;
-      }
+      },
     ));
     await tester.pumpAndSettle();
     await tester.tap(find.text('/'));
     await tester.pumpAndSettle();
-    final double a2 = routes['/A'].secondaryAnimation.value;
+    final double a2 = routes['/A']!.secondaryAnimation!.value;
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 16));
-    expect(routes['/A'].secondaryAnimation.value, greaterThan(a2));
+    expect(routes['/A']!.secondaryAnimation!.value, greaterThan(a2));
     await tester.pumpAndSettle();
     await tester.tap(find.text('B'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    expect(routes['/A'].secondaryAnimation.value, equals(1.0));
+    expect(routes['/A']!.secondaryAnimation!.value, equals(1.0));
     await tester.tap(find.text('C'));
     await tester.pumpAndSettle();
     expect(find.text('C'), isOnstage);
-    expect(routes['/A'].secondaryAnimation.value, equals(routes['/C'].animation.value));
-    final AnimationController controller = routes['/C'].controller;
+    expect(routes['/A']!.secondaryAnimation!.value, equals(routes['/C']!.animation!.value));
+    final AnimationController controller = routes['/C']!.controller!;
     controller.value = 1 - controller.value;
-    expect(routes['/A'].secondaryAnimation.value, equals(routes['/C'].animation.value));
+    expect(routes['/A']!.secondaryAnimation!.value, equals(routes['/C']!.animation!.value));
   });
 
-  testWidgets('new route removed from navigator history druing pushReplacement transition', (WidgetTester tester) async {
+  testWidgets('new route removed from navigator history during pushReplacement transition', (WidgetTester tester) async {
     final Map<String, SlideInOutPageRoute<dynamic>> routes = <String, SlideInOutPageRoute<dynamic>>{};
     final Map<String, WidgetBuilder> builders = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
         id: '/',
         onTap: () {
           Navigator.pushNamed(context, '/A');
-        }
+        },
       ),
       '/A': (BuildContext context) => OnTapPage(
         id: 'A',
         onTap: () {
           Navigator.pushReplacementNamed(context, '/B');
-        }
+        },
       ),
       '/B': (BuildContext context) => OnTapPage(
         id: 'B',
         onTap: () {
-          Navigator.removeRoute(context, routes['/B']);
+          Navigator.removeRoute(context, routes['/B']!);
         },
       ),
     };
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        final SlideInOutPageRoute<dynamic> ret = SlideInOutPageRoute<dynamic>(bodyBuilder: builders[settings.name], settings: settings);
-        routes[settings.name] = ret;
+        final SlideInOutPageRoute<dynamic> ret = SlideInOutPageRoute<dynamic>(bodyBuilder: builders[settings.name]!, settings: settings);
+        routes[settings.name!] = ret;
         return ret;
-      }
+      },
     ));
     await tester.pumpAndSettle();
     await tester.tap(find.text('/'));
@@ -614,8 +901,8 @@ void main() {
     expect(find.text('/'), isOnstage);
     expect(find.text('B'), findsNothing);
     expect(find.text('A'), findsNothing);
-    expect(routes['/'].secondaryAnimation.value, equals(0.0));
-    expect(routes['/'].animation.value, equals(1.0));
+    expect(routes['/']!.secondaryAnimation!.value, equals(0.0));
+    expect(routes['/']!.animation!.value, equals(1.0));
   });
 
   testWidgets('pushReplacement triggers secondaryAnimation', (WidgetTester tester) async {
@@ -624,21 +911,21 @@ void main() {
         id: '/',
         onTap: () {
           Navigator.pushReplacementNamed(context, '/A');
-        }
+        },
       ),
       '/A': (BuildContext context) => OnTapPage(
         id: 'A',
         onTap: () {
           Navigator.pushReplacementNamed(context, '/B');
-        }
+        },
       ),
       '/B': (BuildContext context) => const OnTapPage(id: 'B'),
     };
 
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        return SlideInOutPageRoute<dynamic>(bodyBuilder: routes[settings.name]);
-      }
+        return SlideInOutPageRoute<dynamic>(bodyBuilder: routes[settings.name]!);
+      },
     ));
     await tester.pumpAndSettle();
     final Offset rootOffsetOriginal = tester.getTopLeft(find.text('/'));
@@ -668,7 +955,7 @@ void main() {
   });
 
   testWidgets('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
-    // Regression test for  https://github.com/flutter/flutter/issues/56892.
+    // Regression test for https://github.com/flutter/flutter/issues/56892.
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => const OnTapPage(
         id: '/',
@@ -678,7 +965,7 @@ void main() {
       ),
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
-        onTap: (){
+        onTap: () {
           Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
           Navigator.of(context).pushReplacementNamed('/C');
         },
@@ -688,22 +975,22 @@ void main() {
     };
     final List<NavigatorObservation> observations = <NavigatorObservation>[];
     final TestObserver observer = TestObserver()
-      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onPopped = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         observations.add(
           NavigatorObservation(
-            current: route.settings.name,
-            previous: previousRoute.settings.name,
-            operation: 'didPop'
-          )
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'didPop',
+          ),
         );
       }
-      ..onReplaced = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onReplaced = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         observations.add(
           NavigatorObservation(
-            current: route.settings.name,
-            previous: previousRoute.settings.name,
-            operation: 'didReplace'
-          )
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'didReplace',
+          ),
         );
       };
     await tester.pumpWidget(
@@ -711,7 +998,7 @@ void main() {
         routes: routes,
         navigatorObservers: <NavigatorObserver>[observer],
         initialRoute: '/A/B',
-      )
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('B'), isOnstage);
@@ -745,7 +1032,7 @@ void main() {
       ),
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
-        onTap: (){
+        onTap: () {
           // Pops all routes with bad predicate.
           Navigator.of(context).popUntil((Route<dynamic> route) => false);
         },
@@ -755,7 +1042,7 @@ void main() {
       MaterialApp(
         routes: routes,
         initialRoute: '/A/B',
-      )
+      ),
     );
     await tester.tap(find.text('B'));
     await tester.pumpAndSettle();
@@ -768,21 +1055,21 @@ void main() {
         id: '/',
         onTap: () {
           Navigator.pushNamed(context, '/A');
-        }
+        },
       ),
       '/A': (BuildContext context) => OnTapPage(
         id: 'A',
         onTap: () {
           Navigator.pushNamedAndRemoveUntil(context, '/B', (Route<dynamic> route) => false);
-        }
+        },
       ),
       '/B': (BuildContext context) => const OnTapPage(id: 'B'),
     };
 
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        return SlideInOutPageRoute<dynamic>(bodyBuilder: routes[settings.name]);
-      }
+        return SlideInOutPageRoute<dynamic>(bodyBuilder: routes[settings.name]!);
+      },
     ));
     await tester.pumpAndSettle();
     final Offset rootOffsetOriginal = tester.getTopLeft(find.text('/'));
@@ -836,24 +1123,24 @@ void main() {
         navigatorKey: navigator,
         routes: routes,
         initialRoute: '/A/B',
-      )
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('B'));
     await tester.pumpAndSettle();
     expect(find.text('page D'), isOnstage);
 
-    navigator.currentState.pop();
+    navigator.currentState!.pop();
     await tester.pumpAndSettle();
     expect(find.text('page A'), isOnstage);
 
-    navigator.currentState.pop();
+    navigator.currentState!.pop();
     await tester.pumpAndSettle();
     expect(find.text('home'), isOnstage);
   });
 
   testWidgets('replaceNamed returned value', (WidgetTester tester) async {
-    Future<String> value;
+    late Future<String?> value;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
@@ -866,10 +1153,10 @@ void main() {
         return PageRouteBuilder<String>(
           settings: settings,
           pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-            return routes[settings.name](context);
+            return routes[settings.name]!(context);
           },
         );
-      }
+      },
     ));
 
     expect(find.text('/'), findsOneWidget);
@@ -897,7 +1184,7 @@ void main() {
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsNothing);
 
-    final String replaceNamedValue = await value; // replaceNamed result was 'B'
+    final String? replaceNamedValue = await value; // replaceNamed result was 'B'
     expect(replaceNamedValue, 'B');
   });
 
@@ -909,22 +1196,22 @@ void main() {
     };
     final Map<String, Route<String>> routes = <String, Route<String>>{};
 
-    Route<String> removedRoute;
-    Route<String> previousRoute;
+    late Route<String> removedRoute;
+    late Route<String> previousRoute;
 
     final TestObserver observer = TestObserver()
-      ..onRemoved = (Route<dynamic> route, Route<dynamic> previous) {
-        removedRoute = route as Route<String>;
-        previousRoute = previous as Route<String>;
+      ..onRemoved = (Route<dynamic>? route, Route<dynamic>? previous) {
+        removedRoute = route! as Route<String>;
+        previousRoute = previous! as Route<String>;
       };
 
     await tester.pumpWidget(MaterialApp(
       navigatorObservers: <NavigatorObserver>[observer],
       onGenerateRoute: (RouteSettings settings) {
-        routes[settings.name] = PageRouteBuilder<String>(
+        routes[settings.name!] = PageRouteBuilder<String>(
           settings: settings,
           pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-            return pageBuilders[settings.name](context);
+            return pageBuilders[settings.name!]!(context);
           },
         );
         return routes[settings.name];
@@ -948,47 +1235,47 @@ void main() {
     expect(find.text('B'), findsOneWidget);
 
     // Verify that the navigator's stack is ordered as expected.
-    expect(routes['/'].isActive, true);
-    expect(routes['/A'].isActive, true);
-    expect(routes['/B'].isActive, true);
-    expect(routes['/'].isFirst, true);
-    expect(routes['/B'].isCurrent, true);
+    expect(routes['/']!.isActive, true);
+    expect(routes['/A']!.isActive, true);
+    expect(routes['/B']!.isActive, true);
+    expect(routes['/']!.isFirst, true);
+    expect(routes['/B']!.isCurrent, true);
 
     final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    navigator.removeRoute(routes['/B']); // stack becomes /, /A
+    navigator.removeRoute(routes['/B']!); // stack becomes /, /A
     await tester.pump();
     expect(find.text('/'), findsNothing);
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
 
     // Verify that the navigator's stack no longer includes /B
-    expect(routes['/'].isActive, true);
-    expect(routes['/A'].isActive, true);
-    expect(routes['/B'].isActive, false);
-    expect(routes['/'].isFirst, true);
-    expect(routes['/A'].isCurrent, true);
+    expect(routes['/']!.isActive, true);
+    expect(routes['/A']!.isActive, true);
+    expect(routes['/B']!.isActive, false);
+    expect(routes['/']!.isFirst, true);
+    expect(routes['/A']!.isCurrent, true);
 
     expect(removedRoute, routes['/B']);
     expect(previousRoute, routes['/A']);
 
-    navigator.removeRoute(routes['/A']); // stack becomes just /
+    navigator.removeRoute(routes['/A']!); // stack becomes just /
     await tester.pump();
     expect(find.text('/'), findsOneWidget);
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsNothing);
 
     // Verify that the navigator's stack no longer includes /A
-    expect(routes['/'].isActive, true);
-    expect(routes['/A'].isActive, false);
-    expect(routes['/B'].isActive, false);
-    expect(routes['/'].isFirst, true);
-    expect(routes['/'].isCurrent, true);
+    expect(routes['/']!.isActive, true);
+    expect(routes['/A']!.isActive, false);
+    expect(routes['/B']!.isActive, false);
+    expect(routes['/']!.isFirst, true);
+    expect(routes['/']!.isCurrent, true);
     expect(removedRoute, routes['/A']);
     expect(previousRoute, routes['/']);
   });
 
   testWidgets('remove a route whose value is awaited', (WidgetTester tester) async {
-    Future<String> pageValue;
+    late Future<String?> pageValue;
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
       '/':  (BuildContext context) => OnTapPage(id: '/', onTap: () { pageValue = Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context, 'A'); }),
@@ -997,60 +1284,60 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        routes[settings.name] = PageRouteBuilder<String>(
+        routes[settings.name!] = PageRouteBuilder<String>(
           settings: settings,
           pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-            return pageBuilders[settings.name](context);
+            return pageBuilders[settings.name!]!(context);
           },
         );
         return routes[settings.name];
-      }
+      },
     ));
 
     await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
     await tester.pumpAndSettle();
-    pageValue.then((String value) { assert(false); });
+    pageValue.then((String? value) { assert(false); });
 
     final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    navigator.removeRoute(routes['/A']); // stack becomes /, pageValue will not complete
+    navigator.removeRoute(routes['/A']!); // stack becomes /, pageValue will not complete
   });
 
   testWidgets('replacing route can be observed', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final List<String> log = <String>[];
     final TestObserver observer = TestObserver()
-      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
-        log.add('pushed ${route.settings.name} (previous is ${previousRoute == null ? "<none>" : previousRoute.settings.name})');
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        log.add('pushed ${route!.settings.name} (previous is ${previousRoute == null ? "<none>" : previousRoute.settings.name})');
       }
-      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
-        log.add('popped ${route.settings.name} (previous is ${previousRoute == null ? "<none>" : previousRoute.settings.name})');
+      ..onPopped = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        log.add('popped ${route!.settings.name} (previous is ${previousRoute == null ? "<none>" : previousRoute.settings.name})');
       }
-      ..onRemoved = (Route<dynamic> route, Route<dynamic> previousRoute) {
-        log.add('removed ${route.settings.name} (previous is ${previousRoute == null ? "<none>" : previousRoute.settings.name})');
+      ..onRemoved = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        log.add('removed ${route!.settings.name} (previous is ${previousRoute == null ? "<none>" : previousRoute.settings.name})');
       }
-      ..onReplaced = (Route<dynamic> newRoute, Route<dynamic> oldRoute) {
-        log.add('replaced ${oldRoute.settings.name} with ${newRoute.settings.name}');
+      ..onReplaced = (Route<dynamic>? newRoute, Route<dynamic>? oldRoute) {
+        log.add('replaced ${oldRoute!.settings.name} with ${newRoute!.settings.name}');
       };
-    Route<void> routeB;
+    late Route<void> routeB;
     await tester.pumpWidget(MaterialApp(
       navigatorKey: key,
       navigatorObservers: <NavigatorObserver>[observer],
-      home: FlatButton(
+      home: TextButton(
         child: const Text('A'),
         onPressed: () {
-          key.currentState.push<void>(routeB = MaterialPageRoute<void>(
+          key.currentState!.push<void>(routeB = MaterialPageRoute<void>(
             settings: const RouteSettings(name: 'B'),
             builder: (BuildContext context) {
-              return FlatButton(
+              return TextButton(
                 child: const Text('B'),
                 onPressed: () {
-                  key.currentState.push<void>(MaterialPageRoute<int>(
+                  key.currentState!.push<void>(MaterialPageRoute<int>(
                     settings: const RouteSettings(name: 'C'),
                     builder: (BuildContext context) {
-                      return FlatButton(
+                      return TextButton(
                         child: const Text('C'),
                         onPressed: () {
-                          key.currentState.replace(
+                          key.currentState!.replace(
                             oldRoute: routeB,
                             newRoute: MaterialPageRoute<int>(
                               settings: const RouteSettings(name: 'D'),
@@ -1091,12 +1378,12 @@ void main() {
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
 
-    Route<dynamic> observedRoute;
-    Route<dynamic> observedPreviousRoute;
+    late Route<dynamic> observedRoute;
+    late Route<dynamic> observedPreviousRoute;
     final TestObserver observer = TestObserver()
-      ..onStartUserGesture = (Route<dynamic> route, Route<dynamic> previousRoute) {
-        observedRoute = route;
-        observedPreviousRoute = previousRoute;
+      ..onStartUserGesture = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        observedRoute = route!;
+        observedPreviousRoute = previousRoute!;
       };
 
     await tester.pumpWidget(MaterialApp(
@@ -1119,7 +1406,7 @@ void main() {
   testWidgets('ModalRoute.of sets up a route to rebuild if its state changes', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final List<String> log = <String>[];
-    Route<void> routeB;
+    late Route<void> routeB;
     await tester.pumpWidget(MaterialApp(
       navigatorKey: key,
       theme: ThemeData(
@@ -1129,25 +1416,25 @@ void main() {
           },
         ),
       ),
-      home: FlatButton(
+      home: TextButton(
         child: const Text('A'),
         onPressed: () {
-          key.currentState.push<void>(routeB = MaterialPageRoute<void>(
+          key.currentState!.push<void>(routeB = MaterialPageRoute<void>(
             settings: const RouteSettings(name: 'B'),
             builder: (BuildContext context) {
               log.add('building B');
-              return FlatButton(
+              return TextButton(
                 child: const Text('B'),
                 onPressed: () {
-                  key.currentState.push<void>(MaterialPageRoute<int>(
+                  key.currentState!.push<void>(MaterialPageRoute<int>(
                     settings: const RouteSettings(name: 'C'),
                     builder: (BuildContext context) {
                       log.add('building C');
-                      log.add('found ${ModalRoute.of(context).settings.name}');
-                      return FlatButton(
+                      log.add('found ${ModalRoute.of(context)!.settings.name}');
+                      return TextButton(
                         child: const Text('C'),
                         onPressed: () {
-                          key.currentState.replace(
+                          key.currentState!.replace(
                             oldRoute: routeB,
                             newRoute: MaterialPageRoute<int>(
                               settings: const RouteSettings(name: 'D'),
@@ -1178,9 +1465,57 @@ void main() {
     await tester.tap(find.text('C'));
     await tester.pumpAndSettle(const Duration(milliseconds: 10));
     expect(log, <String>['building B', 'building C', 'found C', 'building D']);
-    key.currentState.pop<void>();
+    key.currentState!.pop<void>();
     await tester.pumpAndSettle(const Duration(milliseconds: 10));
-    expect(log, <String>['building B', 'building C', 'found C', 'building D', 'building C', 'found C']);
+    expect(log, <String>['building B', 'building C', 'found C', 'building D']);
+  });
+
+  testWidgets("Routes don't rebuild just because their animations ended", (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final List<String> log = <String>[];
+    Route<dynamic>? nextRoute = PageRouteBuilder<int>(
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        log.add('building page 1 - ${ModalRoute.of(context)!.canPop}');
+        return const Placeholder();
+      },
+    );
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: key,
+      onGenerateRoute: (RouteSettings settings) {
+        assert(nextRoute != null);
+        final Route<dynamic> result = nextRoute!;
+        nextRoute = null;
+        return result;
+      },
+    ));
+    final List<String> expected = <String>['building page 1 - false'];
+    expect(log, expected);
+    key.currentState!.pushReplacement(PageRouteBuilder<int>(
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        log.add('building page 2 - ${ModalRoute.of(context)!.canPop}');
+        return const Placeholder();
+      },
+    ));
+    expect(log, expected);
+    await tester.pump();
+    expected.add('building page 2 - false');
+    expected.add('building page 1 - false'); // page 1 is rebuilt again because isCurrent changed.
+    expect(log, expected);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(log, expected);
+    key.currentState!.pushReplacement(PageRouteBuilder<int>(
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        log.add('building page 3 - ${ModalRoute.of(context)!.canPop}');
+        return const Placeholder();
+      },
+    ));
+    expect(log, expected);
+    await tester.pump();
+    expected.add('building page 3 - false');
+    expected.add('building page 2 - false'); // page 2 is rebuilt again because isCurrent changed.
+    expect(log, expected);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(log, expected);
   });
 
   testWidgets('route semantics', (WidgetTester tester) async {
@@ -1241,15 +1576,15 @@ void main() {
   });
 
   testWidgets('arguments for named routes on Navigator', (WidgetTester tester) async {
-    GlobalKey currentRouteKey;
-    final List<Object> arguments = <Object>[];
+    late GlobalKey currentRouteKey;
+    final List<Object?> arguments = <Object?>[];
 
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
         arguments.add(settings.arguments);
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (BuildContext context) => Center(key: currentRouteKey = GlobalKey(), child: Text(settings.name)),
+          builder: (BuildContext context) => Center(key: currentRouteKey = GlobalKey(), child: Text(settings.name!)),
         );
       },
     ));
@@ -1259,7 +1594,7 @@ void main() {
     arguments.clear();
 
     Navigator.pushNamed(
-      currentRouteKey.currentContext,
+      currentRouteKey.currentContext!,
       '/A',
       arguments: 'pushNamed',
     );
@@ -1271,7 +1606,7 @@ void main() {
     arguments.clear();
 
     Navigator.popAndPushNamed(
-      currentRouteKey.currentContext,
+      currentRouteKey.currentContext!,
       '/B',
       arguments: 'popAndPushNamed',
     );
@@ -1284,7 +1619,7 @@ void main() {
     arguments.clear();
 
     Navigator.pushNamedAndRemoveUntil(
-      currentRouteKey.currentContext,
+      currentRouteKey.currentContext!,
       '/C',
       (Route<dynamic> route) => route.isFirst,
       arguments: 'pushNamedAndRemoveUntil',
@@ -1299,7 +1634,7 @@ void main() {
     arguments.clear();
 
     Navigator.pushReplacementNamed(
-      currentRouteKey.currentContext,
+      currentRouteKey.currentContext!,
       '/D',
       arguments: 'pushReplacementNamed',
     );
@@ -1316,7 +1651,7 @@ void main() {
 
   testWidgets('arguments for named routes on NavigatorState', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-    final List<Object> arguments = <Object>[];
+    final List<Object?> arguments = <Object?>[];
 
     await tester.pumpWidget(MaterialApp(
       navigatorKey: navigatorKey,
@@ -1324,7 +1659,7 @@ void main() {
         arguments.add(settings.arguments);
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (BuildContext context) => Center(child: Text(settings.name)),
+          builder: (BuildContext context) => Center(child: Text(settings.name!)),
         );
       },
     ));
@@ -1333,7 +1668,7 @@ void main() {
     expect(arguments.single, isNull);
     arguments.clear();
 
-    navigatorKey.currentState.pushNamed(
+    navigatorKey.currentState!.pushNamed(
       '/A',
       arguments:'pushNamed',
     );
@@ -1344,7 +1679,7 @@ void main() {
     expect(arguments.single, 'pushNamed');
     arguments.clear();
 
-    navigatorKey.currentState.popAndPushNamed(
+    navigatorKey.currentState!.popAndPushNamed(
       '/B',
       arguments: 'popAndPushNamed',
     );
@@ -1356,7 +1691,7 @@ void main() {
     expect(arguments.single, 'popAndPushNamed');
     arguments.clear();
 
-    navigatorKey.currentState.pushNamedAndRemoveUntil(
+    navigatorKey.currentState!.pushNamedAndRemoveUntil(
       '/C',
       (Route<dynamic> route) => route.isFirst,
       arguments: 'pushNamedAndRemoveUntil',
@@ -1370,7 +1705,7 @@ void main() {
     expect(arguments.single, 'pushNamedAndRemoveUntil');
     arguments.clear();
 
-    navigatorKey.currentState.pushReplacementNamed(
+    navigatorKey.currentState!.pushReplacementNamed(
       '/D',
       arguments: 'pushReplacementNamed',
     );
@@ -1409,7 +1744,7 @@ void main() {
     expect(find.byKey(keyA, skipOffstage: false), findsOneWidget);
     expect(find.byKey(keyABC), findsOneWidget);
 
-    keyNav.currentState.pop();
+    keyNav.currentState!.pop();
     await tester.pumpAndSettle();
     expect(find.byKey(keyRoot, skipOffstage: false), findsOneWidget);
     expect(find.byKey(keyA), findsOneWidget);
@@ -1437,6 +1772,7 @@ void main() {
 
     final dynamic exception = tester.takeException();
     expect(exception, isA<String>());
+    // ignore: avoid_dynamic_calls
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
 
     // Only the root route should've been pushed.
@@ -1457,13 +1793,13 @@ void main() {
     bool isPushed = false;
     bool isPopped = false;
     final TestObserver observer = TestObserver()
-      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         // Pushes the initial route.
         expect(route is PageRoute && route.settings.name == '/', isTrue);
         expect(previousRoute, isNull);
         isPushed = true;
       }
-      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      ..onPopped = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
         isPopped = true;
       };
 
@@ -1478,7 +1814,7 @@ void main() {
 
     isPushed = false;
     isPopped = false;
-    observer.onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+    observer.onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
       expect(route is PageRoute && route.settings.name == '/A', isTrue);
       expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
       isPushed = true;
@@ -1515,7 +1851,7 @@ void main() {
           '   The onGenerateRoute callback must never return null, unless an\n'
           '   onUnknownRoute callback is provided as well.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#4d6bf(lifecycle state: created)\n',
+          '     NavigatorState#00000(lifecycle state: initialized)\n',
         ),
       );
     });
@@ -1541,7 +1877,7 @@ void main() {
           '   route "/".\n'
           '   The onUnknownRoute callback must never return null.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#38036(lifecycle state: created)\n',
+          '     NavigatorState#00000(lifecycle state: initialized)\n',
         ),
       );
     });
@@ -1564,7 +1900,7 @@ void main() {
       ),
     );
 
-    expect(ModalRoute.of(topmost.currentContext).overlayEntries.first.opaque, isTrue);
+    expect(ModalRoute.of(topmost.currentContext!)!.overlayEntries.first.opaque, isTrue);
 
     expect(find.byKey(root), findsNothing);  // hidden by opaque Route
     expect(find.byKey(intermediate), findsNothing);  // hidden by opaque Route
@@ -1581,18 +1917,18 @@ void main() {
         initialRoute: '/',
         onGenerateRoute: (RouteSettings settings) {
           return NoAnimationPageRoute(
-            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
+            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name!)),
           );
         },
       ),
     );
     expect(find.byKey(const ValueKey<String>('/')), findsOneWidget);
 
-    navigator.currentState.pushNamed('/A');
+    navigator.currentState!.pushNamed('/A');
     await tester.pump();
 
     final BuildContext topMostContext = tester.element(find.byKey(const ValueKey<String>('/A')));
-    expect(ModalRoute.of(topMostContext).overlayEntries.first.opaque, isTrue);
+    expect(ModalRoute.of(topMostContext)!.overlayEntries.first.opaque, isTrue);
 
     expect(find.byKey(const ValueKey<String>('/')), findsNothing);  // hidden by /A
     expect(find.byKey(const ValueKey<String>('/A')), findsOneWidget);
@@ -1608,7 +1944,7 @@ void main() {
         initialRoute: '/A/B',
         onGenerateRoute: (RouteSettings settings) {
           return NoAnimationPageRoute(
-            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
+            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name!)),
           );
         },
       ),
@@ -1619,12 +1955,12 @@ void main() {
 
     final Route<dynamic> oldRoute = ModalRoute.of(
       tester.element(find.byKey(const ValueKey<String>('/A'), skipOffstage: false)),
-    );
+    )!;
     final Route<void> newRoute = NoAnimationPageRoute(
       pageBuilder: (_) => Container(key: const ValueKey<String>('/C')),
     );
 
-    navigator.currentState.replace<void>(oldRoute: oldRoute, newRoute: newRoute);
+    navigator.currentState!.replace<void>(oldRoute: oldRoute, newRoute: newRoute);
     await tester.pump();
 
     expect(newRoute.overlayEntries.first.opaque, isTrue);
@@ -1634,7 +1970,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/C')), findsNothing);  // hidden by /A/B
     expect(find.byKey(const ValueKey<String>('/A/B')), findsOneWidget);
 
-    navigator.currentState.pop();
+    navigator.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey<String>('/')), findsNothing);  // hidden by /C
@@ -1667,7 +2003,7 @@ void main() {
     );
     expect(tester.state<StatefulTestState>(find.byKey(bottomRoute)).rebuildCount, 1);
 
-    navigator.currentState.pushNamed('/a');
+    navigator.currentState!.pushNamed('/a');
     await tester.pumpAndSettle();
 
     // Bottom route is offstage and did not rebuild.
@@ -1678,12 +2014,11 @@ void main() {
   });
 
   testWidgets('initial routes below opaque route are offstage', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
-          key: g,
+          key: testKey,
           initialRoute: '/a/b',
           onGenerateRoute: (RouteSettings s) {
             return MaterialPageRoute<void>(
@@ -1703,7 +2038,7 @@ void main() {
     expect(find.text('+/a+', skipOffstage: false), findsOneWidget);
     expect(find.text('+/a/b+'), findsOneWidget);
 
-    g.currentState.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('+/+'), findsNothing);
@@ -1711,7 +2046,7 @@ void main() {
     expect(find.text('+/a+'), findsOneWidget);
     expect(find.text('+/a/b+'), findsNothing);
 
-    g.currentState.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('+/+'), findsOneWidget);
@@ -1721,12 +2056,11 @@ void main() {
 
   testWidgets('Can provide custom onGenerateInitialRoutes', (WidgetTester tester) async {
     bool onGenerateInitialRoutesCalled = false;
-    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
-          key: g,
+          key: testKey,
           initialRoute: 'Hello World',
           onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
             onGenerateInitialRoutesCalled = true;
@@ -1746,11 +2080,100 @@ void main() {
     expect(find.text('Hello'), findsNothing);
     expect(find.text('World'), findsOneWidget);
 
-    g.currentState.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('Hello'), findsOneWidget);
     expect(find.text('World'), findsNothing);
+  });
+
+  testWidgets('Navigator.of able to handle input context is a navigator context', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: testKey,
+        home: const Text('home'),
+      ),
+    );
+
+    final NavigatorState state = Navigator.of(testKey.currentContext!);
+    expect(state, testKey.currentState);
+  });
+
+  testWidgets('Navigator.of able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> root = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: root,
+        home: Navigator(
+          key: sub,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) => const Text('dummy'),
+            );
+          },
+        ),
+      ),
+    );
+
+    final NavigatorState state = Navigator.of(sub.currentContext!, rootNavigator: true);
+    expect(state, root.currentState);
+  });
+
+  testWidgets('Navigator.maybeOf throws when there is no navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(SizedBox(key: testKey));
+
+    expect(() async {
+      Navigator.of(testKey.currentContext!);
+    }, throwsFlutterError);
+  });
+
+  testWidgets('Navigator.maybeOf works when there is no navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(SizedBox(key: testKey));
+
+    final NavigatorState? state = Navigator.maybeOf(testKey.currentContext!);
+    expect(state, isNull);
+  });
+
+  testWidgets('Navigator.maybeOf able to handle input context is a navigator context', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: testKey,
+          home: const Text('home'),
+        ),
+    );
+
+    final NavigatorState? state = Navigator.maybeOf(testKey.currentContext!);
+    expect(state, isNotNull);
+    expect(state, testKey.currentState);
+  });
+
+  testWidgets('Navigator.maybeOf able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> root = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: root,
+          home: Navigator(
+            key: sub,
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) => const Text('dummy'),
+              );
+            },
+          ),
+        ),
+    );
+
+    final NavigatorState? state = Navigator.maybeOf(sub.currentContext!, rootNavigator: true);
+    expect(state, isNotNull);
+    expect(state, root.currentState);
   });
 
   testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
@@ -1761,8 +2184,7 @@ void main() {
     final Map<String, MaterialPageRoute<dynamic>> routeNameToContext = <String, MaterialPageRoute<dynamic>>{};
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: navigator,
           initialRoute: 'root',
@@ -1770,7 +2192,7 @@ void main() {
             return MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) {
-                routeNameToContext[settings.name] = ModalRoute.of(context) as MaterialPageRoute<dynamic>;
+                routeNameToContext[settings.name!] = ModalRoute.of(context)! as MaterialPageRoute<dynamic>;
                 return Text('Route: ${settings.name}');
               },
             );
@@ -1781,17 +2203,17 @@ void main() {
 
     expect(find.text('Route: root'), findsOneWidget);
 
-    navigator.currentState.pushNamed('1');
+    navigator.currentState!.pushNamed('1');
     await tester.pumpAndSettle();
 
     expect(find.text('Route: 1'), findsOneWidget);
 
-    navigator.currentState.pushNamed('2');
+    navigator.currentState!.pushNamed('2');
     await tester.pumpAndSettle();
 
     expect(find.text('Route: 2'), findsOneWidget);
 
-    navigator.currentState.pushNamed('3');
+    navigator.currentState!.pushNamed('3');
     await tester.pumpAndSettle();
 
     expect(find.text('Route: 3'), findsOneWidget);
@@ -1799,12 +2221,12 @@ void main() {
     expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
     expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
 
-    navigator.currentState.pushNamedAndRemoveUntil('4', (Route<dynamic> route) => route.isFirst);
+    navigator.currentState!.pushNamedAndRemoveUntil('4', (Route<dynamic> route) => route.isFirst);
     await tester.pump();
 
     expect(find.text('Route: 3'), findsOneWidget);
     expect(find.text('Route: 4'), findsOneWidget);
-    final Animation<double> route4Entry = routeNameToContext['4'].animation;
+    final Animation<double> route4Entry = routeNameToContext['4']!.animation!;
     expect(route4Entry.value, 0.0); // Entry animation has not started.
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
@@ -1829,7 +2251,7 @@ void main() {
     expect(find.text('Route: 1', skipOffstage: false), findsNothing);
     expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
 
-    navigator.currentState.pop();
+    navigator.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('Route: root'), findsOneWidget);
@@ -1838,11 +2260,10 @@ void main() {
 
   testWidgets('Wrapping TickerMode can turn off ticking in routes', (WidgetTester tester) async {
     int tickCount = 0;
-    Widget widgetUnderTest({bool enabled}) {
+    Widget widgetUnderTest({required bool enabled}) {
       return TickerMode(
         enabled: enabled,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             initialRoute: 'root',
             onGenerateRoute: (RouteSettings settings) {
@@ -1879,17 +2300,17 @@ void main() {
     expect(tickCount, 4);
   });
 
-  testWidgets('Route annouce correctly for first route and last route', (WidgetTester tester) async {
+  testWidgets('Route announce correctly for first route and last route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/57133.
-    Route<void> previousOfFirst = NotAnnounced();
-    Route<void> nextOfFirst = NotAnnounced();
-    Route<void> popNextOfFirst = NotAnnounced();
-    Route<void> firstRoute;
+    Route<void>? previousOfFirst = NotAnnounced();
+    Route<void>? nextOfFirst = NotAnnounced();
+    Route<void>? popNextOfFirst = NotAnnounced();
+    Route<void>? firstRoute;
 
-    Route<void> previousOfSecond = NotAnnounced();
-    Route<void> nextOfSecond = NotAnnounced();
-    Route<void> popNextOfSecond = NotAnnounced();
-    Route<void> secondRoute;
+    Route<void>? previousOfSecond = NotAnnounced();
+    Route<void>? nextOfSecond = NotAnnounced();
+    Route<void>? popNextOfSecond = NotAnnounced();
+    Route<void>? secondRoute;
 
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
@@ -1899,17 +2320,17 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
             firstRoute = RouteAnnouncementSpy(
-              onDidChangeNext: (Route<void> next) => nextOfFirst = next,
-              onDidChangePrevious: (Route<void> previous) => previousOfFirst = previous,
-              onDidPopNext: (Route<void> next) => popNextOfFirst = next,
+              onDidChangeNext: (Route<void>? next) => nextOfFirst = next,
+              onDidChangePrevious: (Route<void>? previous) => previousOfFirst = previous,
+              onDidPopNext: (Route<void>? next) => popNextOfFirst = next,
               settings: settings,
             );
             return firstRoute;
           }
           secondRoute = RouteAnnouncementSpy(
-            onDidChangeNext: (Route<void> next) => nextOfSecond = next,
-            onDidChangePrevious: (Route<void> previous) => previousOfSecond = previous,
-            onDidPopNext: (Route<void> next) => popNextOfSecond = next,
+            onDidChangeNext: (Route<void>? next) => nextOfSecond = next,
+            onDidChangePrevious: (Route<void>? previous) => previousOfSecond = previous,
+            onDidPopNext: (Route<void>? next) => popNextOfSecond = next,
             settings: settings,
           );
           return secondRoute;
@@ -1926,28 +2347,410 @@ void main() {
     expect(nextOfSecond, isNull);
     expect(popNextOfSecond, isA<NotAnnounced>());
 
-    navigator.currentState.pop();
+    navigator.currentState!.pop();
     expect(popNextOfFirst, secondRoute);
   });
 
-  group('Page api', (){
+  testWidgets('hero controller scope works', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> top = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
+
+    final List<NavigatorObservation> observations = <NavigatorObservation>[];
+    final HeroControllerSpy spy = HeroControllerSpy()
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'didPush',
+          ),
+        );
+      };
+    addTearDown(spy.dispose);
+
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: TestDependencies(
+          child: Navigator(
+            key: top,
+            initialRoute: 'top1',
+            onGenerateRoute: (RouteSettings s) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext c) {
+                  return Navigator(
+                    key: sub,
+                    initialRoute: 'sub1',
+                    onGenerateRoute: (RouteSettings s) {
+                      return MaterialPageRoute<void>(
+                        builder: (BuildContext c) {
+                          return const Placeholder();
+                        },
+                        settings: s,
+                      );
+                    },
+                  );
+                },
+                settings: s,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    // It should only observe the top navigator.
+    expect(observations.length, 1);
+    expect(observations[0].current, 'top1');
+    expect(observations[0].previous, isNull);
+
+    sub.currentState!.push(MaterialPageRoute<void>(
+      settings: const RouteSettings(name:'sub2'),
+      builder: (BuildContext context) => const Text('sub2'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('sub2'), findsOneWidget);
+    // It should not record sub navigator.
+    expect(observations.length, 1);
+
+    top.currentState!.push(MaterialPageRoute<void>(
+      settings: const RouteSettings(name:'top2'),
+      builder: (BuildContext context) => const Text('top2'),
+    ));
+    await tester.pumpAndSettle();
+    expect(observations.length, 2);
+    expect(observations[1].current, 'top2');
+    expect(observations[1].previous, 'top1');
+  });
+
+  testWidgets('hero controller can correctly transfer subscription - replacing navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
+
+    final List<NavigatorObservation> observations = <NavigatorObservation>[];
+    final HeroControllerSpy spy = HeroControllerSpy()
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'didPush',
+          ),
+        );
+      };
+    addTearDown(spy.dispose);
+
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: TestDependencies(
+          child: Navigator(
+            key: key1,
+            initialRoute: 'navigator1',
+            onGenerateRoute: (RouteSettings s) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext c) {
+                  return const Placeholder();
+                },
+                settings: s,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    // Transfer the subscription to another navigator
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: TestDependencies(
+          child: Navigator(
+            key: key2,
+            initialRoute: 'navigator2',
+            onGenerateRoute: (RouteSettings s) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext c) {
+                  return const Placeholder();
+                },
+                settings: s,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    observations.clear();
+
+    key2.currentState!.push(MaterialPageRoute<void>(
+      settings: const RouteSettings(name:'new route'),
+      builder: (BuildContext context) => const Text('new route'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('new route'), findsOneWidget);
+    // It should record from the new navigator.
+    expect(observations.length, 1);
+    expect(observations[0].current, 'new route');
+    expect(observations[0].previous, 'navigator2');
+  });
+
+  testWidgets('hero controller can correctly transfer subscription - swapping navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
+
+    final List<NavigatorObservation> observations1 = <NavigatorObservation>[];
+    final HeroControllerSpy spy1 = HeroControllerSpy()
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        observations1.add(
+          NavigatorObservation(
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'didPush',
+          ),
+        );
+      };
+    addTearDown(spy1.dispose);
+    final List<NavigatorObservation> observations2 = <NavigatorObservation>[];
+    final HeroControllerSpy spy2 = HeroControllerSpy()
+      ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        observations2.add(
+          NavigatorObservation(
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'didPush',
+          ),
+        );
+      };
+    addTearDown(spy2.dispose);
+
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Stack(
+          children: <Widget>[
+            HeroControllerScope(
+              controller: spy1,
+              child: Navigator(
+                key: key1,
+                initialRoute: 'navigator1',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ),
+            HeroControllerScope(
+              controller: spy2,
+              child: Navigator(
+                key: key2,
+                initialRoute: 'navigator2',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(observations1.length, 1);
+    expect(observations1[0].current, 'navigator1');
+    expect(observations1[0].previous, isNull);
+    expect(observations2.length, 1);
+    expect(observations2[0].current, 'navigator2');
+    expect(observations2[0].previous, isNull);
+
+    // Swaps the spies.
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Stack(
+          children: <Widget>[
+            HeroControllerScope(
+              controller: spy2,
+              child: Navigator(
+                key: key1,
+                initialRoute: 'navigator1',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ),
+            HeroControllerScope(
+              controller: spy1,
+              child: Navigator(
+                key: key2,
+                initialRoute: 'navigator2',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Pushes a route to navigator2.
+    key2.currentState!.push(MaterialPageRoute<void>(
+      settings: const RouteSettings(name:'new route2'),
+      builder: (BuildContext context) => const Text('new route2'),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('new route2'), findsOneWidget);
+    // The spy1 should record the push in navigator2.
+    expect(observations1.length, 2);
+    expect(observations1[1].current, 'new route2');
+    expect(observations1[1].previous, 'navigator2');
+    // The spy2 should not record anything.
+    expect(observations2.length, 1);
+
+    // Pushes a route to navigator1
+    key1.currentState!.push(MaterialPageRoute<void>(
+      settings: const RouteSettings(name:'new route1'),
+      builder: (BuildContext context) => const Text('new route1'),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('new route1'), findsOneWidget);
+    // The spy1 should not record anything.
+    expect(observations1.length, 2);
+    // The spy2 should record the push in navigator1.
+    expect(observations2.length, 2);
+    expect(observations2[1].current, 'new route1');
+    expect(observations2[1].previous, 'navigator1');
+  });
+
+  testWidgets('hero controller subscribes to multiple navigators does throw', (WidgetTester tester) async {
+    final HeroControllerSpy spy = HeroControllerSpy();
+    addTearDown(spy.dispose);
+
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: TestDependencies(
+          child: Stack(
+            children: <Widget>[
+              Navigator(
+                initialRoute: 'navigator1',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+              Navigator(
+                initialRoute: 'navigator2',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('hero controller throws has correct error message', (WidgetTester tester) async {
+    final HeroControllerSpy spy = HeroControllerSpy();
+    addTearDown(spy.dispose);
+
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: TestDependencies(
+          child: Stack(
+            children: <Widget>[
+              Navigator(
+                initialRoute: 'navigator1',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+              Navigator(
+                initialRoute: 'navigator2',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final FlutterError error = exception as FlutterError;
+    expect(
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A HeroController can not be shared by multiple Navigators. The\n'
+        '   Navigators that share the same HeroController are:\n'
+        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   Please create a HeroControllerScope for each Navigator or use a\n'
+        '   HeroControllerScope.none to prevent subtree from receiving a\n'
+        '   HeroController.\n',
+      ),
+    );
+  });
+
+  group('Page api', () {
     Widget buildNavigator({
-      List<Page<dynamic>> pages,
-      PopPageCallback onPopPage,
-      GlobalKey<NavigatorState> key,
-      TransitionDelegate<dynamic> transitionDelegate,
+      required FlutterView view,
+      required List<Page<dynamic>> pages,
+      required PopPageCallback onPopPage,
+      GlobalKey<NavigatorState>? key,
+      TransitionDelegate<dynamic>? transitionDelegate,
       List<NavigatorObserver> observers = const <NavigatorObserver>[],
     }) {
       return MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        data: MediaQueryData.fromView(view),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
             DefaultMaterialLocalizations.delegate,
-            DefaultWidgetsLocalizations.delegate
+            DefaultWidgetsLocalizations.delegate,
           ],
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+          child: TestDependencies(
             child: Navigator(
               key: key,
               pages: pages,
@@ -1974,46 +2777,256 @@ void main() {
       }
 
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       expect(find.text('third'), findsOneWidget);
       expect(find.text('second'), findsNothing);
       expect(find.text('initial'), findsNothing);
 
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(find.text('third'), findsNothing);
       expect(find.text('second'), findsOneWidget);
       expect(find.text('initial'), findsNothing);
 
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(find.text('third'), findsNothing);
       expect(find.text('second'), findsNothing);
       expect(find.text('initial'), findsOneWidget);
     });
 
+    testWidgets('can handle duplicate page key if update before transition finishes', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/97363.
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      final List<TestPage> myPages1 = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+      ];
+      final List<TestPage> myPages2 = <TestPage>[
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+
+      bool onPopPage(Route<dynamic> route, dynamic result) => false;
+
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages1,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
+      await tester.pump();
+      expect(find.text('initial'), findsOneWidget);
+      // Update multiple times without waiting for pop to finish to leave
+      // multiple popping route entries in route stack with the same page key.
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages2,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
+      await tester.pump();
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages1,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
+      await tester.pump();
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages2,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('second'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
+      final List<TestPage> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+        const TestPage(key: ValueKey<String>('3'), name:'third'),
+      ];
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: TestDependencies(
+              child: Navigator(
+                pages: myPages,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The Navigator.onPopPage must be provided to use the\n'
+          '   Navigator.pages API\n',
+        ),
+      );
+    });
+
+    testWidgets('throw if page list is empty', (WidgetTester tester) async {
+      final List<TestPage> myPages = <TestPage>[];
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterErrorDetails? firstError;
+      FlutterError.onError = (FlutterErrorDetails? detail) {
+        // We only care about the first error;
+        firstError ??= detail;
+      };
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: TestDependencies(
+              child: Navigator(
+                pages: myPages,
+              ),
+            ),
+          ),
+        ),
+      );
+      FlutterError.onError = originalOnError;
+      expect(
+        firstError!.exception.toString(),
+        'The Navigator.pages must not be empty to use the Navigator.pages API',
+      );
+    });
+
+    testWidgets('Can pop route with local history entries using page api', (WidgetTester tester) async {
+      List<Page<void>> myPages = const <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+        MaterialPage<void>(child: Text('page2')),
+      ];
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('page2'), findsOneWidget);
+      final ModalRoute<void> route = ModalRoute.of(tester.element(find.text('page2')))!;
+      bool entryRemoved = false;
+      route.addLocalHistoryEntry(LocalHistoryEntry(onRemove: () => entryRemoved = true));
+      expect(route.willHandlePopInternally, true);
+
+      myPages = const <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+      ];
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('page1'), findsOneWidget);
+      expect(entryRemoved, isTrue);
+    });
+
+    testWidgets('ModalRoute must comply with willHandlePopInternally when there is a PopScope', (WidgetTester tester) async {
+      const List<Page<void>> myPages = <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+        MaterialPage<void>(
+          child: PopScope(
+            canPop: false,
+            child: Text('page2'),
+          ),
+        ),
+      ];
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      final ModalRoute<void> route = ModalRoute.of(tester.element(find.text('page2')))!;
+      // PopScope only prevents user trigger action, e.g. Navigator.maybePop.
+      // The page can still be popped by the system if it needs to.
+      expect(route.willHandlePopInternally, false);
+      expect(route.didPop(null), true);
+    });
+
     testWidgets('can push and pop pages using page api', (WidgetTester tester) async {
-      Animation<double> secondaryAnimationOfRouteOne;
-      Animation<double> primaryAnimationOfRouteOne;
-      Animation<double> secondaryAnimationOfRouteTwo;
-      Animation<double> primaryAnimationOfRouteTwo;
-      Animation<double> secondaryAnimationOfRouteThree;
-      Animation<double> primaryAnimationOfRouteThree;
+      late Animation<double> secondaryAnimationOfRouteOne;
+      late Animation<double> primaryAnimationOfRouteOne;
+      late Animation<double> secondaryAnimationOfRouteTwo;
+      late Animation<double> primaryAnimationOfRouteTwo;
+      late Animation<double> secondaryAnimationOfRouteThree;
+      late Animation<double> primaryAnimationOfRouteThree;
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<Page<dynamic>> myPages = <Page<dynamic>>[
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteOne = secondaryAnimation;
-                primaryAnimationOfRouteOne = animation;
-                return const Text('initial');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteOne = secondaryAnimation;
+            primaryAnimationOfRouteOne = animation;
+            return const Text('initial');
           },
         ),
       ];
@@ -2024,57 +3037,52 @@ void main() {
       }
 
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       expect(find.text('initial'), findsOneWidget);
 
       myPages = <Page<dynamic>>[
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteOne = secondaryAnimation;
-                primaryAnimationOfRouteOne = animation;
-                return const Text('initial');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteOne = secondaryAnimation;
+            primaryAnimationOfRouteOne = animation;
+            return const Text('initial');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('2'),
           name:'second',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteTwo = secondaryAnimation;
-                primaryAnimationOfRouteTwo = animation;
-                return const Text('second');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteTwo = secondaryAnimation;
+            primaryAnimationOfRouteTwo = animation;
+            return const Text('second');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('3'),
           name:'third',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteThree = secondaryAnimation;
-                primaryAnimationOfRouteThree = animation;
-                return const Text('third');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteThree = secondaryAnimation;
+            primaryAnimationOfRouteThree = animation;
+            return const Text('third');
           },
-        )
+        ),
       ];
 
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       // The third page is transitioning, and the secondary animation of first
       // page should chain with the third page. The animation of second page
@@ -2108,38 +3116,33 @@ void main() {
       // correctly.
 
       myPages = <Page<dynamic>>[
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteOne = secondaryAnimation;
-                primaryAnimationOfRouteOne = animation;
-                return const Text('initial');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteOne = secondaryAnimation;
+            primaryAnimationOfRouteOne = animation;
+            return const Text('initial');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('2'),
           name:'second',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteTwo = secondaryAnimation;
-                primaryAnimationOfRouteTwo = animation;
-                return const Text('second');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteTwo = secondaryAnimation;
+            primaryAnimationOfRouteTwo = animation;
+            return const Text('second');
           },
         ),
       ];
 
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       await tester.pump(const Duration(milliseconds: 30));
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
@@ -2159,53 +3162,38 @@ void main() {
 
     testWidgets('can modify routes history and secondary animation still works', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
-      Animation<double> secondaryAnimationOfRouteOne;
-      Animation<double> primaryAnimationOfRouteOne;
-      Animation<double> secondaryAnimationOfRouteTwo;
-      Animation<double> primaryAnimationOfRouteTwo;
-      Animation<double> secondaryAnimationOfRouteThree;
-      Animation<double> primaryAnimationOfRouteThree;
-      List<Page<dynamic>> myPages = <CustomBuilderPage<void>>[
-        CustomBuilderPage<void>(
+      late Animation<double> secondaryAnimationOfRouteOne;
+      late Animation<double> primaryAnimationOfRouteOne;
+      late Animation<double> secondaryAnimationOfRouteTwo;
+      late Animation<double> primaryAnimationOfRouteTwo;
+      late Animation<double> secondaryAnimationOfRouteThree;
+      late Animation<double> primaryAnimationOfRouteThree;
+      List<Page<dynamic>> myPages = <Page<void>>[
+        BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteOne = secondaryAnimation;
-                primaryAnimationOfRouteOne = animation;
-                return const Text('initial');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteOne = secondaryAnimation;
+            primaryAnimationOfRouteOne = animation;
+            return const Text('initial');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('2'),
           name:'second',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteTwo = secondaryAnimation;
-                primaryAnimationOfRouteTwo = animation;
-                return const Text('second');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteTwo = secondaryAnimation;
+            primaryAnimationOfRouteTwo = animation;
+            return const Text('second');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('3'),
           name:'third',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteThree = secondaryAnimation;
-                primaryAnimationOfRouteThree = animation;
-                return const Text('third');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteThree = secondaryAnimation;
+            primaryAnimationOfRouteThree = animation;
+            return const Text('third');
           },
         ),
       ];
@@ -2214,7 +3202,12 @@ void main() {
         return route.didPop(result);
       }
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       expect(find.text('third'), findsOneWidget);
       expect(find.text('second'), findsNothing);
@@ -2228,7 +3221,12 @@ void main() {
 
       myPages = myPages.reversed.toList();
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       // Reversed routes are still chained up correctly.
       expect(secondaryAnimationOfRouteThree.value, primaryAnimationOfRouteTwo.value);
@@ -2238,7 +3236,7 @@ void main() {
       expect(secondaryAnimationOfRouteOne.status, AnimationStatus.dismissed);
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.completed);
 
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 30));
       expect(secondaryAnimationOfRouteThree.value, primaryAnimationOfRouteTwo.value);
@@ -2255,7 +3253,7 @@ void main() {
       expect(secondaryAnimationOfRouteOne.status, AnimationStatus.dismissed);
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.dismissed);
 
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 30));
       expect(secondaryAnimationOfRouteThree.value, primaryAnimationOfRouteTwo.value);
@@ -2273,6 +3271,31 @@ void main() {
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.dismissed);
     });
 
+    testWidgets('Pop no animation page does not crash', (WidgetTester tester) async {
+      // Regression Test for https://github.com/flutter/flutter/issues/86604.
+      Widget buildNavigator(bool secondPage) {
+        return TestDependencies(
+          child: Navigator(
+            pages: <Page<void>>[
+              const ZeroDurationPage(
+                child: Text('page1'),
+              ),
+              if (secondPage)
+                const ZeroDurationPage(
+                  child: Text('page2'),
+                ),
+            ],
+            onPopPage: (Route<dynamic> route, dynamic result) => false,
+          ),
+        );
+      }
+      await tester.pumpWidget(buildNavigator(true));
+      expect(find.text('page2'), findsOneWidget);
+
+      await tester.pumpWidget(buildNavigator(false));
+      expect(find.text('page1'), findsOneWidget);
+    });
+
     testWidgets('can work with pageless route', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<TestPage> myPages = <TestPage>[
@@ -2286,22 +3309,25 @@ void main() {
       }
 
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       expect(find.text('second'), findsOneWidget);
       expect(find.text('initial'), findsNothing);
       // Pushes two pageless routes to second page route
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless1'),
-          settings: null,
-        )
+        ),
       );
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless2'),
-          settings: null,
-        )
+        ),
       );
       await tester.pumpAndSettle();
       // Now the history should look like
@@ -2317,7 +3343,12 @@ void main() {
         const TestPage(key: ValueKey<String>('3'), name:'third'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsNothing);
@@ -2327,11 +3358,10 @@ void main() {
       expect(find.text('third'), findsOneWidget);
 
       // Pushes one pageless routes to third page route
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('third-pageless1'),
-          settings: null,
-        )
+        ),
       );
       await tester.pumpAndSettle();
       // Now the history should look like
@@ -2349,7 +3379,12 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name:'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       // Swaps the order without any adding or removing should not trigger any
       // transition. The routes should update without a pumpAndSettle
@@ -2362,7 +3397,7 @@ void main() {
       expect(find.text('second-pageless1'), findsNothing);
       expect(find.text('second-pageless2'), findsOneWidget);
       // Pops the route one by one to make sure the order is correct.
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsNothing);
       expect(find.text('third'), findsNothing);
@@ -2371,7 +3406,7 @@ void main() {
       expect(find.text('second-pageless1'), findsOneWidget);
       expect(find.text('second-pageless2'), findsNothing);
       expect(myPages.length, 3);
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsNothing);
       expect(find.text('third'), findsNothing);
@@ -2380,7 +3415,7 @@ void main() {
       expect(find.text('second-pageless1'), findsNothing);
       expect(find.text('second-pageless2'), findsNothing);
       expect(myPages.length, 3);
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsNothing);
       expect(find.text('third'), findsNothing);
@@ -2389,7 +3424,7 @@ void main() {
       expect(find.text('second-pageless1'), findsNothing);
       expect(find.text('second-pageless2'), findsNothing);
       expect(myPages.length, 2);
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsNothing);
       expect(find.text('third'), findsOneWidget);
@@ -2398,7 +3433,7 @@ void main() {
       expect(find.text('second-pageless1'), findsNothing);
       expect(find.text('second-pageless2'), findsNothing);
       expect(myPages.length, 2);
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsOneWidget);
       expect(find.text('third'), findsNothing);
@@ -2421,14 +3456,18 @@ void main() {
 
       // Add initial page route with one pageless route.
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       bool initialPageless1Completed = false;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('initial-pageless1'),
-          settings: null,
-        )
+        ),
       ).then((_) => initialPageless1Completed = true);
       await tester.pumpAndSettle();
 
@@ -2438,23 +3477,26 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       await tester.pumpAndSettle();
       bool secondPageless1Completed = false;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless1'),
-          settings: null,
-        )
+        ),
       ).then((_) => secondPageless1Completed = true);
       await tester.pumpAndSettle();
       bool secondPageless2Completed = false;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless2'),
-          settings: null,
-        )
+        ),
       ).then((_) => secondPageless2Completed = true);
       await tester.pumpAndSettle();
 
@@ -2465,15 +3507,19 @@ void main() {
         const TestPage(key: ValueKey<String>('3'), name: 'third'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       await tester.pumpAndSettle();
       bool thirdPageless1Completed = false;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('third-pageless1'),
-          settings: null,
-        )
+        ),
       ).then((_) => thirdPageless1Completed = true);
       await tester.pumpAndSettle();
 
@@ -2489,7 +3535,12 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       // The pageless route of initial page route should be completed.
       expect(initialPageless1Completed, true);
@@ -2501,7 +3552,12 @@ void main() {
         const TestPage(key: ValueKey<String>('3'), name: 'third'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       await tester.pumpAndSettle();
       expect(secondPageless1Completed, true);
@@ -2512,11 +3568,81 @@ void main() {
         const TestPage(key: ValueKey<String>('4'), name: 'forth'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
       expect(thirdPageless1Completed, true);
       await tester.pumpAndSettle();
       expect(find.text('forth'), findsOneWidget);
+    });
+
+    //Regression test for https://github.com/flutter/flutter/issues/115887
+    testWidgets('Complex case 2', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<TestPage> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
+      expect(find.text('second'), findsOneWidget);
+      expect(find.text('initial'), findsNothing);
+      // Push pageless route to second page route
+      navigator.currentState!.push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const Text('second-pageless1'),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      // Now the history should look like [initial, second, second-pageless1].
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsNothing);
+      expect(find.text('second-pageless1'), findsOneWidget);
+      expect(myPages.length, 2);
+
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Now the history should look like [second, second-pageless1].
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsNothing);
+      expect(find.text('second-pageless1'), findsOneWidget);
+      expect(myPages.length, 1);
+
+      // Pop the pageless route.
+      navigator.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(myPages.length, 1);
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsOneWidget);
+      expect(find.text('second-pageless1'), findsNothing);
     });
 
     testWidgets('complex case 1 - with always remove transition delegate', (WidgetTester tester) async {
@@ -2533,18 +3659,18 @@ void main() {
       // Add initial page route with one pageless route.
       await tester.pumpWidget(
         buildNavigator(
+          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
-          transitionDelegate: transitionDelegate
-        )
+          transitionDelegate: transitionDelegate,
+        ),
       );
       bool initialPageless1Completed = false;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('initial-pageless1'),
-          settings: null,
-        )
+        ),
       ).then((_) => initialPageless1Completed = true);
       await tester.pumpAndSettle();
 
@@ -2555,26 +3681,25 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
+          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
-          transitionDelegate: transitionDelegate
-        )
+          transitionDelegate: transitionDelegate,
+        ),
       );
       bool secondPageless1Completed = false;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless1'),
-          settings: null,
-        )
+        ),
       ).then((_) => secondPageless1Completed = true);
       await tester.pumpAndSettle();
       bool secondPageless2Completed = false;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless2'),
-          settings: null,
-        )
+        ),
       ).then((_) => secondPageless2Completed = true);
       await tester.pumpAndSettle();
 
@@ -2586,18 +3711,18 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
+          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
-          transitionDelegate: transitionDelegate
-        )
+          transitionDelegate: transitionDelegate,
+        ),
       );
       bool thirdPageless1Completed = false;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('third-pageless1'),
-          settings: null,
-        )
+        ),
       ).then((_) => thirdPageless1Completed = true);
       await tester.pumpAndSettle();
 
@@ -2614,11 +3739,12 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
+          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
-          transitionDelegate: transitionDelegate
-        )
+          transitionDelegate: transitionDelegate,
+        ),
       );
       // The pageless route of initial page route should be removed without complete.
       expect(initialPageless1Completed, false);
@@ -2631,11 +3757,12 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
+          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
-          transitionDelegate: transitionDelegate
-        )
+          transitionDelegate: transitionDelegate,
+        ),
       );
       await tester.pumpAndSettle();
       expect(initialPageless1Completed, false);
@@ -2648,11 +3775,12 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
+          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
-          transitionDelegate: transitionDelegate
-        )
+          transitionDelegate: transitionDelegate,
+        ),
       );
       await tester.pump();
       expect(initialPageless1Completed, false);
@@ -2673,7 +3801,12 @@ void main() {
         return route.didPop(result);
       }
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
 
       // Pops the second page route.
@@ -2681,7 +3814,12 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
 
       // Re-push the second page again before it finishes popping.
@@ -2690,7 +3828,12 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
 
       // It should not crash the app.
@@ -2710,7 +3853,12 @@ void main() {
         return route.didPop(result);
       }
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
 
       // Pops the second page route.
@@ -2718,7 +3866,12 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
 
       // Updates the pages again before second page finishes popping.
@@ -2726,9 +3879,61 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       await tester.pumpWidget(
-        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
       );
 
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('initial'), findsOneWidget);
+    });
+
+    testWidgets('can update pages before a pageless route has finished popping', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/68162.
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
+      // Pushes a pageless route.
+      showDialog<void>(
+        useRootNavigator: false,
+        context: navigator.currentContext!,
+        builder: (BuildContext context) => const Text('dialog'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('dialog'), findsOneWidget);
+      // Pops the pageless route.
+      navigator.currentState!.pop();
+      // Before the pop finishes, updates the page list.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
       // It should not crash the app.
       expect(tester.takeException(), isNull);
       await tester.pumpAndSettle();
@@ -2744,33 +3949,34 @@ void main() {
       ];
       final List<NavigatorObservation> observations = <NavigatorObservation>[];
       final TestObserver observer = TestObserver()
-        ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
           observations.add(
             NavigatorObservation(
-              current: route?.settings?.name,
-              previous: previousRoute?.settings?.name,
-              operation: 'push'
-            )
+              current: route?.settings.name,
+              previous: previousRoute?.settings.name,
+              operation: 'push',
+            ),
           );
         }
-        ..onRemoved = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        ..onRemoved = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
           observations.add(
             NavigatorObservation(
-              current: route?.settings?.name,
-              previous: previousRoute?.settings?.name,
-              operation: 'remove'
-            )
+              current: route?.settings.name,
+              previous: previousRoute?.settings.name,
+              operation: 'remove',
+            ),
           );
         };
       bool onPopPage(Route<dynamic> route, dynamic result) => false;
 
       await tester.pumpWidget(
         buildNavigator(
+          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
           observers: <NavigatorObserver>[observer],
-        )
+        ),
       );
       myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('4'), name:'forth'),
@@ -2779,11 +3985,12 @@ void main() {
 
       await tester.pumpWidget(
         buildNavigator(
+          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
           observers: <NavigatorObserver>[observer],
-        )
+        ),
       );
 
       await tester.pumpAndSettle();
@@ -2825,54 +4032,1120 @@ void main() {
       expect(observations[7].previous, isNull);
     });
   });
+
+  testWidgets('Can reuse NavigatorObserver in rebuilt tree', (WidgetTester tester) async {
+    final NavigatorObserver observer = NavigatorObserver();
+    Widget build([Key? key]) {
+      return TestDependencies(
+        child: Navigator(
+          key: key,
+          observers: <NavigatorObserver>[observer],
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
+                return Container();
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    // Test without reinsertion
+    await tester.pumpWidget(build());
+    await tester.pumpWidget(Container(child: build()));
+    expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
+
+    // Clear the tree
+    await tester.pumpWidget(Container());
+    expect(observer.navigator, isNull);
+
+    // Test with reinsertion
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(build(key));
+    await tester.pumpWidget(Container(child: build(key)));
+    expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
+  });
+
+  testWidgets('Navigator requests focus if requestFocus is true', (WidgetTester tester) async {
+    final GlobalKey navigatorKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    final Map<String, Widget> routes = <String, Widget>{
+      '/': const Text('A'),
+      '/second': Text('B', key: innerKey),
+    };
+    late final NavigatorState navigator = navigatorKey.currentState! as NavigatorState;
+    final FocusScopeNode focusNode = FocusScopeNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        FocusScope(node: focusNode, child: Container()),
+        Expanded(
+          child: MaterialApp(
+            home: Navigator(
+              key: navigatorKey,
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext _, Animation<double> __,
+                      Animation<double> ___) {
+                    return routes[settings.name!]!;
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    ));
+    expect(navigator.widget.requestFocus, true);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    expect(focusNode.hasFocus, false);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    navigator.pushNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, false);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    // Pop does not take focus.
+    expect(focusNode.hasFocus, true);
+
+    navigator.pushReplacementNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, false);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    ModalRoute.of(innerKey.currentContext!)!.addLocalHistoryEntry(
+      LocalHistoryEntry(),
+    );
+    await tester.pumpAndSettle();
+    // addLocalHistoryEntry does not take focus.
+    expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('Navigator does not request focus if requestFocus is false', (WidgetTester tester) async {
+    final GlobalKey navigatorKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    final Map<String, Widget> routes = <String, Widget>{
+      '/': const Text('A'),
+      '/second': Text('B', key: innerKey),
+    };
+    late final NavigatorState navigator =
+    navigatorKey.currentState! as NavigatorState;
+    final FocusScopeNode focusNode = FocusScopeNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        FocusScope(node: focusNode, child: Container()),
+        Expanded(
+          child: MaterialApp(
+            home: Navigator(
+              key: navigatorKey,
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext _, Animation<double> __,
+                      Animation<double> ___) {
+                    return routes[settings.name!]!;
+                  },
+                );
+              },
+              requestFocus: false,
+            ),
+          ),
+        ),
+      ],
+    ));
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    expect(focusNode.hasFocus, false);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    navigator.pushNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, true);
+
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    expect(focusNode.hasFocus, true);
+
+    navigator.pushReplacementNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, true);
+
+    ModalRoute.of(innerKey.currentContext!)!.addLocalHistoryEntry(
+      LocalHistoryEntry(),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
+    final _MockNavigatorObserver observer = _MockNavigatorObserver();
+    Widget build([Key? key]) {
+      return TestDependencies(
+        child: Navigator(
+          key: key,
+          observers: <NavigatorObserver>[observer],
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
+                return Container();
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    await tester.pumpWidget(Container(child: build()));
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #navigator]);
+    await tester.pumpWidget(Container());
+    observer._checkInvocations(<Symbol>[#navigator]);
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(build(key));
+    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    await tester.pumpWidget(Container(child: build(key)));
+    observer._checkInvocations(<Symbol>[#navigator, #navigator]);
+  });
+
+  testWidgets("Navigator doesn't override FocusTraversalPolicy of ancestors", (WidgetTester tester) async {
+    FocusTraversalPolicy? policy;
+    await tester.pumpWidget(
+      TestDependencies(
+        child: FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(),
+          child: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                settings: settings,
+                pageBuilder: (BuildContext context, Animation<double> __, Animation<double> ___) {
+                  policy = FocusTraversalGroup.of(context);
+                  return const SizedBox();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    expect(policy, isA<WidgetOrderTraversalPolicy>());
+  });
+
+  testWidgets('Navigator inserts ReadingOrderTraversalPolicy if no ancestor has a policy', (WidgetTester tester) async {
+    FocusTraversalPolicy? policy;
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext context, Animation<double> __, Animation<double> ___) {
+                policy = FocusTraversalGroup.of(context);
+                return const SizedBox();
+              },
+            );
+          },
+        ),
+      ),
+    );
+    expect(policy, isA<ReadingOrderTraversalPolicy>());
+  });
+
+  testWidgets(
+      'Send semantic event to move a11y focus to the last focused item when pop next page',
+      (WidgetTester tester) async {
+    dynamic semanticEvent;
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+        SystemChannels.accessibility, (dynamic message) async {
+      semanticEvent = message;
+    });
+    final Key openSheetKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primarySwatch: Colors.blue),
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => _LinksPage(
+            title: 'Home page',
+            buttons: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/one');
+                },
+                child: const Text('Go to one'),
+              ),
+            ],
+          ),
+          '/one': (BuildContext context) => Scaffold(
+            body: Column(
+              children: <Widget>[
+                const ListTile(title: Text('Title 1')),
+                const ListTile(title: Text('Title 2')),
+                const ListTile(title: Text('Title 3')),
+                ElevatedButton(
+                  key: openSheetKey,
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Center(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close Sheet'),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Open Sheet'),
+                )
+              ],
+            ),
+          ),
+        },
+      ),
+    );
+
+    expect(find.text('Home page'), findsOneWidget);
+
+    await tester.tap(find.text('Go to one'));
+    await tester.pumpAndSettle();
+
+    // The focused node before opening the sheet.
+    final ByteData? fakeMessage =
+        SystemChannels.accessibility.codec.encodeMessage(<String, dynamic>{
+      'type': 'didGainFocus',
+      'nodeId': 5,
+    });
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.accessibility.name,
+      fakeMessage,
+      (ByteData? data) {},
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('Close Sheet'), findsOneWidget);
+    await tester.tap(find.text('Close Sheet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // The focused node before opening the sheet regains the focus;
+    expect(semanticEvent, <String, dynamic>{
+      'type': 'focus',
+      'nodeId': 5,
+      'data': <String, dynamic>{},
+    });
+
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+  },
+    variant:  const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS}),
+    skip: isBrowser, // [intended] only non-web supports move a11y focus back to last item.
+  );
+
+  group('RouteSettings.toString', () {
+    test('when name is not null, should have double quote', () {
+      expect(const RouteSettings(name: '/home').toString(), 'RouteSettings("/home", null)');
+    });
+
+    test('when name is null, should not have double quote', () {
+      expect(const RouteSettings().toString(), 'RouteSettings(none, null)');
+    });
+  });
+
+  group('Android Predictive Back', () {
+    bool? lastFrameworkHandlesBack;
+    setUp(() async {
+      lastFrameworkHandlesBack = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+          if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
+            expect(methodCall.arguments, isA<bool>());
+            lastFrameworkHandlesBack = methodCall.arguments as bool;
+          }
+          return;
+        });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            'flutter/lifecycle',
+            const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
+            (ByteData? data) {},
+          );
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    testWidgets('a single route is already defaulted to false', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Text('home'),
+          )
+        )
+      );
+
+      expect(lastFrameworkHandlesBack, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+    );
+
+    testWidgets('navigating around a single Navigator with .pop', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => _LinksPage(
+              title: 'Home page',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one');
+                  },
+                  child: const Text('Go to one'),
+                ),
+              ],
+            ),
+            '/one': (BuildContext context) => _LinksPage(
+              title: 'Page one',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one/one');
+                  },
+                  child: const Text('Go to one/one'),
+                ),
+              ],
+            ),
+            '/one/one': (BuildContext context) => const _LinksPage(
+              title: 'Page one - one',
+            ),
+          },
+        ),
+      );
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Go back'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Go to one/one'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one - one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Go back'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Go back'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+    );
+
+    testWidgets('navigating around a single Navigator with system back', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => _LinksPage(
+              title: 'Home page',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one');
+                  },
+                  child: const Text('Go to one'),
+                ),
+              ],
+            ),
+            '/one': (BuildContext context) => _LinksPage(
+              title: 'Page one',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one/one');
+                  },
+                  child: const Text('Go to one/one'),
+                ),
+              ],
+            ),
+            '/one/one': (BuildContext context) => const _LinksPage(
+              title: 'Page one - one',
+            ),
+          },
+        ),
+      );
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Go to one/one'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one - one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+    );
+
+    testWidgets('a single Navigator with a PopScope that defaults to enabled', (WidgetTester tester) async {
+      bool canPop = true;
+      late StateSetter setState;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MaterialApp(
+              initialRoute: '/',
+              routes: <String, WidgetBuilder>{
+                '/': (BuildContext context) => _LinksPage(
+                  title: 'Home page',
+                  canPop: canPop,
+                ),
+              },
+            );
+          },
+        ),
+      );
+
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      setState(() {
+        canPop = false;
+      });
+      await tester.pump();
+
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      setState(() {
+        canPop = true;
+      });
+      await tester.pump();
+
+      expect(lastFrameworkHandlesBack, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+    );
+
+    testWidgets('a single Navigator with a PopScope that defaults to disabled', (WidgetTester tester) async {
+      bool canPop = false;
+      late StateSetter setState;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MaterialApp(
+              initialRoute: '/',
+              routes: <String, WidgetBuilder>{
+                '/': (BuildContext context) => _LinksPage(
+                  title: 'Home page',
+                  canPop: canPop,
+                ),
+              },
+            );
+          },
+        ),
+      );
+
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      setState(() {
+        canPop = true;
+      });
+      await tester.pump();
+
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      setState(() {
+        canPop = false;
+      });
+      await tester.pump();
+
+      expect(lastFrameworkHandlesBack, isTrue);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+    );
+
+    // Test both system back gestures and Navigator.pop.
+    for (final _BackType backType in _BackType.values) {
+      testWidgets('navigating around nested Navigators', (WidgetTester tester) async {
+        final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+        final GlobalKey<NavigatorState> nestedNav = GlobalKey<NavigatorState>();
+        Future<void> goBack() async {
+          switch (backType) {
+            case _BackType.systemBack:
+              return simulateSystemBack();
+            case _BackType.navigatorPop:
+              if (nestedNav.currentState != null) {
+                if (nestedNav.currentState!.mounted && nestedNav.currentState!.canPop()) {
+                  return nestedNav.currentState?.pop();
+                }
+              }
+              return nav.currentState?.pop();
+          }
+        }
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorKey: nav,
+            initialRoute: '/',
+            routes: <String, WidgetBuilder>{
+              '/': (BuildContext context) => _LinksPage(
+                title: 'Home page',
+                buttons: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/one');
+                    },
+                    child: const Text('Go to one'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/nested');
+                    },
+                    child: const Text('Go to nested'),
+                  ),
+                ],
+              ),
+              '/one': (BuildContext context) => _LinksPage(
+                title: 'Page one',
+                buttons: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/one/one');
+                    },
+                    child: const Text('Go to one/one'),
+                  ),
+                ],
+              ),
+              '/nested': (BuildContext context) => _NestedNavigatorsPage(
+                navigatorKey: nestedNav,
+              ),
+            },
+          ),
+        );
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+
+        await tester.tap(find.text('Go to one'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Page one'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+
+        await goBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+
+        await tester.tap(find.text('Go to nested'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Nested - home'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+
+        await tester.tap(find.text('Go to nested/one'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Nested - page one'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+
+        await goBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Nested - home'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+
+        await goBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+      },
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      );
+    }
+
+    testWidgets('nested Navigators with a nested PopScope', (WidgetTester tester) async {
+      bool canPop = true;
+      late StateSetter setState;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MaterialApp(
+              initialRoute: '/',
+              routes: <String, WidgetBuilder>{
+                '/': (BuildContext context) => _LinksPage(
+                  title: 'Home page',
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/one');
+                      },
+                      child: const Text('Go to one'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/nested');
+                      },
+                      child: const Text('Go to nested'),
+                    ),
+                  ],
+                ),
+                '/one': (BuildContext context) => _LinksPage(
+                  title: 'Page one',
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/one/one');
+                      },
+                      child: const Text('Go to one/one'),
+                    ),
+                  ],
+                ),
+                '/nested': (BuildContext context) => _NestedNavigatorsPage(
+                  popScopePageEnabled: canPop,
+                ),
+              },
+            );
+          },
+        ),
+      );
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page one'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Go to nested'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - home'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Go to nested/popscope'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - PopScope'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      // Going back works because canPop is true.
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - home'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Go to nested/popscope'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - PopScope'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      setState(() {
+        canPop = false;
+      });
+      await tester.pumpAndSettle();
+
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      // Now going back doesn't work because canPop is false, but it still
+      // has no effect on the system navigator due to all of the other routes.
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - PopScope'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      setState(() {
+        canPop = true;
+      });
+      await tester.pump();
+
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      // And going back works again after switching canPop back to true.
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - home'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+    );
+
+    group('Navigator page API', () {
+      testWidgets('starting with one route as usual', (WidgetTester tester) async {
+        late StateSetter builderSetState;
+        final List<_Page> pages = <_Page>[_Page.home];
+        bool canPop() => pages.length <= 1;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                builderSetState = setState;
+                return PopScope(
+                  canPop: canPop(),
+                  onPopInvoked: (bool success) {
+                    if (success || pages.last == _Page.noPop) {
+                      return;
+                    }
+                    setState(() {
+                      pages.removeLast();
+                    });
+                  },
+                  child: Navigator(
+                    onPopPage: (Route<void> route, void result) {
+                      if (!route.didPop(null)) {
+                        return false;
+                      }
+                      setState(() {
+                        pages.removeLast();
+                      });
+                      return true;
+                    },
+                    pages: pages.map((_Page page) {
+                      switch (page) {
+                        case _Page.home:
+                          return MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.noPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _Page.one:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Page one',
+                            ),
+                          );
+                        case _Page.noPop:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Cannot pop page',
+                              canPop: false,
+                            ),
+                          );
+                      }
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+
+        await tester.tap(find.text('Go to _Page.one'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Page one'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+
+        await simulateSystemBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+
+        await tester.tap(find.text('Go to _Page.noPop'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Cannot pop page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+
+        await simulateSystemBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Cannot pop page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+
+        // Circumvent "Cannot pop page" by directly modifying pages.
+        builderSetState(() {
+          pages.removeLast();
+        });
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+      },
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      );
+
+      testWidgets('starting with existing route history', (WidgetTester tester) async {
+        final List<_Page> pages = <_Page>[_Page.home, _Page.one];
+        bool canPop() => pages.length <= 1;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return PopScope(
+                  canPop: canPop(),
+                  onPopInvoked: (bool success) {
+                    if (success || pages.last == _Page.noPop) {
+                      return;
+                    }
+                    setState(() {
+                      pages.removeLast();
+                    });
+                  },
+                  child: Navigator(
+                    onPopPage: (Route<void> route, void result) {
+                      if (!route.didPop(null)) {
+                        return false;
+                      }
+                      setState(() {
+                        pages.removeLast();
+                      });
+                      return true;
+                    },
+                    pages: pages.map((_Page page) {
+                      switch (page) {
+                        case _Page.home:
+                          return MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.noPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _Page.one:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Page one',
+                            ),
+                          );
+                        case _Page.noPop:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Cannot pop page',
+                              canPop: false,
+                            ),
+                          );
+                      }
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        expect(find.text('Home page'), findsNothing);
+        expect(find.text('Page one'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+
+        await simulateSystemBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(find.text('Page one'), findsNothing);
+        expect(lastFrameworkHandlesBack, isFalse);
+      },
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      );
+    });
+  });
 }
 
-typedef AnnouncementCallBack = void Function(Route<dynamic>);
+typedef AnnouncementCallBack = void Function(Route<dynamic>?);
 
-class NotAnnounced extends Route<void> {/* A place holder for not announced route*/}
+class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
 
 class RouteAnnouncementSpy extends Route<void> {
   RouteAnnouncementSpy({
     this.onDidChangePrevious,
     this.onDidChangeNext,
     this.onDidPopNext,
-    RouteSettings settings,
-  }) : super(settings: settings);
-  final AnnouncementCallBack onDidChangePrevious;
-  final AnnouncementCallBack onDidChangeNext;
-  final AnnouncementCallBack onDidPopNext;
+    super.settings,
+  });
+  final AnnouncementCallBack? onDidChangePrevious;
+  final AnnouncementCallBack? onDidChangeNext;
+  final AnnouncementCallBack? onDidPopNext;
 
   @override
-  List<OverlayEntry> get overlayEntries => <OverlayEntry>[
+  final List<OverlayEntry> overlayEntries = <OverlayEntry>[
     OverlayEntry(
       builder: (BuildContext context) => const Placeholder(),
-    )
+    ),
   ];
 
   @override
-  void didChangeNext(Route<dynamic> nextRoute) {
+  void didChangeNext(Route<dynamic>? nextRoute) {
     super.didChangeNext(nextRoute);
-    if (onDidChangeNext != null)
-      onDidChangeNext(nextRoute);
+    onDidChangeNext?.call(nextRoute);
   }
 
   @override
-  void didChangePrevious(Route<dynamic> previousRoute) {
+  void didChangePrevious(Route<dynamic>? previousRoute) {
     super.didChangePrevious(previousRoute);
-    if (onDidChangePrevious != null)
-      onDidChangePrevious(previousRoute);
+    onDidChangePrevious?.call(previousRoute);
   }
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     super.didPopNext(nextRoute);
-    if (onDidPopNext != null)
-      onDidPopNext(nextRoute);
+    onDidPopNext?.call(nextRoute);
   }
 }
 
 class _TickingWidget extends StatefulWidget {
-  const _TickingWidget({this.onTick});
+  const _TickingWidget({required this.onTick});
 
   final VoidCallback onTick;
 
@@ -2881,7 +5154,7 @@ class _TickingWidget extends StatefulWidget {
 }
 
 class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProviderStateMixin {
-  Ticker _ticker;
+  late Ticker _ticker;
 
   @override
   void initState() {
@@ -2906,21 +5179,22 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   @override
   Iterable<RouteTransitionRecord> resolve({
-    List<RouteTransitionRecord> newPageRouteHistory,
-    Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
-    Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
+    required List<RouteTransitionRecord> newPageRouteHistory,
+    required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
   }) {
     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
-    void handleExitingRoute(RouteTransitionRecord location) {
-      if (!locationToExitingPageRoute.containsKey(location))
+    void handleExitingRoute(RouteTransitionRecord? location) {
+      if (!locationToExitingPageRoute.containsKey(location)) {
         return;
+      }
 
-      final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location];
+      final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location]!;
       if (exitingPageRoute.isWaitingForExitingDecision) {
         final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
         exitingPageRoute.markForRemove();
         if (hasPagelessRoute) {
-          final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+          final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute]!;
           for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
             pagelessRoute.markForRemove();
           }
@@ -2944,36 +5218,53 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   }
 }
 
+class ZeroTransitionPage extends Page<void> {
+  const ZeroTransitionPage({
+    super.key,
+    super.arguments,
+    required String super.name,
+  });
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return NoAnimationPageRoute(
+      settings: this,
+      pageBuilder: (BuildContext context) => Text(name!),
+    );
+  }
+}
+
 class TestPage extends Page<void> {
   const TestPage({
-    LocalKey key,
-    String name,
-    Object arguments,
-  }) : super(key: key, name: name, arguments: arguments);
+    super.key,
+    required String super.name,
+    super.arguments,
+  });
 
   @override
   Route<void> createRoute(BuildContext context) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => Text(name),
+      builder: (BuildContext context) => Text(name!),
       settings: this,
     );
   }
 }
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {
-  NoAnimationPageRoute({WidgetBuilder pageBuilder})
-      : super(pageBuilder: (BuildContext context, __, ___) {
-          return pageBuilder(context);
-        });
-
-  @override
-  AnimationController createAnimationController() {
-    return super.createAnimationController()..value = 1.0;
-  }
+  NoAnimationPageRoute({
+    super.settings,
+    required WidgetBuilder pageBuilder
+  }) : super(
+         transitionDuration: Duration.zero,
+         reverseTransitionDuration: Duration.zero,
+         pageBuilder: (BuildContext context, __, ___) {
+           return pageBuilder(context);
+         }
+       );
 }
 
 class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key key}) : super(key: key);
+  const StatefulTestWidget({super.key});
 
   @override
   State<StatefulTestWidget> createState() => StatefulTestState();
@@ -2989,9 +5280,256 @@ class StatefulTestState extends State<StatefulTestWidget> {
   }
 }
 
+class HeroControllerSpy extends HeroController {
+  OnObservation? onPushed;
+  @override
+  void didPush(Route<dynamic>? route, Route<dynamic>? previousRoute) {
+    onPushed?.call(route, previousRoute);
+  }
+}
+
 class NavigatorObservation {
-  const NavigatorObservation({this.previous, this.current, this.operation});
-  final String previous;
-  final String current;
+  const NavigatorObservation({this.previous, this.current, required this.operation});
+  final String? previous;
+  final String? current;
   final String operation;
+
+  @override
+  String toString() => 'NavigatorObservation($operation, $current, $previous)';
+}
+
+class BuilderPage extends Page<void> {
+  const BuilderPage({super.key, super.name, required this.pageBuilder});
+
+  final RoutePageBuilder pageBuilder;
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return PageRouteBuilder<void>(
+      settings: this,
+      pageBuilder: pageBuilder,
+    );
+  }
+}
+
+class ZeroDurationPage extends Page<void> {
+  const ZeroDurationPage({required this.child});
+
+  final Widget child;
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return ZeroDurationPageRoute(page: this);
+  }
+}
+
+class ZeroDurationPageRoute extends PageRoute<void> {
+  ZeroDurationPageRoute({required ZeroDurationPage page})
+      : super(settings: page, allowSnapshotting: false);
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+
+  ZeroDurationPage get _page => settings as ZeroDurationPage;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return _page.child;
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return child;
+  }
+
+  @override
+  bool get maintainState => false;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+}
+
+class _MockNavigatorObserver implements NavigatorObserver {
+  final List<Symbol> _invocations = <Symbol>[];
+
+  void _checkInvocations(List<Symbol> expected) {
+    expect(_invocations, expected);
+    _invocations.clear();
+  }
+
+  @override
+  Object? noSuchMethod(Invocation invocation) {
+    _invocations.add(invocation.memberName);
+    return null;
+  }
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQueryData.fromView(View.of(context)),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: child,
+      )
+    );
+  }
+}
+
+enum _BackType {
+  systemBack,
+  navigatorPop,
+}
+
+enum _Page {
+  home,
+  one,
+  noPop,
+}
+
+class _LinksPage extends StatelessWidget {
+  const _LinksPage ({
+    this.buttons = const <Widget>[],
+    this.canPop,
+    required this.title,
+    this.onBack,
+  });
+
+  final List<Widget> buttons;
+  final bool? canPop;
+  final VoidCallback? onBack;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(title),
+            ...buttons,
+            if (Navigator.of(context).canPop())
+              TextButton(
+                onPressed: onBack ?? () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Go back'),
+              ),
+            if (canPop != null)
+              PopScope(
+                canPop: canPop!,
+                child: const SizedBox.shrink(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NestedNavigatorsPage extends StatefulWidget {
+  const _NestedNavigatorsPage({
+    this.popScopePageEnabled,
+    this.navigatorKey,
+  });
+
+  /// Whether the PopScope on the /popscope page is enabled.
+  ///
+  /// If null, then no PopScope is built at all.
+  final bool? popScopePageEnabled;
+
+  final GlobalKey<NavigatorState>? navigatorKey;
+
+  @override
+  State<_NestedNavigatorsPage> createState() => _NestedNavigatorsPageState();
+}
+
+class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
+  late final GlobalKey<NavigatorState> _navigatorKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _navigatorKey = widget.navigatorKey ?? GlobalKey<NavigatorState>();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final BuildContext rootContext = context;
+    return NavigatorPopHandler(
+      onPop: () {
+        if (widget.popScopePageEnabled == false) {
+          return;
+        }
+        _navigatorKey.currentState!.pop();
+      },
+      child: Navigator(
+        key: _navigatorKey,
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          switch (settings.name) {
+            case '/':
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return _LinksPage(
+                    title: 'Nested - home',
+                    onBack: () {
+                      Navigator.of(rootContext).pop();
+                    },
+                    buttons: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/one');
+                        },
+                        child: const Text('Go to nested/one'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/popscope');
+                        },
+                        child: const Text('Go to nested/popscope'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(rootContext).pop();
+                        },
+                        child: const Text('Go back out of nested nav'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            case '/one':
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const _LinksPage(
+                    title: 'Nested - page one',
+                  );
+                },
+              );
+            case '/popscope':
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return _LinksPage(
+                    canPop: widget.popScopePageEnabled,
+                    title: 'Nested - PopScope',
+                  );
+                },
+              );
+            default:
+              throw Exception('Invalid route: ${settings.name}');
+          }
+        },
+      ),
+    );
+  }
 }

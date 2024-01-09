@@ -2,15 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder;
+import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
+import 'text_scaler.dart';
 import 'text_span.dart';
 import 'text_style.dart';
+
+// Examples can assume:
+// late InlineSpan myInlineSpan;
 
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
@@ -47,32 +51,29 @@ class InlineSpanSemanticsInformation {
   /// Constructs an object that holds the text and semantics label values of an
   /// [InlineSpan].
   ///
-  /// The text parameter must not be null.
-  ///
   /// Use [InlineSpanSemanticsInformation.placeholder] instead of directly setting
   /// [isPlaceholder].
   const InlineSpanSemanticsInformation(
     this.text, {
     this.isPlaceholder = false,
     this.semanticsLabel,
+    this.stringAttributes = const <ui.StringAttribute>[],
     this.recognizer,
-  }) : assert(text != null),
-       assert(isPlaceholder != null),
-       assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
+  }) : assert(!isPlaceholder || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
        requiresOwnNode = isPlaceholder || recognizer != null;
 
   /// The text info for a [PlaceholderSpan].
   static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation('\uFFFC', isPlaceholder: true);
 
-  /// The text value, if any.  For [PlaceholderSpan]s, this will be the unicode
+  /// The text value, if any. For [PlaceholderSpan]s, this will be the unicode
   /// placeholder value.
   final String text;
 
   /// The semanticsLabel, if any.
-  final String semanticsLabel;
+  final String? semanticsLabel;
 
   /// The gesture recognizer, if any, for this span.
-  final GestureRecognizer recognizer;
+  final GestureRecognizer? recognizer;
 
   /// Whether this is for a placeholder span.
   final bool isPlaceholder;
@@ -83,20 +84,69 @@ class InlineSpanSemanticsInformation {
   /// [isPlaceholder] is true.
   final bool requiresOwnNode;
 
+  /// The string attributes attached to this semantics information
+  final List<ui.StringAttribute> stringAttributes;
+
   @override
   bool operator ==(Object other) {
     return other is InlineSpanSemanticsInformation
         && other.text == text
         && other.semanticsLabel == semanticsLabel
         && other.recognizer == recognizer
-        && other.isPlaceholder == isPlaceholder;
+        && other.isPlaceholder == isPlaceholder
+        && listEquals<ui.StringAttribute>(other.stringAttributes, stringAttributes);
   }
 
   @override
-  int get hashCode => hashValues(text, semanticsLabel, recognizer, isPlaceholder);
+  int get hashCode => Object.hash(text, semanticsLabel, recognizer, isPlaceholder);
 
   @override
   String toString() => '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
+}
+
+/// Combines _semanticsInfo entries where permissible.
+///
+/// Consecutive inline spans can be combined if their
+/// [InlineSpanSemanticsInformation.requiresOwnNode] return false.
+List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanticsInformation> infoList) {
+  final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
+  String workingText = '';
+  String workingLabel = '';
+  List<ui.StringAttribute> workingAttributes = <ui.StringAttribute>[];
+  for (final InlineSpanSemanticsInformation info in infoList) {
+    if (info.requiresOwnNode) {
+      combined.add(InlineSpanSemanticsInformation(
+        workingText,
+        semanticsLabel: workingLabel,
+        stringAttributes: workingAttributes,
+      ));
+      workingText = '';
+      workingLabel = '';
+      workingAttributes = <ui.StringAttribute>[];
+      combined.add(info);
+    } else {
+      workingText += info.text;
+      final String effectiveLabel = info.semanticsLabel ?? info.text;
+      for (final ui.StringAttribute infoAttribute in info.stringAttributes) {
+        workingAttributes.add(
+          infoAttribute.copy(
+            range: TextRange(
+              start: infoAttribute.range.start + workingLabel.length,
+              end: infoAttribute.range.end + workingLabel.length,
+            ),
+          ),
+        );
+      }
+      workingLabel += effectiveLabel;
+
+    }
+  }
+  combined.add(InlineSpanSemanticsInformation(
+    workingText,
+    semanticsLabel: workingLabel,
+    stringAttributes: workingAttributes,
+  ));
+  return combined;
 }
 
 /// An immutable span of inline content which forms part of a paragraph.
@@ -104,7 +154,7 @@ class InlineSpanSemanticsInformation {
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
 ///  * The subclass [PlaceholderSpan] represents a placeholder that may be
 ///    filled with non-text content. [PlaceholderSpan] itself defines a
-///    [ui.PlaceholderAlignemnt] and a [TextBaseline]. To be useful,
+///    [ui.PlaceholderAlignment] and a [TextBaseline]. To be useful,
 ///    [PlaceholderSpan] must be extended to define content. An instance of
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
@@ -118,17 +168,17 @@ class InlineSpanSemanticsInformation {
 /// Text.rich(
 ///   TextSpan(
 ///     text: 'My name is ',
-///     style: TextStyle(color: Colors.black),
+///     style: const TextStyle(color: Colors.black),
 ///     children: <InlineSpan>[
 ///       WidgetSpan(
 ///         alignment: PlaceholderAlignment.baseline,
 ///         baseline: TextBaseline.alphabetic,
 ///         child: ConstrainedBox(
-///           constraints: BoxConstraints(maxWidth: 100),
-///           child: TextField(),
+///           constraints: const BoxConstraints(maxWidth: 100),
+///           child: const TextField(),
 ///         )
 ///       ),
-///       TextSpan(
+///       const TextSpan(
 ///         text: '.',
 ///       ),
 ///     ],
@@ -153,38 +203,12 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// The [style] is also applied to any child spans when this is an instance
   /// of [TextSpan].
-  final TextStyle style;
-
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Returns the text associated with this span if this is an instance of [TextSpan],
-  /// otherwise returns null.
-  @Deprecated(
-    'InlineSpan does not innately have text. Use TextSpan.text instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  String get text => null;
-
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Returns the [InlineSpan] children list associated with this span if this is an
-  /// instance of [TextSpan], otherwise returns null.
-  @Deprecated(
-    'InlineSpan does not innately have children. Use TextSpan.children instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  List<InlineSpan> get children => null;
-
-  /// Returns the [GestureRecognizer] associated with this span if this is an
-  /// instance of [TextSpan], otherwise returns null.
-  @Deprecated(
-    'InlineSpan does not innately have a recognizer. Use TextSpan.recognizer instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  GestureRecognizer get recognizer => null;
+  final TextStyle? style;
 
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained.
   ///
-  /// The `textScaleFactor` parameter specifies a scale that the text and
+  /// The `textScaler` parameter specifies a [TextScaler] that the text and
   /// placeholders will be scaled by. The scaling is performed before layout,
   /// so the text will be laid out with the scaled glyphs and placeholders.
   ///
@@ -193,32 +217,46 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// in the same order as defined in the [InlineSpan] tree.
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
-
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
-  /// for each span that has content.
-  ///
-  /// When `visitor` returns true, the walk will continue. When `visitor` returns
-  /// false, then the walk will end.
-  @Deprecated(
-    'Use visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  bool visitTextSpan(bool visitor(TextSpan span));
+  void build(ui.ParagraphBuilder builder, {
+    TextScaler textScaler = TextScaler.noScaling,
+    List<PlaceholderDimensions>? dimensions,
+  });
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.
   ///
   /// When `visitor` returns true, the walk will continue. When `visitor` returns
   /// false, then the walk will end.
+  ///
+  /// See also:
+  ///
+  ///  * [visitDirectChildren], which preforms `build`-order traversal on the
+  ///    immediate children of this [InlineSpan], regardless of whether they
+  ///    have content.
   bool visitChildren(InlineSpanVisitor visitor);
 
+  /// Calls `visitor` for each immediate child of this [InlineSpan].
+  ///
+  /// The immediate children are visited in the same order they are added to
+  /// a [ui.ParagraphBuilder] in the [build] method, which is also the logical
+  /// order of the child [InlineSpan]s in the text.
+  ///
+  /// The traversal stops when all immediate children are visited, or when the
+  /// `visitor` callback returns `false` on an immediate child. This method
+  /// itself returns a `bool` indicating whether the visitor callback returned
+  /// `true` on all immediate children.
+  ///
+  /// See also:
+  ///
+  ///  * [visitChildren], which performs preorder traversal on this [InlineSpan]
+  ///    if it has content, and all its descendants with content.
+  bool visitDirectChildren(InlineSpanVisitor visitor);
+
   /// Returns the [InlineSpan] that contains the given position in the text.
-  InlineSpan getSpanForPosition(TextPosition position) {
+  InlineSpan? getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     final Accumulator offset = Accumulator();
-    InlineSpan result;
+    InlineSpan? result;
     visitChildren((InlineSpan span) {
       result = span.getSpanForPositionVisitor(position, offset);
       return result == null;
@@ -235,7 +273,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// This method should not be directly called. Use [getSpanForPosition] instead.
   @protected
-  InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset);
+  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset);
 
   /// Flattens the [InlineSpan] tree into a single string.
   ///
@@ -265,7 +303,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Walks the [InlineSpan] tree and accumulates a list of
   /// [InlineSpanSemanticsInformation] objects.
   ///
-  /// This method should not be directly called.  Use
+  /// This method should not be directly called. Use
   /// [getSemanticsInformation] instead.
   ///
   /// [PlaceholderSpan]s in the tree will be represented with a
@@ -292,14 +330,15 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   /// Returns the UTF-16 code unit at the given `index` in the flattened string.
   ///
-  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
+  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpan]s.
   ///
   /// Returns null if the `index` is out of bounds.
-  int codeUnitAt(int index) {
-    if (index < 0)
+  int? codeUnitAt(int index) {
+    if (index < 0) {
       return null;
+    }
     final Accumulator offset = Accumulator();
-    int result;
+    int? result;
     visitChildren((InlineSpan span) {
       result = span.codeUnitAtVisitor(index, offset);
       return result == null;
@@ -316,24 +355,9 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected
-  int codeUnitAtVisitor(int index, Accumulator offset);
+  int? codeUnitAtVisitor(int index, Accumulator offset);
 
-  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
-  /// to be able to construct a [SemanticsNode].
-  ///
-  /// If applicable, the beginning and end text offset are added to [semanticsOffsets].
-  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (0xFFFC) that is inserted to represent it.
-  ///
-  /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
-  /// `semanticsElements` for [PlaceholderSpan]s.
-  @Deprecated(
-    'Implement computeSemanticsInformation instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements);
-
-  /// In checked mode, throws an exception if the object is not in a
+  /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
   ///
   /// This is intended to be used as follows:
@@ -356,10 +380,12 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is InlineSpan
         && other.style == style;
   }
@@ -371,9 +397,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-
-    if (style != null) {
-      style.debugFillProperties(properties);
-    }
+    style?.debugFillProperties(properties);
   }
 }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -15,13 +14,13 @@ class PaintingBindingSpy extends BindingBase with SchedulerBinding, ServicesBind
   int get instantiateImageCodecCalledCount => counter;
 
   @override
-  Future<ui.Codec> instantiateImageCodec(Uint8List list, {int cacheWidth, int cacheHeight}) {
+  Future<ui.Codec> instantiateImageCodecWithSize(ui.ImmutableBuffer buffer, { ui.TargetImageSizeCallback? getTargetSize }) {
     counter++;
-    return ui.instantiateImageCodec(list);
+    return ui.instantiateImageCodecWithSize(buffer, getTargetSize: getTargetSize);
   }
 
   @override
-  // ignore: MUST_CALL_SUPER
+  // ignore: must_call_super
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.

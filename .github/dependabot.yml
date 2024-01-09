@@ -1,0 +1,40 @@
+# See Dependabot documentation for all configuration options:
+# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/dev/ci/mac"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "christopherfujino"
+      - "jmagman"
+      - "keyonghan"
+      - "yusuf-goog"
+    labels:
+      - "team"
+      - "team-infra"
+      - "autosubmit"
+  - package-ecosystem: "docker"
+    directory: "/dev/ci/docker_linux"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "keyonghan"
+      - "yusuf-goog"
+      - "christopherfujino"
+    labels:
+      - "team"
+      - "team-infra"
+      - "autosubmit"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "godofredoc"
+    labels:
+      - "team"
+      - "team-infra"
+      - "autosubmit"

@@ -17,11 +17,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('AndroidDevice stores the requested id', () {
@@ -46,7 +45,7 @@ void main() {
         stdout: '[ro.hardware]: [goldfish]\n[ro.build.characteristics]: [unused]',
         // Heap corruption exit code.
         exitCode: -1073740940,
-      )
+      ),
     ];
 
     final AndroidDevice windowsDevice = setUpAndroidDevice(
@@ -55,14 +54,14 @@ void main() {
     );
     final AndroidDevice linuxDevice = setUpAndroidDevice(
       processManager: FakeProcessManager.list(commands.toList()),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
     );
     final AndroidDevice macOsDevice = setUpAndroidDevice(
       processManager: FakeProcessManager.list(commands.toList()),
       platform: FakePlatform(operatingSystem: 'macos')
     );
 
-    // Parsing succeedes despite the error.
+    // Parsing succeeds despite the error.
     expect(await windowsDevice.isLocalEmulator, true);
 
     // Parsing fails and these default to false.
@@ -89,8 +88,8 @@ void main() {
           FakeCommand(
             command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
             stdout: '[ro.product.cpu.abi]: [${entry.key.first}]\n'
-              '[ro.product.cpu.abilist]: [${entry.key.last}]'
-          )
+              '[ro.product.cpu.abilist]: [${entry.key.last}]',
+          ),
         ]),
       );
 
@@ -98,24 +97,40 @@ void main() {
     }
   });
 
-  testWithoutContext('AndroidDevice can detect local emulator for known types', () async {
-    final Set<String> knownPhyiscal = <String>{
-      'qcom',
-      'samsungexynos7420',
-      'samsungexynos7580',
-      'samsungexynos7870',
-      'samsungexynos7880',
-      'samsungexynos8890',
-      'samsungexynos8895',
-      'samsungexynos9810',
-      'samsungexynos7570',
-    };
-    final Set<String> knownEmulator = <String>{
-      'goldfish',
-      'ranchu',
+  testWithoutContext('AndroidDevice supports profile/release mode on arm and x64 targets '
+    'abi and abiList', () async {
+      // The format is [ABI, ABI list]: expected release mode support.
+    final Map<List<String>, bool> values = <List<String>, bool>{
+      <String>['x86_64', 'unknown']: true,
+      <String>['x86', 'unknown']: false,
+      // The default ABI is arm32
+      <String>['???', 'unknown']: true,
+      <String>['arm64-v8a', 'arm64-v8a,']: true,
+      // The Kindle Fire runs 32 bit apps on 64 bit hardware.
+      <String>['arm64-v8a', 'arm']: true,
     };
 
-    for (final String hardware in knownPhyiscal.followedBy(knownEmulator)) {
+    for (final MapEntry<List<String>, bool> entry in values.entries) {
+      final AndroidDevice device = setUpAndroidDevice(
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
+            stdout: '[ro.product.cpu.abi]: [${entry.key.first}]\n'
+              '[ro.product.cpu.abilist]: [${entry.key.last}]'
+          ),
+        ]),
+      );
+
+      expect(await device.supportsRuntimeMode(BuildMode.release), entry.value);
+      // Debug is always supported.
+      expect(await device.supportsRuntimeMode(BuildMode.debug), true);
+      // jitRelease is never supported.
+      expect(await device.supportsRuntimeMode(BuildMode.jitRelease), false);
+    }
+  });
+
+  testWithoutContext('AndroidDevice can detect local emulator for known types', () async {
+    for (final String hardware in kKnownHardware.keys) {
       final AndroidDevice device = setUpAndroidDevice(
         processManager: FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
@@ -128,7 +143,7 @@ void main() {
         ])
       );
 
-      expect(await device.isLocalEmulator, knownEmulator.contains(hardware));
+      expect(await device.isLocalEmulator, kKnownHardware[hardware] == HardwareType.emulator);
     }
   });
 
@@ -162,7 +177,6 @@ void main() {
     );
 
     expect(await device.isLocalEmulator, true);
-    expect(await device.supportsHardwareRendering, true);
   });
 
   testWithoutContext('isSupportedForProject is true on module project', () async {
@@ -220,11 +234,11 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', 'emulator-5555', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       id: 'emulator-5555',
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockWorkingAndroidConsoleSocket('dummyEmulatorId'),
+        FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
     );
 
     expect(await device.emulatorId, equals('dummyEmulatorId'));
@@ -242,11 +256,11 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', 'emulator-5555', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [samsungexynos7420]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) async {
         socketWasCreated = true;
-        throw 'Socket was created for non-emulator';
+        throw Exception('Socket was created for non-emulator');
       }
     );
 
@@ -261,11 +275,11 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) async {
         socketWasCreated = true;
-        throw 'Socket was created for emulator without port in ID';
+        throw Exception('Socket was created for emulator without port in ID');
       },
     );
 
@@ -279,7 +293,7 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) => throw Exception('Fake socket error'),
     );
@@ -293,10 +307,10 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockUnresponsiveAndroidConsoleSocket(),
+        FakeUnresponsiveAndroidConsoleSocket(),
     );
 
     expect(await device.emulatorId, isNull);
@@ -308,10 +322,10 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockDisconnectingAndroidConsoleSocket()
+        FakeDisconnectingAndroidConsoleSocket()
     );
 
     expect(await device.emulatorId, isNull);
@@ -323,11 +337,11 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1'],
           exitCode: 1,
-        )
+        ),
       ])
     );
 
-    expect(device.lastLogcatTimestamp, isNull);
+    expect(await device.lastLogcatTimestamp(), isNull);
   });
 
   testWithoutContext('AndroidDevice AdbLogReaders for past+future and future logs are not the same', () async {
@@ -339,11 +353,11 @@ flutter:
           exitCode: 1,
         ),
         const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-s', 'flutter'],
+          command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'],
         ),
         const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'logcat', '-v', 'time'],
-        )
+          command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
+        ),
       ])
     );
 
@@ -440,31 +454,39 @@ Uptime: 441088659 Realtime: 521464097
     // contains identifier for platform in memory info.
     expect(json, containsPair('platform', 'Android'));
   });
+
+  testWithoutContext('AndroidDevice stopApp does nothing if app is not passed', () async {
+    final AndroidDevice device = setUpAndroidDevice();
+
+    expect(await device.stopApp(null), isFalse);
+  });
+
 }
 
 AndroidDevice setUpAndroidDevice({
-  String id,
-  AndroidSdk androidSdk,
-  FileSystem fileSystem,
-  ProcessManager processManager,
-  Platform platform,
+  String? id,
+  AndroidSdk? androidSdk,
+  FileSystem? fileSystem,
+  ProcessManager? processManager,
+  Platform? platform,
   AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
 }) {
-  androidSdk ??= MockAndroidSdk();
-  when(androidSdk.adbPath).thenReturn('adb');
+  androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(id ?? '1234',
+    modelID: 'TestModel',
     logger: BufferLogger.test(),
-    platform: platform ?? FakePlatform(operatingSystem: 'linux'),
+    platform: platform ?? FakePlatform(),
     androidSdk: androidSdk,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     processManager: processManager ?? FakeProcessManager.any(),
     androidConsoleSocketFactory: androidConsoleSocketFactory,
-    timeoutConfiguration: const TimeoutConfiguration(),
   );
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {}
-class MockProcessManager extends Mock implements ProcessManager {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String get adbPath => 'adb';
+}
 
 const String kAdbShellGetprop = '''
 [dalvik.vm.dex2oat-Xms]: [64m]
@@ -626,8 +648,8 @@ const String kAdbShellGetprop = '''
 
 /// A mock Android Console that presents a connection banner and responds to
 /// "avd name" requests with the supplied name.
-class MockWorkingAndroidConsoleSocket extends Mock implements Socket {
-  MockWorkingAndroidConsoleSocket(this.avdName) {
+class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
+  FakeWorkingAndroidConsoleSocket(this.avdName) {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.
@@ -638,7 +660,7 @@ class MockWorkingAndroidConsoleSocket extends Mock implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {
@@ -649,25 +671,31 @@ class MockWorkingAndroidConsoleSocket extends Mock implements Socket {
       // as part of the previous text to ensure both are handled.
       _controller.add('OK\n');
     } else {
-      throw 'Unexpected command $text';
+      throw Exception('Unexpected command $text');
     }
   }
+
+  @override
+  void destroy() { }
 }
 
 /// An Android console socket that drops all input and returns no output.
-class MockUnresponsiveAndroidConsoleSocket extends Mock implements Socket {
+class FakeUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {}
+
+  @override
+  void destroy() { }
 }
 
 /// An Android console socket that drops all input and returns no output.
-class MockDisconnectingAndroidConsoleSocket extends Mock implements Socket {
-  MockDisconnectingAndroidConsoleSocket() {
+class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
+  FakeDisconnectingAndroidConsoleSocket() {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.
@@ -677,10 +705,13 @@ class MockDisconnectingAndroidConsoleSocket extends Mock implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {
     _controller.close();
   }
+
+  @override
+  void destroy() { }
 }

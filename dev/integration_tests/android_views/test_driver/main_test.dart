@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 Future<void> main() async {
-  FlutterDriver driver;
+  late FlutterDriver driver;
 
   setUpAll(() async {
     driver = await FlutterDriver.connect();
@@ -23,12 +22,14 @@ Future<void> main() async {
     final SerializableFinder motionEventsListTile =
     find.byValueKey('MotionEventsListTile');
     await driver.tap(motionEventsListTile);
-    await driver.waitFor(find.byValueKey('PlatformView'));
+    await driver.runUnsynchronized(() async {
+      driver.waitFor(find.byValueKey('PlatformView'));
+    });
     final String errorMessage = await driver.requestData('run test');
     expect(errorMessage, '');
     final SerializableFinder backButton = find.byValueKey('back');
     await driver.tap(backButton);
-  });
+  }, timeout: Timeout.none);
 
   group('WindowManager', ()
   {
@@ -50,7 +51,7 @@ Future<void> main() async {
       await driver.tap(showAlertDialog);
       final String status = await driver.getText(find.byValueKey('Status'));
       expect(status, 'Success');
-    });
+    }, timeout: Timeout.none);
 
     test('Child windows can handle touches', () async {
       final SerializableFinder addWindow = find.byValueKey('AddWindow');
@@ -58,8 +59,10 @@ Future<void> main() async {
       await driver.tap(addWindow);
       final SerializableFinder tapWindow = find.byValueKey('TapWindow');
       await driver.tap(tapWindow);
-      final String windowClickCount = await driver.getText(find.byValueKey('WindowClickCount'));
+      final String windowClickCount = await driver.getText(
+        find.byValueKey('WindowClickCount'),
+      );
       expect(windowClickCount, 'Click count: 1');
-    });
+    }, timeout: Timeout.none, skip: true); // TODO(garyq): Skipped, see https://github.com/flutter/flutter/issues/88479
   });
 }

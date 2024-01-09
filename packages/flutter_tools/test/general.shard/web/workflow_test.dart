@@ -6,12 +6,12 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 
 import '../../src/common.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('WebWorkflow applies on Linux', () {
     final WebWorkflow workflow = WebWorkflow(
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       featureFlags: TestFeatureFlags(isWebEnabled: true),
     );
 
@@ -56,7 +56,7 @@ void main() {
 
   testWithoutContext('WebWorkflow does not apply if feature flag is disabled', () {
     final WebWorkflow workflow = WebWorkflow(
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       featureFlags: TestFeatureFlags(),
     );
 

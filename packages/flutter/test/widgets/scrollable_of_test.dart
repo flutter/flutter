@@ -2,29 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class ScrollPositionListener extends StatefulWidget {
-  const ScrollPositionListener({ Key key, this.child, this.log}) : super(key: key);
+  const ScrollPositionListener({ super.key, required this.child, required this.log});
 
   final Widget child;
   final ValueChanged<String> log;
 
   @override
-  _ScrollPositionListenerState createState() => _ScrollPositionListenerState();
+  State<ScrollPositionListener> createState() => _ScrollPositionListenerState();
 }
 
 class _ScrollPositionListenerState extends State<ScrollPositionListener> {
-  ScrollPosition _position;
+  ScrollPosition? _position;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _position?.removeListener(listener);
-    _position = Scrollable.of(context)?.position;
+    _position = Scrollable.maybeOf(context)?.position;
     _position?.addListener(listener);
-    widget.log('didChangeDependencies ${_position?.pixels?.toStringAsFixed(1)}');
+    widget.log('didChangeDependencies ${_position?.pixels.toStringAsFixed(1)}');
   }
 
   @override
@@ -37,20 +37,101 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   Widget build(BuildContext context) => widget.child;
 
   void listener() {
-    widget.log('listener ${_position?.pixels?.toStringAsFixed(1)}');
+    widget.log('listener ${_position?.pixels.toStringAsFixed(1)}');
+  }
+}
+
+class TestScrollController extends ScrollController {
+  TestScrollController({ required this.deferLoading });
+
+  final bool deferLoading;
+
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+    return TestScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+      deferLoading: deferLoading,
+    );
+  }
+}
+
+class TestScrollPosition extends ScrollPositionWithSingleContext {
+  TestScrollPosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+    required this.deferLoading,
+  });
+
+  final bool deferLoading;
+
+  @override
+  bool recommendDeferredLoading(BuildContext context) => deferLoading;
+}
+
+class TestScrollable extends StatefulWidget {
+  const TestScrollable({ super.key, required this.child });
+
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => TestScrollableState();
+}
+
+class TestScrollableState extends State<TestScrollable> {
+  int dependenciesChanged = 0;
+
+  @override
+  void didChangeDependencies() {
+    dependenciesChanged += 1;
+    super.didChangeDependencies();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+class TestChild extends StatefulWidget {
+  const TestChild({ super.key });
+
+  @override
+  State<TestChild> createState() => TestChildState();
+}
+
+class TestChildState extends State<TestChild> {
+  int dependenciesChanged = 0;
+  late ScrollableState scrollable;
+
+  @override
+  void didChangeDependencies() {
+    dependenciesChanged += 1;
+    scrollable = Scrollable.of(context, axis: Axis.horizontal);
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: 1000,
+      child: Text(scrollable.axisDirection.toString()),
+    );
+  }
 }
 
 void main() {
   testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
-    String logValue;
+    late String logValue;
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     // Changing the SingleChildScrollView's physics causes the
     // ScrollController's ScrollPosition to be rebuilt.
 
-    Widget buildFrame(ScrollPhysics physics) {
+    Widget buildFrame(ScrollPhysics? physics) {
       return SingleChildScrollView(
         controller: controller,
         physics: physics,
@@ -84,7 +165,7 @@ void main() {
   });
 
   testWidgets('Scrollable.of() is possible using ScrollNotification context', (WidgetTester tester) async {
-    ScrollNotification notification;
+    late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
@@ -96,10 +177,90 @@ void main() {
       ),
     ));
 
-    await tester.startGesture(const Offset(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
 
     final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
-    expect(Scrollable.of(notification.context), equals(scrollableElement.state));
+    expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Static Scrollable methods can target a specific axis', (WidgetTester tester) async {
+    final TestScrollController horizontalController = TestScrollController(deferLoading: true);
+    addTearDown(horizontalController.dispose);
+    final TestScrollController verticalController = TestScrollController(deferLoading: false);
+    addTearDown(verticalController.dispose);
+    late final AxisDirection foundAxisDirection;
+    late final bool foundRecommendation;
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: horizontalController,
+        child: SingleChildScrollView(
+          controller: verticalController,
+          child: Builder(
+            builder: (BuildContext context) {
+              foundAxisDirection = Scrollable.of(
+                context,
+                axis: Axis.horizontal,
+              ).axisDirection;
+              foundRecommendation = Scrollable.recommendDeferredLoadingForContext(
+                context,
+                axis: Axis.horizontal,
+              );
+              return const SizedBox(height: 1200.0, width: 1200.0);
+            }
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(foundAxisDirection, AxisDirection.right);
+    expect(foundRecommendation, isTrue);
+  });
+
+  testWidgets('Axis targeting scrollables establishes the correct dependencies', (WidgetTester tester) async {
+    final GlobalKey<TestScrollableState> verticalKey = GlobalKey<TestScrollableState>();
+    final GlobalKey<TestChildState> childKey = GlobalKey<TestChildState>();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: TestScrollable(
+          key: verticalKey,
+          child: TestChild(key: childKey),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(verticalKey.currentState!.dependenciesChanged, 1);
+    expect(childKey.currentState!.dependenciesChanged, 1);
+
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    // Change the horizontal ScrollView, adding a controller
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: controller,
+        child: TestScrollable(
+          key: verticalKey,
+          child: TestChild(key: childKey),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(verticalKey.currentState!.dependenciesChanged, 1);
+    expect(childKey.currentState!.dependenciesChanged, 2);
   });
 }

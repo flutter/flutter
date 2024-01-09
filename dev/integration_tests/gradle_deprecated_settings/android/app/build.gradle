@@ -19,16 +19,17 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 28
+    compileSdk 34
 
-    lintOptions {
-        disable 'InvalidPackage'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
         applicationId "com.yourcompany.flavors"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion flutter.targetSdkVersion
         versionCode 1
         versionName "1.0"
     }

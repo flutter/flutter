@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 class LargeImagesPage extends StatelessWidget {
+  const LargeImagesPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final ImageCache imageCache = PaintingBinding.instance.imageCache;
@@ -35,7 +36,7 @@ class DummyImage extends StatelessWidget {
         // creating many copies of the image to trigger the memory issue.
         return snapshot.data == null
             ? Container()
-            : Image.memory(snapshot.data.buffer.asUint8List());
+            : Image.memory(snapshot.data!.buffer.asUint8List());
       },
     );
   }

@@ -6,8 +6,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package show TestFailure;
+import 'package:matcher/expect.dart' show fail;
 
 import 'goldens.dart';
 
@@ -18,7 +17,7 @@ class LocalFileComparator extends GoldenFileComparator {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
 
-   @override
+  @override
   Future<void> update(Uri golden, Uint8List imageBytes) {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
@@ -64,7 +63,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
       method: 'POST',
       sendData: json.encode(<String, Object>{
         'testUri': testUri.toString(),
-        'key': key.toString(),
+        'key': key,
         'width': width.round(),
         'height': height.round(),
       }),
@@ -72,14 +71,39 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
     final String response = request.response as String;
     if (response == 'true') {
       return true;
-    } else {
-      throw test_package.TestFailure(response);
     }
+    fail(response);
   }
 
   @override
   Future<void> update(double width, double height, Uri golden) async {
     // Update is handled on the server side, just use the same logic here
     await compare(width, height, golden);
+  }
+
+  @override
+  Future<bool> compareBytes(Uint8List bytes, Uri golden) async {
+    final String key = golden.toString();
+    final String bytesEncoded = base64.encode(bytes);
+    final html.HttpRequest request = await html.HttpRequest.request(
+      'flutter_goldens',
+      method: 'POST',
+      sendData: json.encode(<String, Object>{
+        'testUri': testUri.toString(),
+        'key': key,
+        'bytes': bytesEncoded,
+      }),
+    );
+    final String response = request.response as String;
+    if (response == 'true') {
+      return true;
+    }
+    fail(response);
+  }
+
+  @override
+  Future<void> updateBytes(Uint8List bytes, Uri golden) async {
+    // Update is handled on the server side, just use the same logic here
+    await compareBytes(bytes, golden);
   }
 }

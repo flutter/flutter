@@ -19,6 +19,13 @@
   "copyButtonLabel": "Salin",
   "pasteButtonLabel": "Tempel",
   "selectAllButtonLabel": "Pilih Semua",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Tutup"
+  "tabSemanticsLabel": "Tab $tabIndex dari $tabCount",
+  "modalBarrierDismissLabel": "Tutup",
+  "searchTextFieldPlaceholderLabel": "Telusuri",
+  "noSpellCheckReplacementsLabel": "Penggantian Tidak Ditemukan",
+  "menuDismissLabel": "Tutup menu",
+  "lookUpButtonLabel": "Cari",
+  "searchWebButtonLabel": "Telusuri di Web",
+  "shareButtonLabel": "Bagikan...",
+  "clearButtonLabel": "Clear"
 }

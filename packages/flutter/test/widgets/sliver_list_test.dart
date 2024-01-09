@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SliverList reverse children (with keys)', (WidgetTester tester) async {
@@ -14,6 +13,7 @@ void main() {
 
     const double scrollPosition = 18 * itemHeight;
     final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(_buildSliverList(
       items: items,
@@ -61,6 +61,7 @@ void main() {
 
     const double scrollPosition = 18 * itemHeight;
     final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(_buildSliverList(
       items: items,
@@ -113,6 +114,7 @@ void main() {
 
     final double scrollPosition = items.length * itemHeight - viewportHeight;
     final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(_buildSliverList(
       items: items,
@@ -149,15 +151,18 @@ void main() {
   testWidgets('SliverList should layout first child in case of child reordering', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35904.
     List<String> items = <String>['1', '2'];
-
-    await tester.pumpWidget(_buildSliverListRenderWidgetChild(items));
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    await tester.pumpWidget(_buildSliverListRenderWidgetChild(items, controller1));
     await tester.pumpAndSettle();
 
     expect(find.text('Tile 1'), findsOneWidget);
     expect(find.text('Tile 2'), findsOneWidget);
 
     items = items.reversed.toList();
-    await tester.pumpWidget(_buildSliverListRenderWidgetChild(items));
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
+    await tester.pumpWidget(_buildSliverListRenderWidgetChild(items, controller2));
     await tester.pumpAndSettle();
 
     expect(find.text('Tile 1'), findsOneWidget);
@@ -168,13 +173,15 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/42142.
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       _buildSliverList(
         items: List<int>.from(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -197,7 +204,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pump();
     // We need second pump to ensure the scheduled animation gets run.
@@ -228,13 +235,15 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/42142.
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       _buildSliverList(
         items: List<int>.from(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -261,7 +270,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pump();
     // We need second pump to ensure the scheduled animation gets run.
@@ -275,17 +284,78 @@ void main() {
     expect(find.text('Tile 18'), findsOneWidget);
     expect(find.text('Tile 3'), findsOneWidget);
   });
+
+  testWidgets('SliverList should start to perform layout from the initial child when there is no valid offset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66198.
+    bool isShow = true;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    Widget buildSliverList(ScrollController controller) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 200,
+            child: ListView(
+              controller: controller,
+              children: <Widget>[
+                if (isShow)
+                  for (int i = 0; i < 20; i++)
+                    SizedBox(
+                      height: 50,
+                      child: Text('Tile $i'),
+                    ),
+                const SizedBox(), // Use this widget to occupy the position where the offset is 0 when rebuild
+                const SizedBox(key: Key('key0'), height: 50.0),
+                const SizedBox(key: Key('key1'), height: 50.0),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSliverList(controller));
+    await tester.pumpAndSettle();
+
+    // Scrolling to the bottom.
+    await tester.drag(find.text('Tile 2'), const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+
+    // Viewport should be scrolled to the end of list.
+    expect(controller.offset, 900.0);
+    expect(find.text('Tile 17'), findsNothing);
+    expect(find.text('Tile 18'), findsOneWidget);
+    expect(find.text('Tile 19'), findsOneWidget);
+    expect(find.byKey(const Key('key0')), findsOneWidget);
+    expect(find.byKey(const Key('key1')), findsOneWidget);
+
+    // Trigger rebuild.
+    isShow = false;
+    await tester.pumpWidget(buildSliverList(controller));
+
+    // After rebuild, [ContainerRenderObjectMixin] has two children, and
+    // neither of them has a valid layout offset.
+    // SliverList can layout normally without any assert or dead loop.
+    // Only the 'SizeBox' show in the viewport.
+    expect(controller.offset, 0.0);
+    expect(find.text('Tile 0'), findsNothing);
+    expect(find.text('Tile 19'), findsNothing);
+    expect(find.byKey(const Key('key0')), findsOneWidget);
+    expect(find.byKey(const Key('key1')), findsOneWidget);
+  });
 }
 
-Widget _buildSliverListRenderWidgetChild(List<String> items) {
+Widget _buildSliverListRenderWidgetChild(List<String> items, ScrollController controller) {
   return MaterialApp(
     home: Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
-        child: Container(
+        child: SizedBox(
           height: 500,
           child: CustomScrollView(
-            controller: ScrollController(),
+            controller: controller,
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildListDelegate(
@@ -307,14 +377,14 @@ Widget _buildSliverListRenderWidgetChild(List<String> items) {
 
 Widget _buildSliverList({
   List<int> items = const <int>[],
-  ScrollController controller,
+  ScrollController? controller,
   double itemHeight = 500.0,
   double viewportHeight = 300.0,
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
-      child: Container(
+      child: SizedBox(
         height: viewportHeight,
         child: CustomScrollView(
           controller: controller,
@@ -322,7 +392,7 @@ Widget _buildSliverList({
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int i) {
-                  return Container(
+                  return SizedBox(
                     key: ValueKey<int>(items[i]),
                     height: itemHeight,
                     child: Text('Tile ${items[i]}'),

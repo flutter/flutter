@@ -16,7 +16,7 @@ import 'framework.dart';
 ///
 ///  * [ValueListenableBuilder], a widget which invokes this builder each time
 ///    a [ValueListenable] changes value.
-typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget child);
+typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget? child);
 
 /// A widget whose content stays synced with a [ValueListenable].
 ///
@@ -47,11 +47,11 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///
 /// ```dart
 /// class MyHomePage extends StatefulWidget {
-///   MyHomePage({Key key, this.title}) : super(key: key);
+///   const MyHomePage({super.key, required this.title});
 ///   final String title;
 ///
 ///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
+///   State<MyHomePage> createState() => _MyHomePageState();
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
@@ -67,16 +67,16 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text('You have pushed the button this many times:'),
-///             ValueListenableBuilder(
-///               builder: (BuildContext context, int value, Widget child) {
+///             const Text('You have pushed the button this many times:'),
+///             ValueListenableBuilder<int>(
+///               builder: (BuildContext context, int value, Widget? child) {
 ///                 // This builder will only get called when the _counter
 ///                 // is updated.
 ///                 return Row(
 ///                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///                   children: <Widget>[
 ///                     Text('$value'),
-///                     child,
+///                     child!,
 ///                   ],
 ///                 );
 ///               },
@@ -90,7 +90,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///         ),
 ///       ),
 ///       floatingActionButton: FloatingActionButton(
-///         child: Icon(Icons.plus_one),
+///         child: const Icon(Icons.plus_one),
 ///         onPressed: () => _counter.value += 1,
 ///       ),
 ///     );
@@ -111,24 +111,19 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 class ValueListenableBuilder<T> extends StatefulWidget {
   /// Creates a [ValueListenableBuilder].
   ///
-  /// The [valueListenable] and [builder] arguments must not be null.
   /// The [child] is optional but is good practice to use if part of the widget
   /// subtree does not depend on the value of the [valueListenable].
   const ValueListenableBuilder({
-    Key key,
-    @required this.valueListenable,
-    @required this.builder,
+    super.key,
+    required this.valueListenable,
+    required this.builder,
     this.child,
-  }) : assert(valueListenable != null),
-       assert(builder != null),
-       super(key: key);
+  });
 
   /// The [ValueListenable] whose value you depend on in order to build.
   ///
   /// This widget does not ensure that the [ValueListenable]'s value is not
   /// null, therefore your [builder] may need to handle null values.
-  ///
-  /// This [ValueListenable] itself must not be null.
   final ValueListenable<T> valueListenable;
 
   /// A [ValueWidgetBuilder] which builds a widget depending on the
@@ -136,24 +131,23 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   ///
   /// Can incorporate a [valueListenable] value-independent widget subtree
   /// from the [child] parameter into the returned widget tree.
-  ///
-  /// Must not be null.
   final ValueWidgetBuilder<T> builder;
 
   /// A [valueListenable]-independent widget which is passed back to the [builder].
   ///
-  /// This argument is optional and can be null if the entire widget subtree
-  /// the [builder] builds depends on the value of the [valueListenable]. For
-  /// example, if the [valueListenable] is a [String] and the [builder] simply
-  /// returns a [Text] widget with the [String] value.
-  final Widget child;
+  /// This argument is optional and can be null if the entire widget subtree the
+  /// [builder] builds depends on the value of the [valueListenable]. For
+  /// example, in the case where the [valueListenable] is a [String] and the
+  /// [builder] returns a [Text] widget with the current [String] value, there
+  /// would be no useful [child].
+  final Widget? child;
 
   @override
   State<StatefulWidget> createState() => _ValueListenableBuilderState<T>();
 }
 
 class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
-  T value;
+  late T value;
 
   @override
   void initState() {
@@ -164,12 +158,12 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
 
   @override
   void didUpdateWidget(ValueListenableBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.valueListenable != widget.valueListenable) {
       oldWidget.valueListenable.removeListener(_valueChanged);
       value = widget.valueListenable.value;
       widget.valueListenable.addListener(_valueChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override

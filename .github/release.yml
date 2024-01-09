@@ -1,0 +1,69 @@
+changelog:
+  exclude:
+    authors:
+      - engine-flutter-autoroll
+      - fluttergithubbot
+    labels:
+      - passed first triage
+      - passed secondary triage
+      - team-release
+      - "team: flakes"
+      - revert
+  categories:
+    - title: Framework
+      labels:
+        - framework
+        - "a: text input"
+        - "f: scrolling"
+        - "f: routes"
+        - "f: selection"
+        - "f: gestures"
+      exclude:
+        labels:
+          - "f: material design"
+    - title: Material
+      labels:
+        - "f: material design"
+    # Mobile
+    - title: iOS
+      labels:
+        - platform-ios
+        - "f: cupertino"
+    - title: Android
+      labels:
+        - platform-android
+    # Desktop
+    - title: macOS
+      labels:
+        - platform-mac
+    - title: Windows
+      labels:
+        - platform-windows
+    - title: Linux
+      labels:
+        - platform-linux
+    # Web
+    - title: Web
+      labels:
+        - platform-web
+        - "browser: chrome-desktop"
+        - "browser: edge"
+        - "browser: firefox"
+        - "browser: safari-macos"
+    # Misc
+    - title: Tooling
+      labels:
+        - tool
+    - title: DevTools
+      labels:
+        - "d: devtools"
+        - "d: intellij"
+        - "d: tools_metadata"
+        - "f: inspector"
+    - title: Documentation
+      labels:
+        - "d: examples"
+        - "d: api docs"
+    - title: Other Changes
+      labels:
+        - '*'

@@ -12,18 +12,18 @@ const double _kPickerSheetHeight = 216.0;
 const double _kPickerItemHeight = 32.0;
 
 class CupertinoPickerDemo extends StatefulWidget {
+  const CupertinoPickerDemo({super.key});
+
   static const String routeName = '/cupertino/picker';
 
   @override
-  _CupertinoPickerDemoState createState() => _CupertinoPickerDemoState();
+  State<CupertinoPickerDemo> createState() => _CupertinoPickerDemoState();
 }
 
 class _BottomPicker extends StatelessWidget {
   const _BottomPicker({
-    Key key,
-    @required this.child,
-  }) : assert(child != null),
-       super(key: key);
+    required this.child,
+  });
 
   final Widget child;
 
@@ -53,10 +53,8 @@ class _BottomPicker extends StatelessWidget {
 
 class _Menu extends StatelessWidget {
   const _Menu({
-    Key key,
-    @required this.children,
-  }) : assert(children != null),
-       super(key: key);
+    required this.children,
+  });
 
   final List<Widget> children;
 
@@ -89,7 +87,7 @@ class _Menu extends StatelessWidget {
 class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedColorIndex = 0;
 
-  Duration timer = const Duration();
+  Duration timer = Duration.zero;
 
   // Value that is shown in the date picker in date mode.
   DateTime date = DateTime.now();
@@ -247,7 +245,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             return _BottomPicker(
               child: CupertinoDatePicker(
                 backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
-                mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: dateTime,
                 onDateTimeChanged: (DateTime newDateTime) {
                   setState(() => dateTime = newDateTime);

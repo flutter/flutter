@@ -140,7 +140,7 @@ import 'text_style.dart';
 ///     fontSize: 30,
 ///     height: 1.5,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -181,7 +181,7 @@ import 'text_style.dart';
 ///     fontFamily: 'Roboto',
 ///     height: 1.5,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -224,7 +224,7 @@ import 'text_style.dart';
 ///     height: 1,
 ///     forceStrutHeight: true,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -237,7 +237,7 @@ import 'text_style.dart';
 /// ![The result of the example below.](https://flutter.github.io/assets-for-api-docs/assets/painting/strut_force_example_2.png)
 ///
 /// ```dart
-/// Text.rich(
+/// const Text.rich(
 ///   TextSpan(
 ///     text: '       he candle flickered\n',
 ///     style: TextStyle(
@@ -280,7 +280,7 @@ import 'text_style.dart';
 ///     fontSize: 14,
 ///     forceStrutHeight: true,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -295,27 +295,26 @@ class StrutStyle with Diagnosticable {
   /// If provided, fontSize must be positive and non-zero, leading must be
   /// zero or positive.
   const StrutStyle({
-    String fontFamily,
-    List<String> fontFamilyFallback,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
     this.fontSize,
     this.height,
+    this.leadingDistribution,
     this.leading,
     this.fontWeight,
     this.fontStyle,
     this.forceStrutHeight,
     this.debugLabel,
-    String package,
+    String? package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
        assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
-       assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null)));
+       assert(package == null || (fontFamily != null || fontFamilyFallback != null));
 
   /// Builds a StrutStyle that contains values of the equivalent properties in
   /// the provided [textStyle].
-  ///
-  /// The [textStyle] parameter must not be null.
   ///
   /// The named parameters override the [textStyle]'s argument's properties.
   /// Since TextStyle does not contain [leading] or [forceStrutHeight], these
@@ -333,23 +332,24 @@ class StrutStyle with Diagnosticable {
   /// from being prepended twice.
   StrutStyle.fromTextStyle(
     TextStyle textStyle, {
-    String fontFamily,
-    List<String> fontFamilyFallback,
-    double fontSize,
-    double height,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    double? fontSize,
+    double? height,
+    TextLeadingDistribution? leadingDistribution,
     this.leading, // TextStyle does not have an equivalent (yet).
-    FontWeight fontWeight,
-    FontStyle fontStyle,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
     this.forceStrutHeight,
-    String debugLabel,
-    String package,
-  }) : assert(textStyle != null),
-       assert(fontSize == null || fontSize > 0),
+    String? debugLabel,
+    String? package,
+  }) : assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
-       assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null))),
+       assert(package == null || fontFamily != null || fontFamilyFallback != null),
        fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
        _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
        height = height ?? textStyle.height,
+       leadingDistribution = leadingDistribution ?? textStyle.leadingDistribution,
        fontSize = fontSize ?? textStyle.fontSize,
        fontWeight = fontWeight ?? textStyle.fontWeight,
        fontStyle = fontStyle ?? textStyle.fontStyle,
@@ -378,7 +378,7 @@ class StrutStyle with Diagnosticable {
   /// was found, the default platform font family will be used instead. Unlike
   /// [TextStyle.fontFamilyFallback], the font does not need to contain the
   /// desired glyphs to match.
-  final String fontFamily;
+  final String? fontFamily;
 
   /// The ordered list of font families to fall back on when a higher priority
   /// font family cannot be found.
@@ -399,16 +399,17 @@ class StrutStyle with Diagnosticable {
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the
   /// constructor.
-  List<String> get fontFamilyFallback {
-    if (_package != null && _fontFamilyFallback != null)
+  List<String>? get fontFamilyFallback {
+    if (_package != null && _fontFamilyFallback != null) {
       return _fontFamilyFallback.map((String family) => 'packages/$_package/$family').toList();
+    }
     return _fontFamilyFallback;
   }
-  final List<String> _fontFamilyFallback;
+  final List<String>? _fontFamilyFallback;
 
   // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
   // in the [fontFamilyFallback] getter.
-  final String _package;
+  final String? _package;
 
   /// The size of text (in logical pixels) to use when obtaining metrics from the font.
   ///
@@ -417,27 +418,22 @@ class StrutStyle with Diagnosticable {
   /// [fontSize].
   ///
   /// The default fontSize is 14 logical pixels.
-  final double fontSize;
+  final double? fontSize;
 
-  /// The multiple of [fontSize] to multiply the ascent and descent by where
-  /// `ascent + descent = fontSize`.
+  /// The minimum height of the strut, as a multiple of [fontSize].
   ///
-  /// Ascent is the spacing above the baseline and descent is the spacing below
-  /// the baseline.
+  /// When [height] is omitted or null, then the strut's height will be the sum
+  /// of the strut's font-defined ascent, its font-defined descent, and its
+  /// [leading]. The font's combined ascent and descent may be taller or shorter
+  /// than the [fontSize].
   ///
-  /// When [height] is omitted or null, then the font defined ascent and descent
-  /// will be used. The font's combined ascent and descent may be taller or
-  /// shorter than the [fontSize]. When [height] is provided, the line's EM-square
-  /// ascent and descent (which sums to [fontSize]) will be scaled by [height] to
-  /// achieve a final line height of `fontSize * height + fontSize * leading`
-  /// logical pixels. The following diagram illustrates the differences between
-  /// the font metrics defined height and the EM-square height:
+  /// When [height] is provided, the line's EM-square ascent and descent (which
+  /// sums to [fontSize]) will be scaled by [height] to achieve a final strut
+  /// height of `fontSize * height + fontSize * leading` logical pixels. The
+  /// following diagram illustrates the differences between the font metrics
+  /// defined height and the EM-square height:
   ///
   /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
-  ///
-  /// The [height] will impact the spacing above and below the baseline differently
-  /// depending on the ratios between the font's ascent and descent. This property is
-  /// separate from the leading multiplier, which is controlled through [leading].
   ///
   /// The ratio of ascent:descent with [height] specified is the same as the
   /// font metrics defined ascent:descent ratio when [height] is null or omitted.
@@ -445,27 +441,44 @@ class StrutStyle with Diagnosticable {
   /// See [TextStyle.height], which works in a similar manner.
   ///
   /// The default height is null.
-  final double height;
+  final double? height;
+
+  /// How the vertical space added by the [height] multiplier should be
+  /// distributed over and under the strut.
+  ///
+  /// When a non-null [height] is specified, after accommodating the imaginary
+  /// strut glyph, the remaining vertical space from the allotted
+  /// `fontSize * height` logical pixels will be distributed over and under the
+  /// strut, according to the [leadingDistribution] property.
+  ///
+  /// The additional leading introduced by the [leading] property applies
+  /// independently of [leadingDistribution]: it will always be distributed
+  /// evenly over and under the strut, regardless of [leadingDistribution].
+  ///
+  /// Defaults to null, which defers to the paragraph's
+  /// `ParagraphStyle.textHeightBehavior`'s [leadingDistribution].
+  final TextLeadingDistribution? leadingDistribution;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
   ///
   /// The default fontWeight is [FontWeight.w400].
-  final FontWeight fontWeight;
+  final FontWeight? fontWeight;
 
   /// The typeface variant to use when calculating the strut (e.g., italics).
   ///
   /// The default fontStyle is [FontStyle.normal].
-  final FontStyle fontStyle;
+  final FontStyle? fontStyle;
 
-  /// The custom leading to apply to the strut as a multiple of [fontSize].
+  /// The additional leading to apply to the strut as a multiple of [fontSize],
+  /// independent of [height] and [leadingDistribution].
   ///
   /// Leading is additional spacing between lines. Half of the leading is added
   /// to the top and the other half to the bottom of the line. This differs
-  /// from [height] since the spacing is equally distributed above and below the
-  /// baseline.
+  /// from [height] since the spacing is always equally distributed above and
+  /// below the baseline, regardless of [leadingDistribution].
   ///
   /// The default leading is null, which will use the font-specified leading.
-  final double leading;
+  final double? leading;
 
   /// Whether the strut height should be forced.
   ///
@@ -484,7 +497,7 @@ class StrutStyle with Diagnosticable {
   /// of the strut.
   ///
   /// The default is false.
-  final bool forceStrutHeight;
+  final bool? forceStrutHeight;
 
   /// A human-readable description of this strut style.
   ///
@@ -492,7 +505,7 @@ class StrutStyle with Diagnosticable {
   ///
   /// This property is not considered when comparing strut styles using `==` or
   /// [compareTo], and it does not affect [hashCode].
-  final String debugLabel;
+  final String? debugLabel;
 
   /// Describe the difference between this style and another, in terms of how
   /// much damage it will make to the rendering.
@@ -501,8 +514,9 @@ class StrutStyle with Diagnosticable {
   ///
   ///  * [TextSpan.compareTo], which does the same thing for entire [TextSpan]s.
   RenderComparison compareTo(StrutStyle other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return RenderComparison.identical;
+    }
     if (fontFamily != other.fontFamily ||
         fontSize != other.fontSize ||
         fontWeight != other.fontWeight ||
@@ -510,8 +524,9 @@ class StrutStyle with Diagnosticable {
         height != other.height ||
         leading != other.leading ||
         forceStrutHeight != other.forceStrutHeight ||
-        !listEquals(fontFamilyFallback, other.fontFamilyFallback))
+        !listEquals(fontFamilyFallback, other.fontFamilyFallback)) {
       return RenderComparison.layout;
+    }
     return RenderComparison.identical;
   }
 
@@ -523,9 +538,10 @@ class StrutStyle with Diagnosticable {
   /// [StrutStyle] shares many of the same basic properties as [TextStyle].
   ///
   /// If the given text style is null, returns this strut style.
-  StrutStyle inheritFromTextStyle(TextStyle other) {
-    if (other == null)
+  StrutStyle inheritFromTextStyle(TextStyle? other) {
+    if (other == null) {
       return this;
+    }
 
     return StrutStyle(
       fontFamily: fontFamily ?? other.fontFamily,
@@ -543,10 +559,12 @@ class StrutStyle with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is StrutStyle
         && other.fontFamily == fontFamily
         && other.fontSize == fontSize
@@ -558,17 +576,15 @@ class StrutStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      fontFamily,
-      fontSize,
-      fontWeight,
-      fontStyle,
-      height,
-      leading,
-      forceStrutHeight,
-    );
-  }
+  int get hashCode => Object.hash(
+    fontFamily,
+    fontSize,
+    fontWeight,
+    fontStyle,
+    height,
+    leading,
+    forceStrutHeight,
+  );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'StrutStyle');
@@ -577,16 +593,17 @@ class StrutStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     super.debugFillProperties(properties);
-    if (debugLabel != null)
-      properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
+    if (debugLabel != null) {
+      properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
+    }
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[
       StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
       IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null),
       DoubleProperty('${prefix}size', fontSize, defaultValue: null),
     ];
-    String weightDescription;
+    String? weightDescription;
     if (fontWeight != null) {
-      weightDescription = 'w${fontWeight.index + 1}00';
+      weightDescription = 'w${fontWeight!.index + 1}00';
     }
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing
@@ -599,12 +616,13 @@ class StrutStyle with Diagnosticable {
     ));
     styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
+    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     styles.forEach(properties.add);
 
-    if (!styleSpecified)
+    if (!styleSpecified) {
       properties.add(FlagProperty('forceStrutHeight', value: forceStrutHeight, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
+    }
   }
 }

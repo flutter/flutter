@@ -29,6 +29,13 @@
   "copyButtonLabel": "Kopiuj",
   "pasteButtonLabel": "Wklej",
   "selectAllButtonLabel": "Wybierz wszystkie",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Zamknij"
+  "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
+  "modalBarrierDismissLabel": "Zamknij",
+  "searchTextFieldPlaceholderLabel": "Szukaj",
+  "noSpellCheckReplacementsLabel": "Brak wyników zamieniania",
+  "menuDismissLabel": "Zamknij menu",
+  "lookUpButtonLabel": "Sprawdź",
+  "searchWebButtonLabel": "Szukaj w internecie",
+  "shareButtonLabel": "Udostępnij…",
+  "clearButtonLabel": "Clear"
 }

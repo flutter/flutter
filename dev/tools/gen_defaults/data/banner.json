@@ -1,0 +1,18 @@
+{
+  "version": "v0_162",
+
+  "md.comp.banner.container.color": "surface",
+  "md.comp.banner.container.elevation": "md.sys.elevation.level1",
+  "md.comp.banner.container.shape": "md.sys.shape.corner.none",
+  "md.comp.banner.container.surface-tint-layer.color": "surfaceTint",
+  "md.comp.banner.desktop.with-single-line.container.height": 52.0,
+  "md.comp.banner.desktop.with-three-lines.container.height": 90.0,
+  "md.comp.banner.desktop.with-two-lines.with-image.container.height": 72.0,
+  "md.comp.banner.mobile.with-single-line.container.height": 54.0,
+  "md.comp.banner.mobile.with-two-lines.container.height": 112.0,
+  "md.comp.banner.mobile.with-two-lines.with-image.container.height": 120.0,
+  "md.comp.banner.supporting-text.color": "onSurfaceVariant",
+  "md.comp.banner.supporting-text.text-style": "bodyMedium",
+  "md.comp.banner.with-image.image.shape": "md.sys.shape.corner.full",
+  "md.comp.banner.with-image.image.size": 40.0
+}

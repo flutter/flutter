@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io show IOOverrides, Directory, File, Link;
+import 'dart:io' as io show Directory, File, IOOverrides, Link;
 
 import 'package:flutter_tools/src/base/file_system.dart';
 
@@ -17,10 +17,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 /// The only safe delegate types are those that do not call out to `dart:io`,
 /// like the [MemoryFileSystem].
 class FlutterIOOverrides extends io.IOOverrides {
-  FlutterIOOverrides({ FileSystem fileSystem })
+  FlutterIOOverrides({ FileSystem? fileSystem })
     : _fileSystemDelegate = fileSystem;
 
-  final FileSystem _fileSystemDelegate;
+  final FileSystem? _fileSystemDelegate;
 
   @override
   io.Directory createDirectory(String path) {
@@ -67,7 +67,7 @@ class FlutterIOOverrides extends io.IOOverrides {
     if (_fileSystemDelegate == null) {
       return super.fseGetType(path, followLinks);
     }
-    return _fileSystemDelegate.type(path, followLinks: followLinks ?? true);
+    return _fileSystemDelegate.type(path, followLinks: followLinks);
   }
 
   @override
@@ -75,7 +75,7 @@ class FlutterIOOverrides extends io.IOOverrides {
     if (_fileSystemDelegate == null) {
       return super.fseGetTypeSync(path, followLinks);
     }
-    return _fileSystemDelegate.typeSync(path, followLinks: followLinks ?? true);
+    return _fileSystemDelegate.typeSync(path, followLinks: followLinks);
   }
 
   @override

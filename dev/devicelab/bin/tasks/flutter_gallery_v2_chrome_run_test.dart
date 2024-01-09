@@ -6,17 +6,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(const NewGalleryChromeRunTest().run);
 }
-
-/// URI for the New Flutter Gallery repository.
-const String galleryRepo = 'https://github.com/flutter/gallery.git';
 
 /// After the gallery loads, a duration of [durationToWaitForError]
 /// is waited, allowing any possible exceptions to be thrown.
@@ -36,9 +34,14 @@ class NewGalleryChromeRunTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    await gitClone(path: 'temp', repo: galleryRepo);
+    final Directory galleryParentDir =
+        Directory.systemTemp.createTempSync('flutter_gallery_v2_chrome_run.');
+    final Directory galleryDir =
+        Directory(path.join(galleryParentDir.path, 'gallery'));
 
-    final TaskResult result = await inDirectory<TaskResult>('temp/gallery', () async {
+    await getNewGallery(galleryVersion, galleryDir);
+
+    final TaskResult result = await inDirectory<TaskResult>(galleryDir, () async {
       await flutter('doctor');
       await flutter('packages', options: <String>['get']);
 
@@ -50,9 +53,9 @@ class NewGalleryChromeRunTest {
       ]);
 
       final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
-      final Process process = await startProcess(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        flutterCommandArgs('run', options),
+      final Process process = await startFlutter(
+        'run',
+        options: options,
       );
 
       final Completer<void> stdoutDone = Completer<void>();
@@ -102,7 +105,7 @@ class NewGalleryChromeRunTest {
       }
     });
 
-    rmTree(Directory('temp'));
+    rmTree(galleryParentDir);
 
     return result;
   }

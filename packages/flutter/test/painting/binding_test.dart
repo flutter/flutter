@@ -5,27 +5,26 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
+Future<void> main() async {
+  final ui.Image image = await createTestImage();
 
-void main() {
   testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
     imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
-        image: FakeImage(),
-        scale: 1.0,
-      ),
-    )));
+        image: image,
+      )),
+    ));
 
     await tester.idle();
     expect(imageCache.currentSize, 1);
-    final ByteData message = const JSONMessageCodec().encodeMessage(
-      <String, dynamic>{'type': 'memoryPressure'});
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(imageCache.currentSize, 0);
   });
 
@@ -38,11 +37,18 @@ void main() {
     expect(binding.imageCache.clearCount, 1);
     expect(binding.imageCache.liveClearCount, 1);
   });
+
+  test('ShaderWarmUp is null by default', () {
+    expect(PaintingBinding.shaderWarmUp, null);
+  });
 }
 
 class TestBindingBase implements BindingBase {
   @override
   void initInstances() {}
+
+  @override
+  bool debugCheckZone(String entryPoint) { return true; }
 
   @override
   void initServiceExtensions() {}
@@ -67,29 +73,31 @@ class TestBindingBase implements BindingBase {
   }
 
   @override
-  void registerBoolServiceExtension({String name, AsyncValueGetter<bool> getter, AsyncValueSetter<bool> setter}) {}
+  void registerBoolServiceExtension({required String name, required AsyncValueGetter<bool> getter, required AsyncValueSetter<bool> setter}) {}
 
   @override
-  void registerNumericServiceExtension({String name, AsyncValueGetter<double> getter, AsyncValueSetter<double> setter}) {}
+  void registerNumericServiceExtension({required String name, required AsyncValueGetter<double> getter, required AsyncValueSetter<double> setter}) {}
 
   @override
-  void registerServiceExtension({String name, ServiceExtensionCallback callback}) {}
+  void registerServiceExtension({required String name, required ServiceExtensionCallback callback}) {}
 
   @override
-  void registerSignalServiceExtension({String name, AsyncCallback callback}) {}
+  void registerSignalServiceExtension({required String name, required AsyncCallback callback}) {}
 
   @override
-  void registerStringServiceExtension({String name, AsyncValueGetter<String> getter, AsyncValueSetter<String> setter}) {}
+  void registerStringServiceExtension({required String name, required AsyncValueGetter<String> getter, required AsyncValueSetter<String> setter}) {}
 
   @override
   void unlocked() {}
 
   @override
-  ui.Window get window => throw UnimplementedError();
+  ui.SingletonFlutterWindow get window => throw UnimplementedError(); // ignore: deprecated_member_use
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
 }
 
 class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
-
   @override
   final FakeImageCache imageCache = FakeImageCache();
 
@@ -112,20 +120,4 @@ class FakeImageCache extends ImageCache {
     liveClearCount += 1;
     super.clearLiveImages();
   }
-}
-
-class FakeImage implements ui.Image {
-  @override
-  void dispose() {}
-
-  @override
-  int get height => 10;
-
-  @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  int get width => 10;
 }

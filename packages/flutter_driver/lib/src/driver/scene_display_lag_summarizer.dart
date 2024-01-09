@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'percentile_utils.dart';
 import 'timeline.dart';
 
 /// Key for SceneDisplayLag timeline events.
@@ -9,19 +10,10 @@ const String kSceneDisplayLagEvent = 'SceneDisplayLag';
 
 const String _kVsyncTransitionsMissed = 'vsync_transitions_missed';
 
-/// Returns the [p]-th percentile element from the [doubles].
-///
-/// Note: [doubles] will be sorted.
-double findPercentile(List<double> doubles, double p) {
-  assert(doubles.isNotEmpty);
-  doubles.sort();
-  return doubles[((doubles.length - 1) * (p / 100)).round()];
-}
-
 /// Summarizes [TimelineEvents]s corresponding to [kSceneDisplayLagEvent] events.
 ///
-/// A sample event (some fields have been omitted for brewity):
-/// ```
+/// A sample event (some fields have been omitted for brevity):
+/// ```json
 ///     {
 ///      "name": "SceneDisplayLag",
 ///      "ts": 408920509340,
@@ -74,8 +66,8 @@ class SceneDisplayLagSummarizer {
 
   double _getVsyncTransitionsMissed(TimelineEvent e) {
     assert(e.name == kSceneDisplayLagEvent);
-    assert(e.arguments.containsKey(_kVsyncTransitionsMissed));
-    final dynamic transitionsMissed = e.arguments[_kVsyncTransitionsMissed];
+    assert(e.arguments!.containsKey(_kVsyncTransitionsMissed));
+    final dynamic transitionsMissed = e.arguments![_kVsyncTransitionsMissed];
     assert(transitionsMissed is String);
     return double.parse(transitionsMissed as String);
   }

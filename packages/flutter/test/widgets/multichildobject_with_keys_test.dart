@@ -11,10 +11,10 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/48855.
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Text('0', key: ValueKey<int>(0)),
             Text('1', key: ValueKey<int>(1)),
             Text('2', key: ValueKey<int>(2)),
@@ -35,10 +35,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Text('0', key: ValueKey<int>(0)),
             Text('6', key: ValueKey<int>(6)),
             Text('7', key: ValueKey<int>(7)),
@@ -58,6 +58,57 @@ void main() {
       <String>['0', '6', '7', '8', '1', '2', '3', '4', '5'],
     );
   });
+
+  testWidgets('Building a new MultiChildRenderObjectElement with children having duplicated keys throws', (WidgetTester tester) async {
+    const ValueKey<int> duplicatedKey = ValueKey<int>(1);
+
+    await tester.pumpWidget(const Column(
+      children: <Widget>[
+        Text('Text 1', textDirection: TextDirection.ltr, key: duplicatedKey),
+        Text('Text 2', textDirection: TextDirection.ltr, key: duplicatedKey),
+      ],
+    ));
+
+    expect(
+      tester.takeException(),
+      isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'error.message',
+        startsWith('Duplicate keys found.'),
+      ),
+    );
+  });
+
+  testWidgets('Updating a MultiChildRenderObjectElement to have children with duplicated keys throws', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/81541
+
+    const ValueKey<int> key1 = ValueKey<int>(1);
+    const ValueKey<int> key2 = ValueKey<int>(2);
+
+    Future<void> buildWithKey(Key key) {
+      return tester.pumpWidget(Column(
+        children: <Widget>[
+          const Text('Text 1', textDirection: TextDirection.ltr, key: key1),
+          Text('Text 2', textDirection: TextDirection.ltr, key: key),
+        ],
+      ));
+    }
+
+    // Initial build with two different keys.
+    await buildWithKey(key2);
+    expect(tester.takeException(), isNull);
+
+    // Subsequent build with duplicated keys.
+    await buildWithKey(key1);
+    expect(
+      tester.takeException(),
+      isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'error.message',
+        startsWith('Duplicate keys found.'),
+      ),
+    );
+  });
 }
 
 // Do not use tester.renderObjectList(find.byType(RenderParagraph). That returns
@@ -66,7 +117,7 @@ void main() {
 List<String> _getChildOrder(RenderFlex flex) {
   final List<String> childOrder = <String>[];
   flex.visitChildren((RenderObject child) {
-    childOrder.add(((child as RenderParagraph).text as TextSpan).text);
+    childOrder.add(((child as RenderParagraph).text as TextSpan).text!);
   });
   return childOrder;
 }

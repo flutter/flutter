@@ -13,7 +13,7 @@ function error() {
 }
 
 function accept_android_licenses() {
-  yes "y" | flutter doctor --android-licenses > /dev/null 2>&1
+  yes "y" | flutter doctor --android-licenses
 }
 
 echo "Flutter SDK directory is: $PWD"

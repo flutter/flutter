@@ -4,16 +4,23 @@
 
 import 'dart:io';
 
-// Whether the current dart code is running in an environment that was compiled
-// to JavaScript.
-const bool _kIsCompiledToJavaScript = identical(0, 0.0);
+/// Whether the test is running in a web browser compiled to JavaScript.
+///
+/// See also:
+///
+///  * [kIsWeb], the equivalent constant in the `foundation` library.
+const bool isBrowser = identical(0, 0.0);
 
 /// Whether the test is running on the Windows operating system.
 ///
-/// This does not include test compiled to JavaScript running in a browser on
+/// This does not include tests compiled to JavaScript running in a browser on
 /// the Windows operating system.
+///
+/// See also:
+///
+///  * [isBrowser], which reports true for tests running in browsers.
 bool get isWindows {
-  if (_kIsCompiledToJavaScript) {
+  if (isBrowser) {
     return false;
   }
   return Platform.isWindows;
@@ -21,10 +28,14 @@ bool get isWindows {
 
 /// Whether the test is running on the macOS operating system.
 ///
-/// This does not include test compiled to JavaScript running in a browser on
+/// This does not include tests compiled to JavaScript running in a browser on
 /// the macOS operating system.
+///
+/// See also:
+///
+///  * [isBrowser], which reports true for tests running in browsers.
 bool get isMacOS {
-  if (_kIsCompiledToJavaScript) {
+  if (isBrowser) {
     return false;
   }
   return Platform.isMacOS;
@@ -32,16 +43,15 @@ bool get isMacOS {
 
 /// Whether the test is running on the Linux operating system.
 ///
-/// This does not include test compiled to JavaScript running in a browser on
+/// This does not include tests compiled to JavaScript running in a browser on
 /// the Linux operating system.
+///
+/// See also:
+///
+///  * [isBrowser], which reports true for tests running in browsers.
 bool get isLinux {
-  if (_kIsCompiledToJavaScript) {
+  if (isBrowser) {
     return false;
   }
   return Platform.isLinux;
-}
-
-/// Whether the test is running in a web browser compiled to JavaScript.
-bool get isBrowser {
-  return _kIsCompiledToJavaScript;
 }

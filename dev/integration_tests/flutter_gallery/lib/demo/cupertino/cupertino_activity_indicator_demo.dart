@@ -7,6 +7,8 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoProgressIndicatorDemo extends StatelessWidget {
+  const CupertinoProgressIndicatorDemo({super.key});
+
   static const String routeName = '/cupertino/progress_indicator';
 
   @override

@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('overflow indicator is not shown when not overflowing', (WidgetTester tester) async {
@@ -35,8 +33,10 @@ void main() {
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
-    expect(exception.diagnostics.first.toString(), startsWith('A RenderUnconstrainedBox overflowed by '));
+    // ignore: avoid_dynamic_calls
+    expect(exception.diagnostics.first.toString(), startsWith('A RenderConstraintsTransformBox overflowed by '));
     expect(find.byType(UnconstrainedBox), paints..rect());
 
     await tester.pumpWidget(

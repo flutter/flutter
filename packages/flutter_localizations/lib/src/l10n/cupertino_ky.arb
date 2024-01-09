@@ -19,6 +19,13 @@
   "copyButtonLabel": "Көчүрүү",
   "pasteButtonLabel": "Чаптоо",
   "selectAllButtonLabel": "Баарын тандоо",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "Жабуу"
+  "tabSemanticsLabel": "$tabCount ичинен $tabIndex-өтмөк",
+  "modalBarrierDismissLabel": "Жабуу",
+  "searchTextFieldPlaceholderLabel": "Издөө",
+  "noSpellCheckReplacementsLabel": "Алмаштыруу үчүн сөз табылган жок",
+  "menuDismissLabel": "Менюну жабуу",
+  "lookUpButtonLabel": "Издөө",
+  "searchWebButtonLabel": "Интернеттен издөө",
+  "shareButtonLabel": "Бөлүшүү…",
+  "clearButtonLabel": "Clear"
 }

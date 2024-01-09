@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbols.dart' as intl;
 
 import 'cupertino_localizations.dart';
 import 'l10n/generated_material_localizations.dart';
 import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
+
+// Examples can assume:
+// import 'package:flutter_localizations/flutter_localizations.dart';
+// import 'package:flutter/material.dart';
 
 /// Implementation of localized strings for the material widgets using the
 /// `intl` package for date and time formatting.
@@ -33,11 +34,11 @@ import 'widgets_localizations.dart';
 /// app supports with [MaterialApp.supportedLocales]:
 ///
 /// ```dart
-/// new MaterialApp(
+/// const MaterialApp(
 ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
-///   supportedLocales: [
-///     const Locale('en', 'US'), // American English
-///     const Locale('he', 'IL'), // Israeli Hebrew
+///   supportedLocales: <Locale>[
+///     Locale('en', 'US'), // American English
+///     Locale('he', 'IL'), // Israeli Hebrew
 ///     // ...
 ///   ],
 ///   // ...
@@ -75,12 +76,12 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///
   ///  1. The string that would be returned by [Intl.canonicalizedLocale] for
   ///     the locale.
-  ///  2. The [intl.DateFormat] for [formatYear].
-  ///  3. The [int.DateFormat] for [formatShortDate].
-  ///  4. The [intl.DateFormat] for [formatMediumDate].
-  ///  5. The [intl.DateFormat] for [formatFullDate].
-  ///  6. The [intl.DateFormat] for [formatMonthYear].
-  ///  7. The [int.DateFormat] for [formatShortMonthDay].
+  ///  2. The [DateFormat] for [formatYear].
+  ///  3. The [DateFormat] for [formatShortDate].
+  ///  4. The [DateFormat] for [formatMediumDate].
+  ///  5. The [DateFormat] for [formatFullDate].
+  ///  6. The [DateFormat] for [formatMonthYear].
+  ///  7. The [DateFormat] for [formatShortMonthDay].
   ///  8. The [NumberFormat] for [formatDecimal] (also used by [formatHour] and
   ///     [formatTimeOfDay] when [timeOfDayFormat] doesn't use [HourFormat.HH]).
   ///  9. The [NumberFormat] for [formatHour] and the hour part of
@@ -90,35 +91,25 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// The [narrowWeekdays] and [firstDayOfWeekIndex] properties use the values
   /// from the [intl.DateFormat] used by [formatFullDate].
   const GlobalMaterialLocalizations({
-    @required String localeName,
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : assert(localeName != null),
-       _localeName = localeName,
-       assert(fullYearFormat != null),
+    required String localeName,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : _localeName = localeName,
        _fullYearFormat = fullYearFormat,
-       assert(compactDateFormat != null),
        _compactDateFormat = compactDateFormat,
-       assert(shortDateFormat != null),
        _shortDateFormat = shortDateFormat,
-       assert(mediumDateFormat != null),
        _mediumDateFormat = mediumDateFormat,
-       assert(longDateFormat != null),
        _longDateFormat = longDateFormat,
-       assert(yearMonthFormat != null),
        _yearMonthFormat = yearMonthFormat,
-       assert(shortMonthDayFormat != null),
        _shortMonthDayFormat = shortMonthDayFormat,
-       assert(decimalFormat != null),
        _decimalFormat = decimalFormat,
-       assert(twoDigitZeroPaddedFormat != null),
        _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
 
   final String _localeName;
@@ -143,7 +134,6 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
         final int hour = timeOfDay.hourOfPeriod;
         return formatDecimal(hour == 0 ? 12 : hour);
     }
-    return null;
   }
 
   @override
@@ -187,9 +177,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  DateTime parseCompactDate(String inputString) {
+  DateTime? parseCompactDate(String? inputString) {
     try {
-      return _compactDateFormat.parseStrict(inputString);
+      return inputString != null ? _compactDateFormat.parseStrict(inputString) : null;
     } on FormatException {
       return null;
     }
@@ -222,28 +212,26 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     final String minute = formatMinute(timeOfDay);
     switch (timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat)) {
       case TimeOfDayFormat.h_colon_mm_space_a:
-        return '$hour:$minute ${_formatDayPeriod(timeOfDay)}';
+        return '$hour:$minute ${_formatDayPeriod(timeOfDay)!}';
       case TimeOfDayFormat.H_colon_mm:
       case TimeOfDayFormat.HH_colon_mm:
         return '$hour:$minute';
       case TimeOfDayFormat.HH_dot_mm:
         return '$hour.$minute';
       case TimeOfDayFormat.a_space_h_colon_mm:
-        return '${_formatDayPeriod(timeOfDay)} $hour:$minute';
+        return '${_formatDayPeriod(timeOfDay)!} $hour:$minute';
       case TimeOfDayFormat.frenchCanadian:
         return '$hour h $minute';
     }
-    return null;
   }
 
-  String _formatDayPeriod(TimeOfDay timeOfDay) {
+  String? _formatDayPeriod(TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
       case DayPeriod.am:
         return anteMeridiemAbbreviation;
       case DayPeriod.pm:
         return postMeridiemAbbreviation;
     }
-    return null;
   }
 
   /// The raw version of [dateRangeStartDateSemanticLabel], with `$formattedDate` verbatim
@@ -252,8 +240,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeStartDateSemanticLabelRaw;
 
   @override
-  String dateRangeStartDateSemanticLabel(String fullDate) {
-    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  String dateRangeStartDateSemanticLabel(String formattedDate) {
+    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
   }
 
   /// The raw version of [dateRangeEndDateSemanticLabel], with `$fullDate` verbatim
@@ -262,8 +250,19 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndDateSemanticLabelRaw;
 
   @override
-  String dateRangeEndDateSemanticLabel(String fullDate) {
-    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  String dateRangeEndDateSemanticLabel(String formattedDate) {
+    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
+  }
+
+  /// The raw version of [scrimOnTapHint], with `$modalRouteContentName` verbatim
+  /// in the string.
+  @protected
+  String get scrimOnTapHintRaw;
+
+  @override
+  String scrimOnTapHint(String modalRouteContentName) {
+    final String text = scrimOnTapHintRaw;
+    return text.replaceFirst(r'$modalRouteContentName', modalRouteContentName);
   }
 
   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
@@ -291,9 +290,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
-    String text = rowCountIsApproximate ? pageRowsInfoTitleApproximateRaw : null;
+    String? text = rowCountIsApproximate ? pageRowsInfoTitleApproximateRaw : null;
     text ??= pageRowsInfoTitleRaw;
-    assert(text != null, 'A $_localeName localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
     return text
       .replaceFirst(r'$firstRow', formatDecimal(firstRow))
       .replaceFirst(r'$lastRow', formatDecimal(lastRow))
@@ -306,7 +304,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({ int tabIndex, int tabCount }) {
+  String tabLabel({ required int tabIndex, required int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;
@@ -328,7 +326,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [selectedRowCountTitleMany], the "many" form
   ///  * [selectedRowCountTitleOther], the "other" form
   @protected
-  String get selectedRowCountTitleZero => null;
+  String? get selectedRowCountTitleZero => null;
 
   /// The "one" form of [selectedRowCountTitle].
   ///
@@ -343,7 +341,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [selectedRowCountTitleMany], the "many" form
   ///  * [selectedRowCountTitleOther], the "other" form
   @protected
-  String get selectedRowCountTitleOne => null;
+  String? get selectedRowCountTitleOne => null;
 
   /// The "two" form of [selectedRowCountTitle].
   ///
@@ -358,7 +356,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [selectedRowCountTitleMany], the "many" form
   ///  * [selectedRowCountTitleOther], the "other" form
   @protected
-  String get selectedRowCountTitleTwo => null;
+  String? get selectedRowCountTitleTwo => null;
 
   /// The "few" form of [selectedRowCountTitle].
   ///
@@ -373,7 +371,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [selectedRowCountTitleMany], the "many" form
   ///  * [selectedRowCountTitleOther], the "other" form
   @protected
-  String get selectedRowCountTitleFew => null;
+  String? get selectedRowCountTitleFew => null;
 
   /// The "many" form of [selectedRowCountTitle].
   ///
@@ -388,7 +386,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [selectedRowCountTitleFew], the "few" form
   ///  * [selectedRowCountTitleOther], the "other" form
   @protected
-  String get selectedRowCountTitleMany => null;
+  String? get selectedRowCountTitleMany => null;
 
   /// The "other" form of [selectedRowCountTitle].
   ///
@@ -441,15 +439,124 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///    the short time pattern used in the `en_US` locale.
   @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
-    assert(alwaysUse24HourFormat != null);
-    if (alwaysUse24HourFormat)
+    if (alwaysUse24HourFormat) {
       return _get24HourVersionOf(timeOfDayFormatRaw);
+    }
     return timeOfDayFormatRaw;
+  }
+
+  /// The "zero" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String? get licensesPackageDetailTextZero => null;
+
+  /// The "one" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String? get licensesPackageDetailTextOne => null;
+
+  /// The "two" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String? get licensesPackageDetailTextTwo => null;
+
+  /// The "many" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String? get licensesPackageDetailTextMany => null;
+
+  /// The "few" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String? get licensesPackageDetailTextFew => null;
+
+  /// The "other" form of [licensesPackageDetailText].
+  ///
+  /// This form is required.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextOther;
+
+  @override
+  String licensesPackageDetailText(int licenseCount) {
+    return intl.Intl.pluralLogic(
+      licenseCount,
+      zero: licensesPackageDetailTextZero,
+      one: licensesPackageDetailTextOne,
+      two: licensesPackageDetailTextTwo,
+      many: licensesPackageDetailTextMany,
+      few: licensesPackageDetailTextFew,
+      other: licensesPackageDetailTextOther,
+      locale: _localeName,
+    ).replaceFirst(r'$licenseCount', formatDecimal(licenseCount));
   }
 
   /// The "zero" form of [remainingTextFieldCharacterCount].
   ///
-  /// This form is required.
+  /// This form is optional.
   ///
   /// See also:
   ///
@@ -461,7 +568,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
-  String get remainingTextFieldCharacterCountZero;
+  String? get remainingTextFieldCharacterCountZero => null;
 
   /// The "one" form of [remainingTextFieldCharacterCount].
   ///
@@ -476,7 +583,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
-  String get remainingTextFieldCharacterCountOne => null;
+  String? get remainingTextFieldCharacterCountOne => null;
 
   /// The "two" form of [remainingTextFieldCharacterCount].
   ///
@@ -492,7 +599,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
-  String get remainingTextFieldCharacterCountTwo => null;
+  String? get remainingTextFieldCharacterCountTwo => null;
 
   /// The "many" form of [remainingTextFieldCharacterCount].
   ///
@@ -508,7 +615,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
-  String get remainingTextFieldCharacterCountMany => null;
+  String? get remainingTextFieldCharacterCountMany => null;
 
   /// The "few" form of [remainingTextFieldCharacterCount].
   ///
@@ -524,7 +631,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
-  String get remainingTextFieldCharacterCountFew => null;
+  String? get remainingTextFieldCharacterCountFew => null;
 
   /// The "other" form of [remainingTextFieldCharacterCount].
   ///
@@ -543,9 +650,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get remainingTextFieldCharacterCountOther;
 
   @override
-  String remainingTextFieldCharacterCount(int remainingCount) {
+  String remainingTextFieldCharacterCount(int remaining) {
     return intl.Intl.pluralLogic(
-      remainingCount,
+      remaining,
       zero: remainingTextFieldCharacterCountZero,
       one: remainingTextFieldCharacterCountOne,
       two: remainingTextFieldCharacterCountTwo,
@@ -553,14 +660,13 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
       few: remainingTextFieldCharacterCountFew,
       other: remainingTextFieldCharacterCountOther,
       locale: _localeName,
-    ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
+    ).replaceFirst(r'$remainingCount', formatDecimal(remaining));
   }
 
   @override
   ScriptCategory get scriptCategory;
 
-  /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
-  /// to create an instance of this class.
+  /// A [LocalizationsDelegate] for [MaterialLocalizations].
   ///
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
@@ -579,11 +685,11 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// app supports with [MaterialApp.supportedLocales]:
   ///
   /// ```dart
-  /// new MaterialApp(
+  /// const MaterialApp(
   ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
-  ///   supportedLocales: [
-  ///     const Locale('en', 'US'), // English
-  ///     const Locale('he', 'IL'), // Hebrew
+  ///   supportedLocales: <Locale>[
+  ///     Locale('en', 'US'), // English
+  ///     Locale('he', 'IL'), // Hebrew
   ///   ],
   ///   // ...
   /// )
@@ -609,7 +715,6 @@ TimeOfDayFormat _get24HourVersionOf(TimeOfDayFormat original) {
     case TimeOfDayFormat.a_space_h_colon_mm:
       return TimeOfDayFormat.HH_colon_mm;
   }
-  return TimeOfDayFormat.HH_colon_mm;
 }
 
 class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
@@ -690,7 +795,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
         shortMonthDayFormat,
         decimalFormat,
         twoDigitZeroPaddedFormat,
-      ));
+      )!);
     });
   }
 

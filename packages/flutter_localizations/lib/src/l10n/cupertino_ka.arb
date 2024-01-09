@@ -19,6 +19,13 @@
   "copyButtonLabel": "კოპირება",
   "pasteButtonLabel": "ჩასმა",
   "selectAllButtonLabel": "ყველას არჩევა",
-  "tabSemanticsLabel": "TBD",
-  "modalBarrierDismissLabel": "დახურვა"
+  "tabSemanticsLabel": "ჩანართი $tabIndex / $tabCount-დან",
+  "modalBarrierDismissLabel": "დახურვა",
+  "searchTextFieldPlaceholderLabel": "ძიება",
+  "noSpellCheckReplacementsLabel": "ჩანაცვლება არ მოიძებნა",
+  "menuDismissLabel": "მენიუს უარყოფა",
+  "lookUpButtonLabel": "აიხედეთ ზემოთ",
+  "searchWebButtonLabel": "ვებში ძიება",
+  "shareButtonLabel": "გაზიარება...",
+  "clearButtonLabel": "Clear"
 }
