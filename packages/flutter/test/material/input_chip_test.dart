@@ -304,7 +304,7 @@ void main() {
     focusNode2.dispose();
   });
 
-  testWidgets('Material2 - Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgets('Material2 - Input chip disabled check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
@@ -314,13 +314,13 @@ void main() {
     expectCheckmarkColor(find.byType(InputChip), Colors.black.withAlpha(0xde));
   });
 
-  testWidgets('Material3 - Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgets('Material3 - Input chip disabled check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await pumpCheckmarkChip(tester, chip: selectedInputChip());
-
-    expectCheckmarkColor(find.byType(InputChip), Colors.black.withAlpha(0xde));
+    // Without color opacity. _RenderChip handles the 'disabled' opacity internally
+    expectCheckmarkColor(find.byType(InputChip), ThemeData.light().colorScheme.onSurface);
   });
 
-  testWidgets('Material2 - Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgets('Material2 - Input chip disabled check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
@@ -331,14 +331,14 @@ void main() {
     expectCheckmarkColor(find.byType(InputChip), Colors.white.withAlpha(0xde));
   });
 
-  testWidgets('Material3 - Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgets('Material3 - Input chip disabled check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
       brightness: Brightness.dark,
     );
-
-    expectCheckmarkColor(find.byType(InputChip), Colors.white.withAlpha(0xde));
+    // Without color opacity. _RenderChip handles the 'disabled' state opacity internally
+    expectCheckmarkColor(find.byType(InputChip), ThemeData.dark().colorScheme.onSurface);
   });
 
   testWidgets('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
