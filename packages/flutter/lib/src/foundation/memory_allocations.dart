@@ -192,17 +192,6 @@ class FlutterMemoryAllocations {
     }
   }
 
-  /// Removes all listeners.
-  @visibleForTesting
-  void removeAllListeners(){
-    if (_listeners == null) {
-      return;
-    }
-    _listeners = null;
-    _unSubscribeFromSdkObjects();
-    _listenersContainNulls = false;
-  }
-
   void _tryDefragmentListeners() {
     if (_activeDispatchLoops > 0 || !_listenersContainNulls) {
       return;
