@@ -7,9 +7,6 @@
                 "kvm=1",
                 "cores=8"
             ],
-            "gclient_variables": {
-                "use_rbe": true
-            },
             "gn": [
                 "--android",
                 "--android-cpu=x64",
@@ -72,9 +69,6 @@
                 "kvm=1",
                 "cores=8"
             ],
-            "gclient_variables": {
-                "use_rbe": true
-            },
             "gn": [
                 "--android",
                 "--android-cpu=x86",
