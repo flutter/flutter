@@ -14,8 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import 'utils/leaking_classes.dart';
-
 late final String _test1TrackingOnNoLeaks;
 late final String _test2TrackingOffLeaks;
 late final String _test3TrackingOnLeaks;
