@@ -91,7 +91,7 @@ void main() {
         zoneValues: <dynamic, dynamic>{#flutter.io.allow_http: mockTrue});
       expect(mockFalse.checked, isTrue);
     });
-  });
+  }, skip: Platform.isMacOS); // https://github.com/flutter/flutter/issues/141149
 
   test('testWithLoopback', () async {
     await bindServerAndTest('127.0.0.1', (HttpClient httpClient, Uri uri) async {
