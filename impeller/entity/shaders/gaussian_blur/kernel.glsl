@@ -16,7 +16,7 @@ struct KernelSample {
 
 uniform KernelSamples {
   int sample_count;
-  KernelSample samples[24];
+  KernelSample samples[32];
 }
 blur_info;
 
