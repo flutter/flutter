@@ -3855,7 +3855,6 @@ targets:
 
   - name: Mac_pixel_7pro entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3870,7 +3869,6 @@ targets:
   - name: Mac_pixel_7pro hello_world_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3900,7 +3898,6 @@ targets:
   - name: Mac_pixel_7pro integration_test_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3920,7 +3917,6 @@ targets:
   - name: Mac_pixel_7pro integration_ui_frame_number
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3950,7 +3946,6 @@ targets:
   - name: Mac_pixel_7pro run_debug_test_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     runIf:
       - .ci.yaml
       - dev/**
@@ -3976,7 +3971,6 @@ targets:
   - name: Mac_pixel_7pro run_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     runIf:
       - .ci.yaml
       - dev/**
