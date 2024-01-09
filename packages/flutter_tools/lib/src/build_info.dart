@@ -52,7 +52,6 @@ class BuildInfo {
        fileSystemRoots = fileSystemRoots ?? const <String>[],
        dartDefines = dartDefines ?? const <String>[],
        dartExperiments = dartExperiments ?? const <String>[];
-       
 
   final BuildMode mode;
 
