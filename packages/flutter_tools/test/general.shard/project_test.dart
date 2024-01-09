@@ -1409,8 +1409,17 @@ Future<FlutterProject> someProject({
       .childDirectory('android')
       ..createSync(recursive: true);
   androidDirectory
+    .childDirectory('app')
+    .childDirectory('src')
+    .childDirectory('main')
     .childFile('AndroidManifest.xml')
-    .writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
+    ..createSync(recursive: true)
+    ..writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
+
+  androidDirectory.childFile('settings.gradle').createSync();
+  androidDirectory.childFile('build.gradle').createSync();
+  androidDirectory.childDirectory('app').childFile('build.gradle').createSync(recursive: true);
+
   return FlutterProject.fromDirectory(directory);
 }
 
