@@ -1693,17 +1693,26 @@ class _TabBarState extends State<TabBar> {
           TabAlignment.start || TabAlignment.startOffset || TabAlignment.fill => AlignmentDirectional.centerStart,
         };
 
-        tabBar = CustomPaint(
-          painter: _DividerPainter(
-            dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
-            dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
-          ),
-          child: Align(
-            heightFactor: 1.0,
-            alignment: effectiveAlignment,
-            child: tabBar,
-          ),
+        final Color dividerColor = widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!;
+        final double dividerHeight = widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!;
+        final bool showDivider = dividerColor != Colors.transparent && dividerHeight > 0;
+
+        tabBar = Align(
+          heightFactor: 1.0,
+          widthFactor: showDivider ? null : 1.0,
+          alignment: effectiveAlignment,
+          child: tabBar,
         );
+
+        if (showDivider) {
+          tabBar = CustomPaint(
+            painter: _DividerPainter(
+              dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
+              dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
+            ),
+            child: tabBar,
+          );
+        }
       }
     } else if (widget.padding != null) {
       tabBar = Padding(
