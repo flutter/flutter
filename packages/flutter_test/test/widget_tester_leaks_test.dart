@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(polina-c): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20240108"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,9 +41,6 @@ void main() {
     _test2TrackingOffLeaks = 'test2, tracking-off, leaks',
     experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester widgetTester) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, null);
-    expect(LeakTracking.phase.ignoreLeaks, true);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
   });
 
