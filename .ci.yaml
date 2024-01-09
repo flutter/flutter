@@ -121,7 +121,6 @@ platform_properties:
         ]
       os: Mac-12|Mac-13
       device_type: none
-      cpu: x86
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -135,7 +134,6 @@ platform_properties:
         ]
       os: Mac-12|Mac-13
       device_type: none
-      cpu: x86
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -3685,6 +3683,7 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       test_timeout_secs: "2700"
+      cpu: x86
     runIf:
       - dev/**
       - packages/flutter_tools/**
