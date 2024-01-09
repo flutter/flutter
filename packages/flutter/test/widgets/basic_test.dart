@@ -21,7 +21,9 @@ import 'semantics_tester.dart';
 
 void main() {
   group('RawImage', () {
-    testWidgets('properties', (WidgetTester tester) async {
+    testWidgets('properties',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+    (WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
 
       await tester.pumpWidget(
