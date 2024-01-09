@@ -546,18 +546,18 @@ keep this 3
       });
 
       testWithoutContext('skipped if nothing to upgrade', () {
-        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
+        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 12.0;';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
         const String appFrameworkInfoPlistContents = '''
   <key>MinimumOSVersion</key>
-  <string>11.0</string>
+  <string>12.0</string>
 ''';
         appFrameworkInfoPlist.writeAsStringSync(appFrameworkInfoPlistContents);
 
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-        const String podfileFileContents = "# platform :ios, '11.0'";
+        const String podfileFileContents = "# platform :ios, '12.0'";
         podfile.writeAsStringSync(podfileFileContents);
         final DateTime podfileLastModified = podfile.lastModifiedSync();
 
@@ -576,7 +576,7 @@ keep this 3
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('Xcode project is migrated to 11', () {
+      testWithoutContext('Xcode project is migrated to 12', () {
         xcodeProjectInfoFile.writeAsStringSync('''
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -585,6 +585,7 @@ keep this 3
 
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 ''');
 
         appFrameworkInfoPlist.writeAsStringSync('''
@@ -598,6 +599,8 @@ keep this 3
   <string>8.0</string>
   <key>MinimumOSVersion</key>
   <string>11.0</string>
+  <key>MinimumOSVersion</key>
+  <string>12.0</string>
 </dict>
 </plist>
 ''');
@@ -605,6 +608,8 @@ keep this 3
         podfile.writeAsStringSync('''
 # platform :ios, '9.0'
 platform :ios, '9.0'
+# platform :ios, '11.0'
+platform :ios, '11.0'
 ''');
 
         final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
@@ -615,12 +620,13 @@ platform :ios, '9.0'
 
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 ''');
 
         expect(appFrameworkInfoPlist.readAsStringSync(), '''
@@ -631,19 +637,23 @@ platform :ios, '9.0'
   <key>CFBundleVersion</key>
   <string>1.0</string>
   <key>MinimumOSVersion</key>
-  <string>11.0</string>
+  <string>12.0</string>
   <key>MinimumOSVersion</key>
-  <string>11.0</string>
+  <string>12.0</string>
+  <key>MinimumOSVersion</key>
+  <string>12.0</string>
 </dict>
 </plist>
 ''');
 
         expect(podfile.readAsStringSync(), '''
-# platform :ios, '11.0'
-platform :ios, '11.0'
+# platform :ios, '12.0'
+platform :ios, '12.0'
+# platform :ios, '12.0'
+platform :ios, '12.0'
 ''');
         // Only print once even though 2 lines were changed.
-        expect('Updating minimum iOS deployment target to 11.0'.allMatches(testLogger.statusText).length, 1);
+        expect('Updating minimum iOS deployment target to 12.0'.allMatches(testLogger.statusText).length, 1);
       });
     });
 
@@ -864,7 +874,7 @@ platform :ios, '11.0'
       });
 
       testWithoutContext('skipped if nothing to upgrade', () {
-        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
+        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 12.0;';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
