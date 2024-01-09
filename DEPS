@@ -54,7 +54,7 @@ vars = {
   # https://chrome-infra-packages.appspot.com/p/fuchsia/third_party/goma/client
   'goma_version': ' git_revision:41b3bcb64014144a844153fd5588c36411fffb56',
 
-  'reclient_version': 'git_revision:f3883c2237b0eb9cc9524cb571b5ab8378f257e4',
+  'reclient_version': 'git_revision:81e819b39d4743462857cc55430d898b9fcca1af',
 
   'gcloud_version': 'version:2@444.0.0.chromium.3',
 
@@ -126,10 +126,6 @@ vars = {
   # the engine build will prefer to use this client over a client that is
   # specified by GOMA_DIR, or installed in the default goma install location.
   'use_cipd_goma': False,
-
-  # When this is true, the Flutter Engine's configuration files and scripts for
-  # RBE will be downloaded from CIPD. This option is only usable by Googlers.
-  'use_rbe': False,
 
   # This is not downloaded be default because it increases the
   # `gclient sync` time by between 1 and 3 minutes. This option is enabled
@@ -271,7 +267,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a43582b52d361bc3da156a8e6eab6dd947ca339d',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '8c274b21f1ad4f2aec0a5e0ae8f4264393045b4b',
 
   'src/flutter/third_party/rapidjson':
    Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
@@ -848,7 +844,7 @@ deps = {
         'version': Var('clang_version'),
       }
     ],
-    'condition': 'host_os == "linux" or host_os == "mac"',
+    'condition': 'host_os == "linux" and host_cpu == "x64"',
     'dep_type': 'cipd',
   },
 
@@ -908,7 +904,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  # RBE binaries and configs.
+  # reclient.
   'src/buildtools/linux-x64/reclient': {
     'packages': [
       {
@@ -916,40 +912,7 @@ deps = {
         'version': Var('reclient_version'),
       }
     ],
-    'condition': 'use_rbe and host_os == "linux" and host_cpu == "x64"',
-    'dep_type': 'cipd',
-  },
-
-  'src/buildtools/mac-arm64/reclient': {
-    'packages': [
-      {
-        'package': 'infra/rbe/client/${{platform}}',
-        'version': Var('reclient_version'),
-      }
-    ],
-    'condition': 'use_rbe and host_os == "mac" and host_cpu == "arm64"',
-    'dep_type': 'cipd',
-  },
-
-  'src/buildtools/mac-x64/reclient': {
-    'packages': [
-      {
-        'package': 'infra/rbe/client/${{platform}}',
-        'version': Var('reclient_version'),
-      }
-    ],
-    'condition': 'use_rbe and host_os == "mac" and host_cpu == "x64"',
-    'dep_type': 'cipd',
-  },
-
-  'src/flutter/build/rbe': {
-    'packages': [
-      {
-        'package': 'flutter_internal/rbe/reclient_cfgs',
-        'version': 'U42C0v8jI-_YREjd8rbDEt0evvqvLWJ_NTkaiJ_Clt8C',
-      }
-    ],
-    'condition': 'use_rbe',
+    'condition': 'host_os == "linux" and host_cpu == "x64"',
     'dep_type': 'cipd',
   },
 
@@ -961,18 +924,7 @@ deps = {
         'version': Var('gcloud_version'),
       }
     ],
-    'condition': 'use_rbe and host_os == "linux" and host_cpu == "x64"',
-    'dep_type': 'cipd',
-  },
-
-  'src/buildtools/mac-arm64/gcloud': {
-    'packages': [
-      {
-        'package': 'infra/3pp/tools/gcloud/${{platform}}',
-        'version': Var('gcloud_version'),
-      }
-    ],
-    'condition': 'use_rbe and host_os == "mac" and host_cpu == "arm64"',
+    'condition': 'host_os == "linux" and host_cpu == "x64"',
     'dep_type': 'cipd',
   },
 
