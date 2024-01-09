@@ -235,14 +235,14 @@ std::optional<Rect> GaussianBlurFilterContents::GetFilterCoverage(
     return {};
   }
 
-  Vector2 scaled_sigma = {ScaleSigma(sigma_x_), ScaleSigma(sigma_y_)};
-  Vector2 blur_radius = {CalculateBlurRadius(scaled_sigma.x),
-                         CalculateBlurRadius(scaled_sigma.y)};
-  Vector3 blur_radii =
-      (inputs[0]->GetTransform(entity).Basis() * effect_transform.Basis() *
-       Vector3{blur_radius.x, blur_radius.y, 0.0})
-          .Abs();
-  return input_coverage.value().Expand(Point(blur_radii.x, blur_radii.y));
+  Vector2 scaled_sigma = (effect_transform.Basis() *
+                          Vector2(ScaleSigma(sigma_x_), ScaleSigma(sigma_y_)))
+                             .Abs();
+  Vector2 blur_radius = Vector2(CalculateBlurRadius(scaled_sigma.x),
+                                CalculateBlurRadius(scaled_sigma.y));
+  Vector2 padding(ceil(blur_radius.x), ceil(blur_radius.y));
+  Vector2 local_padding = (entity.GetTransform().Basis() * padding).Abs();
+  return input_coverage.value().Expand(Point(local_padding.x, local_padding.y));
 }
 
 std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
@@ -256,13 +256,13 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  Vector2 scaled_sigma = {ScaleSigma(sigma_x_), ScaleSigma(sigma_y_)};
-  Vector2 blur_radius = {CalculateBlurRadius(scaled_sigma.x),
-                         CalculateBlurRadius(scaled_sigma.y)};
+  Vector2 scaled_sigma = (effect_transform.Basis() *
+                          Vector2(ScaleSigma(sigma_x_), ScaleSigma(sigma_y_)))
+                             .Abs();
+  Vector2 blur_radius = Vector2(CalculateBlurRadius(scaled_sigma.x),
+                                CalculateBlurRadius(scaled_sigma.y));
   Vector2 padding(ceil(blur_radius.x), ceil(blur_radius.y));
-  Vector2 local_padding =
-      (entity.GetTransform().Basis() * effect_transform.Basis() * padding)
-          .Abs();
+  Vector2 local_padding = (entity.GetTransform().Basis() * padding).Abs();
 
   // Apply as much of the desired padding as possible from the source. This may
   // be ignored so must be accounted for in the downsample pass by adding a
@@ -437,7 +437,8 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
   KernelPipeline::FragmentShader::KernelSamples result;
   result.sample_count =
       ((2 * parameters.blur_radius) / parameters.step_size) + 1;
-  FML_CHECK(result.sample_count < 24);
+  // 32 comes from kernel.glsl.
+  FML_CHECK(result.sample_count < 32);
 
   // Chop off the last samples if the radius >= 3 where they account for < 1.56%
   // of the result.
