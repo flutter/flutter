@@ -303,6 +303,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
+
   final TextPainter _textPainter;
 
   List<AttributedString>? _cachedAttributedLabels;
@@ -730,9 +731,18 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   bool hitTestSelf(Offset position) => true;
 
   @override
+  @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
-    switch (_textPainter.text!.getSpanForPosition(textPosition)) {
+    final GlyphInfo? glyph = _textPainter.getClosestGlyphForOffset(position);
+    // The hit-test can't fall through the horizontal gaps between visually
+    // adjacent characters on the same line, even with a large letter-spacing or
+    // text justification, as graphemeClusterLayoutBounds.width is the advance
+    // width to the next character, so there's no gap between their
+    // graphemeClusterLayoutBounds rects.
+    final InlineSpan? spanHit = glyph != null && glyph.graphemeClusterLayoutBounds.contains(position)
+      ? _textPainter.text!.getSpanForPosition(TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start))
+      : null;
+    switch (spanHit) {
       case final HitTestTarget span:
         result.add(HitTestEntry(span));
         return true;
