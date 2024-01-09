@@ -130,7 +130,7 @@ class DefaultProcessTextService implements ProcessTextService {
       return <ProcessTextAction>[];
     }
 
-    return [
+    return <ProcessTextAction>[
       for (final Object? id in rawResults.keys)
         ProcessTextAction(id! as String, rawResults[id]! as String),
     ];
