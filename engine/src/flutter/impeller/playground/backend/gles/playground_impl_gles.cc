@@ -9,6 +9,8 @@
 
 #include "flutter/fml/build_config.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
+#include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
+#include "impeller/entity/gles/modern_shaders_gles.h"
 #include "impeller/fixtures/gles/fixtures_shaders_gles.h"
 #include "impeller/playground/imgui/gles/imgui_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
@@ -93,6 +95,12 @@ ShaderLibraryMappingsForPlayground() {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_entity_shaders_gles_data,
           impeller_entity_shaders_gles_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_modern_shaders_gles_data,
+          impeller_modern_shaders_gles_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_framebuffer_blend_shaders_gles_data,
+          impeller_framebuffer_blend_shaders_gles_length),
       std::make_shared<fml::NonOwnedMapping>(
           impeller_fixtures_shaders_gles_data,
           impeller_fixtures_shaders_gles_length),
