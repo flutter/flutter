@@ -21,10 +21,7 @@ import '_goldens_io.dart'
 /// See documentation for [testWidgets] on how to except individual tests.
 bool isLeakTrackingEnabled() {
   // The values can be different: https://github.com/dart-lang/sdk/issues/54568
-  if (Platform.environment['LEAK_TRACKING'] == 'true') {
-    return true;
-  }
-  return const bool.fromEnvironment('LEAK_TRACKING');
+  return const bool.fromEnvironment('LEAK_TRACKING') || (bool.tryParse(Platform.environment['LEAK_TRACKING'] ?? '')  ?? false);
 }
 
 /// Test configuration for each test library in this directory.
@@ -39,8 +36,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  // Leak tracking is off by default.
-  // To enable it, follow doc for [_kLeakTracking].
   if (isLeakTrackingEnabled()) {
     LeakTesting.enable();
 
@@ -54,8 +49,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
     // Print is here in spite of
     // https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#only-log-actionable-messages-to-the-console
-    // to provide a way to detect if the env variable is passed as expected on bots, that is not obvious
-    // (https://github.com/dart-lang/sdk/issues/54568).
+    // to provide a way to detect if the env variable is passed as expected on bots, that is not obvious.
+    // Sometimes the bot's environment contains `LEAK_TRACKING=true` but the value is not passed to the test.
+    // https://github.com/dart-lang/sdk/issues/54568
     debugPrint('Leak tracking is enabled.');
   }
 
