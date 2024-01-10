@@ -5103,7 +5103,7 @@ void main() {
       testWidgets('popping a page with canPop true still calls onPopInvoked', (WidgetTester tester) async {
         final List<_PageWithYesPop> pages = <_PageWithYesPop>[_PageWithYesPop.home];
         bool canPop() => pages.length <= 1;
-        bool onPopInvokedWasCalled = false;
+        int onPopInvokedCallCount = 0;
 
         await tester.pumpWidget(
           MaterialApp(
@@ -5182,7 +5182,7 @@ void main() {
                               title: 'Can pop page',
                               canPop: true,
                               onPopInvoked: (bool didPop) {
-                                onPopInvokedWasCalled = true;
+                                onPopInvokedCallCount += 1;
                               },
                             ),
                           );
@@ -5197,14 +5197,14 @@ void main() {
 
         expect(find.text('Home page'), findsOneWidget);
         expect(lastFrameworkHandlesBack, isFalse);
-        expect(onPopInvokedWasCalled, isFalse);
+        expect(onPopInvokedCallCount, equals(0));
 
         await tester.tap(find.text('Go to _PageWithYesPop.yesPop'));
         await tester.pumpAndSettle();
 
         expect(find.text('Can pop page'), findsOneWidget);
         expect(lastFrameworkHandlesBack, isTrue);
-        expect(onPopInvokedWasCalled, isFalse);
+        expect(onPopInvokedCallCount, equals(0));
 
         // A system back calls onPopInvoked.
         await simulateSystemBack();
@@ -5212,15 +5212,14 @@ void main() {
 
         expect(find.text('Home page'), findsOneWidget);
         expect(lastFrameworkHandlesBack, isFalse);
-        expect(onPopInvokedWasCalled, isTrue);
+        expect(onPopInvokedCallCount, equals(1));
 
-        onPopInvokedWasCalled = false;
         await tester.tap(find.text('Go to _PageWithYesPop.yesPop'));
         await tester.pumpAndSettle();
 
         expect(find.text('Can pop page'), findsOneWidget);
         expect(lastFrameworkHandlesBack, isTrue);
-        expect(onPopInvokedWasCalled, isFalse);
+        expect(onPopInvokedCallCount, equals(1));
 
         // Tapping a back button also calls onPopInvoked.
         await tester.tap(find.text('Go back'));
@@ -5228,7 +5227,7 @@ void main() {
 
         expect(find.text('Home page'), findsOneWidget);
         expect(lastFrameworkHandlesBack, isFalse);
-        expect(onPopInvokedWasCalled, isTrue);
+        expect(onPopInvokedCallCount, equals(2));
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
