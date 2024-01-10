@@ -40,8 +40,10 @@ void main() {
 
     final VerticalDragGestureRecognizer v = VerticalDragGestureRecognizer()
       ..onStart = (_) { };
+    addTearDown(v.dispose);
     final HorizontalDragGestureRecognizer h = HorizontalDragGestureRecognizer()
       ..onStart = (_) { };
+    addTearDown(h.dispose);
 
     const PointerDownEvent down90 = PointerDownEvent(
       pointer: 90,
