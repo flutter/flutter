@@ -1020,7 +1020,6 @@ class _TrianglePainter extends CustomPainter {
 ///   ),
 /// )
 /// ```
-/// See also:
 /// {@tool dartpad}
 /// An example that uses [StepStyle] to customize the appearance of each [Step] in a [Stepper].
 ///
@@ -1120,7 +1119,7 @@ class StepStyle with Diagnosticable {
 
   @override
   int get hashCode {
-    final List<Object?> values = <Object?>[
+    return Object.hash(
       color,
       errorColor,
       connectorColor,
@@ -1129,8 +1128,7 @@ class StepStyle with Diagnosticable {
       boxShadow,
       gradient,
       indexStyle,
-    ];
-    return Object.hashAll(values);
+    );
   }
 
   @override
