@@ -24,7 +24,7 @@ static void EncodeCommand(const SceneContext& scene_context,
                           const Matrix& view_transform,
                           RenderPass& render_pass,
                           const SceneCommand& scene_command) {
-  auto& host_buffer = render_pass.GetTransientsBuffer();
+  auto& host_buffer = scene_context.GetTransientsBuffer();
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, scene_command.label);

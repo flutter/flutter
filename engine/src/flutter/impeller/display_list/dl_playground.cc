@@ -51,7 +51,7 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
         list->Dispatch(dispatcher);
         auto picture = dispatcher.EndRecordingAsPicture();
 
-        return context.Render(picture, render_target);
+        return context.Render(picture, render_target, true);
       });
 }
 

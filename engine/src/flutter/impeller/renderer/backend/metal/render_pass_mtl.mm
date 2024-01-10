@@ -364,7 +364,7 @@ static bool Bind(PassBindingsCache& pass,
     return false;
   }
 
-  auto device_buffer = view.buffer->GetDeviceBuffer(allocator);
+  auto device_buffer = view.buffer->GetDeviceBuffer();
   if (!device_buffer) {
     return false;
   }
@@ -508,7 +508,7 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
     if (!index_buffer) {
       return false;
     }
-    auto device_buffer = index_buffer->GetDeviceBuffer(*allocator);
+    auto device_buffer = index_buffer->GetDeviceBuffer();
     if (!device_buffer) {
       return false;
     }
