@@ -14967,7 +14967,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           inputDecorationTheme: const InputDecorationTheme(
-            errorStyle: TextStyle(color: Colors.green), 
+            errorStyle: TextStyle(color: Colors.green),
           ),
         ),
         home: const Scaffold(
