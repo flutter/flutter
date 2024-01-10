@@ -54,7 +54,7 @@ public class FlutterRenderer implements TextureRegistry {
   @Nullable private Surface surface;
   private boolean isDisplayingFlutterUi = false;
   private int isRenderingToImageViewCount = 0;
-  private Handler handler = new Handler();
+  private final Handler handler = new Handler();
 
   @NonNull
   private final Set<WeakReference<TextureRegistry.OnTrimMemoryListener>> onTrimMemoryListeners =
@@ -159,6 +159,7 @@ public class FlutterRenderer implements TextureRegistry {
    * Creates and returns a new external texture {@link SurfaceProducer} managed by the Flutter
    * engine that is also made available to Flutter code.
    */
+  @NonNull
   @Override
   public SurfaceProducer createSurfaceProducer() {
     // TODO(matanl, johnmccutchan): Implement a SurfaceTexture version and switch on whether or
@@ -166,7 +167,7 @@ public class FlutterRenderer implements TextureRegistry {
     final ImageReaderSurfaceProducer entry =
         new ImageReaderSurfaceProducer(nextTextureId.getAndIncrement());
     Log.v(TAG, "New SurfaceProducer ID: " + entry.id());
-    registerImageTexture(entry.id(), (TextureRegistry.ImageConsumer) entry);
+    registerImageTexture(entry.id(), entry);
     return entry;
   }
 
@@ -174,6 +175,7 @@ public class FlutterRenderer implements TextureRegistry {
    * Creates and returns a new {@link SurfaceTexture} managed by the Flutter engine that is also
    * made available to Flutter code.
    */
+  @NonNull
   @Override
   public SurfaceTextureEntry createSurfaceTexture() {
     Log.v(TAG, "Creating a SurfaceTexture.");
@@ -185,6 +187,7 @@ public class FlutterRenderer implements TextureRegistry {
    * Registers and returns a {@link SurfaceTexture} managed by the Flutter engine that is also made
    * available to Flutter code.
    */
+  @NonNull
   @Override
   public SurfaceTextureEntry registerSurfaceTexture(@NonNull SurfaceTexture surfaceTexture) {
     surfaceTexture.detachFromGLContext();
@@ -196,12 +199,13 @@ public class FlutterRenderer implements TextureRegistry {
     return entry;
   }
 
+  @NonNull
   @Override
   public ImageTextureEntry createImageTexture() {
     final ImageTextureRegistryEntry entry =
         new ImageTextureRegistryEntry(nextTextureId.getAndIncrement());
     Log.v(TAG, "New ImageTextureEntry ID: " + entry.id());
-    registerImageTexture(entry.id(), (TextureRegistry.ImageConsumer) entry);
+    registerImageTexture(entry.id(), entry);
     return entry;
   }
 
@@ -227,20 +231,32 @@ public class FlutterRenderer implements TextureRegistry {
     private boolean released;
     @Nullable private OnTrimMemoryListener trimMemoryListener;
     @Nullable private OnFrameConsumedListener frameConsumedListener;
-    private final Runnable onFrameConsumed =
-        new Runnable() {
-          @Override
-          public void run() {
-            if (frameConsumedListener != null) {
-              frameConsumedListener.onFrameConsumed();
-            }
-          }
-        };
 
     SurfaceTextureRegistryEntry(long id, @NonNull SurfaceTexture surfaceTexture) {
       this.id = id;
+      Runnable onFrameConsumed =
+          () -> {
+            if (frameConsumedListener != null) {
+              frameConsumedListener.onFrameConsumed();
+            }
+          };
       this.textureWrapper = new SurfaceTextureWrapper(surfaceTexture, onFrameConsumed);
 
+      // Even though we make sure to unregister the callback before releasing, as of
+      // Android O, SurfaceTexture has a data race when accessing the callback, so the
+      // callback may still be called by a stale reference after released==true and
+      // mNativeView==null.
+      SurfaceTexture.OnFrameAvailableListener onFrameListener =
+          texture -> {
+            if (released || !flutterJNI.isAttached()) {
+              // Even though we make sure to unregister the callback before releasing, as of
+              // Android O, SurfaceTexture has a data race when accessing the callback, so the
+              // callback may still be called by a stale reference after released==true and
+              // mNativeView==null.
+              return;
+            }
+            markTextureFrameAvailable(id);
+          };
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         // The callback relies on being executed on the UI thread (unsynchronised read
         // of
@@ -265,21 +281,6 @@ public class FlutterRenderer implements TextureRegistry {
         trimMemoryListener.onTrimMemory(level);
       }
     }
-
-    private SurfaceTexture.OnFrameAvailableListener onFrameListener =
-        new SurfaceTexture.OnFrameAvailableListener() {
-          @Override
-          public void onFrameAvailable(@NonNull SurfaceTexture texture) {
-            if (released || !flutterJNI.isAttached()) {
-              // Even though we make sure to unregister the callback before releasing, as of
-              // Android O, SurfaceTexture has a data race when accessing the callback, so the
-              // callback may still be called by a stale reference after released==true and
-              // mNativeView==null.
-              return;
-            }
-            markTextureFrameAvailable(id);
-          }
-        };
 
     private void removeListener() {
       removeOnTrimMemoryListener(this);
@@ -391,7 +392,7 @@ public class FlutterRenderer implements TextureRegistry {
     // Active image reader.
     private ImageReader activeReader;
     // Set of image readers that should be closed.
-    private final Set<ImageReader> readersToClose = new HashSet();
+    private final Set<ImageReader> readersToClose = new HashSet<>();
     // Last image produced. We keep this around until a new image is produced or the
     // consumer consumes this image.
     private PerImage lastProducedImage;
@@ -401,20 +402,17 @@ public class FlutterRenderer implements TextureRegistry {
 
     private final Handler onImageAvailableHandler = new Handler();
     private final ImageReader.OnImageAvailableListener onImageAvailableListener =
-        new ImageReader.OnImageAvailableListener() {
-          @Override
-          public void onImageAvailable(ImageReader reader) {
-            Image image = null;
-            try {
-              image = reader.acquireLatestImage();
-            } catch (IllegalStateException e) {
-              Log.e(TAG, "onImageAvailable acquireLatestImage failed: " + e.toString());
-            }
-            if (image == null) {
-              return;
-            }
-            onImage(new PerImage(reader, image));
+        reader -> {
+          Image image = null;
+          try {
+            image = reader.acquireLatestImage();
+          } catch (IllegalStateException e) {
+            Log.e(TAG, "onImageAvailable acquireLatestImage failed: " + e);
           }
+          if (image == null) {
+            return;
+          }
+          onImage(new PerImage(reader, image));
         };
 
     ImageReaderSurfaceProducer(long id) {
@@ -557,11 +555,9 @@ public class FlutterRenderer implements TextureRegistry {
         Log.i(TAG, "Dropping rendered frame that was not acquired in time.");
         toClose.close();
       }
-      if (image != null) {
-        // Mark that we have a new frame available. Eventually the raster thread will
-        // call acquireLatestImage.
-        markTextureFrameAvailable(id);
-      }
+      // Mark that we have a new frame available. Eventually the raster thread will
+      // call acquireLatestImage.
+      markTextureFrameAvailable(id);
     }
 
     @TargetApi(33)
@@ -589,11 +585,9 @@ public class FlutterRenderer implements TextureRegistry {
         waitOnFence(image);
         return;
       }
-      if (!ignoringFence) {
-        // Log once per ImageTextureEntry.
-        ignoringFence = true;
-        Log.w(TAG, "ImageTextureEntry can't wait on the fence on Android < 33");
-      }
+      // Log once per ImageTextureEntry.
+      ignoringFence = true;
+      Log.w(TAG, "ImageTextureEntry can't wait on the fence on Android < 33");
     }
 
     @Override
@@ -747,11 +741,9 @@ public class FlutterRenderer implements TextureRegistry {
         waitOnFence(image);
         return;
       }
-      if (!ignoringFence) {
-        // Log once per ImageTextureEntry.
-        ignoringFence = true;
-        Log.w(TAG, "ImageTextureEntry can't wait on the fence on Android < 33");
-      }
+      // Log once per ImageTextureEntry.
+      ignoringFence = true;
+      Log.w(TAG, "ImageTextureEntry can't wait on the fence on Android < 33");
     }
 
     @Override
@@ -1051,7 +1043,7 @@ public class FlutterRenderer implements TextureRegistry {
       return width > 0 && height > 0 && devicePixelRatio > 0;
     }
 
-    public List<DisplayFeature> displayFeatures = new ArrayList<DisplayFeature>();
+    public List<DisplayFeature> displayFeatures = new ArrayList<>();
   }
 
   /**
