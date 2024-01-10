@@ -1305,6 +1305,37 @@ void main() {
   });
 
   group('$PageView handles change of controller', () {
+    final key = GlobalKey();
+
+    Widget createPageView(PageController? controller) {
+      return MaterialApp(
+        home: Scaffold(
+          body: PageView(
+            key: key,
+            controller: controller,
+            children: const <Widget>[
+              Center(child: Text('0')),
+              Center(child: Text('1')),
+              Center(child: Text('2')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    void testPageViewWithController(PageController controller, WidgetTester tester, bool controls) {
+      int curentVisiblePage() {
+        return int.parse(tester.widgetList(find.byType(Text)).whereType<Text>().first.data!);
+      }
+
+      final int initialPageInView = curentVisiblePage();
+
+      for (int i = 0; i < 3; i++) {
+        controller.jumpToPage(i);
+        expect(curentVisiblePage(), controls ? i : initialPageInView);
+      }
+    }
+
     testWidgets('null to value', (WidgetTester tester) async {
     });
 
