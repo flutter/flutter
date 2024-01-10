@@ -21,7 +21,7 @@ import '_goldens_io.dart'
 ///
 /// To enable leak tracking for an individual test file, add the line to the test `main`:
 /// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
-bool _kLeakTracking = bool.parse(Platform.environment['LEAK_TRACKING']!);
+bool _kLeakTracking = bool.parse(Platform.environment['LEAK_TRACKING'] ?? 'false');
 
 const String _kLeakTrackingDebug = String.fromEnvironment('LEAK_TRACKING');
 
