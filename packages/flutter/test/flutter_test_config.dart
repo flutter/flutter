@@ -23,17 +23,10 @@ import '_goldens_io.dart'
 /// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
 bool _kLeakTracking = bool.parse(Platform.environment['LEAK_TRACKING'] ?? 'false');
 
-const String _myVarConst = String.fromEnvironment('LEAK_TRACKING');
-String _myVarFromPlatform = Platform.environment['LEAK_TRACKING'] ?? '';
-
 /// Test configuration for each test library in this directory.
 ///
 /// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
 Future<void> testExecutable(FutureOr<void> Function() testMain) {
-  debugPrint('!!! _kLeakTracking: [$_kLeakTracking]');
-  debugPrint('!!! _myVarConst: [$_myVarConst]');
-  debugPrint('!!! _myVarFromPlatform: [$_myVarFromPlatform]');
-
   // Enable checks because there are many implementations of [RenderBox] in this
   // package can benefit from the additional validations.
   debugCheckIntrinsicSizes = true;
@@ -44,7 +37,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   // Leak tracking is off by default.
   // To enable it, follow doc for [_kLeakTracking].
-  if (_kLeakTracking == 'true') {
+  if (_kLeakTracking) {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;
@@ -54,6 +47,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
       .withIgnored(
         allNotGCed: true,
       );
+
+    // TODO(polina-c): remove print after fixing https://github.com/dart-lang/sdk/issues/54568
+    debugPrint('Leak tracking is enabled.');
   }
 
   // Enable golden file testing using Skia Gold.
