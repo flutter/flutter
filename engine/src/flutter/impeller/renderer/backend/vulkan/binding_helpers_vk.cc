@@ -70,7 +70,7 @@ static bool BindBuffers(const Bindings& bindings,
   for (const BufferAndUniformSlot& data : bindings.buffers) {
     const auto& buffer_view = data.view.resource.buffer;
 
-    auto device_buffer = buffer_view->GetDeviceBuffer(allocator);
+    auto device_buffer = buffer_view->GetDeviceBuffer();
     if (!device_buffer) {
       VALIDATION_LOG << "Failed to get device buffer for vertex binding";
       return false;

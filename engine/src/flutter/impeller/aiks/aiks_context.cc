@@ -40,13 +40,18 @@ ContentContext& AiksContext::GetContentContext() const {
   return *content_context_;
 }
 
-bool AiksContext::Render(const Picture& picture, RenderTarget& render_target) {
+bool AiksContext::Render(const Picture& picture,
+                         RenderTarget& render_target,
+                         bool reset_host_buffer) {
   if (!IsValid()) {
     return false;
   }
 
   if (picture.pass) {
     return picture.pass->Render(*content_context_, render_target);
+  }
+  if (reset_host_buffer) {
+    content_context_->GetTransientsBuffer().Reset();
   }
 
   return true;

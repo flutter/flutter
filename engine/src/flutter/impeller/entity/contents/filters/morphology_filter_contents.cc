@@ -75,7 +75,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
 
   ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
                                                  RenderPass& pass) {
-    auto& host_buffer = pass.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsBuffer();
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.AddVertices({

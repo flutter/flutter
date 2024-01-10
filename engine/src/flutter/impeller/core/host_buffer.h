@@ -6,20 +6,29 @@
 #define FLUTTER_IMPELLER_CORE_HOST_BUFFER_H_
 
 #include <algorithm>
+#include <array>
+#include <functional>
 #include <memory>
 #include <string>
 #include <type_traits>
 
-#include "impeller/base/allocation.h"
 #include "impeller/core/buffer.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/platform.h"
 
 namespace impeller {
 
-class HostBuffer final : public Buffer {
+/// Approximately the same size as the max frames in flight.
+static const constexpr size_t kHostBufferArenaSize = 3u;
+
+/// The host buffer class manages one more 1024 Kb blocks of device buffer
+/// allocations.
+///
+/// These are reset per-frame.
+class HostBuffer {
  public:
-  static std::shared_ptr<HostBuffer> Create();
+  static std::shared_ptr<HostBuffer> Create(
+      const std::shared_ptr<Allocator>& allocator);
 
   // |Buffer|
   virtual ~HostBuffer();
@@ -114,48 +123,51 @@ class HostBuffer final : public Buffer {
   ///        reused.
   void Reset();
 
-  //----------------------------------------------------------------------------
-  /// @brief Returns the capacity of the HostBuffer in memory in bytes.
-  size_t GetSize() const;
+  /// Test only internal state.
+  struct TestStateQuery {
+    size_t current_frame;
+    size_t current_buffer;
+    size_t total_buffer_count;
+  };
 
-  //----------------------------------------------------------------------------
-  /// @brief Returns the size of the currently allocated HostBuffer memory in
-  ///        bytes.
-  size_t GetLength() const;
+  /// @brief Retrieve internal buffer state for test expectations.
+  TestStateQuery GetStateForTest();
 
  private:
-  struct HostBufferState : public Buffer, public Allocation {
-    std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
-        Allocator& allocator) const override;
+  struct HostBufferState {
+    [[nodiscard]] std::tuple<uint8_t*, Range, std::shared_ptr<DeviceBuffer>>
+    Emplace(const void* buffer, size_t length);
 
-    [[nodiscard]] std::pair<uint8_t*, Range> Emplace(const void* buffer,
-                                                     size_t length);
+    std::tuple<uint8_t*, Range, std::shared_ptr<DeviceBuffer>>
+    Emplace(size_t length, size_t align, const EmplaceProc& cb);
 
-    std::pair<uint8_t*, Range> Emplace(size_t length,
-                                       size_t align,
-                                       const EmplaceProc& cb);
-
-    std::pair<uint8_t*, Range> Emplace(const void* buffer,
-                                       size_t length,
-                                       size_t align);
+    std::tuple<uint8_t*, Range, std::shared_ptr<DeviceBuffer>>
+    Emplace(const void* buffer, size_t length, size_t align);
 
     void Reset();
 
-    mutable std::shared_ptr<DeviceBuffer> device_buffer;
-    mutable size_t device_buffer_generation = 0u;
-    size_t generation = 1u;
+    size_t GetLength() const { return offset; }
+
+    void MaybeCreateNewBuffer(size_t required_size);
+
+    std::shared_ptr<DeviceBuffer> GetCurrentBuffer() {
+      return device_buffers[frame_index][current_buffer];
+    }
+
+    std::shared_ptr<Allocator> allocator;
+    std::array<std::vector<std::shared_ptr<DeviceBuffer>>, kHostBufferArenaSize>
+        device_buffers;
+    size_t current_buffer = 0u;
+    size_t offset = 0u;
+    size_t frame_index = 0u;
     std::string label;
   };
 
   std::shared_ptr<HostBufferState> state_ = std::make_shared<HostBufferState>();
 
-  // |Buffer|
-  std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
-      Allocator& allocator) const override;
-
   [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
 
-  HostBuffer();
+  explicit HostBuffer(const std::shared_ptr<Allocator>& allocator);
 
   HostBuffer(const HostBuffer&) = delete;
 

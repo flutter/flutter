@@ -14,19 +14,9 @@ RenderPass::RenderPass(std::weak_ptr<const Context> context,
       has_stencil_attachment_(target.GetStencilAttachment().has_value()),
       render_target_size_(target.GetRenderTargetSize()),
       render_target_(target),
-      transients_buffer_(),
-      orthographic_(Matrix::MakeOrthographic(render_target_size_)) {
-  auto strong_context = context_.lock();
-  FML_DCHECK(strong_context);
-  transients_buffer_ = strong_context->GetHostBufferPool().Grab();
-}
+      orthographic_(Matrix::MakeOrthographic(render_target_size_)) {}
 
-RenderPass::~RenderPass() {
-  auto strong_context = context_.lock();
-  if (strong_context) {
-    strong_context->GetHostBufferPool().Recycle(transients_buffer_);
-  }
-}
+RenderPass::~RenderPass() {}
 
 SampleCount RenderPass::GetSampleCount() const {
   return sample_count_;
@@ -52,15 +42,10 @@ const Matrix& RenderPass::GetOrthographicTransform() const {
   return orthographic_;
 }
 
-HostBuffer& RenderPass::GetTransientsBuffer() {
-  return *transients_buffer_;
-}
-
 void RenderPass::SetLabel(std::string label) {
   if (label.empty()) {
     return;
   }
-  transients_buffer_->SetLabel(SPrintF("%s Transients", label.c_str()));
   OnSetLabel(std::move(label));
 }
 

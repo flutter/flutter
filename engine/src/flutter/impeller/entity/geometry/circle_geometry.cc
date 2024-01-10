@@ -41,7 +41,7 @@ GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
   auto generator =
       tessellator->StrokedCircle(transform, center_, radius_, half_width);
 
-  return ComputePositionGeometry(generator, entity, pass);
+  return ComputePositionGeometry(renderer, generator, entity, pass);
 }
 
 // |Geometry|
@@ -65,7 +65,8 @@ GeometryResult CircleGeometry::GetPositionUVBuffer(
   auto generator =
       tessellator->StrokedCircle(transform, center_, radius_, half_width);
 
-  return ComputePositionUVGeometry(generator, uv_transform, entity, pass);
+  return ComputePositionUVGeometry(renderer, generator, uv_transform, entity,
+                                   pass);
 }
 
 GeometryVertexType CircleGeometry::GetVertexType() const {
