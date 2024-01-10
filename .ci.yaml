@@ -438,7 +438,6 @@ targets:
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
-    bringup: false
     presubmit: false
     recipe: firebaselab/firebaselab
     timeout: 60
@@ -3673,6 +3672,7 @@ targets:
 
   - name: Mac_x64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3843,6 +3843,7 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -4273,6 +4274,7 @@ targets:
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4377,6 +4379,7 @@ targets:
 
   - name: Mac_x64 ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -4472,6 +4475,7 @@ targets:
 
   - name: Mac_x64 macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -4714,6 +4718,7 @@ targets:
 
   - name: Mac_x64 hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
