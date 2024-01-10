@@ -32,7 +32,6 @@ class StepStyleExample extends StatefulWidget {
    State<StepStyleExample> createState() => _StepStyleExampleState();
 }
 
-
 class _StepStyleExampleState extends State<StepStyleExample> {
   final StepStyle _stepStyle = StepStyle(
     connectorThickness: 10,

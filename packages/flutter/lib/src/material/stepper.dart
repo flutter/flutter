@@ -534,7 +534,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     color ??= _isDark() ? _kErrorDark : _kErrorLight;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      margin: _stepIconMargin ?? const EdgeInsets.symmetric(vertical: 8.0),
       width: _stepIconWidth ?? _kStepSize,
       height: _stepIconHeight ?? _kStepSize,
       child: Center(
@@ -776,13 +776,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildVerticalBody(int index) {
     final double? marginLeft = _stepIconMargin?.resolve(TextDirection.ltr).left;
+    final double? marginRight = _stepIconMargin?.resolve(TextDirection.ltr).right;
+    final double? additionalMarginLeft = marginLeft != null ? marginLeft / 2.0 : null;
+    final double? additionalMarginRight = marginRight != null ? marginRight / 2.0 : null;
 
     return Stack(
       children: <Widget>[
         PositionedDirectional(
-          // Adjusts the left side of the line so that it is centered when
-          // [StepperType.error] is displayed.
-          start: 24.0 + (marginLeft ?? 0.0),
+          // When use margin affects the left or right side of the child, we
+          // need to add half of the margin to the start or end of the child
+          // respectively to get the correct positioning.
+          start: 24.0 + (additionalMarginLeft ?? 0.0)  + (additionalMarginRight ?? 0.0),
           top: 0.0,
           bottom: 0.0,
           child: SizedBox(
@@ -804,8 +808,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           firstChild: Container(height: 0.0),
           secondChild: Container(
             margin: EdgeInsetsDirectional.only(
-              // Adjust the left side of the content so that it is aligned with
-              // the labels of the previous and next steps.
+              // Adjust [controlsBuilder] padding so that the content is
+              // centered vertically.
               start: 60.0 + (marginLeft ?? 0.0),
               end: 24.0,
               bottom: 24.0,
@@ -869,7 +873,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
-               SizedBox(
+              SizedBox(
                 height: _isLabel() ? 104.0 : 72.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

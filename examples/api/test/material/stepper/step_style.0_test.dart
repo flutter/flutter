@@ -14,7 +14,6 @@ void main() {
 
     expect(find.widgetWithText(AppBar, 'Step Style Example'), findsOneWidget);
 
-
     final Stepper stepper = tester.widget<Stepper>(find.byType(Stepper));
     // Check that the stepper has the correct properties.
     expect(stepper.type, StepperType.horizontal);
