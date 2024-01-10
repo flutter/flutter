@@ -1020,6 +1020,7 @@ class _TrianglePainter extends CustomPainter {
 ///   ),
 /// )
 /// ```
+///
 /// {@tool dartpad}
 /// An example that uses [StepStyle] to customize the appearance of each [Step] in a [Stepper].
 ///
