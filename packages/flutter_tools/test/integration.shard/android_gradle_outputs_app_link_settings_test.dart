@@ -188,6 +188,7 @@ void main() {
     expect(fileDump.existsSync(), true);
     final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
     expect(json['applicationId'], 'com.example.testapp');
+    expect(json['deeplinkingFlagEnabled'], true);
     final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
     expect(deeplinks.length, 5);
     testDeeplink(deeplinks[0], 'http', 'pure-http.com', '.*');
@@ -198,7 +199,7 @@ void main() {
   });
 
   testWithoutContext(
-      'gradle task outputs<mode>AppLinkSettings works when a project does not have app link', () async {
+      'gradle task outputs<mode>AppLinkSettings works when a project does not have app link and the flutter_deeplinking_enabled flag', () async {
     // Create a new flutter project.
     final String flutterBin =
     fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -233,6 +234,7 @@ void main() {
     expect(fileDump.existsSync(), true);
     final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
     expect(json['applicationId'], 'com.example.testapp');
+    expect(json['deeplinkingFlagEnabled'], false);
     final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
     expect(deeplinks.length, 0);
   });

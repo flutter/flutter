@@ -841,6 +841,24 @@ class FlutterPlugin implements Plugin<Project> {
                                 def schemes = [] as Set<String>
                                 def hosts = [] as Set<String>
                                 def paths = [] as Set<String>
+                                def intentFilterCheck = new IntentFilterCheck()
+
+                                if (appLinkIntent.attributes().find { it.key == 'android:autoVerify' }?.value == 'true') {
+                                    intentFilterCheck.hasAutoVerify = true
+                                }
+                                appLinkIntent.'action'.each { action ->
+                                    if (action.attributes().find { it.key == 'android:name' }?.value == 'android.intent.action.VIEW') {
+                                        intentFilterCheck.hasActionView = true
+                                    }
+                                }
+                                appLinkIntent.'category'.each { category ->
+                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.DEFAULT') {
+                                        intentFilterCheck.hasDefaultCategory = true
+                                    }
+                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.BROWSABLE') {
+                                        intentFilterCheck.hasBrowsableCategory = true
+                                    }
+                                }
                                 appLinkIntent.data.each { data ->
                                     data.attributes().each { entry ->
                                         if (entry.key instanceof QName) {
@@ -869,28 +887,12 @@ class FlutterPlugin implements Plugin<Project> {
                                 schemes.each {scheme ->
                                     hosts.each { host ->
                                         if (!paths) {
-                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*"))
+                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*", intentFilterCheck: intentFilterCheck))
                                         } else {
                                             paths.each { path ->
-                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path))
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path, intentFilterCheck: intentFilterCheck))
                                             }
                                         }
-                                    }
-                                }
-                                if (appLinkIntent.attributes().find { it.key == 'android:autoVerify' }?.value == 'true') {
-                                    appLinkSettings.hasAutoVerify = true
-                                }
-                                appLinkIntent.'action'.each { action ->
-                                    if (action.attributes().find { it.key == 'android:name' }?.value == 'android.intent.action.VIEW') {
-                                        appLinkSettings.hasActionView = true
-                                    }
-                                }
-                                appLinkIntent.'category'.each { category ->
-                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.DEFAULT') {
-                                        appLinkSettings.hasDefaultCategory = true
-                                    }
-                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.BROWSABLE') {
-                                        appLinkSettings.hasBrowsableCategory = true
                                     }
                                 }
                             }
@@ -1367,19 +1369,21 @@ class FlutterPlugin implements Plugin<Project> {
 }
 
 class AppLinkSettings {
-
     String applicationId
     Set<Deeplink> deeplinks
     boolean deeplinkingFlagEnabled
+}
+
+class IntentFilterCheck {
     boolean hasAutoVerify
     boolean hasActionView
     boolean hasDefaultCategory
     boolean hasBrowsableCategory
-
 }
 
 class Deeplink {
     String scheme, host, path
+    IntentFilterCheck intentFilterCheck
     boolean equals(o) {
         if (o == null)
             throw new NullPointerException()
