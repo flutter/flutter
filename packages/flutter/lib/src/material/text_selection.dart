@@ -26,7 +26,7 @@ const double _kToolbarContentDistance = 8.0;
 /// [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `MaterialTextSelectionControls` instead. '
-  'This feature was deprecated after v3.16.6.',
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls with TextSelectionHandleControls {
 }
@@ -268,7 +268,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
 /// Text selection handle controls that follow the Material Design specification.
 @Deprecated(
   'Use `materialTextSelectionControls` instead. '
-  'This feature was deprecated after v3.16.6.',
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 final TextSelectionControls materialTextSelectionHandleControls = MaterialTextSelectionHandleControls();
 

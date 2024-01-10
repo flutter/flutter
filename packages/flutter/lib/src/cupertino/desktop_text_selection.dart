@@ -43,7 +43,7 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 /// Text selection handle controls that follow MacOS design conventions.
 @Deprecated(
   'Use `cupertinoDesktopTextSelectionControls` instead. '
-  'This feature was deprecated after v3.16.6.',
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 final TextSelectionControls cupertinoDesktopTextSelectionHandleControls =
     _CupertinoDesktopTextSelectionHandleControls();

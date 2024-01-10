@@ -3372,7 +3372,7 @@ enum LiveTextInputStatus {
 /// to leave that to [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `TextSelectionControls` instead. '
-  'This feature was deprecated after v3.16.6.',
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 mixin TextSelectionHandleControls on TextSelectionControls {
 }

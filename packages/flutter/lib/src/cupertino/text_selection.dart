@@ -60,7 +60,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
 /// [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `CupertinoTextSelectionControls` instead. '
-  'This feature was deprecated after v3.16.6.',
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 class CupertinoTextSelectionHandleControls extends CupertinoTextSelectionControls with TextSelectionHandleControls {
 }
@@ -158,7 +158,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 /// Text selection handle controls that follow iOS design conventions.
 @Deprecated(
   'Use `cupertinoTextSelectionControls` instead. '
-  'This feature was deprecated after v3.16.6.',
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 final TextSelectionControls cupertinoTextSelectionHandleControls =
     CupertinoTextSelectionHandleControls();

@@ -45,7 +45,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
 /// conventions.
 @Deprecated(
   'Use `desktopTextSelectionControls` instead. '
-  'This feature was deprecated after v3.16.6.',
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 final TextSelectionControls desktopTextSelectionHandleControls =
     _DesktopTextSelectionHandleControls();
