@@ -721,12 +721,23 @@ TextAffinity? _toTextAffinity(String? affinity) {
   return null;
 }
 
-/// The state of a floating cursor drag on an iOS soft keyboard.
+/// The state of a "floating cursor" drag on an iOS soft keyboard.
 ///
-/// The floating cursor is an iOS feature in which long pressing and dragging on
-/// the spacebar of the soft keyboard causes the cursor in the text field to
-/// move along with the drag gesture. It's used to precisely position the cursor
-/// in some editable text.
+/// The "floating cursor" cursor-positioning mode is an iOS feature used to
+/// precisely position the caret in some editable text. When the user
+/// long-presses the spacebar on the iOS virtual keyboard, iOS enters floating
+/// cursor mode where the whole keyboard becomes a trackpad. In this mode,
+/// there are two visible cursors. One, the floating cursor, hovers over the
+/// text, following the user's horizontal movements exactly and snapping to
+/// lines vertically. The other, the placeholder cursor, is a "shadow" that also
+/// snaps to the actual location where the cursor will go horizontally when the
+/// user releases the trackpad.
+///
+/// The floating cursor renders over the text field, while the placeholder
+/// cursor is a faint shadow of the cursor rendered in the text field in the
+/// location between characters where the cursor will drop into when released.
+/// The placeholder cursor is a faint vertical bar, while the floating cursor
+/// has the same appearance as a normal cursor (a blue vertical bar).
 ///
 /// This feature works out-of-the-box with Flutter. Support is built into
 /// [EditableText].
@@ -734,9 +745,7 @@ TextAffinity? _toTextAffinity(String? affinity) {
 /// See also:
 ///
 ///  * [EditableText.backgroundCursorColor], which configures the color of the
-///    placeholder cursor that appear in the original cursor location while the
-///    floating cursor is being dragged.
-///  * <https://developer.apple.com/documentation/uikit/uitextinput/1614557-beginfloatingcursor>
+///    placeholder cursor while the floating cursor is being dragged.
 enum FloatingCursorDragState {
   /// A user has just activated a floating cursor by long pressing on the
   /// spacebar.
