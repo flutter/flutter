@@ -537,6 +537,7 @@ targets:
 
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -3280,6 +3281,7 @@ targets:
 
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -3292,6 +3294,7 @@ targets:
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -5062,6 +5065,10 @@ targets:
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5120,6 +5127,10 @@ targets:
       subshard: misc
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - examples/api/**
@@ -5172,6 +5183,10 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5939,6 +5954,7 @@ targets:
 
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
