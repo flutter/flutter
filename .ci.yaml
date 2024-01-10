@@ -2571,6 +2571,7 @@ targets:
 
   # Samsung A02, Skia
   - name: Linux_samsung_a02 new_gallery__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/141246
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
