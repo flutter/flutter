@@ -89,7 +89,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
                             outer_blur_factor = outer_blur_factor_, sigma](
                                const ContentContext& renderer,
                                const Entity& entity, RenderPass& pass) -> bool {
-    auto& host_buffer = pass.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsBuffer();
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     auto origin = coverage.GetOrigin();

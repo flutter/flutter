@@ -881,13 +881,13 @@ TEST_P(EntityTest, BlendingModeOptions) {
       options.primitive_type = PrimitiveType::kTriangle;
       cmd.pipeline = context.GetSolidFillPipeline(options);
       cmd.BindVertices(
-          vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
+          vtx_builder.CreateVertexBuffer(context.GetTransientsBuffer()));
 
       VS::FrameInfo frame_info;
       frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
       frame_info.color = color.Premultiply();
-      VS::BindFrameInfo(cmd,
-                        pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+      VS::BindFrameInfo(
+          cmd, context.GetTransientsBuffer().EmplaceUniform(frame_info));
 
       return pass.AddCommand(std::move(cmd));
     };

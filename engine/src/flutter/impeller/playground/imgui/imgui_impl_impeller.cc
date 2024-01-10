@@ -9,6 +9,8 @@
 #include <memory>
 #include <vector>
 
+#include "impeller/core/host_buffer.h"
+#include "impeller/core/platform.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/playground/imgui/imgui_raster.frag.h"
@@ -123,6 +125,8 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
   if (draw_data->CmdListsCount == 0) {
     return;  // Nothing to render.
   }
+  auto host_buffer = impeller::HostBuffer::Create(
+      render_pass.GetContext().lock()->GetResourceAllocator());
 
   using VS = impeller::ImguiRasterVertexShader;
   using FS = impeller::ImguiRasterFragmentShader;
@@ -156,8 +160,7 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
   VS::UniformBuffer uniforms;
   uniforms.mvp = impeller::Matrix::MakeOrthographic(display_rect.GetSize())
                      .Translate(-display_rect.GetOrigin());
-  auto vtx_uniforms =
-      render_pass.GetTransientsBuffer().EmplaceUniform(uniforms);
+  auto vtx_uniforms = host_buffer->EmplaceUniform(uniforms);
 
   size_t vertex_buffer_offset = 0;
   size_t index_buffer_offset = total_vtx_bytes;
@@ -269,4 +272,5 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
     vertex_buffer_offset += draw_list_vtx_bytes;
     index_buffer_offset += draw_list_idx_bytes;
   }
+  host_buffer->Reset();
 }

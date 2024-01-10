@@ -9,24 +9,17 @@
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/host_buffer.h"
-#include "impeller/renderer/blit_command.h"
 
 namespace impeller {
 
-BlitPass::BlitPass() : transients_buffer_(HostBuffer::Create()) {}
+BlitPass::BlitPass() {}
 
 BlitPass::~BlitPass() = default;
-
-HostBuffer& BlitPass::GetTransientsBuffer() {
-  return *transients_buffer_;
-}
 
 void BlitPass::SetLabel(std::string label) {
   if (label.empty()) {
     return;
   }
-  transients_buffer_->SetLabel(SPrintF("%s Transients", label.c_str()));
   OnSetLabel(std::move(label));
 }
 

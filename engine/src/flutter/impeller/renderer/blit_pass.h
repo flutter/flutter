@@ -6,11 +6,9 @@
 #define FLUTTER_IMPELLER_RENDERER_BLIT_PASS_H_
 
 #include <string>
-#include <variant>
 
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/texture.h"
-#include "impeller/renderer/blit_command.h"
 
 namespace impeller {
 
@@ -32,8 +30,6 @@ class BlitPass {
   virtual bool IsValid() const = 0;
 
   void SetLabel(std::string label);
-
-  HostBuffer& GetTransientsBuffer();
 
   //----------------------------------------------------------------------------
   /// @brief      Record a command to copy the contents of one texture to
@@ -128,8 +124,6 @@ class BlitPass {
       const std::shared_ptr<Allocator>& transients_allocator) const = 0;
 
  protected:
-  std::shared_ptr<HostBuffer> transients_buffer_;
-
   explicit BlitPass();
 
   virtual void OnSetLabel(std::string label) = 0;

@@ -15,6 +15,7 @@
 #include "flutter/fml/status_or.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/host_buffer.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/pipeline.h"
@@ -729,6 +730,12 @@ class ContentContext {
     return render_target_cache_;
   }
 
+  /// @brief Retrieve the currnent host buffer for transient storage.
+  ///
+  /// This is only safe to use from the raster threads. Other threads should
+  /// allocate their own device buffers.
+  HostBuffer& GetTransientsBuffer() const { return *host_buffer_; }
+
  private:
   std::shared_ptr<Context> context_;
   std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_;
@@ -940,6 +947,7 @@ class ContentContext {
   std::shared_ptr<scene::SceneContext> scene_context_;
 #endif  // IMPELLER_ENABLE_3D
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
+  std::shared_ptr<HostBuffer> host_buffer_;
   bool wireframe_ = false;
 
   ContentContext(const ContentContext&) = delete;

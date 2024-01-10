@@ -72,7 +72,7 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
         {Point(0, 1)},
         {Point(1, 1)},
     });
-    auto& host_buffer = pass.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsBuffer();
     cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
 
     VS::FrameInfo frame_info;
