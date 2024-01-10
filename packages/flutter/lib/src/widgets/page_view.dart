@@ -860,7 +860,7 @@ class _PageViewState extends State<PageView> {
   }
 
 
-  void initController() {
+  void _initController() {
     _controller = widget.controller ?? PageController();
   }
 
