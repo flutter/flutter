@@ -24,7 +24,7 @@ bool isLeakTrackingEnabled() {
   if (kIsWeb) {
     return false;
   }
-  // The values can be different: https://github.com/dart-lang/sdk/issues/54568
+  // The values can be different, one is compile time, another is run time.
   return const bool.fromEnvironment('LEAK_TRACKING') || (bool.tryParse(Platform.environment['LEAK_TRACKING'] ?? '')  ?? false);
 }
 
@@ -54,8 +54,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     // Print is here in spite of
     // https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#only-log-actionable-messages-to-the-console
     // to provide a way to detect if the env variable is passed as expected on bots, that is not obvious.
-    // Sometimes the bot's environment contains `LEAK_TRACKING=true` but the value is not passed to the test.
-    // https://github.com/dart-lang/sdk/issues/54568
+    // It can be removed after fixing https://github.com/flutter/flutter/issues/141299.
     debugPrint('Leak tracking is enabled.');
   }
 
