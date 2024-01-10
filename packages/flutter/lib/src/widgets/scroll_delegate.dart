@@ -895,7 +895,7 @@ abstract class TwoDimensionalChildDelegate extends ChangeNotifier {
   /// widgets have changed, a new delegate must be provided, and the new
   /// delegate's [shouldRebuild] method must return true. Alternatively,
   /// calling [notifyListeners] will allow the same delegate to be used.
-  Widget? build(BuildContext context, ChildVicinity vicinity);
+  Widget? build(BuildContext context, covariant ChildVicinity vicinity);
 
   /// Called whenever a new instance of the child delegate class is
   /// provided.
