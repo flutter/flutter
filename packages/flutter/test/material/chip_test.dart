@@ -333,7 +333,7 @@ void main() {
     expect(getIconData(tester).size, 18);
 
     TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
-    expect(labelStyle.color, textTheme.labelLarge?.color);
+    expect(labelStyle.color, lightTheme.colorScheme.onSurfaceVariant);
     expect(labelStyle.fontFamily, textTheme.labelLarge?.fontFamily);
     expect(labelStyle.fontFamilyFallback, textTheme.labelLarge?.fontFamilyFallback);
     expect(labelStyle.fontFeatures, textTheme.labelLarge?.fontFeatures);
@@ -361,7 +361,7 @@ void main() {
     expect(getIconData(tester).size, 18);
 
     labelStyle = getLabelStyle(tester, 'Chip A').style;
-    expect(labelStyle.color, textTheme.labelLarge?.color);
+    expect(labelStyle.color, darkTheme.colorScheme.onSurfaceVariant);
     expect(labelStyle.fontFamily, textTheme.labelLarge?.fontFamily);
     expect(labelStyle.fontFamilyFallback, textTheme.labelLarge?.fontFamilyFallback);
     expect(labelStyle.fontFeatures, textTheme.labelLarge?.fontFeatures);
