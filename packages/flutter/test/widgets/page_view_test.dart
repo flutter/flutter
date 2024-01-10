@@ -1305,7 +1305,7 @@ void main() {
   });
 
   group('$PageView handles change of controller', () {
-    final key = GlobalKey();
+    final GlobalKey key = GlobalKey();
 
     Widget createPageView(PageController? controller) {
       return MaterialApp(
