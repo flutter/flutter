@@ -164,7 +164,7 @@ void test(
   Map<String, dynamic>? onPlatform,
   int? retry,
 }) {
-  _configureTearDownForTestFile();
+  _maybeConfigureTearDownForTestFile();
   _declarer.test(
     description.toString(),
     body,
@@ -188,7 +188,7 @@ void test(
 /// of running the group's tests.
 @isTestGroup
 void group(Object description, void Function() body, { dynamic skip, int? retry }) {
-  _configureTearDownForTestFile();
+  _maybeConfigureTearDownForTestFile();
   _declarer.group(description.toString(), body, skip: skip, retry: retry);
 }
 
@@ -204,7 +204,7 @@ void group(Object description, void Function() body, { dynamic skip, int? retry 
 /// Each callback at the top level or in a given group will be run in the order
 /// they were declared.
 void setUp(dynamic Function() body) {
-  _configureTearDownForTestFile();
+  _maybeConfigureTearDownForTestFile();
   _declarer.setUp(body);
 }
 
@@ -222,7 +222,7 @@ void setUp(dynamic Function() body) {
 ///
 /// See also [addTearDown], which adds tear-downs to a running test.
 void tearDown(dynamic Function() body) {
-  _configureTearDownForTestFile();
+  _maybeConfigureTearDownForTestFile();
   _declarer.tearDown(body);
 }
 
@@ -240,7 +240,7 @@ void tearDown(dynamic Function() body) {
 /// prefer [setUp], and only use [setUpAll] if the callback is prohibitively
 /// slow.
 void setUpAll(dynamic Function() body) {
-  _configureTearDownForTestFile();
+  _maybeConfigureTearDownForTestFile();
   _declarer.setUpAll(body);
 }
 
@@ -256,21 +256,27 @@ void setUpAll(dynamic Function() body) {
 /// prefer [tearDown], and only use [tearDownAll] if the callback is
 /// prohibitively slow.
 void tearDownAll(dynamic Function() body) {
-  _configureTearDownForTestFile();
+  _maybeConfigureTearDownForTestFile();
   _declarer.tearDownAll(body);
 }
 
 bool _isTearDownForTestFileConfigured = false;
-/// Configures `tearDownAll` after all user defined `tearDownAll` in the test file.
+
+/// If needed, configures `tearDownAll` after all user defined `tearDownAll` in the test file.
 ///
 /// This function should be invoked in all functions, that may be invoked by user in the test file,
 /// to be invoked before any other `tearDownAll`.
-void _configureTearDownForTestFile() {
-  if (_isTearDownForTestFileConfigured) {
+void _maybeConfigureTearDownForTestFile() {
+  if (_isTearDownForTestFileConfigured || !_shouldConfigureTearDownForTestFile()) {
     return;
   }
   _declarer.tearDownAll(_tearDownForTestFile);
   _isTearDownForTestFileConfigured = true;
+}
+
+/// Returns true if tear down for the test file needs to be configured.
+bool _shouldConfigureTearDownForTestFile() {
+  return LeakTesting.enabled;
 }
 
 /// Tear down that should happen after all user defined tear down.

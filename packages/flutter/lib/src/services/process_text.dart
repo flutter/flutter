@@ -113,22 +113,27 @@ class DefaultProcessTextService implements ProcessTextService {
 
   @override
   Future<List<ProcessTextAction>> queryTextActions() async {
-    final List<ProcessTextAction> textActions = <ProcessTextAction>[];
-    final Map<Object?, Object?>? rawResults;
+    final Map<Object?, Object?> rawResults;
 
     try {
-      rawResults = await _processTextChannel.invokeMethod(
+      final Map<Object?, Object?>? result =
+          await _processTextChannel.invokeMethod(
         'ProcessText.queryTextActions',
-      ) as Map<Object?, Object?>;
+      ) as Map<Object?, Object?>?;
+
+      if (result == null) {
+        return <ProcessTextAction>[];
+      }
+
+      rawResults = result;
     } catch (e) {
-      return textActions;
+      return <ProcessTextAction>[];
     }
 
-    for (final Object? id in rawResults.keys) {
-      textActions.add(ProcessTextAction(id! as String, rawResults[id]! as String));
-    }
-
-    return textActions;
+    return <ProcessTextAction>[
+      for (final Object? id in rawResults.keys)
+        ProcessTextAction(id! as String, rawResults[id]! as String),
+    ];
   }
 
   @override
