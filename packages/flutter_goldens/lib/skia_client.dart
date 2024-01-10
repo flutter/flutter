@@ -592,8 +592,8 @@ class SkiaGoldClient {
     return _isBrowserTest && platform.environment[_kWebRendererKey] == 'canvaskit';
   }
 
-  String get _isImpeller {
-    return (platform.environment[_kImpellerKey] != null).toString();
+  bool get _isImpeller {
+    return (platform.environment[_kImpellerKey] != null);
   }
 
   String get _browserKey {
@@ -614,7 +614,8 @@ class SkiaGoldClient {
       'Platform' : platform.operatingSystem,
       'name' : testName,
       'source_type' : 'flutter',
-      'impeller': _isImpeller,
+      if (_isImpeller)
+        'impeller': 'swiftshader',
     };
     final String jsonTrace = json.encode(keys);
     final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
