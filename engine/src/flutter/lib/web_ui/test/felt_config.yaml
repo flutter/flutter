@@ -42,59 +42,60 @@ test-sets:
   - name: ui
     directory: ui
 
-  # This just has a single test that makes sure the skwasm stub renderer is
-  # included when compiling to JS
-  - name: skwasm_stub
-    directory: skwasm_stub
+  # Tests for fallback functionality between build variants
+  - name: fallbacks
+    directory: fallbacks
 
 test-bundles:
   - name: dart2js-html-engine
     test-set: engine
-    compile-config: dart2js-html
+    compile-configs: dart2js-html
 
   - name: dart2js-html-html
     test-set: html
-    compile-config: dart2js-html
+    compile-configs: dart2js-html
 
   - name: dart2js-html-ui
     test-set: ui
-    compile-config: dart2js-html
+    compile-configs: dart2js-html
 
   - name: dart2js-canvaskit-canvaskit
     test-set: canvaskit
-    compile-config: dart2js-canvaskit
+    compile-configs: dart2js-canvaskit
 
   - name: dart2js-canvaskit-ui
     test-set: ui
-    compile-config: dart2js-canvaskit
-
-  - name: dart2js-skwasm-skwasm_stub
-    test-set: skwasm_stub
-    compile-config: dart2js-skwasm
+    compile-configs: dart2js-canvaskit
 
   - name: dart2wasm-html-engine
     test-set: engine
-    compile-config: dart2wasm-html
+    compile-configs: dart2wasm-html
 
   - name: dart2wasm-html-html
     test-set: html
-    compile-config: dart2wasm-html
+    compile-configs: dart2wasm-html
 
   - name: dart2wasm-html-ui
     test-set: ui
-    compile-config: dart2wasm-html
+    compile-configs: dart2wasm-html
 
   - name: dart2wasm-canvaskit-canvaskit
     test-set: canvaskit
-    compile-config: dart2wasm-canvaskit
+    compile-configs: dart2wasm-canvaskit
 
   - name: dart2wasm-canvaskit-ui
     test-set: ui
-    compile-config: dart2wasm-canvaskit
+    compile-configs: dart2wasm-canvaskit
 
   - name: dart2wasm-skwasm-ui
     test-set: ui
-    compile-config: dart2wasm-skwasm
+    compile-configs: dart2wasm-skwasm
+
+  - name: fallbacks
+    test-set: fallbacks
+    compile-configs:
+      - dart2wasm-skwasm
+      - dart2js-canvaskit
 
 run-configs:
   - name: chrome
@@ -143,10 +144,6 @@ test-suites:
     test-bundle: dart2js-canvaskit-ui
     run-config: chrome
     artifact-deps: [ canvaskit_chromium ]
-
-  - name: chrome-dart2js-skwasm-skwasm_stub
-    test-bundle: dart2js-skwasm-skwasm_stub
-    run-config: chrome
 
   - name: chrome-full-dart2js-canvaskit-canvaskit
     test-bundle: dart2js-canvaskit-canvaskit
@@ -269,4 +266,19 @@ test-suites:
   - name: chrome-full-dart2wasm-canvaskit-ui
     test-bundle: dart2wasm-canvaskit-ui
     run-config: chrome-full
+    artifact-deps: [ canvaskit ]
+
+  - name: chrome-fallbacks
+    test-bundle: fallbacks
+    run-config: chrome
+    artifact-deps: [ canvaskit, skwasm ]
+
+  - name: firefox-fallbacks
+    test-bundle: fallbacks
+    run-config: firefox
+    artifact-deps: [ canvaskit ]
+
+  - name: safari-fallbacks
+    test-bundle: fallbacks
+    run-config: safari
     artifact-deps: [ canvaskit ]

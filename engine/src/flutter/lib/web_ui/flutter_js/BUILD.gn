@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/build/esbuild/esbuild.gni")
+import("//flutter/shell/version/version.gni")
 import("sources.gni")
 
 group("flutter_js") {

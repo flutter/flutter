@@ -5877,7 +5877,16 @@ ORIGIN: ../../../flutter/lib/ui/window/pointer_data_packet_converter.cc + ../../
 ORIGIN: ../../../flutter/lib/ui/window/pointer_data_packet_converter.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/window/viewport_metrics.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/window/viewport_metrics.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/base_uri.js + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/browser_environment.js + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/canvaskit_loader.js + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/entrypoint_loader.js + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/flutter.js + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/instantiate_wasm.js + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/loader.js + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/service_worker_loader.js + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/skwasm_loader.js + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/flutter_js/src/trusted_types.js + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/annotations.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/canvas.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/channel_buffers.dart + ../../../flutter/LICENSE
@@ -8700,7 +8709,17 @@ FILE: ../../../flutter/lib/ui/window/pointer_data_packet_converter.cc
 FILE: ../../../flutter/lib/ui/window/pointer_data_packet_converter.h
 FILE: ../../../flutter/lib/ui/window/viewport_metrics.cc
 FILE: ../../../flutter/lib/ui/window/viewport_metrics.h
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/base_uri.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/browser_environment.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/canvaskit_loader.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/entrypoint_loader.js
 FILE: ../../../flutter/lib/web_ui/flutter_js/src/flutter.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/instantiate_wasm.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/loader.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/service_worker_loader.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/skwasm_loader.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/trusted_types.js
+FILE: ../../../flutter/lib/web_ui/flutter_js/src/types.d.ts
 FILE: ../../../flutter/lib/web_ui/lib/annotations.dart
 FILE: ../../../flutter/lib/web_ui/lib/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/channel_buffers.dart

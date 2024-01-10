@@ -179,28 +179,6 @@
       }
     },
     {
-      "name": "web_tests/test_bundles/dart2js-skwasm-skwasm_stub",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "generators": {
-        "tasks": [
-          {
-            "name": "compile bundle dart2js-skwasm-skwasm_stub",
-            "parameters": [
-              "test",
-              "--compile",
-              "--bundle=dart2js-skwasm-skwasm_stub"
-            ],
-            "scripts": [
-              "flutter/lib/web_ui/dev/felt"
-            ]
-          }
-        ]
-      }
-    },
-    {
       "name": "web_tests/test_bundles/dart2wasm-html-engine",
       "drone_dimensions": [
         "device_type=none",
@@ -324,6 +302,28 @@
               "test",
               "--compile",
               "--bundle=dart2wasm-skwasm-ui"
+            ],
+            "scripts": [
+              "flutter/lib/web_ui/dev/felt"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "web_tests/test_bundles/fallbacks",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Linux"
+      ],
+      "generators": {
+        "tasks": [
+          {
+            "name": "compile bundle fallbacks",
+            "parameters": [
+              "test",
+              "--compile",
+              "--bundle=fallbacks"
             ],
             "scripts": [
               "flutter/lib/web_ui/dev/felt"
@@ -509,42 +509,6 @@
             "test",
             "--run",
             "--suite=chrome-dart2js-canvaskit-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        }
-      ]
-    },
-    {
-      "name": "Linux run chrome-dart2js-skwasm-skwasm_stub suite",
-      "recipe": "engine_v2/tester_engine",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "gclient_variables": {
-        "download_android_deps": false
-      },
-      "dependencies": [
-        "web_tests/artifacts",
-        "web_tests/test_bundles/dart2js-skwasm-skwasm_stub"
-      ],
-      "test_dependencies": [
-        {
-          "dependency": "goldctl",
-          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
-        },
-        {
-          "dependency": "chrome_and_driver",
-          "version": "119.0.6045.9"
-        }
-      ],
-      "tasks": [
-        {
-          "name": "run suite chrome-dart2js-skwasm-skwasm_stub",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2js-skwasm-skwasm_stub"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         }
@@ -1091,6 +1055,78 @@
       ]
     },
     {
+      "name": "Linux run chrome-fallbacks suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Linux"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/fallbacks"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-fallbacks",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-fallbacks"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Linux run firefox-fallbacks suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Linux"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/fallbacks"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "firefox",
+          "version": "version:106.0"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite firefox-fallbacks",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=firefox-fallbacks"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
       "name": "Mac run safari-dart2js-html-engine suite",
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
@@ -1250,6 +1286,39 @@
             "test",
             "--run",
             "--suite=safari-dart2js-canvaskit-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Mac run safari-fallbacks suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Mac-13",
+        "cpu=arm64"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/fallbacks"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite safari-fallbacks",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=safari-fallbacks"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         }
@@ -1436,42 +1505,6 @@
       ]
     },
     {
-      "name": "Windows run chrome-dart2js-skwasm-skwasm_stub suite",
-      "recipe": "engine_v2/tester_engine",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Windows"
-      ],
-      "gclient_variables": {
-        "download_android_deps": false
-      },
-      "dependencies": [
-        "web_tests/artifacts",
-        "web_tests/test_bundles/dart2js-skwasm-skwasm_stub"
-      ],
-      "test_dependencies": [
-        {
-          "dependency": "goldctl",
-          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
-        },
-        {
-          "dependency": "chrome_and_driver",
-          "version": "119.0.6045.9"
-        }
-      ],
-      "tasks": [
-        {
-          "name": "run suite chrome-dart2js-skwasm-skwasm_stub",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2js-skwasm-skwasm_stub"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        }
-      ]
-    },
-    {
       "name": "Windows run chrome-full-dart2js-canvaskit-canvaskit suite",
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
@@ -1538,6 +1571,330 @@
             "test",
             "--run",
             "--suite=chrome-full-dart2js-canvaskit-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-dart2wasm-html-engine suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/dart2wasm-html-engine"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-dart2wasm-html-engine",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2wasm-html-engine"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-dart2wasm-html-html suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/dart2wasm-html-html"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-dart2wasm-html-html",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2wasm-html-html"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-dart2wasm-html-ui suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/dart2wasm-html-ui"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-dart2wasm-html-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2wasm-html-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-dart2wasm-canvaskit-canvaskit suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/dart2wasm-canvaskit-canvaskit"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-dart2wasm-canvaskit-canvaskit",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2wasm-canvaskit-canvaskit"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-dart2wasm-canvaskit-ui suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/dart2wasm-canvaskit-ui"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-dart2wasm-canvaskit-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2wasm-canvaskit-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-dart2wasm-skwasm-ui suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/dart2wasm-skwasm-ui"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-dart2wasm-skwasm-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2wasm-skwasm-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-full-dart2wasm-canvaskit-canvaskit suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/dart2wasm-canvaskit-canvaskit"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-full-dart2wasm-canvaskit-canvaskit",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-full-dart2wasm-canvaskit-canvaskit"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-full-dart2wasm-canvaskit-ui suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/dart2wasm-canvaskit-ui"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-full-dart2wasm-canvaskit-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-full-dart2wasm-canvaskit-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        }
+      ]
+    },
+    {
+      "name": "Windows run chrome-fallbacks suite",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Windows"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false
+      },
+      "dependencies": [
+        "web_tests/artifacts",
+        "web_tests/test_bundles/fallbacks"
+      ],
+      "test_dependencies": [
+        {
+          "dependency": "goldctl",
+          "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+        },
+        {
+          "dependency": "chrome_and_driver",
+          "version": "119.0.6045.9"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "run suite chrome-fallbacks",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-fallbacks"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         }

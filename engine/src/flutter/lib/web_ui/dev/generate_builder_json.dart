@@ -120,11 +120,7 @@ Iterable<dynamic> _getAllTestSteps(List<TestSuite> suites) {
       suite.runConfig.browser == BrowserName.safari
     ),
     ..._getTestStepsForPlatform(suites, 'Windows', (TestSuite suite) =>
-      suite.runConfig.browser == BrowserName.chrome &&
-
-      // TODO(jacksongardner): Enable dart2wasm tests on Windows
-      // https://github.com/flutter/flutter/issues/124082
-      suite.testBundle.compileConfig.compiler != Compiler.dart2wasm
+      suite.runConfig.browser == BrowserName.chrome
     ),
   ];
 }

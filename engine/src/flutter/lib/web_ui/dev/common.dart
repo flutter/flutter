@@ -240,12 +240,11 @@ const List<String> kAllBrowserNames = <String>[
 /// The [browserName] matches the browser name passed as the `--browser` option.
 BrowserEnvironment getBrowserEnvironment(
   BrowserName browserName, {
-  required bool enableWasmGC,
   required bool useDwarf,
 }) {
   switch (browserName) {
     case BrowserName.chrome:
-      return ChromeEnvironment(enableWasmGC: enableWasmGC, useDwarf: useDwarf);
+      return ChromeEnvironment(useDwarf: useDwarf);
     case BrowserName.edge:
       return EdgeEnvironment();
     case BrowserName.firefox:
