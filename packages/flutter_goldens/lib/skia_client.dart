@@ -536,7 +536,8 @@ class SkiaGoldClient {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'CI' : 'luci',
-      'impeller': _isImpeller,
+      if (_isImpeller)
+        'impeller': 'swiftshader',
     };
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;
