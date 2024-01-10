@@ -14961,7 +14961,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
   });
 
-  // Regressing test for https://github.com/flutter/flutter/issues/140607.
+  // Regression test for https://github.com/flutter/flutter/issues/140607.
   testWidgets('TextFields can inherit errorStyle color from InputDecorationTheme.', (WidgetTester tester) async {
     Widget textFieldBuilder() {
       return MaterialApp(
