@@ -327,7 +327,7 @@ end
 
 def flutter_parse_xcconfig_file(file)
   file_abs_path = File.expand_path(file)
-  if !File.exists? file_abs_path
+  if !File.exist? file_abs_path
     return [];
   end
   entries = Hash.new
@@ -346,7 +346,7 @@ end
 
 def flutter_get_local_engine_dir(xcconfig_file)
   file_abs_path = File.expand_path(xcconfig_file)
-  if !File.exists? file_abs_path
+  if !File.exist? file_abs_path
     return nil
   end
   config = flutter_parse_xcconfig_file(xcconfig_file)
