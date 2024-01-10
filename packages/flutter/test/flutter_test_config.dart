@@ -48,6 +48,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     LeakTesting.settings = LeakTesting
       .settings
       .withIgnored(
+        createdByTestHelpers: true,
         allNotGCed: true,
       );
 
