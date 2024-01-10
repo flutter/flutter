@@ -165,7 +165,7 @@ void main() {
         nativeAssetsYaml.readAsStringSync(),
         stringContainsInOrder(<String>[
           'package:foo/foo.dart',
-          'foo.framework${fileSystem.path.separator}foo',
+          'foo.framework',
         ]),
       );
     },
