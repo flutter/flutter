@@ -14966,13 +14966,13 @@ void main() {
     Widget textFieldBuilder() {
       return MaterialApp(
         theme: ThemeData(
-          inputDecorationTheme: InputDecorationTheme(
+          inputDecorationTheme: const InputDecorationTheme(
             errorStyle: TextStyle(color: Colors.green), 
           ),
         ),
-        home: Scaffold(
+        home: const Scaffold(
           body: TextField(
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               errorText: 'error',
             ),
           ),
