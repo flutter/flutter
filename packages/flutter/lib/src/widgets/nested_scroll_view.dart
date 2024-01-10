@@ -1065,7 +1065,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           outerDelta = math.max(outerDelta, potentialOuterDelta);
         }
       }
-      if (outerDelta != 0.0) {
+      if (outerDelta.abs() > precisionErrorTolerance) {
         final double innerDelta = _outerPosition!.applyClampedDragUpdate(
           outerDelta,
         );
@@ -1302,8 +1302,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       this,
       delta,
     );
-    if (oldPixels == newPixels) {
-      // Delta must have been so small we dropped it during floating point addition.
+    if ((oldPixels - newPixels).abs() < precisionErrorTolerance) {
+      // Delta is so small we can drop it.
       return 0.0;
     }
     // Check for overscroll:
