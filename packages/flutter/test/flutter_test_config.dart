@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +21,7 @@ import '_goldens_io.dart'
 ///
 /// To enable leak tracking for an individual test file, add the line to the test `main`:
 /// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
-const bool _kLeakTracking = bool.fromEnvironment('LEAK_TRACKING');
+bool _kLeakTracking = bool.parse(Platform.environment['LEAK_TRACKING']!);
 
 const String _kLeakTrackingDebug = String.fromEnvironment('LEAK_TRACKING');
 
