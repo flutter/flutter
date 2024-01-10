@@ -735,6 +735,38 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   Offset? _lastEndEdgeUpdateGlobalPosition;
 
   @override
+  Comparator<Selectable> get compareOrder {
+    return (Selectable a, Selectable b) {
+      // Maintain position of first and last selectable.
+      if (a == paragraph.selectables?[0]) {
+        return -1;
+      }
+
+      if (b == paragraph.selectables?[0]) {
+        return 1;
+      }
+
+      if (a == paragraph.selectables?[(paragraph.selectables?.length ?? 0) - 1]) {
+        return 1;
+      }
+
+      if (b == paragraph.selectables?[(paragraph.selectables?.length ?? 0) - 1]) {
+        return -1;
+      }
+
+      // Maintain relative order of root text selectables.
+      final bool aIsFromRootText = paragraph.selectables!.contains(a);
+      final bool bIsFromRootText = paragraph.selectables!.contains(b);
+
+      if (aIsFromRootText && bIsFromRootText) {
+        return paragraph.selectables!.indexOf(a).compareTo(paragraph.selectables!.indexOf(b));
+      }
+
+      return super.compareOrder(a,b);
+    };
+  }
+
+  @override
   void remove(Selectable selectable) {
     _hasReceivedStartEvent.remove(selectable);
     _hasReceivedEndEvent.remove(selectable);
