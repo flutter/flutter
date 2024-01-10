@@ -842,12 +842,37 @@ class PageView extends StatefulWidget {
 class _PageViewState extends State<PageView> {
   int _lastReportedPage = 0;
 
-  late final PageController _controller = widget.controller ?? PageController();
+  late PageController _controller;
 
   @override
   void initState() {
     super.initState();
+    initController();
     _lastReportedPage = _controller.initialPage;
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+
+  void initController() {
+    _controller = widget.controller ?? PageController();
+  }
+
+  @override
+  void didUpdateWidget(PageView oldWidget) {
+    if (oldWidget.controller != widget.controller) {
+      if (oldWidget.controller == null) {
+        _controller.dispose();
+      }
+      initController();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   AxisDirection _getDirection(BuildContext context) {
