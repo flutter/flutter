@@ -458,10 +458,10 @@ class FlutterPlugin implements Plugin<Project> {
     private Boolean doesSupportAndroidPlatform(String path) {
         File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
         File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
-        if (settingsGradle.exists() && settingsGradleKts.exists()) {
+        if (buildGradle.exists() && buildGradleKts.exists()) {
             logger.error(
-                "Both build.gradle and build.gradle.kts exist. " +
-                "This is not supported and will result in an error in the future."
+                "Both build.gradle and build.gradle.kts exist, so the " +
+                "latter one is ignored. This is likely a mistake."
             )
         }
 
@@ -469,20 +469,21 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
-     * Returns the Gradle script script for the build. Kotlin (settings.gradle.kts)
-     * is preferred over Groovy (settings.gradle).
+     * Returns the Gradle settings script for the build. When both Groovy and
+     * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
+     * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
      */
     private File settingsGradleFile(Project project) {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
             logger.error(
-                "Both settings.gradle and settings.gradle.kts exist. " +
-                "This is not supported and will result in an error in the future."
+                "Both settings.gradle and settings.gradle.kts exist, so the " +
+                "latter one is ignored. This is likely a mistake."
             )
         }
 
-        return settingsGradleKts.exists() ? settingsGradleKts : settingsGradle
+        return settingsGradle.exists() ? settingsGradle : settingsGradleKts
     }
 
     /** Adds the plugin project dependency to the app project. */
