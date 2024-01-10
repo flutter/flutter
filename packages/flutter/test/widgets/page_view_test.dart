@@ -1299,4 +1299,18 @@ void main() {
     expect(attach, 1);
     expect(detach, 1);
   });
+
+  group('$PageView handles change of controller', () {
+    testWidgets('null to value', (WidgetTester tester) async {
+    });
+
+    testWidgets('value to value', (WidgetTester tester) async {
+    });
+
+    testWidgets('value to null', (WidgetTester tester) async {
+    });
+
+    testWidgets('null to null', (WidgetTester tester) async {
+    });
+  });
 }
