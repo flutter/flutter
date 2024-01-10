@@ -270,6 +270,11 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     return value.hasSelection ? const SelectedContent(plainText: 'Custom Text') : null;
   }
 
+  @override
+  int? get contentLength => 1;
+
+
+
   LayerLink? _startHandle;
   LayerLink? _endHandle;
 

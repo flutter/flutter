@@ -364,6 +364,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return results;
   }
 
+
   // Should be null if selection is not enabled, i.e. _registrar = null. The
   // paragraph splits on [PlaceholderSpan.placeholderCodeUnit], and stores each
   // fragment in this list.
@@ -2126,7 +2127,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   TextRange getWordBoundary(TextPosition position) => paragraph.getWordBoundary(position);
 
   @override
-  TextSelection? getLocalTextSelection() {
+  TextSelection? get textSelection {
     if (_textSelectionStart != null && _textSelectionEnd != null) {
       final int start = math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
       final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
@@ -2135,10 +2136,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     }
     return null;
   }
-  
+
   @override
-  int? getContentLength() {
+  int? get contentLength  {
     return fullText.length;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

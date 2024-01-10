@@ -166,7 +166,7 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  int? getContentLength() {
+  int? get contentLength {
     return 0;
   }
 

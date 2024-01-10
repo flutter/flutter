@@ -575,7 +575,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _updateSelectedContentIfNeeded() {
     if (_lastSelectedContent?.plainText !=_selectable?.getSelectedContent()?.plainText) {
       _lastSelectedContent = _selectable?.getSelectedContent();
-      final TextSelection? textSelection = _selectable?.getLocalTextSelection();
+      final TextSelection? textSelection = _selectable?.textSelection;
       widget.onSelectionChanged?.call(_lastSelectedContent?.copyWith(textSelection: textSelection));
     }
   }
@@ -1831,16 +1831,16 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   }
 
   @override
-  int? getContentLength() {
+  int? get contentLength {
     int length = 0;
     for (final Selectable selectable in selectables) {
-      length += selectable.getContentLength() ?? 0;
+      length += selectable.contentLength ?? 0;
     }
     return length;
   }
 
   @override
-  TextSelection? getLocalTextSelection() {
+  TextSelection? get textSelection {
     // initialize data structures
     int start = 0;
     int? end;
@@ -1851,7 +1851,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       // Retrieve the selected content, if any, of the current 'selectable'.
       final SelectedContent? data = selectable.getSelectedContent();
       if (data != null) {
-        final TextSelection? selection = selectable.getLocalTextSelection();
+        final TextSelection? selection = selectable.textSelection ;
         if (!enteredSelectedRegion) {
           // ...start the selection index at the start of the current selection.
           start += selection?.start ?? 0;
@@ -1861,7 +1861,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       } else {
         if (!enteredSelectedRegion) {
           // add its length to the 'start' index if we haven't started selection.
-          start += selectable.getContentLength() ?? 0;
+          start += selectable.contentLength ?? 0;
         }
       }
     }
@@ -2178,6 +2178,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       plainText: buffer.toString(),
     );
   }
+
 
   // Clears the selection on all selectables not in the range of
   // currentSelectionStartIndex..currentSelectionEndIndex.

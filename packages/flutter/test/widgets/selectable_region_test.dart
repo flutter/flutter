@@ -555,7 +555,7 @@ void main() {
       'fine day?'
     ];
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'iteratively gather offsets 0 through the last character of each Text widget',
       (WidgetTester tester) async {
         TextSelection? currentSelection;
@@ -618,7 +618,7 @@ void main() {
       variant: TargetPlatformVariant.all(),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Test collecting offsets from the middle of the first Text widget through the middle of the last Text widget',
       (WidgetTester tester) async {
         TextSelection? currentSelection;
@@ -3993,7 +3993,7 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  int? getContentLength() {
+  int? get contentLength  {
     return 0;
   }
 
@@ -4080,7 +4080,7 @@ class RenderSelectAll extends RenderProxyBox
   }
 
   @override
-  int? getContentLength() {
+  int? get contentLength {
     return 0;
   }
 
