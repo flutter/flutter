@@ -23,14 +23,16 @@ import '_goldens_io.dart'
 /// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
 bool _kLeakTracking = bool.parse(Platform.environment['LEAK_TRACKING'] ?? 'false');
 
-const String _kLeakTrackingDebug = String.fromEnvironment('LEAK_TRACKING');
+const String _myVarConst = String.fromEnvironment('LEAK_TRACKING');
+String _myVarFromPlatform = Platform.environment['LEAK_TRACKING'] ?? '';
 
 /// Test configuration for each test library in this directory.
 ///
 /// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
 Future<void> testExecutable(FutureOr<void> Function() testMain) {
-  debugPrint('!!! _kLeakTrackingDebug: [$_kLeakTrackingDebug]');
   debugPrint('!!! _kLeakTracking: [$_kLeakTracking]');
+  debugPrint('!!! _myVarConst: [$_myVarConst]');
+  debugPrint('!!! _myVarFromPlatform: [$_myVarFromPlatform]');
 
   // Enable checks because there are many implementations of [RenderBox] in this
   // package can benefit from the additional validations.
@@ -42,7 +44,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   // Leak tracking is off by default.
   // To enable it, follow doc for [_kLeakTracking].
-  if (_kLeakTracking) {
+  if (_kLeakTracking == 'true') {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;
