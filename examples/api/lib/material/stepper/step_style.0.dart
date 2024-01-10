@@ -14,14 +14,14 @@ class StepStyleExampleApp extends StatelessWidget {
 
    @override
    Widget build(BuildContext context) {
-       return MaterialApp(
-         home: Scaffold(
-             appBar: AppBar(title: const Text('Step Style Example')),
-             body: const Center(
-                 child: StepStyleExample(),
-             ),
-         ),
-       );
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Step Style Example')),
+          body: const Center(
+            child: StepStyleExample(),
+          ),
+        ),
+      );
   }
 }
 
@@ -34,6 +34,18 @@ class StepStyleExample extends StatefulWidget {
 
 
 class _StepStyleExampleState extends State<StepStyleExample> {
+  final StepStyle _stepStyle = StepStyle(
+    connectorThickness: 10,
+    color: Colors.white,
+    connectorColor: Colors.red,
+    indexStyle: const TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+    ),
+    border: Border.all(
+      width: 2,
+    ),
+  );
 
    @override
    Widget build(BuildContext context) {
@@ -47,64 +59,44 @@ class _StepStyleExampleState extends State<StepStyleExample> {
           title: const SizedBox.shrink(),
           content: const SizedBox.shrink(),
           isActive: true,
-          stepStyle: StepStyle(
-            connectorThickness: 10,
-            color: Colors.white,
-            connectorColor: Colors.red,
-            indexStyle: const TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-            ),
-            border: Border.all(
-              width: 2
-            ),
-          ),
+          stepStyle: _stepStyle,
         ),
-        const Step(
-          title: SizedBox.shrink(),
-          content: SizedBox.shrink(),
+        Step(
+          title: const SizedBox.shrink(),
+          content: const SizedBox.shrink(),
           isActive: true,
-          stepStyle: StepStyle(
+          stepStyle: _stepStyle.copyWith(
             connectorColor: Colors.orange,
-            connectorThickness: 10,
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: <Color>[
                 Colors.white,
                 Colors.black,
               ],
             ),
-
-          )
-        ),
-        Step(
-          title: const SizedBox.shrink(),
-          content: const SizedBox.shrink(),
-          isActive: true,
-          stepStyle: StepStyle(
-            color: Colors.white,
-            connectorColor: Colors.blue,
-            connectorThickness: 10,
-            indexStyle: const TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-            ),
-            border: Border.all(
-              width: 2,
-            ),
           ),
         ),
         Step(
           title: const SizedBox.shrink(),
           content: const SizedBox.shrink(),
           isActive: true,
-          stepStyle: StepStyle(
-            color: Colors.white,
-            indexStyle: const TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-            ),
-            border: Border.all(
-              width: 2,
+          stepStyle: _stepStyle.copyWith(
+            connectorColor: Colors.blue,
+          ),
+        ),
+        Step(
+          title: const SizedBox.shrink(),
+          content: const SizedBox.shrink(),
+          isActive: true,
+          stepStyle: _stepStyle.merge(
+            StepStyle(
+              color: Colors.white,
+              indexStyle: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+              ),
+              border: Border.all(
+                width: 2,
+              ),
             ),
           ),
         ),

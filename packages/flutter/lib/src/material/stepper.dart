@@ -1000,9 +1000,10 @@ class _TrianglePainter extends CustomPainter {
   }
 }
 
-/// The `StepStyle` class provides customization options for configuring the appearance of a step in a stepper widget.
+/// This class is used to override the default visual properties of [Step] widgets within a [Stepper].
 ///
-/// To create a customized step style, instantiate a `StepStyle` object and pass it to the `Step` widget.
+/// To customize the appearance of a [Step] create an instance of this class with non-null parameters
+/// for the step properties whose default value you want to override.
 ///
 /// Example usage:
 /// ```dart
@@ -1021,8 +1022,7 @@ class _TrianglePainter extends CustomPainter {
 /// ```
 /// See also:
 /// {@tool dartpad}
-/// An example the shows how to use the [StepStyle], and the [StepStyle] UI
-/// appearance.
+/// An example that uses [StepStyle] to customize the appearance of each [Step] in a [Stepper].
 ///
 /// ** See code in examples/api/lib/material/stepper/step_style.0.dart **
 /// {@end-tool}
@@ -1053,11 +1053,13 @@ class StepStyle with Diagnosticable {
   final Color? connectorColor;
 
   /// Overrides the default thickness of the connector line between two steps.
-  /// Only works when [StepperType] is [StepperType.horizontal].
+  ///
+  /// This property only applies when [Stepper.type] is [StepperType.horizontal].
   final double? connectorThickness;
 
   /// Add a border around the step.
-  /// Only works to circle step.
+  ///
+  /// Will be applied to the circle in the step.
   final BoxBorder? border;
 
   /// Add a shadow around the step.
