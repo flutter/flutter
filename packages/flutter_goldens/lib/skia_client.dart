@@ -592,8 +592,8 @@ class SkiaGoldClient {
     return _isBrowserTest && platform.environment[_kWebRendererKey] == 'canvaskit';
   }
 
-  bool get _isImpeller {
-    return platform.environment[_kImpellerKey] != null;
+  String get _isImpeller {
+    return (platform.environment[_kImpellerKey] != null).toString();
   }
 
   String get _browserKey {
