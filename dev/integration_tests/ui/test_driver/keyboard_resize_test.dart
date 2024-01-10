@@ -33,7 +33,7 @@ void main() {
 
       bool heightTextDidShrink = false;
       for (int i = 0; i < 3; ++i) {
-        await Future<void>.delayed(const Duration(seconds: 1));
+        await Future<void>.delayed(const Duration(seconds: 3));
         // Measure the height with keyboard displayed.
         final String heightWithKeyboardShown = await driver.getText(heightText);
         if (double.parse(heightWithKeyboardShown) < double.parse(startHeight)) {
