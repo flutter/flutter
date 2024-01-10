@@ -57,10 +57,6 @@ bool DeviceBufferGLES::OnCopyHostBuffer(const uint8_t* source,
   return true;
 }
 
-void DeviceBufferGLES::Flush(std::optional<Range> range) const {
-  generation_++;
-}
-
 static GLenum ToTarget(DeviceBufferGLES::BindingType type) {
   switch (type) {
     case DeviceBufferGLES::BindingType::kArrayBuffer:

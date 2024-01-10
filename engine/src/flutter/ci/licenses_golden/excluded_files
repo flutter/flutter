@@ -146,7 +146,6 @@
 ../../../flutter/impeller/entity/contents/filters/directional_gaussian_blur_filter_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/filters/inputs/filter_input_unittests.cc
-../../../flutter/impeller/entity/contents/host_buffer_unittests.cc
 ../../../flutter/impeller/entity/contents/test
 ../../../flutter/impeller/entity/contents/tiled_texture_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/vertices_contents_unittests.cc
@@ -188,6 +187,7 @@
 ../../../flutter/impeller/renderer/compute_subgroup_unittests.cc
 ../../../flutter/impeller/renderer/compute_unittests.cc
 ../../../flutter/impeller/renderer/device_buffer_unittests.cc
+../../../flutter/impeller/renderer/host_buffer_unittests.cc
 ../../../flutter/impeller/renderer/pipeline_descriptor_unittests.cc
 ../../../flutter/impeller/renderer/pool_unittests.cc
 ../../../flutter/impeller/renderer/renderer_dart_unittests.cc

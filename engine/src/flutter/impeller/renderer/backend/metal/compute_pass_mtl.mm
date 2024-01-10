@@ -171,7 +171,7 @@ static bool Bind(ComputePassBindingsCache& pass,
     return false;
   }
 
-  auto device_buffer = view.buffer->GetDeviceBuffer();
+  auto device_buffer = view.buffer->GetDeviceBuffer(allocator);
   if (!device_buffer) {
     return false;
   }

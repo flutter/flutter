@@ -155,7 +155,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
   ContentContext::SubpassCallback subpass_callback = [&](const ContentContext&
                                                              renderer,
                                                          RenderPass& pass) {
-    auto& host_buffer = renderer.GetTransientsBuffer();
+    auto& host_buffer = pass.GetTransientsBuffer();
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.AddVertices({

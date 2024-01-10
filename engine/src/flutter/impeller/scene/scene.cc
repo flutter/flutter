@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "flutter/fml/logging.h"
-#include "fml/closure.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/scene/scene_context.h"
 #include "impeller/scene/scene_encoder.h"
@@ -33,9 +32,6 @@ Node& Scene::GetRoot() {
 
 bool Scene::Render(const RenderTarget& render_target,
                    const Matrix& camera_transform) {
-  fml::ScopedCleanupClosure reset_state(
-      [context = scene_context_]() { context->GetTransientsBuffer().Reset(); });
-
   // Collect the render commands from the scene.
   SceneEncoder encoder;
   if (!root_.Render(encoder,

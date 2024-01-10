@@ -184,12 +184,10 @@ ContentContext::ContentContext(
       render_target_cache_(render_target_allocator == nullptr
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
-                               : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator())) {
+                               : std::move(render_target_allocator)) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
-
   auto options = ContentContextOptions{
       .sample_count = SampleCount::kCount4,
       .color_attachment_pixel_format =

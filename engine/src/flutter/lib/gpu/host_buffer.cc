@@ -4,9 +4,6 @@
 
 #include "flutter/lib/gpu/host_buffer.h"
 
-#include <optional>
-
-#include "dart_api.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/platform.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
@@ -16,9 +13,7 @@ namespace gpu {
 
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, HostBuffer);
 
-HostBuffer::HostBuffer(Context* context)
-    : host_buffer_(impeller::HostBuffer::Create(
-          context->GetContext()->GetResourceAllocator())) {}
+HostBuffer::HostBuffer() : host_buffer_(impeller::HostBuffer::Create()) {}
 
 HostBuffer::~HostBuffer() = default;
 
@@ -47,9 +42,8 @@ std::optional<impeller::BufferView> HostBuffer::GetBufferViewForOffset(
 /// Exports
 ///
 
-void InternalFlutterGpu_HostBuffer_Initialize(Dart_Handle wrapper,
-                                              flutter::gpu::Context* context) {
-  auto res = fml::MakeRefCounted<flutter::gpu::HostBuffer>(context);
+void InternalFlutterGpu_HostBuffer_Initialize(Dart_Handle wrapper) {
+  auto res = fml::MakeRefCounted<flutter::gpu::HostBuffer>();
   res->AssociateWithDartWrapper(wrapper);
 }
 

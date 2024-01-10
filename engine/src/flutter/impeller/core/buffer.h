@@ -16,7 +16,8 @@ class Buffer {
  public:
   virtual ~Buffer();
 
-  virtual std::shared_ptr<const DeviceBuffer> GetDeviceBuffer() const = 0;
+  virtual std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
+      Allocator& allocator) const = 0;
 };
 
 }  // namespace impeller

@@ -6,10 +6,10 @@
 
 #include <cmath>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "flutter/fml/logging.h"
-#include "impeller/base/allocation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/scene/importer/conversions.h"
 

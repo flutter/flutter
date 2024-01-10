@@ -8,7 +8,6 @@
 #include "gmock/gmock.h"
 #include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/host_buffer.h"
 #include "impeller/fixtures/sample.comp.h"
 #include "impeller/fixtures/stage1.comp.h"
 #include "impeller/fixtures/stage2.comp.h"
@@ -36,7 +35,6 @@ TEST_P(ComputeTest, CapabilitiesReportSupport) {
 TEST_P(ComputeTest, CanCreateComputePass) {
   using CS = SampleComputeShader;
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -76,9 +74,11 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   auto output_buffer = CreateHostVisibleDeviceBuffer<CS::Output<kCount>>(
       context, "Output Buffer");
 
-  CS::BindInfo(cmd, host_buffer->EmplaceUniform(info));
-  CS::BindInput0(cmd, host_buffer->EmplaceStorageBuffer(input_0));
-  CS::BindInput1(cmd, host_buffer->EmplaceStorageBuffer(input_1));
+  CS::BindInfo(cmd, pass->GetTransientsBuffer().EmplaceUniform(info));
+  CS::BindInput0(cmd,
+                 pass->GetTransientsBuffer().EmplaceStorageBuffer(input_0));
+  CS::BindInput1(cmd,
+                 pass->GetTransientsBuffer().EmplaceStorageBuffer(input_1));
   CS::BindOutput(cmd, output_buffer->AsBufferView());
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
@@ -113,7 +113,6 @@ TEST_P(ComputeTest, CanCreateComputePass) {
 TEST_P(ComputeTest, CanComputePrefixSum) {
   using CS = PrefixSumTestComputeShader;
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -146,7 +145,8 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
   auto output_buffer = CreateHostVisibleDeviceBuffer<CS::OutputData<kCount>>(
       context, "Output Buffer");
 
-  CS::BindInputData(cmd, host_buffer->EmplaceStorageBuffer(input_data));
+  CS::BindInputData(
+      cmd, pass->GetTransientsBuffer().EmplaceStorageBuffer(input_data));
   CS::BindOutputData(cmd, output_buffer->AsBufferView());
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
@@ -231,8 +231,6 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
   using CS = PrefixSumTestComputeShader;
 
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
-
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -262,12 +260,12 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
     auto output_buffer = CreateHostVisibleDeviceBuffer<CS::OutputData<kCount>>(
         context, "Output Buffer");
 
-    CS::BindInputData(cmd, host_buffer->EmplaceStorageBuffer(input_data));
+    CS::BindInputData(
+        cmd, pass->GetTransientsBuffer().EmplaceStorageBuffer(input_data));
     CS::BindOutputData(cmd, output_buffer->AsBufferView());
 
     pass->AddCommand(std::move(cmd));
     pass->EncodeCommands();
-    host_buffer->Reset();
     return cmd_buffer->SubmitCommands();
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -280,7 +278,6 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
   using Stage2PipelineBuilder = ComputePipelineBuilder<CS2>;
 
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -329,7 +326,8 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     ComputeCommand cmd;
     cmd.pipeline = compute_pipeline_1;
 
-    CS1::BindInput(cmd, host_buffer->EmplaceStorageBuffer(input_1));
+    CS1::BindInput(cmd,
+                   pass->GetTransientsBuffer().EmplaceStorageBuffer(input_1));
     CS1::BindOutput(cmd, output_buffer_1->AsBufferView());
 
     ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
@@ -375,7 +373,6 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
 TEST_P(ComputeTest, CanCompute1DimensionalData) {
   using CS = SampleComputeShader;
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -414,9 +411,11 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
   auto output_buffer = CreateHostVisibleDeviceBuffer<CS::Output<kCount>>(
       context, "Output Buffer");
 
-  CS::BindInfo(cmd, host_buffer->EmplaceUniform(info));
-  CS::BindInput0(cmd, host_buffer->EmplaceStorageBuffer(input_0));
-  CS::BindInput1(cmd, host_buffer->EmplaceStorageBuffer(input_1));
+  CS::BindInfo(cmd, pass->GetTransientsBuffer().EmplaceUniform(info));
+  CS::BindInput0(cmd,
+                 pass->GetTransientsBuffer().EmplaceStorageBuffer(input_0));
+  CS::BindInput1(cmd,
+                 pass->GetTransientsBuffer().EmplaceStorageBuffer(input_1));
   CS::BindOutput(cmd, output_buffer->AsBufferView());
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
@@ -451,7 +450,6 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
 TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
   using CS = SampleComputeShader;
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -493,9 +491,11 @@ TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
   auto output_buffer = CreateHostVisibleDeviceBuffer<CS::Output<kCount>>(
       context, "Output Buffer");
 
-  CS::BindInfo(cmd, host_buffer->EmplaceUniform(info));
-  CS::BindInput0(cmd, host_buffer->EmplaceStorageBuffer(input_0));
-  CS::BindInput1(cmd, host_buffer->EmplaceStorageBuffer(input_1));
+  CS::BindInfo(cmd, pass->GetTransientsBuffer().EmplaceUniform(info));
+  CS::BindInput0(cmd,
+                 pass->GetTransientsBuffer().EmplaceStorageBuffer(input_0));
+  CS::BindInput1(cmd,
+                 pass->GetTransientsBuffer().EmplaceStorageBuffer(input_1));
   CS::BindOutput(cmd, output_buffer->AsBufferView());
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
