@@ -10,8 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '_goldens_io.dart'
-  if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
+import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart'
+    as flutter_goldens;
 
 /// If true, leak tracking is enabled for all `testWidgets`.
 ///
@@ -25,7 +25,8 @@ bool isLeakTrackingEnabled() {
     return false;
   }
   // The values can be different, one is compile time, another is run time.
-  return const bool.fromEnvironment('LEAK_TRACKING') || (bool.tryParse(Platform.environment['LEAK_TRACKING'] ?? '')  ?? false);
+  return const bool.fromEnvironment('LEAK_TRACKING') ||
+      (bool.tryParse(Platform.environment['LEAK_TRACKING'] ?? '') ?? false);
 }
 
 /// Test configuration for each test library in this directory.
@@ -45,17 +46,15 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
     LeakTracking.warnForUnsupportedPlatforms = false;
 
-    LeakTesting.settings = LeakTesting
-      .settings
-      .withIgnored(
-        createdByTestHelpers: true,
-        allNotGCed: true,
-      );
+    LeakTesting.settings = LeakTesting.settings.withIgnored(
+      createdByTestHelpers: true,
+      allNotGCed: true,
+    );
 
     // Print is here in spite of
     // https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#only-log-actionable-messages-to-the-console
     // to provide a way to detect if the env variable is passed as expected on bots, that is not obvious.
-    // It can be removed after fixing https://github.com/flutter/flutter/issues/141299.
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/141299.
     debugPrint('Leak tracking is enabled.');
   }
 
