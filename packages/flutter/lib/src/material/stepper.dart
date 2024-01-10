@@ -1066,6 +1066,7 @@ class StepStyle with Diagnosticable {
   final BoxShadow? boxShadow;
 
   /// Add a gradient around the step.
+  ///
   /// If [gradient] is specified, [color] will be ignored.
   final Gradient? gradient;
 
