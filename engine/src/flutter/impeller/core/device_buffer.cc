@@ -11,11 +11,10 @@ DeviceBuffer::DeviceBuffer(DeviceBufferDescriptor desc) : desc_(desc) {}
 DeviceBuffer::~DeviceBuffer() = default;
 
 // |Buffer|
-std::shared_ptr<const DeviceBuffer> DeviceBuffer::GetDeviceBuffer() const {
+std::shared_ptr<const DeviceBuffer> DeviceBuffer::GetDeviceBuffer(
+    Allocator& allocator) const {
   return shared_from_this();
 }
-
-void DeviceBuffer::Flush(std::optional<Range> range) const {}
 
 BufferView DeviceBuffer::AsBufferView() const {
   BufferView view;

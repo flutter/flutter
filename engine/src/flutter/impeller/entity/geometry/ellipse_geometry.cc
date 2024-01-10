@@ -17,7 +17,6 @@ GeometryResult EllipseGeometry::GetPositionBuffer(
     const Entity& entity,
     RenderPass& pass) const {
   return ComputePositionGeometry(
-      renderer,
       renderer.GetTessellator()->FilledEllipse(entity.GetTransform(), bounds_),
       entity, pass);
 }
@@ -30,7 +29,6 @@ GeometryResult EllipseGeometry::GetPositionUVBuffer(
     const Entity& entity,
     RenderPass& pass) const {
   return ComputePositionUVGeometry(
-      renderer,
       renderer.GetTessellator()->FilledEllipse(entity.GetTransform(), bounds_),
       texture_coverage.GetNormalizingTransform() * effect_transform, entity,
       pass);

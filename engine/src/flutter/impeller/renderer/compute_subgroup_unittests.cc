@@ -12,7 +12,6 @@
 #include "gmock/gmock.h"
 #include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/host_buffer.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/fixtures/golden_paths.h"
@@ -89,12 +88,11 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
       auto future = promise.get_future();
 
       auto path = skia_conversions::ToPath(sk_path);
-      auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
       auto status =
           ComputeTessellator{}
               .SetStrokeWidth(stroke_width)
               .Tessellate(
-                  path, *host_buffer, context, vertex_buffer->AsBufferView(),
+                  path, context, vertex_buffer->AsBufferView(),
                   vertex_buffer_count->AsBufferView(),
                   [vertex_buffer_count, &vertex_count,
                    &promise](CommandBuffer::Status status) {
@@ -164,8 +162,8 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();
-    VS::BindFrameInfo(
-        cmd, renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
+    VS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
     if (!pass.AddCommand(std::move(cmd))) {
       return false;
@@ -318,21 +316,21 @@ TEST_P(ComputeSubgroupTest, LargePath) {
     ::memset(vertex_buffer->AsBufferView().contents, 0,
              sizeof(SS::VertexBuffer<2048>));
 
-    ContentContext renderer(context, nullptr);
-    if (!renderer.IsValid()) {
-      return false;
-    }
-
     ComputeTessellator{}
         .SetStrokeWidth(stroke_width)
         .Tessellate(
-            complex_path, renderer.GetTransientsBuffer(), context,
-            vertex_buffer->AsBufferView(), vertex_buffer_count->AsBufferView(),
+            complex_path, context, vertex_buffer->AsBufferView(),
+            vertex_buffer_count->AsBufferView(),
             [vertex_buffer_count, &vertex_count](CommandBuffer::Status status) {
               vertex_count = reinterpret_cast<SS::VertexBufferCount*>(
                                  vertex_buffer_count->AsBufferView().contents)
                                  ->count;
             });
+
+    ContentContext renderer(context, nullptr);
+    if (!renderer.IsValid()) {
+      return false;
+    }
 
     using VS = SolidFillPipeline::VertexShader;
 
@@ -366,8 +364,8 @@ TEST_P(ComputeSubgroupTest, LargePath) {
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();
-    VS::BindFrameInfo(
-        cmd, renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
+    VS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
     if (!pass.AddCommand(std::move(cmd))) {
       return false;
@@ -400,9 +398,8 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
 
   fml::AutoResetWaitableEvent latch;
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   auto status = tessellator.Tessellate(
-      path, *host_buffer, context, vertex_buffer->AsBufferView(),
+      path, context, vertex_buffer->AsBufferView(),
       vertex_buffer_count->AsBufferView(),
       [&latch](CommandBuffer::Status status) {
         EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
@@ -449,8 +446,8 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();
-    VS::BindFrameInfo(
-        cmd, renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
+    VS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
     if (!pass.AddCommand(std::move(cmd))) {
       return false;

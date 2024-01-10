@@ -217,7 +217,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.Reserve(texture_coords_.size() * 6);
     const auto texture_size = texture_->GetSize();
-    auto& host_buffer = renderer.GetTransientsBuffer();
+    auto& host_buffer = pass.GetTransientsBuffer();
 
     for (size_t i = 0; i < texture_coords_.size(); i++) {
       auto sample_rect = texture_coords_[i];
@@ -399,7 +399,7 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "AtlasTexture");
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
 
   VS::FrameInfo frame_info;
   frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();
@@ -486,7 +486,7 @@ bool AtlasColorContents::Render(const ContentContext& renderer,
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "AtlasColors");
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
 
   VS::FrameInfo frame_info;
   frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();

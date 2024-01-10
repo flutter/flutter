@@ -75,7 +75,7 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
   if (cap_ == Cap::kRound) {
     std::shared_ptr<Tessellator> tessellator = renderer.GetTessellator();
     auto generator = tessellator->RoundCapLine(transform, p0_, p1_, radius);
-    return ComputePositionGeometry(renderer, generator, entity, pass);
+    return ComputePositionGeometry(generator, entity, pass);
   }
 
   Point corners[4];
@@ -83,7 +83,7 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
     return kEmptyResult;
   }
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
 
   size_t count = 4;
   BufferView vertex_buffer = host_buffer.Emplace(
@@ -115,7 +115,7 @@ GeometryResult LineGeometry::GetPositionUVBuffer(Rect texture_coverage,
                                                  const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
   using VT = TextureFillVertexShader::PerVertexData;
 
   auto& transform = entity.GetTransform();
@@ -127,8 +127,7 @@ GeometryResult LineGeometry::GetPositionUVBuffer(Rect texture_coverage,
   if (cap_ == Cap::kRound) {
     std::shared_ptr<Tessellator> tessellator = renderer.GetTessellator();
     auto generator = tessellator->RoundCapLine(transform, p0_, p1_, radius);
-    return ComputePositionUVGeometry(renderer, generator, uv_transform, entity,
-                                     pass);
+    return ComputePositionUVGeometry(generator, uv_transform, entity, pass);
   }
 
   Point corners[4];

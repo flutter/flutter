@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_BASE_ALLOCATION_H_
 
 #include <cstdint>
+#include <limits>
 #include <memory>
 
 #include "flutter/fml/mapping.h"

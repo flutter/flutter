@@ -121,7 +121,7 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "VerticesUV");
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
   auto geometry = parent_.GetGeometry();
 
   auto coverage = src_contents->GetCoverage(Entity{});
@@ -175,7 +175,7 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "VerticesColors");
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
   auto geometry = parent_.GetGeometry();
 
   auto geometry_result =

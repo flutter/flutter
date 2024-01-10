@@ -123,13 +123,11 @@ class Geometry {
 
  protected:
   static GeometryResult ComputePositionGeometry(
-      const ContentContext& renderer,
       const Tessellator::VertexGenerator& generator,
       const Entity& entity,
       RenderPass& pass);
 
   static GeometryResult ComputePositionUVGeometry(
-      const ContentContext& renderer,
       const Tessellator::VertexGenerator& generator,
       const Matrix& uv_transform,
       const Entity& entity,

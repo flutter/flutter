@@ -62,7 +62,7 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
         {Point(1, 1)},
     });
 
-    auto& host_buffer = renderer.GetTransientsBuffer();
+    auto& host_buffer = pass.GetTransientsBuffer();
     cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
 
     VS::FrameInfo frame_info;

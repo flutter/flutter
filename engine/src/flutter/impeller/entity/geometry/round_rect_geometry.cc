@@ -17,8 +17,7 @@ GeometryResult RoundRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  return ComputePositionGeometry(renderer,
-                                 renderer.GetTessellator()->FilledRoundRect(
+  return ComputePositionGeometry(renderer.GetTessellator()->FilledRoundRect(
                                      entity.GetTransform(), bounds_, radii_),
                                  entity, pass);
 }
@@ -31,7 +30,6 @@ GeometryResult RoundRectGeometry::GetPositionUVBuffer(
     const Entity& entity,
     RenderPass& pass) const {
   return ComputePositionUVGeometry(
-      renderer,
       renderer.GetTessellator()->FilledRoundRect(entity.GetTransform(), bounds_,
                                                  radii_),
       texture_coverage.GetNormalizingTransform() * effect_transform, entity,

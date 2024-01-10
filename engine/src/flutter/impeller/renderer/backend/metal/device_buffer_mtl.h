@@ -52,9 +52,6 @@ class DeviceBufferMTL final : public DeviceBuffer,
   // |DeviceBuffer|
   bool SetLabel(const std::string& label, Range range) override;
 
-  // |DeviceBuffer|
-  void Flush(std::optional<Range> range) const override;
-
   DeviceBufferMTL(const DeviceBufferMTL&) = delete;
 
   DeviceBufferMTL& operator=(const DeviceBufferMTL&) = delete;

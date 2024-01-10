@@ -7,8 +7,11 @@
 
 #include <memory>
 
+#include "flutter/fml/macros.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/device_buffer.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/vma.h"
 
@@ -65,9 +68,6 @@ class DeviceBufferVK final : public DeviceBuffer,
 
   // |DeviceBuffer|
   bool SetLabel(const std::string& label, Range range) override;
-
-  // |DeviceBuffer|
-  void Flush(std::optional<Range> range) const override;
 
   DeviceBufferVK(const DeviceBufferVK&) = delete;
 

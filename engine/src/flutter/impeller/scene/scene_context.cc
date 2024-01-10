@@ -4,7 +4,6 @@
 
 #include "impeller/scene/scene_context.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/host_buffer.h"
 #include "impeller/scene/material.h"
 #include "impeller/scene/shaders/skinned.vert.h"
 #include "impeller/scene/shaders/unlit.frag.h"
@@ -81,7 +80,7 @@ SceneContext::SceneContext(std::shared_ptr<Context> context)
       return;
     }
   }
-  host_buffer_ = HostBuffer::Create(GetContext()->GetResourceAllocator());
+
   is_valid_ = true;
 }
 

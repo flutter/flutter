@@ -32,6 +32,8 @@ class ComputePass {
 
   void SetThreadGroupSize(const ISize& size);
 
+  HostBuffer& GetTransientsBuffer();
+
   //----------------------------------------------------------------------------
   /// @brief      Record a command for subsequent encoding to the underlying
   ///             command buffer. No work is encoded into the command buffer at

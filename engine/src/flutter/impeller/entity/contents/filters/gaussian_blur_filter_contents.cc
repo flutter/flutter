@@ -75,7 +75,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
     Entity::TileMode tile_mode) {
   ContentContext::SubpassCallback subpass_callback =
       [&](const ContentContext& renderer, RenderPass& pass) {
-        HostBuffer& host_buffer = renderer.GetTransientsBuffer();
+        HostBuffer& host_buffer = pass.GetTransientsBuffer();
 
         Command cmd;
         DEBUG_COMMAND_INFO(cmd, "Gaussian blur downsample");
@@ -139,7 +139,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
             .mvp = Matrix::MakeOrthographic(ISize(1, 1)),
             .texture_sampler_y_coord_scale = 1.0};
 
-        HostBuffer& host_buffer = renderer.GetTransientsBuffer();
+        HostBuffer& host_buffer = pass.GetTransientsBuffer();
 
         Command cmd;
         ContentContextOptions options = OptionsFromPass(pass);

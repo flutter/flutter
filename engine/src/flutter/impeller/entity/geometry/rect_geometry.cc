@@ -11,7 +11,7 @@ RectGeometry::RectGeometry(Rect rect) : rect_(rect) {}
 GeometryResult RectGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                const Entity& entity,
                                                RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer =

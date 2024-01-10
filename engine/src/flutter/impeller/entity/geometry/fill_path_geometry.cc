@@ -14,7 +14,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
   VertexBuffer vertex_buffer;
 
   if (path_.GetFillType() == FillType::kNonZero &&  //
@@ -94,7 +94,7 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
     return GeometryResult{
         .type = PrimitiveType::kTriangleStrip,
         .vertex_buffer =
-            vertex_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()),
+            vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer()),
         .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
         .prevent_overdraw = false,
     };
@@ -127,7 +127,7 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
   return GeometryResult{
       .type = PrimitiveType::kTriangle,
       .vertex_buffer =
-          vertex_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()),
+          vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer()),
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
       .prevent_overdraw = false,
   };

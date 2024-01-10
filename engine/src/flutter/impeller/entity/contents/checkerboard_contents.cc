@@ -21,7 +21,7 @@ CheckerboardContents::~CheckerboardContents() = default;
 bool CheckerboardContents::Render(const ContentContext& renderer,
                                   const Entity& entity,
                                   RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
 
   using VS = CheckerboardPipeline::VertexShader;
   using FS = CheckerboardPipeline::FragmentShader;
