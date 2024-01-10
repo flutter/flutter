@@ -22,10 +22,14 @@ import '_goldens_io.dart'
 /// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
 const bool _kLeakTracking = bool.fromEnvironment('LEAK_TRACKING');
 
+const String _kLeakTrackingDebug = String.fromEnvironment('LEAK_TRACKING');
+
 /// Test configuration for each test library in this directory.
 ///
 /// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
 Future<void> testExecutable(FutureOr<void> Function() testMain) {
+  debugPrint('!!! _kLeakTrackingDebug: [$_kLeakTrackingDebug]');
+
   // Enable checks because there are many implementations of [RenderBox] in this
   // package can benefit from the additional validations.
   debugCheckIntrinsicSizes = true;
