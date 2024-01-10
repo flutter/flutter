@@ -8,9 +8,8 @@
 #include <memory>
 #include <optional>
 #include <utility>
-#include "fml/macros.h"
+
 #include "impeller/base/thread.h"
-#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
 
 namespace impeller {
@@ -67,8 +66,8 @@ class CommandPoolVK final {
   std::weak_ptr<ContextVK>& context_;
 
   // Used to retain a reference on these until the pool is reset.
-  std::vector<vk::UniqueCommandBuffer> collected_buffers_
-      IPLR_GUARDED_BY(pool_mutex_);
+  std::vector<vk::UniqueCommandBuffer> collected_buffers_ IPLR_GUARDED_BY(
+      pool_mutex_);
 };
 
 //------------------------------------------------------------------------------

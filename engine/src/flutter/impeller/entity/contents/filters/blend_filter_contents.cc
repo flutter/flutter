@@ -146,7 +146,7 @@ static std::optional<Entity> AdvancedBlend(
 
   ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
                                                  RenderPass& pass) {
-    auto& host_buffer = pass.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsBuffer();
 
     auto size = pass.GetRenderTargetSize();
     VertexBufferBuilder<typename VS::PerVertexData> vtx_builder;
@@ -264,7 +264,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     using VS = BlendScreenPipeline::VertexShader;
     using FS = BlendScreenPipeline::FragmentShader;
 
-    auto& host_buffer = pass.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsBuffer();
 
     auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(coverage);
     if (!maybe_dst_uvs.has_value()) {
@@ -433,7 +433,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     using VS = PorterDuffBlendPipeline::VertexShader;
     using FS = PorterDuffBlendPipeline::FragmentShader;
 
-    auto& host_buffer = pass.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsBuffer();
 
     auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(coverage);
     if (!maybe_dst_uvs.has_value()) {
@@ -550,7 +550,7 @@ static std::optional<Entity> PipelineBlend(
 
   ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
                                                  RenderPass& pass) {
-    auto& host_buffer = pass.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsBuffer();
 
     Command cmd;
     DEBUG_COMMAND_INFO(cmd, SPrintF("Pipeline Blend Filter (%s)",

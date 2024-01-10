@@ -128,7 +128,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   bool is_external_texture =
       texture_->GetTextureDescriptor().type == TextureType::kTextureExternalOES;
 
-  auto& host_buffer = pass.GetTransientsBuffer();
+  auto& host_buffer = renderer.GetTransientsBuffer();
 
   auto geometry_result = GetGeometry()->GetPositionUVBuffer(
       Rect::MakeSize(texture_size), GetInverseEffectTransform(), renderer,

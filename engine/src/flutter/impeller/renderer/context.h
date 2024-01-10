@@ -180,10 +180,6 @@ class Context {
   ///             pending work.
   virtual void SetSyncPresentation(bool value) {}
 
-  //----------------------------------------------------------------------------
-  /// @brief Accessor for a pool of HostBuffers.
-  Pool<HostBuffer>& GetHostBufferPool() const { return host_buffer_pool_; }
-
   CaptureContext capture;
 
   /// Stores a task on the `ContextMTL` that is awaiting access for the GPU.
@@ -202,9 +198,9 @@ class Context {
  protected:
   Context();
 
- private:
-  mutable Pool<HostBuffer> host_buffer_pool_ = Pool<HostBuffer>(1'000'000);
+  std::vector<std::function<void()>> per_frame_task_;
 
+ private:
   Context(const Context&) = delete;
 
   Context& operator=(const Context&) = delete;

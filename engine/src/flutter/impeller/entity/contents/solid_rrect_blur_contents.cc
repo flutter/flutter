@@ -106,12 +106,14 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   cmd.pipeline = renderer.GetRRectBlurPipeline(opts);
   cmd.stencil_reference = entity.GetClipDepth();
 
-  cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
+  cmd.BindVertices(
+      vtx_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()));
 
   VS::FrameInfo frame_info;
   frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform() *
                    Matrix::MakeTranslation(positive_rect.GetOrigin());
-  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+  VS::BindFrameInfo(cmd,
+                    renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   FS::FragInfo frag_info;
   frag_info.color = color;
@@ -120,7 +122,8 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   frag_info.corner_radius =
       std::min(corner_radius_, std::min(positive_rect.GetWidth() / 2.0f,
                                         positive_rect.GetHeight() / 2.0f));
-  FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
+  FS::BindFragInfo(cmd,
+                   renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
 
   if (!pass.AddCommand(std::move(cmd))) {
     return false;
