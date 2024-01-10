@@ -768,11 +768,9 @@ class PageView extends StatefulWidget {
   /// Defaults to false.
   final bool reverse;
 
-  final PageController? _controller;
-
   /// An object that can be used to control the position to which this page
   /// view is scrolled.
-  PageController get controller => _controller ?? PageController();
+  final PageController? controller;
 
   /// How the page view should respond to user input.
   ///
