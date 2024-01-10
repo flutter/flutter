@@ -5101,6 +5101,7 @@ void main() {
       );
 
       testWidgets('popping a page with canPop true still calls onPopInvoked', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/141189.
         final List<_PageWithYesPop> pages = <_PageWithYesPop>[_PageWithYesPop.home];
         bool canPop() => pages.length <= 1;
         int onPopInvokedCallCount = 0;
