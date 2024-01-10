@@ -61,20 +61,20 @@ class CompileBundleStep implements PipelineStep {
       .toList();
   }
 
-  TestCompiler _createCompiler() {
-    switch (bundle.compileConfig.compiler) {
+  TestCompiler _createCompiler(CompileConfiguration config) {
+    switch (config.compiler) {
       case Compiler.dart2js:
         return Dart2JSCompiler(
           testSetDirectory,
           outputBundleDirectory,
-          renderer: bundle.compileConfig.renderer,
+          renderer: config.renderer,
           isVerbose: isVerbose,
         );
       case Compiler.dart2wasm:
         return Dart2WasmCompiler(
           testSetDirectory,
           outputBundleDirectory,
-          renderer: bundle.compileConfig.renderer,
+          renderer: config.renderer,
           isVerbose: isVerbose,
         );
     }
@@ -84,7 +84,9 @@ class CompileBundleStep implements PipelineStep {
   Future<void> run() async {
     print('Compiling test bundle ${bundle.name.ansiMagenta}...');
     final List<FilePath> allTests = _findTestFiles();
-    final TestCompiler compiler = _createCompiler();
+    final List<TestCompiler> compilers = bundle.compileConfigs.map(
+      (CompileConfiguration config) => _createCompiler(config)
+    ).toList();
     final Stopwatch stopwatch = Stopwatch()..start();
     final String testSetDirectoryPath = testSetDirectory.path;
 
@@ -94,26 +96,28 @@ class CompileBundleStep implements PipelineStep {
     }
 
     final List<Future<MapEntry<String, CompileResult>>> pendingResults = <Future<MapEntry<String, CompileResult>>>[];
-    for (final FilePath testFile in allTests) {
-      final String relativePath = pathlib.relative(
-        testFile.absolute,
-        from: testSetDirectoryPath);
-      final Future<MapEntry<String, CompileResult>> result = compilePool.withResource(() async {
-        if (testFiles != null && !testFiles!.contains(testFile)) {
-          return MapEntry<String, CompileResult>(relativePath, CompileResult.filtered);
-        }
-        final bool success = await compiler.compileTest(testFile);
-        const int maxTestNameLength = 80;
-        final String truncatedPath = relativePath.length > maxTestNameLength
-          ? relativePath.replaceRange(maxTestNameLength - 3, relativePath.length, '...')
-          : relativePath;
-        final String expandedPath = truncatedPath.padRight(maxTestNameLength);
-        io.stdout.write('\r  ${success ? expandedPath.ansiGreen : expandedPath.ansiRed}');
-        return success
-          ? MapEntry<String, CompileResult>(relativePath, CompileResult.success)
-          : MapEntry<String, CompileResult>(relativePath, CompileResult.compilationFailure);
-      });
-      pendingResults.add(result);
+    for (final TestCompiler compiler in compilers) {
+      for (final FilePath testFile in allTests) {
+        final String relativePath = pathlib.relative(
+          testFile.absolute,
+          from: testSetDirectoryPath);
+        final Future<MapEntry<String, CompileResult>> result = compilePool.withResource(() async {
+          if (testFiles != null && !testFiles!.contains(testFile)) {
+            return MapEntry<String, CompileResult>(relativePath, CompileResult.filtered);
+          }
+          final bool success = await compiler.compileTest(testFile);
+          const int maxTestNameLength = 80;
+          final String truncatedPath = relativePath.length > maxTestNameLength
+            ? relativePath.replaceRange(maxTestNameLength - 3, relativePath.length, '...')
+            : relativePath;
+          final String expandedPath = truncatedPath.padRight(maxTestNameLength);
+          io.stdout.write('\r  ${success ? expandedPath.ansiGreen : expandedPath.ansiRed}');
+          return success
+            ? MapEntry<String, CompileResult>(relativePath, CompileResult.success)
+            : MapEntry<String, CompileResult>(relativePath, CompileResult.compilationFailure);
+        });
+        pendingResults.add(result);
+      }
     }
     final Map<String, CompileResult> results = Map<String, CompileResult>.fromEntries(await Future.wait(pendingResults));
     stopwatch.stop();
@@ -121,8 +125,11 @@ class CompileBundleStep implements PipelineStep {
     final String resultsJson = const JsonEncoder.withIndent('  ').convert(<String, dynamic>{
       'name': bundle.name,
       'directory': bundle.testSet.directory,
-      'compiler': bundle.compileConfig.compiler.name,
-      'renderer': bundle.compileConfig.renderer.name,
+      'builds': bundle.compileConfigs.map(
+        (CompileConfiguration config) => <String, dynamic>{
+          'compiler': config.compiler.name,
+          'renderer': config.renderer.name,
+        }).toList(),
       'compileTimeInMs': stopwatch.elapsedMilliseconds,
       'results': results.map((String k, CompileResult v) => MapEntry<String, String>(k, v.name)),
     });

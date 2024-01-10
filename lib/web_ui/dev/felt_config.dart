@@ -32,11 +32,11 @@ class TestSet {
 }
 
 class TestBundle {
-  TestBundle(this.name, this.testSet, this.compileConfig);
+  TestBundle(this.name, this.testSet, this.compileConfigs);
 
   final String name;
   final TestSet testSet;
-  final CompileConfiguration compileConfig;
+  final List<CompileConfiguration> compileConfigs;
 }
 
 enum CanvasKitVariant {
@@ -157,12 +157,16 @@ class FeltConfig {
       if (testSet == null) {
         throw AssertionError('Test set not found with name: `$testSetName` (referenced by test bundle: `$name`)');
       }
-      final String compileConfigName = testBundleYaml['compile-config'] as String;
-      final CompileConfiguration? compileConfig = compileConfigsByName[compileConfigName];
-      if (compileConfig == null) {
-        throw AssertionError('Compile config not found with name: `$compileConfigName` (referenced by test bundle: `$name`)');
+      final dynamic compileConfigsValue = testBundleYaml['compile-configs'];
+      final List<CompileConfiguration> compileConfigs;
+      if (compileConfigsValue is String) {
+        compileConfigs = <CompileConfiguration>[compileConfigsByName[compileConfigsValue]!];
+      } else {
+        compileConfigs = (compileConfigsValue as List<dynamic>).map(
+          (dynamic configName) => compileConfigsByName[configName as String]!
+        ).toList();
       }
-      final TestBundle bundle = TestBundle(name, testSet, compileConfig);
+      final TestBundle bundle = TestBundle(name, testSet, compileConfigs);
       testBundles.add(bundle);
       if (testBundlesByName.containsKey(name)) {
         throw AssertionError('Duplicate test bundle name: $name');
@@ -201,11 +205,6 @@ class FeltConfig {
       final RunConfiguration? runConfig = runConfigsByName[runConfigName];
       if (runConfig == null) {
         throw AssertionError('Run config not found with name: `$runConfigName` (referenced by test suite: `$name`)');
-      }
-      if (bundle.compileConfig.renderer == Renderer.canvaskit && runConfig.variant == null) {
-        throw AssertionError(
-            'Run config `$runConfigName` was used with a CanvasKit test bundle `$testBundleName` '
-            'but did not specify a CanvasKit variant (referenced by test suite: `$name`)');
       }
       bool canvasKit = false;
       bool canvasKitChromium = false;

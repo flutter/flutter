@@ -70,18 +70,28 @@ class FileFilter extends BundleNameFilter {
   }
 }
 
-class CompilerFilter extends AllowListSuiteFilter<Compiler> {
-  CompilerFilter({required super.allowList});
+class CompilerFilter extends SuiteFilter {
+  CompilerFilter({required this.allowList});
+
+  final Set<Compiler> allowList;
 
   @override
-  Compiler getAttributeForSuite(TestSuite suite) => suite.testBundle.compileConfig.compiler;
+  SuiteFilterResult filterSuite(TestSuite suite) => suite.testBundle.compileConfigs.any(
+    (CompileConfiguration config) => allowList.contains(config.compiler)
+  ) ? SuiteFilterResult.accepted()
+    : SuiteFilterResult.rejected('Selected compilers not used in suite.');
 }
 
-class RendererFilter extends AllowListSuiteFilter<Renderer> {
-  RendererFilter({required super.allowList});
+class RendererFilter extends SuiteFilter {
+  RendererFilter({required this.allowList});
+
+  final Set<Renderer> allowList;
 
   @override
-  Renderer getAttributeForSuite(TestSuite suite) => suite.testBundle.compileConfig.renderer;
+  SuiteFilterResult filterSuite(TestSuite suite) => suite.testBundle.compileConfigs.any(
+    (CompileConfiguration config) => allowList.contains(config.renderer)
+  ) ? SuiteFilterResult.accepted()
+    : SuiteFilterResult.rejected('Selected renderers not used in suite.');
 }
 
 class CanvasKitVariantFilter extends AllowListSuiteFilter<CanvasKitVariant> {

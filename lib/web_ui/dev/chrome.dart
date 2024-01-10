@@ -23,14 +23,11 @@ import 'package_lock.dart';
 /// Provides an environment for desktop Chrome.
 class ChromeEnvironment implements BrowserEnvironment {
   ChromeEnvironment({
-    required bool enableWasmGC,
     required bool useDwarf,
-  }) : _enableWasmGC = enableWasmGC,
-       _useDwarf = useDwarf;
+  }) : _useDwarf = useDwarf;
 
   late final BrowserInstallation _installation;
 
-  final bool _enableWasmGC;
   final bool _useDwarf;
 
   @override
@@ -42,7 +39,6 @@ class ChromeEnvironment implements BrowserEnvironment {
       url,
       _installation,
       debug: debug,
-      enableWasmGC: _enableWasmGC,
       useDwarf: _useDwarf
     );
   }
@@ -83,7 +79,6 @@ class Chrome extends Browser {
     Uri url,
     BrowserInstallation installation, {
     required bool debug,
-    required bool enableWasmGC,
     required bool useDwarf,
   }) {
     final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
@@ -101,13 +96,7 @@ class Chrome extends Browser {
       final bool isChromeNoSandbox =
           Platform.environment['CHROME_NO_SANDBOX'] == 'true';
       final String dir = await generateUserDirectory(installation, useDwarf);
-      final String jsFlags = enableWasmGC ? <String>[
-        '--experimental-wasm-gc',
-        '--experimental-wasm-stack-switching',
-        '--experimental-wasm-type-reflection',
-      ].join(' ') : '';
       final List<String> args = <String>[
-        if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
         '--user-data-dir=$dir',
         url.toString(),
         if (!debug)
