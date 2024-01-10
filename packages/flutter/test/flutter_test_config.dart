@@ -12,16 +12,20 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '_goldens_io.dart'
   if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
 
-/// If true, leak tracking will be enabled for all tests `testWidgetsWithLeakTracking`.
+/// If true, leak tracking is enabled for all `testWidgets`.
 ///
-/// By default, the constant is false.
-/// To enable the leak tracking for all tests, either pass the compilation flag
-/// `--dart-define=flutter_test_config.leak_tracking=true` or
-/// temporarily pass `defaultValue = true` to `fromEnvironment` in the constant definition.
+/// By default it is false.
+/// To enable the leak tracking, either pass the compilation flag
+/// `--dart-define LEAK_TRACKING=true` or set the environment variable `LEAK_TRACKING` to `true`.
 ///
-/// To enable leak tracking for an individual test file, add the line to the test `main`:
-/// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
-bool _kLeakTracking = bool.parse(Platform.environment['LEAK_TRACKING'] ?? 'false');
+/// See documentation for [testWidgets] on how to except individual tests.
+bool isLeakTrackingEnabled() {
+  // The values can be different: https://github.com/dart-lang/sdk/issues/54568
+  if (Platform.environment['LEAK_TRACKING'] == 'true') {
+    return true;
+  }
+  return const bool.fromEnvironment('LEAK_TRACKING');
+}
 
 /// Test configuration for each test library in this directory.
 ///
@@ -37,7 +41,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   // Leak tracking is off by default.
   // To enable it, follow doc for [_kLeakTracking].
-  if (_kLeakTracking) {
+  if (isLeakTrackingEnabled()) {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;
@@ -48,7 +52,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
         allNotGCed: true,
       );
 
-    // TODO(polina-c): remove print after fixing https://github.com/dart-lang/sdk/issues/54568
+    // Print is here in spite of
+    // https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#only-log-actionable-messages-to-the-console
+    // to provide a way to detect if the env variable is passed as expected on bots, that is not obvious
+    // (https://github.com/dart-lang/sdk/issues/54568).
     debugPrint('Leak tracking is enabled.');
   }
 
