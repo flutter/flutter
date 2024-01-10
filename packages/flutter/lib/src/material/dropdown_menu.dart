@@ -640,9 +640,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(minimumSize: MaterialStatePropertyAll<Size?>(Size(anchorWidth, 0.0)));
     }
 
-    if (widget.menuHeight != null) {
-      effectiveMenuStyle = effectiveMenuStyle.copyWith(maximumSize: MaterialStatePropertyAll<Size>(Size(double.infinity, widget.menuHeight!)));
-    }
+    effectiveMenuStyle = effectiveMenuStyle.copyWith(
+      maximumSize: MaterialStatePropertyAll<Size>(Size(widget.width ?? anchorWidth ?? double.infinity, widget.menuHeight ?? double.infinity))
+    );
     final InputDecorationTheme effectiveInputDecorationTheme = widget.inputDecorationTheme
       ?? theme.inputDecorationTheme
       ?? defaults.inputDecorationTheme!;
