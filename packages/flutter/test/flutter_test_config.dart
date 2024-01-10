@@ -17,7 +17,7 @@ import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart'
 ///
 /// By default it is false.
 /// To enable the leak tracking, either pass the compilation flag
-/// `--dart-define LEAK_TRACKING=true` or set the environment variable `LEAK_TRACKING` to `true`.
+/// `--dart-define LEAK_TRACKING=true` or invoke `export LEAK_TRACKING=true`.
 ///
 /// See documentation for [testWidgets] on how to except individual tests.
 bool isLeakTrackingEnabled() {
@@ -50,12 +50,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
       createdByTestHelpers: true,
       allNotGCed: true,
     );
-
-    // Print is here in spite of
-    // https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#only-log-actionable-messages-to-the-console
-    // to provide a way to detect if the env variable is passed as expected on bots, that is not obvious.
-    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/141299.
-    debugPrint('Leak tracking is enabled.');
   }
 
   // Enable golden file testing using Skia Gold.
