@@ -1932,6 +1932,38 @@ void main() {
 
     expect(find.byType(Scrollbar), findsOneWidget);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Long text item does not overflow', (WidgetTester tester) async {
+    const String longText =
+      'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
+    final List<DropdownMenuEntry<int>> menuItems = <DropdownMenuEntry<int>>[
+      const DropdownMenuEntry<int>(
+        value: 0,
+        label: longText,
+      ),
+    ];
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            DropdownMenu<int>(
+              expandedInsets: EdgeInsets.zero,
+              dropdownMenuEntries: menuItems,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+  });
 }
 
 enum TestMenu {

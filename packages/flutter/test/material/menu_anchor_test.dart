@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta_meta.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -2436,6 +2437,25 @@ void main() {
       await tester.tap(find.text('Button 1'));
       await tester.pump();
       expect(find.byType(MenuItemButton), findsNWidgets(1));
+    });
+
+    testWidgets('MenuItemButton does not overflow when child is long', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            child: MenuItemButton(
+              onPressed: () {},
+              child: const Text('MenuItem Button does not overflow when child is long'),
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pumpAndSettle();
+
+      // No exception should be thrown.
+      expect(tester.takeException(), isNull);
     });
   });
 
