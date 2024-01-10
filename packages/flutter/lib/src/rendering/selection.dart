@@ -172,9 +172,11 @@ mixin Selectable implements SelectionHandler {
   List<Rect> get boundingBoxes;
 
   /// The [TextSelection] of this [Selectable].
+  @override
   TextSelection? get textSelection;
 
   /// An int that represents the content length of this [Selectable].
+  @override
   int? get contentLength;
 
   /// Disposes resources held by the mixer.
