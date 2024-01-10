@@ -49,8 +49,6 @@ class RunSuiteStep implements PipelineStep {
   /// Require Skia Gold to be available and reachable.
   final bool requireSkiaGold;
 
-  bool get isWasm => suite.testBundle.compileConfig.compiler == Compiler.dart2wasm;
-
   @override
   String get description => 'run_suite';
 
@@ -65,7 +63,6 @@ class RunSuiteStep implements PipelineStep {
     _prepareTestResultsDirectory();
     final BrowserEnvironment browserEnvironment = getBrowserEnvironment(
       suite.runConfig.browser,
-      enableWasmGC: isWasm,
       useDwarf: useDwarf,
     );
     await browserEnvironment.prepare();
@@ -177,12 +174,18 @@ class RunSuiteStep implements PipelineStep {
   }
 
   Future<SkiaGoldClient?> _createSkiaClient() async {
-    final Renderer renderer = suite.testBundle.compileConfig.renderer;
+    if (suite.testBundle.compileConfigs.length > 1) {
+      // Multiple compile configs are only used for our fallback tests, which
+      // do not collect goldens.
+      return null;
+    }
+    final Renderer renderer = suite.testBundle.compileConfigs.first.renderer;
     final CanvasKitVariant? variant = suite.runConfig.variant;
     final io.Directory workDirectory = getSkiaGoldDirectoryForSuite(suite);
     if (workDirectory.existsSync()) {
       workDirectory.deleteSync(recursive: true);
     }
+    final bool isWasm = suite.testBundle.compileConfigs.first.compiler == Compiler.dart2wasm;
     final SkiaGoldClient skiaClient = SkiaGoldClient(
       workDirectory,
       dimensions: <String, String> {
