@@ -53,7 +53,7 @@ bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
         if (!picture.has_value()) {
           return false;
         }
-        return renderer.Render(*picture, render_target);
+        return renderer.Render(*picture, render_target, true);
       });
 }
 

@@ -138,7 +138,7 @@ bool TextureContents::Render(const ContentContext& renderer,
       {destination_rect.GetRightBottom(), texture_coords.GetRightBottom()},
   });
 
-  auto& host_buffer = pass.GetTransientsBuffer();
+  auto& host_buffer = renderer.GetTransientsBuffer();
 
   VS::FrameInfo frame_info;
   frame_info.mvp = pass.GetOrthographicTransform() *

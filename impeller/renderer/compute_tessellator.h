@@ -65,6 +65,7 @@ class ComputeTessellator {
   // and heap allocated buffers on Metal.
   Status Tessellate(
       const Path& path,
+      HostBuffer& host_buffer,
       const std::shared_ptr<Context>& context,
       BufferView vertex_buffer,
       BufferView vertex_buffer_count,
