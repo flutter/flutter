@@ -314,6 +314,7 @@ void main() {
       testWidgets('Keep alive works with additional parent data widgets', (WidgetTester tester) async {
         const ChildVicinity firstCell = ChildVicinity(xIndex: 0, yIndex: 0);
         final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
         final UniqueKey checkBoxKey = UniqueKey();
         final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBuilderDelegate(
           maxXIndex: 5,

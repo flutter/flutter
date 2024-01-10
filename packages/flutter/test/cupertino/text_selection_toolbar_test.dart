@@ -343,6 +343,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'Select me custom menu',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(

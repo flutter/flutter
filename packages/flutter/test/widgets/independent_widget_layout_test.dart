@@ -229,7 +229,10 @@ void main() {
   testWidgets('no crosstalk between focus nodes', (WidgetTester tester) async {
     final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
     final FocusNode onscreenFocus = FocusNode();
+    addTearDown(onscreenFocus.dispose);
     final FocusNode offscreenFocus = FocusNode();
+    addTearDown(offscreenFocus.dispose);
+
     await tester.pumpWidget(
       TestFocusable(
         focusNode: onscreenFocus,

@@ -45,6 +45,8 @@ void main() {
 
   testWidgets('Focus handling', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(

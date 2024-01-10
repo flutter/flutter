@@ -81,8 +81,8 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
     final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..onStart = (_) {};
-    addTearDown(() => drag.dispose);
-    addTearDown(() => competingDrag.dispose);
+    addTearDown(drag.dispose);
+    addTearDown(competingDrag.dispose);
 
     late Offset positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
@@ -104,8 +104,8 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
     final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..onStart = (_) {};
-    addTearDown(() => drag.dispose);
-    addTearDown(() => competingDrag.dispose);
+    addTearDown(drag.dispose);
+    addTearDown(competingDrag.dispose);
 
     Offset? positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
@@ -354,7 +354,7 @@ void main() {
 
     final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..onStart = (_) {};
-    addTearDown(() => competingDrag.dispose);
+    addTearDown(competingDrag.dispose);
 
     down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 600));
     drag.addPointer(down);
@@ -436,8 +436,8 @@ void main() {
     final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
       ..onStart = (_) {};
-    addTearDown(() => drag.dispose);
-    addTearDown(() => competingDrag.dispose);
+    addTearDown(drag.dispose);
+    addTearDown(competingDrag.dispose);
 
     Offset? positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
@@ -475,8 +475,8 @@ void main() {
       VerticalDragGestureRecognizer()
         ..dragStartBehavior = DragStartBehavior.down
         ..multitouchDragStrategy = MultitouchDragStrategy.sumAllPointers;
-    addTearDown(() => drag1.dispose);
-    addTearDown(() => drag2.dispose);
+    addTearDown(drag1.dispose);
+    addTearDown(drag2.dispose);
 
     final List<String> log = <String>[];
     drag1.onDown = (_) { log.add('drag1-down'); };
@@ -556,8 +556,8 @@ void main() {
     HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     final VerticalDragGestureRecognizer drag2 =
     VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
-    addTearDown(() => drag1.dispose);
-    addTearDown(() => drag2.dispose);
+    addTearDown(drag1.dispose);
+    addTearDown(drag2.dispose);
 
     final List<String> log = <String>[];
     drag1.onDown = (_) { log.add('drag1-down'); };

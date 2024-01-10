@@ -78,6 +78,9 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
 }
 
 void main() {
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   late Image image20x10;
   late Image image200x100;
   setUp(() async {

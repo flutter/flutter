@@ -357,7 +357,9 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/133529
       final List<String> log = <String>[];
       final ScrollController verticalController = ScrollController();
+      addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController();
+      addTearDown(horizontalController.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -498,7 +500,9 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/133529
       final List<String> log = <String>[];
       final ScrollController verticalController = ScrollController();
+      addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController();
+      addTearDown(horizontalController.dispose);
 
       await tester.pumpWidget(
         Directionality(

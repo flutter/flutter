@@ -1067,10 +1067,12 @@ void main() {
         final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
+        final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,

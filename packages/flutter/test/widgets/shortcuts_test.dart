@@ -1619,6 +1619,7 @@ void main() {
 
     testWidgets("doesn't override text field shortcuts", (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
