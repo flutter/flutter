@@ -1049,7 +1049,7 @@ class StepStyle with Diagnosticable {
 
   /// Overrides the default color of the connector line between two steps.
   ///
-  /// Only works when [StepperType] is [StepperType.horizontal].
+  /// This property only applies when [Stepper.type] is [StepperType.horizontal].
   final Color? connectorColor;
 
   /// Overrides the default thickness of the connector line between two steps.
