@@ -5,20 +5,26 @@
 #include "impeller/renderer/compute_pass.h"
 #include <memory>
 
-#include "fml/logging.h"
+#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/host_buffer.h"
 
 namespace impeller {
 
 ComputePass::ComputePass(std::weak_ptr<const Context> context)
-    : context_(std::move(context)) {}
+    : context_(std::move(context)), transients_buffer_(HostBuffer::Create()) {}
 
 ComputePass::~ComputePass() = default;
+
+HostBuffer& ComputePass::GetTransientsBuffer() {
+  return *transients_buffer_;
+}
 
 void ComputePass::SetLabel(const std::string& label) {
   if (label.empty()) {
     return;
   }
+  transients_buffer_->SetLabel(SPrintF("%s Transients", label.c_str()));
   OnSetLabel(label);
 }
 

@@ -95,7 +95,6 @@ class CommandEncoderVK {
   std::shared_ptr<TrackedObjectsVK> tracked_objects_;
   std::shared_ptr<QueueVK> queue_;
   const std::shared_ptr<FenceWaiterVK> fence_waiter_;
-  std::shared_ptr<HostBuffer> host_buffer_;
   bool is_valid_ = true;
 
   void Reset();

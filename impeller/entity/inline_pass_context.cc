@@ -6,9 +6,9 @@
 
 #include <utility>
 
-#include "impeller/base/allocation.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/entity_pass_target.h"
 #include "impeller/renderer/command_buffer.h"
 

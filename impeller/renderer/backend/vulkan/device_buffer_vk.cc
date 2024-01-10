@@ -5,8 +5,6 @@
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 
 #include "flutter/fml/trace_event.h"
-#include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "vulkan/vulkan_core.h"
 
 namespace impeller {
 
@@ -62,13 +60,6 @@ bool DeviceBufferVK::SetLabel(const std::string& label) {
 
   return ContextVK::Cast(*context).SetDebugName(resource_->buffer.get().buffer,
                                                 label);
-}
-
-void DeviceBufferVK::Flush(std::optional<Range> range) const {
-  auto flush_range = range.value_or(Range{0, GetDeviceBufferDescriptor().size});
-  ::vmaFlushAllocation(resource_->buffer.get().allocator,
-                       resource_->buffer.get().allocation, flush_range.offset,
-                       flush_range.length);
 }
 
 bool DeviceBufferVK::SetLabel(const std::string& label, Range range) {

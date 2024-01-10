@@ -38,20 +38,12 @@ class DeviceBuffer : public Buffer,
       uint16_t row_bytes) const;
 
   // |Buffer|
-  std::shared_ptr<const DeviceBuffer> GetDeviceBuffer() const;
+  std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
+      Allocator& allocator) const;
 
   const DeviceBufferDescriptor& GetDeviceBufferDescriptor() const;
 
   virtual uint8_t* OnGetContents() const = 0;
-
-  /// Make any pending writes visible to the GPU.
-  ///
-  /// This method must be called if the device pointer provided by
-  /// [OnGetContents] is written to without using [CopyHostBuffer]. On Devices
-  /// with coherent host memory, this method will not perform extra work.
-  ///
-  /// If the range is not provided, the entire buffer is flushed.
-  virtual void Flush(std::optional<Range> range = std::nullopt) const;
 
  protected:
   const DeviceBufferDescriptor desc_;

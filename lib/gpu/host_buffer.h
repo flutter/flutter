@@ -9,7 +9,6 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/host_buffer.h"
-#include "lib/gpu/context.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
@@ -20,7 +19,7 @@ class HostBuffer : public RefCountedDartWrappable<HostBuffer> {
   FML_FRIEND_MAKE_REF_COUNTED(HostBuffer);
 
  public:
-  explicit HostBuffer(Context* context);
+  explicit HostBuffer();
 
   ~HostBuffer() override;
 

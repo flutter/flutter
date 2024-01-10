@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "impeller/core/host_buffer.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
@@ -53,8 +52,6 @@ class SceneContext {
   std::shared_ptr<Context> GetContext() const;
 
   std::shared_ptr<Texture> GetPlaceholderTexture() const;
-
-  HostBuffer& GetTransientsBuffer() const { return *host_buffer_; }
 
  private:
   class PipelineVariants {
@@ -147,7 +144,6 @@ class SceneContext {
   // A 1x1 opaque white texture that can be used as a placeholder binding.
   // Available for the lifetime of the scene context
   std::shared_ptr<Texture> placeholder_texture_;
-  std::shared_ptr<HostBuffer> host_buffer_;
 
   SceneContext(const SceneContext&) = delete;
 

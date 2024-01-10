@@ -39,9 +39,7 @@ class AiksContext {
 
   ContentContext& GetContentContext() const;
 
-  bool Render(const Picture& picture,
-              RenderTarget& render_target,
-              bool reset_host_buffer);
+  bool Render(const Picture& picture, RenderTarget& render_target);
 
  private:
   std::shared_ptr<Context> context_;

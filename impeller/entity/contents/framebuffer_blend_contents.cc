@@ -38,7 +38,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   using VS = FramebufferBlendScreenPipeline::VertexShader;
   using FS = FramebufferBlendScreenPipeline::FragmentShader;
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = pass.GetTransientsBuffer();
 
   auto src_snapshot = child_contents_->RenderToSnapshot(
       renderer,                                    // renderer

@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "impeller/base/allocation.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/device_buffer.h"
@@ -37,8 +38,6 @@ class DeviceBufferGLES final
   };
 
   [[nodiscard]] bool BindAndUploadDataIfNecessary(BindingType type) const;
-
-  void Flush(std::optional<Range> range = std::nullopt) const override;
 
  private:
   ReactorGLES::Ref reactor_;

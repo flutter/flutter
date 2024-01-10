@@ -96,12 +96,11 @@ bool ClipContents::Render(const ContentContext& renderer,
       auto vertices =
           VertexBufferBuilder<VS::PerVertexData>{}
               .AddVertices({{points[0]}, {points[1]}, {points[2]}, {points[3]}})
-              .CreateVertexBuffer(renderer.GetTransientsBuffer());
+              .CreateVertexBuffer(pass.GetTransientsBuffer());
       cmd.BindVertices(std::move(vertices));
 
       info.mvp = pass.GetOrthographicTransform();
-      VS::BindFrameInfo(cmd,
-                        renderer.GetTransientsBuffer().EmplaceUniform(info));
+      VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
       options.primitive_type = PrimitiveType::kTriangleStrip;
       cmd.pipeline = renderer.GetClipPipeline(options);
@@ -129,7 +128,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   cmd.BindVertices(std::move(geometry_result.vertex_buffer));
 
   info.mvp = geometry_result.transform;
-  VS::BindFrameInfo(cmd, renderer.GetTransientsBuffer().EmplaceUniform(info));
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
   pass.AddCommand(std::move(cmd));
   return true;
@@ -198,12 +197,11 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
       {Point(ltrb[0], ltrb[3])},
       {Point(ltrb[2], ltrb[3])},
   });
-  cmd.BindVertices(
-      vtx_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()));
+  cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
   VS::FrameInfo info;
   info.mvp = pass.GetOrthographicTransform();
-  VS::BindFrameInfo(cmd, renderer.GetTransientsBuffer().EmplaceUniform(info));
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
   pass.AddCommand(std::move(cmd));
   return true;

@@ -78,16 +78,6 @@ std::shared_ptr<Texture> DeviceBufferMTL::AsTexture(
   return true;
 }
 
-void DeviceBufferMTL::Flush(std::optional<Range> range) const {
-#if !FML_OS_IOS
-  auto flush_range = range.value_or(Range{0, GetDeviceBufferDescriptor().size});
-  if (storage_mode_ == MTLStorageModeManaged) {
-    [buffer_
-        didModifyRange:NSMakeRange(flush_range.offset, flush_range.length)];
-  }
-#endif
-}
-
 bool DeviceBufferMTL::SetLabel(const std::string& label) {
   if (label.empty()) {
     return false;

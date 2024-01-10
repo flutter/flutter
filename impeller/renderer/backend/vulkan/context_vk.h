@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/fml/concurrent_message_loop.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/unique_fd.h"
 #include "fml/thread.h"
