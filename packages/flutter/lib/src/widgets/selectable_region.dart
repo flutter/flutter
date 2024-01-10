@@ -430,26 +430,12 @@ class SelectableRegionState extends State<SelectableRegion> implements Selection
   }
 
   void _updateSelectionStatus() {
-    /*
-    final TextSelection selection;
-    final SelectionGeometry geometry = _selectionDelegate.value;
-    switch (geometry.status) {
-      case SelectionStatus.uncollapsed:
-      case SelectionStatus.collapsed:
-        selection = const TextSelection(baseOffset: 0, extentOffset: 1);
-      case SelectionStatus.none:
-        selection = const TextSelection.collapsed(offset: 1);
-    }
-    _selectionDelegate.value;
-    // TODO(justinmc): How do I update the selection now? What did this ever do?
-    //textEditingValue = TextEditingValue(text: '__', selection: selection);
     if (_hasSelectionOverlayGeometry) {
       _updateSelectionOverlay();
     } else {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
     }
-    */
   }
 
   // gestures.
@@ -702,12 +688,14 @@ class SelectableRegionState extends State<SelectableRegion> implements Selection
 
  void _onAnyDragEnd(DragEndDetails details) {
    _selectionOverlay!.hideMagnifier();
-   _selectionOverlay!.showToolbar(
-     context: context,
-     contextMenuBuilder: (BuildContext context) {
-       return widget.contextMenuBuilder!(context, this);
-     },
-   );
+   if (widget.contextMenuBuilder != null) {
+     _selectionOverlay!.showToolbar(
+       context: context,
+       contextMenuBuilder: (BuildContext context) {
+         return widget.contextMenuBuilder!(context, this);
+       },
+     );
+   }
   _stopSelectionStartEdgeUpdate();
   _stopSelectionEndEdgeUpdate();
   _updateSelectedContentIfNeeded();
@@ -906,7 +894,8 @@ class SelectableRegionState extends State<SelectableRegion> implements Selection
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
   bool _showToolbar({Offset? location}) {
-    if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
+    if (widget.contextMenuBuilder == null
+        || (!_hasSelectionOverlayGeometry && _selectionOverlay == null)) {
       return false;
     }
 
