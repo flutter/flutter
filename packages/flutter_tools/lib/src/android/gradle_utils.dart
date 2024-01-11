@@ -206,11 +206,9 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   const String buildFileName = 'build.gradle/build.gradle.kts';
 
-  final File buildFile;
-  if (directory.childFile('build.gradle.kts').existsSync()) {
+  File buildFile = directory.childFile('build.gradle');
+  if (!buildFile.existsSync()) {
     buildFile = directory.childFile('build.gradle.kts');
-  } else {
-    buildFile = directory.childFile('build.gradle');
   }
 
   if (!buildFile.existsSync()) {
@@ -333,9 +331,13 @@ OS:           Mac OS X 13.2.1 aarch64
 /// [settings.gradle] file within the project's
 /// Android directory ([androidDirectory]).
 String? getAgpVersion(Directory androidDirectory, Logger logger) {
-  final File buildFile = androidDirectory.childFile('build.gradle');
+  File buildFile = androidDirectory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
-    logger.printTrace('Can not find build.gradle in $androidDirectory');
+    buildFile = androidDirectory.childFile('build.gradle.kts');
+  }
+
+  if (!buildFile.existsSync()) {
+    logger.printTrace('Can not find build.gradle/build.gradle.kts in $androidDirectory');
     return null;
   }
   final String buildFileContent = buildFile.readAsStringSync();
