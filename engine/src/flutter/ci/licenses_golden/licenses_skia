@@ -1,4 +1,4 @@
-Signature: 021f16f951fc3f5f38dfa832382f7cfb
+Signature: 88370e23f3bfbfe0fd7ee9e454639574
 
 ====================================================================================================
 LIBRARY: etc1
@@ -401,8 +401,12 @@ FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_gpu.minified.sks
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_gpu.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag.unoptimized.sksl
+FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag_es2.minified.sksl
+FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag_es2.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert.unoptimized.sksl
+FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert_es2.minified.sksl
+FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert_es2.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_public.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_public.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_rt_shader.minified.sksl
@@ -416,7 +420,9 @@ FILE: ../../../flutter/third_party/skia/src/sksl/sksl_compute.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_frag.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_frag.sksl
+FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_frag_es2.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_vert.sksl
+FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_vert_es2.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_shared.sksl
