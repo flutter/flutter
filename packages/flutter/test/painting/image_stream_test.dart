@@ -891,4 +891,30 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('ImageInfo dispatches memory events by default', (WidgetTester tester) async {
+    final Image image = await createTestImage(width: 100, height: 100);
+    await expectLater(
+      await memoryEvents(
+        () async {
+          final ImageInfo info = TestImageInfo(1, image: image);
+          info.dispose();
+        },
+        ImageInfo,
+      ),
+      areCreateAndDispose,
+    );
+  });
+
+  testWidgets('ImageInfo does not dispatch memory events when image does not need to be disposed', (WidgetTester tester) async {
+    final Image image = await createTestImage(width: 100, height: 100);
+    final List<ObjectEvent> events = await memoryEvents(
+      () async {
+        final ImageInfo info = TestImageInfo(1, image: image, shouldDisposeImage: false);
+        info.dispose();
+      },
+      ImageInfo,
+    );
+    expect(events, isEmpty);
+  });
 }

@@ -23,7 +23,12 @@ class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
   /// The [debugLabel] may be used to identify the source of this image.
-  ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel,  this.shouldDisposeImage = false})
+  ImageInfo({
+    required this.image,
+    this.scale = 1.0,
+    this.debugLabel,
+    this.shouldDisposeImage = true, // The default is true for backwards compatibility.
+  })
   {
     if (kFlutterMemoryAllocationsEnabled && shouldDisposeImage) {
       MemoryAllocations.instance.dispatchObjectCreated(
@@ -57,7 +62,6 @@ class ImageInfo {
       image: image.clone(),
       scale: scale,
       debugLabel: debugLabel,
-      shouldDisposeImage: true,
     );
   }
 
@@ -110,11 +114,13 @@ class ImageInfo {
   /// the image.
   final ui.Image image;
 
-  /// if true, the [image] will be disposed when this object is disposed.
+  /// If true, the [image] will be disposed when this object is disposed.
+  ///
+  /// If false, the object will not dispatch its lifecicle events to [FlutterMemoryAllocations].
   ///
   /// This is used to:
-  /// * avoid disposing the [image] when it is owned by other object
-  /// * transfer the [image] ownership to this object
+  /// * avoid disposing the [image] when it is owned by other object (when false)
+  /// * transfer the [image] ownership to this object (when true)
   final bool shouldDisposeImage;
 
   /// The size of raw image pixels in bytes.
