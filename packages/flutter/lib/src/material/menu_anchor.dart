@@ -855,6 +855,7 @@ class MenuItemButton extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.closeOnActivate = true,
+    this.menuDirection = Axis.vertical,
     required this.child,
   });
 
@@ -923,6 +924,8 @@ class MenuItemButton extends StatefulWidget {
   /// Defaults to true.
   /// {@endtemplate}
   final bool closeOnActivate;
+
+  final Axis menuDirection;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1111,6 +1114,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         shortcut: widget.shortcut,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
+        menuDirection: widget.menuDirection,
         child: widget.child!,
       ),
     );
@@ -1608,6 +1612,7 @@ class SubmenuButton extends StatefulWidget {
     this.statesController,
     this.leadingIcon,
     this.trailingIcon,
+    this.menuDirection = Axis.vertical,
     required this.menuChildren,
     required this.child,
   });
@@ -1674,6 +1679,8 @@ class SubmenuButton extends StatefulWidget {
 
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
+
+  final Axis menuDirection;
 
   /// The list of widgets that appear in the menu when it is opened.
   ///
@@ -1961,6 +1968,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                 trailingIcon: widget.trailingIcon,
                 hasSubmenu: true,
                 showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                menuDirection: controller._anchor!._parent?._orientation ?? widget.menuDirection,
                 child: child ?? const SizedBox(),
               ),
             ),
@@ -3064,6 +3072,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.shortcut,
+    this.menuDirection = Axis.vertical,
     required this.child,
   });
 
@@ -3087,6 +3096,8 @@ class _MenuItemLabel extends StatelessWidget {
   /// the shortcut.
   final MenuSerializableShortcut? shortcut;
 
+  final Axis menuDirection;
+
   /// The required label child widget.
   final Widget child;
 
@@ -3097,27 +3108,43 @@ class _MenuItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
+
+    Widget leadings;
+    if (menuDirection == Axis.vertical) {
+      leadings = Expanded(
+        child: ClipRect(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (leadingIcon != null) leadingIcon!,
+              Expanded(
+                child: ClipRect(
+                  child: Padding(
+                    padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+                    child: child,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      leadings = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (leadingIcon != null) leadingIcon!,
+          Padding(
+            padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+            child: child,
+          ),
+        ],
+      );
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Expanded(
-          child: ClipRect(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                if (leadingIcon != null) leadingIcon!,
-                Expanded(
-                  child: ClipRect(
-                    child: Padding(
-                      padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
-                      child: child,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        leadings,
         if (trailingIcon != null)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),

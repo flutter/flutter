@@ -662,7 +662,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(0, 0, 800, 48)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(124.0, 73.0, 278.0, 87.0)),
+        equals(const Rect.fromLTRB(124.0, 73.0, 314.0, 87.0)),
       );
       expect(
         tester.getRect(
@@ -730,7 +730,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(0, 0, 800, 48)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(522.0, 73.0, 676.0, 87.0)),
+        equals(const Rect.fromLTRB(486.0, 73.0, 676.0, 87.0)),
       );
       expect(
         tester.getRect(
@@ -941,7 +941,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(146.0, 95.0, 300.0, 109.0)),
+        equals(const Rect.fromLTRB(146.0, 95.0, 336.0, 109.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
@@ -997,7 +997,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(500.0, 95.0, 654.0, 109.0)),
+        equals(const Rect.fromLTRB(464.0, 95.0, 654.0, 109.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
@@ -1261,6 +1261,7 @@ void main() {
 
     testWidgets('diagnostics', (WidgetTester tester) async {
       const MenuItemButton item = MenuItemButton(
+        menuDirection: Axis.horizontal,
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
         child: Text('label2'),
       );
