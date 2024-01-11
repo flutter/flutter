@@ -7,6 +7,7 @@
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/path.h"
 #include "impeller/renderer/render_pass.h"
 
@@ -38,7 +39,7 @@ std::optional<Rect> SolidColorContents::GetCoverage(
     return std::nullopt;
   }
 
-  auto geometry = GetGeometry();
+  const std::shared_ptr<Geometry>& geometry = GetGeometry();
   if (geometry == nullptr) {
     return std::nullopt;
   }
