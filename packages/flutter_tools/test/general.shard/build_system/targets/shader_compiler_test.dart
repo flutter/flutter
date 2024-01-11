@@ -118,12 +118,13 @@ void main() {
     expect(fileSystem.file(outputPath).existsSync(), true);
   });
 
-  testWithoutContext('compileShader invokes impellerc for .frag files and opengl es', () async {
+  testWithoutContext('compileShader invokes impellerc for .frag files and Android', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
           '--runtime-stage-gles',
+          '--runtime-stage-vulkan',
           '--iplr',
           '--sl=$outputPath',
           '--spirv=$outputPath.spirv',
@@ -292,6 +293,7 @@ void main() {
         command: <String>[
           impellerc,
           '--runtime-stage-gles',
+          '--runtime-stage-vulkan',
           '--iplr',
           '--sl=/.tmp_rand0/0.8255140718871702.temp',
           '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
