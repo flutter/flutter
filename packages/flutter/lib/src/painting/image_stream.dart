@@ -8,7 +8,7 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
+const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
@@ -23,7 +23,16 @@ class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
   /// The [debugLabel] may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
+  ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel,  this.shouldDisposeImage = false})
+  {
+    if (kFlutterMemoryAllocationsEnabled && shouldDisposeImage) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
+        className: '$ImageInfo',
+        object: this,
+      );
+    }
+  }
 
   /// Creates an [ImageInfo] with a cloned [image].
   ///
@@ -48,6 +57,7 @@ class ImageInfo {
       image: image.clone(),
       scale: scale,
       debugLabel: debugLabel,
+      shouldDisposeImage: true,
     );
   }
 
@@ -100,6 +110,13 @@ class ImageInfo {
   /// the image.
   final ui.Image image;
 
+  /// if true, the [image] will be disposed when this object is disposed.
+  ///
+  /// This is used to:
+  /// * avoid disposing the [image] when it is owned by other object
+  /// * transfer the [image] ownership to this object
+  final bool shouldDisposeImage;
+
   /// The size of raw image pixels in bytes.
   int get sizeBytes => image.height * image.width * 4;
 
@@ -125,7 +142,12 @@ class ImageInfo {
   /// and no clones of it or the image it contains can be made.
   void dispose() {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
-    image.dispose();
+    if (shouldDisposeImage) {
+      image.dispose();
+    }
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
   }
 
   @override
@@ -443,7 +465,7 @@ class ImageStreamCompleterHandle {
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
+        library: _flutterPaintingLibrary,
         className: '$ImageStreamCompleterHandle',
         object: this,
       );
