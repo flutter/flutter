@@ -180,7 +180,7 @@ platform_properties:
         ]
       os: Mac-12|Mac-13
       cpu: x86
-      device_os: iOS-16
+      device_os: iOS-16|iOS-17
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -194,7 +194,7 @@ platform_properties:
         ]
       os: Mac-12|Mac-13
       cpu: arm64
-      device_os: iOS-16
+      device_os: iOS-16|iOS-17
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
@@ -537,6 +537,7 @@ targets:
 
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -3280,6 +3281,7 @@ targets:
 
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -3292,6 +3294,7 @@ targets:
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:
@@ -3855,7 +3858,6 @@ targets:
 
   - name: Mac_pixel_7pro entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3870,7 +3872,6 @@ targets:
   - name: Mac_pixel_7pro hello_world_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3900,7 +3901,6 @@ targets:
   - name: Mac_pixel_7pro integration_test_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3920,7 +3920,6 @@ targets:
   - name: Mac_pixel_7pro integration_ui_frame_number
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3950,7 +3949,6 @@ targets:
   - name: Mac_pixel_7pro run_debug_test_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     runIf:
       - .ci.yaml
       - dev/**
@@ -3976,7 +3974,6 @@ targets:
   - name: Mac_pixel_7pro run_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     runIf:
       - .ci.yaml
       - dev/**
@@ -4743,7 +4740,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-16","os=Mac-12|Mac-13", "cpu=x86"]
+        ["device_os=iOS-16|iOS-17","os=Mac-12|Mac-13", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -5068,6 +5065,10 @@ targets:
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5126,6 +5127,10 @@ targets:
       subshard: misc
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - examples/api/**
@@ -5178,6 +5183,10 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true"
+        }
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5945,6 +5954,7 @@ targets:
 
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
+    presubmit: false
     enabled_branches:
       - master
     properties:

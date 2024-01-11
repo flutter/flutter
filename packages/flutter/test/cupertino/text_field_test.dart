@@ -10100,6 +10100,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'abcd',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
