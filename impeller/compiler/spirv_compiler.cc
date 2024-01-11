@@ -310,6 +310,8 @@ shaderc::CompileOptions SPIRVCompilerOptions::BuildShadercOptions() const {
     options.SetIncluder(UniqueIncluder::Make(includer));
   }
 
+  options.SetVulkanRulesRelaxed(relaxed_vulkan_rules);
+
   return options;
 }
 
