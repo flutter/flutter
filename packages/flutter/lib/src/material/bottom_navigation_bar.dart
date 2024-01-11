@@ -449,6 +449,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.item,
     this.animation,
     this.iconSize, {
+    super.key,
     this.onTap,
     this.labelColorTween,
     this.iconColorTween,
@@ -1101,6 +1102,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.items[i],
         _animations[i],
         widget.iconSize,
+        key: widget.items[i].key,
         selectedIconTheme: widget.useLegacyColorScheme ? widget.selectedIconTheme ?? bottomTheme.selectedIconTheme : effectiveSelectedIconTheme,
         unselectedIconTheme: widget.useLegacyColorScheme ? widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme : effectiveUnselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,

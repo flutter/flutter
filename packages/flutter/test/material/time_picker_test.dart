@@ -602,7 +602,7 @@ void main() {
         render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('setting orientation should override MediaQuery orientation', (WidgetTester tester) async {
@@ -616,7 +616,7 @@ void main() {
         final RenderObject render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('builder parameter', (WidgetTester tester) async {

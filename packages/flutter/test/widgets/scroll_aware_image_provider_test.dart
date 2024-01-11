@@ -6,6 +6,7 @@ import 'dart:ui' as ui show Image;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../painting/image_test_utils.dart';
 
@@ -226,7 +227,10 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -297,7 +301,10 @@ void main() {
     expect(imageCache.currentSize, 0);
   });
 
-  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -347,7 +354,10 @@ void main() {
     expect(stream.completer, null);
   });
 
-  testWidgets('ScrollAwareImageProvider does not block LRU updates to image cache', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not block LRU updates to image cache',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final int oldSize = imageCache.maximumSize;
     imageCache.maximumSize = 1;
 

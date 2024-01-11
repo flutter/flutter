@@ -1429,7 +1429,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     final Finder finder = find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_PackagesView');
     // force the stream to complete (has to be done in a runAsync block since it's areal async process)
-    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>); // ignore: avoid_dynamic_calls
+    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>);
     expect(tester.takeException().toString(), 'Exception: Injected failure');
     await tester.pumpAndSettle();
     expect(tester.takeException().toString(), 'Exception: Injected failure');
@@ -1452,7 +1452,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     final Finder finder = find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_PackagesView');
     // force the stream to complete (has to be done in a runAsync block since it's areal async process)
-    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>); // ignore: avoid_dynamic_calls
+    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>);
     expect(tester.takeException().toString(), 'Exception: Injected failure');
     await tester.pumpAndSettle();
     expect(tester.takeException().toString(), 'Exception: Injected failure');
