@@ -817,7 +817,6 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runImpeller() async {
     printProgress('${green}Running packages/flutter tests $reset in Impeller$reset');
-    // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--enable-impeller'],
