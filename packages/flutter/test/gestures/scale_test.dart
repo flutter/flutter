@@ -633,6 +633,7 @@ void main() {
   // Regressing test for https://github.com/flutter/flutter/issues/78941
   testGesture('First rotation test', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+    addTearDown(scale.dispose);
 
     double? updatedRotation;
     scale.onUpdate = (ScaleUpdateDetails details) {
@@ -712,7 +713,9 @@ void main() {
 
   testGesture('Should recognize scale gestures from pointer pan/zoom events', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+    addTearDown(scale.dispose);
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    addTearDown(drag.dispose);
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
@@ -812,7 +815,9 @@ void main() {
 
   testGesture('Pointer pan/zooms should work alongside touches', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+    addTearDown(scale.dispose);
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    addTearDown(drag.dispose);
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
@@ -1062,7 +1067,9 @@ void main() {
 
   testGesture('Scale gesture from pan/zoom events properly handles DragStartBehavior.start', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(dragStartBehavior: DragStartBehavior.start);
+    addTearDown(scale.dispose);
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    addTearDown(drag.dispose);
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
@@ -1161,8 +1168,6 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
-
-    scale.dispose();
   });
 
   testGesture('scale trackpadScrollCausesScale', (GestureTester tester) {

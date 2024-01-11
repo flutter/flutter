@@ -4186,6 +4186,44 @@ void main() {
     expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
   });
 
+  testWidgets('DefaultTabController changes does not recreate PageController', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/134253.
+    Widget buildFrame(int length) {
+      return boilerplate(
+        child: DefaultTabController(
+          length: length,
+          initialIndex: length - 1,
+          child: TabBarView(
+            physics: const TestScrollPhysics(),
+            children: List<Widget>.generate(
+              length,
+              (int index) {
+                return Center(child: Text('Page $index'));
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(15));
+    PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController1 = pageView.controller;
+    TabController tabController = DefaultTabController.of(tester.element(find.text('Page 14')));
+    expect(tabController.index, 14);
+    expect(pageController1.page, 14);
+
+    // Rebuild with a new default tab controller with more tabs.
+    await tester.pumpWidget(buildFrame(10));
+    pageView = tester.widget(find.byType(PageView));
+    final PageController pageController2 = pageView.controller;
+    tabController = DefaultTabController.of(tester.element(find.text('Page 9')));
+    expect(tabController.index, 9);
+    expect(pageController2.page, 9);
+
+    expect(pageController1, equals(pageController2));
+  });
+
   testWidgets('Do not throw when switching between a scrollable TabBar and a non-scrollable TabBar', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/120649
     final TabController controller1 = _tabController(
@@ -6444,7 +6482,6 @@ void main() {
 
     // Test painter's divider color.
     final CustomPaint paint = tester.widget<CustomPaint>(find.byType(CustomPaint).last);
-    // ignore: avoid_dynamic_calls
     expect((paint.painter as dynamic).dividerColor, dividerColor);
   });
 
@@ -6597,6 +6634,97 @@ void main() {
     expect(uselectedTabIcon.color, unselectedLabelColor);
     expect(unselectedTextStyle.color, unselectedLabelColor);
     expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/140338.
+  testWidgets('Material3 - Scrollable TabBar without a divider does not expand to full width', (WidgetTester tester) async {
+    Widget buildTabBar({
+      Color? dividerColor,
+      double? dividerHeight,
+      TabAlignment? tabAlignment,
+     }) {
+      return boilerplate(
+        child: Center(
+          child: DefaultTabController(
+            length: 3,
+            child: TabBar(
+              dividerColor: dividerColor,
+              dividerHeight: dividerHeight,
+              tabAlignment: tabAlignment,
+              isScrollable: true,
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default tab bar width when there is a divider and tabAlignment
+    // is set to startOffset.
+    await tester.pumpWidget(buildTabBar(tabAlignment: TabAlignment.start));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when there is a divider and tabAlignment
+    // is set to start.
+    await tester.pumpWidget(buildTabBar(tabAlignment: TabAlignment.startOffset));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when there is a divider and tabAlignment
+    // tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(tabAlignment: TabAlignment.center));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider height is set to 0.0
+    // and tabAlignment is set to startOffset.
+    await tester.pumpWidget(buildTabBar(
+      dividerHeight: 0.0,
+      tabAlignment: TabAlignment.startOffset,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 359.5);
+
+    // Test default tab bar width when the divider height is set to 0.0
+    // and tabAlignment is set to start.
+    await tester.pumpWidget(buildTabBar(
+      dividerHeight: 0.0,
+      tabAlignment: TabAlignment.start,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
+
+    // Test default tab bar width when the divider height is set to 0.0
+    // and tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(
+      dividerHeight: 0.0,
+      tabAlignment: TabAlignment.center,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to startOffset.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.startOffset,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 359.5);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to start.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.start,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.center,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
   });
 
   group('Material 2', () {
