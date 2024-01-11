@@ -1101,9 +1101,7 @@ void main() {
     const IconData elevatedDeleteIcon = Icons.clear_all;
     final ThemeData theme = ThemeData();
 
-    Widget buildChips({
-      required bool selected,
-    }) {
+    Widget buildChips({ required bool selected }) {
       return MaterialApp(
         theme: theme,
         home: Material(
