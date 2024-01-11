@@ -4,6 +4,7 @@
 
 import '_platform_io.dart'
   if (dart.library.js_util) '_platform_web.dart' as platform;
+import 'assertions.dart';
 import 'constants.dart';
 
 /// The [TargetPlatform] that matches the platform on which the framework is
@@ -96,5 +97,17 @@ enum TargetPlatform {
 /// certainly widgets to work assuming the presence of a system-wide back
 /// button, which will make those widgets unusable since iOS has no such button.
 ///
-/// Therefore this property can only override the platform in debug builds.
-TargetPlatform? debugDefaultTargetPlatformOverride;
+/// Attempting to override this property in non-debug builds causes an error.
+TargetPlatform? get debugDefaultTargetPlatformOverride =>
+    _debugDefaultTargetPlatformOverride;
+
+set debugDefaultTargetPlatformOverride(TargetPlatform? value) {
+  if (!kDebugMode) {
+    throw FlutterError(
+      'Cannot modify debugDefaultTargetPlatformOverride in non-debug builds.\n'
+    );
+  }
+  _debugDefaultTargetPlatformOverride = value;
+}
+
+TargetPlatform? _debugDefaultTargetPlatformOverride;
