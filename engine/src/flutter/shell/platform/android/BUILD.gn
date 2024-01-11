@@ -266,6 +266,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/renderer/FlutterRenderer.java",
   "io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java",
   "io/flutter/embedding/engine/renderer/RenderSurface.java",
+  "io/flutter/embedding/engine/renderer/SurfaceTextureSurfaceProducer.java",
   "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper.java",
   "io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java",
   "io/flutter/embedding/engine/systemchannels/DeferredComponentChannel.java",

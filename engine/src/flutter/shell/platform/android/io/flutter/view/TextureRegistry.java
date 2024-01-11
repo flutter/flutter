@@ -159,6 +159,18 @@ public interface TextureRegistry {
      *
      * @return Image or null.
      */
+    @Nullable
     public Image acquireLatestImage();
+  }
+
+  @Keep
+  interface GLTextureConsumer extends TextureEntry {
+    /**
+     * Retrieve the last GL texture produced.
+     *
+     * @return SurfaceTexture.
+     */
+    @NonNull
+    public SurfaceTexture getSurfaceTexture();
   }
 }
