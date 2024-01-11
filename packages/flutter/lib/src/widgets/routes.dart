@@ -1568,9 +1568,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       }
     }
 
-    if (!canPop) {
-      return RoutePopDisposition.doNotPop;
-    }
     return super.popDisposition;
   }
 
