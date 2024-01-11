@@ -460,8 +460,8 @@ class FlutterPlugin implements Plugin<Project> {
         File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
         if (buildGradle.exists() && buildGradleKts.exists()) {
             logger.error(
-                "Both build.gradle and build.gradle.kts exist, so the " +
-                "latter one is ignored. This is likely a mistake."
+                "Both build.gradle and build.gradle.kts exist, so " +
+                "build.gradle.kts is ignored. This is likely a mistake."
             )
         }
 
@@ -478,8 +478,8 @@ class FlutterPlugin implements Plugin<Project> {
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
             logger.error(
-                "Both settings.gradle and settings.gradle.kts exist, so the " +
-                "latter one is ignored. This is likely a mistake."
+                "Both settings.gradle and settings.gradle.kts exist, so " +
+                "settings.gradle.kts is ignored. This is likely a mistake."
             )
         }
 
