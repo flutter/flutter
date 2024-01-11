@@ -110,18 +110,6 @@ class JsCompilerConfig extends WebCompilerConfig {
         if (noFrequencyBasedMinification) '--no-frequency-based-minification',
         if (csp) '--csp',
       ];
-
-  @override
-  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-        ...super.buildEventAnalyticsValues,
-        kCspMode: csp.toString(),
-        kDart2jsDumpInfo: dumpInfo.toString(),
-        kNativeNullAssertions: nativeNullAssertions.toString(),
-        kDart2jsNoFrequencyBasedMinification:
-            noFrequencyBasedMinification.toString(),
-        kDart2jsOptimization: optimizationLevel,
-        kSourceMapsEnabled: sourceMaps.toString(),
-      };
 }
 
 /// Configuration for the Wasm compiler.
