@@ -925,6 +925,7 @@ class MenuItemButton extends StatefulWidget {
   /// {@endtemplate}
   final bool closeOnActivate;
 
+  ///
   final Axis menuDirection;
 
   /// The widget displayed in the center of this button.
@@ -1680,6 +1681,7 @@ class SubmenuButton extends StatefulWidget {
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
 
+  ///
   final Axis menuDirection;
 
   /// The list of widgets that appear in the menu when it is opened.
