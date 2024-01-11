@@ -11,7 +11,6 @@ import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
-import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -530,7 +529,7 @@ abstract class CreateBase extends FlutterCommand {
         engineVersion: globals.flutterVersion.engineRevision,
         fileSystem: globals.fs,
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
+        outputDir: directory.childDirectory('build'),
         processManager: globals.processManager,
         platform: globals.platform,
         usage: globals.flutterUsage,
