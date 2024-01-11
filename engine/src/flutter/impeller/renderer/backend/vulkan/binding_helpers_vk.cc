@@ -173,7 +173,6 @@ fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
     auto desc_set = command.pipeline->GetDescriptor()
                         .GetVertexDescriptor()
                         ->GetDescriptorSetLayouts();
-
     if (!BindBuffers(command.vertex_bindings, allocator, encoder,
                      descriptor_sets[desc_index], desc_set, buffers, writes) ||
         !BindBuffers(command.fragment_bindings, allocator, encoder,

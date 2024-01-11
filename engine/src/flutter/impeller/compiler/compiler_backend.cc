@@ -13,7 +13,10 @@ CompilerBackend::CompilerBackend(MSLCompiler compiler)
     : CompilerBackend(Type::kMSL, compiler) {}
 
 CompilerBackend::CompilerBackend(GLSLCompiler compiler)
-    : CompilerBackend(Type::kGLSL, compiler) {}
+    : CompilerBackend(compiler->get_common_options().vulkan_semantics
+                          ? Type::kGLSLVulkan
+                          : Type::kGLSL,
+                      compiler) {}
 
 CompilerBackend::CompilerBackend(SkSLCompiler compiler)
     : CompilerBackend(Type::kSkSL, compiler) {}

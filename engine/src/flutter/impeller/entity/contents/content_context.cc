@@ -490,4 +490,18 @@ void ContentContext::SetWireframe(bool wireframe) {
   wireframe_ = wireframe;
 }
 
+std::shared_ptr<Pipeline<PipelineDescriptor>>
+ContentContext::GetCachedRuntimeEffectPipeline(
+    const std::string& unique_entrypoint_name,
+    const ContentContextOptions& options,
+    const std::function<std::shared_ptr<Pipeline<PipelineDescriptor>>()>&
+        create_callback) const {
+  RuntimeEffectPipelineKey key{unique_entrypoint_name, options};
+  auto it = runtime_effect_pipelines_.find(key);
+  if (it == runtime_effect_pipelines_.end()) {
+    it = runtime_effect_pipelines_.insert(it, {key, create_callback()});
+  }
+  return it->second;
+}
+
 }  // namespace impeller
