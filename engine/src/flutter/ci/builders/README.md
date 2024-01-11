@@ -300,7 +300,7 @@ configuration.
            "--variant",
            "host_debug_impeller_vulkan",
            "--type",
-           "impeller-vulkan",
+           "impeller",
            "--engine-capture-core-dump"
        ],
        "script": "flutter/testing/run_tests.py",
