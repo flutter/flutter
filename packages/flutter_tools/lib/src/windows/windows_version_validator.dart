@@ -19,6 +19,10 @@ const List<String> kUnsupportedVersions = <String>[
 /// Regex pattern for identifying line from systeminfo stdout with windows version
 /// (ie. 10.5.4123)
 const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9\.]+)';
+
+/// Regex pattern for identifying a running instance of the Topaz OFD process.
+/// This is a known process that interferes with the build toolchain.
+/// See https://github.com/flutter/flutter/issues/121366
 const String kCoreProcessPattern = r'Topaz OFD\\Warsaw\\core\.exe';
 
 /// Validator for supported Windows host machine operating system version.
@@ -50,6 +54,8 @@ class WindowsVersionValidator extends DoctorValidator {
       windowsVersionStatus = ValidationType.success;
       statusInfo = 'Installed version of Windows is version 10 or higher';
 
+      // Check if the Topaz OFD security module is running, and warn the user if it is.
+      // See https://github.com/flutter/flutter/issues/121366
       final ProcessResult getProcessesResult = await _processLister.getProcessesWithPath();
       if (getProcessesResult.exitCode != 0) {
         windowsVersionStatus = ValidationType.partial;
