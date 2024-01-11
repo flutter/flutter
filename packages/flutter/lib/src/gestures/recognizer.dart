@@ -51,7 +51,7 @@ enum DragStartBehavior {
 /// Configuration of multi-finger drag strategy on multi-touch devices.
 ///
 /// When dragging with only one finger, there's no difference in behavior
-/// between the two settings.
+/// between all the settings.
 ///
 /// Used by [DragGestureRecognizer.multitouchDragStrategy].
 enum MultitouchDragStrategy {
@@ -64,11 +64,29 @@ enum MultitouchDragStrategy {
   latestPointer,
 
   /// All active pointers will be tracked together. The scrolling offset
+  /// is determined by the maximum deltas of both directions.
+  ///
+  /// If drag with two pointers at the same time, with the first moving +10 pixels
+  /// and the second moving +20 pixels, the recognizer will report a delta of 20.
+  ///
+  /// If the first moving +20 pixels and the second moving -15 pixels, the
+  /// recognizer will report a delta of 5.
+  ///
+  /// This is the behavior typically seen on iOS.
+  maxAllPointers,
+
+  /// All active pointers will be tracked together. The scrolling offset
   /// is the sum of the offsets of all active pointers.
   ///
   /// When a [Scrollable] drives scrolling by this drag strategy, the scrolling
   /// speed will double or triple, depending on how many fingers are dragging
   /// at the same time.
+  ///
+  /// If drag with two pointers at the same time, with the first moving +20 pixels
+  /// and the second moving +20 pixels, the recognizer will report a delta of 40.
+  ///
+  /// If the first moving +20 pixels and the second moving -15 pixels, the
+  /// recognizer will report a delta of 5.
   sumAllPointers,
 }
 

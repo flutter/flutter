@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../gestures.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
@@ -492,6 +493,9 @@ class CupertinoScrollBehavior extends ScrollBehavior {
     }
     return const BouncingScrollPhysics();
   }
+
+  @override
+  MultitouchDragStrategy get multitouchDragStrategy => MultitouchDragStrategy.maxAllPointers;
 }
 
 class _CupertinoAppState extends State<CupertinoApp> {

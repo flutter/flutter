@@ -110,8 +110,20 @@ class ScrollBehavior {
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.multitouchDragStrategy}
   ///
   /// By default, [MultitouchDragStrategy.latestPointer] is configured to
-  /// create drag gestures for all platforms.
-  MultitouchDragStrategy get multitouchDragStrategy => MultitouchDragStrategy.latestPointer;
+  /// create drag gestures for non-Apple platforms, and
+  /// [MultitouchDragStrategy.maxAllPointers] for Apple platforms.
+  MultitouchDragStrategy get multitouchDragStrategy {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.iOS:
+        return MultitouchDragStrategy.maxAllPointers;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return MultitouchDragStrategy.latestPointer;
+    }
+  }
 
   /// A set of [LogicalKeyboardKey]s that, when any or all are pressed in
   /// combination with a [PointerDeviceKind.mouse] pointer scroll event, will
