@@ -617,7 +617,6 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///  * [GridView], for a scrollable grid of boxes.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
-@immutable
 class PageView extends StatefulWidget {
   /// Creates a scrollable list that works page by page from an explicit [List]
   /// of widgets.
