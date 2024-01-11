@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/render_pass.h"
+#include "fml/status.h"
 
 namespace impeller {
 
@@ -86,6 +87,77 @@ bool RenderPass::EncodeCommands() const {
 
 const std::weak_ptr<const Context>& RenderPass::GetContext() const {
   return context_;
+}
+
+void RenderPass::SetPipeline(
+    const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) {
+  pending_.pipeline = pipeline;
+}
+
+void RenderPass::SetCommandLabel(std::string_view label) {
+#ifdef IMPELLER_DEBUG
+  pending_.label = std::string(label);
+#endif  // IMPELLER_DEBUG
+}
+
+void RenderPass::SetStencilReference(uint32_t value) {
+  pending_.stencil_reference = value;
+}
+
+void RenderPass::SetBaseVertex(uint64_t value) {
+  pending_.base_vertex = value;
+}
+
+void RenderPass::SetViewport(Viewport viewport) {
+  pending_.viewport = viewport;
+}
+
+void RenderPass::SetScissor(IRect scissor) {
+  pending_.scissor = scissor;
+}
+
+void RenderPass::SetInstanceCount(size_t count) {
+  pending_.instance_count = count;
+}
+
+bool RenderPass::SetVertexBuffer(VertexBuffer buffer) {
+  return pending_.BindVertices(std::move(buffer));
+}
+
+fml::Status RenderPass::Draw() {
+  auto result = AddCommand(std::move(pending_));
+  pending_ = Command{};
+  if (result) {
+    return fml::Status();
+  }
+  return fml::Status(fml::StatusCode::kInvalidArgument,
+                     "Failed to encode command");
+}
+
+// |ResourceBinder|
+bool RenderPass::BindResource(ShaderStage stage,
+                              const ShaderUniformSlot& slot,
+                              const ShaderMetadata& metadata,
+                              BufferView view) {
+  return pending_.BindResource(stage, slot, metadata, view);
+}
+
+bool RenderPass::BindResource(
+    ShaderStage stage,
+    const ShaderUniformSlot& slot,
+    const std::shared_ptr<const ShaderMetadata>& metadata,
+    BufferView view) {
+  return pending_.BindResource(stage, slot, metadata, std::move(view));
+}
+
+// |ResourceBinder|
+bool RenderPass::BindResource(ShaderStage stage,
+                              const SampledImageSlot& slot,
+                              const ShaderMetadata& metadata,
+                              std::shared_ptr<const Texture> texture,
+                              std::shared_ptr<const Sampler> sampler) {
+  return pending_.BindResource(stage, slot, metadata, std::move(texture),
+                               std::move(sampler));
 }
 
 }  // namespace impeller

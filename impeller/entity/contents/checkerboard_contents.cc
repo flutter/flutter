@@ -4,11 +4,8 @@
 
 #include "impeller/entity/contents/checkerboard_contents.h"
 
-#include <memory>
-
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
@@ -26,15 +23,11 @@ bool CheckerboardContents::Render(const ContentContext& renderer,
   using VS = CheckerboardPipeline::VertexShader;
   using FS = CheckerboardPipeline::FragmentShader;
 
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, "Checkerboard");
-
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kSourceOver;
   options.stencil_compare = CompareFunction::kAlways;  // Ignore all clips.
   options.stencil_operation = StencilOperation::kKeep;
   options.primitive_type = PrimitiveType::kTriangleStrip;
-  cmd.pipeline = renderer.GetCheckerboardPipeline(options);
 
   VertexBufferBuilder<typename VS::PerVertexData> vtx_builder;
   vtx_builder.AddVertices({
@@ -43,16 +36,17 @@ bool CheckerboardContents::Render(const ContentContext& renderer,
       {Point(-1, 1)},
       {Point(1, 1)},
   });
-  cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
+
+  pass.SetCommandLabel("Checkerboard");
+  pass.SetPipeline(renderer.GetCheckerboardPipeline(options));
+  pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
 
   FS::FragInfo frag_info;
   frag_info.color = color_;
   frag_info.square_size = square_size_;
-  FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
 
-  pass.AddCommand(std::move(cmd));
-
-  return true;
+  return pass.Draw().ok();
 }
 
 std::optional<Rect> CheckerboardContents::GetCoverage(

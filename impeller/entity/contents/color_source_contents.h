@@ -5,11 +5,9 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_COLOR_SOURCE_CONTENTS_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_COLOR_SOURCE_CONTENTS_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/geometry/path.h"
 
 namespace impeller {
 

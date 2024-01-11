@@ -90,10 +90,6 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
   frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();
   frame_info.matrix = GetInverseEffectTransform();
 
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, "ConicalGradientSSBOFill");
-  cmd.stencil_reference = entity.GetClipDepth();
-
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
   auto options = OptionsFromPassAndEntity(pass, entity);
@@ -102,16 +98,18 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
     options.stencil_operation = StencilOperation::kIncrementClamp;
   }
   options.primitive_type = geometry_result.type;
-  cmd.pipeline = renderer.GetConicalGradientSSBOFillPipeline(options);
 
-  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
-  FS::BindFragInfo(cmd,
+  pass.SetCommandLabel("ConicalGradientSSBOFill");
+  pass.SetStencilReference(entity.GetClipDepth());
+  pass.SetPipeline(renderer.GetConicalGradientSSBOFillPipeline(options));
+  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
+  FS::BindFragInfo(pass,
                    renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
-  FS::BindColorData(cmd, color_buffer);
-  VS::BindFrameInfo(cmd,
+  FS::BindColorData(pass, color_buffer);
+  VS::BindFrameInfo(pass,
                     renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
 
-  if (!pass.AddCommand(std::move(cmd))) {
+  if (!pass.Draw().ok()) {
     return false;
   }
 
