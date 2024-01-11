@@ -104,7 +104,7 @@ void main() {
         label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
-                  'RunWasmOpt: none; WasmOmitTypeChecks: false; wasm-compile: true; web-renderer: auto;',
+                  'RunWasmOpt: none; WasmOmitTypeChecks: false; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
       ),
           ),
         ],
@@ -117,7 +117,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'RunWasmOpt: none; WasmOmitTypeChecks: false; wasm-compile: true; web-renderer: auto;',
+          settings: 'RunWasmOpt: none; WasmOmitTypeChecks: false; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
         ),
       ]),
     );
@@ -125,12 +125,12 @@ void main() {
     // Sends timing event.
     final TestTimingEvent timingEvent = testUsage.timings.single;
     expect(timingEvent.category, 'build');
-    expect(timingEvent.variableName, 'dart2wasm');
+    expect(timingEvent.variableName, 'dual-compile');
     expect(
       analyticsTimingEventExists(
         sentEvents: fakeAnalytics.sentEvents,
         workflow: 'build',
-        variableName: 'dart2wasm',
+        variableName: 'dual-compile',
       ),
       true,
     );

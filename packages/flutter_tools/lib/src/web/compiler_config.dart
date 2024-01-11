@@ -5,18 +5,21 @@
 import '../base/utils.dart';
 import 'compile.dart';
 
+enum CompileTarget {
+  js,
+  wasm,
+}
+
 sealed class WebCompilerConfig {
   const WebCompilerConfig({required this.renderer});
 
   /// Returns `true` if `this` represents configuration for the Wasm compiler.
   ///
   /// Otherwise, `false`–represents the JavaScript compiler.
-  bool get isWasm;
+  CompileTarget get compileTarget;
   final WebRendererMode renderer;
 
-  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-        'wasm-compile': isWasm,
-      };
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{};
 }
 
 /// Configuration for the Dart-to-Javascript compiler (dart2js).
@@ -92,7 +95,7 @@ class JsCompilerConfig extends WebCompilerConfig {
   final bool sourceMaps;
 
   @override
-  bool get isWasm => false;
+  CompileTarget get compileTarget => CompileTarget.js;
 
   /// Arguments to use in both phases: full JS compile and CFE-only.
   List<String> toSharedCommandOptions() => <String>[
@@ -133,7 +136,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   final WasmOptLevel wasmOpt;
 
   @override
-  bool get isWasm => true;
+  CompileTarget get compileTarget => CompileTarget.wasm;
 
   bool get runWasmOpt =>
       wasmOpt == WasmOptLevel.full || wasmOpt == WasmOptLevel.debug;

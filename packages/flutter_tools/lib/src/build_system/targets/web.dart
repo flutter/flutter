@@ -636,7 +636,7 @@ class WebServiceWorker extends Target {
       urlToHash,
       <String>[
         'main.dart.js',
-        if (compileConfigs.any((WebCompilerConfig config) => config.isWasm)) ...<String>[
+        if (compileConfigs.any((WebCompilerConfig config) => config is WasmCompilerConfig)) ...<String>[
           'main.dart.wasm',
           'main.dart.mjs',
         ],

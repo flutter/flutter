@@ -238,10 +238,14 @@ String _buildEventAnalyticsSettings({
 }) {
   final Map<String, Object> values = <String, Object>{};
   final List<String> renderers = <String>[];
+  final List<String> targets = <String>[];
   for (final WebCompilerConfig config in configs) {
     values.addAll(config.buildEventAnalyticsValues);
+    renderers.add(config.renderer.name);
+    targets.add(config.compileTarget.name);
   }
   values['web-renderer'] = renderers.join(',');
+  values['web-target'] = targets.join(',');
 
   final List<String> sortedList = values.entries
       .map((MapEntry<String, Object> e) => '${e.key}: ${e.value};')
