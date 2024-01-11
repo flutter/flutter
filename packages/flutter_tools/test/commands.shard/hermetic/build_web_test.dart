@@ -11,11 +11,13 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -275,15 +277,17 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
     await runner.run(<String>['build', 'web', '--no-pub']);
-    final BuildInfo buildInfo =
-        await buildCommand.webCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
-    expect(buildInfo.dartDefines, contains('FLUTTER_WEB_AUTO_DETECT=true'));
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => processManager,
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(target, isA<WebServiceWorker>());
+      final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+      expect(configs.length, 1);
+      expect(configs.first.renderer, WebRendererMode.auto);
+    }),
   });
 
   testUsingContext('Web build supports build-name and build-number', () async {
