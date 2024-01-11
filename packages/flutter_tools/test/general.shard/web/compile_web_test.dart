@@ -43,16 +43,11 @@ void main() {
   testUsingContext('WebBuilder sets environment on success', () async {
     final TestBuildSystem buildSystem =
         TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      final WebServiceWorker webServiceWorker = target as WebServiceWorker;
-      expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
-      expect(webServiceWorker.webRenderer, WebRendererMode.auto);
-
+      expect(target, isA<WebServiceWorker>());
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
-        'WasmOmitTypeChecks': 'false',
-        'RunWasmOpt': 'none',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -77,10 +72,17 @@ void main() {
       'target',
       BuildInfo.debug,
       ServiceWorkerStrategy.offlineFirst,
-      compilerConfig: const WasmCompilerConfig(
-        omitTypeChecks: false,
-        wasmOpt: WasmOptLevel.none,
-      ),
+      compilerConfigs: <WebCompilerConfig>[
+        const WasmCompilerConfig(
+          omitTypeChecks: false,
+          wasmOpt: WasmOptLevel.none,
+          renderer: WebRendererMode.skwasm,
+        ),
+        const JsCompilerConfig.run(
+          nativeNullAssertions: true,
+          renderer: WebRendererMode.canvaskit,
+        ),
+      ],
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -161,7 +163,9 @@ void main() {
               'target',
               BuildInfo.debug,
               ServiceWorkerStrategy.offlineFirst,
-              compilerConfig: const JsCompilerConfig.run(nativeNullAssertions: true),
+              compilerConfigs: <WebCompilerConfig>[
+                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto),
+              ]
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
 
