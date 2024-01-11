@@ -389,10 +389,14 @@ void main() {
   testWidgets('Material2 - Tab icon-label margin', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
     Widget buildApp() {
-      const Tab tab = Tab(icon: Icon(Icons.house), text: 'x');
       return MaterialApp(
         theme: theme,
-        home: const Center(child: Material(child: tab),
+        home: const Center(child: Material(
+          child: Tab(
+            icon: Icon(Icons.house),
+            text: 'x',
+          ),
+        ),
       ));
     }
 
@@ -409,10 +413,14 @@ void main() {
   testWidgets('Material3 - Tab icon-label margin', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     Widget buildApp() {
-      const Tab tab = Tab(icon: Icon(Icons.house), text: 'x');
       return MaterialApp(
         theme: theme,
-        home: const Center(child: Material(child: tab),
+        home: const Center(child: Material(
+          child: Tab(
+            icon: Icon(Icons.house),
+            text: 'x',
+          ),
+        ),
       ));
     }
 
