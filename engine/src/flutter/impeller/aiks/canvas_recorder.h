@@ -33,7 +33,9 @@ enum CanvasRecorderOp : uint16_t {
   kRotate,
   kDrawPath,
   kDrawPaint,
+  kDrawLine,
   kDrawRect,
+  kDrawOval,
   kDrawRRect,
   kDrawCircle,
   kDrawPoints,
@@ -41,6 +43,7 @@ enum CanvasRecorderOp : uint16_t {
   kDrawImageRect,
   kClipPath,
   kClipRect,
+  kClipOval,
   kClipRRect,
   kDrawPicture,
   kDrawTextFrame,
@@ -191,8 +194,18 @@ class CanvasRecorder {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(DrawPaint), paint);
   }
 
+  void DrawLine(const Point& p0, const Point& p1, const Paint& paint) {
+    return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(DrawLine), p0, p1,
+                               paint);
+  }
+
   void DrawRect(Rect rect, const Paint& paint) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(DrawRect), rect,
+                               paint);
+  }
+
+  void DrawOval(const Rect& rect, const Paint& paint) {
+    return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(DrawOval), rect,
                                paint);
   }
 
@@ -246,6 +259,13 @@ class CanvasRecorder {
       const Rect& rect,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(ClipRect), rect,
+                               clip_op);
+  }
+
+  void ClipOval(
+      const Rect& bounds,
+      Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect) {
+    return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(ClipOval), bounds,
                                clip_op);
   }
 

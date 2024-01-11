@@ -86,24 +86,20 @@ std::ostream& operator<<(std::ostream& os, const ColorSource& color_source) {
 std::ostream& operator<<(std::ostream& os, const Paint& paint) {
   os << "{" << std::endl;
   os << "  color: [" << paint.color << "]" << std::endl;
-  os << "  color_source:"
-     << "[" << paint.color_source << "]" << std::endl;
+  os << "  color_source:" << "[" << paint.color_source << "]" << std::endl;
   os << "  dither: [" << paint.dither << "]" << std::endl;
   os << "  stroke_width: [" << paint.stroke_width << "]" << std::endl;
-  os << "  stroke_cap: "
-     << "[Paint::Cap]" << std::endl;
-  os << "  stroke_join: "
-     << "[Paint::Join]" << std::endl;
+  os << "  stroke_cap: " << "[Paint::Cap]" << std::endl;
+  os << "  stroke_join: " << "[Paint::Join]" << std::endl;
   os << "  stroke_miter: [" << paint.stroke_miter << "]" << std::endl;
-  os << "  style:"
-     << "[Paint::Style]" << std::endl;
+  os << "  style:" << "[Paint::Style]" << std::endl;
   os << "  blend_mode: [" << BlendModeToString(paint.blend_mode) << "]"
      << std::endl;
   os << "  invert_colors: [" << paint.invert_colors << "]" << std::endl;
   os << "  image_filter: " << paint.image_filter << std::endl;
   os << "  color_filter: " << paint.color_filter << std::endl;
-  os << "  mask_blur_descriptor: "
-     << "[std::optional<MaskBlurDescriptor>]" << std::endl;
+  os << "  mask_blur_descriptor: " << "[std::optional<MaskBlurDescriptor>]"
+     << std::endl;
   os << "}";
   return os;
 }
@@ -132,7 +128,9 @@ std::string_view CanvasRecorderOpToString(CanvasRecorderOp op) {
     FLT_CANVAS_RECORDER_OP_TO_STRING(kRotate);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPath);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPaint);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawLine);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawRect);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawOval);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawRRect);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawCircle);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPoints);
@@ -140,6 +138,7 @@ std::string_view CanvasRecorderOpToString(CanvasRecorderOp op) {
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawImageRect);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kClipPath);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kClipRect);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kClipOval);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kClipRRect);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPicture);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawTextFrame);
