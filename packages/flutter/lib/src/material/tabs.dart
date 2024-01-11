@@ -133,8 +133,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// Only useful when used in combination with [icon], and either one of
   /// [text] or [child] is non-null.
   ///
-  /// If [ThemeData.useMaterial3] is true, the default value is 2 pixels of bottom margin.
-  /// Otherwise, the default value is 10 pixels of bottom margin.
+  /// Defaults to 2 pixels of bottom margin. If [ThemeData.useMaterial3] is false,
+  /// then defaults to 10 pixels of bottom margin.
   final EdgeInsetsGeometry? iconMargin;
 
   /// The height of the [Tab].

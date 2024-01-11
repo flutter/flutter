@@ -390,7 +390,10 @@ void main() {
     final ThemeData theme = ThemeData(useMaterial3: false);
     Widget buildApp() {
       const Tab tab = Tab(icon: Icon(Icons.house), text: 'x');
-      return MaterialApp(theme: theme, home: const Center(child: Material(child: tab)));
+      return MaterialApp(
+        theme: theme,
+        home: const Center(child: Material(child: tab),
+      ));
     }
 
     double getIconMargin() {
@@ -407,7 +410,10 @@ void main() {
     final ThemeData theme = ThemeData();
     Widget buildApp() {
       const Tab tab = Tab(icon: Icon(Icons.house), text: 'x');
-      return MaterialApp(theme: theme, home: const Center(child: Material(child: tab)));
+      return MaterialApp(
+        theme: theme,
+        home: const Center(child: Material(child: tab),
+      ));
     }
 
     double getIconMargin() {
