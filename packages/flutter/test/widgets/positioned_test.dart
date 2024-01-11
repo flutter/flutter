@@ -71,6 +71,7 @@ void main() {
       duration: const Duration(seconds: 10),
       vsync: tester,
     );
+    addTearDown(controller.dispose);
     final List<Size> sizes = <Size>[];
     final List<Offset> positions = <Offset>[];
     final GlobalKey key = GlobalKey();

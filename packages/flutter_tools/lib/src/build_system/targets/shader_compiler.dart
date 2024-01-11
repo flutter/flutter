@@ -22,13 +22,13 @@ import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  impellerAndroid('--runtime-stage-gles'),
-  impelleriOS('--runtime-stage-metal'),
-  sksl('--sksl');
+  impellerAndroid(<String>['--runtime-stage-gles', '--runtime-stage-vulkan']),
+  impelleriOS(<String>['--runtime-stage-metal']),
+  sksl(<String>['--sksl']);
 
-  const ShaderTarget(this.target);
+  const ShaderTarget(this.stages);
 
-  final String target;
+  final List<String> stages;
 }
 
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
@@ -177,7 +177,7 @@ class ShaderCompiler {
     final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
     final List<String> cmd = <String>[
       impellerc.path,
-      target.target,
+      ...target.stages,
       '--iplr',
       if (json)
         '--json',

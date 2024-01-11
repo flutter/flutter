@@ -75,6 +75,7 @@ def flutter_additional_ios_build_settings(target)
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
 
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
+    # TODO(stuartmorgan): Handle local engines here; see https://github.com/flutter/flutter/issues/132228
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
       next if xcframework_file.start_with?('.') # Hidden file, possibly on external disk.
@@ -124,6 +125,10 @@ def flutter_additional_macos_build_settings(target)
   artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
   debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64'), __FILE__)
   release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release'), __FILE__)
+  application_path = File.dirname(defined_in_file.realpath) if respond_to?(:defined_in_file)
+  # Find the local engine path, if any.
+  local_engine = application_path.nil? ?
+    nil : flutter_get_local_engine_dir(File.join(application_path, 'Flutter', 'ephemeral', 'Flutter-Generated.xcconfig'))
 
   unless Dir.exist?(debug_framework_dir)
     # macOS artifacts have not been downloaded.
@@ -138,7 +143,7 @@ def flutter_additional_macos_build_settings(target)
     next unless target.dependencies.any? { |dependency| dependency.name == 'FlutterMacOS' }
 
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
-    configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
+    configuration_engine_dir = local_engine || (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
     build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"
 
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
@@ -318,4 +323,37 @@ def flutter_relative_path_from_podfile(path)
   pathname = Pathname.new File.expand_path(path)
   relative = pathname.relative_path_from project_directory_pathname
   relative.to_s
+end
+
+def flutter_parse_xcconfig_file(file)
+  file_abs_path = File.expand_path(file)
+  if !File.exist? file_abs_path
+    return [];
+  end
+  entries = Hash.new
+  skip_line_start_symbols = ["#", "/"]
+  File.foreach(file_abs_path) { |line|
+    next if skip_line_start_symbols.any? { |symbol| line =~ /^\s*#{symbol}/ }
+    key_value_pair = line.split(pattern = '=')
+    if key_value_pair.length == 2
+      entries[key_value_pair[0].strip()] = key_value_pair[1].strip();
+    else
+      puts "Invalid key/value pair: #{line}"
+    end
+  }
+  return entries
+end
+
+def flutter_get_local_engine_dir(xcconfig_file)
+  file_abs_path = File.expand_path(xcconfig_file)
+  if !File.exist? file_abs_path
+    return nil
+  end
+  config = flutter_parse_xcconfig_file(xcconfig_file)
+  local_engine = config['LOCAL_ENGINE']
+  base_dir = config['FLUTTER_ENGINE']
+  if !local_engine.nil? && !base_dir.nil?
+    return File.join(base_dir, 'out', local_engine)
+  end
+  return nil
 end
