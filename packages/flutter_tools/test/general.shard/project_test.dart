@@ -743,6 +743,7 @@ apply plugin: 'kotlin-android'
       final FlutterProject project = await someProject();
 
         addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
           gradleFileContent: () {
             return '''
 plugins {
@@ -751,7 +752,7 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 ''';
-        }, kotlinDsl: true);
+        });
         expect(project.android.isKotlin, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -773,6 +774,7 @@ plugins {
 ''';
         });
         addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
           gradleFileContent: () {
             return '''
 plugins {
@@ -781,7 +783,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 ''';
-        }, kotlinDsl: true);
+        });
 
         expect(project.android.isKotlin, isFalse);
       }, overrides: <Type, Generator>{
