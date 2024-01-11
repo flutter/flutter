@@ -101,14 +101,8 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
         {{origin.x + size.width, origin.y + size.height}, input_uvs[3]},
     });
 
-    Command cmd;
-    DEBUG_COMMAND_INFO(cmd, "Border Mask Blur Filter");
     auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = PrimitiveType::kTriangleStrip;
-
-    cmd.pipeline = renderer.GetBorderMaskBlurPipeline(options);
-    cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
-    cmd.stencil_reference = entity.GetClipDepth();
 
     VS::FrameInfo frame_info;
     frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();
@@ -121,13 +115,18 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     frag_info.inner_blur_factor = inner_blur_factor;
     frag_info.outer_blur_factor = outer_blur_factor;
 
-    FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
-    VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+    pass.SetCommandLabel("Border Mask Blur Filter");
+    pass.SetPipeline(renderer.GetBorderMaskBlurPipeline(options));
+    pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
+    pass.SetStencilReference(entity.GetClipDepth());
+
+    FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+    VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
     auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
-    FS::BindTextureSampler(cmd, input_snapshot->texture, sampler);
+    FS::BindTextureSampler(pass, input_snapshot->texture, sampler);
 
-    return pass.AddCommand(std::move(cmd));
+    return pass.Draw().ok();
   };
 
   CoverageProc coverage_proc =

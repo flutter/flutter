@@ -6,7 +6,6 @@
 
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/geometry/point.h"
 
 namespace impeller {
 
