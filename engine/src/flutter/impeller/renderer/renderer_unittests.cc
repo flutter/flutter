@@ -457,6 +457,9 @@ TEST_P(RendererTest, CanRenderInstanced) {
 }
 
 TEST_P(RendererTest, CanBlitTextureToTexture) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
+  }
   auto context = GetContext();
   ASSERT_TRUE(context);
 
@@ -572,6 +575,9 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
 }
 
 TEST_P(RendererTest, CanBlitTextureToBuffer) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
+  }
   auto context = GetContext();
   ASSERT_TRUE(context);
 
@@ -706,6 +712,9 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
 }
 
 TEST_P(RendererTest, CanGenerateMipmaps) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
+  }
   auto context = GetContext();
   ASSERT_TRUE(context);
 
