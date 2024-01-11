@@ -655,11 +655,10 @@ class Text extends StatelessWidget {
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
-    final bool isRootText = context.findAncestorWidgetOfExactType<Text>() == null;
     final GlobalKey _textKey = GlobalKey();
-    final _SelectableTextContainerDelegate? _selectionDelegate = isRootText ? _SelectableTextContainerDelegate(_textKey) : null;
+    final _SelectableTextContainerDelegate _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
     Widget result = RichText(
-      key: isRootText ? _textKey : null,
+      key: _textKey,
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -670,7 +669,7 @@ class Text extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-      selectionRegistrar: isRootText ? _selectionDelegate : registrar,
+      selectionRegistrar: _selectionDelegate,
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
       text: TextSpan(
         style: effectiveTextStyle,
@@ -679,9 +678,7 @@ class Text extends StatelessWidget {
       ),
     );
     if (registrar != null) {
-      if (isRootText) {
-        result = SelectionContainer(delegate: _selectionDelegate!, child: result);
-      }
+      result = SelectionContainer(delegate: _selectionDelegate, child: result);
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: result,
