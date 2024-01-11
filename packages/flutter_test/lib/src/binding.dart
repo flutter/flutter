@@ -1182,6 +1182,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 /// A variant of [TestWidgetsFlutterBinding] for executing tests typically
 /// the `flutter test` environment, unless it is an integration test.
 ///
+/// When doing integration test, [LiveTestWidgetsFlutterBinding] is utilized
+/// instead.
+///
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
 ///
