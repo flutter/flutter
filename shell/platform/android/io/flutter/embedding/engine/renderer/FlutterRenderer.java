@@ -47,6 +47,16 @@ import java.util.concurrent.atomic.AtomicLong;
  * io.flutter.embedding.android.FlutterTextureView} are implementations of {@link RenderSurface}.
  */
 public class FlutterRenderer implements TextureRegistry {
+  /**
+   * Whether to always use GL textures for {@link FlutterRenderer#createSurfaceProducer()}.
+   *
+   * <p>This is a debug-only API intended for local development. For example, when using a newer
+   * Android device (that normally would use {@link ImageReaderSurfaceProducer}, but wanting to test
+   * the OpenGLES/{@link SurfaceTextureSurfaceProducer} code branch. This flag has undefined
+   * behavior if set to true while running in a Vulkan (Impeller) context.
+   */
+  @VisibleForTesting static boolean debugForceSurfaceProducerGlTextures = false;
+
   private static final String TAG = "FlutterRenderer";
 
   @NonNull private final FlutterJNI flutterJNI;
@@ -162,12 +172,36 @@ public class FlutterRenderer implements TextureRegistry {
   @NonNull
   @Override
   public SurfaceProducer createSurfaceProducer() {
-    // TODO(matanl, johnmccutchan): Implement a SurfaceTexture version and switch on whether or
-    // not impeller is enabled.
-    final ImageReaderSurfaceProducer entry =
-        new ImageReaderSurfaceProducer(nextTextureId.getAndIncrement());
-    Log.v(TAG, "New SurfaceProducer ID: " + entry.id());
-    registerImageTexture(entry.id(), entry);
+    // Prior to Impeller, Flutter on Android *only* ran on OpenGLES (via Skia). That meant that
+    // plugins (i.e. end-users) either explicitly created a SurfaceTexture (via
+    // createX/registerX) or an ImageTexture (via createX/registerX).
+    //
+    // In an Impeller world, which for the first time uses (if available) a Vulkan rendering
+    // backend, it is no longer possible (at least not trivially) to render an OpenGLES-provided
+    // texture (SurfaceTexture) in a Vulkan context.
+    //
+    // This function picks the "best" rendering surface based on the Android runtime, and
+    // provides a consumer-agnostic SurfaceProducer (which in turn vends a Surface), and has
+    // plugins (i.e. end-users) use the Surface instead, letting us "hide" the consumer-side
+    // of the implementation.
+    //
+    // tl;dr: If ImageTexture is available, we use it, otherwise we use a SurfaceTexture.
+    // Coincidentally, if ImageTexture is available, we are also on an Android version that is
+    // running Vulkan, so we don't have to worry about it not being supported.
+    final long id = nextTextureId.getAndIncrement();
+    final SurfaceProducer entry;
+    if (!debugForceSurfaceProducerGlTextures && Build.VERSION.SDK_INT >= 29) {
+      final ImageReaderSurfaceProducer producer = new ImageReaderSurfaceProducer(id);
+      registerImageTexture(id, producer);
+      Log.v(TAG, "New ImageReaderSurfaceProducer ID: " + id);
+      entry = producer;
+    } else {
+      final SurfaceTextureSurfaceProducer producer =
+          new SurfaceTextureSurfaceProducer(id, handler, flutterJNI);
+      registerSurfaceTexture(producer.getSurfaceTexture());
+      Log.v(TAG, "New SurfaceTextureSurfaceProducer ID: " + id);
+      entry = producer;
+    }
     return entry;
   }
 
