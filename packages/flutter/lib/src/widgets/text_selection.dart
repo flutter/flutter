@@ -125,18 +125,6 @@ class EmptyTextSelectionControls extends TextSelectionControls {
   Size getHandleSize(double textLineHeight) => Size.zero;
 
   @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) => const SizedBox.shrink();
-
-  @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     return const SizedBox.shrink();
   }
@@ -1403,7 +1391,6 @@ class SelectionOverlay {
 // TextSelectionControls.buildToolbar.
 class _SelectionToolbarWrapper extends StatefulWidget {
   const _SelectionToolbarWrapper({
-    this.visibility,
     required this.layerLink,
     required this.offset,
     required this.child,
@@ -1412,7 +1399,6 @@ class _SelectionToolbarWrapper extends StatefulWidget {
   final Widget child;
   final Offset offset;
   final LayerLink layerLink;
-  final ValueListenable<bool>? visibility;
 
   @override
   State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
@@ -1427,35 +1413,18 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper> with
     super.initState();
 
     _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
-
-    _toolbarVisibilityChanged();
-    widget.visibility?.addListener(_toolbarVisibilityChanged);
+    _controller.forward();
   }
 
   @override
   void didUpdateWidget(_SelectionToolbarWrapper oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.visibility == widget.visibility) {
-      return;
-    }
-    oldWidget.visibility?.removeListener(_toolbarVisibilityChanged);
-    _toolbarVisibilityChanged();
-    widget.visibility?.addListener(_toolbarVisibilityChanged);
   }
 
   @override
   void dispose() {
-    widget.visibility?.removeListener(_toolbarVisibilityChanged);
     _controller.dispose();
     super.dispose();
-  }
-
-  void _toolbarVisibilityChanged() {
-    if (widget.visibility?.value ?? true) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
   }
 
   @override
