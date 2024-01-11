@@ -788,6 +788,68 @@ include ":app"
     });
   });
 
+  group('getGradleVersionForAndroidPlugin', () {
+    late FileSystem fileSystem;
+    late Logger testLogger;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      testLogger = BufferLogger.test();
+    });
+
+    testWithoutContext('prefers build.gradle over build.gradle.kts', () async {
+      const String versionInGroovy = '4.0.0';
+      const String versionInKotlin = '7.4.2';
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+
+      androidDirectory.childFile('build.gradle').writeAsStringSync('''
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:$versionInGroovy'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+''');
+
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:$versionInKotlin")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+''');
+
+
+      expect(
+        getGradleVersionForAndroidPlugin(androidDirectory, testLogger),
+        '6.7', // as per compatibility matrix in gradle_utils.dart
+      );
+    });
+  });
+
   group('validates java/AGP versions', () {
     final List<JavaAgpTestData> testData = <JavaAgpTestData>[
       // Strictly too old Java versions for known AGP versions.
