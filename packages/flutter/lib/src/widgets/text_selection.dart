@@ -288,7 +288,6 @@ class TextSelectionOverlay {
   void showToolbar() {
     _updateSelectionOverlay();
 
-    // TODO(justinmc): Can contextMenuBuilder be null?
     if (contextMenuBuilder == null) {
       return;
     }
@@ -826,9 +825,7 @@ class SelectionOverlay {
   /// Includes both the text selection toolbar and the spell check menu.
   /// {@endtemplate}
   bool get toolbarIsVisible {
-    return selectionControls is TextSelectionHandleControls
-        ? _contextMenuController.isShown || _spellCheckToolbarController.isShown
-        : _toolbar != null || _spellCheckToolbarController.isShown;
+    return _contextMenuController.isShown || _spellCheckToolbarController.isShown;
   }
 
   /// {@template flutter.widgets.SelectionOverlay.showMagnifier}
@@ -1193,6 +1190,7 @@ class SelectionOverlay {
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
+          visibility: toolbarVisible,
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
           child: contextMenuBuilder(context),
@@ -1216,6 +1214,7 @@ class SelectionOverlay {
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
+          visibility: toolbarVisible,
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
           child: builder(context),
@@ -1391,6 +1390,7 @@ class SelectionOverlay {
 // TextSelectionControls.buildToolbar.
 class _SelectionToolbarWrapper extends StatefulWidget {
   const _SelectionToolbarWrapper({
+    this.visibility,
     required this.layerLink,
     required this.offset,
     required this.child,
@@ -1399,6 +1399,7 @@ class _SelectionToolbarWrapper extends StatefulWidget {
   final Widget child;
   final Offset offset;
   final LayerLink layerLink;
+  final ValueListenable<bool>? visibility;
 
   @override
   State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
@@ -1413,18 +1414,35 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper> with
     super.initState();
 
     _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
-    _controller.forward();
+
+    _toolbarVisibilityChanged();
+    widget.visibility?.addListener(_toolbarVisibilityChanged);
   }
 
   @override
   void didUpdateWidget(_SelectionToolbarWrapper oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.visibility == widget.visibility) {
+      return;
+    }
+    oldWidget.visibility?.removeListener(_toolbarVisibilityChanged);
+    _toolbarVisibilityChanged();
+    widget.visibility?.addListener(_toolbarVisibilityChanged);
   }
 
   @override
   void dispose() {
+    widget.visibility?.removeListener(_toolbarVisibilityChanged);
     _controller.dispose();
     super.dispose();
+  }
+
+  void _toolbarVisibilityChanged() {
+    if (widget.visibility?.value ?? true) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   @override
