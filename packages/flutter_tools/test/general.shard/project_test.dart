@@ -1622,8 +1622,11 @@ void addIosProjectFile(Directory directory, {required String Function() projectF
     ..writeAsStringSync(projectFileContent());
 }
 
-/// Adds app-level Gradle Groovy build file to [directory]. If [kotlinDsl] is
-/// true, then Kotlin Script (kts) is used instead of Groovy.
+/// Adds app-level Gradle Groovy build file (build.gradle) to [directory].
+///
+/// If [kotlinDsl] is true, then build.gradle.kts is created instead of
+/// build.gradle. It's the caller's responsibility to make sure that
+/// [gradleFileContent] is consistent with the value of the [kotlinDsl] flag.
 void addAndroidGradleFile(Directory directory, {
   required String Function() gradleFileContent, bool kotlinDsl = false,
 }) {
