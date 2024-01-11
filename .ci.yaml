@@ -3338,6 +3338,33 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac framework_tests_impeller
+    recipe: flutter/flutter_drone
+    timeout: 60
+    bringup: true
+    properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/119880
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: framework_tests
+      subshard: impeller
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac framework_tests_misc
     recipe: flutter/flutter_drone
     timeout: 60
