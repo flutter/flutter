@@ -44,7 +44,6 @@ import 'vscode/vscode_validator.dart';
 import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
-import 'windows/topaz_ofd_validator.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
@@ -141,14 +140,12 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         operatingSystemUtils: globals.os,
       ),
       if (platform.isWindows)
-        ...<DoctorValidator>[
-          WindowsVersionValidator(
-            operatingSystemUtils: globals.os,
+        WindowsVersionValidator(
+          operatingSystemUtils: globals.os,
+          processLister: ProcessLister(
+            const LocalProcessManager(),
           ),
-          TopazOfdValidator(
-            processLister: ProcessLister(const LocalProcessManager()),
-          ),
-        ],
+        ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
       if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
