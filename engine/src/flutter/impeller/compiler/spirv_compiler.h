@@ -49,6 +49,8 @@ struct SPIRVCompilerOptions {
 
   std::shared_ptr<Includer> includer;
 
+  bool relaxed_vulkan_rules = false;
+
   shaderc::CompileOptions BuildShadercOptions() const;
 };
 

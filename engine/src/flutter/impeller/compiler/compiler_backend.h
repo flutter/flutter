@@ -27,6 +27,7 @@ struct CompilerBackend {
   enum class Type {
     kMSL,
     kGLSL,
+    kGLSLVulkan,
     kSkSL,
   };
 

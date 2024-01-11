@@ -19,6 +19,7 @@
 #include "impeller/compiler/includer.h"
 #include "impeller/compiler/logger.h"
 #include "impeller/compiler/spirv_compiler.h"
+#include "impeller/compiler/types.h"
 #include "impeller/compiler/uniform_sorter.h"
 #include "impeller/compiler/utilities.h"
 
@@ -122,15 +123,13 @@ static CompilerBackend CreateMSLCompiler(
 static CompilerBackend CreateVulkanCompiler(
     const spirv_cross::ParsedIR& ir,
     const SourceOptions& source_options) {
-  // TODO(dnfield): It seems like what we'd want is a CompilerGLSL with
-  // vulkan_semantics set to true, but that has regressed some things on GLES
-  // somehow. In the mean time, go back to using CompilerMSL, but set the Metal
-  // Language version to something really high so that we don't get weird
-  // complaints about using Metal features while trying to build Vulkan shaders.
-  // https://github.com/flutter/flutter/issues/123795
-  return CreateMSLCompiler(
-      ir, source_options,
-      spirv_cross::CompilerMSL::Options::make_msl_version(3, 0, 0));
+  auto gl_compiler = std::make_shared<spirv_cross::CompilerGLSL>(ir);
+  spirv_cross::CompilerGLSL::Options sl_options;
+  sl_options.force_zero_initialized_variables = true;
+  sl_options.vertex.fixup_clipspace = true;
+  sl_options.vulkan_semantics = true;
+  gl_compiler->set_common_options(sl_options);
+  return CompilerBackend(gl_compiler);
 }
 
 static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
@@ -302,18 +301,23 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     } break;
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
-    case TargetPlatform::kVulkan: {
+    case TargetPlatform::kVulkan:
+    case TargetPlatform::kRuntimeStageVulkan: {
       SPIRVCompilerTargetEnv target;
 
       target.env = shaderc_target_env::shaderc_target_env_vulkan;
       target.version = shaderc_env_version::shaderc_env_version_vulkan_1_1;
       target.spirv_version = shaderc_spirv_version::shaderc_spirv_version_1_3;
 
+      if (source_options.target_platform ==
+          TargetPlatform::kRuntimeStageVulkan) {
+        spirv_options.macro_definitions.push_back("IMPELLER_GRAPHICS_BACKEND");
+        spirv_options.relaxed_vulkan_rules = true;
+      }
       spirv_options.target = target;
     } break;
     case TargetPlatform::kRuntimeStageMetal:
-    case TargetPlatform::kRuntimeStageGLES:
-    case TargetPlatform::kRuntimeStageVulkan: {
+    case TargetPlatform::kRuntimeStageGLES: {
       SPIRVCompilerTargetEnv target;
 
       target.env = shaderc_target_env::shaderc_target_env_opengl;
@@ -398,7 +402,8 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   // If the target is Vulkan, our shading language is SPIRV which we already
   // have. We just need to strip it of debug information. If it isn't, we need
   // to invoke the appropriate compiler to compile the SPIRV to the target SL.
-  if (source_options.target_platform == TargetPlatform::kVulkan) {
+  if (source_options.target_platform == TargetPlatform::kVulkan ||
+      source_options.target_platform == TargetPlatform::kRuntimeStageVulkan) {
     auto stripped_spirv_options = spirv_options;
     stripped_spirv_options.generate_debug_info = false;
     sl_mapping_ = spv_compiler.CompileToSPV(

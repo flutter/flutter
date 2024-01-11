@@ -64,6 +64,7 @@ impellerc("runtime_stages") {
   shader_target_flags = [
     "--runtime-stage-metal",
     "--runtime-stage-gles",
+    "--runtime-stage-vulkan",
   ]
 
   iplr = true

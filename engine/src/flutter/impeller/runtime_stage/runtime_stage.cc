@@ -9,6 +9,7 @@
 
 #include "fml/mapping.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
 #include "runtime_stage_types_flatbuffers.h"
 
@@ -16,32 +17,12 @@ namespace impeller {
 
 static RuntimeUniformType ToType(fb::UniformDataType type) {
   switch (type) {
-    case fb::UniformDataType::kBoolean:
-      return RuntimeUniformType::kBoolean;
-    case fb::UniformDataType::kSignedByte:
-      return RuntimeUniformType::kSignedByte;
-    case fb::UniformDataType::kUnsignedByte:
-      return RuntimeUniformType::kUnsignedByte;
-    case fb::UniformDataType::kSignedShort:
-      return RuntimeUniformType::kSignedShort;
-    case fb::UniformDataType::kUnsignedShort:
-      return RuntimeUniformType::kUnsignedShort;
-    case fb::UniformDataType::kSignedInt:
-      return RuntimeUniformType::kSignedInt;
-    case fb::UniformDataType::kUnsignedInt:
-      return RuntimeUniformType::kUnsignedInt;
-    case fb::UniformDataType::kSignedInt64:
-      return RuntimeUniformType::kSignedInt64;
-    case fb::UniformDataType::kUnsignedInt64:
-      return RuntimeUniformType::kUnsignedInt64;
-    case fb::UniformDataType::kHalfFloat:
-      return RuntimeUniformType::kHalfFloat;
     case fb::UniformDataType::kFloat:
       return RuntimeUniformType::kFloat;
-    case fb::UniformDataType::kDouble:
-      return RuntimeUniformType::kDouble;
     case fb::UniformDataType::kSampledImage:
       return RuntimeUniformType::kSampledImage;
+    case fb::UniformDataType::kStruct:
+      return RuntimeUniformType::kStruct;
   }
   FML_UNREACHABLE();
 }
@@ -57,6 +38,13 @@ static RuntimeShaderStage ToShaderStage(fb::Stage stage) {
   }
   FML_UNREACHABLE();
 }
+
+/// The generated name from GLSLang/shaderc for the UBO containing non-opaque
+/// uniforms specified in the user-written runtime effect shader.
+///
+/// Vulkan does not allow non-opaque uniforms outside of a UBO.
+const char* RuntimeStage::kVulkanUBOName =
+    "_RESERVED_IDENTIFIER_FIXUP_gl_DefaultUniformBlock";
 
 std::unique_ptr<RuntimeStage> RuntimeStage::RuntimeStageIfPresent(
     const fb::RuntimeStage* runtime_stage,
@@ -110,6 +98,12 @@ RuntimeStage::RuntimeStage(const fb::RuntimeStage* runtime_stage,
           static_cast<size_t>(i->rows()), static_cast<size_t>(i->columns())};
       desc.bit_width = i->bit_width();
       desc.array_elements = i->array_elements();
+      if (i->struct_layout()) {
+        for (const auto& byte_type : *i->struct_layout()) {
+          desc.struct_layout.push_back(static_cast<uint8_t>(byte_type));
+        }
+      }
+      desc.struct_float_count = i->struct_float_count();
       uniforms_.emplace_back(std::move(desc));
     }
   }

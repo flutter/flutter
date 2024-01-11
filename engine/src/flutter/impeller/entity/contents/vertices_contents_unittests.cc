@@ -71,6 +71,7 @@ TEST_P(EntityTest, RendersDstPerColorWithAlpha) {
   const auto& cmd = render_pass->GetCommands()[0];
   auto* frag_uniforms = GetFragInfo<FS>(cmd);
 
+  ASSERT_TRUE(frag_uniforms);
   ASSERT_EQ(frag_uniforms->alpha, 0.5);
 }
 

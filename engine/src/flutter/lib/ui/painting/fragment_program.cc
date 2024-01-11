@@ -113,16 +113,17 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   Dart_Handle result = Dart_SetField(ths, tonic::ToDart("_samplerCount"),
                                      Dart_NewInteger(sampled_image_count));
   if (Dart_IsError(result)) {
-    Dart_PropagateError(result);
+    return "Failed to set sampler count for fragment program.";
   }
 
   size_t rounded_uniform_bytes =
       (other_uniforms_bytes + sizeof(float) - 1) & ~(sizeof(float) - 1);
   size_t float_count = rounded_uniform_bytes / sizeof(float);
+
   result = Dart_SetField(ths, tonic::ToDart("_uniformFloatCount"),
                          Dart_NewInteger(float_count));
   if (Dart_IsError(result)) {
-    Dart_PropagateError(result);
+    return "Failed to set uniform float count for fragment program.";
   }
 
   return "";

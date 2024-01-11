@@ -41,6 +41,7 @@ if (enable_unittests) {
     shader_target_flags = [
       "--runtime-stage-metal",
       "--runtime-stage-gles",
+      "--runtime-stage-vulkan",
     ]
     intermediates_subdir = "iplr-remap"
     sl_file_extension = "iplr"

@@ -85,7 +85,7 @@ TEST(ContextVKTest, DeleteShaderFunctionAfterContext) {
     pipeline_desc.SetVertexDescriptor(std::make_shared<VertexDescriptor>());
     std::vector<uint8_t> data = {0x03, 0x02, 0x23, 0x07};
     context->GetShaderLibrary()->RegisterFunction(
-        "foobar", ShaderStage::kFragment,
+        "foobar_fragment_main", ShaderStage::kFragment,
         std::make_shared<fml::DataMapping>(data), [](bool) {});
     shader_function = context->GetShaderLibrary()->GetFunction(
         "foobar_fragment_main", ShaderStage::kFragment);

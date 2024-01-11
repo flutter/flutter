@@ -18,6 +18,8 @@ namespace impeller {
 
 class RuntimeStage {
  public:
+  static const char* kVulkanUBOName;
+
   using Map = std::map<RuntimeStageBackend, std::shared_ptr<RuntimeStage>>;
   static Map DecodeRuntimeStages(const std::shared_ptr<fml::Mapping>& payload);
 

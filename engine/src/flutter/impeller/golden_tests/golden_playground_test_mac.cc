@@ -53,6 +53,8 @@ static const std::vector<std::string> kSkipTests = {
     // Gold.
     "impeller_Play_AiksTest_TextRotated_Metal",
     "impeller_Play_AiksTest_TextRotated_Vulkan",
+    // Runtime stage based tests get confused with a Metal context.
+    "impeller_Play_AiksTest_CanRenderClippedRuntimeEffects_Vulkan",
 };
 
 namespace {
