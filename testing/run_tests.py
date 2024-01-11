@@ -1266,8 +1266,8 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
         build_dir, engine_filter, args.coverage, args.engine_capture_core_dump
     )
 
-  # Use this type to exclusively run impeller vulkan tests.
-  if 'impeller-vulkan' in types:
+  # Use this type to exclusively run impeller tests.
+  if 'impeller' in types:
     build_name = args.variant
     try:
       xvfb.start_virtual_x(build_name, build_dir)
@@ -1275,8 +1275,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
           build_dir,
           'impeller_unittests',
           engine_filter,
-          shuffle_flags + ['--gtest_filter=-'
-                           '*/OpenGLES:'],
+          shuffle_flags,
           coverage=args.coverage
       )
     finally:
