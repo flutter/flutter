@@ -3215,6 +3215,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.Update:
+        // Stop cursor blinking and making it visible.
+        _stopCursorBlink(resetCharTicks: false);
+        _cursorBlinkOpacityController.value = 1.0;
+
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
         final Offset rawCursorOffset = _startCaretCenter! + centeredPoint - _floatingCursorOffset;
 
