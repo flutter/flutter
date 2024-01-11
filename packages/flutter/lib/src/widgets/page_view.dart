@@ -846,7 +846,7 @@ class _PageViewState extends State<PageView> {
   @override
   void initState() {
     super.initState();
-    initController();
+    _initController();
     _lastReportedPage = _controller.initialPage;
   }
 
@@ -859,7 +859,7 @@ class _PageViewState extends State<PageView> {
   }
 
 
-  void initController() {
+  void _initController() {
     _controller = widget.controller ?? PageController();
   }
 
@@ -869,7 +869,7 @@ class _PageViewState extends State<PageView> {
       if (oldWidget.controller == null) {
         _controller.dispose();
       }
-      initController();
+      _initController();
     }
     super.didUpdateWidget(oldWidget);
   }
