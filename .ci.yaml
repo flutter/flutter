@@ -135,6 +135,7 @@ platform_properties:
         ]
       os: Mac-12|Mac-13
       device_type: none
+      cpu: x86
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"
