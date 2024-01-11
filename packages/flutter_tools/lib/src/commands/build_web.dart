@@ -143,7 +143,7 @@ class BuildWebCommand extends BuildSubCommand {
       if (!featureFlags.isFlutterWebWasmEnabled) {
         throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
       }
-      if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
+      if (stringArg(FlutterOptions.kWebRendererFlag) != argParser.defaultFor(FlutterOptions.kWebRendererFlag)) {
         throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
       }
       globals.logger.printBox(
