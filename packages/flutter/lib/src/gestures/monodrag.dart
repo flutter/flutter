@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'drag_details.dart';
@@ -325,7 +324,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
-  Axis? _getPrimaryDragAxis() => null;
+  _DragDirection? _getPrimaryDragAxis() => null;
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
   bool _hasDragThresholdBeenMet = false;
 
@@ -436,29 +435,29 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   double _getPrimarySumDelta(int pointer, bool positive) {
     double sum = 0.0;
-    final Axis? axis = _getPrimaryDragAxis();
+    final _DragDirection? axis = _getPrimaryDragAxis();
     assert(axis != null);
 
     if (_moveDeltasBetweenFrames.containsKey(pointer)) {
       for (final Offset delta in _moveDeltasBetweenFrames[pointer]!) {
         if (positive) {
-          if (axis == Axis.vertical) {
+          if (axis == _DragDirection.vertical) {
             if (delta.dy > 0.0) {
               sum += delta.dy;
             }
           } else {
-            assert(axis == Axis.horizontal);
+            assert(axis == _DragDirection.horizontal);
             if (delta.dx > 0.0) {
               sum += delta.dx;
             }
           }
         } else {
-          if (axis == Axis.vertical) {
+          if (axis == _DragDirection.vertical) {
             if (delta.dy < 0.0) {
               sum += delta.dy;
             }
           } else {
-            assert(axis == Axis.horizontal);
+            assert(axis == _DragDirection.horizontal);
             if (delta.dx < 0.0) {
               sum += delta.dx;
             }
@@ -505,14 +504,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         return localOffset;
       }
 
-      final Axis? axis = _getPrimaryDragAxis();
+      final _DragDirection? axis = _getPrimaryDragAxis();
       if (axis == null) {
         // Do not merge delta for PanGestureRecognizer because we don't know how to
         // merge the delta of two directions.
         return localOffset;
       }
 
-      final bool positive = (axis == Axis.vertical) ? localOffset.dy > 0.0 : localOffset.dx > 0.0;
+      final bool positive = (axis == _DragDirection.vertical) ? localOffset.dy > 0.0 : localOffset.dx > 0.0;
 
       final int? maxSumDeltaPointer = _getMaxPrimarySumDeltaPointer(positive: positive);
       if (maxSumDeltaPointer == null || maxSumDeltaPointer == pointer) {
@@ -521,14 +520,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         final double maxSumDelta = _getPrimarySumDelta(maxSumDeltaPointer, positive);
         final double curPointerSumDelta = _getPrimarySumDelta(pointer, positive);
         if (positive) {
-          if (axis == Axis.vertical) {
+          if (axis == _DragDirection.vertical) {
             if (curPointerSumDelta + localOffset.dy > maxSumDelta) {
               return Offset(localOffset.dx, curPointerSumDelta + localOffset.dy - maxSumDelta);
             } else {
               return Offset.zero;
             }
           } else {
-            assert(axis == Axis.horizontal);
+            assert(axis == _DragDirection.horizontal);
             if (curPointerSumDelta + localOffset.dx > maxSumDelta) {
               return Offset(curPointerSumDelta + localOffset.dx - maxSumDelta, localOffset.dy);
             } else {
@@ -536,14 +535,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
             }
           }
         } else {
-          if (axis == Axis.vertical) {
+          if (axis == _DragDirection.vertical) {
             if (curPointerSumDelta + localOffset.dy < maxSumDelta) {
               return Offset(localOffset.dx, curPointerSumDelta + localOffset.dy - maxSumDelta);
             } else {
               return Offset.zero;
             }
           } else {
-            assert(axis == Axis.horizontal);
+            assert(axis == _DragDirection.horizontal);
             if (curPointerSumDelta + localOffset.dx < maxSumDelta) {
               return Offset(curPointerSumDelta + localOffset.dx - maxSumDelta, localOffset.dy);
             } else {
@@ -855,7 +854,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   double _getPrimaryValueFromOffset(Offset value) => value.dy;
 
   @override
-  Axis? _getPrimaryDragAxis() => Axis.vertical;
+  _DragDirection? _getPrimaryDragAxis() => _DragDirection.vertical;
 
   @override
   String get debugDescription => 'vertical drag';
@@ -915,7 +914,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   double _getPrimaryValueFromOffset(Offset value) => value.dx;
 
   @override
-  Axis? _getPrimaryDragAxis() => Axis.horizontal;
+  _DragDirection? _getPrimaryDragAxis() => _DragDirection.horizontal;
 
   @override
   String get debugDescription => 'horizontal drag';
@@ -973,4 +972,9 @@ class PanGestureRecognizer extends DragGestureRecognizer {
 
   @override
   String get debugDescription => 'pan';
+}
+
+enum _DragDirection {
+  horizontal,
+  vertical,
 }
