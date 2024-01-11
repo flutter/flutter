@@ -8,8 +8,8 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
@@ -1882,5 +1882,29 @@ void main() {
     );
 
     expect(tester.layers.whereType<OpacityLayer>(), hasLength(1));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/140780.
+  testWidgets('ListWheelScrollView in an AnimatedContainer with zero height does not throw an error',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnimatedContainer(
+              height: 0,
+              duration: Duration.zero,
+              child: ListWheelScrollView(
+                itemExtent: 20.0,
+                children: <Widget>[
+                  for (int i = 0; i < 20; i++)
+                    Container(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
   });
 }
