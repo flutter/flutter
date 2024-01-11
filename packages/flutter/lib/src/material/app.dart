@@ -1015,6 +1015,7 @@ class _MaterialAppState extends State<MaterialApp> {
         routeInformationParser: widget.routeInformationParser,
         routerDelegate: widget.routerDelegate,
         routerConfig: widget.routerConfig,
+        onNavigationNotification: widget.onNavigationNotification,
         backButtonDispatcher: widget.backButtonDispatcher,
         onNavigationNotification: widget.onNavigationNotification,
         builder: _materialBuilder,

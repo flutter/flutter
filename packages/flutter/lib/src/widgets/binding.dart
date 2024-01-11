@@ -76,6 +76,16 @@ abstract mixin class WidgetsBindingObserver {
   /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
+  Future<bool> startBackGesture(AndroidBackEvent backEvent) =>
+      Future<bool>.value(false);
+
+  Future<bool> updateBackGestureProgress(AndroidBackEvent backEvent) =>
+      Future<bool>.value(false);
+
+  Future<bool> commitBackGesture() => Future<bool>.value(false);
+
+  Future<bool> cancelBackGesture() => Future<bool>.value(false);
+
   /// Called when the host tells the application to push a new route onto the
   /// navigator.
   ///
@@ -780,6 +790,50 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     SystemNavigator.pop();
   }
 
+  @protected
+  @visibleForTesting
+  Future<void> handleStartBackGesture(Map<dynamic, dynamic> arguments) async {
+    final AndroidBackEvent backEvent = AndroidBackEvent.fromMap(arguments);
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (await observer.startBackGesture(backEvent)) {
+        return;
+      }
+    }
+  }
+
+  @protected
+  @visibleForTesting
+  Future<void> handleUpdateBackGestureProgress(
+      Map<dynamic, dynamic> arguments) async {
+    final AndroidBackEvent backEvent = AndroidBackEvent.fromMap(arguments);
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (await observer.updateBackGestureProgress(backEvent)) {
+        return;
+      }
+    }
+  }
+
+  @protected
+  @visibleForTesting
+  Future<void> handleCommitBackGesture() async {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (await observer.commitBackGesture()) {
+        return;
+      }
+    }
+    await handlePopRoute();
+  }
+
+  @protected
+  @visibleForTesting
+  Future<void> handleCancelBackGesture() async {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (await observer.cancelBackGesture()) {
+        return;
+      }
+    }
+  }
+
   /// Called when the host tells the app to push a new route onto the
   /// navigator.
   ///
@@ -819,6 +873,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       'popRoute' => handlePopRoute(),
       'pushRoute' => handlePushRoute(methodCall.arguments as String),
       'pushRouteInformation' => _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>),
+	  'startBackGesture' => handleStartBackGesture(methodCall.arguments as Map<dynamic, dynamic>),
+      'updateBackGestureProgress' => handleUpdateBackGestureProgress(methodCall.arguments as Map<dynamic, dynamic>),
+      'commitBackGesture' => handleCommitBackGesture(),
+      'cancelBackGesture' => handleCancelBackGesture(),
       _ => Future<dynamic>.value(),
     };
   }

@@ -187,9 +187,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// true first.
   ///
   /// This should only be used between frames, not during build.
-  bool get popGestureEnabled => _isPopGestureEnabled(this);
+  bool get popGestureEnabled => isPopGestureEnabled(this);
 
-  static bool _isPopGestureEnabled<T>(PageRoute<T> route) {
+  static bool isPopGestureEnabled<T>(PageRoute<T> route) {
     // If there's nothing to go back to, then obviously we don't support
     // the back gesture.
     if (route.isFirst) {
@@ -243,7 +243,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
-    assert(_isPopGestureEnabled(route));
+    assert(isPopGestureEnabled(route));
 
     return _CupertinoBackGestureController<T>(
       navigator: route.navigator!,
@@ -293,7 +293,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
         child: _CupertinoBackGestureDetector<T>(
-          enabledCallback: () => _isPopGestureEnabled<T>(route),
+          enabledCallback: () => isPopGestureEnabled<T>(route),
           onStartPopGesture: () => _startPopGesture<T>(route),
           getIsCurrent: () => route.isCurrent,
           getIsActive: () => route.isActive,

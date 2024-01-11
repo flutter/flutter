@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'colors.dart';
 import 'theme.dart';
@@ -656,11 +659,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T>? route,
-    BuildContext? context,
+    PageRoute<T> route,
+    BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-    Widget? child,
+    Widget child,
   ) {
     if (_kProfileForceDisableSnapshotting) {
       return _ZoomPageTransitionNoCache(
@@ -672,10 +675,178 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      allowSnapshotting: allowSnapshotting && (route?.allowSnapshotting ?? true),
+      allowSnapshotting: allowSnapshotting && route.allowSnapshotting,
       allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
       child: child,
     );
+  }
+}
+
+class AndroidBackGestureTransitionsBuilder extends PageTransitionsBuilder {
+  const AndroidBackGestureTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final bool hasBackGesture = _hasBackGesture(route);
+
+    return AndroidBackGestureDetector(
+      controller: route.controller!, // protected access
+      navigator: route.navigator!,
+      enabledCallback: () =>
+          CupertinoRouteTransitionMixin.isPopGestureEnabled(route),
+      child: hasBackGesture
+          ? CupertinoPageTransition(
+              primaryRouteAnimation: animation,
+              secondaryRouteAnimation: secondaryAnimation,
+              linearTransition: hasBackGesture,
+              child: child,
+            )
+          : _ZoomPageTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              allowSnapshotting: route.allowSnapshotting,
+              allowEnterRouteSnapshotting: true,
+              child: child,
+            ),
+    );
+  }
+
+  bool _hasBackGesture(PageRoute<dynamic> route) {
+    return route.navigator!.userGestureInProgress;
+  }
+}
+
+class AndroidBackGestureDetector extends StatefulWidget {
+  const AndroidBackGestureDetector({
+    super.key,
+    required this.child,
+    required this.controller,
+    required this.navigator,
+    required this.enabledCallback,
+  });
+
+  final Widget child;
+  final AnimationController controller;
+  final NavigatorState navigator;
+  final ValueGetter<bool> enabledCallback;
+
+  @override
+  State<AndroidBackGestureDetector> createState() =>
+      _AndroidBackGestureDetectorState();
+}
+
+class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
+    with WidgetsBindingObserver {
+  bool gestureInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<bool> startBackGesture(AndroidBackEvent backEvent) {
+    gestureInProgress = widget.enabledCallback();
+    if (gestureInProgress) {
+      widget.navigator.didStartUserGesture();
+      widget.controller.value = 1 - backEvent.progress;
+
+      return Future<bool>.value(true);
+    }
+
+    return Future<bool>.value(false);
+  }
+
+  @override
+  Future<bool> updateBackGestureProgress(AndroidBackEvent backEvent) {
+    if (gestureInProgress) {
+      widget.controller.value = 1 - backEvent.progress;
+
+      return Future<bool>.value(true);
+    }
+
+    return Future<bool>.value(false);
+  }
+
+  @override
+  Future<bool> cancelBackGesture() {
+    if (gestureInProgress) {
+      // The closer the panel is to dismissing, the shorter the animation is.
+      // We want to cap the animation time, but we want to use a linear curve
+      // to determine it.
+      final int droppedPageForwardAnimationTime = min(
+        lerpDouble(800, 0, widget.controller.value)!.floor(),
+        300,
+      );
+      widget.controller.animateTo(
+        1.0,
+        duration: Duration(milliseconds: droppedPageForwardAnimationTime),
+        curve: Curves.fastLinearToSlowEaseIn,
+      );
+      _finalizeGesture();
+
+      return Future<bool>.value(true);
+    }
+
+    return Future<bool>.value(false);
+  }
+
+  @override
+  Future<bool> commitBackGesture() {
+    if (gestureInProgress) {
+      // This route is destined to pop at this point. Reuse navigator's pop.
+      widget.navigator.pop();
+
+      // The popping may have finished inline if already at the target destination.
+      if (widget.controller.isAnimating) {
+        // Otherwise, use a custom popping animation duration and curve.
+        final int droppedPageBackAnimationTime =
+            lerpDouble(0, 800, widget.controller.value)!.floor();
+        widget.controller.animateBack(0.0,
+            duration: Duration(milliseconds: droppedPageBackAnimationTime),
+            curve: Curves.fastLinearToSlowEaseIn);
+      }
+      _finalizeGesture();
+
+      return Future<bool>.value(true);
+    }
+
+    return Future<bool>.value(false);
+  }
+
+  void _finalizeGesture() {
+    gestureInProgress = false;
+    if (widget.controller.isAnimating) {
+      // Keep the userGestureInProgress in true state so we don't change the
+      // curve of the page transition mid-flight since CupertinoPageTransition
+      // depends on userGestureInProgress.
+      late AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        widget.navigator.didStopUserGesture();
+        widget.controller.removeStatusListener(animationStatusCallback);
+      };
+      widget.controller.addStatusListener(animationStatusCallback);
+    } else {
+      widget.navigator.didStopUserGesture();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
 
@@ -765,11 +936,7 @@ class PageTransitionsTheme with Diagnosticable {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    TargetPlatform platform = Theme.of(context).platform;
-
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) {
-      platform = TargetPlatform.iOS;
-    }
+    final TargetPlatform platform = Theme.of(context).platform;
 
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
