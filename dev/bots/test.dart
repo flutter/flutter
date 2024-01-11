@@ -815,6 +815,15 @@ Future<void> _runFrameworkTests() async {
     );
   }
 
+  Future<void> runImpeller() async {
+    printProgress('${green}Running packages/flutter tests $reset in Impeller$reset');
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--enable-impeller'],
+    );
+  }
+
+
   Future<void> runLibraries() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false)
@@ -1064,6 +1073,7 @@ Future<void> _runFrameworkTests() async {
     'libraries': runLibraries,
     'slow': runSlow,
     'misc': runMisc,
+    'impeller': runImpeller,
   });
 }
 
