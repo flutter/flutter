@@ -19,11 +19,10 @@ Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
   TextScaler textScaler = TextScaler.noScaling,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  ThemeData? theme,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    theme: theme,
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -38,13 +37,11 @@ Future<void> pumpCheckmarkChip(
   WidgetTester tester, {
   required Widget chip,
   Color? themeColor,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     wrapForChip(
-      useMaterial3: useMaterial3,
-      brightness: brightness,
+      theme: theme,
       child: Builder(
         builder: (BuildContext context) {
           final ChipThemeData chipTheme = ChipTheme.of(context);
@@ -705,10 +702,11 @@ void main() {
   });
 
   testWidgets('Material2 - Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      useMaterial3: false,
+      theme: theme,
     );
 
     expectCheckmarkColor(find.byType(FilterChip), Colors.black.withAlpha(0xde));
@@ -719,7 +717,7 @@ void main() {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      useMaterial3: theme.useMaterial3,
+      theme: theme,
     );
 
     expectCheckmarkColor(
@@ -729,11 +727,11 @@ void main() {
   });
 
   testWidgets('Material2 - Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.dark(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      brightness: Brightness.dark,
-      useMaterial3: false,
+      theme: theme,
     );
 
     expectCheckmarkColor(
@@ -747,8 +745,7 @@ void main() {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      brightness: theme.brightness,
-      useMaterial3: theme.useMaterial3,
+      theme: theme,
     );
 
     expectCheckmarkColor(

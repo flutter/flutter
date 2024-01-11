@@ -16,11 +16,10 @@ Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  ThemeData? theme,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    theme: theme,
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery.withClampedTextScaling(
@@ -50,13 +49,11 @@ Future<void> pumpCheckmarkChip(
   WidgetTester tester, {
   required Widget chip,
   Color? themeColor,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     wrapForChip(
-      useMaterial3: useMaterial3,
-      brightness: brightness,
+      theme: theme,
       child: Builder(
         builder: (BuildContext context) {
           final ChipThemeData chipTheme = ChipTheme.of(context);
@@ -305,40 +302,41 @@ void main() {
   });
 
   testWidgets('Material2 - Input chip disabled check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      useMaterial3: false,
+      theme: theme,
     );
 
     expectCheckmarkColor(find.byType(InputChip), Colors.black.withAlpha(0xde));
   });
 
   testWidgets('Material3 - Input chip disabled check mark color is determined by platform brightness when light', (WidgetTester tester) async {
-    await pumpCheckmarkChip(tester, chip: selectedInputChip());
-    // Without color opacity. _RenderChip handles the 'disabled' opacity internally
-    expectCheckmarkColor(find.byType(InputChip), ThemeData.light().colorScheme.onSurface);
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await pumpCheckmarkChip(tester, chip: selectedInputChip(), theme: theme);
+    expectCheckmarkColor(find.byType(InputChip), theme.colorScheme.onSurface);
   });
 
   testWidgets('Material2 - Input chip disabled check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.dark(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      brightness: Brightness.dark,
-      useMaterial3: false,
+      theme: theme,
     );
 
     expectCheckmarkColor(find.byType(InputChip), Colors.white.withAlpha(0xde));
   });
 
   testWidgets('Material3 - Input chip disabled check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.dark(useMaterial3: true);
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      brightness: Brightness.dark,
+      theme: theme,
     );
-    // Without color opacity. _RenderChip handles the 'disabled' state opacity internally
-    expectCheckmarkColor(find.byType(InputChip), ThemeData.dark().colorScheme.onSurface);
+    expectCheckmarkColor(find.byType(InputChip), theme.colorScheme.onSurface);
   });
 
   testWidgets('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
@@ -380,11 +378,12 @@ void main() {
   });
 
   testWidgets('Material3 - Input chip has correct selected color when enabled', (WidgetTester tester) async {
-    final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ChipThemeData material3ChipDefaults = theme.chipTheme;
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(enabled: true),
-      useMaterial3: true,
+      theme: theme,
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
@@ -392,11 +391,12 @@ void main() {
   });
 
   testWidgets('Material3 - Input chip has correct selected color when disabled', (WidgetTester tester) async {
-    final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ChipThemeData material3ChipDefaults = theme.chipTheme;
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      useMaterial3: true,
+      theme: theme,
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
