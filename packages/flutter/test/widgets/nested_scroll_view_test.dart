@@ -218,6 +218,7 @@ void main() {
     final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
 
     final ScrollController outerController = ScrollController();
+    addTearDown(outerController.dispose);
 
     Widget build() {
       return Directionality(
