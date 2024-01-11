@@ -11,6 +11,8 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
+
+// flutter_ignore: package_path_import -- We aren't using this to construct paths.
 import 'package:path/path.dart' show Style;
 
 import '../src/common.dart';
