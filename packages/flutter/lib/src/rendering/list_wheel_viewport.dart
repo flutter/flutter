@@ -879,7 +879,7 @@ class RenderListWheelViewport
     // renderChildrenOutsideViewport is true. Otherwise, only children within
     // suitable angles (via _first/lastVisibleLayoutOffset) reach the paint
     // phase.
-    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0) {
+    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0 || angle.isNaN) {
       return;
     }
 
