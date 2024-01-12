@@ -1908,10 +1908,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-
-  // Test for #139871
-  // DropdownMenu throws exception when it is in any scrollable list view and scrolls quickly #139871
-  // https://github.com/flutter/flutter/issues/139871
+  // Regression test for https://github.com/flutter/flutter/issues/139871.
   testWidgets('setState is not called through addPostFrameCallback after DropdownMenu is unmounted', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
