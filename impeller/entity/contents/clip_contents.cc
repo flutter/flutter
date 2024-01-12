@@ -80,59 +80,58 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo info;
 
-  Command cmd;
-
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kDestination;
-  cmd.stencil_reference = entity.GetClipDepth();
+  pass.SetStencilReference(entity.GetClipDepth());
   options.stencil_compare = CompareFunction::kEqual;
   options.stencil_operation = StencilOperation::kIncrementClamp;
 
   if (clip_op_ == Entity::ClipOperation::kDifference) {
     {
-      DEBUG_COMMAND_INFO(cmd, "Difference Clip (Increment)");
+      pass.SetCommandLabel("Difference Clip (Increment)");
 
       auto points = Rect::MakeSize(pass.GetRenderTargetSize()).GetPoints();
       auto vertices =
           VertexBufferBuilder<VS::PerVertexData>{}
               .AddVertices({{points[0]}, {points[1]}, {points[2]}, {points[3]}})
               .CreateVertexBuffer(renderer.GetTransientsBuffer());
-      cmd.BindVertices(std::move(vertices));
+
+      pass.SetVertexBuffer(std::move(vertices));
 
       info.mvp = pass.GetOrthographicTransform();
-      VS::BindFrameInfo(cmd,
+      VS::BindFrameInfo(pass,
                         renderer.GetTransientsBuffer().EmplaceUniform(info));
 
       options.primitive_type = PrimitiveType::kTriangleStrip;
-      cmd.pipeline = renderer.GetClipPipeline(options);
-      pass.AddCommand(Command(cmd));
+      pass.SetPipeline(renderer.GetClipPipeline(options));
+      pass.Draw();
     }
 
     {
-      DEBUG_COMMAND_INFO(cmd, "Difference Clip (Punch)");
+      pass.SetCommandLabel("Difference Clip (Punch)");
+      pass.SetStencilReference(entity.GetClipDepth() + 1);
 
-      cmd.stencil_reference = entity.GetClipDepth() + 1;
       options.stencil_compare = CompareFunction::kEqual;
       options.stencil_operation = StencilOperation::kDecrementClamp;
     }
   } else {
-    DEBUG_COMMAND_INFO(cmd, "Intersect Clip");
+    pass.SetCommandLabel("Intersect Clip");
+
     options.stencil_compare = CompareFunction::kEqual;
     options.stencil_operation = StencilOperation::kIncrementClamp;
   }
 
   auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
   options.primitive_type = geometry_result.type;
-  cmd.pipeline = renderer.GetClipPipeline(options);
+  pass.SetPipeline(renderer.GetClipPipeline(options));
 
   auto allocator = renderer.GetContext()->GetResourceAllocator();
-  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
+  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   info.mvp = geometry_result.transform;
-  VS::BindFrameInfo(cmd, renderer.GetTransientsBuffer().EmplaceUniform(info));
+  VS::BindFrameInfo(pass, renderer.GetTransientsBuffer().EmplaceUniform(info));
 
-  pass.AddCommand(std::move(cmd));
-  return true;
+  return pass.Draw().ok();
 }
 
 /*******************************************************************************
@@ -176,15 +175,14 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
                                  RenderPass& pass) const {
   using VS = ClipPipeline::VertexShader;
 
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, "Restore Clip");
+  pass.SetCommandLabel("Restore Clip");
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kDestination;
   options.stencil_compare = CompareFunction::kLess;
   options.stencil_operation = StencilOperation::kSetToReferenceValue;
   options.primitive_type = PrimitiveType::kTriangleStrip;
-  cmd.pipeline = renderer.GetClipPipeline(options);
-  cmd.stencil_reference = entity.GetClipDepth();
+  pass.SetPipeline(renderer.GetClipPipeline(options));
+  pass.SetStencilReference(entity.GetClipDepth());
 
   // Create a rect that covers either the given restore area, or the whole
   // render target texture.
@@ -198,15 +196,14 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
       {Point(ltrb[0], ltrb[3])},
       {Point(ltrb[2], ltrb[3])},
   });
-  cmd.BindVertices(
+  pass.SetVertexBuffer(
       vtx_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()));
 
   VS::FrameInfo info;
   info.mvp = pass.GetOrthographicTransform();
-  VS::BindFrameInfo(cmd, renderer.GetTransientsBuffer().EmplaceUniform(info));
+  VS::BindFrameInfo(pass, renderer.GetTransientsBuffer().EmplaceUniform(info));
 
-  pass.AddCommand(std::move(cmd));
-  return true;
+  return pass.Draw().ok();
 }
 
 };  // namespace impeller

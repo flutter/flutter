@@ -26,22 +26,23 @@ static void EncodeCommand(const SceneContext& scene_context,
                           const SceneCommand& scene_command) {
   auto& host_buffer = scene_context.GetTransientsBuffer();
 
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, scene_command.label);
-  cmd.stencil_reference =
-      0;  // TODO(bdero): Configurable stencil ref per-command.
+  render_pass.SetCommandLabel(scene_command.label);
+  // TODO(bdero): Configurable stencil ref per-command.
+  render_pass.SetStencilReference(0);
 
-  cmd.pipeline = scene_context.GetPipeline(
+  render_pass.SetPipeline(scene_context.GetPipeline(
       PipelineKey{scene_command.geometry->GetGeometryType(),
                   scene_command.material->GetMaterialType()},
-      scene_command.material->GetContextOptions(render_pass));
+      scene_command.material->GetContextOptions(render_pass)));
 
   scene_command.geometry->BindToCommand(
       scene_context, host_buffer, view_transform * scene_command.transform,
-      cmd);
-  scene_command.material->BindToCommand(scene_context, host_buffer, cmd);
+      render_pass);
+  scene_command.material->BindToCommand(scene_context, host_buffer,
+                                        render_pass);
 
-  render_pass.AddCommand(std::move(cmd));
+  render_pass.Draw();
+  ;
 }
 
 std::shared_ptr<CommandBuffer> SceneEncoder::BuildSceneCommandBuffer(

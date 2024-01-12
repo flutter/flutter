@@ -13,6 +13,7 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/shaders/skinned.vert.h"
@@ -162,13 +163,13 @@ VertexBuffer CuboidGeometry::GetVertexBuffer(Allocator& allocator) const {
 void CuboidGeometry::BindToCommand(const SceneContext& scene_context,
                                    HostBuffer& buffer,
                                    const Matrix& transform,
-                                   Command& command) const {
-  command.BindVertices(
+                                   RenderPass& pass) const {
+  pass.SetVertexBuffer(
       GetVertexBuffer(*scene_context.GetContext()->GetResourceAllocator()));
 
   UnskinnedVertexShader::FrameInfo info;
   info.mvp = transform;
-  UnskinnedVertexShader::BindFrameInfo(command, buffer.EmplaceUniform(info));
+  UnskinnedVertexShader::BindFrameInfo(pass, buffer.EmplaceUniform(info));
 }
 
 //------------------------------------------------------------------------------
@@ -200,13 +201,13 @@ void UnskinnedVertexBufferGeometry::BindToCommand(
     const SceneContext& scene_context,
     HostBuffer& buffer,
     const Matrix& transform,
-    Command& command) const {
-  command.BindVertices(
+    RenderPass& pass) const {
+  pass.SetVertexBuffer(
       GetVertexBuffer(*scene_context.GetContext()->GetResourceAllocator()));
 
   UnskinnedVertexShader::FrameInfo info;
   info.mvp = transform;
-  UnskinnedVertexShader::BindFrameInfo(command, buffer.EmplaceUniform(info));
+  UnskinnedVertexShader::BindFrameInfo(pass, buffer.EmplaceUniform(info));
 }
 
 //------------------------------------------------------------------------------
@@ -237,8 +238,8 @@ void SkinnedVertexBufferGeometry::BindToCommand(
     const SceneContext& scene_context,
     HostBuffer& buffer,
     const Matrix& transform,
-    Command& command) const {
-  command.BindVertices(
+    RenderPass& pass) const {
+  pass.SetVertexBuffer(
       GetVertexBuffer(*scene_context.GetContext()->GetResourceAllocator()));
 
   SamplerDescriptor sampler_desc;
@@ -249,7 +250,7 @@ void SkinnedVertexBufferGeometry::BindToCommand(
   sampler_desc.label = "NN Repeat";
 
   SkinnedVertexShader::BindJointsTexture(
-      command,
+      pass,
       joints_texture_ ? joints_texture_ : scene_context.GetPlaceholderTexture(),
       scene_context.GetContext()->GetSamplerLibrary()->GetSampler(
           sampler_desc));
@@ -259,7 +260,7 @@ void SkinnedVertexBufferGeometry::BindToCommand(
   info.enable_skinning = joints_texture_ ? 1 : 0;
   info.joint_texture_size =
       joints_texture_ ? joints_texture_->GetSize().width : 1;
-  SkinnedVertexShader::BindFrameInfo(command, buffer.EmplaceUniform(info));
+  SkinnedVertexShader::BindFrameInfo(pass, buffer.EmplaceUniform(info));
 }
 
 // |Geometry|

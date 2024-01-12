@@ -236,17 +236,13 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
           clip_rect = visible_clip.value();
         }
 
-        impeller::Command cmd;
-        DEBUG_COMMAND_INFO(cmd,
-                           impeller::SPrintF("ImGui draw list %d (command %d)",
-                                             draw_list_i, cmd_i));
-
-        cmd.viewport = viewport;
-        cmd.scissor = impeller::IRect(clip_rect);
-
-        cmd.pipeline = bd->pipeline;
-        VS::BindUniformBuffer(cmd, vtx_uniforms);
-        FS::BindTex(cmd, bd->font_texture, bd->sampler);
+        render_pass.SetCommandLabel(impeller::SPrintF(
+            "ImGui draw list %d (command %d)", draw_list_i, cmd_i));
+        render_pass.SetViewport(viewport);
+        render_pass.SetScissor(impeller::IRect(clip_rect));
+        render_pass.SetPipeline(bd->pipeline);
+        VS::BindUniformBuffer(render_pass, vtx_uniforms);
+        FS::BindTex(render_pass, bd->font_texture, bd->sampler);
 
         size_t vb_start =
             vertex_buffer_offset + pcmd->VtxOffset * sizeof(ImDrawVert);
@@ -262,10 +258,10 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
                 pcmd->ElemCount * sizeof(ImDrawIdx))};
         vertex_buffer.vertex_count = pcmd->ElemCount;
         vertex_buffer.index_type = impeller::IndexType::k16bit;
-        cmd.BindVertices(std::move(vertex_buffer));
-        cmd.base_vertex = pcmd->VtxOffset;
+        render_pass.SetVertexBuffer(std::move(vertex_buffer));
+        render_pass.SetBaseVertex(pcmd->VtxOffset);
 
-        render_pass.AddCommand(std::move(cmd));
+        render_pass.Draw().ok();
       }
     }
 

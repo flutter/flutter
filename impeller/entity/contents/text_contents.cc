@@ -91,16 +91,15 @@ bool TextContents::Render(const ContentContext& renderer,
   }
 
   // Information shared by all glyph draw calls.
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, "TextFrame");
+  pass.SetCommandLabel("TextFrame");
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = PrimitiveType::kTriangle;
   if (type == GlyphAtlas::Type::kAlphaBitmap) {
-    cmd.pipeline = renderer.GetGlyphAtlasPipeline(opts);
+    pass.SetPipeline(renderer.GetGlyphAtlasPipeline(opts));
   } else {
-    cmd.pipeline = renderer.GetGlyphAtlasColorPipeline(opts);
+    pass.SetPipeline(renderer.GetGlyphAtlasColorPipeline(opts));
   }
-  cmd.stencil_reference = entity.GetClipDepth();
+  pass.SetStencilReference(entity.GetClipDepth());
 
   using VS = GlyphAtlasPipeline::VertexShader;
   using FS = GlyphAtlasPipeline::FragmentShader;
@@ -117,14 +116,14 @@ bool TextContents::Render(const ContentContext& renderer,
   frame_info.entity_transform = entity.GetTransform();
   frame_info.text_color = ToVector(color.Premultiply());
 
-  VS::BindFrameInfo(cmd,
+  VS::BindFrameInfo(pass,
                     renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   if (type == GlyphAtlas::Type::kColorBitmap) {
     using FSS = GlyphAtlasColorPipeline::FragmentShader;
     FSS::FragInfo frag_info;
     frag_info.use_text_color = force_text_color_ ? 1.0 : 0.0;
-    FSS::BindFragInfo(cmd,
+    FSS::BindFragInfo(pass,
                       renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
   }
 
@@ -144,7 +143,7 @@ bool TextContents::Render(const ContentContext& renderer,
   sampler_desc.mip_filter = MipFilter::kNearest;
 
   FS::BindGlyphAtlasSampler(
-      cmd,                  // command
+      pass,                 // command
       atlas->GetTexture(),  // texture
       renderer.GetContext()->GetSamplerLibrary()->GetSampler(
           sampler_desc)  // sampler
@@ -206,14 +205,14 @@ bool TextContents::Render(const ContentContext& renderer,
         }
       });
 
-  cmd.BindVertices({
-      .vertex_buffer = buffer_view,
+  pass.SetVertexBuffer({
+      .vertex_buffer = std::move(buffer_view),
       .index_buffer = {},
       .vertex_count = vertex_count,
       .index_type = IndexType::kNone,
   });
 
-  return pass.AddCommand(std::move(cmd));
+  return pass.Draw().ok();
 }
 
 }  // namespace impeller
