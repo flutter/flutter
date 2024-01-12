@@ -894,7 +894,7 @@ void main() {
   });
 
   group('Memory events.', () {
-    testWidgets('ImageInfo dispatches memory events and disposes image by default', (WidgetTester tester) async {
+    testWidgets('ImageInfo dispatches memory events by default', (WidgetTester tester) async {
       await expectLater(
         await memoryEvents(
           () async {
