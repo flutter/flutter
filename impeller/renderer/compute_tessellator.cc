@@ -133,7 +133,7 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
     PS::BindQuads(cmd, host_buffer.EmplaceStorageBuffer(quads));
     PS::BindLines(cmd, host_buffer.EmplaceStorageBuffer(lines));
     PS::BindComponents(cmd, host_buffer.EmplaceStorageBuffer(components));
-    PS::BindPolyline(cmd, polyline_buffer->AsBufferView());
+    PS::BindPolyline(cmd, DeviceBuffer::AsBufferView(polyline_buffer));
 
     if (!pass->AddCommand(std::move(cmd))) {
       return Status::kCommandInvalid;
@@ -164,7 +164,7 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
     };
     SS::BindConfig(cmd, host_buffer.EmplaceUniform(config));
 
-    SS::BindPolyline(cmd, polyline_buffer->AsBufferView());
+    SS::BindPolyline(cmd, DeviceBuffer::AsBufferView(polyline_buffer));
     SS::BindVertexBufferCount(cmd, std::move(vertex_buffer_count));
     SS::BindVertexBuffer(cmd, std::move(vertex_buffer));
 

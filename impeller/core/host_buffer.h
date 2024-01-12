@@ -12,7 +12,7 @@
 #include <string>
 #include <type_traits>
 
-#include "impeller/core/buffer.h"
+#include "impeller/core/allocator.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/platform.h"
 
@@ -134,18 +134,18 @@ class HostBuffer {
   TestStateQuery GetStateForTest();
 
  private:
-  [[nodiscard]] std::tuple<uint8_t*, Range, std::shared_ptr<DeviceBuffer>>
+  [[nodiscard]] std::tuple<Range, std::shared_ptr<DeviceBuffer>>
   EmplaceInternal(const void* buffer, size_t length);
 
-  std::tuple<uint8_t*, Range, std::shared_ptr<DeviceBuffer>>
+  std::tuple<Range, std::shared_ptr<DeviceBuffer>>
   EmplaceInternal(size_t length, size_t align, const EmplaceProc& cb);
 
-  std::tuple<uint8_t*, Range, std::shared_ptr<DeviceBuffer>>
+  std::tuple<Range, std::shared_ptr<DeviceBuffer>>
   EmplaceInternal(const void* buffer, size_t length, size_t align);
 
   size_t GetLength() const { return offset_; }
 
-  void MaybeCreateNewBuffer(size_t required_size);
+  void MaybeCreateNewBuffer();
 
   std::shared_ptr<DeviceBuffer>& GetCurrentBuffer() {
     return device_buffers_[frame_index_][current_buffer_];

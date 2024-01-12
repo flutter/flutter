@@ -54,11 +54,10 @@ TEST(BlitCommandVkTest, BlitCopyBufferToTextureCommandVK) {
       .format = PixelFormat::kR8G8B8A8UNormInt,
       .size = ISize(100, 100),
   });
-  cmd.source = context->GetResourceAllocator()
-                   ->CreateBuffer({
-                       .size = 1,
-                   })
-                   ->AsBufferView();
+  cmd.source =
+      DeviceBuffer::AsBufferView(context->GetResourceAllocator()->CreateBuffer({
+          .size = 1,
+      }));
   bool result = cmd.Encode(*encoder.get());
   EXPECT_TRUE(result);
   EXPECT_TRUE(encoder->IsTracking(cmd.source.buffer));

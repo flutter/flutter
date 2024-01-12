@@ -64,9 +64,9 @@ class CommandEncoderVK {
 
   bool Track(std::shared_ptr<SharedObjectVK> object);
 
-  bool Track(std::shared_ptr<const Buffer> buffer);
+  bool Track(std::shared_ptr<const DeviceBuffer> buffer);
 
-  bool IsTracking(const std::shared_ptr<const Buffer>& texture) const;
+  bool IsTracking(const std::shared_ptr<const DeviceBuffer>& texture) const;
 
   bool Track(const std::shared_ptr<const Texture>& texture);
 
