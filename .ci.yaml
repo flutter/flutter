@@ -4197,7 +4197,7 @@ targets:
       # TODO(vashworth): Remove after Xcode 15 is default in CI (https://github.com/flutter/flutter/issues/132237)
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "15c500b"
         }
       os: Mac-13
     bringup: true
@@ -4240,7 +4240,7 @@ targets:
       # TODO(vashworth): Remove after Xcode 15 is default in CI (https://github.com/flutter/flutter/issues/132237)
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "15c500b"
         }
       os: Mac-13
     bringup: true
@@ -4350,7 +4350,7 @@ targets:
       # TODO(vashworth): Remove after Xcode 15 is default in CI (https://github.com/flutter/flutter/issues/132237)
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "15c500b"
         }
       os: Mac-13
     bringup: true
@@ -4530,7 +4530,7 @@ targets:
       # TODO(vashworth): Remove after Xcode 15 is default in CI (https://github.com/flutter/flutter/issues/132237)
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "15c500b"
         }
       os: Mac-13
     bringup: true
