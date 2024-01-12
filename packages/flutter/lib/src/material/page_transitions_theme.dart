@@ -700,20 +700,26 @@ class AndroidBackGestureTransitionsBuilder extends PageTransitionsBuilder {
       navigator: route.navigator!,
       enabledCallback: () =>
           CupertinoRouteTransitionMixin.isPopGestureEnabled(route),
-      child: hasBackGesture
-          ? CupertinoPageTransition(
-              primaryRouteAnimation: animation,
-              secondaryRouteAnimation: secondaryAnimation,
-              linearTransition: hasBackGesture,
-              child: child,
-            )
-          : _ZoomPageTransition(
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              allowSnapshotting: route.allowSnapshotting,
-              allowEnterRouteSnapshotting: true,
-              child: child,
-            ),
+      builder: (BuildContext context, AndroidBackEvent? startBackEvent,
+          AndroidBackEvent? currentBackEvent) {
+        if (hasBackGesture) {
+          return AndroidBackGestureTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            startBackEvent: startBackEvent,
+            currentBackEvent: currentBackEvent,
+            child: child,
+          );
+        }
+
+        return _ZoomPageTransition(
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          allowSnapshotting: route.allowSnapshotting,
+          allowEnterRouteSnapshotting: true,
+          child: child,
+        );
+      },
     );
   }
 
@@ -722,16 +728,92 @@ class AndroidBackGestureTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
+class AndroidBackGestureTransition extends StatelessWidget {
+  const AndroidBackGestureTransition({
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.startBackEvent,
+    required this.currentBackEvent,
+    required this.child,
+  });
+
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final AndroidBackEvent? startBackEvent;
+  final AndroidBackEvent? currentBackEvent;
+  final Widget child;
+
+  double get _startTouchY => startBackEvent?.touchY ?? 0;
+
+  double get _currentTouchY => currentBackEvent?.touchY ?? 0;
+
+  SwipeEdge get _currentSwipeEdge =>
+      currentBackEvent?.swipeEdge ?? SwipeEdge.left;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: _animatedBuilder,
+      child: child,
+    );
+  }
+
+  Widget _animatedBuilder(BuildContext context, Widget? child) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double xShift = (screenWidth / 20) - 8;
+    final double yShiftMax = (screenHeight / 20) - 8;
+
+    final double rawYShift = _currentTouchY - _startTouchY;
+    final double easedYShift =
+        Curves.easeOut.transform(rawYShift.abs() / screenHeight) *
+            rawYShift.sign *
+            yShiftMax;
+    final double yShift = easedYShift.clamp(-yShiftMax, yShiftMax);
+
+    final Tween<double> xShiftTween = Tween<double>(
+        begin: _currentSwipeEdge == SwipeEdge.left ? xShift : -xShift,
+        end: 0.0);
+    final Tween<double> scaleTween = Tween<double>(begin: 0.9, end: 1.0);
+    final Tween<double> gapTween = Tween<double>(begin: 8.0, end: 0.0);
+    final Tween<double> borderRadiusTween =
+        Tween<double>(begin: 32.0, end: 0.0);
+
+    return Transform.translate(
+      offset: Offset(xShiftTween.animate(animation).value, yShift),
+      child: Transform.scale(
+        scale: scaleTween.animate(animation).value,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: gapTween.animate(animation).value),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(
+              borderRadiusTween.animate(animation).value,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+typedef AndroidBackGestureDetectorWidgetBuilder = Widget Function(
+    BuildContext context,
+    AndroidBackEvent? startBackEvent,
+    AndroidBackEvent? currentBackEvent);
+
 class AndroidBackGestureDetector extends StatefulWidget {
   const AndroidBackGestureDetector({
     super.key,
-    required this.child,
+    required this.builder,
     required this.controller,
     required this.navigator,
     required this.enabledCallback,
   });
 
-  final Widget child;
+  final AndroidBackGestureDetectorWidgetBuilder builder;
   final AnimationController controller;
   final NavigatorState navigator;
   final ValueGetter<bool> enabledCallback;
@@ -743,6 +825,8 @@ class AndroidBackGestureDetector extends StatefulWidget {
 
 class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
     with WidgetsBindingObserver {
+  AndroidBackEvent? startBackEvent;
+  AndroidBackEvent? currentBackEvent;
   bool gestureInProgress = false;
 
   @override
@@ -761,6 +845,10 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
   Future<bool> startBackGesture(AndroidBackEvent backEvent) {
     gestureInProgress = widget.enabledCallback();
     if (gestureInProgress) {
+      startBackEvent = currentBackEvent = backEvent;
+      if (mounted) {
+        setState(() {});
+      }
       widget.navigator.didStartUserGesture();
       widget.controller.value = 1 - backEvent.progress;
 
@@ -773,6 +861,10 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
   @override
   Future<bool> updateBackGestureProgress(AndroidBackEvent backEvent) {
     if (gestureInProgress) {
+      currentBackEvent = backEvent;
+      if (mounted) {
+        setState(() {});
+      }
       widget.controller.value = 1 - backEvent.progress;
 
       return Future<bool>.value(true);
@@ -829,6 +921,10 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
 
   void _finalizeGesture() {
     gestureInProgress = false;
+    startBackEvent = currentBackEvent = null;
+    if (mounted) {
+      setState(() {});
+    }
     if (widget.controller.isAnimating) {
       // Keep the userGestureInProgress in true state so we don't change the
       // curve of the page transition mid-flight since CupertinoPageTransition
@@ -846,7 +942,7 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return widget.builder(context, startBackEvent, currentBackEvent);
   }
 }
 
