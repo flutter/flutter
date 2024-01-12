@@ -75,6 +75,10 @@ platform_properties:
 
   mac:
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       dependencies: >-
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
@@ -87,6 +91,10 @@ platform_properties:
         }
   mac_arm64:
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       dependencies: >-
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
@@ -115,6 +123,10 @@ platform_properties:
         }
   mac_x64:
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       dependencies: >-
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
