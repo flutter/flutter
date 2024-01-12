@@ -1165,6 +1165,15 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// underlying render tree, similar to what happens when a [StatefulWidget]
 /// rebuilds after calling [State.setState].
 ///
+/// By default, [runApp] will render the provided `app` widget into the
+/// [PlatformDispatcher.implicitView] by wrapping it in a [View] widget, which
+/// will bootstrap the render tree for the app. If an app wants to manually
+/// create and/or manage the [FlutterView](s) into which it is drawn,
+/// `renderIntoDefaultSurface` may be set to false. In that case, the provided
+/// `app` widget tree must contain [View] widget(s) (or widgets that implement
+/// similar functionality) to specify the [FlutterView](s) into which the pixels
+/// for the app are drawn.
+///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 ///
 /// ## Application shutdown
@@ -1207,11 +1216,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///    element for the element hierarchy.
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
-void runApp(Widget app) {
+void runApp(Widget app, {bool renderIntoDefaultSurface = true}) {
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   assert(binding.debugCheckZone('runApp'));
+  final Widget root = renderIntoDefaultSurface ? binding.wrapWithDefaultView(app) : app;
   binding
-    ..scheduleAttachRootWidget(binding.wrapWithDefaultView(app))
+    ..scheduleAttachRootWidget(root)
     ..scheduleWarmUpFrame();
 }
 
