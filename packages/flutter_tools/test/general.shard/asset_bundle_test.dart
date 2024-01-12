@@ -756,7 +756,9 @@ flutter:
         FakeCommand(
           command: <String>[
             impellerc,
-            '--sksl',
+            // --sksl is implicit.
+            '--runtime-stage-gles',
+            '--runtime-stage-vulkan',
             '--iplr',
             '--sl=$outputPath',
             '--spirv=$outputPath.spirv',
