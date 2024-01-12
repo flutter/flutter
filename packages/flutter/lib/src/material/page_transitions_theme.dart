@@ -495,6 +495,79 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   }
 }
 
+class AndroidBackGestureTransition extends StatelessWidget {
+  const AndroidBackGestureTransition({
+    super.key,
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.startBackEvent,
+    required this.currentBackEvent,
+    required this.child,
+  });
+
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final AndroidBackEvent? startBackEvent;
+  final AndroidBackEvent? currentBackEvent;
+  final Widget child;
+
+  double get _startTouchY => startBackEvent?.touchY ?? 0;
+
+  double get _currentTouchY => currentBackEvent?.touchY ?? 0;
+
+  SwipeEdge get _currentSwipeEdge =>
+      currentBackEvent?.swipeEdge ?? SwipeEdge.left;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: _animatedBuilder,
+      child: child,
+    );
+  }
+
+  Widget _animatedBuilder(BuildContext context, Widget? child) {
+    final Size size = MediaQuery.sizeOf(context);
+    final double screenWidth = size.width;
+    final double screenHeight = size.height;
+    final double xShift = (screenWidth / 20) - 8;
+    final double yShiftMax = (screenHeight / 20) - 8;
+
+    final double rawYShift = _currentTouchY - _startTouchY;
+    final double easedYShift = Curves.easeOut
+            .transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
+        rawYShift.sign *
+        yShiftMax;
+    final double yShift = easedYShift.clamp(-yShiftMax, yShiftMax);
+
+    final Tween<double> xShiftTween = Tween<double>(
+        begin: _currentSwipeEdge == SwipeEdge.left ? xShift : -xShift,
+        end: 0.0);
+    final Tween<double> scaleTween = Tween<double>(begin: 0.9, end: 1.0);
+    final Tween<double> gapTween = Tween<double>(begin: 8.0, end: 0.0);
+    final Tween<double> borderRadiusTween =
+        Tween<double>(begin: 32.0, end: 0.0);
+
+    return Transform.translate(
+      offset: Offset(xShiftTween.animate(animation).value, yShift),
+      child: Transform.scale(
+        scale: scaleTween.animate(animation).value,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: gapTween.animate(animation).value),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(
+              borderRadiusTween.animate(animation).value,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
@@ -759,78 +832,6 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
 
   static bool hasBackGesture(PageRoute<dynamic> route) {
     return route.navigator!.userGestureInProgress;
-  }
-}
-
-class AndroidBackGestureTransition extends StatelessWidget {
-  const AndroidBackGestureTransition({
-    required this.animation,
-    required this.secondaryAnimation,
-    required this.startBackEvent,
-    required this.currentBackEvent,
-    required this.child,
-  });
-
-  final Animation<double> animation;
-  final Animation<double> secondaryAnimation;
-  final AndroidBackEvent? startBackEvent;
-  final AndroidBackEvent? currentBackEvent;
-  final Widget child;
-
-  double get _startTouchY => startBackEvent?.touchY ?? 0;
-
-  double get _currentTouchY => currentBackEvent?.touchY ?? 0;
-
-  SwipeEdge get _currentSwipeEdge =>
-      currentBackEvent?.swipeEdge ?? SwipeEdge.left;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: _animatedBuilder,
-      child: child,
-    );
-  }
-
-  Widget _animatedBuilder(BuildContext context, Widget? child) {
-    final Size size = MediaQuery.sizeOf(context);
-    final double screenWidth = size.width;
-    final double screenHeight = size.height;
-    final double xShift = (screenWidth / 20) - 8;
-    final double yShiftMax = (screenHeight / 20) - 8;
-
-    final double rawYShift = _currentTouchY - _startTouchY;
-    final double easedYShift = Curves.easeOut
-            .transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
-        rawYShift.sign *
-        yShiftMax;
-    final double yShift = easedYShift.clamp(-yShiftMax, yShiftMax);
-
-    final Tween<double> xShiftTween = Tween<double>(
-        begin: _currentSwipeEdge == SwipeEdge.left ? xShift : -xShift,
-        end: 0.0);
-    final Tween<double> scaleTween = Tween<double>(begin: 0.9, end: 1.0);
-    final Tween<double> gapTween = Tween<double>(begin: 8.0, end: 0.0);
-    final Tween<double> borderRadiusTween =
-        Tween<double>(begin: 32.0, end: 0.0);
-
-    return Transform.translate(
-      offset: Offset(xShiftTween.animate(animation).value, yShift),
-      child: Transform.scale(
-        scale: scaleTween.animate(animation).value,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: gapTween.animate(animation).value),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(
-              borderRadiusTween.animate(animation).value,
-            ),
-            child: child,
-          ),
-        ),
-      ),
-    );
   }
 }
 
