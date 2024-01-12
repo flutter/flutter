@@ -21,7 +21,7 @@ var flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "
 
 android {
     namespace = "io.flutter.examples.hello_world"
-    compileSdk = 33
+    compileSdk = FlutterExtension.compileSdkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -30,8 +30,8 @@ android {
 
     defaultConfig {
         applicationId = "io.flutter.examples.hello_world"
-        minSdk = 21
-        targetSdk = 33
+        minSdk = FlutterExtension.minSdkVersion
+        targetSdk = FlutterExtension.targetSdkVersion
         versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName
     }
