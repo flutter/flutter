@@ -139,7 +139,7 @@ abstract class BundleWindowsAssets extends Target {
       environment,
       outputDirectory,
       targetPlatform: TargetPlatform.windows_x64,
-      shaderTarget: ShaderTarget.sksl,
+      shaderTarget: ShaderTarget.windows,
     );
     environment.depFileService.writeToFile(
       depfile,

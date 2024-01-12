@@ -22,12 +22,42 @@ import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  impellerAndroid(<String>['--runtime-stage-gles', '--runtime-stage-vulkan']),
-  impelleriOS(<String>['--runtime-stage-metal']),
-  impellerSwiftShader(<String>['--runtime-stage-vulkan']),
-  sksl(<String>['--sksl']);
+  android(<String>['--runtime-stage-gles', '--runtime-stage-vulkan']),
+  ios(<String>['--runtime-stage-metal']),
+  web(<String>['--sksl']),
+  linux(<String>['--runtime-stage-gles', '--runtime-stage-vulkan']),
+  macOS(<String>['--runtime-stage-metal']),
+  windows(<String>['--runtime-stage-gles', '--runtime-stage-vulkan']),
+  tester(<String>['--sksl', '--runtime-stage-vulkan']);
 
   const ShaderTarget(this.stages);
+
+  static ShaderTarget fromTargetPlatform(TargetPlatform targetPlatform) {
+    switch (targetPlatform) {
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android:
+        return ShaderTarget.android;
+      case TargetPlatform.ios:
+        return ShaderTarget.ios;
+      case TargetPlatform.darwin:
+        return ShaderTarget.macOS;
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
+        return ShaderTarget.linux;
+      case TargetPlatform.windows_x64:
+        return ShaderTarget.windows;
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        return ShaderTarget.tester; // TODO(dnfield): Does Fuchsia need something else?
+      case TargetPlatform.tester:
+        return ShaderTarget.tester;
+      case TargetPlatform.web_javascript:
+        return ShaderTarget.web;
+    }
+  }
 
   final List<String> stages;
 }
@@ -53,34 +83,13 @@ class DevelopmentShaderCompiler {
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform? platform, { required ImpellerStatus impellerStatus }) {
-    switch (platform) {
-      case TargetPlatform.ios:
-        _shaderTarget = ShaderTarget.impelleriOS;
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android:
-        _shaderTarget = impellerStatus == ImpellerStatus.enabled
-          ? ShaderTarget.impellerAndroid
-          : ShaderTarget.sksl;
-      case TargetPlatform.darwin:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.tester:
-        _shaderTarget =  impellerStatus == ImpellerStatus.enabled
-          ? ShaderTarget.impellerSwiftShader
-          : ShaderTarget.sksl;
-      case TargetPlatform.web_javascript:
-        assert(impellerStatus != ImpellerStatus.enabled);
-        _shaderTarget = ShaderTarget.sksl;
-        _jsonMode = true;
-      case null:
-        return;
+  void configureCompiler(TargetPlatform? platform) {
+    if (platform == null) {
+      return;
+    }
+    _shaderTarget = ShaderTarget.fromTargetPlatform(platform);
+    if (_shaderTarget == ShaderTarget.web) {
+      _jsonMode = true;
     }
     _debugConfigured = true;
   }

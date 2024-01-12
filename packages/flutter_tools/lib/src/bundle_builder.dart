@@ -170,11 +170,6 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
-  ShaderTarget shaderTarget = ShaderTarget.sksl;
-  if (targetPlatform == TargetPlatform.tester && impellerStatus == ImpellerStatus.enabled) {
-    shaderTarget = ShaderTarget.impellerSwiftShader;
-  }
-
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -202,7 +197,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
-                target: shaderTarget,
+                target: ShaderTarget.fromTargetPlatform(targetPlatform),
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
             case AssetKind.model:

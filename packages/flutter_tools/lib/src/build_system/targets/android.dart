@@ -68,7 +68,7 @@ abstract class AndroidAssetBundle extends Target {
       outputDirectory,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
-      shaderTarget: ShaderTarget.impellerAndroid,
+      shaderTarget: ShaderTarget.android,
       flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(

@@ -40,7 +40,7 @@ void main() {
     fileSystem.file(notFragPath).createSync(recursive: true);
   });
 
-  testWithoutContext('compileShader invokes impellerc for .frag files and sksl target', () async {
+  testWithoutContext('compileShader invokes impellerc for .frag files and web target', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -71,7 +71,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.sksl,
+        target: ShaderTarget.web,
         json: false,
       ),
       true,
@@ -110,7 +110,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.impelleriOS,
+        target: ShaderTarget.ios,
         json: false,
       ),
       true,
@@ -188,7 +188,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        target: ShaderTarget.sksl,
+        target: ShaderTarget.web,
         json: false,
       ),
       true,
@@ -227,7 +227,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        target: ShaderTarget.sksl,
+        target: ShaderTarget.web,
         json: false,
       );
       fail('unreachable');
@@ -274,10 +274,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(
-      TargetPlatform.android,
-      impellerStatus: ImpellerStatus.disabled,
-    );
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
 
     final DevFSContent? content = await developmentShaderCompiler
       .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));
@@ -370,10 +367,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(
-      TargetPlatform.android,
-      impellerStatus: ImpellerStatus.enabled,
-    );
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
 
     final DevFSContent? content = await developmentShaderCompiler
       .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));
@@ -419,10 +413,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(
-      TargetPlatform.web_javascript,
-      impellerStatus: ImpellerStatus.disabled,
-    );
+    developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
 
     final DevFSContent? content = await developmentShaderCompiler
       .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));
