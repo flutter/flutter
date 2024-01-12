@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "impeller/base/backend_cast.h"
-#include "impeller/core/host_buffer.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/context.h"
 

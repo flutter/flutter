@@ -14,27 +14,11 @@ namespace testing {
 TEST(DescriptorPoolRecyclerVKTest, GetDescriptorPoolRecyclerCreatesNewPools) {
   auto const context = MockVulkanContextBuilder().Build();
 
-  auto const [pool1, _] = context->GetDescriptorPoolRecycler()->Get(1024);
-  auto const [pool2, __] = context->GetDescriptorPoolRecycler()->Get(1024);
+  auto const pool1 = context->GetDescriptorPoolRecycler()->Get();
+  auto const pool2 = context->GetDescriptorPoolRecycler()->Get();
 
   // The two descriptor pools should be different.
   EXPECT_NE(pool1.get(), pool2.get());
-
-  context->Shutdown();
-}
-
-TEST(DescriptorPoolRecyclerVKTest, DescriptorPoolCapacityIsRoundedUp) {
-  auto const context = MockVulkanContextBuilder().Build();
-  auto const [pool1, capacity] = context->GetDescriptorPoolRecycler()->Get(1);
-
-  // Rounds up to a minimum of 64.
-  EXPECT_EQ(capacity, 64u);
-
-  auto const [pool2, capacity_2] =
-      context->GetDescriptorPoolRecycler()->Get(1023);
-
-  // Rounds up to the next power of two.
-  EXPECT_EQ(capacity_2, 1024u);
 
   context->Shutdown();
 }
@@ -66,7 +50,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
   {
     // Fetch a pool (which will be created).
     auto pool = DescriptorPoolVK(context);
-    pool.AllocateDescriptorSets(1024, 1024, 1024, {});
+    pool.AllocateDescriptorSets({}, *context);
   }
 
   // There is a chance that the first death rattle item below is destroyed in
@@ -88,7 +72,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
     waiter.Wait();
   }
 
-  auto const [pool, _] = context->GetDescriptorPoolRecycler()->Get(1024);
+  auto const pool = context->GetDescriptorPoolRecycler()->Get();
 
   // Now check that we only ever created one pool.
   auto const called = GetMockVulkanFunctions(context->GetDevice());
@@ -106,7 +90,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
     for (auto i = 0u; i < 33; i++) {
       auto pool = std::make_unique<DescriptorPoolVK>(context);
-      pool->AllocateDescriptorSets(1024, 1024, 1024, {});
+      pool->AllocateDescriptorSets({}, *context);
       pools.push_back(std::move(pool));
     }
   }
@@ -135,7 +119,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
     for (auto i = 0u; i < 33; i++) {
       auto pool = std::make_unique<DescriptorPoolVK>(context);
-      pool->AllocateDescriptorSets(1024, 1024, 1024, {});
+      pool->AllocateDescriptorSets({}, *context);
       pools.push_back(std::move(pool));
     }
   }

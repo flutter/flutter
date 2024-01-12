@@ -101,26 +101,28 @@ bool ComputePassVK::OnEncodeCommands(const Context& context,
     VALIDATION_LOG << "Could not update binding layouts for compute pass.";
     return false;
   }
-  auto desc_sets_result =
-      AllocateAndBindDescriptorSets(vk_context, encoder, commands_);
-  if (!desc_sets_result.ok()) {
-    return false;
-  }
-  auto desc_sets = desc_sets_result.value();
+  auto& allocator = *context.GetResourceAllocator();
 
   TRACE_EVENT0("impeller", "EncodeComputePassCommands");
-  size_t desc_index = 0;
   for (const auto& command : commands_) {
+    auto desc_set_result = AllocateAndBindDescriptorSets(
+        vk_context, encoder, allocator, command, image_workspace_,
+        buffer_workspace_, write_workspace_);
+    if (!desc_set_result.ok()) {
+      return false;
+    }
+    auto desc_set = desc_set_result.value();
+
     const auto& pipeline_vk = ComputePipelineVK::Cast(*command.pipeline);
 
     cmd_buffer.bindPipeline(vk::PipelineBindPoint::eCompute,
                             pipeline_vk.GetPipeline());
     cmd_buffer.bindDescriptorSets(
-        vk::PipelineBindPoint::eCompute,             // bind point
-        pipeline_vk.GetPipelineLayout(),             // layout
-        0,                                           // first set
-        {vk::DescriptorSet{desc_sets[desc_index]}},  // sets
-        nullptr                                      // offsets
+        vk::PipelineBindPoint::eCompute,  // bind point
+        pipeline_vk.GetPipelineLayout(),  // layout
+        0,                                // first set
+        {vk::DescriptorSet{desc_set}},    // sets
+        nullptr                           // offsets
     );
 
     // TOOD(dnfield): This should be moved to caps. But for now keeping this
@@ -148,7 +150,6 @@ bool ComputePassVK::OnEncodeCommands(const Context& context,
       }
       cmd_buffer.dispatch(width, height, 1);
     }
-    desc_index += 1;
   }
 
   return true;
