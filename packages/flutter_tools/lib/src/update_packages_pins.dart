@@ -28,5 +28,4 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'test_api': '0.6.1', // https://github.com/flutter/flutter/issues/140169
   'test_core': '0.5.9', // https://github.com/flutter/flutter/issues/140169
   'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
-  'web_socket_channel': '2.4.1', // https://github.com/flutter/flutter/issues/141032
 };
