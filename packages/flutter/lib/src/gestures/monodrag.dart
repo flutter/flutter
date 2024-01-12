@@ -441,7 +441,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
               sum += delta.dy;
             }
           } else {
-            assert(axis == _DragDirection.horizontal);
             if (delta.dx > 0.0) {
               sum += delta.dx;
             }
@@ -452,7 +451,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
               sum += delta.dy;
             }
           } else {
-            assert(axis == _DragDirection.horizontal);
             if (delta.dx < 0.0) {
               sum += delta.dx;
             }
