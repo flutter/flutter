@@ -30,14 +30,12 @@ class ImageInfo {
     this.shouldDisposeImage = true, // The default is true for backwards compatibility.
   })
   {
-    if (kFlutterMemoryAllocationsEnabled) {
-      if (shouldDisposeImage) {
-        MemoryAllocations.instance.dispatchObjectCreated(
-          library: _flutterPaintingLibrary,
-          className: '$ImageInfo',
-          object: this,
-        );
-      }
+    if (kFlutterMemoryAllocationsEnabled && shouldDisposeImage) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
+        className: '$ImageInfo',
+        object: this,
+      );
     }
   }
 
@@ -153,9 +151,7 @@ class ImageInfo {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
     if (shouldDisposeImage) {
       image.dispose();
-    }
-    if (kFlutterMemoryAllocationsEnabled) {
-      if (shouldDisposeImage) {
+      if (kFlutterMemoryAllocationsEnabled) {
         MemoryAllocations.instance.dispatchObjectDisposed(object: this);
       }
     }
