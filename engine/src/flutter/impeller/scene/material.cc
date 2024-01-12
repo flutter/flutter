@@ -6,6 +6,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/scene/importer/conversions.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/pipeline_key.h"
@@ -108,12 +109,12 @@ MaterialType UnlitMaterial::GetMaterialType() const {
 // |Material|
 void UnlitMaterial::BindToCommand(const SceneContext& scene_context,
                                   HostBuffer& buffer,
-                                  Command& command) const {
+                                  RenderPass& pass) const {
   // Uniform buffer.
   UnlitFragmentShader::FragInfo info;
   info.color = color_;
   info.vertex_color_weight = vertex_color_weight_;
-  UnlitFragmentShader::BindFragInfo(command, buffer.EmplaceUniform(info));
+  UnlitFragmentShader::BindFragInfo(pass, buffer.EmplaceUniform(info));
 
   // Textures.
   SamplerDescriptor sampler_descriptor;
@@ -122,7 +123,7 @@ void UnlitMaterial::BindToCommand(const SceneContext& scene_context,
   sampler_descriptor.mag_filter = MinMagFilter::kLinear;
   sampler_descriptor.mip_filter = MipFilter::kLinear;
   UnlitFragmentShader::BindBaseColorTexture(
-      command,
+      pass,
       color_texture_ ? color_texture_ : scene_context.GetPlaceholderTexture(),
       scene_context.GetContext()->GetSamplerLibrary()->GetSampler(
           sampler_descriptor));
@@ -221,7 +222,7 @@ MaterialType PhysicallyBasedMaterial::GetMaterialType() const {
 // |Material|
 void PhysicallyBasedMaterial::BindToCommand(const SceneContext& scene_context,
                                             HostBuffer& buffer,
-                                            Command& command) const {}
+                                            RenderPass& pass) const {}
 
 }  // namespace scene
 }  // namespace impeller

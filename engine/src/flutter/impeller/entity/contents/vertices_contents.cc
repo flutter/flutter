@@ -121,8 +121,7 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
     return false;
   }
 
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, "VerticesUV");
+  pass.SetCommandLabel("VerticesUV");
   auto& host_buffer = renderer.GetTransientsBuffer();
   const std::shared_ptr<Geometry>& geometry = parent_.GetGeometry();
 
@@ -134,22 +133,22 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
       coverage.value(), Matrix(), renderer, entity, pass);
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = geometry_result.type;
-  cmd.pipeline = renderer.GetTexturePipeline(opts);
-  cmd.stencil_reference = entity.GetClipDepth();
-  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
+  pass.SetPipeline(renderer.GetTexturePipeline(opts));
+  pass.SetStencilReference(entity.GetClipDepth());
+  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
   frame_info.texture_sampler_y_coord_scale =
       snapshot->texture->GetYCoordScale();
   frame_info.alpha = alpha_ * snapshot->opacity;
-  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
-  FS::BindTextureSampler(cmd, snapshot->texture,
+  FS::BindTextureSampler(pass, snapshot->texture,
                          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
                              snapshot->sampler_descriptor));
 
-  return pass.AddCommand(std::move(cmd));
+  return pass.Draw().ok();
 }
 
 //------------------------------------------------------
@@ -175,8 +174,7 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
   using VS = GeometryColorPipeline::VertexShader;
   using FS = GeometryColorPipeline::FragmentShader;
 
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, "VerticesColors");
+  pass.SetCommandLabel("VerticesColors");
   auto& host_buffer = renderer.GetTransientsBuffer();
   const std::shared_ptr<VerticesGeometry>& geometry = parent_.GetGeometry();
 
@@ -184,19 +182,19 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
       geometry->GetPositionColorBuffer(renderer, entity, pass);
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = geometry_result.type;
-  cmd.pipeline = renderer.GetGeometryColorPipeline(opts);
-  cmd.stencil_reference = entity.GetClipDepth();
-  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
+  pass.SetPipeline(renderer.GetGeometryColorPipeline(opts));
+  pass.SetStencilReference(entity.GetClipDepth());
+  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
-  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
   FS::FragInfo frag_info;
   frag_info.alpha = alpha_;
-  FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
 
-  return pass.AddCommand(std::move(cmd));
+  return pass.Draw().ok();
 }
 
 }  // namespace impeller

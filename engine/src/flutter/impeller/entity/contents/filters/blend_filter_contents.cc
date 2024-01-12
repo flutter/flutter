@@ -164,11 +164,12 @@ static std::optional<Entity> AdvancedBlend(
     std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline =
         std::invoke(pipeline_proc, renderer, options);
 
-    Command cmd;
-    DEBUG_COMMAND_INFO(cmd, SPrintF("Advanced Blend Filter (%s)",
-                                    BlendModeToString(blend_mode)));
-    cmd.BindVertices(std::move(vtx_buffer));
-    cmd.pipeline = std::move(pipeline);
+#ifdef IMPELLER_DEBUG
+    pass.SetCommandLabel(
+        SPrintF("Advanced Blend Filter (%s)", BlendModeToString(blend_mode)));
+#endif  // IMPELLER_DEBUG
+    pass.SetVertexBuffer(std::move(vtx_buffer));
+    pass.SetPipeline(pipeline);
 
     typename FS::BlendInfo blend_info;
     typename VS::FrameInfo frame_info;
@@ -180,7 +181,7 @@ static std::optional<Entity> AdvancedBlend(
     }
     auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
         dst_sampler_descriptor);
-    FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
+    FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
         absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
@@ -193,7 +194,7 @@ static std::optional<Entity> AdvancedBlend(
       // This texture will not be sampled from due to the color factor. But
       // this is present so that validation doesn't trip on a missing
       // binding.
-      FS::BindTextureSamplerSrc(cmd, dst_snapshot->texture, dst_sampler);
+      FS::BindTextureSamplerSrc(pass, dst_snapshot->texture, dst_sampler);
     } else {
       auto src_sampler_descriptor = src_snapshot->sampler_descriptor;
       if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
@@ -204,21 +205,20 @@ static std::optional<Entity> AdvancedBlend(
           src_sampler_descriptor);
       blend_info.color_factor = 0;
       blend_info.src_input_alpha = src_snapshot->opacity;
-      FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, src_sampler);
+      FS::BindTextureSamplerSrc(pass, src_snapshot->texture, src_sampler);
       frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
     }
     auto blend_uniform = host_buffer.EmplaceUniform(blend_info);
-    FS::BindBlendInfo(cmd, blend_uniform);
+    FS::BindBlendInfo(pass, blend_uniform);
 
     frame_info.mvp = pass.GetOrthographicTransform() *
                      Matrix::MakeTranslation(coverage.GetOrigin() -
                                              subpass_coverage.GetOrigin());
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
-    VS::BindFrameInfo(cmd, uniform_view);
-    pass.AddCommand(std::move(cmd));
+    VS::BindFrameInfo(pass, uniform_view);
 
-    return true;
+    return pass.Draw().ok();
   };
 
   fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
@@ -284,59 +284,60 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     });
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
-    Command cmd;
-    DEBUG_COMMAND_INFO(cmd, SPrintF("Foreground Advanced Blend Filter (%s)",
-                                    BlendModeToString(blend_mode)));
-    cmd.BindVertices(std::move(vtx_buffer));
-    cmd.stencil_reference = entity.GetClipDepth();
+#ifdef IMPELLER_DEBUG
+    pass.SetCommandLabel(SPrintF("Foreground Advanced Blend Filter (%s)",
+                                 BlendModeToString(blend_mode)));
+#endif  // IMPELLER_DEBUG
+    pass.SetVertexBuffer(std::move(vtx_buffer));
+    pass.SetStencilReference(entity.GetClipDepth());
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;
 
     switch (blend_mode) {
       case BlendMode::kScreen:
-        cmd.pipeline = renderer.GetBlendScreenPipeline(options);
+        pass.SetPipeline(renderer.GetBlendScreenPipeline(options));
         break;
       case BlendMode::kOverlay:
-        cmd.pipeline = renderer.GetBlendOverlayPipeline(options);
+        pass.SetPipeline(renderer.GetBlendOverlayPipeline(options));
         break;
       case BlendMode::kDarken:
-        cmd.pipeline = renderer.GetBlendDarkenPipeline(options);
+        pass.SetPipeline(renderer.GetBlendDarkenPipeline(options));
         break;
       case BlendMode::kLighten:
-        cmd.pipeline = renderer.GetBlendLightenPipeline(options);
+        pass.SetPipeline(renderer.GetBlendLightenPipeline(options));
         break;
       case BlendMode::kColorDodge:
-        cmd.pipeline = renderer.GetBlendColorDodgePipeline(options);
+        pass.SetPipeline(renderer.GetBlendColorDodgePipeline(options));
         break;
       case BlendMode::kColorBurn:
-        cmd.pipeline = renderer.GetBlendColorBurnPipeline(options);
+        pass.SetPipeline(renderer.GetBlendColorBurnPipeline(options));
         break;
       case BlendMode::kHardLight:
-        cmd.pipeline = renderer.GetBlendHardLightPipeline(options);
+        pass.SetPipeline(renderer.GetBlendHardLightPipeline(options));
         break;
       case BlendMode::kSoftLight:
-        cmd.pipeline = renderer.GetBlendSoftLightPipeline(options);
+        pass.SetPipeline(renderer.GetBlendSoftLightPipeline(options));
         break;
       case BlendMode::kDifference:
-        cmd.pipeline = renderer.GetBlendDifferencePipeline(options);
+        pass.SetPipeline(renderer.GetBlendDifferencePipeline(options));
         break;
       case BlendMode::kExclusion:
-        cmd.pipeline = renderer.GetBlendExclusionPipeline(options);
+        pass.SetPipeline(renderer.GetBlendExclusionPipeline(options));
         break;
       case BlendMode::kMultiply:
-        cmd.pipeline = renderer.GetBlendMultiplyPipeline(options);
+        pass.SetPipeline(renderer.GetBlendMultiplyPipeline(options));
         break;
       case BlendMode::kHue:
-        cmd.pipeline = renderer.GetBlendHuePipeline(options);
+        pass.SetPipeline(renderer.GetBlendHuePipeline(options));
         break;
       case BlendMode::kSaturation:
-        cmd.pipeline = renderer.GetBlendSaturationPipeline(options);
+        pass.SetPipeline(renderer.GetBlendSaturationPipeline(options));
         break;
       case BlendMode::kColor:
-        cmd.pipeline = renderer.GetBlendColorPipeline(options);
+        pass.SetPipeline(renderer.GetBlendColorPipeline(options));
         break;
       case BlendMode::kLuminosity:
-        cmd.pipeline = renderer.GetBlendLuminosityPipeline(options);
+        pass.SetPipeline(renderer.GetBlendLuminosityPipeline(options));
         break;
       default:
         return false;
@@ -352,7 +353,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     }
     auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
         dst_sampler_descriptor);
-    FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
+    FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
         absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
@@ -364,17 +365,17 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     // This texture will not be sampled from due to the color factor. But
     // this is present so that validation doesn't trip on a missing
     // binding.
-    FS::BindTextureSamplerSrc(cmd, dst_snapshot->texture, dst_sampler);
+    FS::BindTextureSamplerSrc(pass, dst_snapshot->texture, dst_sampler);
 
     auto blend_uniform = host_buffer.EmplaceUniform(blend_info);
-    FS::BindBlendInfo(cmd, blend_uniform);
+    FS::BindBlendInfo(pass, blend_uniform);
 
     frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
-    VS::BindFrameInfo(cmd, uniform_view);
+    VS::BindFrameInfo(pass, uniform_view);
 
-    return pass.AddCommand(std::move(cmd));
+    return pass.Draw().ok();
   };
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
@@ -454,14 +455,15 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     });
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
-    Command cmd;
-    DEBUG_COMMAND_INFO(cmd, SPrintF("Foreground PorterDuff Blend Filter (%s)",
-                                    BlendModeToString(blend_mode)));
-    cmd.BindVertices(std::move(vtx_buffer));
-    cmd.stencil_reference = entity.GetClipDepth();
+#ifdef IMPELLER_DEBUG
+    pass.SetCommandLabel(SPrintF("Foreground PorterDuff Blend Filter (%s)",
+                                 BlendModeToString(blend_mode)));
+#endif  // IMPELLER_DEBUG
+    pass.SetVertexBuffer(std::move(vtx_buffer));
+    pass.SetStencilReference(entity.GetClipDepth());
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;
-    cmd.pipeline = renderer.GetPorterDuffBlendPipeline(options);
+    pass.SetPipeline(renderer.GetPorterDuffBlendPipeline(options));
 
     FS::FragInfo frag_info;
     VS::FrameInfo frame_info;
@@ -473,7 +475,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     }
     auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
         dst_sampler_descriptor);
-    FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
+    FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.texture_sampler_y_coord_scale =
         dst_snapshot->texture->GetYCoordScale();
 
@@ -491,14 +493,14 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     frag_info.dst_coeff_src_alpha = blend_coefficients[3];
     frag_info.dst_coeff_src_color = blend_coefficients[4];
 
-    FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+    FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
 
     frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
-    VS::BindFrameInfo(cmd, uniform_view);
+    VS::BindFrameInfo(pass, uniform_view);
 
-    return pass.AddCommand(std::move(cmd));
+    return pass.Draw().ok();
   };
 
   CoverageProc coverage_proc =
@@ -552,9 +554,10 @@ static std::optional<Entity> PipelineBlend(
                                                  RenderPass& pass) {
     auto& host_buffer = renderer.GetTransientsBuffer();
 
-    Command cmd;
-    DEBUG_COMMAND_INFO(cmd, SPrintF("Pipeline Blend Filter (%s)",
-                                    BlendModeToString(blend_mode)));
+#ifdef IMPELLER_DEBUG
+    pass.SetCommandLabel(
+        SPrintF("Pipeline Blend Filter (%s)", BlendModeToString(blend_mode)));
+#endif  // IMPELLER_DEBUG
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;
 
@@ -569,7 +572,7 @@ static std::optional<Entity> PipelineBlend(
 
       auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
           input->sampler_descriptor);
-      FS::BindTextureSamplerSrc(cmd, input->texture, sampler);
+      FS::BindTextureSamplerSrc(pass, input->texture, sampler);
 
       auto size = input->texture->GetSize();
       VertexBufferBuilder<VS::PerVertexData> vtx_builder;
@@ -579,7 +582,7 @@ static std::optional<Entity> PipelineBlend(
           {Point(0, size.height), Point(0, 1)},
           {Point(size.width, size.height), Point(1, 1)},
       });
-      cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
+      pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
 
       VS::FrameInfo frame_info;
       frame_info.mvp = pass.GetOrthographicTransform() *
@@ -593,16 +596,15 @@ static std::optional<Entity> PipelineBlend(
           absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
               ? input->opacity
               : 1.0;
-      FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
-      VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+      FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+      VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
-      pass.AddCommand(std::move(cmd));
-      return true;
+      return pass.Draw().ok();
     };
 
     // Draw the first texture using kSource.
     options.blend_mode = BlendMode::kSource;
-    cmd.pipeline = renderer.GetBlendPipeline(options);
+    pass.SetPipeline(renderer.GetBlendPipeline(options));
     if (!add_blend_command(dst_snapshot)) {
       return true;
     }
@@ -611,7 +613,7 @@ static std::optional<Entity> PipelineBlend(
 
     if (inputs.size() >= 2) {
       options.blend_mode = blend_mode;
-      cmd.pipeline = renderer.GetBlendPipeline(options);
+      pass.SetPipeline(renderer.GetBlendPipeline(options));
 
       for (auto texture_i = inputs.begin() + 1; texture_i < inputs.end();
            texture_i++) {

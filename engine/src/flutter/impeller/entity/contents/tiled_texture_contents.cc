@@ -141,14 +141,13 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frame_info.alpha = GetOpacityFactor();
 
-  Command cmd;
   if (uses_emulated_tile_mode) {
-    DEBUG_COMMAND_INFO(cmd, "TiledTextureFill");
+    pass.SetCommandLabel("TiledTextureFill");
   } else {
-    DEBUG_COMMAND_INFO(cmd, "TextureFill");
+    pass.SetCommandLabel("TextureFill");
   }
 
-  cmd.stencil_reference = entity.GetClipDepth();
+  pass.SetStencilReference(entity.GetClipDepth());
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   if (geometry_result.prevent_overdraw) {
@@ -159,31 +158,31 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 
 #ifdef IMPELLER_ENABLE_OPENGLES
   if (is_external_texture) {
-    cmd.pipeline = renderer.GetTiledTextureExternalPipeline(options);
+    pass.SetPipeline(renderer.GetTiledTextureExternalPipeline(options));
   } else {
-    cmd.pipeline = uses_emulated_tile_mode
-                       ? renderer.GetTiledTexturePipeline(options)
-                       : renderer.GetTexturePipeline(options);
+    pass.SetPipeline(uses_emulated_tile_mode
+                         ? renderer.GetTiledTexturePipeline(options)
+                         : renderer.GetTexturePipeline(options));
   }
 #else
-  cmd.pipeline = uses_emulated_tile_mode
-                     ? renderer.GetTiledTexturePipeline(options)
-                     : renderer.GetTexturePipeline(options);
+  pass.SetPipeline(uses_emulated_tile_mode
+                       ? renderer.GetTiledTexturePipeline(options)
+                       : renderer.GetTexturePipeline(options));
 #endif  // IMPELLER_ENABLE_OPENGLES
 
-  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
-  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
+  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
   if (is_external_texture) {
     FSExternal::FragInfo frag_info;
     frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
     frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-    FSExternal::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+    FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   } else if (uses_emulated_tile_mode) {
     FS::FragInfo frag_info;
     frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
     frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-    FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+    FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   }
 
   if (is_external_texture) {
@@ -199,7 +198,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         << "Color filters are not currently supported for external textures.";
 
     FSExternal::BindSAMPLEREXTERNALOESTextureSampler(
-        cmd, texture_,
+        pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
   } else {
     if (color_filter_) {
@@ -208,18 +207,18 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         return false;
       }
       FS::BindTextureSampler(
-          cmd, filtered_texture,
+          pass, filtered_texture,
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
               CreateSamplerDescriptor(renderer.GetDeviceCapabilities())));
     } else {
       FS::BindTextureSampler(
-          cmd, texture_,
+          pass, texture_,
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
               CreateSamplerDescriptor(renderer.GetDeviceCapabilities())));
     }
   }
 
-  if (!pass.AddCommand(std::move(cmd))) {
+  if (!pass.Draw().ok()) {
     return false;
   }
 

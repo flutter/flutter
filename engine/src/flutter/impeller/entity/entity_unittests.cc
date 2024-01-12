@@ -874,22 +874,21 @@ TEST_P(EntityTest, BlendingModeOptions) {
         });
       }
 
-      Command cmd;
-      DEBUG_COMMAND_INFO(cmd, "Blended Rectangle");
+      pass.SetCommandLabel("Blended Rectangle");
       auto options = OptionsFromPass(pass);
       options.blend_mode = blend_mode;
       options.primitive_type = PrimitiveType::kTriangle;
-      cmd.pipeline = context.GetSolidFillPipeline(options);
-      cmd.BindVertices(
+      pass.SetPipeline(context.GetSolidFillPipeline(options));
+      pass.SetVertexBuffer(
           vtx_builder.CreateVertexBuffer(context.GetTransientsBuffer()));
 
       VS::FrameInfo frame_info;
       frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
       frame_info.color = color.Premultiply();
       VS::BindFrameInfo(
-          cmd, context.GetTransientsBuffer().EmplaceUniform(frame_info));
+          pass, context.GetTransientsBuffer().EmplaceUniform(frame_info));
 
-      return pass.AddCommand(std::move(cmd));
+      return pass.Draw().ok();
     };
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);

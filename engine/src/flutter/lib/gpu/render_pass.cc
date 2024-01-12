@@ -137,7 +137,40 @@ impeller::Command RenderPass::ProvisionRasterCommand() {
 
 bool RenderPass::Draw() {
   impeller::Command result = ProvisionRasterCommand();
-  return render_pass_->AddCommand(std::move(result));
+#ifdef IMPELLER_DEBUG
+  render_pass_->SetCommandLabel(result.label);
+#endif  // IMPELLER_DEBUG
+  render_pass_->SetPipeline(result.pipeline);
+  render_pass_->SetStencilReference(result.stencil_reference);
+  render_pass_->SetBaseVertex(result.base_vertex);
+  if (result.viewport.has_value()) {
+    render_pass_->SetViewport(result.viewport.value());
+  }
+  if (result.scissor.has_value()) {
+    render_pass_->SetScissor(result.scissor.value());
+  }
+  render_pass_->SetVertexBuffer(result.vertex_buffer);
+  for (const auto& buffer : result.vertex_bindings.buffers) {
+    render_pass_->BindResource(impeller::ShaderStage::kVertex, buffer.slot,
+                               *buffer.view.GetMetadata(),
+                               buffer.view.resource);
+  }
+  for (const auto& texture : result.vertex_bindings.sampled_images) {
+    render_pass_->BindResource(impeller::ShaderStage::kVertex, texture.slot,
+                               *texture.texture.GetMetadata(),
+                               texture.texture.resource, texture.sampler);
+  }
+  for (const auto& buffer : result.fragment_bindings.buffers) {
+    render_pass_->BindResource(impeller::ShaderStage::kFragment, buffer.slot,
+                               *buffer.view.GetMetadata(),
+                               buffer.view.resource);
+  }
+  for (const auto& texture : result.fragment_bindings.sampled_images) {
+    render_pass_->BindResource(impeller::ShaderStage::kFragment, texture.slot,
+                               *texture.texture.GetMetadata(),
+                               texture.texture.resource, texture.sampler);
+  }
+  return render_pass_->Draw().ok();
 }
 
 }  // namespace gpu

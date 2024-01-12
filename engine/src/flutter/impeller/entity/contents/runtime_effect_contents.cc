@@ -137,10 +137,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
   using VS = RuntimeEffectVertexShader;
 
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, "RuntimeEffectContents");
-  cmd.stencil_reference = entity.GetClipDepth();
-  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
+  pass.SetCommandLabel("RuntimeEffectContents");
+  pass.SetStencilReference(entity.GetClipDepth());
+  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   //--------------------------------------------------------------------------
   /// Vertex stage uniforms.
@@ -148,7 +147,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
-  VS::BindFrameInfo(cmd,
+  VS::BindFrameInfo(pass,
                     renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   //--------------------------------------------------------------------------
@@ -192,8 +191,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         ShaderUniformSlot uniform_slot;
         uniform_slot.name = uniform.name.c_str();
         uniform_slot.ext_res_0 = uniform.location;
-        cmd.BindResource(ShaderStage::kFragment, uniform_slot, metadata,
-                         buffer_view);
+        pass.BindResource(ShaderStage::kFragment, uniform_slot, metadata,
+                          buffer_view);
         buffer_index++;
         buffer_offset += uniform.GetSize();
         break;
@@ -230,8 +229,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         auto buffer_view = renderer.GetTransientsBuffer().Emplace(
             reinterpret_cast<const void*>(uniform_buffer.data()), alignment,
             alignment);
-        cmd.BindResource(ShaderStage::kFragment, uniform_slot, ShaderMetadata{},
-                         buffer_view);
+        pass.BindResource(ShaderStage::kFragment, uniform_slot,
+                          ShaderMetadata{}, buffer_view);
       }
     }
   }
@@ -264,8 +263,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
         image_slot.binding = sampler_binding_location;
         image_slot.texture_index = uniform.location - minimum_sampler_index;
-        cmd.BindResource(ShaderStage::kFragment, image_slot, *metadata,
-                         input.texture, sampler);
+        pass.BindResource(ShaderStage::kFragment, image_slot, *metadata,
+                          input.texture, sampler);
 
         sampler_index++;
         break;
@@ -317,10 +316,12 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     return pipeline;
   };
 
-  cmd.pipeline = renderer.GetCachedRuntimeEffectPipeline(
-      runtime_stage_->GetEntrypoint(), options, create_callback);
+  pass.SetPipeline(renderer.GetCachedRuntimeEffectPipeline(
+      runtime_stage_->GetEntrypoint(), options, create_callback));
 
-  pass.AddCommand(std::move(cmd));
+  if (!pass.Draw().ok()) {
+    return false;
+  }
 
   if (geometry_result.prevent_overdraw) {
     auto restore = ClipRestoreContents();

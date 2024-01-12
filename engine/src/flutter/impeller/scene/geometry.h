@@ -15,6 +15,7 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/pipeline_key.h"
 #include "impeller/scene/scene_context.h"
@@ -45,7 +46,7 @@ class Geometry {
   virtual void BindToCommand(const SceneContext& scene_context,
                              HostBuffer& buffer,
                              const Matrix& transform,
-                             Command& command) const = 0;
+                             RenderPass& pass) const = 0;
 
   virtual void SetJointsTexture(const std::shared_ptr<Texture>& texture);
 };
@@ -68,7 +69,7 @@ class CuboidGeometry final : public Geometry {
   void BindToCommand(const SceneContext& scene_context,
                      HostBuffer& buffer,
                      const Matrix& transform,
-                     Command& command) const override;
+                     RenderPass& pass) const override;
 
  private:
   Vector3 size_;
@@ -96,7 +97,7 @@ class UnskinnedVertexBufferGeometry final : public Geometry {
   void BindToCommand(const SceneContext& scene_context,
                      HostBuffer& buffer,
                      const Matrix& transform,
-                     Command& command) const override;
+                     RenderPass& pass) const override;
 
  private:
   VertexBuffer vertex_buffer_;
@@ -125,7 +126,7 @@ class SkinnedVertexBufferGeometry final : public Geometry {
   void BindToCommand(const SceneContext& scene_context,
                      HostBuffer& buffer,
                      const Matrix& transform,
-                     Command& command) const override;
+                     RenderPass& pass) const override;
 
   // |Geometry|
   void SetJointsTexture(const std::shared_ptr<Texture>& texture) override;

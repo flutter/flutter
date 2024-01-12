@@ -158,9 +158,8 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
   frame_info.mvp = geometry_result.transform;
   frame_info.matrix = GetInverseEffectTransform();
 
-  Command cmd;
-  DEBUG_COMMAND_INFO(cmd, "ConicalGradientFill");
-  cmd.stencil_reference = entity.GetClipDepth();
+  pass.SetCommandLabel("ConicalGradientFill");
+  pass.SetStencilReference(entity.GetClipDepth());
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   if (geometry_result.prevent_overdraw) {
@@ -168,21 +167,21 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
     options.stencil_operation = StencilOperation::kIncrementClamp;
   }
   options.primitive_type = geometry_result.type;
-  cmd.pipeline = renderer.GetConicalGradientFillPipeline(options);
+  pass.SetPipeline(renderer.GetConicalGradientFillPipeline(options));
 
-  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
-  FS::BindFragInfo(cmd,
+  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
+  FS::BindFragInfo(pass,
                    renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
   sampler_desc.mag_filter = MinMagFilter::kLinear;
   FS::BindTextureSampler(
-      cmd, gradient_texture,
+      pass, gradient_texture,
       renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
-  VS::BindFrameInfo(cmd,
+  VS::BindFrameInfo(pass,
                     renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
 
-  if (!pass.AddCommand(std::move(cmd))) {
+  if (!pass.Draw().ok()) {
     return false;
   }
 

@@ -112,13 +112,12 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
             .Normalize() /
         Point(transformed_texture_width, transformed_texture_height);
 
-    Command cmd;
-    DEBUG_COMMAND_INFO(cmd, "Morphology Filter");
+    pass.SetCommandLabel("Morphology Filter");
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;
     options.blend_mode = BlendMode::kSource;
-    cmd.pipeline = renderer.GetMorphologyFilterPipeline(options);
-    cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
+    pass.SetPipeline(renderer.GetMorphologyFilterPipeline(options));
+    pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
 
     auto sampler_descriptor = input_snapshot->sampler_descriptor;
     if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
@@ -127,13 +126,13 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     }
 
     FS::BindTextureSampler(
-        cmd, input_snapshot->texture,
+        pass, input_snapshot->texture,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             sampler_descriptor));
-    VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
-    FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+    VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+    FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
 
-    return pass.AddCommand(std::move(cmd));
+    return pass.Draw().ok();
   };
 
   fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
