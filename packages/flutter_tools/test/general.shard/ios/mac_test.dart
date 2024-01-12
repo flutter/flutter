@@ -44,6 +44,58 @@ void main() {
       );
     });
 
+    group('startLogger', () {
+      late FakeProcessManager fakeProcessManager;
+
+      setUp(() {
+        fakeProcessManager = FakeProcessManager.empty();
+      });
+      
+      testWithoutContext('starts idevicesyslog when USB connected', () async {
+        fakeProcessManager.addCommand(const FakeCommand(
+          command: <String>[
+            'HostArtifact.idevicesyslog', '-u', '1234'
+          ],
+          environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+        ));
+
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: artifacts,
+          cache: cache,
+          processManager: fakeProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.startLogger(
+          '1234',
+          false,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('starts idevicesyslog when wirelessly connected', () async {
+        fakeProcessManager.addCommand(const FakeCommand(
+          command: <String>[
+            'HostArtifact.idevicesyslog', '-u', '1234', '--network'
+          ],
+          environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+        ));
+
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: artifacts,
+          cache: cache,
+          processManager: fakeProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.startLogger(
+          '1234',
+          true,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+    });
+
     group('screenshot', () {
       late FakeProcessManager fakeProcessManager;
       late File outputFile;
