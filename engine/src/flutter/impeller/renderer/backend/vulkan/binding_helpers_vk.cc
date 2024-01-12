@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/binding_helpers_vk.h"
 #include "fml/status.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
@@ -23,15 +25,19 @@ namespace impeller {
 // manually changed.
 static constexpr size_t kMagicSubpassInputBinding = 64;
 
-static bool BindImages(const Bindings& bindings,
-                       Allocator& allocator,
-                       const std::shared_ptr<CommandEncoderVK>& encoder,
-                       vk::DescriptorSet& vk_desc_set,
-                       std::vector<vk::DescriptorImageInfo>& images,
-                       std::vector<vk::WriteDescriptorSet>& writes) {
+static bool BindImages(
+    const Bindings& bindings,
+    Allocator& allocator,
+    const std::shared_ptr<CommandEncoderVK>& encoder,
+    vk::DescriptorSet& vk_desc_set,
+    std::array<vk::DescriptorImageInfo, kMaxBindings>& image_workspace,
+    size_t& image_offset,
+    std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>&
+        write_workspace,
+    size_t& write_offset) {
   for (const TextureAndSampler& data : bindings.sampled_images) {
-    auto texture = data.texture.resource;
-    const auto& texture_vk = TextureVK::Cast(*texture);
+    const std::shared_ptr<const Texture>& texture = data.texture.resource;
+    const TextureVK& texture_vk = TextureVK::Cast(*texture);
     const SamplerVK& sampler = SamplerVK::Cast(*data.sampler);
 
     if (!encoder->Track(texture) ||
@@ -45,36 +51,35 @@ static bool BindImages(const Bindings& bindings,
     image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
     image_info.sampler = sampler.GetSampler();
     image_info.imageView = texture_vk.GetImageView();
-    images.push_back(image_info);
+    image_workspace[image_offset++] = image_info;
 
     vk::WriteDescriptorSet write_set;
     write_set.dstSet = vk_desc_set;
     write_set.dstBinding = slot.binding;
     write_set.descriptorCount = 1u;
     write_set.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-    write_set.pImageInfo = &images.back();
+    write_set.pImageInfo = &image_workspace[image_offset - 1];
 
-    writes.push_back(write_set);
+    write_workspace[write_offset++] = write_set;
   }
 
   return true;
 };
 
-static bool BindBuffers(const Bindings& bindings,
-                        Allocator& allocator,
-                        const std::shared_ptr<CommandEncoderVK>& encoder,
-                        vk::DescriptorSet& vk_desc_set,
-                        const std::vector<DescriptorSetLayout>& desc_set,
-                        std::vector<vk::DescriptorBufferInfo>& buffers,
-                        std::vector<vk::WriteDescriptorSet>& writes) {
+static bool BindBuffers(
+    const Bindings& bindings,
+    Allocator& allocator,
+    const std::shared_ptr<CommandEncoderVK>& encoder,
+    vk::DescriptorSet& vk_desc_set,
+    const std::vector<DescriptorSetLayout>& desc_set,
+    std::array<vk::DescriptorBufferInfo, kMaxBindings>& buffer_workspace,
+    size_t& buffer_offset,
+    std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>&
+        write_workspace,
+    size_t& write_offset) {
   for (const BufferAndUniformSlot& data : bindings.buffers) {
-    const auto& buffer_view = data.view.resource.buffer;
-
-    auto device_buffer = buffer_view;
-    if (!device_buffer) {
-      VALIDATION_LOG << "Failed to get device buffer for vertex binding";
-      return false;
-    }
+    const std::shared_ptr<const DeviceBuffer>& device_buffer =
+        data.view.resource.buffer;
 
     auto buffer = DeviceBufferVK::Cast(*device_buffer).GetBuffer();
     if (!buffer) {
@@ -91,7 +96,7 @@ static bool BindBuffers(const Bindings& bindings,
     buffer_info.buffer = buffer;
     buffer_info.offset = offset;
     buffer_info.range = data.view.resource.range.length;
-    buffers.push_back(buffer_info);
+    buffer_workspace[buffer_offset++] = buffer_info;
 
     // TODO(jonahwilliams): remove this part by storing more data in
     // ShaderUniformSlot.
@@ -113,156 +118,111 @@ static bool BindBuffers(const Bindings& bindings,
     write_set.dstBinding = uniform.binding;
     write_set.descriptorCount = 1u;
     write_set.descriptorType = ToVKDescriptorType(layout.descriptor_type);
-    write_set.pBufferInfo = &buffers.back();
+    write_set.pBufferInfo = &buffer_workspace[buffer_offset - 1];
 
-    writes.push_back(write_set);
+    write_workspace[write_offset++] = write_set;
   }
   return true;
 }
 
-fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
+fml::StatusOr<vk::DescriptorSet> AllocateAndBindDescriptorSets(
     const ContextVK& context,
     const std::shared_ptr<CommandEncoderVK>& encoder,
-    const std::vector<Command>& commands,
-    const TextureVK& input_attachment) {
-  if (commands.empty()) {
-    return std::vector<vk::DescriptorSet>{};
-  }
-
-  // Step 1: Determine the total number of buffer and sampler descriptor
-  // sets required. Collect this information along with the layout information
-  // to allocate a correctly sized descriptor pool.
-  size_t buffer_count = 0;
-  size_t samplers_count = 0;
-  size_t subpass_count = 0;
-  std::vector<vk::DescriptorSetLayout> layouts;
-  layouts.reserve(commands.size());
-
-  for (const auto& command : commands) {
-    buffer_count += command.vertex_bindings.buffers.size();
-    buffer_count += command.fragment_bindings.buffers.size();
-    samplers_count += command.fragment_bindings.sampled_images.size();
-    subpass_count +=
-        command.pipeline->GetDescriptor().UsesSubpassInput() ? 1 : 0;
-
-    layouts.emplace_back(
-        PipelineVK::Cast(*command.pipeline).GetDescriptorSetLayout());
-  }
+    Allocator& allocator,
+    const Command& command,
+    const TextureVK& input_attachment,
+    std::array<vk::DescriptorImageInfo, kMaxBindings>& image_workspace,
+    std::array<vk::DescriptorBufferInfo, kMaxBindings>& buffer_workspace,
+    std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>&
+        write_workspace) {
   auto descriptor_result = encoder->AllocateDescriptorSets(
-      buffer_count, samplers_count, subpass_count, layouts);
+      PipelineVK::Cast(*command.pipeline).GetDescriptorSetLayout(), context);
   if (!descriptor_result.ok()) {
     return descriptor_result.status();
   }
-  auto descriptor_sets = descriptor_result.value();
-  if (descriptor_sets.empty()) {
-    return fml::Status();
+  vk::DescriptorSet descriptor_set = descriptor_result.value();
+
+  size_t buffer_offset = 0u;
+  size_t image_offset = 0u;
+  size_t write_offset = 0u;
+
+  auto& pipeline_descriptor = command.pipeline->GetDescriptor();
+  auto& desc_set =
+      pipeline_descriptor.GetVertexDescriptor()->GetDescriptorSetLayouts();
+
+  if (!BindBuffers(command.vertex_bindings, allocator, encoder, descriptor_set,
+                   desc_set, buffer_workspace, buffer_offset, write_workspace,
+                   write_offset) ||
+      !BindBuffers(command.fragment_bindings, allocator, encoder,
+                   descriptor_set, desc_set, buffer_workspace, buffer_offset,
+                   write_workspace, write_offset) ||
+      !BindImages(command.fragment_bindings, allocator, encoder, descriptor_set,
+                  image_workspace, image_offset, write_workspace,
+                  write_offset)) {
+    return fml::Status(fml::StatusCode::kUnknown,
+                       "Failed to bind texture or buffer.");
   }
 
-  // Step 2: Update the descriptors for all image and buffer descriptors used
-  // in the render pass.
-  std::vector<vk::DescriptorImageInfo> images;
-  std::vector<vk::DescriptorBufferInfo> buffers;
-  std::vector<vk::WriteDescriptorSet> writes;
-  images.reserve(samplers_count + subpass_count);
-  buffers.reserve(buffer_count);
-  writes.reserve(samplers_count + buffer_count + subpass_count);
+  if (pipeline_descriptor.UsesSubpassInput()) {
+    vk::DescriptorImageInfo image_info;
+    image_info.imageLayout = vk::ImageLayout::eGeneral;
+    image_info.sampler = VK_NULL_HANDLE;
+    image_info.imageView = input_attachment.GetImageView();
+    image_workspace[image_offset++] = image_info;
 
-  auto& allocator = *context.GetResourceAllocator();
-  auto desc_index = 0u;
-  for (const auto& command : commands) {
-    auto desc_set = command.pipeline->GetDescriptor()
-                        .GetVertexDescriptor()
-                        ->GetDescriptorSetLayouts();
-    if (!BindBuffers(command.vertex_bindings, allocator, encoder,
-                     descriptor_sets[desc_index], desc_set, buffers, writes) ||
-        !BindBuffers(command.fragment_bindings, allocator, encoder,
-                     descriptor_sets[desc_index], desc_set, buffers, writes) ||
-        !BindImages(command.fragment_bindings, allocator, encoder,
-                    descriptor_sets[desc_index], images, writes)) {
-      return fml::Status(fml::StatusCode::kUnknown,
-                         "Failed to bind texture or buffer.");
-    }
+    vk::WriteDescriptorSet write_set;
+    write_set.dstSet = descriptor_set;
+    write_set.dstBinding = kMagicSubpassInputBinding;
+    write_set.descriptorCount = 1u;
+    write_set.descriptorType = vk::DescriptorType::eInputAttachment;
+    write_set.pImageInfo = &image_workspace[image_offset - 1];
 
-    if (command.pipeline->GetDescriptor().UsesSubpassInput()) {
-      vk::DescriptorImageInfo image_info;
-      image_info.imageLayout = vk::ImageLayout::eGeneral;
-      image_info.sampler = VK_NULL_HANDLE;
-      image_info.imageView = input_attachment.GetImageView();
-      images.push_back(image_info);
-
-      vk::WriteDescriptorSet write_set;
-      write_set.dstSet = descriptor_sets[desc_index];
-      write_set.dstBinding = kMagicSubpassInputBinding;
-      write_set.descriptorCount = 1u;
-      write_set.descriptorType = vk::DescriptorType::eInputAttachment;
-      write_set.pImageInfo = &images.back();
-
-      writes.push_back(write_set);
-    }
-    desc_index += 1;
+    write_workspace[write_offset++] = write_set;
   }
 
-  context.GetDevice().updateDescriptorSets(writes, {});
-  return descriptor_sets;
+  context.GetDevice().updateDescriptorSets(write_offset, write_workspace.data(),
+                                           0u, {});
+
+  return descriptor_set;
 }
 
-fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
+fml::StatusOr<vk::DescriptorSet> AllocateAndBindDescriptorSets(
     const ContextVK& context,
     const std::shared_ptr<CommandEncoderVK>& encoder,
-    const std::vector<ComputeCommand>& commands) {
-  if (commands.empty()) {
-    return std::vector<vk::DescriptorSet>{};
-  }
-  // Step 1: Determine the total number of buffer and sampler descriptor
-  // sets required. Collect this information along with the layout information
-  // to allocate a correctly sized descriptor pool.
-  size_t buffer_count = 0;
-  size_t samplers_count = 0;
-  std::vector<vk::DescriptorSetLayout> layouts;
-  layouts.reserve(commands.size());
-
-  for (const auto& command : commands) {
-    buffer_count += command.bindings.buffers.size();
-    samplers_count += command.bindings.sampled_images.size();
-
-    layouts.emplace_back(
-        ComputePipelineVK::Cast(*command.pipeline).GetDescriptorSetLayout());
-  }
-  auto descriptor_result =
-      encoder->AllocateDescriptorSets(buffer_count, samplers_count, 0, layouts);
+    Allocator& allocator,
+    const ComputeCommand& command,
+    std::array<vk::DescriptorImageInfo, kMaxBindings>& image_workspace,
+    std::array<vk::DescriptorBufferInfo, kMaxBindings>& buffer_workspace,
+    std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>&
+        write_workspace) {
+  auto descriptor_result = encoder->AllocateDescriptorSets(
+      ComputePipelineVK::Cast(*command.pipeline).GetDescriptorSetLayout(),
+      context);
   if (!descriptor_result.ok()) {
     return descriptor_result.status();
   }
-  auto descriptor_sets = descriptor_result.value();
-  if (descriptor_sets.empty()) {
-    return fml::Status();
+  auto descriptor_set = descriptor_result.value();
+
+  size_t buffer_offset = 0u;
+  size_t image_offset = 0u;
+  size_t write_offset = 0u;
+
+  auto& pipeline_descriptor = command.pipeline->GetDescriptor();
+  auto& desc_set = pipeline_descriptor.GetDescriptorSetLayouts();
+
+  if (!BindBuffers(command.bindings, allocator, encoder, descriptor_set,
+                   desc_set, buffer_workspace, buffer_offset, write_workspace,
+                   write_offset) ||
+      !BindImages(command.bindings, allocator, encoder, descriptor_set,
+                  image_workspace, image_offset, write_workspace,
+                  write_offset)) {
+    return fml::Status(fml::StatusCode::kUnknown,
+                       "Failed to bind texture or buffer.");
   }
-  // Step 2: Update the descriptors for all image and buffer descriptors used
-  // in the render pass.
-  std::vector<vk::DescriptorImageInfo> images;
-  std::vector<vk::DescriptorBufferInfo> buffers;
-  std::vector<vk::WriteDescriptorSet> writes;
-  images.reserve(samplers_count);
-  buffers.reserve(buffer_count);
-  writes.reserve(samplers_count + buffer_count);
+  context.GetDevice().updateDescriptorSets(write_offset, write_workspace.data(),
+                                           0u, {});
 
-  auto& allocator = *context.GetResourceAllocator();
-  auto desc_index = 0u;
-  for (const auto& command : commands) {
-    auto desc_set = command.pipeline->GetDescriptor().GetDescriptorSetLayouts();
-
-    if (!BindBuffers(command.bindings, allocator, encoder,
-                     descriptor_sets[desc_index], desc_set, buffers, writes) ||
-        !BindImages(command.bindings, allocator, encoder,
-                    descriptor_sets[desc_index], images, writes)) {
-      return fml::Status(fml::StatusCode::kUnknown,
-                         "Failed to bind texture or buffer.");
-    }
-    desc_index += 1;
-  }
-
-  context.GetDevice().updateDescriptorSets(writes, {});
-  return descriptor_sets;
+  return descriptor_set;
 }
 
 }  // namespace impeller

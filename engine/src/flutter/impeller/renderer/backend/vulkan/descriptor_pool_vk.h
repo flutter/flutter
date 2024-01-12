@@ -14,7 +14,7 @@
 namespace impeller {
 
 //------------------------------------------------------------------------------
-/// @brief      A short-lived fixed-sized descriptor pool. Descriptors
+/// @brief      A per-frame descriptor pool. Descriptors
 ///             from this pool don't need to be freed individually. Instead, the
 ///             pool must be collected after all the descriptors allocated from
 ///             it are done being used.
@@ -26,44 +26,28 @@ namespace impeller {
 ///             threading and lifecycle restrictions.
 class DescriptorPoolVK {
  public:
-  explicit DescriptorPoolVK(const std::weak_ptr<const ContextVK>& context);
+  explicit DescriptorPoolVK(std::weak_ptr<const ContextVK> context);
 
   ~DescriptorPoolVK();
 
-  fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateDescriptorSets(
-      uint32_t buffer_count,
-      uint32_t sampler_count,
-      uint32_t subpass_count,
-      const std::vector<vk::DescriptorSetLayout>& layouts);
+  fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
+      const vk::DescriptorSetLayout& layout,
+      const ContextVK& context_vk);
 
  private:
   std::weak_ptr<const ContextVK> context_;
-  vk::UniqueDescriptorPool pool_ = {};
-  uint32_t allocated_capacity_ = 0;
+  std::vector<vk::UniqueDescriptorPool> pools_;
+
+  fml::Status CreateNewPool(const ContextVK& context_vk);
 
   DescriptorPoolVK(const DescriptorPoolVK&) = delete;
 
   DescriptorPoolVK& operator=(const DescriptorPoolVK&) = delete;
 };
 
-// A descriptor pool and its allocated buffer/sampler size.
-using DescriptorPoolAndSize = std::pair<vk::UniqueDescriptorPool, uint32_t>;
-
 //------------------------------------------------------------------------------
 /// @brief      Creates and manages the lifecycle of |vk::DescriptorPoolVK|
 ///             objects.
-///
-/// To make descriptor pool recycling more effective, the number of requusted
-/// descriptor slots is rounded up the nearest power of two. This also makes
-/// determining whether a recycled pool has sufficient slots easier as only a
-/// single number comparison is required.
-///
-/// We round up to a minimum of 64 as the smallest power of two to reduce the
-/// range of potential allocations to approximately: 64, 128, 256, 512, 1024,
-/// 2048, 4096. Beyond this size applications will have far too many drawing
-/// commands to render correctly. We also limit the number of cached descriptor
-/// pools to 32, which is somewhat arbitrarily chosen, but given 2-ish frames in
-/// flight is about 16 descriptors pools per frame which is extremely generous.
 class DescriptorPoolRecyclerVK final
     : public std::enable_shared_from_this<DescriptorPoolRecyclerVK> {
  public:
@@ -78,41 +62,34 @@ class DescriptorPoolRecyclerVK final
   explicit DescriptorPoolRecyclerVK(std::weak_ptr<ContextVK> context)
       : context_(std::move(context)) {}
 
-  /// @brief      Gets a descriptor pool with at least [minimum_capacity]
-  ///             sampler and slots.
+  /// @brief      Gets a descriptor pool.
   ///
   ///             This may create a new descriptor pool if no existing pools had
   ///             the necessary capacity.
-  DescriptorPoolAndSize Get(uint32_t minimum_capacity);
+  vk::UniqueDescriptorPool Get();
 
   /// @brief      Returns the descriptor pool to be reset on a background
   ///             thread.
   ///
   /// @param[in]  pool The pool to recycler.
-  void Reclaim(vk::UniqueDescriptorPool&& pool, uint32_t allocated_capacity);
+  void Reclaim(vk::UniqueDescriptorPool&& pool);
 
  private:
   std::weak_ptr<ContextVK> context_;
 
   Mutex recycled_mutex_;
-  std::vector<DescriptorPoolAndSize> recycled_ IPLR_GUARDED_BY(recycled_mutex_);
+  std::vector<vk::UniqueDescriptorPool> recycled_ IPLR_GUARDED_BY(
+      recycled_mutex_);
 
   /// @brief      Creates a new |vk::CommandPool|.
   ///
-  ///             The descriptor pool will have at least [minimum_capacity]
-  ///             buffer and texture slots.
-  ///
   /// @returns    Returns a |std::nullopt| if a pool could not be created.
-  DescriptorPoolAndSize Create(uint32_t minimum_capacity);
+  vk::UniqueDescriptorPool Create();
 
   /// @brief      Reuses a recycled |vk::CommandPool|, if available.
   ///
-  ///             The descriptor pool will have at least [minimum_capacity]
-  ///             buffer and texture slots. [minimum_capacity] should be rounded
-  ///             up to the next power of two for more efficient cache reuse.
-  ///
   /// @returns    Returns a |std::nullopt| if a pool was not available.
-  std::optional<DescriptorPoolAndSize> Reuse(uint32_t minimum_capacity);
+  std::optional<vk::UniqueDescriptorPool> Reuse();
 
   DescriptorPoolRecyclerVK(const DescriptorPoolRecyclerVK&) = delete;
 

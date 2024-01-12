@@ -294,18 +294,15 @@ bool CommandEncoderVK::IsTracking(
   return tracked_objects_->IsTracking(source);
 }
 
-fml::StatusOr<std::vector<vk::DescriptorSet>>
-CommandEncoderVK::AllocateDescriptorSets(
-    uint32_t buffer_count,
-    uint32_t sampler_count,
-    uint32_t subpass_count,
-    const std::vector<vk::DescriptorSetLayout>& layouts) {
+fml::StatusOr<vk::DescriptorSet> CommandEncoderVK::AllocateDescriptorSets(
+    const vk::DescriptorSetLayout& layout,
+    const ContextVK& context) {
   if (!IsValid()) {
     return fml::Status(fml::StatusCode::kUnknown, "command encoder invalid");
   }
 
-  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(
-      buffer_count, sampler_count, subpass_count, layouts);
+  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(layout,
+                                                                      context);
 }
 
 void CommandEncoderVK::PushDebugGroup(const char* label) const {
