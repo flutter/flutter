@@ -29,7 +29,8 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
 /**
- * For apps only. Provides the flutter extension used in app/build.gradle.
+ * For apps only. Provides the flutter extension used in the app-level Gradle
+ * build file (app/build.gradle or app/build.gradle.kts).
  *
  * The versions specified here should match the values in
  * packages/flutter_tools/lib/src/android/gradle_utils.dart, so when bumping,
@@ -62,7 +63,7 @@ class FlutterExtension {
 
     /**
      * Specifies the relative directory to the Flutter project directory.
-     * In an app project, this is ../.. since the app's build.gradle is under android/app.
+     * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
     String source = "../.."
 
@@ -90,7 +91,8 @@ buildscript {
 
 /**
  * Some apps don't set default compile options.
- * Apps can change these values in android/app/build.gradle.
+ * Apps can change these values in the app-level Gradle build file
+ * (android/app/build.gradle or android/app/build.gradle.kts).
  * This just ensures that default values are set.
  */
 android {
@@ -423,13 +425,12 @@ class FlutterPlugin implements Plugin<Project> {
      * just using the `plugins.android` list.
      */
     private configureLegacyPluginEachProjects(Project project) {
-        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         try {
-            if (!settingsGradle.text.contains("'.flutter-plugins'")) {
+            if (!settingsGradleFile(project).text.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
-            throw new GradleException("settings.gradle does not exist: ${settingsGradle.absolutePath}")
+            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${settingsGradleFile(project).absolutePath}")
         }
         List<Map<String, Object>> deps = getPluginDependencies(project)
         List<String> plugins = getPluginList(project).collect { it.name as String }
@@ -438,7 +439,7 @@ class FlutterPlugin implements Plugin<Project> {
             Project pluginProject = project.rootProject.findProject(":${it.name}")
             if (pluginProject == null) {
                 // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
-                project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle.")
+                project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
             } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
@@ -451,11 +452,38 @@ class FlutterPlugin implements Plugin<Project> {
 
     // TODO(54566): Can remove this function and its call sites once resolved.
     /**
-     * Returns `true` if the given path contains an `android/build.gradle` file.
+     * Returns `true` if the given path contains an `android` directory
+     * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private static Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, "android" + File.separator + "build.gradle")
-        return editableAndroidProject.exists()
+    private Boolean doesSupportAndroidPlatform(String path) {
+        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
+        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+        if (buildGradle.exists() && buildGradleKts.exists()) {
+            logger.error(
+                "Both build.gradle and build.gradle.kts exist, so " +
+                "build.gradle.kts is ignored. This is likely a mistake."
+            )
+        }
+
+        return buildGradle.exists() || buildGradleKts.exists()
+    }
+
+    /**
+     * Returns the Gradle settings script for the build. When both Groovy and
+     * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
+     * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
+     */
+    private File settingsGradleFile(Project project) {
+        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
+        File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
+        if (settingsGradle.exists() && settingsGradleKts.exists()) {
+            logger.error(
+                "Both settings.gradle and settings.gradle.kts exist, so " +
+                "settings.gradle.kts is ignored. This is likely a mistake."
+            )
+        }
+
+        return settingsGradle.exists() ? settingsGradle : settingsGradleKts
     }
 
     /** Adds the plugin project dependency to the app project. */
@@ -1083,7 +1111,6 @@ class FlutterPlugin implements Plugin<Project> {
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
-            boolean isAndroidLibraryValue = isBuildingAar || isUsedAsSubproject
 
             String variantBuildMode = buildModeFor(variant.buildType)
             String flavorValue = variant.getFlavorName()
@@ -1123,11 +1150,10 @@ class FlutterPlugin implements Plugin<Project> {
                 codeSizeDirectory(codeSizeDirectoryValue)
                 deferredComponents(deferredComponentsValue)
                 validateDeferredComponents(validateDeferredComponentsValue)
-                isAndroidLibrary(isAndroidLibraryValue)
                 flavor(flavorValue)
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
-            Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1140,10 +1166,20 @@ class FlutterPlugin implements Plugin<Project> {
                             return "lib/${abi}/lib${filename}"
                         }
                     }
+                    // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
+                    // The `$project.buildDir` is '.android/Flutter/build/' instead of 'build/'.
+                    def buildDir = "${getFlutterSourceDirectory()}/build"
+                    def nativeAssetsDir = "${buildDir}/native_assets/android/jniLibs/lib"
+                    from("${nativeAssetsDir}/${abi}") {
+                        include "*.so"
+                        rename { String filename ->
+                            return "lib/${abi}/${filename}"
+                        }
+                    }
                 }
             }
             addApiDependencies(project, variant.name, project.files {
-                packFlutterAppAotTask
+                packJniLibsTask
             })
             Task copyFlutterAssetsTask = project.tasks.create(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
@@ -1413,8 +1449,6 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean validateDeferredComponents
     @Optional @Input
-    Boolean isAndroidLibrary
-    @Optional @Input
     String flavor
 
     @OutputFiles
@@ -1510,9 +1544,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args("-dAndroidArchs=${targetPlatformValues.join(' ')}")
             args("-dMinSdkVersion=${minSdkVersion}")
-            if (isAndroidLibrary != null) {
-                args("-dIsAndroidLibrary=${isAndroidLibrary ? "true" : "false"}")
-            }
             args(ruleNames)
         }
     }
