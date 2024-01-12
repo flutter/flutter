@@ -69,6 +69,34 @@ class FlutterExtension {
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
+
+    /** The versionCode that was read from app's local.properties. */
+    String flutterVersionCode = null
+
+    /** The versionName that was read from app's local.properties. */
+    String flutterVersionName = null
+
+    /** Returns flutterVersionCode as an integer with error handling. */
+    Integer versionCode() {
+        if (flutterVersionCode == null) {
+            throw new GradleException("flutterVersionCode must not be null.")
+        }
+
+        if (!flutterVersionCode.isNumber()) {
+            throw new GradleException("flutterVersionCode must be an integer.")
+        }
+
+        return flutterVersionCode.toInteger()
+    }
+
+    /** Returns flutterVersionName with error handling. */
+    String versionName() {
+        if (flutterVersionName == null) {
+            throw new GradleException("flutterVersionName must not be null.")
+        }
+
+        return flutterVersionName
+    }
 }
 
 // This buildscript block supplies dependencies for this file's own import
@@ -226,7 +254,28 @@ class FlutterPlugin implements Plugin<Project> {
         // Load shared gradle functions
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
 
-        project.extensions.create("flutter", FlutterExtension)
+        def extension = project.extensions.create("flutter", FlutterExtension)
+        def localProperties = new Properties()
+        def localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.withReader("UTF-8") { reader ->
+                localProperties.load(reader)
+            }
+        }
+
+        def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+        if (flutterVersionCode == null) {
+            flutterVersionCode = "1"
+        }
+        extension.flutterVersionCode = flutterVersionCode
+
+
+        def flutterVersionName = localProperties.getProperty("flutter.versionName")
+        if (flutterVersionName == null) {
+            flutterVersionName = "1.0"
+        }
+        extension.flutterVersionName = flutterVersionName
+
         this.addFlutterTasks(project)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
