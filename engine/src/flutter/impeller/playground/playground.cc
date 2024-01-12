@@ -422,7 +422,7 @@ static std::shared_ptr<Texture> CreateTextureForDecompressedImage(
       return nullptr;
     }
     blit_pass->SetLabel("Mipmap Blit Pass");
-    blit_pass->AddCopy(buffer->AsBufferView(), dest_texture);
+    blit_pass->AddCopy(DeviceBuffer::AsBufferView(buffer), dest_texture);
     if (enable_mipmapping) {
       blit_pass->GenerateMipmap(dest_texture);
     }

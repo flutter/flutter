@@ -410,7 +410,7 @@ static bool EncodeCommand(const Context& context,
   }
 
   auto& allocator = *context.GetResourceAllocator();
-  auto vertex_buffer = vertex_buffer_view.buffer->GetDeviceBuffer();
+  auto vertex_buffer = vertex_buffer_view.buffer;
 
   if (!vertex_buffer) {
     VALIDATION_LOG << "Failed to acquire device buffer"
@@ -435,7 +435,7 @@ static bool EncodeCommand(const Context& context,
       return false;
     }
 
-    auto index_buffer = index_buffer_view.buffer->GetDeviceBuffer();
+    auto index_buffer = index_buffer_view.buffer;
     if (!index_buffer) {
       VALIDATION_LOG << "Failed to acquire device buffer"
                      << " for index buffer view";

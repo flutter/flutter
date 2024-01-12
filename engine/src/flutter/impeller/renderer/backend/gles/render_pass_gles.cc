@@ -386,7 +386,7 @@ struct RenderPassData {
       return false;
     }
 
-    auto vertex_buffer = vertex_buffer_view.buffer->GetDeviceBuffer();
+    auto vertex_buffer = vertex_buffer_view.buffer;
 
     if (!vertex_buffer) {
       return false;
@@ -445,7 +445,7 @@ struct RenderPassData {
     } else {
       // Bind the index buffer if necessary.
       auto index_buffer_view = command.vertex_buffer.index_buffer;
-      auto index_buffer = index_buffer_view.buffer->GetDeviceBuffer();
+      auto index_buffer = index_buffer_view.buffer;
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
       if (!index_buffer_gles.BindAndUploadDataIfNecessary(
               DeviceBufferGLES::BindingType::kElementArrayBuffer)) {

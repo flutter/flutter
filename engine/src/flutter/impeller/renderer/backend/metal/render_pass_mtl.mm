@@ -364,7 +364,7 @@ static bool Bind(PassBindingsCache& pass,
     return false;
   }
 
-  auto device_buffer = view.buffer->GetDeviceBuffer();
+  auto device_buffer = view.buffer;
   if (!device_buffer) {
     return false;
   }
@@ -508,12 +508,7 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
     if (!index_buffer) {
       return false;
     }
-    auto device_buffer = index_buffer->GetDeviceBuffer();
-    if (!device_buffer) {
-      return false;
-    }
-    auto mtl_index_buffer =
-        DeviceBufferMTL::Cast(*device_buffer).GetMTLBuffer();
+    auto mtl_index_buffer = DeviceBufferMTL::Cast(*index_buffer).GetMTLBuffer();
     if (!mtl_index_buffer) {
       return false;
     }

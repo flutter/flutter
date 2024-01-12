@@ -162,10 +162,8 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
   buffer_desc.size = total * sizeof(Point);
   buffer_desc.storage_mode = StorageMode::kDevicePrivate;
 
-  auto geometry_buffer = renderer.GetContext()
-                             ->GetResourceAllocator()
-                             ->CreateBuffer(buffer_desc)
-                             ->AsBufferView();
+  auto geometry_buffer = DeviceBuffer::AsBufferView(
+      renderer.GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc));
 
   BufferView output;
   {
@@ -197,10 +195,9 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
     buffer_desc.size = total * sizeof(Vector4);
     buffer_desc.storage_mode = StorageMode::kDevicePrivate;
 
-    auto geometry_uv_buffer = renderer.GetContext()
-                                  ->GetResourceAllocator()
-                                  ->CreateBuffer(buffer_desc)
-                                  ->AsBufferView();
+    auto geometry_uv_buffer = DeviceBuffer::AsBufferView(
+        renderer.GetContext()->GetResourceAllocator()->CreateBuffer(
+            buffer_desc));
 
     using UV = UvComputeShader;
 

@@ -5,8 +5,6 @@
 #ifndef FLUTTER_IMPELLER_BASE_BACKEND_CAST_H_
 #define FLUTTER_IMPELLER_BASE_BACKEND_CAST_H_
 
-#include "flutter/fml/macros.h"
-
 namespace impeller {
 
 template <class Sub, class Base>
