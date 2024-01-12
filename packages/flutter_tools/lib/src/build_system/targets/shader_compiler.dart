@@ -17,7 +17,6 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../device.dart';
 import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].

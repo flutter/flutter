@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/device.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -149,7 +148,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.impellerAndroid,
+        target: ShaderTarget.android,
         json: false,
       ),
       true,
@@ -319,10 +318,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(
-      TargetPlatform.tester,
-      impellerStatus: ImpellerStatus.enabled,
-    );
+    developmentShaderCompiler.configureCompiler(TargetPlatform.tester);
 
     final DevFSContent? content = await developmentShaderCompiler
       .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));

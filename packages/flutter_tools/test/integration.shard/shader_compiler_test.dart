@@ -32,7 +32,7 @@ void main() {
     await shaderCompiler.compileShader(
       input: file,
       outputPath: tmpDir.childFile('test_shader.frag.out').path,
-      target: ShaderTarget.sksl,
+      target: ShaderTarget.tester,
       json: false,
     );
   }
@@ -62,7 +62,7 @@ void main() {
     final bool compileResult = await shaderCompiler.compileShader(
       input: globals.fs.file(inkSparklePath),
       outputPath: inkSparkleOutputPath,
-      target: ShaderTarget.sksl,
+      target: ShaderTarget.tester,
       json: false,
     );
     final File resultFile = globals.fs.file(inkSparkleOutputPath);
