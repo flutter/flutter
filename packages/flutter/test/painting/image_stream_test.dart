@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:web/web.dart';
 
 import '../image_data.dart';
 import 'fake_codec.dart';
@@ -892,29 +893,29 @@ void main() {
     );
   });
 
-  testWidgets('ImageInfo dispatches memory events by default', (WidgetTester tester) async {
-    final Image image = await createTestImage(width: 100, height: 100);
-    await expectLater(
-      await memoryEvents(
+  group('Memory events.', () {
+    testWidgets('ImageInfo dispatches memory events and disposes image by default', (WidgetTester tester) async {
+      await expectLater(
+        await memoryEvents(
+          () async {
+            final ImageInfo info = ImageInfo(image: image20x10);
+            info.dispose();
+          },
+          ImageInfo,
+        ),
+        areCreateAndDispose,
+      );
+    });
+
+    testWidgets('ImageInfo does not dispatch memory events when shouldDisposeImage is false', (WidgetTester tester) async {
+      final List<ObjectEvent> events = await memoryEvents(
         () async {
-          final ImageInfo info = TestImageInfo(1, image: image);
+          final ImageInfo info = ImageInfo(image: image20x10, shouldDisposeImage: false);
           info.dispose();
         },
         ImageInfo,
-      ),
-      areCreateAndDispose,
-    );
-  });
-
-  testWidgets('ImageInfo does not dispatch memory events when image does not need to be disposed', (WidgetTester tester) async {
-    final Image image = await createTestImage(width: 100, height: 100);
-    final List<ObjectEvent> events = await memoryEvents(
-      () async {
-        final ImageInfo info = TestImageInfo(1, image: image, shouldDisposeImage: false);
-        info.dispose();
-      },
-      ImageInfo,
-    );
-    expect(events, isEmpty);
+      );
+      expect(events, isEmpty);
+    });
   });
 }
