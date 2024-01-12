@@ -682,8 +682,24 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-class AndroidBackGestureTransitionsBuilder extends PageTransitionsBuilder {
-  const AndroidBackGestureTransitionsBuilder();
+typedef AndroidBackGestureTransitionBuilder<T> = Widget Function(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+    AndroidBackEvent? startBackEvent,
+    AndroidBackEvent? currentBackEvent);
+
+class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
+  const AndroidBackGesturePageTransitionsBuilder({
+    this.parent = const ZoomPageTransitionsBuilder(),
+    this.backGestureTransitionBuilder = defaultBackGestureTransitionBuilder,
+  });
+
+  final PageTransitionsBuilder parent;
+  final AndroidBackGestureTransitionBuilder<dynamic>
+      backGestureTransitionBuilder;
 
   @override
   Widget buildTransitions<T>(
@@ -693,8 +709,6 @@ class AndroidBackGestureTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final bool hasBackGesture = _hasBackGesture(route);
-
     return AndroidBackGestureDetector(
       controller: route.controller!, // protected access
       navigator: route.navigator!,
@@ -702,24 +716,46 @@ class AndroidBackGestureTransitionsBuilder extends PageTransitionsBuilder {
           CupertinoRouteTransitionMixin.isPopGestureEnabled(route),
       builder: (BuildContext context, AndroidBackEvent? startBackEvent,
           AndroidBackEvent? currentBackEvent) {
+        final bool hasBackGesture = _hasBackGesture(route);
+
         if (hasBackGesture) {
-          return AndroidBackGestureTransition(
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-            startBackEvent: startBackEvent,
-            currentBackEvent: currentBackEvent,
-            child: child,
+          return backGestureTransitionBuilder(
+            route,
+            context,
+            animation,
+            secondaryAnimation,
+            child,
+            startBackEvent,
+            currentBackEvent,
           );
         }
 
-        return _ZoomPageTransition(
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          allowSnapshotting: route.allowSnapshotting,
-          allowEnterRouteSnapshotting: true,
-          child: child,
+        return parent.buildTransitions(
+          route,
+          context,
+          animation,
+          secondaryAnimation,
+          child,
         );
       },
+    );
+  }
+
+  static Widget defaultBackGestureTransitionBuilder<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+    AndroidBackEvent? startBackEvent,
+    AndroidBackEvent? currentBackEvent,
+  ) {
+    return AndroidBackGestureTransition(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      startBackEvent: startBackEvent,
+      currentBackEvent: currentBackEvent,
+      child: child,
     );
   }
 
@@ -766,10 +802,10 @@ class AndroidBackGestureTransition extends StatelessWidget {
     final double yShiftMax = (screenHeight / 20) - 8;
 
     final double rawYShift = _currentTouchY - _startTouchY;
-    final double easedYShift =
-        Curves.easeOut.transform(rawYShift.abs() / screenHeight) *
-            rawYShift.sign *
-            yShiftMax;
+    final double easedYShift = Curves.easeOut
+            .transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
+        rawYShift.sign *
+        yShiftMax;
     final double yShift = easedYShift.clamp(-yShiftMax, yShiftMax);
 
     final Tween<double> xShiftTween = Tween<double>(
