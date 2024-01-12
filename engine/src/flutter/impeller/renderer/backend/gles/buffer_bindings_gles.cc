@@ -232,7 +232,7 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
                                            Allocator& transients_allocator,
                                            const BufferResource& buffer) {
   const auto* metadata = buffer.GetMetadata();
-  auto device_buffer = buffer.resource.buffer->GetDeviceBuffer();
+  auto device_buffer = buffer.resource.buffer;
   if (!device_buffer) {
     VALIDATION_LOG << "Device buffer not found.";
     return false;

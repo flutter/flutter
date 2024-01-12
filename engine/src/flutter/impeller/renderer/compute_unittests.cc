@@ -79,33 +79,33 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   CS::BindInfo(cmd, host_buffer->EmplaceUniform(info));
   CS::BindInput0(cmd, host_buffer->EmplaceStorageBuffer(input_0));
   CS::BindInput1(cmd, host_buffer->EmplaceStorageBuffer(input_1));
-  CS::BindOutput(cmd, output_buffer->AsBufferView());
+  CS::BindOutput(cmd, DeviceBuffer::AsBufferView(output_buffer));
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
-  ASSERT_TRUE(
-      cmd_buffer->SubmitCommands([&latch, output_buffer, &input_0,
-                                  &input_1](CommandBuffer::Status status) {
-        EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+  ASSERT_TRUE(cmd_buffer->SubmitCommands([&latch, output_buffer, &input_0,
+                                          &input_1](
+                                             CommandBuffer::Status status) {
+    EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
-        auto view = output_buffer->AsBufferView();
-        EXPECT_EQ(view.range.length, sizeof(CS::Output<kCount>));
+    auto view = DeviceBuffer::AsBufferView(output_buffer);
+    EXPECT_EQ(view.range.length, sizeof(CS::Output<kCount>));
 
-        CS::Output<kCount>* output =
-            reinterpret_cast<CS::Output<kCount>*>(view.contents);
-        EXPECT_TRUE(output);
-        for (size_t i = 0; i < kCount; i++) {
-          Vector4 vector = output->elements[i];
-          Vector4 computed = input_0.elements[i] * input_1.elements[i];
-          EXPECT_EQ(vector, Vector4(computed.x + 2 + input_1.some_struct.i,
-                                    computed.y + 3 + input_1.some_struct.vf.x,
-                                    computed.z + 5 + input_1.some_struct.vf.y,
-                                    computed.w));
-        }
-        latch.Signal();
-      }));
+    CS::Output<kCount>* output =
+        reinterpret_cast<CS::Output<kCount>*>(output_buffer->OnGetContents());
+    EXPECT_TRUE(output);
+    for (size_t i = 0; i < kCount; i++) {
+      Vector4 vector = output->elements[i];
+      Vector4 computed = input_0.elements[i] * input_1.elements[i];
+      EXPECT_EQ(vector,
+                Vector4(computed.x + 2 + input_1.some_struct.i,
+                        computed.y + 3 + input_1.some_struct.vf.x,
+                        computed.z + 5 + input_1.some_struct.vf.y, computed.w));
+    }
+    latch.Signal();
+  }));
 
   latch.Wait();
 }
@@ -147,30 +147,30 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
       context, "Output Buffer");
 
   CS::BindInputData(cmd, host_buffer->EmplaceStorageBuffer(input_data));
-  CS::BindOutputData(cmd, output_buffer->AsBufferView());
+  CS::BindOutputData(cmd, DeviceBuffer::AsBufferView(output_buffer));
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
-  ASSERT_TRUE(cmd_buffer->SubmitCommands(
-      [&latch, output_buffer](CommandBuffer::Status status) {
-        EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+  ASSERT_TRUE(cmd_buffer->SubmitCommands([&latch, output_buffer](
+                                             CommandBuffer::Status status) {
+    EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
-        auto view = output_buffer->AsBufferView();
-        EXPECT_EQ(view.range.length, sizeof(CS::OutputData<kCount>));
+    auto view = DeviceBuffer::AsBufferView(output_buffer);
+    EXPECT_EQ(view.range.length, sizeof(CS::OutputData<kCount>));
 
-        CS::OutputData<kCount>* output =
-            reinterpret_cast<CS::OutputData<kCount>*>(view.contents);
-        EXPECT_TRUE(output);
+    CS::OutputData<kCount>* output = reinterpret_cast<CS::OutputData<kCount>*>(
+        output_buffer->OnGetContents());
+    EXPECT_TRUE(output);
 
-        constexpr uint32_t expected[kCount] = {1, 3, 6, 10, 15};
-        for (size_t i = 0; i < kCount; i++) {
-          auto computed_sum = output->data[i];
-          EXPECT_EQ(computed_sum, expected[i]);
-        }
-        latch.Signal();
-      }));
+    constexpr uint32_t expected[kCount] = {1, 3, 6, 10, 15};
+    for (size_t i = 0; i < kCount; i++) {
+      auto computed_sum = output->data[i];
+      EXPECT_EQ(computed_sum, expected[i]);
+    }
+    latch.Signal();
+  }));
 
   latch.Wait();
 }
@@ -204,25 +204,25 @@ TEST_P(ComputeTest, 1DThreadgroupSizingIsCorrect) {
   auto output_buffer = CreateHostVisibleDeviceBuffer<CS::OutputData<kCount>>(
       context, "Output Buffer");
 
-  CS::BindOutputData(cmd, output_buffer->AsBufferView());
+  CS::BindOutputData(cmd, DeviceBuffer::AsBufferView(output_buffer));
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
-  ASSERT_TRUE(cmd_buffer->SubmitCommands(
-      [&latch, output_buffer](CommandBuffer::Status status) {
-        EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+  ASSERT_TRUE(cmd_buffer->SubmitCommands([&latch, output_buffer](
+                                             CommandBuffer::Status status) {
+    EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
-        auto view = output_buffer->AsBufferView();
-        EXPECT_EQ(view.range.length, sizeof(CS::OutputData<kCount>));
+    auto view = DeviceBuffer::AsBufferView(output_buffer);
+    EXPECT_EQ(view.range.length, sizeof(CS::OutputData<kCount>));
 
-        CS::OutputData<kCount>* output =
-            reinterpret_cast<CS::OutputData<kCount>*>(view.contents);
-        EXPECT_TRUE(output);
-        EXPECT_EQ(output->data[kCount - 1], kCount - 1);
-        latch.Signal();
-      }));
+    CS::OutputData<kCount>* output = reinterpret_cast<CS::OutputData<kCount>*>(
+        output_buffer->OnGetContents());
+    EXPECT_TRUE(output);
+    EXPECT_EQ(output->data[kCount - 1], kCount - 1);
+    latch.Signal();
+  }));
 
   latch.Wait();
 }
@@ -263,7 +263,7 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
         context, "Output Buffer");
 
     CS::BindInputData(cmd, host_buffer->EmplaceStorageBuffer(input_data));
-    CS::BindOutputData(cmd, output_buffer->AsBufferView());
+    CS::BindOutputData(cmd, DeviceBuffer::AsBufferView(output_buffer));
 
     pass->AddCommand(std::move(cmd));
     pass->EncodeCommands();
@@ -330,7 +330,7 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     cmd.pipeline = compute_pipeline_1;
 
     CS1::BindInput(cmd, host_buffer->EmplaceStorageBuffer(input_1));
-    CS1::BindOutput(cmd, output_buffer_1->AsBufferView());
+    CS1::BindOutput(cmd, DeviceBuffer::AsBufferView(output_buffer_1));
 
     ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
   }
@@ -339,8 +339,8 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     ComputeCommand cmd;
     cmd.pipeline = compute_pipeline_2;
 
-    CS1::BindInput(cmd, output_buffer_1->AsBufferView());
-    CS2::BindOutput(cmd, output_buffer_2->AsBufferView());
+    CS1::BindInput(cmd, DeviceBuffer::AsBufferView(output_buffer_1));
+    CS2::BindOutput(cmd, DeviceBuffer::AsBufferView(output_buffer_2));
     ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
   }
 
@@ -353,14 +353,14 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
     CS1::Output<kCount2>* output_1 = reinterpret_cast<CS1::Output<kCount2>*>(
-        output_buffer_1->AsBufferView().contents);
+        output_buffer_1->OnGetContents());
     EXPECT_TRUE(output_1);
     EXPECT_EQ(output_1->count, 10u);
     EXPECT_THAT(output_1->elements,
                 ::testing::ElementsAre(0, 0, 2, 3, 4, 6, 6, 9, 8, 12));
 
     CS2::Output<kCount2>* output_2 = reinterpret_cast<CS2::Output<kCount2>*>(
-        output_buffer_2->AsBufferView().contents);
+        output_buffer_2->OnGetContents());
     EXPECT_TRUE(output_2);
     EXPECT_EQ(output_2->count, 10u);
     EXPECT_THAT(output_2->elements,
@@ -417,33 +417,33 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
   CS::BindInfo(cmd, host_buffer->EmplaceUniform(info));
   CS::BindInput0(cmd, host_buffer->EmplaceStorageBuffer(input_0));
   CS::BindInput1(cmd, host_buffer->EmplaceStorageBuffer(input_1));
-  CS::BindOutput(cmd, output_buffer->AsBufferView());
+  CS::BindOutput(cmd, DeviceBuffer::AsBufferView(output_buffer));
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
-  ASSERT_TRUE(
-      cmd_buffer->SubmitCommands([&latch, output_buffer, &input_0,
-                                  &input_1](CommandBuffer::Status status) {
-        EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+  ASSERT_TRUE(cmd_buffer->SubmitCommands([&latch, output_buffer, &input_0,
+                                          &input_1](
+                                             CommandBuffer::Status status) {
+    EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
-        auto view = output_buffer->AsBufferView();
-        EXPECT_EQ(view.range.length, sizeof(CS::Output<kCount>));
+    auto view = DeviceBuffer::AsBufferView(output_buffer);
+    EXPECT_EQ(view.range.length, sizeof(CS::Output<kCount>));
 
-        CS::Output<kCount>* output =
-            reinterpret_cast<CS::Output<kCount>*>(view.contents);
-        EXPECT_TRUE(output);
-        for (size_t i = 0; i < kCount; i++) {
-          Vector4 vector = output->elements[i];
-          Vector4 computed = input_0.elements[i] * input_1.elements[i];
-          EXPECT_EQ(vector, Vector4(computed.x + 2 + input_1.some_struct.i,
-                                    computed.y + 3 + input_1.some_struct.vf.x,
-                                    computed.z + 5 + input_1.some_struct.vf.y,
-                                    computed.w));
-        }
-        latch.Signal();
-      }));
+    CS::Output<kCount>* output =
+        reinterpret_cast<CS::Output<kCount>*>(output_buffer->OnGetContents());
+    EXPECT_TRUE(output);
+    for (size_t i = 0; i < kCount; i++) {
+      Vector4 vector = output->elements[i];
+      Vector4 computed = input_0.elements[i] * input_1.elements[i];
+      EXPECT_EQ(vector,
+                Vector4(computed.x + 2 + input_1.some_struct.i,
+                        computed.y + 3 + input_1.some_struct.vf.x,
+                        computed.z + 5 + input_1.some_struct.vf.y, computed.w));
+    }
+    latch.Signal();
+  }));
 
   latch.Wait();
 }
@@ -496,7 +496,7 @@ TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
   CS::BindInfo(cmd, host_buffer->EmplaceUniform(info));
   CS::BindInput0(cmd, host_buffer->EmplaceStorageBuffer(input_0));
   CS::BindInput1(cmd, host_buffer->EmplaceStorageBuffer(input_1));
-  CS::BindOutput(cmd, output_buffer->AsBufferView());
+  CS::BindOutput(cmd, DeviceBuffer::AsBufferView(output_buffer));
 
   ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
   ASSERT_FALSE(pass->EncodeCommands());

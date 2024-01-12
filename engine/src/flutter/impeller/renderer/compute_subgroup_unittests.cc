@@ -71,10 +71,9 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
                                                            "VertexCount");
 
   auto callback = [&](RenderPass& pass) -> bool {
-    ::memset(vertex_buffer_count->AsBufferView().contents, 0,
+    ::memset(vertex_buffer_count->OnGetContents(), 0,
              sizeof(SS::VertexBufferCount));
-    ::memset(vertex_buffer->AsBufferView().contents, 0,
-             sizeof(SS::VertexBuffer<2048>));
+    ::memset(vertex_buffer->OnGetContents(), 0, sizeof(SS::VertexBuffer<2048>));
     const auto* main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(
         ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20));
@@ -93,18 +92,18 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
       auto status =
           ComputeTessellator{}
               .SetStrokeWidth(stroke_width)
-              .Tessellate(
-                  path, *host_buffer, context, vertex_buffer->AsBufferView(),
-                  vertex_buffer_count->AsBufferView(),
-                  [vertex_buffer_count, &vertex_count,
-                   &promise](CommandBuffer::Status status) {
-                    vertex_count =
-                        reinterpret_cast<SS::VertexBufferCount*>(
-                            vertex_buffer_count->AsBufferView().contents)
-                            ->count;
-                    promise.set_value(status ==
-                                      CommandBuffer::Status::kCompleted);
-                  });
+              .Tessellate(path, *host_buffer, context,
+                          DeviceBuffer::AsBufferView(vertex_buffer),
+                          DeviceBuffer::AsBufferView(vertex_buffer_count),
+                          [vertex_buffer_count, &vertex_count,
+                           &promise](CommandBuffer::Status status) {
+                            vertex_count =
+                                reinterpret_cast<SS::VertexBufferCount*>(
+                                    vertex_buffer_count->OnGetContents())
+                                    ->count;
+                            promise.set_value(
+                                status == CommandBuffer::Status::kCompleted);
+                          });
       switch (status) {
         case ComputeTessellator::Status::kCommandInvalid:
           ImGui::Text("Failed to submit compute job (invalid command)");
@@ -152,11 +151,11 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
     cmd.pipeline = renderer.GetSolidFillPipeline(options);
 
     auto count = reinterpret_cast<SS::VertexBufferCount*>(
-                     vertex_buffer_count->AsBufferView().contents)
+                     vertex_buffer_count->OnGetContents())
                      ->count;
 
     cmd.BindVertices(
-        VertexBuffer{.vertex_buffer = vertex_buffer->AsBufferView(),
+        VertexBuffer{.vertex_buffer = DeviceBuffer::AsBufferView(vertex_buffer),
                      .vertex_count = count,
                      .index_type = IndexType::kNone});
 
@@ -313,10 +312,9 @@ TEST_P(ComputeSubgroupTest, LargePath) {
           .TakePath();
 
   auto callback = [&](RenderPass& pass) -> bool {
-    ::memset(vertex_buffer_count->AsBufferView().contents, 0,
+    ::memset(vertex_buffer_count->OnGetContents(), 0,
              sizeof(SS::VertexBufferCount));
-    ::memset(vertex_buffer->AsBufferView().contents, 0,
-             sizeof(SS::VertexBuffer<2048>));
+    ::memset(vertex_buffer->OnGetContents(), 0, sizeof(SS::VertexBuffer<2048>));
 
     ContentContext renderer(context, nullptr);
     if (!renderer.IsValid()) {
@@ -327,10 +325,11 @@ TEST_P(ComputeSubgroupTest, LargePath) {
         .SetStrokeWidth(stroke_width)
         .Tessellate(
             complex_path, renderer.GetTransientsBuffer(), context,
-            vertex_buffer->AsBufferView(), vertex_buffer_count->AsBufferView(),
+            DeviceBuffer::AsBufferView(vertex_buffer),
+            DeviceBuffer::AsBufferView(vertex_buffer_count),
             [vertex_buffer_count, &vertex_count](CommandBuffer::Status status) {
               vertex_count = reinterpret_cast<SS::VertexBufferCount*>(
-                                 vertex_buffer_count->AsBufferView().contents)
+                                 vertex_buffer_count->OnGetContents())
                                  ->count;
             });
 
@@ -354,11 +353,11 @@ TEST_P(ComputeSubgroupTest, LargePath) {
     cmd.pipeline = renderer.GetSolidFillPipeline(options);
 
     auto count = reinterpret_cast<SS::VertexBufferCount*>(
-                     vertex_buffer_count->AsBufferView().contents)
+                     vertex_buffer_count->OnGetContents())
                      ->count;
 
     cmd.BindVertices(
-        VertexBuffer{.vertex_buffer = vertex_buffer->AsBufferView(),
+        VertexBuffer{.vertex_buffer = DeviceBuffer::AsBufferView(vertex_buffer),
                      .vertex_count = count,
                      .index_type = IndexType::kNone});
 
@@ -402,8 +401,8 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
 
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   auto status = tessellator.Tessellate(
-      path, *host_buffer, context, vertex_buffer->AsBufferView(),
-      vertex_buffer_count->AsBufferView(),
+      path, *host_buffer, context, DeviceBuffer::AsBufferView(vertex_buffer),
+      DeviceBuffer::AsBufferView(vertex_buffer_count),
       [&latch](CommandBuffer::Status status) {
         EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
         latch.Signal();
@@ -437,11 +436,11 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
     cmd.pipeline = renderer.GetSolidFillPipeline(options);
 
     auto count = reinterpret_cast<SS::VertexBufferCount*>(
-                     vertex_buffer_count->AsBufferView().contents)
+                     vertex_buffer_count->OnGetContents())
                      ->count;
 
     cmd.BindVertices(
-        VertexBuffer{.vertex_buffer = vertex_buffer->AsBufferView(),
+        VertexBuffer{.vertex_buffer = DeviceBuffer::AsBufferView(vertex_buffer),
                      .vertex_count = count,
                      .index_type = IndexType::kNone});
 
@@ -468,11 +467,11 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
   latch.Wait();
 
   auto vertex_count = reinterpret_cast<SS::VertexBufferCount*>(
-                          vertex_buffer_count->AsBufferView().contents)
+                          vertex_buffer_count->OnGetContents())
                           ->count;
   EXPECT_EQ(vertex_count, golden_cubic_and_quad_points.size());
-  auto vertex_buffer_data = reinterpret_cast<SS::VertexBuffer<2048>*>(
-      vertex_buffer->AsBufferView().contents);
+  auto vertex_buffer_data =
+      reinterpret_cast<SS::VertexBuffer<2048>*>(vertex_buffer->OnGetContents());
   for (size_t i = 0; i < vertex_count; i++) {
     EXPECT_LT(std::abs(golden_cubic_and_quad_points[i].x -
                        vertex_buffer_data->position[i].x),

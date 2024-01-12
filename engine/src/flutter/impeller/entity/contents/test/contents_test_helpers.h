@@ -21,8 +21,8 @@ typename T::VertInfo* GetVertInfo(const Command& command) {
     return nullptr;
   }
 
-  auto data =
-      (resource->view.resource.contents + resource->view.resource.range.offset);
+  auto data = (resource->view.resource.buffer->OnGetContents() +
+               resource->view.resource.range.offset);
   return reinterpret_cast<typename T::VertInfo*>(data);
 }
 
@@ -39,8 +39,8 @@ typename T::FragInfo* GetFragInfo(const Command& command) {
     return nullptr;
   }
 
-  auto data =
-      (resource->view.resource.contents + resource->view.resource.range.offset);
+  auto data = (resource->view.resource.buffer->OnGetContents() +
+               resource->view.resource.range.offset);
   return reinterpret_cast<typename T::FragInfo*>(data);
 }
 

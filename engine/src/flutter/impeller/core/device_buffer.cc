@@ -10,18 +10,13 @@ DeviceBuffer::DeviceBuffer(DeviceBufferDescriptor desc) : desc_(desc) {}
 
 DeviceBuffer::~DeviceBuffer() = default;
 
-// |Buffer|
-std::shared_ptr<const DeviceBuffer> DeviceBuffer::GetDeviceBuffer() const {
-  return shared_from_this();
-}
-
 void DeviceBuffer::Flush(std::optional<Range> range) const {}
 
-BufferView DeviceBuffer::AsBufferView() const {
+// static
+BufferView DeviceBuffer::AsBufferView(std::shared_ptr<DeviceBuffer> buffer) {
   BufferView view;
-  view.buffer = shared_from_this();
-  view.contents = OnGetContents();
-  view.range = {0u, desc_.size};
+  view.buffer = std::move(buffer);
+  view.range = {0u, view.buffer->desc_.size};
   return view;
 }
 

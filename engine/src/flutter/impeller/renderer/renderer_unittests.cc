@@ -688,10 +688,10 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
         FS::BindFragInfo(cmd, host_buffer->EmplaceUniform(frag_info));
 
         auto sampler = context->GetSamplerLibrary()->GetSampler({});
-        auto buffer_view = device_buffer->AsBufferView();
+        auto buffer_view = DeviceBuffer::AsBufferView(device_buffer);
         auto texture =
             context->GetResourceAllocator()->CreateTexture(texture_desc);
-        if (!texture->SetContents(buffer_view.contents,
+        if (!texture->SetContents(device_buffer->OnGetContents(),
                                   buffer_view.range.length)) {
           VALIDATION_LOG << "Could not upload texture to device memory";
           return false;

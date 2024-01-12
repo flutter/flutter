@@ -13,8 +13,9 @@
 
 namespace impeller {
 
-class DeviceBufferMTL final : public DeviceBuffer,
-                              public BackendCast<DeviceBufferMTL, Buffer> {
+class DeviceBufferMTL final
+    : public DeviceBuffer,
+      public BackendCast<DeviceBufferMTL, DeviceBuffer> {
  public:
   DeviceBufferMTL();
 

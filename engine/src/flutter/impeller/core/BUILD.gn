@@ -8,8 +8,6 @@ impeller_component("core") {
   sources = [
     "allocator.cc",
     "allocator.h",
-    "buffer.cc",
-    "buffer.h",
     "buffer_view.cc",
     "buffer_view.h",
     "capture.cc",

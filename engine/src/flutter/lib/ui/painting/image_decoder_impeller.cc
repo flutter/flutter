@@ -333,7 +333,8 @@ static std::pair<sk_sp<DlImage>, std::string> UnsafeUploadTextureToPrivate(
     return std::make_pair(nullptr, decode_error);
   }
   blit_pass->SetLabel("Mipmap Blit Pass");
-  blit_pass->AddCopy(buffer->AsBufferView(), dest_texture);
+  blit_pass->AddCopy(impeller::DeviceBuffer::AsBufferView(buffer),
+                     dest_texture);
   if (texture_descriptor.size.MipCount() > 1) {
     blit_pass->GenerateMipmap(dest_texture);
   }

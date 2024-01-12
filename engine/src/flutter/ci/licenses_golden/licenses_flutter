@@ -5050,8 +5050,6 @@ ORIGIN: ../../../flutter/impeller/compiler/utilities.cc + ../../../flutter/LICEN
 ORIGIN: ../../../flutter/impeller/compiler/utilities.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/allocator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/allocator.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/core/buffer.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/core/buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/buffer_view.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/buffer_view.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/capture.cc + ../../../flutter/LICENSE
@@ -7877,8 +7875,6 @@ FILE: ../../../flutter/impeller/compiler/utilities.cc
 FILE: ../../../flutter/impeller/compiler/utilities.h
 FILE: ../../../flutter/impeller/core/allocator.cc
 FILE: ../../../flutter/impeller/core/allocator.h
-FILE: ../../../flutter/impeller/core/buffer.cc
-FILE: ../../../flutter/impeller/core/buffer.h
 FILE: ../../../flutter/impeller/core/buffer_view.cc
 FILE: ../../../flutter/impeller/core/buffer_view.h
 FILE: ../../../flutter/impeller/core/capture.cc

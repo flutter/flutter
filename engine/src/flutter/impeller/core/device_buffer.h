@@ -9,7 +9,6 @@
 #include <string>
 
 #include "impeller/core/allocator.h"
-#include "impeller/core/buffer.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/range.h"
@@ -17,8 +16,7 @@
 
 namespace impeller {
 
-class DeviceBuffer : public Buffer,
-                     public std::enable_shared_from_this<DeviceBuffer> {
+class DeviceBuffer {
  public:
   virtual ~DeviceBuffer();
 
@@ -30,15 +28,13 @@ class DeviceBuffer : public Buffer,
 
   virtual bool SetLabel(const std::string& label, Range range) = 0;
 
-  BufferView AsBufferView() const;
+  /// @brief Create a buffer view of this entire buffer.
+  static BufferView AsBufferView(std::shared_ptr<DeviceBuffer> buffer);
 
   virtual std::shared_ptr<Texture> AsTexture(
       Allocator& allocator,
       const TextureDescriptor& descriptor,
       uint16_t row_bytes) const;
-
-  // |Buffer|
-  std::shared_ptr<const DeviceBuffer> GetDeviceBuffer() const;
 
   const DeviceBufferDescriptor& GetDeviceBufferDescriptor() const;
 
