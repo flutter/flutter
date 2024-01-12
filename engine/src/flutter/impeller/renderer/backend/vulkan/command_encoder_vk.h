@@ -82,11 +82,9 @@ class CommandEncoderVK {
 
   void InsertDebugMarker(const char* label) const;
 
-  fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateDescriptorSets(
-      uint32_t buffer_count,
-      uint32_t sampler_count,
-      uint32_t subpass_count,
-      const std::vector<vk::DescriptorSetLayout>& layouts);
+  fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
+      const vk::DescriptorSetLayout& layout,
+      const ContextVK& context);
 
  private:
   friend class ContextVK;

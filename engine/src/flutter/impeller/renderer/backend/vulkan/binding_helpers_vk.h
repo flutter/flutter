@@ -5,8 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_BINDING_HELPERS_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_BINDING_HELPERS_VK_H_
 
-#include <vector>
-
 #include "fml/status_or.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
@@ -15,16 +13,30 @@
 
 namespace impeller {
 
-fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
-    const ContextVK& context,
-    const std::shared_ptr<CommandEncoderVK>& encoder,
-    const std::vector<Command>& commands,
-    const TextureVK& input_attachment);
+// Limit on the total number of buffer and image bindings that allow the Vulkan
+// backend to avoid dynamic heap allocations.
+static constexpr size_t kMaxBindings = 32;
 
-fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
+fml::StatusOr<vk::DescriptorSet> AllocateAndBindDescriptorSets(
     const ContextVK& context,
     const std::shared_ptr<CommandEncoderVK>& encoder,
-    const std::vector<ComputeCommand>& commands);
+    Allocator& allocator,
+    const Command& command,
+    const TextureVK& input_attachment,
+    std::array<vk::DescriptorImageInfo, kMaxBindings>& image_workspace,
+    std::array<vk::DescriptorBufferInfo, kMaxBindings>& buffer_workspace,
+    std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>&
+        write_workspace);
+
+fml::StatusOr<vk::DescriptorSet> AllocateAndBindDescriptorSets(
+    const ContextVK& context,
+    const std::shared_ptr<CommandEncoderVK>& encoder,
+    Allocator& allocator,
+    const ComputeCommand& command,
+    std::array<vk::DescriptorImageInfo, kMaxBindings>& image_workspace,
+    std::array<vk::DescriptorBufferInfo, kMaxBindings>& buffer_workspace,
+    std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>&
+        write_workspace);
 
 }  // namespace impeller
 

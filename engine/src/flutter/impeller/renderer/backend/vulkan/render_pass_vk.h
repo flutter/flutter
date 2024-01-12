@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_RENDER_PASS_VK_H_
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/vulkan/binding_helpers_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/pass_bindings_cache.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
@@ -27,6 +28,12 @@ class RenderPassVK final : public RenderPass {
   std::weak_ptr<CommandBufferVK> command_buffer_;
   std::string debug_label_;
   bool is_valid_ = false;
+
+  mutable std::array<vk::DescriptorImageInfo, kMaxBindings> image_workspace_;
+  mutable std::array<vk::DescriptorBufferInfo, kMaxBindings> buffer_workspace_;
+  mutable std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>
+      write_workspace_;
+
   mutable PassBindingsCache pass_bindings_cache_;
 
   RenderPassVK(const std::shared_ptr<const Context>& context,

@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMPUTE_PASS_VK_H_
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/vulkan/binding_helpers_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/compute_pass.h"
 
@@ -24,6 +25,10 @@ class ComputePassVK final : public ComputePass {
   std::weak_ptr<CommandBufferVK> command_buffer_;
   std::string label_;
   bool is_valid_ = false;
+  mutable std::array<vk::DescriptorImageInfo, kMaxBindings> image_workspace_;
+  mutable std::array<vk::DescriptorBufferInfo, kMaxBindings> buffer_workspace_;
+  mutable std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>
+      write_workspace_;
 
   ComputePassVK(std::weak_ptr<const Context> context,
                 std::weak_ptr<CommandBufferVK> command_buffer);
