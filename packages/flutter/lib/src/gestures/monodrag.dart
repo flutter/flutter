@@ -324,7 +324,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
-  _DragDirection? _getPrimaryDragAxis() => null;
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
   bool _hasDragThresholdBeenMet = false;
 
@@ -395,21 +394,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     final bool result;
     switch (multitouchDragStrategy) {
       case MultitouchDragStrategy.sumAllPointers:
-        result = true;
       case MultitouchDragStrategy.maxAllPointers:
-        if (_getPrimaryDragAxis() != null) {
-          result = true;
-        } else {
-          // Keep the PanGestureRecognizer to latestPointer behavior in this case.
-          result = _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.last;
-        }
+        result = true;
       case MultitouchDragStrategy.latestPointer:
         result = _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.last;
     }
     return result;
   }
 
-  void _recordMoveDeltaIfNeeded(int pointer, Offset localDelta) {
+  void _recordMoveDeltaForMultitouch(int pointer, Offset localDelta) {
     if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
       assert(_frameTimeStamp == null);
       assert(_moveDeltasBetweenFrames.isEmpty);
@@ -433,10 +426,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  double _getPrimarySumDelta(int pointer, bool positive) {
+  double _getSumDelta({
+    required int pointer,
+    required bool positive,
+    required _DragDirection axis,
+  }) {
     double sum = 0.0;
-    final _DragDirection? axis = _getPrimaryDragAxis();
-    assert(axis != null);
 
     if (_moveDeltasBetweenFrames.containsKey(pointer)) {
       for (final Offset delta in _moveDeltasBetweenFrames[pointer]!) {
@@ -468,14 +463,17 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     return sum;
   }
 
-  int? _getMaxPrimarySumDeltaPointer({ required bool positive }) {
+  int? _getMaxSumDeltaPointer({
+    required bool positive,
+    required _DragDirection axis,
+  }) {
     if (_moveDeltasBetweenFrames.isEmpty) {
       return null;
     }
 
     final Map<int, double> sumDeltas = <int, double>{};
     for (final int pointer in _moveDeltasBetweenFrames.keys) {
-      sumDeltas[pointer] = _getPrimarySumDelta(pointer, positive);
+      sumDeltas[pointer] = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
     }
 
     assert(sumDeltas.isNotEmpty);
@@ -498,66 +496,72 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     return ret;
   }
 
-  Offset _mergePrimaryLocalDeltaIfNeeded(int pointer, Offset localOffset) {
-    if (multitouchDragStrategy == MultitouchDragStrategy.maxAllPointers) {
-      if (localOffset == Offset.zero) {
-        return localOffset;
-      }
-
-      final _DragDirection? axis = _getPrimaryDragAxis();
-      if (axis == null) {
-        // Do not merge delta for PanGestureRecognizer because we don't know how to
-        // merge the delta of two directions.
-        return localOffset;
-      }
-
-      final bool positive = (axis == _DragDirection.vertical) ? localOffset.dy > 0.0 : localOffset.dx > 0.0;
-
-      final int? maxSumDeltaPointer = _getMaxPrimarySumDeltaPointer(positive: positive);
-      if (maxSumDeltaPointer == null || maxSumDeltaPointer == pointer) {
-        return localOffset;
-      } else {
-        final double maxSumDelta = _getPrimarySumDelta(maxSumDeltaPointer, positive);
-        final double curPointerSumDelta = _getPrimarySumDelta(pointer, positive);
-        if (positive) {
-          if (axis == _DragDirection.vertical) {
-            if (curPointerSumDelta + localOffset.dy > maxSumDelta) {
-              return Offset(localOffset.dx, curPointerSumDelta + localOffset.dy - maxSumDelta);
-            } else {
-              return Offset.zero;
-            }
-          } else {
-            assert(axis == _DragDirection.horizontal);
-            if (curPointerSumDelta + localOffset.dx > maxSumDelta) {
-              return Offset(curPointerSumDelta + localOffset.dx - maxSumDelta, localOffset.dy);
-            } else {
-              return Offset.zero;
-            }
-          }
-        } else {
-          if (axis == _DragDirection.vertical) {
-            if (curPointerSumDelta + localOffset.dy < maxSumDelta) {
-              return Offset(localOffset.dx, curPointerSumDelta + localOffset.dy - maxSumDelta);
-            } else {
-              return Offset.zero;
-            }
-          } else {
-            assert(axis == _DragDirection.horizontal);
-            if (curPointerSumDelta + localOffset.dx < maxSumDelta) {
-              return Offset(curPointerSumDelta + localOffset.dx - maxSumDelta, localOffset.dy);
-            } else {
-              return Offset.zero;
-            }
-          }
-        }
-      }
-    } else {
+  Offset _resolveLocalDeltaForMultitouch(int pointer, Offset localDelta) {
+    if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
       if (_frameTimeStamp != null) {
         _moveDeltasBetweenFrames.clear();
         _frameTimeStamp = null;
       }
+      return localDelta;
     }
-    return localOffset;
+
+    if (localDelta == Offset.zero) {
+      return localDelta;
+    }
+
+    final double dx;
+    _DragDirection axis = _DragDirection.horizontal;
+    bool positive = localDelta.dx > 0.0;
+
+    int? maxSumDeltaPointer = _getMaxSumDeltaPointer(positive: positive, axis: axis);
+    double maxSumDelta;
+    double curPointerSumDelta;
+
+    if (maxSumDeltaPointer == null || maxSumDeltaPointer == pointer) {
+      dx = localDelta.dx;
+    } else {
+      maxSumDelta = _getSumDelta(pointer: maxSumDeltaPointer, positive: positive, axis: axis);
+      curPointerSumDelta = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
+      if (positive) {
+        if (curPointerSumDelta + localDelta.dx > maxSumDelta) {
+          dx = curPointerSumDelta + localDelta.dx - maxSumDelta;
+        } else {
+          dx = 0.0;
+        }
+      } else {
+        if (curPointerSumDelta + localDelta.dx < maxSumDelta) {
+          dx = curPointerSumDelta + localDelta.dx - maxSumDelta;
+        } else {
+          dx = 0.0;
+        }
+      }
+    }
+
+    final double dy;
+    axis = _DragDirection.vertical;
+    positive = localDelta.dy > 0.0;
+
+    maxSumDeltaPointer = _getMaxSumDeltaPointer(positive: positive, axis: axis);
+    if (maxSumDeltaPointer == null || maxSumDeltaPointer == pointer) {
+      dy = localDelta.dy;
+    } else {
+      maxSumDelta = _getSumDelta(pointer: maxSumDeltaPointer, positive: positive, axis: axis);
+      curPointerSumDelta = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
+      if (positive) {
+        if (curPointerSumDelta + localDelta.dy > maxSumDelta) {
+          dy = curPointerSumDelta + localDelta.dy - maxSumDelta;
+        } else {
+          dy = 0.0;
+        }
+      } else {
+        if (curPointerSumDelta + localDelta.dy < maxSumDelta) {
+          dy = curPointerSumDelta + localDelta.dy - maxSumDelta;
+        } else {
+          dy = 0.0;
+        }
+      }
+    }
+    return Offset(dx, dy);
   }
 
   @override
@@ -584,7 +588,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if ((event is PointerMoveEvent || event is PointerPanZoomUpdateEvent)
         && _shouldTrackMoveEvent(event.pointer)) {
       final Offset delta = (event is PointerMoveEvent) ? event.delta : (event as PointerPanZoomUpdateEvent).panDelta;
-      Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
+      final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
       final Offset position = (event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan);
       final Offset localPosition = (event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
       _finalPosition = OffsetPair(local: localPosition, global: position);
@@ -609,16 +613,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
             }
           }
         case _DragState.accepted:
-          localDelta = _mergePrimaryLocalDeltaIfNeeded(event.pointer, localDelta);
+          final Offset resolvedDelta = _resolveLocalDeltaForMultitouch(event.pointer, localDelta);
           _checkUpdate(
             sourceTimeStamp: event.timeStamp,
-            delta: _getDeltaForDetails(localDelta),
-            primaryDelta: _getPrimaryValueFromOffset(localDelta),
+            delta: _getDeltaForDetails(resolvedDelta),
+            primaryDelta: _getPrimaryValueFromOffset(resolvedDelta),
             globalPosition: position,
             localPosition: localPosition,
           );
       }
-      _recordMoveDeltaIfNeeded(event.pointer, localDelta);
+      _recordMoveDeltaForMultitouch(event.pointer, localDelta);
     }
     if (event case PointerUpEvent() || PointerCancelEvent() || PointerPanZoomEndEvent()) {
       _giveUpPointer(event.pointer);
@@ -854,9 +858,6 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   double _getPrimaryValueFromOffset(Offset value) => value.dy;
 
   @override
-  _DragDirection? _getPrimaryDragAxis() => _DragDirection.vertical;
-
-  @override
   String get debugDescription => 'vertical drag';
 }
 
@@ -912,9 +913,6 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 
   @override
   double _getPrimaryValueFromOffset(Offset value) => value.dx;
-
-  @override
-  _DragDirection? _getPrimaryDragAxis() => _DragDirection.horizontal;
 
   @override
   String get debugDescription => 'horizontal drag';
