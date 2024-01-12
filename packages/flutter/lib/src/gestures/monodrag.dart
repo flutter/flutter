@@ -329,8 +329,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
-  // local move deltas before persistentCallbacks
-  final Map<int, Set<Offset>> _moveDeltasBetweenFrames = <int, Set<Offset>>{};
+  // save the move deltas before persistentCallbacks
+  final Map<int, Set<Offset>> _moveDeltasBeforeFrame = <int, Set<Offset>>{};
   Duration? _frameTimeStamp;
 
   @override
@@ -405,13 +405,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void _recordMoveDeltaForMultitouch(int pointer, Offset localDelta) {
     if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
       assert(_frameTimeStamp == null);
-      assert(_moveDeltasBetweenFrames.isEmpty);
+      assert(_moveDeltasBeforeFrame.isEmpty);
       return;
     }
 
     final Duration currentSystemFrameTimeStamp = SchedulerBinding.instance.currentSystemFrameTimeStamp;
     if (_frameTimeStamp != currentSystemFrameTimeStamp) {
-      _moveDeltasBetweenFrames.clear();
+      _moveDeltasBeforeFrame.clear();
       _frameTimeStamp = currentSystemFrameTimeStamp;
     }
 
@@ -419,10 +419,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return;
     }
 
-    if (_moveDeltasBetweenFrames.containsKey(pointer)) {
-      _moveDeltasBetweenFrames[pointer]!.add(localDelta);
+    if (_moveDeltasBeforeFrame.containsKey(pointer)) {
+      _moveDeltasBeforeFrame[pointer]!.add(localDelta);
     } else {
-      _moveDeltasBetweenFrames[pointer] = <Offset>{ localDelta };
+      _moveDeltasBeforeFrame[pointer] = <Offset>{ localDelta };
     }
   }
 
@@ -433,8 +433,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }) {
     double sum = 0.0;
 
-    if (_moveDeltasBetweenFrames.containsKey(pointer)) {
-      for (final Offset delta in _moveDeltasBetweenFrames[pointer]!) {
+    if (_moveDeltasBeforeFrame.containsKey(pointer)) {
+      for (final Offset delta in _moveDeltasBeforeFrame[pointer]!) {
         if (positive) {
           if (axis == _DragDirection.vertical) {
             if (delta.dy > 0.0) {
@@ -467,12 +467,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     required bool positive,
     required _DragDirection axis,
   }) {
-    if (_moveDeltasBetweenFrames.isEmpty) {
+    if (_moveDeltasBeforeFrame.isEmpty) {
       return null;
     }
 
     final Map<int, double> sumDeltas = <int, double>{};
-    for (final int pointer in _moveDeltasBetweenFrames.keys) {
+    for (final int pointer in _moveDeltasBeforeFrame.keys) {
       sumDeltas[pointer] = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
     }
 
@@ -499,7 +499,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   Offset _resolveLocalDeltaForMultitouch(int pointer, Offset localDelta) {
     if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
       if (_frameTimeStamp != null) {
-        _moveDeltasBetweenFrames.clear();
+        _moveDeltasBeforeFrame.clear();
         _frameTimeStamp = null;
       }
       return localDelta;
