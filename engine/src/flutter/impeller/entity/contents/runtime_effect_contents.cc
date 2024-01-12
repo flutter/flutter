@@ -227,8 +227,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
                                     DefaultUniformAlignment());
 
         auto buffer_view = renderer.GetTransientsBuffer().Emplace(
-            reinterpret_cast<const void*>(uniform_buffer.data()), alignment,
-            alignment);
+            reinterpret_cast<const void*>(uniform_buffer.data()),
+            sizeof(float) * uniform_buffer.size(), alignment);
         pass.BindResource(ShaderStage::kFragment, uniform_slot,
                           ShaderMetadata{}, buffer_view);
       }
