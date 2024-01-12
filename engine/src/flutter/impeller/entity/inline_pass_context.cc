@@ -6,11 +6,13 @@
 
 #include <utility>
 
+#include "flutter/fml/status.h"
 #include "impeller/base/allocation.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/entity_pass_target.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/texture_mipmap.h"
 
 namespace impeller {
 
@@ -60,6 +62,15 @@ bool InlinePassContext::EndPass() {
       VALIDATION_LOG
           << "Failed to encode and submit command buffer while ending "
              "render pass.";
+      return false;
+    }
+  }
+
+  std::shared_ptr<Texture> target_texture =
+      GetPassTarget().GetRenderTarget().GetRenderTargetTexture();
+  if (target_texture->GetMipCount() > 1) {
+    fml::Status mip_status = AddMipmapGeneration(context_, target_texture);
+    if (!mip_status.ok()) {
       return false;
     }
   }

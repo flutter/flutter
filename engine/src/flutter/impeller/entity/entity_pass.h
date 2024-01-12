@@ -101,6 +101,9 @@ class EntityPass {
   ///         it's included in the stream before its children.
   void IterateAllElements(const std::function<bool(Element&)>& iterator);
 
+  void IterateAllElements(
+      const std::function<bool(const Element&)>& iterator) const;
+
   //----------------------------------------------------------------------------
   /// @brief  Iterate all entities in this pass, recursively including entities
   ///         of child passes. The iteration order is depth-first.
@@ -147,6 +150,12 @@ class EntityPass {
   void SetBackdropFilter(BackdropFilterProc proc);
 
   void SetEnableOffscreenCheckerboard(bool enabled);
+
+  int32_t GetRequiredMipCount() const { return required_mip_count_; }
+
+  void SetRequiredMipCount(int32_t mip_count) {
+    required_mip_count_ = mip_count;
+  }
 
   //----------------------------------------------------------------------------
   /// @brief  Computes the coverage of a given subpass. This is used to
@@ -297,6 +306,7 @@ class EntityPass {
   std::optional<Rect> bounds_limit_;
   std::unique_ptr<EntityPassClipRecorder> clip_replay_ =
       std::make_unique<EntityPassClipRecorder>();
+  int32_t required_mip_count_ = 1;
 
   /// These values are incremented whenever something is added to the pass that
   /// requires reading from the backdrop texture. Currently, this can happen in

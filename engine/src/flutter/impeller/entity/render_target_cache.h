@@ -43,6 +43,17 @@ class RenderTargetCache : public RenderTargetAllocator {
   RenderTargetCache(const RenderTargetCache&) = delete;
 
   RenderTargetCache& operator=(const RenderTargetCache&) = delete;
+
+ public:
+  /// Visible for testing.
+  std::vector<TextureData>::const_iterator GetTextureDataBegin() const {
+    return texture_data_.begin();
+  }
+
+  /// Visible for testing.
+  std::vector<TextureData>::const_iterator GetTextureDataEnd() const {
+    return texture_data_.end();
+  }
 };
 
 }  // namespace impeller

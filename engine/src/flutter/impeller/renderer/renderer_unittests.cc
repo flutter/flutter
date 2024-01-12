@@ -1261,8 +1261,8 @@ TEST_P(RendererTest, CanPreAllocateCommands) {
   auto render_target_cache = std::make_shared<RenderTargetAllocator>(
       GetContext()->GetResourceAllocator());
 
-  auto render_target =
-      RenderTarget::CreateOffscreen(*context, *render_target_cache, {100, 100});
+  auto render_target = RenderTarget::CreateOffscreen(
+      *context, *render_target_cache, {100, 100}, /*mip_count=*/1);
   auto render_pass = cmd_buffer->CreateRenderPass(render_target);
 
   render_pass->ReserveCommands(100u);
@@ -1276,8 +1276,8 @@ TEST_P(RendererTest, CanLookupRenderTargetProperties) {
   auto render_target_cache = std::make_shared<RenderTargetAllocator>(
       GetContext()->GetResourceAllocator());
 
-  auto render_target =
-      RenderTarget::CreateOffscreen(*context, *render_target_cache, {100, 100});
+  auto render_target = RenderTarget::CreateOffscreen(
+      *context, *render_target_cache, {100, 100}, /*mip_count=*/1);
   auto render_pass = cmd_buffer->CreateRenderPass(render_target);
 
   EXPECT_EQ(render_pass->GetSampleCount(), render_target.GetSampleCount());

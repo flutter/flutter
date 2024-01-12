@@ -35,7 +35,8 @@ TEST_P(EntityTest, RendersWithoutError) {
   auto buffer = content_context->GetContext()->CreateCommandBuffer();
   auto render_target = RenderTarget::CreateOffscreenMSAA(
       *content_context->GetContext(),
-      *GetContentContext()->GetRenderTargetCache(), {100, 100});
+      *GetContentContext()->GetRenderTargetCache(), {100, 100},
+      /*mip_count=*/1);
   auto render_pass = buffer->CreateRenderPass(render_target);
   Entity entity;
 
