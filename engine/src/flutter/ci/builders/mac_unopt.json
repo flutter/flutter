@@ -16,7 +16,8 @@
                 "mac_model=Macmini8,1"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
@@ -24,7 +25,10 @@
                 "--unoptimized",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--enable-impeller-3d"
+                "--enable-impeller-3d",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
             ],
             "name": "host_debug_unopt",
             "ninja": {
@@ -75,14 +79,18 @@
                 "cpu=x86"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--ios",
                 "--runtime-mode",
                 "debug",
                 "--simulator",
-                "--no-lto"
+                "--no-lto",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
             ],
             "name": "ios_debug_sim",
             "ninja": {
@@ -132,7 +140,8 @@
                 "cpu=arm64"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                "--runtime-mode",
@@ -142,7 +151,10 @@
                "--prebuilt-dart-sdk",
                "--force-mac-arm64",
                "--mac-cpu",
-               "arm64"
+               "arm64",
+               "--rbe",
+               "--no-goma",
+               "--xcode-symlinks"
             ],
             "name": "host_debug_unopt_arm64",
             "ninja": {
@@ -181,7 +193,8 @@
                 "cpu=arm64"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--ios",
@@ -191,7 +204,10 @@
                 "--no-lto",
                 "--force-mac-arm64",
                 "--simulator-cpu",
-                "arm64"
+                "arm64",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
             ],
             "name": "ios_debug_sim_arm64",
             "ninja": {
@@ -251,7 +267,8 @@
                 "cpu=arm64"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--ios",
@@ -262,7 +279,10 @@
                 "--force-mac-arm64",
                 "--simulator-cpu",
                 "arm64",
-                "--darwin-extension-safe"
+                "--darwin-extension-safe",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
             ],
             "name": "ios_debug_sim_arm64_extension_safe",
             "ninja": {

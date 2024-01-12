@@ -6,6 +6,9 @@
                 "os=Linux",
                 "cores=32"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "debug",
@@ -84,6 +87,9 @@
                 "os=Linux"
             ],
             "dependencies": [],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--embedder-for-target",
@@ -112,6 +118,9 @@
                     "version": "last_updated:2023-02-03T15:32:01-0800"
                 }
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--unoptimized",

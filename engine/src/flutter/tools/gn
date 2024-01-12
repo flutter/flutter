@@ -205,8 +205,6 @@ def buildtools_dir():
   host_cpu = get_host_cpu()
   if host_os == 'win':
     host_os = 'windows'
-  if host_os == 'mac' and host_cpu == 'arm64':
-    host_cpu = 'x64'
   return '%s-%s' % (host_os, host_cpu)
 
 
@@ -217,9 +215,10 @@ def setup_rbe(args):
   if not args.rbe:
     return rbe_gn_args
 
-  if get_host_os() not in ['linux']:
+  if get_host_os() not in ['linux', 'mac']:
     print(
-        'The --rbe flag has no effect. RBE is currently only supported on Linux.'
+        'The --rbe flag has no effect. RBE is currently only supported on '
+        'macOS and Linux.'
     )
     return rbe_gn_args
 
@@ -239,7 +238,9 @@ def setup_rbe(args):
     )
     bootstrap_path = os.path.join(cipd_reclient_dir, 'bootstrap')
     reproxy_path = os.path.join(cipd_reclient_dir, 'reproxy')
-    rbe_cfg_path = os.path.join(SRC_ROOT, 'build', 'rbe.cfg')
+    rbe_cfg_path = os.path.join(
+        SRC_ROOT, 'flutter', 'build', 'rbe', 'reclient.cfg'
+    )
     bootstrap_cmd = [
         bootstrap_path,
         '--re_proxy=' + reproxy_path,
@@ -260,8 +261,20 @@ def setup_rbe(args):
     rbe_gn_args['rbe_dial_timeout'] = args.rbe_dial_timeout
   if args.rbe_platform:
     rbe_gn_args['rbe_platform'] = args.rbe_platform
-  if args.rbe_dir:
-    rbe_gn_args['rbe_dir'] = args.rbe_dir
+
+  rbe_gn_args['rbe_dir'] = os.path.join(
+      SRC_ROOT, 'buildtools', buildtools_dir(), 'reclient'
+  )
+
+  rbe_gn_args['rbe_cfg'] = os.path.join(
+      SRC_ROOT, 'flutter', 'build', 'rbe',
+      'rewrapper-' + buildtools_dir() + '.cfg'
+  )
+
+  if sys.platform == 'darwin':
+    if (not running_on_luci or args.xcode_symlinks or
+        os.getenv('FLUTTER_GOMA_CREATE_XCODE_SYMLINKS', '0') == '1'):
+      rbe_gn_args['create_xcode_symlinks'] = True
 
   return rbe_gn_args
 
@@ -285,8 +298,16 @@ def setup_goma(args):
   # care of starting and stopping the compiler proxy.
   running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
 
+  # The GOMA client has no arm64 binary, so run the x64 binary through
+  # Rosetta.
+  buildtools_platform = buildtools_dir()
+  if buildtools_platform == 'mac-arm64':
+    buildtools_platform = 'mac-x64'
+
   # Prefer the goma fetched by gclient if it exists.
-  cipd_goma_dir = os.path.join(SRC_ROOT, 'buildtools', buildtools_dir(), 'goma')
+  cipd_goma_dir = os.path.join(
+      SRC_ROOT, 'buildtools', buildtools_platform, 'goma'
+  )
 
   # Next, if GOMA_DIR is set, use that install.
   goma_dir = os.environ.get('GOMA_DIR')

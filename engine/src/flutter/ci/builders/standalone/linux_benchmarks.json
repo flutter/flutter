@@ -4,7 +4,8 @@
         "os=Linux"
     ],
     "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "use_rbe": true
     },
     "gn": [
         "--runtime-mode",
