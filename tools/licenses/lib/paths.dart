@@ -101,6 +101,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/yapf', // only used for code formatting
   r'flutter/tools',
   r'flutter/web_sdk', // this code is not linked into Flutter apps; it's only used by engine tests and tools
+  r'fuchsia/images',
   r'fuchsia/sdk/linux/docs',
   r'fuchsia/sdk/linux/meta',
   r'fuchsia/sdk/linux/NOTICE.fuchsia', // covers things that contribute to the Fuchsia SDK; see fxb/94240
@@ -110,6 +111,7 @@ final Set<String> skippedPaths = <String>{
   r'fuchsia/sdk/mac/meta',
   r'fuchsia/sdk/mac/NOTICE.fuchsia',
   r'fuchsia/sdk/mac/tools',
+  r'fuchsia/test_scripts',
   r'out', // output of build
   r'third_party/android_embedding_dependencies', // Not shipped. Used only for the build-time classpath, and for the in-tree testing framework for Android
   r'third_party/android_tools', // excluded on advice
