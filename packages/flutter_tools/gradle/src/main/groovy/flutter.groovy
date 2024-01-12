@@ -41,10 +41,10 @@ import org.gradle.internal.os.OperatingSystem
 */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    public static int compileSdkVersion = 34
+    public final int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    public static int minSdkVersion = 19
+    public  final int minSdkVersion = 19
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -52,14 +52,14 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    public static int targetSdkVersion = 33
+    public final int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public static String ndkVersion = "23.1.7779620"
+    public final String ndkVersion = "23.1.7779620"
 
     /**
      * Specifies the relative directory to the Flutter project directory.

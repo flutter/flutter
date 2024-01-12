@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "io.flutter.examples.hello_world"
-    compileSdk = FlutterExtension.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -18,8 +18,8 @@ android {
 
     defaultConfig {
         applicationId = "io.flutter.examples.hello_world"
-        minSdk = FlutterExtension.minSdkVersion
-        targetSdk = FlutterExtension.targetSdkVersion
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode()
         versionName = flutter.versionName()
     }
