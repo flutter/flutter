@@ -20,6 +20,8 @@ namespace impeller {
 
 class FilterContents : public Contents {
  public:
+  static const int32_t kBlurFilterRequiredMipCount;
+
   enum class BlurStyle {
     /// Blurred inside and outside.
     kNormal,

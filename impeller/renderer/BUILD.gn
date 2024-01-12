@@ -92,6 +92,8 @@ impeller_component("renderer") {
     "snapshot.h",
     "surface.cc",
     "surface.h",
+    "texture_mipmap.cc",
+    "texture_mipmap.h",
     "vertex_buffer_builder.cc",
     "vertex_buffer_builder.h",
     "vertex_descriptor.cc",

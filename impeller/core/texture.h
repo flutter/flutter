@@ -45,6 +45,9 @@ class Texture {
 
   virtual Scalar GetYCoordScale() const;
 
+  /// Returns true if mipmaps have never been generated.
+  /// The contents of the mipmap may be out of date if the root texture has been
+  /// modified and the mipmaps hasn't been regenerated.
   bool NeedsMipmapGeneration() const;
 
  protected:

@@ -11,6 +11,7 @@
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/texture_mipmap.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
@@ -186,7 +187,6 @@ Rect MakeReferenceUVs(const Rect& reference, const Rect& rect) {
                                      rect.GetSize());
   return result.Scale(1.0f / Vector2(reference.GetSize()));
 }
-
 }  // namespace
 
 GaussianBlurFilterContents::GaussianBlurFilterContents(
@@ -277,6 +277,12 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     return Entity::FromSnapshot(input_snapshot.value(), entity.GetBlendMode(),
                                 entity.GetClipDepth());  // No blur to render.
   }
+
+  // In order to avoid shimmering in downsampling step, we should have mips.
+  if (input_snapshot->texture->GetMipCount() <= 1) {
+    FML_DLOG(ERROR) << "Applying gaussian blur without mipmap.";
+  }
+  FML_DCHECK(!input_snapshot->texture->NeedsMipmapGeneration());
 
   Scalar desired_scalar =
       std::min(CalculateScale(scaled_sigma.x), CalculateScale(scaled_sigma.y));

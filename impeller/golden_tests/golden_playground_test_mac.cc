@@ -55,6 +55,8 @@ static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_TextRotated_Vulkan",
     // Runtime stage based tests get confused with a Metal context.
     "impeller_Play_AiksTest_CanRenderClippedRuntimeEffects_Vulkan",
+    "impeller_Play_AiksTest_CaptureContext_Metal",
+    "impeller_Play_AiksTest_CaptureContext_Vulkan",
 };
 
 namespace {
@@ -153,7 +155,20 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(Picture picture) {
 bool GoldenPlaygroundTest::OpenPlaygroundHere(
     AiksPlaygroundCallback
         callback) {  // NOLINT(performance-unnecessary-value-param)
-  return false;
+  AiksContext renderer(GetContext(), typographer_context_);
+
+  std::optional<Picture> picture;
+  std::unique_ptr<testing::MetalScreenshot> screenshot;
+  for (int i = 0; i < 2; ++i) {
+    picture = callback(renderer);
+    if (!picture.has_value()) {
+      return false;
+    }
+    screenshot = pimpl_->screenshotter->MakeScreenshot(
+        renderer, picture.value(), pimpl_->window_size);
+  }
+
+  return SaveScreenshot(std::move(screenshot));
 }
 
 std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
