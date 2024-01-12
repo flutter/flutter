@@ -146,6 +146,7 @@ class ImageInfo {
   ///
   /// Once this method has been called, the object should not be used anymore,
   /// and no clones of it or the image it contains can be made.
+  @mustCallSuper
   void dispose() {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
     if (shouldDisposeImage) {
