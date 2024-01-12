@@ -149,14 +149,16 @@ namespace {
 GPtrArray* g_call_records;
 }
 
-static EmbedderSendKeyEvent record_calls_in(GPtrArray* records_array) {
-  return [records_array](const FlutterKeyEvent* event,
-                         FlutterKeyEventCallback callback, void* user_data) {
-    if (records_array != nullptr) {
-      g_ptr_array_add(records_array, fl_key_embedder_call_record_new(
-                                         event, callback, user_data));
-    }
-  };
+static void record_calls(const FlutterKeyEvent* event,
+                         FlutterKeyEventCallback callback,
+                         void* callback_user_data,
+                         void* send_key_event_user_data) {
+  GPtrArray* records_array =
+      reinterpret_cast<GPtrArray*>(send_key_event_user_data);
+  if (records_array != nullptr) {
+    g_ptr_array_add(records_array, fl_key_embedder_call_record_new(
+                                       event, callback, callback_user_data));
+  }
 }
 
 static void clear_g_call_records() {
@@ -169,7 +171,7 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -265,7 +267,7 @@ TEST(FlKeyEmbedderResponderTest, UsesSpecifiedLogicalKey) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -300,7 +302,7 @@ TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -393,7 +395,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -554,7 +556,7 @@ TEST(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -649,7 +651,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -810,7 +812,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -967,7 +969,7 @@ TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1028,7 +1030,7 @@ TEST(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   // Release KeyA before it was even pressed.
@@ -1058,7 +1060,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncPressingStateOnSelfEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1189,7 +1191,7 @@ TEST(FlKeyEmbedderResponderTest,
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1320,7 +1322,7 @@ TEST(FlKeyEmbedderResponderTest,
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1388,7 +1390,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1496,7 +1498,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1595,7 +1597,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1648,7 +1650,7 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
 
   g_expected_handled = true;
   guint32 now_time = 1;
@@ -1746,7 +1748,7 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyResponder* responder = FL_KEY_RESPONDER(
-      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+      fl_key_embedder_responder_new(record_calls, g_call_records));
 
   g_expected_handled = true;
   guint32 now_time = 1;

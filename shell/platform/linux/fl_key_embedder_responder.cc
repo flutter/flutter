@@ -141,6 +141,7 @@ struct _FlKeyEmbedderResponder {
   GObject parent_instance;
 
   EmbedderSendKeyEvent send_key_event;
+  void* send_key_event_user_data;
 
   // Internal record for states of whether a key is pressed.
   //
@@ -260,11 +261,13 @@ static void initialize_logical_key_to_lock_bit_loop_body(gpointer lock_bit,
 
 // Creates a new FlKeyEmbedderResponder instance.
 FlKeyEmbedderResponder* fl_key_embedder_responder_new(
-    EmbedderSendKeyEvent send_key_event) {
+    EmbedderSendKeyEvent send_key_event,
+    void* send_key_event_user_data) {
   FlKeyEmbedderResponder* self = FL_KEY_EMBEDDER_RESPONDER(
       g_object_new(FL_TYPE_EMBEDDER_RESPONDER_USER_DATA, nullptr));
 
-  self->send_key_event = std::move(send_key_event);
+  self->send_key_event = send_key_event;
+  self->send_key_event_user_data = send_key_event_user_data;
 
   self->pressing_records = g_hash_table_new(g_direct_hash, g_direct_equal);
   self->mapping_records = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -360,7 +363,8 @@ static void synthesize_simple_event(FlKeyEmbedderResponder* self,
   out_event.character = nullptr;
   out_event.synthesized = true;
   self->sent_any_events = true;
-  self->send_key_event(&out_event, nullptr, nullptr);
+  self->send_key_event(&out_event, nullptr, nullptr,
+                       self->send_key_event_user_data);
 }
 
 namespace {
@@ -850,7 +854,8 @@ static void fl_key_embedder_responder_handle_event_impl(
   FlKeyEmbedderUserData* response_data =
       fl_key_embedder_user_data_new(callback, user_data);
   self->sent_any_events = true;
-  self->send_key_event(&out_event, handle_response, response_data);
+  self->send_key_event(&out_event, handle_response, response_data,
+                       self->send_key_event_user_data);
 }
 
 // Sends a key event to the framework.
@@ -865,7 +870,8 @@ static void fl_key_embedder_responder_handle_event(
   fl_key_embedder_responder_handle_event_impl(
       responder, event, specified_logical_key, callback, user_data);
   if (!self->sent_any_events) {
-    self->send_key_event(&kEmptyEvent, nullptr, nullptr);
+    self->send_key_event(&kEmptyEvent, nullptr, nullptr,
+                         self->send_key_event_user_data);
   }
 }
 
