@@ -345,19 +345,32 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    String? testAssetDirectory;
-    if (buildTestAssets) {
-      await _buildTestAsset(flavor: buildInfo.flavor);
-      testAssetDirectory = globals.fs.path.
-        join(flutterProject.directory.path, 'build', 'unit_test_assets');
-    }
-
     final bool startPaused = boolArg('start-paused');
     if (startPaused && _testFileUris.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
         exitCode: 1,
       );
+    }
+
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      buildInfo,
+      startPaused: startPaused,
+      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      serveObservatory: boolArg('serve-observatory'),
+      // On iOS >=14, keeping this enabled will leave a prompt on the screen.
+      disablePortPublication: true,
+      enableDds: enableDds,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      usingCISystem: usingCISystem,
+      enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
+    );
+
+    String? testAssetDirectory;
+    if (buildTestAssets) {
+      await _buildTestAsset(flavor: buildInfo.flavor, impellerStatus: debuggingOptions.enableImpeller);
+      testAssetDirectory = globals.fs.path.
+        join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
 
     final String? concurrencyString = stringArg('concurrency');
@@ -426,19 +439,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     } else if (collector != null) {
       watcher = collector;
     }
-
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
-      buildInfo,
-      startPaused: startPaused,
-      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-      serveObservatory: boolArg('serve-observatory'),
-      // On iOS >=14, keeping this enabled will leave a prompt on the screen.
-      disablePortPublication: true,
-      enableDds: enableDds,
-      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
-      usingCISystem: usingCISystem,
-      enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
-    );
 
     Device? integrationTestDevice;
     if (_isIntegrationTest) {
@@ -569,6 +569,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   Future<void> _buildTestAsset({
     required String? flavor,
+    required ImpellerStatus impellerStatus,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
@@ -584,6 +585,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         assetBundle.entries,
         assetBundle.entryKinds,
         targetPlatform: TargetPlatform.tester,
+        impellerStatus: impellerStatus,
       );
     }
   }
