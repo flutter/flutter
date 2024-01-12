@@ -50,7 +50,7 @@ void main() {
       setUp(() {
         fakeProcessManager = FakeProcessManager.empty();
       });
-      
+
       testWithoutContext('starts idevicesyslog when USB connected', () async {
         fakeProcessManager.addCommand(const FakeCommand(
           command: <String>[
