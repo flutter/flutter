@@ -1475,9 +1475,7 @@ class OverrideArtifacts implements Artifacts {
   bool get isLocalEngine => parent.isLocalEngine;
 
   @override
-  FileSystemEntity getHostArtifact(
-    HostArtifact artifact,
-  ) {
+  FileSystemEntity getHostArtifact(HostArtifact artifact) {
     return parent.getHostArtifact(
       artifact,
     );
@@ -1532,10 +1530,8 @@ class _TestArtifacts implements Artifacts {
   bool get isLocalEngine => false;
 
   @override
-  FileSystemEntity getHostArtifact(
-    HostArtifact artifact,
-  ) {
-      return fileSystem.file(artifact.toString());
+  FileSystemEntity getHostArtifact(HostArtifact artifact) {
+    return fileSystem.file(artifact.toString());
   }
 }
 
