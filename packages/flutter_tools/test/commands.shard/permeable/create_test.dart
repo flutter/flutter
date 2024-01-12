@@ -212,7 +212,7 @@ void main() {
   });
 
   testUsingContext('can create a skeleton (list/detail) app', () async {
-  
+
     final bool buildDirAlreadyExists = globals.fs.currentDirectory.childDirectory('build').existsSync();
     await _createAndAnalyzeProject(
       projectDir,
