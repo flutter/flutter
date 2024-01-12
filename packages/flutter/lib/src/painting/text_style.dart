@@ -469,7 +469,7 @@ class TextStyle with Diagnosticable {
   ///
   /// On Apple devices the strings 'CupertinoSystemText' and
   /// 'CupertinoSystemDisplay' are used in [fontFamily] as proxies for the
-  /// Apple system fonts. They currently redirect to the equivilant of SF Pro
+  /// Apple system fonts. They currently redirect to the equivalent of SF Pro
   /// Text and SF Pro Display respectively. 'CupertinoSystemText' is designed
   /// for fonts below 20 point size, and 'CupertinoSystemDisplay' is recommended
   /// for sizes 20 and above. When used on non-Apple platforms, these strings
@@ -568,7 +568,7 @@ class TextStyle with Diagnosticable {
   ///
   /// When running on Apple devices, the strings 'CupertinoSystemText' and
   /// 'CupertinoSystemDisplay' are used as proxies for the Apple system fonts.
-  /// They currently redirect to the equivilant of SF Pro Text and SF Pro Display
+  /// They currently redirect to the equivalent of SF Pro Text and SF Pro Display
   /// respectively. 'CupertinoSystemText' is designed for fonts below 20 point
   /// size, and 'CupertinoSystemDisplay' is recommended for sizes 20 and above.
   /// When used on non-Apple platforms, these strings will return the regular

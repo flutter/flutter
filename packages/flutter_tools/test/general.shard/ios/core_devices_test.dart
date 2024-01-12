@@ -1341,7 +1341,7 @@ invalid JSON
         fakeProcessManager.addCommand(FakeCommand(
           command: args,
           onRun: () {
-            // Simulate that this command threw and simulataneously the OS
+            // Simulate that this command threw and simultaneously the OS
             // deleted the temp directory
             expect(tempFile, exists);
             tempDir.deleteSync(recursive: true);
@@ -1470,7 +1470,7 @@ invalid JSON
         expect(devices[0].connectionProperties, isNotNull);
         expect(devices[0].deviceProperties, isNotNull);
         expect(devices[0].hardwareProperties, isNotNull);
-        expect(devices[0].coreDeviceIdentifer, '123456BB5-AEDE-7A22-B890-1234567890DD');
+        expect(devices[0].coreDeviceIdentifier, '123456BB5-AEDE-7A22-B890-1234567890DD');
         expect(devices[0].visibilityClass, 'default');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1533,7 +1533,7 @@ invalid JSON
         expect(devices[0].connectionProperties, isNull);
         expect(devices[0].deviceProperties, isNull);
         expect(devices[0].hardwareProperties, isNull);
-        expect(devices[0].coreDeviceIdentifer, '123456BB5-AEDE-7A22-B890-1234567890DD');
+        expect(devices[0].coreDeviceIdentifier, '123456BB5-AEDE-7A22-B890-1234567890DD');
         expect(devices[0].visibilityClass, 'default');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
