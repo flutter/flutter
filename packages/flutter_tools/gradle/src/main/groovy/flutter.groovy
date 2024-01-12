@@ -69,6 +69,34 @@ class FlutterExtension {
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
+
+    /** The versionCode that was read from app's local.properties. */
+    String flutterVersionCode = null
+
+    /** The versionName that was read from app's local.properties. */
+    String flutterVersionName = null
+
+    /** Returns flutterVersionCode as an integer with error handling. */
+    Integer versionCode() {
+        if (flutterVersionCode == null) {
+            throw new GradleException("flutterVersionCode must not be null.")
+        }
+
+        if (!flutterVersionCode.isNumber()) {
+            throw new GradleException("flutterVersionCode must be an integer.")
+        }
+
+        return flutterVersionCode.toInteger()
+    }
+
+    /** Returns flutterVersionName with error handling. */
+    String versionName() {
+        if (flutterVersionName == null) {
+            throw new GradleException("flutterVersionName must not be null.")
+        }
+
+        return flutterVersionName
+    }
 }
 
 // This buildscript block supplies dependencies for this file's own import
@@ -226,7 +254,28 @@ class FlutterPlugin implements Plugin<Project> {
         // Load shared gradle functions
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
 
-        project.extensions.create("flutter", FlutterExtension)
+        def extension = project.extensions.create("flutter", FlutterExtension)
+        def localProperties = new Properties()
+        def localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.withReader("UTF-8") { reader ->
+                localProperties.load(reader)
+            }
+        }
+
+        def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+        if (flutterVersionCode == null) {
+            flutterVersionCode = "1"
+        }
+        extension.flutterVersionCode = flutterVersionCode
+
+
+        def flutterVersionName = localProperties.getProperty("flutter.versionName")
+        if (flutterVersionName == null) {
+            flutterVersionName = "1.0"
+        }
+        extension.flutterVersionName = flutterVersionName
+
         this.addFlutterTasks(project)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
@@ -857,11 +906,36 @@ class FlutterPlugin implements Plugin<Project> {
                                 output.processResourcesProvider.get() : output.processResources
                         def manifest = new XmlParser().parse(processResources.manifestFile)
                         manifest.application.activity.each { activity ->
+                            activity."meta-data".each { metadata ->
+                                def nameAttribute = metadata.attributes().find { it.key == 'android:name' }?.value == 'flutter_deeplinking_enabled'
+                                def valueAttribute = metadata.attributes().find { it.key == 'android:value' }?.value == 'true'
+                                if (nameAttribute && valueAttribute) {
+                                    appLinkSettings.deeplinkingFlagEnabled = true
+                                }
+                            }
                             activity."intent-filter".each { appLinkIntent ->
                                 // Print out the host attributes in data tags.
                                 def schemes = [] as Set<String>
                                 def hosts = [] as Set<String>
                                 def paths = [] as Set<String>
+                                def intentFilterCheck = new IntentFilterCheck()
+
+                                if (appLinkIntent.attributes().find { it.key == 'android:autoVerify' }?.value == 'true') {
+                                    intentFilterCheck.hasAutoVerify = true
+                                }
+                                appLinkIntent.'action'.each { action ->
+                                    if (action.attributes().find { it.key == 'android:name' }?.value == 'android.intent.action.VIEW') {
+                                        intentFilterCheck.hasActionView = true
+                                    }
+                                }
+                                appLinkIntent.'category'.each { category ->
+                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.DEFAULT') {
+                                        intentFilterCheck.hasDefaultCategory = true
+                                    }
+                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.BROWSABLE') {
+                                        intentFilterCheck.hasBrowsableCategory = true
+                                    }
+                                }
                                 appLinkIntent.data.each { data ->
                                     data.attributes().each { entry ->
                                         if (entry.key instanceof QName) {
@@ -890,10 +964,10 @@ class FlutterPlugin implements Plugin<Project> {
                                 schemes.each {scheme ->
                                     hosts.each { host ->
                                         if (!paths) {
-                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*"))
+                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*", intentFilterCheck: intentFilterCheck))
                                         } else {
                                             paths.each { path ->
-                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path))
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path, intentFilterCheck: intentFilterCheck))
                                             }
                                         }
                                     }
@@ -1372,14 +1446,21 @@ class FlutterPlugin implements Plugin<Project> {
 }
 
 class AppLinkSettings {
-
     String applicationId
     Set<Deeplink> deeplinks
+    boolean deeplinkingFlagEnabled
+}
 
+class IntentFilterCheck {
+    boolean hasAutoVerify
+    boolean hasActionView
+    boolean hasDefaultCategory
+    boolean hasBrowsableCategory
 }
 
 class Deeplink {
     String scheme, host, path
+    IntentFilterCheck intentFilterCheck
     boolean equals(o) {
         if (o == null)
             throw new NullPointerException()
