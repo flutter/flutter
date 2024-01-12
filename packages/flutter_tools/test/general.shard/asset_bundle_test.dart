@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
@@ -622,6 +623,7 @@ flutter:
       <String, AssetKind>{},
       loggerOverride: testLogger,
       targetPlatform: TargetPlatform.android,
+      impellerStatus: ImpellerStatus.disabled,
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -744,6 +746,7 @@ flutter:
         bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.android,
+        impellerStatus: ImpellerStatus.disabled,
       );
 
     }, overrides: <Type, Generator>{
@@ -790,6 +793,7 @@ flutter:
         bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
+        impellerStatus: ImpellerStatus.disabled,
       );
 
     }, overrides: <Type, Generator>{
@@ -873,6 +877,7 @@ flutter:
         bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
+        impellerStatus: ImpellerStatus.disabled,
       );
       expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{

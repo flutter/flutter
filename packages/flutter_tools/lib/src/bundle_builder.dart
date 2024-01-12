@@ -18,6 +18,7 @@ import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
+import 'device.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -140,6 +141,7 @@ Future<void> writeBundle(
   Map<String, AssetKind> entryKinds, {
   Logger? loggerOverride,
   required TargetPlatform targetPlatform,
+  required ImpellerStatus impellerStatus,
 }) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
@@ -168,6 +170,11 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
+  ShaderTarget shaderTarget = ShaderTarget.sksl;
+  if (targetPlatform == TargetPlatform.tester && impellerStatus == ImpellerStatus.enabled) {
+    shaderTarget = ShaderTarget.impellerSwiftShader;
+  }
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -195,7 +202,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
-                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+                target: shaderTarget,
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
             case AssetKind.model:

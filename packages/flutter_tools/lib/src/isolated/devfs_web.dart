@@ -32,6 +32,7 @@ import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
@@ -885,6 +886,7 @@ class WebDevFS implements DevFS {
           bundle.entries,
           bundle.entryKinds,
           targetPlatform: TargetPlatform.web_javascript,
+          impellerStatus: ImpellerStatus.disabled,
         );
       }
     }
