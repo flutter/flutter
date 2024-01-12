@@ -2077,7 +2077,7 @@ void main() {
       );
       final Offset gestureOffset = tester.getCenter(find.byKey(flutterLogo).first);
 
-      // Right click on unseletable element.
+      // Right click on unselectable element.
       final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
       await tester.pump();
