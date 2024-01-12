@@ -54,17 +54,6 @@ class RenderPass : public ResourceBinder {
   }
 
   //----------------------------------------------------------------------------
-  /// @brief      Record a command for subsequent encoding to the underlying
-  ///             command buffer. No work is encoded into the command buffer at
-  ///             this time.
-  ///
-  /// @param[in]  command  The command
-  ///
-  /// @return     If the command was valid for subsequent commitment.
-  ///
-  bool AddCommand(Command&& command);
-
-  //----------------------------------------------------------------------------
   /// The pipeline to use for this command.
   void SetPipeline(
       const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline);
@@ -180,6 +169,17 @@ class RenderPass : public ResourceBinder {
   const RenderTarget render_target_;
   std::vector<Command> commands_;
   const Matrix orthographic_;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Record a command for subsequent encoding to the underlying
+  ///             command buffer. No work is encoded into the command buffer at
+  ///             this time.
+  ///
+  /// @param[in]  command  The command
+  ///
+  /// @return     If the command was valid for subsequent commitment.
+  ///
+  bool AddCommand(Command&& command);
 
   RenderPass(std::weak_ptr<const Context> context, const RenderTarget& target);
 

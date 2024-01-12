@@ -44,13 +44,12 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
                             absorb_opacity = GetAbsorbOpacity()](
                                const ContentContext& renderer,
                                const Entity& entity, RenderPass& pass) -> bool {
-    Command cmd;
-    DEBUG_COMMAND_INFO(cmd, "Linear to sRGB Filter");
-    cmd.stencil_reference = entity.GetClipDepth();
+    pass.SetCommandLabel("Linear to sRGB Filter");
+    pass.SetStencilReference(entity.GetClipDepth());
 
     auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = PrimitiveType::kTriangleStrip;
-    cmd.pipeline = renderer.GetLinearToSrgbFilterPipeline(options);
+    pass.SetPipeline(renderer.GetLinearToSrgbFilterPipeline(options));
 
     auto size = input_snapshot->texture->GetSize();
 
@@ -63,7 +62,7 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
     });
 
     auto& host_buffer = renderer.GetTransientsBuffer();
-    cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
+    pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
 
     VS::FrameInfo frame_info;
     frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform() *
@@ -78,12 +77,13 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
             ? input_snapshot->opacity
             : 1.0f;
 
-    auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
-    FS::BindInputTexture(cmd, input_snapshot->texture, sampler);
-    FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
-    VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+    FS::BindInputTexture(
+        pass, input_snapshot->texture,
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler({}));
+    FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+    VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
-    return pass.AddCommand(std::move(cmd));
+    return pass.Draw().ok();
   };
 
   CoverageProc coverage_proc =
