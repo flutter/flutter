@@ -48,6 +48,7 @@
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
@@ -2176,6 +2177,53 @@ TEST_P(EntityTest, RuntimeEffect) {
     return result;
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
+  if (GetBackend() != PlaygroundBackend::kVulkan) {
+    GTEST_SKIP() << "Test only applies to Vulkan";
+  }
+
+  auto runtime_stages =
+      OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  auto runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  auto contents = std::make_shared<RuntimeEffectContents>();
+  contents->SetGeometry(Geometry::MakeCover());
+
+  contents->SetRuntimeStage(runtime_stage);
+
+  struct FragUniforms {
+    Vector2 iResolution;
+    Scalar iTime;
+  } frag_uniforms = {
+      .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
+      .iTime = static_cast<Scalar>(GetSecondsElapsed()),
+  };
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(FragUniforms));
+  memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
+  contents->SetUniformData(uniform_data);
+
+  Entity entity;
+  entity.SetContents(contents);
+
+  auto context = GetContentContext();
+  RenderTarget target;
+  testing::MockRenderPass pass(GetContext(), target);
+  ASSERT_TRUE(contents->Render(*context, entity, pass));
+  ASSERT_EQ(pass.GetCommands().size(), 1u);
+  const auto& command = pass.GetCommands()[0];
+  ASSERT_EQ(command.fragment_bindings.buffers.size(), 1u);
+  // 16 bytes:
+  //   8 bytes for iResolution
+  //   4 bytes for iTime
+  //   4 bytes padding
+  EXPECT_EQ(command.fragment_bindings.buffers[0].view.resource.range.length,
+            16u);
 }
 
 TEST_P(EntityTest, InheritOpacityTest) {
