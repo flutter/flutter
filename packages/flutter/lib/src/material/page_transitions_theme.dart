@@ -716,9 +716,7 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
           CupertinoRouteTransitionMixin.isPopGestureEnabled(route),
       builder: (BuildContext context, AndroidBackEvent? startBackEvent,
           AndroidBackEvent? currentBackEvent) {
-        final bool hasBackGesture = _hasBackGesture(route);
-
-        if (hasBackGesture) {
+        if (hasBackGesture(route)) {
           return backGestureTransitionBuilder(
             route,
             context,
@@ -759,7 +757,7 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
     );
   }
 
-  bool _hasBackGesture(PageRoute<dynamic> route) {
+  static bool hasBackGesture(PageRoute<dynamic> route) {
     return route.navigator!.userGestureInProgress;
   }
 }
@@ -796,8 +794,9 @@ class AndroidBackGestureTransition extends StatelessWidget {
   }
 
   Widget _animatedBuilder(BuildContext context, Widget? child) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
+    final Size size = MediaQuery.sizeOf(context);
+    final double screenWidth = size.width;
+    final double screenHeight = size.height;
     final double xShift = (screenWidth / 20) - 8;
     final double yShiftMax = (screenHeight / 20) - 8;
 
@@ -861,8 +860,28 @@ class AndroidBackGestureDetector extends StatefulWidget {
 
 class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
     with WidgetsBindingObserver {
-  AndroidBackEvent? startBackEvent;
-  AndroidBackEvent? currentBackEvent;
+  AndroidBackEvent? _startBackEvent;
+
+  AndroidBackEvent? get startBackEvent => _startBackEvent;
+
+  set startBackEvent(AndroidBackEvent? startBackEvent) {
+    if (_startBackEvent != startBackEvent && mounted) {
+      _startBackEvent = startBackEvent;
+      setState(() {});
+    }
+  }
+
+  AndroidBackEvent? _currentBackEvent;
+
+  AndroidBackEvent? get currentBackEvent => _currentBackEvent;
+
+  set currentBackEvent(AndroidBackEvent? currentBackEvent) {
+    if (_currentBackEvent != currentBackEvent && mounted) {
+      _currentBackEvent = currentBackEvent;
+      setState(() {});
+    }
+  }
+
   bool gestureInProgress = false;
 
   @override
@@ -879,13 +898,10 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
 
   @override
   Future<bool> startBackGesture(AndroidBackEvent backEvent) {
-    gestureInProgress = widget.enabledCallback();
+    gestureInProgress = !backEvent.isBackPressed && widget.enabledCallback();
     if (gestureInProgress) {
-      startBackEvent = currentBackEvent = backEvent;
-      if (mounted) {
-        setState(() {});
-      }
       widget.navigator.didStartUserGesture();
+      startBackEvent = currentBackEvent = backEvent;
       widget.controller.value = 1 - backEvent.progress;
 
       return Future<bool>.value(true);
@@ -898,9 +914,6 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
   Future<bool> updateBackGestureProgress(AndroidBackEvent backEvent) {
     if (gestureInProgress) {
       currentBackEvent = backEvent;
-      if (mounted) {
-        setState(() {});
-      }
       widget.controller.value = 1 - backEvent.progress;
 
       return Future<bool>.value(true);
@@ -958,9 +971,7 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
   void _finalizeGesture() {
     gestureInProgress = false;
     startBackEvent = currentBackEvent = null;
-    if (mounted) {
-      setState(() {});
-    }
+
     if (widget.controller.isAnimating) {
       // Keep the userGestureInProgress in true state so we don't change the
       // curve of the page transition mid-flight since CupertinoPageTransition

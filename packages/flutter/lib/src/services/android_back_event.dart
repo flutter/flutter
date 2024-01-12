@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 /// Enum representing the edge from which a swipe starts in a back gesture.
 ///
 /// This is used in [AndroidBackEvent] to indicate the starting edge of the
@@ -14,6 +16,7 @@ enum SwipeEdge {
 ///
 /// Holds information about the touch event, swipe direction and the animation
 /// progress that predictive back animations should seek to.
+@immutable
 class AndroidBackEvent {
   /// Creates a new [AndroidBackEvent] instance.
   const AndroidBackEvent({
@@ -62,6 +65,39 @@ class AndroidBackEvent {
 
   /// The screen edge from which the swipe starts.
   final SwipeEdge swipeEdge;
+
+  /// Determines if the event was triggered by a button press.
+  ///
+  /// In practice, when the back button is pressed for instance, if the user
+  /// employs 3-button Navigation instead of Gesture Navigation, [onBackStarted](https://developer.android.com/reference/android/window/OnBackAnimationCallback#onBackStarted(android.window.BackEvent))
+  /// is called with [touchX] at 0 and [touchY] at 0, instead of on NaN values.
+  /// Subsequently, [onBackInvoked](https://developer.android.com/reference/android/window/OnBackInvokedCallback#onBackInvoked())
+  /// is called immediately.
+  bool get isBackPressed =>
+      touchX == null || touchY == null || (touchX == 0 && touchY == 0);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is AndroidBackEvent &&
+        touchX == other.touchX &&
+        touchY == other.touchY &&
+        progress == other.progress &&
+        swipeEdge == other.swipeEdge;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        touchX,
+        touchY,
+        progress,
+        swipeEdge,
+      );
 
   @override
   String toString() {
