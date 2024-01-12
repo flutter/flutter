@@ -1577,8 +1577,10 @@ Future<void> _runCustomerTesting() async {
   await runCommand(
     'git',
     <String>[
-      'checkout',
+      'branch',
+      '-f',
       'master',
+      'origin/master',
     ],
     workingDirectory: flutterRoot,
   );
