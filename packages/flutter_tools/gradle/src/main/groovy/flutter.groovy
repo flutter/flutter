@@ -70,12 +70,13 @@ class FlutterExtension {
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
 
-    /** The versionCode that was read from app's local.properties. **/
+    /** The versionCode that was read from app's local.properties. */
     String flutterVersionCode = null
 
-    /** The versionName that was read from app's local.properties. **/
+    /** The versionName that was read from app's local.properties. */
     String flutterVersionName = null
 
+    /** Returns flutterVersionCode as an integer with error handling. */
     Integer versionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
@@ -88,9 +89,10 @@ class FlutterExtension {
         return flutterVersionCode.toInteger()
     }
 
+    /** Returns flutterVersionName with error handling. */
     String versionName() {
         if (flutterVersionName == null) {
-            throw new GradleException("flutterVersionName is null. This is an error.")
+            throw new GradleException("flutterVersionName must not be null.")
         }
 
         return flutterVersionName
