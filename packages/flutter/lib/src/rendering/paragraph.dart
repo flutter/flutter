@@ -165,7 +165,7 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
   /// The `boxes` list must be in logical order, which is the order each child
   /// is encountered when the user reads the text. Usually the length of the
   /// list equals [childCount], but it can be less than that, when some children
-  /// are ommitted due to ellipsing. It never exceeds [childCount].
+  /// are omitted due to ellipsing. It never exceeds [childCount].
   ///
   /// See also:
   ///

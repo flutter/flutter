@@ -83,8 +83,8 @@ void main() {
           );
         });
 
-        final StreamController<String> lifecyles = StreamController<String>();
-        final StreamIterator<String> lifecycleItr = StreamIterator<String>(lifecyles.stream);
+        final StreamController<String> lifecycles = StreamController<String>();
+        final StreamIterator<String> lifecycleItr = StreamIterator<String>(lifecycles.stream);
 
         final StreamSubscription<void> stdout = run.stdout
           .transform<String>(utf8.decoder)
@@ -97,7 +97,7 @@ void main() {
               }
               final String lifecycle = match[1]!;
               print('stdout: Found app lifecycle: $lifecycle');
-              lifecyles.add(lifecycle);
+              lifecycles.add(lifecycle);
           });
 
         final StreamSubscription<void> stderr = run.stderr
@@ -151,7 +151,7 @@ void main() {
         section('Stop subscriptions (mode: $mode)');
 
         await lifecycleItr.cancel();
-        await lifecyles.close();
+        await lifecycles.close();
         await stdout.cancel();
         await stderr.cancel();
         return TaskResult.success(null);

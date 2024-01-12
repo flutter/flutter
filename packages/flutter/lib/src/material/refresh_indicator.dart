@@ -156,7 +156,7 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   ///
-  /// Noteably the scrollable widget itself will have slightly different behavior
+  /// Notably the scrollable widget itself will have slightly different behavior
   /// from [CupertinoSliverRefreshControl], due to a difference in structure.
   const RefreshIndicator.adaptive({
     super.key,

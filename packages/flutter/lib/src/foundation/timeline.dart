@@ -252,7 +252,7 @@ final class AggregatedTimedBlock {
   /// easily tell which part of code was measured.
   final String name;
 
-  /// The sum of [TimedBlock.duration] values of aggretaged blocks.
+  /// The sum of [TimedBlock.duration] values of aggregated blocks.
   final double duration;
 
   /// The number of [TimedBlock] objects aggregated.

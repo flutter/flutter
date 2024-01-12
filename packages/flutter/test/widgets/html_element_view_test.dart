@@ -28,7 +28,7 @@ void main() {
   setUp(() {
     fakePlatformViewRegistry = FakePlatformViewRegistry();
 
-    // Simulate the engine registering default factores.
+    // Simulate the engine registering default factories.
     fakePlatformViewRegistry.registerViewFactory(ui_web.PlatformViewRegistry.defaultVisibleViewType, (int viewId, {Object? params}) {
       params!;
       params as Map<Object?, Object?>;

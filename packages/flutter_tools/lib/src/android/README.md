@@ -26,7 +26,7 @@ When updating the Android `compileSdkVersion`, `minSdkVersion`, or
 - Framework integration & benchmark tests are running with at least that SDK
 version.
 - Flutter tools tests that perform String checks with the current template
-SDK verisons are updated (you should see these fail if you do not fix them
+SDK versions are updated (you should see these fail if you do not fix them
 preemptively).
 
 #### Gradle
@@ -43,7 +43,7 @@ When updating the Kotlin Gradle Plugin (KGP) version used in project templates
 (`templateKotlinGradlePluginVersion`), make sure that the framework integration
 & benchmark tests are running with at least this KGP version.
 
-For information aboout the latest version, check https://kotlinlang.org/docs/releases.html#release-details.
+For information about the latest version, check https://kotlinlang.org/docs/releases.html#release-details.
 
 #### The Android Gradle Plugin (AGP)
 When updating the Android Gradle Plugin (AGP) versions used in project templates
@@ -52,7 +52,7 @@ make sure that:
 - Framework integration & benchmark tests are running with at least this AGP
 version.
 - Flutter tools tests that perform String checks with the current template
-AGP verisons are updated (you should see these fail if you do not fix them
+AGP versions are updated (you should see these fail if you do not fix them
 preemptively).
 
 ### A new version becomes available for...

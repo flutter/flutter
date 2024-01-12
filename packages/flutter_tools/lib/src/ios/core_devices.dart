@@ -370,7 +370,7 @@ class IOSCoreDevice {
     required this.connectionProperties,
     required this.deviceProperties,
     required this.hardwareProperties,
-    required this.coreDeviceIdentifer,
+    required this.coreDeviceIdentifier,
     required this.visibilityClass,
   });
 
@@ -432,7 +432,7 @@ class IOSCoreDevice {
       connectionProperties: connectionProperties,
       deviceProperties: deviceProperties,
       hardwareProperties: hardwareProperties,
-      coreDeviceIdentifer: data['identifier']?.toString(),
+      coreDeviceIdentifier: data['identifier']?.toString(),
       visibilityClass: data['visibilityClass']?.toString(),
     );
   }
@@ -462,7 +462,7 @@ class IOSCoreDevice {
   @visibleForTesting
   final _IOSCoreDeviceHardwareProperties? hardwareProperties;
 
-  final String? coreDeviceIdentifer;
+  final String? coreDeviceIdentifier;
   final String? visibilityClass;
 }
 

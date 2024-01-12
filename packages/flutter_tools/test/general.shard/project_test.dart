@@ -1573,7 +1573,7 @@ void _testInMemory(
       ProcessManager: () => processManager ?? FakeProcessManager.any(),
       Java : () => java,
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
-      // Intentionlly null if not set. Some ios tests fail if this is a fake.
+      // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
       Cache: () => Cache(
             logger: globals.logger,

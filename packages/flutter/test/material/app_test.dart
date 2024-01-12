@@ -1565,7 +1565,7 @@ void main() {
     await tester.pumpWidget(buildWidget());
     await tester.pumpAndSettle();
 
-    // Switch to dark theme with overriden animation curve.
+    // Switch to dark theme with overridden animation curve.
     await tester.pumpWidget(buildWidget(
       themeMode: ThemeMode.dark,
       animationStyle: AnimationStyle(curve: Curves.easeIn,
@@ -1583,7 +1583,7 @@ void main() {
     // Scaffold background color is fully updated to dark theme.
     expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xff1c1b1f));
 
-    // Switch from dark to light theme with overriden animation duration.
+    // Switch from dark to light theme with overridden animation duration.
     await tester.pumpWidget(buildWidget(animationStyle: AnimationStyle.noAnimation));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));

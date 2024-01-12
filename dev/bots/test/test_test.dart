@@ -82,7 +82,7 @@ void main() {
     });
   });
 
-  group('flutter/pacakges version', () {
+  group('flutter/packages version', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     final fs.File packagesVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_packages.version'));
     const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';

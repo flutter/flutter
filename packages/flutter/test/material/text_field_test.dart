@@ -11135,7 +11135,7 @@ void main() {
           TextSelection(baseOffset: 0, extentOffset: platformSelectsByLine ? 19 : 20),
         );
 
-        // Clicking again moves the caret to the tapped positio.
+        // Clicking again moves the caret to the tapped position.
         await gesture.down(textFieldStart + const Offset(210.0, 9.0));
         await tester.pump();
         await gesture.up();
@@ -11768,7 +11768,7 @@ void main() {
         ),
       );
 
-      // This extra pump is so autofocus can propogate to renderEditable.
+      // This extra pump is so autofocus can propagate to renderEditable.
       await tester.pump();
 
       final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'
@@ -11892,7 +11892,7 @@ void main() {
         ),
       );
 
-      // This extra pump is so autofocus can propogate to renderEditable.
+      // This extra pump is so autofocus can propagate to renderEditable.
       await tester.pump();
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -12209,7 +12209,7 @@ void main() {
       ),
     );
 
-    // This extra pump is so autofocus can propogate to renderEditable.
+    // This extra pump is so autofocus can propagate to renderEditable.
     await tester.pump();
 
     final RenderEditable renderEditable = findRenderEditable(tester);
@@ -12442,7 +12442,7 @@ void main() {
       ),
     );
 
-    // This extra pump is so autofocus can propogate to renderEditable.
+    // This extra pump is so autofocus can propagate to renderEditable.
     await tester.pump();
 
     // Just testing the test and making sure that the last character is outside
@@ -12733,7 +12733,7 @@ void main() {
         ),
       );
 
-      // This extra pump is so autofocus can propogate to renderEditable.
+      // This extra pump is so autofocus can propagate to renderEditable.
       await tester.pump();
 
       // The second tap is slightly higher to avoid tapping the context menu on

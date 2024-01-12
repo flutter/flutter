@@ -196,7 +196,7 @@ class XCDevice {
   /// Observe identifiers (UDIDs) of devices as they attach and detach.
   ///
   /// Each attach and detach event contains information on the event type,
-  /// the event interface, and the device identifer.
+  /// the event interface, and the device identifier.
   Stream<XCDeviceEventNotification>? observedDeviceEvents() {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
