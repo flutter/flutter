@@ -244,11 +244,6 @@ vars = {
   "upstream_yaml": "https://github.com/dart-lang/yaml.git",
   "upstream_yapf": "https://github.com/google/yapf.git",
   "upstream_zlib": "https://github.com/madler/zlib.git",
-
-  # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
-  # will be used altogether with fuchsia-sdk to setup the build / test
-  # environment.
-  'fuchsia_test_scripts_version': 'xMcCltDynP2JMZNUekFtV24vCnjgz_J3SZIN-4FbUKQC',
 }
 
 gclient_gn_args_file = 'src/third_party/dart/build/config/gclient_args.gni'
@@ -934,7 +929,7 @@ deps = {
 
   # Get the SDK from https://chrome-infra-packages.appspot.com/p/fuchsia/sdk/core at the 'latest' tag
   # Get the toolchain from https://chrome-infra-packages.appspot.com/p/fuchsia/clang at the 'goma' tag
-  'src/fuchsia/sdk/linux': {
+   'src/fuchsia/sdk/linux': {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
@@ -942,17 +937,6 @@ deps = {
        }
      ],
      'condition': 'host_os == "linux" and not download_fuchsia_sdk',
-     'dep_type': 'cipd',
-   },
-
-  'src/fuchsia/test_scripts': {
-     'packages': [
-       {
-        'package': 'chromium/fuchsia/test-scripts',
-        'version': Var('fuchsia_test_scripts_version'),
-       }
-     ],
-     'condition': 'host_os == "linux"',
      'dep_type': 'cipd',
    },
 
@@ -1116,17 +1100,6 @@ hooks = [
       '--path',
       'third_party/impeller-cmake-example',
       '--setup',
-    ]
-  },
-  {
-    'name': 'Download Fuchsia system images',
-    'pattern': '.',
-    'condition': 'host_os == "linux"',
-    'action': [
-      'python3',
-      'src/flutter/tools/fuchsia/with_envs.py',
-      'src/fuchsia/test_scripts/update_product_bundles.py',
-      'terminal.x64',
     ]
   }
 ]

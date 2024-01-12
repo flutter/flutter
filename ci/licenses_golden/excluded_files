@@ -1122,7 +1122,6 @@
 ../../../flutter/tools/licenses/pubspec.yaml
 ../../../flutter/tools/licenses/test
 ../../../flutter/web_sdk
-../../../fuchsia/images
 ../../../fuchsia/sdk/linux/.build-id
 ../../../fuchsia/sdk/linux/.versions
 ../../../fuchsia/sdk/linux/AUTHORS
@@ -1435,7 +1434,6 @@
 ../../../fuchsia/sdk/linux/pkg/zx/meta.json
 ../../../fuchsia/sdk/linux/tools
 ../../../fuchsia/sdk/linux/version_history.json
-../../../fuchsia/test_scripts
 ../../../out
 ../../../third_party/abseil-cpp/.git
 ../../../third_party/abseil-cpp/.github
