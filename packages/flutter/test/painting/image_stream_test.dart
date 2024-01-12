@@ -10,7 +10,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
-import 'package:web/web.dart';
 
 import '../image_data.dart';
 import 'fake_codec.dart';
