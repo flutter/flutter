@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:collection/collection.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -16,6 +17,10 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
+import 'package:unified_analytics/src/enums.dart';
+import 'package:unified_analytics/unified_analytics.dart';
+
+import 'fakes.dart';
 
 export 'package:path/path.dart' show Context; // flutter_ignore: package_path_import
 export 'package:test/test.dart' hide isInstanceOf, test;
@@ -304,4 +309,76 @@ class FileExceptionHandler {
     }
     throw exception;
   }
+}
+
+/// This method is required to fetch an instance of [FakeAnalytics]
+/// because there is initialization logic that is required. An initial
+/// instance will first be created and will let package:unified_analytics
+/// know that the consent message has been shown. After confirming on the first
+/// instance, then a second instance will be generated and returned. This second
+/// instance will be cleared to send events.
+FakeAnalytics getInitializedFakeAnalyticsInstance({
+  required FileSystem fs,
+  required FakeFlutterVersion fakeFlutterVersion,
+  String? clientIde,
+}) {
+  final Directory homeDirectory = fs.directory('/');
+  final FakeAnalytics initialAnalytics = FakeAnalytics(
+    tool: DashTool.flutterTool,
+    homeDirectory: homeDirectory,
+    dartVersion: fakeFlutterVersion.dartSdkVersion,
+    platform: DevicePlatform.linux,
+    fs: fs,
+    surveyHandler: SurveyHandler(homeDirectory: homeDirectory, fs: fs),
+    flutterChannel: fakeFlutterVersion.channel,
+    flutterVersion: fakeFlutterVersion.getVersionString(),
+  );
+  initialAnalytics.clientShowedMessage();
+
+  return FakeAnalytics(
+    tool: DashTool.flutterTool,
+    homeDirectory: homeDirectory,
+    dartVersion: fakeFlutterVersion.dartSdkVersion,
+    platform: DevicePlatform.linux,
+    fs: fs,
+    surveyHandler: SurveyHandler(homeDirectory: homeDirectory, fs: fs),
+    flutterChannel: fakeFlutterVersion.channel,
+    flutterVersion: fakeFlutterVersion.getVersionString(),
+    clientIde: clientIde,
+  );
+}
+
+/// Returns "true" if the timing event searched for exists in [sentEvents].
+///
+/// This utility function allows us to check for an instance of
+/// [Event.timing] within a [FakeAnalytics] instance. Normally, we can
+/// use the equality operator for [Event] to check if the event exists, but
+/// we are unable to do so for the timing event because the elapsed time
+/// is variable so we cannot predict what that value will be in tests.
+///
+/// This function allows us to check for the other keys that have
+/// string values by removing the `elapsedMilliseconds` from the
+/// [Event.eventData] map and checking for a match.
+bool analyticsTimingEventExists({
+  required List<Event> sentEvents,
+  required String workflow,
+  required String variableName,
+  String? label,
+}) {
+  final Map<String, String> lookup = <String, String>{
+    'workflow': workflow,
+    'variableName': variableName,
+    if (label != null) 'label': label,
+  };
+
+  for (final Event e in sentEvents) {
+    final Map<String, Object?> eventData = <String, Object?>{...e.eventData};
+    eventData.remove('elapsedMilliseconds');
+
+    if (const DeepCollectionEquality().equals(lookup, eventData)) {
+      return true;
+    }
+  }
+
+  return false;
 }
