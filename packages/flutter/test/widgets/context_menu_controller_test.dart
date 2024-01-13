@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
@@ -178,7 +179,10 @@ void main() {
     controller.remove();
   });
 
-  testWidgets('Calling show when a built-in widget is already showing its context menu hides the built-in menu', (WidgetTester tester) async {
+  testWidgets('Calling show when a built-in widget is already showing its context menu hides the built-in menu',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final GlobalKey builtInKey = GlobalKey();
     final GlobalKey directKey = GlobalKey();
     late final BuildContext context;
