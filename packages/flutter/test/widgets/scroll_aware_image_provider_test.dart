@@ -34,7 +34,10 @@ void main() {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position;
   }
 
-  testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
