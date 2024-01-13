@@ -1721,6 +1721,10 @@ targets:
       cores: "8"
       machine_type: "n1-standard-8"
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       device_type: "none"
       tags: >
         ["devicelab", "linux"]
