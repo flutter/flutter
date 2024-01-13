@@ -380,9 +380,13 @@ end
     nativePodClass.createSync(recursive: true);
     nativePodClass.writeAsStringSync('''
 #import <Flutter/Flutter.h>
+
 @interface NativePodTest : NSObject
+
 @end
+
 @implementation NativePodTest
+
 @end
 ''');
 
