@@ -325,23 +325,13 @@ bool EntityPass::Render(ContentContext& renderer,
                   Rect::MakeSize(root_render_target.GetRenderTargetSize()),
                   {.readonly = true});
 
-  int32_t required_mip_count = 1;
-  IterateAllElements(
-      [&required_mip_count, lazy_glyph_atlas = renderer.GetLazyGlyphAtlas()](
-          const Element& element) {
-        if (auto entity = std::get_if<Entity>(&element)) {
-          if (const auto& contents = entity->GetContents()) {
-            contents->PopulateGlyphAtlas(lazy_glyph_atlas,
-                                         entity->DeriveTextScale());
-          }
-        }
-        if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-          const EntityPass* entity_pass = subpass->get();
-          required_mip_count =
-              std::max(required_mip_count, entity_pass->GetRequiredMipCount());
-        }
-        return true;
-      });
+  IterateAllEntities([lazy_glyph_atlas =
+                          renderer.GetLazyGlyphAtlas()](const Entity& entity) {
+    if (const auto& contents = entity.GetContents()) {
+      contents->PopulateGlyphAtlas(lazy_glyph_atlas, entity.DeriveTextScale());
+    }
+    return true;
+  });
 
   ClipCoverageStack clip_coverage_stack = {ClipCoverageLayer{
       .coverage = Rect::MakeSize(root_render_target.GetRenderTargetSize()),
@@ -353,7 +343,8 @@ bool EntityPass::Render(ContentContext& renderer,
   // there's no need to set up a stencil attachment on the root render target.
   if (reads_from_onscreen_backdrop) {
     EntityPassTarget offscreen_target = CreateRenderTarget(
-        renderer, root_render_target.GetRenderTargetSize(), required_mip_count,
+        renderer, root_render_target.GetRenderTargetSize(),
+        GetBackdropFilterMipCount(),
         GetClearColorOrDefault(render_target.GetRenderTargetSize()));
 
     if (!OnRender(renderer,  // renderer
@@ -615,7 +606,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     auto subpass_target = CreateRenderTarget(
         renderer,      // renderer
         subpass_size,  // size
-        /*mip_count=*/1,
+        subpass->GetBackdropFilterMipCount(),
         subpass->GetClearColorOrDefault(subpass_size));  // clear_color
 
     if (!subpass_target.IsValid()) {
@@ -1198,6 +1189,16 @@ void EntityPass::SetBackdropFilter(BackdropFilterProc proc) {
 
 void EntityPass::SetEnableOffscreenCheckerboard(bool enabled) {
   enable_offscreen_debug_checkerboard_ = enabled;
+}
+
+int32_t EntityPass::GetBackdropFilterMipCount() const {
+  int32_t result = 1;
+  for (auto& element : elements_) {
+    if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+      result = std::max(result, subpass->get()->GetRequiredMipCount());
+    }
+  }
+  return result;
 }
 
 EntityPassClipRecorder::EntityPassClipRecorder() {}

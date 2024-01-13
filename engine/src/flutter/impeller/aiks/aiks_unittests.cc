@@ -3794,5 +3794,31 @@ TEST_P(AiksTest, GaussianBlurAllocatesCorrectMipCountRenderTarget) {
   EXPECT_EQ(max_mip_count, 1lu);
 }
 
+TEST_P(AiksTest, GaussianBlurMipMapNestedLayer) {
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color::Wheat()});
+  canvas.SaveLayer({.blend_mode = BlendMode::kMultiply});
+  canvas.DrawCircle({100, 100}, 50, {.color = Color::CornflowerBlue()});
+  canvas.SaveLayer({}, std::nullopt,
+                   ImageFilter::MakeBlur(Sigma(30), Sigma(30),
+                                         FilterContents::BlurStyle::kNormal,
+                                         Entity::TileMode::kClamp));
+  canvas.DrawCircle({200, 200}, 50, {.color = Color::Chartreuse()});
+
+  Picture picture = canvas.EndRecordingAsPicture();
+  std::shared_ptr<RenderTargetCache> cache =
+      std::make_shared<RenderTargetCache>(GetContext()->GetResourceAllocator());
+  AiksContext aiks_context(GetContext(), nullptr, cache);
+  picture.ToImage(aiks_context, {100, 100});
+
+  size_t max_mip_count = 0;
+  for (auto it = cache->GetTextureDataBegin(); it != cache->GetTextureDataEnd();
+       ++it) {
+    max_mip_count =
+        std::max(it->texture->GetTextureDescriptor().mip_count, max_mip_count);
+  }
+  EXPECT_EQ(max_mip_count, 1lu);
+}
+
 }  // namespace testing
 }  // namespace impeller
