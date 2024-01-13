@@ -123,7 +123,9 @@ abstract interface class ChipAttributes {
   /// Otherwise, [StadiumBorder] is used.
   ///
   /// This shape is combined with [side] to create a shape decorated with an
-  /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
+  /// outline. If [side] is not null or side of [shape] is [BorderSide.none],
+  /// side of [shape] is ignored. To omit the outline entirely,
+  /// pass [BorderSide.none] to [side].
   ///
   /// If it is a [MaterialStateOutlinedBorder], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
@@ -1554,12 +1556,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     required this.enableAnimation,
     this.avatarBorder,
   }) : _theme = theme,
-       _textDirection = textDirection {
-    checkmarkAnimation.addListener(markNeedsPaint);
-    avatarDrawerAnimation.addListener(markNeedsLayout);
-    deleteDrawerAnimation.addListener(markNeedsLayout);
-    enableAnimation.addListener(markNeedsPaint);
-  }
+       _textDirection = textDirection;
 
   bool? value;
   bool? isEnabled;
@@ -2069,26 +2066,39 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
-  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
+  final LayerHandle<OpacityLayer> _labelOpacityLayerHandler = LayerHandle<OpacityLayer>();
+  final LayerHandle<OpacityLayer> _deleteIconOpacityLayerHandler = LayerHandle<OpacityLayer>();
 
-  void _paintChild(PaintingContext context, Offset offset, RenderBox? child, bool? isEnabled) {
+  void _paintChild(PaintingContext context, Offset offset, RenderBox? child, {required bool isDeleteIcon}) {
     if (child == null) {
-      _childOpacityLayerHandler.layer = null;
+      _labelOpacityLayerHandler.layer = null;
+      _deleteIconOpacityLayerHandler.layer = null;
       return;
     }
     final int disabledColorAlpha = _disabledColor.alpha;
     if (!enableAnimation.isCompleted) {
       if (needsCompositing) {
-        _childOpacityLayerHandler.layer = context.pushOpacity(
+        _labelOpacityLayerHandler.layer = context.pushOpacity(
           offset,
           disabledColorAlpha,
           (PaintingContext context, Offset offset) {
             context.paintChild(child, _boxParentData(child).offset + offset);
           },
-          oldLayer: _childOpacityLayerHandler.layer,
+          oldLayer: _labelOpacityLayerHandler.layer,
         );
+        if (isDeleteIcon) {
+          _deleteIconOpacityLayerHandler.layer = context.pushOpacity(
+            offset,
+            disabledColorAlpha,
+            (PaintingContext context, Offset offset) {
+              context.paintChild(child, _boxParentData(child).offset + offset);
+            },
+            oldLayer: _deleteIconOpacityLayerHandler.layer,
+          );
+        }
       } else {
-        _childOpacityLayerHandler.layer = null;
+        _labelOpacityLayerHandler.layer = null;
+        _deleteIconOpacityLayerHandler.layer = null;
         final Rect childRect = _boxRect(child).shift(offset);
         context.canvas.saveLayer(childRect.inflate(20.0), Paint()..color = _disabledColor);
         context.paintChild(child, _boxParentData(child).offset + offset);
@@ -2100,8 +2110,27 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    checkmarkAnimation.addListener(markNeedsPaint);
+    avatarDrawerAnimation.addListener(markNeedsLayout);
+    deleteDrawerAnimation.addListener(markNeedsLayout);
+    enableAnimation.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    checkmarkAnimation.removeListener(markNeedsPaint);
+    avatarDrawerAnimation.removeListener(markNeedsLayout);
+    deleteDrawerAnimation.removeListener(markNeedsLayout);
+    enableAnimation.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
+  @override
   void dispose() {
-    _childOpacityLayerHandler.layer = null;
+    _labelOpacityLayerHandler.layer = null;
+    _deleteIconOpacityLayerHandler.layer = null;
     _avatarOpacityLayerHandler.layer = null;
     super.dispose();
   }
@@ -2110,9 +2139,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   void paint(PaintingContext context, Offset offset) {
     _paintAvatar(context, offset);
     if (deleteIconShowing) {
-      _paintChild(context, offset, deleteIcon, isEnabled);
+      _paintChild(context, offset, deleteIcon, isDeleteIcon: true);
     }
-    _paintChild(context, offset, label, isEnabled);
+    _paintChild(context, offset, label, isDeleteIcon: false);
   }
 
   // Set this to true to have outlines of the tap targets drawn over

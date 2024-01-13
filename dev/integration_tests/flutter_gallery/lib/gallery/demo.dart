@@ -80,7 +80,7 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
-    } else if (mounted) {
+    } else if (context.mounted) {
       showDialog<void>(
         context: context,
         builder: (BuildContext context) {

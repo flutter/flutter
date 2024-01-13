@@ -33,6 +33,7 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
@@ -161,6 +162,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -224,6 +226,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
         Signals: () => FakeSignals(),
       });
@@ -293,6 +296,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
         ProcessManager: () => FakeProcessManager.empty(),
       });
@@ -362,6 +366,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -432,6 +437,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -506,6 +512,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -580,6 +587,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -1199,6 +1207,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
+    Analytics? analytics,
   }) {
     if (_artifactTester != null) {
       for (final FlutterDevice device in devices) {
@@ -1390,9 +1399,6 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   FakeAndroidDevice({required this.id});
 
@@ -1464,9 +1470,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get ephemeral => true;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     DevicePortForwarder? portForwarder,

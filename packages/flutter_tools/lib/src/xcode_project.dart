@@ -68,8 +68,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   /// The 'Runner.xcscheme' file of [xcodeProject].
-  File get xcodeProjectSchemeFile =>
-      xcodeProject.childDirectory('xcshareddata').childDirectory('xcschemes').childFile('Runner.xcscheme');
+  File xcodeProjectSchemeFile({String? scheme}) {
+    final String schemeName = scheme ?? 'Runner';
+    return xcodeProject.childDirectory('xcshareddata').childDirectory('xcschemes').childFile('$schemeName.xcscheme');
+  }
 
   File get xcodeProjectWorkspaceData =>
       xcodeProject

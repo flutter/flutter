@@ -48,8 +48,7 @@ class AndroidAnalyze {
         logger.printStatus(jsonEncode(await project.android.getBuildVariants()));
       case AndroidAnalyzeOption.outputAppLinkSettings:
         assert(buildVariant != null);
-        await project.android.outputsAppLinkSettings(variant: buildVariant!);
-        final String filePath = fileSystem.path.join(project.directory.path, 'build', 'app', 'app-link-settings-$buildVariant.json`');
+        final String filePath = await project.android.outputsAppLinkSettings(variant: buildVariant!);
         logger.printStatus('result saved in $filePath');
     }
   }

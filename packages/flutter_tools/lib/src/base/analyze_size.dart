@@ -5,6 +5,7 @@
 import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../convert.dart';
@@ -20,8 +21,10 @@ class SizeAnalyzer {
     required FileSystem fileSystem,
     required Logger logger,
     required Usage flutterUsage,
+    required Analytics analytics,
     Pattern appFilenamePattern = 'libapp.so',
   }) : _flutterUsage = flutterUsage,
+       _analytics = analytics,
        _fileSystem = fileSystem,
        _logger = logger,
        _appFilenamePattern = appFilenamePattern;
@@ -30,6 +33,7 @@ class SizeAnalyzer {
   final Logger _logger;
   final Pattern _appFilenamePattern;
   final Usage _flutterUsage;
+  final Analytics _analytics;
   String? _appFilename;
 
   static const String aotSnapshotFileName = 'aot-snapshot.json';
@@ -88,6 +92,7 @@ class SizeAnalyzer {
 
     assert(_appFilename != null);
     CodeSizeEvent(type, flutterUsage: _flutterUsage).send();
+    _analytics.send(Event.codeSizeAnalysis(platform: type));
     return apkAnalysisJson;
   }
 
@@ -141,6 +146,7 @@ class SizeAnalyzer {
       precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
     );
     CodeSizeEvent(kind, flutterUsage: _flutterUsage).send();
+    _analytics.send(Event.codeSizeAnalysis(platform: kind));
     return apkAnalysisJson;
   }
 

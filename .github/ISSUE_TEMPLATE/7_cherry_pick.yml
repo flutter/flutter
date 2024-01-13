@@ -2,22 +2,12 @@ name: Request a cherry-pick
 description: As a contributor, you would like to request that a feature be cherry-picked into a release.
 title: '[CP] <title>'
 labels: ['cp: review']
-assignees:
-  - itsjustkevin
-  - caseyhillers
 body:
   - type: input
     id: issue_link
     attributes:
       label: Issue Link
       description: What is the link to the issue this cherry-pick is addressing?
-    validations:
-      required: true
-  - type: input
-    id: commit_hash
-    attributes:
-      label: Commit Hash
-      description: What is the shortened commit hash that has been merged to master/main?
     validations:
       required: true
   - type: dropdown
@@ -44,7 +34,7 @@ body:
     attributes:
       label: Changelog Description
       description: >-
-        Explain this CP in one line that is accessible to most Flutter developers
+        Explain this CP in less than 80 characters that is accessible to most Flutter developers
         See https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices for examples
     validations:
       required: true

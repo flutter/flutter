@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
@@ -55,7 +54,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('tapping on a partly visible editable brings it fully on screen', (WidgetTester tester) async {
+  testWidgets('tapping on a partly visible editable brings it fully on screen', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -93,7 +92,7 @@ void main() {
     expect(scrollController.offset, 0.0);
   });
 
-  testWidgetsWithLeakTracking('tapping on a partly visible editable brings it fully on screen with scrollInsets', (WidgetTester tester) async {
+  testWidgets('tapping on a partly visible editable brings it fully on screen with scrollInsets', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -138,7 +137,7 @@ void main() {
     expect(scrollController.offset, greaterThan(200.0 - 50.0 - 5.0));
   });
 
-  testWidgetsWithLeakTracking('editable comes back on screen when entering text while it is off-screen', (WidgetTester tester) async {
+  testWidgets('editable comes back on screen when entering text while it is off-screen', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController(initialScrollOffset: 100.0);
     addTearDown(scrollController.dispose);
 
@@ -184,7 +183,7 @@ void main() {
     expect(find.byType(EditableText), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('entering text does not scroll when scrollPhysics.allowImplicitScrolling = false', (WidgetTester tester) async {
+  testWidgets('entering text does not scroll when scrollPhysics.allowImplicitScrolling = false', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
     final ScrollController scrollController = ScrollController(initialScrollOffset: 100.0);
     addTearDown(scrollController.dispose);
@@ -232,7 +231,7 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
+  testWidgets('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
     final PageController pageController = PageController(initialPage: 1);
     addTearDown(pageController.dispose);
@@ -280,7 +279,7 @@ void main() {
     expect(controller.text, 'H');
   });
 
-  testWidgetsWithLeakTracking('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
+  testWidgets('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     controller.text = "Start${'\n' * 39}End";
@@ -329,7 +328,7 @@ void main() {
     expect(scrollController.offset, greaterThan(0.0));
   });
 
-  testWidgetsWithLeakTracking('focused multi-line editable does not scroll to old position when non-collapsed selection set', (WidgetTester tester) async {
+  testWidgets('focused multi-line editable does not scroll to old position when non-collapsed selection set', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     final String text = "Start${'\n' * 39}End";
@@ -366,7 +365,7 @@ void main() {
     expect(render.size.height, greaterThan(500.0));
     expect(scrollController.offset, 0.0);
 
-    // Change selection to non-collapased so that cursor isn't shown
+    // Change selection to non-collapsed so that cursor isn't shown
     // and the location requires a bit of scroll.
     tester.testTextInput.updateEditingValue(TextEditingValue(
       text: text,
@@ -380,7 +379,7 @@ void main() {
     expect(scrollController.offset, 28.0);
   });
 
-  testWidgetsWithLeakTracking('scrolls into view with scrollInserts after the keyboard pops up', (WidgetTester tester) async {
+  testWidgets('scrolls into view with scrollInserts after the keyboard pops up', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     const Key container = Key('container');
@@ -422,7 +421,7 @@ void main() {
     expect(find.byKey(container), findsNothing);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'A pinned persistent header should not scroll when its descendant EditableText gains focus',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/25507.
@@ -483,7 +482,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'A pinned persistent header should not scroll when its descendant EditableText gains focus (no animation)',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/25507.
@@ -589,7 +588,7 @@ void main() {
         );
       }
 
-      testWidgetsWithLeakTracking('focus-triggered showCaretOnScreen', (WidgetTester tester) async {
+      testWidgets('focus-triggered showCaretOnScreen', (WidgetTester tester) async {
         controller.text = 'a' * 100;
         controller.selection = const TextSelection.collapsed(offset: 100);
         final ScrollController scrollController = ScrollController();
@@ -620,7 +619,7 @@ void main() {
         expect(editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
       });
 
-      testWidgetsWithLeakTracking('selection-triggered showCaretOnScreen: virtual keyboard', (WidgetTester tester) async {
+      testWidgets('selection-triggered showCaretOnScreen: virtual keyboard', (WidgetTester tester) async {
         controller.text = 'a' * 100;
         controller.selection = const TextSelection.collapsed(offset: 80);
         final ScrollController scrollController = ScrollController();
@@ -680,7 +679,7 @@ void main() {
         expect(editableScrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
       });
 
-      testWidgetsWithLeakTracking('selection-triggered showCaretOnScreen: text selection delegate', (WidgetTester tester) async {
+      testWidgets('selection-triggered showCaretOnScreen: text selection delegate', (WidgetTester tester) async {
         controller.text = 'a' * 100;
         controller.selection = const TextSelection.collapsed(offset: 80);
         final ScrollController scrollController = ScrollController();
@@ -746,7 +745,7 @@ void main() {
       });
 
       // Regression text for https://github.com/flutter/flutter/pull/74722.
-      testWidgetsWithLeakTracking('does NOT randomly trigger when cursor blinks', (WidgetTester tester) async {
+      testWidgets('does NOT randomly trigger when cursor blinks', (WidgetTester tester) async {
         controller.text = 'a' * 100;
         controller.selection = const TextSelection.collapsed(offset: 0);
         final ScrollController editableScrollController = ScrollController();

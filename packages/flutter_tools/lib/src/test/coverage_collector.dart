@@ -37,6 +37,7 @@ class CoverageCollector extends TestWatcher {
 
   final coverage.Resolver? resolver;
   final Map<String, List<List<int>>?> _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
+  final Map<String, Set<int>> _coverableLineCache = <String, Set<int>>{};
 
   final TestTimeRecorder? testTimeRecorder;
 
@@ -103,7 +104,11 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverageIsolate(Uri vmServiceUri) async {
     _logMessage('collecting coverage data from $vmServiceUri...');
     final Map<String, dynamic> data = await collect(
-        vmServiceUri, libraryNames, branchCoverage: branchCoverage);
+      vmServiceUri,
+      libraryNames,
+      branchCoverage: branchCoverage,
+      coverableLineCache: _coverableLineCache,
+    );
 
     _logMessage('($vmServiceUri): collected coverage data; merging...');
     _addHitmap(await coverage.HitMap.parseJson(
@@ -145,9 +150,12 @@ class CoverageCollector extends TestWatcher {
       .then((Uri? vmServiceUri) {
         _logMessage('collecting coverage data from $testDevice at $vmServiceUri...');
         return collect(
-            vmServiceUri!, libraryNames, serviceOverride: serviceOverride,
-            branchCoverage: branchCoverage)
-          .then<void>((Map<String, dynamic> result) {
+          vmServiceUri!,
+          libraryNames,
+          serviceOverride: serviceOverride,
+          branchCoverage: branchCoverage,
+          coverableLineCache: _coverableLineCache,
+        ).then<void>((Map<String, dynamic> result) {
             _logMessage('Collected coverage data.');
             data = result;
           });
@@ -267,9 +275,12 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String>? libraryNames, 
   @visibleForTesting bool forceSequential = false,
   @visibleForTesting FlutterVmService? serviceOverride,
   bool branchCoverage = false,
+  Map<String, Set<int>>? coverableLineCache,
 }) {
   return coverage.collect(
-      serviceUri, false, false, false, libraryNames,
-      serviceOverrideForTesting: serviceOverride?.service,
-      branchCoverage: branchCoverage);
+    serviceUri, false, false, false, libraryNames,
+    serviceOverrideForTesting: serviceOverride?.service,
+    branchCoverage: branchCoverage,
+    coverableLineCache: coverableLineCache,
+  );
 }

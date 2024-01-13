@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -70,6 +71,7 @@ void main() {
   late BufferLogger logger;
   late XcodeProjectInterpreter xcodeProjectInterpreter;
   late Artifacts artifacts;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -86,6 +88,10 @@ void main() {
       processManager: fakeProcessManager,
     );
     xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -134,6 +140,11 @@ note: Building targets in dependency order
         stderr: '''
 2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionSentinelHostApplications for extension Xcode.DebuggerFoundation.AppExtensionHosts.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
+2023-11-10 10:44:58.030 xcodebuild[61115:1017566] [MT] DVTAssertions: Warning in /System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot11/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/IDEFrameworks/IDEFrameworks-22267/IDEFoundation/Provisioning/Capabilities Infrastructure/IDECapabilityQuerySelection.swift:103
+Details:  createItemModels creation requirements should not create capability item model for a capability item model that already exists.
+Function: createItemModels(for:itemModelSource:)
+Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
 STDERR STUFF
 ''',
       onRun: () {
@@ -189,11 +200,21 @@ STDERR STUFF
     await createTestCommandRunner(command).run(
         const <String>['build', 'macos', '--no-pub']
     );
+
+    expect(
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'xcode-macos',
+      ),
+      true,
+    );
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('macOS build fails on non-macOS platform', () async {
@@ -267,6 +288,10 @@ STDERR STUFF
     expect(testLogger.errorText, isNot(contains('xcodebuild[2096:1927385]')));
     expect(testLogger.errorText, isNot(contains('Using new build system')));
     expect(testLogger.errorText, isNot(contains('Building targets in dependency order')));
+    expect(testLogger.errorText, isNot(contains('DVTAssertions: Warning in')));
+    expect(testLogger.errorText, isNot(contains('createItemModels')));
+    expect(testLogger.errorText, isNot(contains('_NSMainThread:')));
+    expect(testLogger.errorText, isNot(contains('Please file a bug at https://feedbackassistant')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -585,6 +610,7 @@ STDERR STUFF
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'macos'),
     ));
+    expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'macos')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -609,5 +635,6 @@ STDERR STUFF
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
   });
 }

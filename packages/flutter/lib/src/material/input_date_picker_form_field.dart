@@ -57,6 +57,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.keyboardType,
     this.autofocus = false,
     this.acceptEmptyDate = false,
+    this.focusNode,
   }) : initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate) {
@@ -135,6 +136,9 @@ class InputDatePickerFormField extends StatefulWidget {
   ///
   /// If true, [errorFormatText] is not shown when the date input field is empty.
   final bool acceptEmptyDate;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
 
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
@@ -266,6 +270,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       onFieldSubmitted: _handleSubmitted,
       autofocus: widget.autofocus,
       controller: _controller,
+      focusNode: widget.focusNode,
     );
   }
 }

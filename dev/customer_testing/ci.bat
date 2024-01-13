@@ -19,7 +19,7 @@ ECHO.
 ECHO Finding correct version of customer tests...
 CMD /S /C "IF EXIST "..\..\bin\cache\pkg\tests\" RMDIR /S /Q ..\..\bin\cache\pkg\tests"
 git clone https://github.com/flutter/tests.git ..\..\bin\cache\pkg\tests
-FOR /F "usebackq tokens=*" %%a IN (`dart --enable-asserts ..\tools\bin\find_commit.dart ..\..\bin\cache\pkg\tests`) DO git -C ..\..\bin\cache\pkg\tests checkout %%a
+FOR /F "usebackq tokens=*" %%a IN (`dart --enable-asserts ..\tools\bin\find_commit.dart . master ..\..\bin\cache\pkg\tests main`) DO git -C ..\..\bin\cache\pkg\tests checkout %%a
 
 ECHO.
 ECHO Running tests...

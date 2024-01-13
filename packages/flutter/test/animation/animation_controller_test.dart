@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../scheduler/scheduler_tester.dart';
 
@@ -18,6 +19,19 @@ void main() {
         ..resetEpoch()
         ..platformDispatcher.onBeginFrame = null
         ..platformDispatcher.onDrawFrame = null;
+  });
+
+  test('AnimationController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        ).dispose(),
+        AnimationController,
+      ),
+      areCreateAndDispose,
+    );
   });
 
   test('Can set value during status callback', () {

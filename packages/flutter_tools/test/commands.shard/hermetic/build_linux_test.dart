@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -48,12 +49,13 @@ void main() {
     Cache.disableLocking();
   });
 
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager processManager;
   late ProcessUtils processUtils;
   late Logger logger;
   late TestUsage usage;
   late Artifacts artifacts;
+  late FakeAnalytics fakeAnalytics;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -65,6 +67,10 @@ void main() {
     processUtils = ProcessUtils(
       logger: logger,
       processManager: processManager,
+    );
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
     );
   });
 
@@ -209,12 +215,30 @@ void main() {
       const <String>['build', 'linux', '--no-pub']
     );
     expect(fileSystem.file('linux/flutter/ephemeral/generated_config.cmake'), exists);
+
+    expect(
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'cmake-linux',
+      ),
+      true,
+    );
+    expect(
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'linux-ninja',
+      ),
+      true,
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('Handles missing cmake', () async {
@@ -701,6 +725,9 @@ set(BINARY_NAME "fizz_bar")
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'linux'),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'linux')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -708,6 +735,7 @@ set(BINARY_NAME "fizz_bar")
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Usage: () => usage,
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('Linux on ARM64 build --release passes, and check if the LinuxBuildDirectory for arm64 can be referenced correctly by using analytics', () async {
@@ -754,6 +782,9 @@ set(BINARY_NAME "fizz_bar")
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'linux'),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'linux')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -761,6 +792,7 @@ set(BINARY_NAME "fizz_bar")
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Usage: () => usage,
     OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    Analytics: () => fakeAnalytics,
   });
 }
 

@@ -191,7 +191,7 @@ Future<void> main() async {
     transitionFromUserGestures = false;
   });
 
-  testWidgetsWithLeakTracking('Heroes animate', (WidgetTester tester) async {
+  testWidgets('Heroes animate', (WidgetTester tester) async {
 
     await tester.pumpWidget(MaterialApp(routes: routes));
 
@@ -301,12 +301,15 @@ Future<void> main() async {
     expect(find.byKey(thirdKey), isInCard);
   });
 
-  testWidgetsWithLeakTracking('Heroes still animate after hero controller is swapped.', (WidgetTester tester) async {
+  testWidgets('Heroes still animate after hero controller is swapped.', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final UniqueKey heroKey = UniqueKey();
+    final HeroController controller1 = HeroController();
+    addTearDown(controller1.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
-        controller: HeroController(),
+        controller: controller1,
         child: TestDependencies(
           child: Navigator(
             key: key,
@@ -352,15 +355,19 @@ Future<void> main() async {
         );
       },
     ));
+
     expect(find.byKey(heroKey), findsNothing);
     // Begins the navigation
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 30));
     expect(find.byKey(heroKey), isOnstage);
+    final HeroController controller2 = HeroController();
+    addTearDown(controller2.dispose);
+
     // Pumps a new hero controller.
     await tester.pumpWidget(
       HeroControllerScope(
-        controller: HeroController(),
+        controller: controller2,
         child: TestDependencies(
           child: Navigator(
             key: key,
@@ -389,6 +396,7 @@ Future<void> main() async {
         ),
       ),
     );
+
     // The original animation still flies.
     expect(find.byKey(heroKey), isOnstage);
     // Waits for the animation finishes.
@@ -396,7 +404,7 @@ Future<void> main() async {
     expect(find.byKey(heroKey), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Heroes animate should hide original hero', (WidgetTester tester) async {
+  testWidgets('Heroes animate should hide original hero', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(routes: routes));
     // Checks initial state.
     expect(find.byKey(firstKey), isOnstage);
@@ -419,7 +427,7 @@ Future<void> main() async {
     expect(find.byKey(secondKey), isInCard);
   });
 
-  testWidgetsWithLeakTracking('Destination hero is rebuilt midflight', (WidgetTester tester) async {
+  testWidgets('Destination hero is rebuilt midflight', (WidgetTester tester) async {
     final MutatingRoute route = MutatingRoute();
 
     await tester.pumpWidget(MaterialApp(
@@ -444,7 +452,7 @@ Future<void> main() async {
     await tester.pump(const Duration(seconds: 1));
   });
 
-  testWidgetsWithLeakTracking('Heroes animation is fastOutSlowIn', (WidgetTester tester) async {
+  testWidgets('Heroes animation is fastOutSlowIn', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(routes: routes));
     await tester.tap(find.text('two'));
     await tester.pump(); // begin navigation
@@ -484,7 +492,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('Heroes are not interactive', (WidgetTester tester) async {
+  testWidgets('Heroes are not interactive', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(MaterialApp(
@@ -554,7 +562,7 @@ Future<void> main() async {
     expect(log, equals(<String>['bar']));
   });
 
-  testWidgetsWithLeakTracking('Popping on first frame does not cause hero observer to crash', (WidgetTester tester) async {
+  testWidgets('Popping on first frame does not cause hero observer to crash', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
@@ -575,7 +583,7 @@ Future<void> main() async {
     await tester.pump(); // ...and removes it straight away (since it's already at 0.0)
   });
 
-  testWidgetsWithLeakTracking('Overlapping starting and ending a hero transition works ok', (WidgetTester tester) async {
+  testWidgets('Overlapping starting and ending a hero transition works ok', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
@@ -604,7 +612,7 @@ Future<void> main() async {
     await tester.pump();
   });
 
-  testWidgetsWithLeakTracking('One route, two heroes, same tag, throws', (WidgetTester tester) async {
+  testWidgets('One route, two heroes, same tag, throws', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: ListView(
@@ -659,7 +667,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('Hero push transition interrupted by a pop', (WidgetTester tester) async {
+  testWidgets('Hero push transition interrupted by a pop', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       routes: routes,
     ));
@@ -724,7 +732,7 @@ Future<void> main() async {
     expect(find.byKey(secondKey), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Hero pop transition interrupted by a push', (WidgetTester tester) async {
+  testWidgets('Hero pop transition interrupted by a push', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         routes: routes,
@@ -801,7 +809,7 @@ Future<void> main() async {
     expect(find.byKey(firstKey), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Destination hero disappears mid-flight', (WidgetTester tester) async {
+  testWidgets('Destination hero disappears mid-flight', (WidgetTester tester) async {
     const Key homeHeroKey = Key('home hero');
     const Key routeHeroKey = Key('route hero');
     bool routeIncludesHero = true;
@@ -904,7 +912,7 @@ Future<void> main() async {
 
   });
 
-  testWidgetsWithLeakTracking('Destination hero scrolls mid-flight', (WidgetTester tester) async {
+  testWidgets('Destination hero scrolls mid-flight', (WidgetTester tester) async {
     const Key homeHeroKey = Key('home hero');
     const Key routeHeroKey = Key('route hero');
     const Key routeContainerKey = Key('route hero container');
@@ -991,7 +999,7 @@ Future<void> main() async {
     expect(finalHeroY, 75.0); // 100 less 25 for the scroll
   });
 
-  testWidgetsWithLeakTracking('Destination hero scrolls out of view mid-flight', (WidgetTester tester) async {
+  testWidgets('Destination hero scrolls out of view mid-flight', (WidgetTester tester) async {
     const Key homeHeroKey = Key('home hero');
     const Key routeHeroKey = Key('route hero');
     const Key routeContainerKey = Key('route hero container');
@@ -1068,7 +1076,7 @@ Future<void> main() async {
     expect(find.byKey(routeHeroKey), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Aborted flight', (WidgetTester tester) async {
+  testWidgets('Aborted flight', (WidgetTester tester) async {
     // See https://github.com/flutter/flutter/issues/5798
     const Key heroABKey = Key('AB hero');
     const Key heroBCKey = Key('BC hero');
@@ -1203,7 +1211,7 @@ Future<void> main() async {
     expect(tester.getTopLeft(find.byKey(heroBCKey)).dy, 0.0);
   });
 
-  testWidgetsWithLeakTracking('Stateful hero child state survives flight', (WidgetTester tester) async {
+  testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
     final MaterialPageRoute<void> route = MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Material(
@@ -1287,7 +1295,7 @@ Future<void> main() async {
 
   });
 
-  testWidgetsWithLeakTracking('Hero createRectTween', (WidgetTester tester) async {
+  testWidgets('Hero createRectTween', (WidgetTester tester) async {
     RectTween createRectTween(Rect? begin, Rect? end) {
       return MaterialRectCenterArcTween(begin: begin, end: end);
     }
@@ -1399,7 +1407,7 @@ Future<void> main() async {
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
   });
 
-  testWidgetsWithLeakTracking('Hero createRectTween for Navigator that is not full screen', (WidgetTester tester) async {
+  testWidgets('Hero createRectTween for Navigator that is not full screen', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25272
 
     RectTween createRectTween(Rect? begin, Rect? end) {
@@ -1520,7 +1528,7 @@ Future<void> main() async {
   });
 
 
-  testWidgetsWithLeakTracking('Pop interrupts push, reverses flight', (WidgetTester tester) async {
+  testWidgets('Pop interrupts push, reverses flight', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(routes: routes));
     await tester.tap(find.text('twoInset'));
     await tester.pump(); // begin navigation from / to /twoInset.
@@ -1613,7 +1621,7 @@ Future<void> main() async {
     expect(tester.getTopLeft(find.byKey(firstKey)).dx, x0);
   });
 
-  testWidgetsWithLeakTracking('Can override flight shuttle in to hero', (WidgetTester tester) async {
+  testWidgets('Can override flight shuttle in to hero', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: ListView(
@@ -1657,7 +1665,7 @@ Future<void> main() async {
     expect(find.text('baz'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Can override flight shuttle in from hero', (WidgetTester tester) async {
+  testWidgets('Can override flight shuttle in from hero', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: ListView(
@@ -1700,7 +1708,7 @@ Future<void> main() async {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/77720.
-  testWidgetsWithLeakTracking("toHero's shuttle builder over fromHero's shuttle builder", (WidgetTester tester) async {
+  testWidgets("toHero's shuttle builder over fromHero's shuttle builder", (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: ListView(
@@ -1753,7 +1761,7 @@ Future<void> main() async {
     expect(find.text('toHero text'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Can override flight launch pads', (WidgetTester tester) async {
+  testWidgets('Can override flight launch pads', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: ListView(
@@ -1800,7 +1808,7 @@ Future<void> main() async {
     expect(find.text('Joker'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Heroes do not transition on back gestures by default', (WidgetTester tester) async {
+  testWidgets('Heroes do not transition on back gestures by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
      routes: routes,
     ));
@@ -1839,7 +1847,7 @@ Future<void> main() async {
     expect(find.byKey(secondKey), isInCard);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Heroes can transition on gesture in one frame', (WidgetTester tester) async {
+  testWidgets('Heroes can transition on gesture in one frame', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
       routes: routes,
@@ -1882,7 +1890,7 @@ Future<void> main() async {
     expect(find.byKey(secondKey), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Heroes animate should hide destination hero and display original hero in case of dismissed', (WidgetTester tester) async {
+  testWidgets('Heroes animate should hide destination hero and display original hero in case of dismissed', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
       routes: routes,
@@ -1918,7 +1926,7 @@ Future<void> main() async {
     expect(find.byKey(secondKey), isInCard);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
+  testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       routes: routes,
       initialRoute: '/two',
@@ -1928,7 +1936,7 @@ Future<void> main() async {
     expect(find.text('three'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Can push/pop on outer Navigator if nested Navigator contains Heroes', (WidgetTester tester) async {
+  testWidgets('Can push/pop on outer Navigator if nested Navigator contains Heroes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28042.
 
     const String heroTag = 'You are my hero!';
@@ -2002,7 +2010,7 @@ Future<void> main() async {
     expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Can hero from route in root Navigator to route in nested Navigator', (WidgetTester tester) async {
+  testWidgets('Can hero from route in root Navigator to route in nested Navigator', (WidgetTester tester) async {
     const String heroTag = 'foo';
     final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
     final Key smallContainer = UniqueKey();
@@ -2088,7 +2096,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
   });
 
-  testWidgetsWithLeakTracking('Hero within a Hero, throws', (WidgetTester tester) async {
+  testWidgets('Hero within a Hero, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -2106,7 +2114,7 @@ Future<void> main() async {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Can push/pop on outer Navigator if nested Navigators contains same Heroes', (WidgetTester tester) async {
+  testWidgets('Can push/pop on outer Navigator if nested Navigators contains same Heroes', (WidgetTester tester) async {
     const String heroTag = 'foo';
     final GlobalKey<NavigatorState> rootNavigator = GlobalKey<NavigatorState>();
     final Key rootRouteHero = UniqueKey();
@@ -2190,7 +2198,7 @@ Future<void> main() async {
     expect(find.byKey(nestedRouteHeroOne, skipOffstage: false), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Hero within a Hero subtree, throws', (WidgetTester tester) async {
+  testWidgets('Hero within a Hero subtree, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -2208,7 +2216,7 @@ Future<void> main() async {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Hero within a Hero subtree with Builder, throws', (WidgetTester tester) async {
+  testWidgets('Hero within a Hero subtree with Builder, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -2230,7 +2238,7 @@ Future<void> main() async {
     expect(tester.takeException(),isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Hero within a Hero subtree with LayoutBuilder, throws', (WidgetTester tester) async {
+  testWidgets('Hero within a Hero subtree with LayoutBuilder, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -2252,7 +2260,7 @@ Future<void> main() async {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Heroes fly on pushReplacement', (WidgetTester tester) async {
+  testWidgets('Heroes fly on pushReplacement', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28041.
 
     const String heroTag = 'foo';
@@ -2339,7 +2347,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
   });
 
-  testWidgetsWithLeakTracking('On an iOS back swipe and snap, only a single flight should take place', (WidgetTester tester) async {
+  testWidgets('On an iOS back swipe and snap, only a single flight should take place', (WidgetTester tester) async {
     int shuttlesBuilt = 0;
     Widget shuttleBuilder(
       BuildContext flightContext,
@@ -2402,7 +2410,7 @@ Future<void> main() async {
     expect(shuttlesBuilt, 2);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     "From hero's state should be preserved, "
     'heroes work well with child widgets that has global keys',
     (WidgetTester tester) async {
@@ -2469,7 +2477,7 @@ Future<void> main() async {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     "Hero works with images that don't have both width and height specified",
     // Regression test for https://github.com/flutter/flutter/issues/32356
     // and https://github.com/flutter/flutter/issues/31503
@@ -2557,7 +2565,7 @@ Future<void> main() async {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/38183.
-  testWidgetsWithLeakTracking('Remove user gesture driven flights when the gesture is invalid', (WidgetTester tester) async {
+  testWidgets('Remove user gesture driven flights when the gesture is invalid', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
       routes: routes,
@@ -2586,7 +2594,7 @@ Future<void> main() async {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'In a pop transition, when fromHero is null, the to hero should eventually become visible',
     (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
@@ -2635,7 +2643,7 @@ Future<void> main() async {
     },
   );
 
-  testWidgetsWithLeakTracking('popped hero uses fastOutSlowIn curve', (WidgetTester tester) async {
+  testWidgets('popped hero uses fastOutSlowIn curve', (WidgetTester tester) async {
     final Key container1 = UniqueKey();
     final Key container2 = UniqueKey();
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -2713,7 +2721,7 @@ Future<void> main() async {
     expect(heroSize, tween.transform(1.0));
   });
 
-  testWidgetsWithLeakTracking('Heroes in enabled HeroMode do transition', (WidgetTester tester) async {
+  testWidgets('Heroes in enabled HeroMode do transition', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Column(
@@ -2784,7 +2792,7 @@ Future<void> main() async {
     expect(find.byKey(secondKey), isInCard);
   });
 
-  testWidgetsWithLeakTracking('Heroes in disabled HeroMode do not transition', (WidgetTester tester) async {
+  testWidgets('Heroes in disabled HeroMode do not transition', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Column(
@@ -2862,7 +2870,7 @@ Future<void> main() async {
     expect(find.byKey(secondKey), isOnstage);
   });
 
-  testWidgetsWithLeakTracking('kept alive Hero does not throw when the transition begins', (WidgetTester tester) async {
+  testWidgets('kept alive Hero does not throw when the transition begins', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
     await tester.pumpWidget(
@@ -2915,7 +2923,7 @@ Future<void> main() async {
     expect(find.byType(Placeholder), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('toHero becomes unpaintable after the transition begins', (WidgetTester tester) async {
+  testWidgets('toHero becomes unpaintable after the transition begins', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
@@ -2991,7 +2999,7 @@ Future<void> main() async {
     expect(find.byType(Placeholder), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('diverting to a keepalive but unpaintable hero', (WidgetTester tester) async {
+  testWidgets('diverting to a keepalive but unpaintable hero', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
     await tester.pumpWidget(
@@ -3071,7 +3079,7 @@ Future<void> main() async {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('smooth transition between different incoming data', (WidgetTester tester) async {
+  testWidgets('smooth transition between different incoming data', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
@@ -3134,6 +3142,13 @@ Future<void> main() async {
     expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+  });
+
+  test('HeroController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => HeroController().dispose(), HeroController),
+      areCreateAndDispose,
+    );
   });
 }
 

@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
@@ -303,7 +304,21 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   final bool doResolveToError;
 
   @override
-  ResidentRunner createWebRunner(FlutterDevice device, {String? target, bool? stayResident, FlutterProject? flutterProject, bool? ipv6, DebuggingOptions? debuggingOptions, UrlTunneller? urlTunneller, Logger? logger, FileSystem? fileSystem, SystemClock? systemClock, Usage? usage, bool machine = false}) {
+  ResidentRunner createWebRunner(
+    FlutterDevice device, {
+    String? target,
+    bool? stayResident,
+    FlutterProject? flutterProject,
+    bool? ipv6,
+    DebuggingOptions? debuggingOptions,
+    UrlTunneller? urlTunneller,
+    Logger? logger,
+    FileSystem? fileSystem,
+    SystemClock? systemClock,
+    Usage? usage,
+    Analytics? analytics,
+    bool machine = false,
+  }) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
@@ -369,9 +384,6 @@ WebDriverService setUpDriverService() {
   );
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   final PlatformType platformType = PlatformType.web;

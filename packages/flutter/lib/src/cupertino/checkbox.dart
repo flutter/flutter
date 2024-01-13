@@ -12,7 +12,7 @@ import 'toggleable.dart';
 // bool _throwShotAway = false;
 // late StateSetter setState;
 
-// The relative values needed to transform a color to it's equivilant focus
+// The relative values needed to transform a color to it's equivalent focus
 // outline color.
 const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
@@ -338,7 +338,7 @@ class _CheckboxPainter extends ToggleablePainter {
     final Path path = Path();
     // The ratios for the offsets below were found from looking at the checkbox
     // examples on in the HIG docs. The distance from the needed point to the
-    // edge was measured, then devided by the total width.
+    // edge was measured, then divided by the total width.
     const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.52);
     const Offset mid = Offset(CupertinoCheckbox.width * 0.46, CupertinoCheckbox.width * 0.75);
     const Offset end = Offset(CupertinoCheckbox.width * 0.72, CupertinoCheckbox.width * 0.29);
