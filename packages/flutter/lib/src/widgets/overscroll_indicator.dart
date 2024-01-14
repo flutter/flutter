@@ -308,6 +308,9 @@ class _GlowController extends ChangeNotifier {
     required Axis axis,
   }) : _color = color,
        _axis = axis {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _glowController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
     final Animation<double> decelerator = CurvedAnimation(
@@ -812,6 +815,9 @@ enum _StretchState {
 
 class _StretchController extends ChangeNotifier {
   _StretchController({ required TickerProvider vsync }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _stretchController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
     final Animation<double> decelerator = CurvedAnimation(
