@@ -935,7 +935,7 @@ class _AppBarState extends State<AppBar> {
         );
 
         leading = Material(
-          shape: CircleBorder(),
+          shape: const CircleBorder(),
           clipBehavior: Clip.antiAlias,
           color: Colors.transparent,
           child: leading,
