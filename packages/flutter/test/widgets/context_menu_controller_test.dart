@@ -91,7 +91,10 @@ void main() {
     expect(find.byKey(key2), findsNothing);
   });
 
-  testWidgets('A menu can be hidden and then reshown', (WidgetTester tester) async {
+  testWidgets('A menu can be hidden and then reshown',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     late final BuildContext context;
 
