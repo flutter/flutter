@@ -934,6 +934,13 @@ class _AppBarState extends State<AppBar> {
             child: leading is IconButton ? Center(child: leading) : leading,
         );
 
+        leading = Material(
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          color: Colors.transparent,
+          child: leading,
+        );
+
         // Based on the Material Design 3 specs, the leading IconButton should have
         // a size of 48x48, and a highlight size of 40x40. Users can also put other
         // type of widgets on leading with the original config.
