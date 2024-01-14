@@ -5,11 +5,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-    int _creations = 0;
-    int _disposals = 0;
+int _creations = 0;
+int _disposals = 0;
 
 void main() {
+  // LeakTesting is turned off because it adds subscriptions to
+  // [FlutterMemoryAllocations], that may interfere with the tests.
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   test('Publishers dispatch events in debug mode', () async {
