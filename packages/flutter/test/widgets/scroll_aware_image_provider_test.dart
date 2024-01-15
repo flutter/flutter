@@ -102,7 +102,10 @@ void main() {
     expect(findPhysics<RecordingPhysics>(tester).velocities, <double>[0]);
   });
 
-  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);

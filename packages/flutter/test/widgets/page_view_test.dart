@@ -602,7 +602,10 @@ void main() {
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(790.0, 0.0));
   });
 
-  testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
+  testWidgets('Page snapping disable and reenable',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     Widget build({ required bool pageSnapping }) {

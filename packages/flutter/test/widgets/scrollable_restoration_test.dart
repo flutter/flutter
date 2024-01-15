@@ -301,7 +301,10 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgets('PageView.custom restoration', (WidgetTester tester) async {
+  testWidgets('PageView.custom restoration',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView.custom(
