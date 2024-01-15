@@ -9,10 +9,35 @@
         "editor.formatOnType": false,
         "editor.formatOnPaste": false,
     },
-
     "html.format.enable": false,
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "cSpell.words": [
+        "binpb",
+        "Cupertino",
+        "embedder",
+        "GLSL",
+        "goldens",
+        "jank",
+        "Multidex",
+        "objc",
+        "overscroll",
+        "overscrolled",
+        "perfetto",
+        "polina",
+        "proto",
+        "pubspec",
+        "SIGUSR",
+        "skia",
+        "sksl",
+        "systrace",
+        "tappable",
+        "unawaited",
+        "vmservice",
+        "vulkan",
+        "Wirelessly",
+        "zanderso"
+    ]
 }
