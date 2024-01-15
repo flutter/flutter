@@ -26,6 +26,7 @@ class ViewConfiguration {
   /// [ViewConfiguration.fromView] is a more convenient way for deriving a
   /// [ViewConfiguration] from a given [FlutterView].
   const ViewConfiguration({
+    size: view.physicalSize / devicePixelRatio,
     this.physicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
     this.logicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
     this.devicePixelRatio = 1.0,
