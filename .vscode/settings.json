@@ -16,6 +16,7 @@
     "files.trimTrailingWhitespace": true,
     "cSpell.words": [
         "binpb",
+        "canonicalize",
         "cupertino",
         "embedder",
         "GLSL",
