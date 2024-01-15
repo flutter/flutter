@@ -402,6 +402,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     return result;
   }
 
+  void _resetMoveDeltaRecords() {
+    if (_frameTimeStamp != null) {
+      _moveDeltasBeforeFrame.clear();
+      _frameTimeStamp = null;
+    }
+
+    assert(_frameTimeStamp == null);
+    assert(_moveDeltasBeforeFrame.isEmpty);
+  }
+
   void _recordMoveDeltaForMultitouch(int pointer, Offset localDelta) {
     if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
       assert(_frameTimeStamp == null);
@@ -409,11 +419,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return;
     }
 
-    final Duration currentSystemFrameTimeStamp = SchedulerBinding.instance.currentSystemFrameTimeStamp;
-    if (_frameTimeStamp != currentSystemFrameTimeStamp) {
-      _moveDeltasBeforeFrame.clear();
-      _frameTimeStamp = currentSystemFrameTimeStamp;
-    }
+    assert(_frameTimeStamp == SchedulerBinding.instance.currentSystemFrameTimeStamp);
 
     if (localDelta == Offset.zero) {
       return;
@@ -433,27 +439,29 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }) {
     double sum = 0.0;
 
-    if (_moveDeltasBeforeFrame.containsKey(pointer)) {
-      for (final Offset delta in _moveDeltasBeforeFrame[pointer]!) {
-        if (positive) {
-          if (axis == _DragDirection.vertical) {
-            if (delta.dy > 0.0) {
-              sum += delta.dy;
-            }
-          } else {
-            if (delta.dx > 0.0) {
-              sum += delta.dx;
-            }
+    if (!_moveDeltasBeforeFrame.containsKey(pointer)) {
+      return sum;
+    }
+
+    for (final Offset delta in _moveDeltasBeforeFrame[pointer]!) {
+      if (positive) {
+        if (axis == _DragDirection.vertical) {
+          if (delta.dy > 0.0) {
+            sum += delta.dy;
           }
         } else {
-          if (axis == _DragDirection.vertical) {
-            if (delta.dy < 0.0) {
-              sum += delta.dy;
-            }
-          } else {
-            if (delta.dx < 0.0) {
-              sum += delta.dx;
-            }
+          if (delta.dx > 0.0) {
+            sum += delta.dx;
+          }
+        }
+      } else {
+        if (axis == _DragDirection.vertical) {
+          if (delta.dy < 0.0) {
+            sum += delta.dy;
+          }
+        } else {
+          if (delta.dx < 0.0) {
+            sum += delta.dx;
           }
         }
       }
@@ -496,14 +504,19 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Offset _resolveLocalDeltaForMultitouch(int pointer, Offset localDelta) {
     if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
-      if (_frameTimeStamp != null) {
-        _moveDeltasBeforeFrame.clear();
-        _frameTimeStamp = null;
-      }
+      _resetMoveDeltaRecords();
       return localDelta;
     }
 
-    if (localDelta == Offset.zero) {
+    final Duration currentSystemFrameTimeStamp = SchedulerBinding.instance.currentSystemFrameTimeStamp;
+    if (_frameTimeStamp != currentSystemFrameTimeStamp) {
+      _moveDeltasBeforeFrame.clear();
+      _frameTimeStamp = currentSystemFrameTimeStamp;
+    }
+
+    assert(_frameTimeStamp == SchedulerBinding.instance.currentSystemFrameTimeStamp);
+
+    if (localDelta == Offset.zero || _moveDeltasBeforeFrame.isEmpty) {
       return localDelta;
     }
 
@@ -559,6 +572,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         }
       }
     }
+
+    assert(dx.abs() <= localDelta.dx.abs());
+    assert(dy.abs() <= localDelta.dy.abs());
+
     return Offset(dx, dy);
   }
 

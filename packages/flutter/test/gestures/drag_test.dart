@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
@@ -645,6 +646,348 @@ void main() {
       'drag1-update',
       '-k',
       'drag1-end'
+    ]);
+  });
+
+  testGesture('Horizontal drag with multiple pointers - maxAllPointers', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag =
+    HorizontalDragGestureRecognizer()
+      ..multitouchDragStrategy = MultitouchDragStrategy.maxAllPointers;
+
+    final List<String> log = <String>[];
+    drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(Offset.zero);
+    drag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+
+    log.add('-a');
+    // #5 pointer move to right 100.0, received delta should be (100.0, 0.0).
+    tester.route(pointer5.move(const Offset(100.0, 0.0)));
+    log.add('-b');
+    // #5 pointer move to left 50.0, received delta should be (-50.0, 0.0).
+    tester.route(pointer5.move(const Offset(50.0, 0.0)));
+
+    // Put down the second pointer 6.
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(Offset.zero);
+    drag.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+
+    // Currently, #5 pointer has the max move deltas and #6 pointer's move event
+    // may be merged.
+
+    log.add('-c');
+    // #6 pointer move to right 100.0, received delta should be (0.0, 0.0).
+    tester.route(pointer6.move(const Offset(100.0, 0.0)));
+    log.add('-d');
+    // #6 pointer move to left 50.0, received delta should be (0.0, 0.0).
+    tester.route(pointer6.move(const Offset(50.0, 0.0)));
+
+    // Currently, the two pointers have the same sum move deltas.
+
+    log.add('-e');
+    // #6 pointer move to right 1.0, received delta should be (1.0, 0.0).
+    tester.route(pointer6.move(const Offset(51.0, 0.0)));
+    log.add('-f');
+    // #6 pointer move to left 1.0, received delta should be (-1.0, 0.0).
+    tester.route(pointer6.move(const Offset(50.0, 0.0)));
+
+    // Currently, #6 pointer has the max move deltas and #5 pointer's move event
+    // may be merged.
+
+    log.add('-g');
+    // #5 pointer move to right 1.0, received delta should be (0.0, 0.0).
+    tester.route(pointer5.move(const Offset(51.0, 0.0)));
+    log.add('-h');
+    // #5 pointer move to left 1.0, received delta should be (0.0, 0.0).
+    tester.route(pointer5.move(const Offset(50.0, 0.0)));
+
+    // Currently, the two pointers have the same sum move deltas.
+
+    log.add('-i');
+    // #6 pointer move to right 10.0, received delta should be (10.0, 0.0).
+    tester.route(pointer6.move(const Offset(60.0, 0.0)));
+    log.add('-j');
+    // #6 pointer move to left 10.0, received delta should be (-10.0, 0.0).
+    tester.route(pointer6.move(const Offset(50.0, 0.0)));
+
+    // Currently, #6 pointer has the max move deltas.
+
+    // Trigger a new frame.
+    SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
+    SchedulerBinding.instance.handleDrawFrame();
+
+    log.add('-k');
+    // #5 pointer move to right 1.0, received delta should be (1.0, 0.0).
+    tester.route(pointer5.move(const Offset(51.0, 0.0)));
+    log.add('-l');
+    // #5 pointer move to left 1.0, received delta should be (-1.0, 0.0).
+    tester.route(pointer5.move(const Offset(50.0, 0.0)));
+
+    tester.route(pointer5.up());
+    tester.route(pointer6.up());
+
+    // Tear down 'currentSystemFrameTimeStamp'
+    SchedulerBinding.instance.handleBeginFrame(Duration.zero);
+    SchedulerBinding.instance.handleDrawFrame();
+
+    expect(log, <String>[
+      '-a',
+      'drag-update (Offset(100.0, 0.0))',
+      '-b',
+      'drag-update (Offset(-50.0, 0.0))',
+      '-c',
+      'drag-update (Offset(0.0, 0.0))',
+      '-d',
+      'drag-update (Offset(0.0, 0.0))',
+      '-e',
+      'drag-update (Offset(1.0, 0.0))',
+      '-f',
+      'drag-update (Offset(-1.0, 0.0))',
+      '-g',
+      'drag-update (Offset(0.0, 0.0))',
+      '-h',
+      'drag-update (Offset(0.0, 0.0))',
+      '-i',
+      'drag-update (Offset(10.0, 0.0))',
+      '-j',
+      'drag-update (Offset(-10.0, 0.0))',
+      '-k',
+      'drag-update (Offset(1.0, 0.0))',
+      '-l',
+      'drag-update (Offset(-1.0, 0.0))',
+    ]);
+  });
+
+  testGesture('Vertical drag with multiple pointers - maxAllPointers', (GestureTester tester) {
+    final VerticalDragGestureRecognizer drag =
+    VerticalDragGestureRecognizer()
+      ..multitouchDragStrategy = MultitouchDragStrategy.maxAllPointers;
+
+    final List<String> log = <String>[];
+    drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(Offset.zero);
+    drag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+
+    log.add('-a');
+    // #5 pointer move to down 100.0, received delta should be (0.0, 100.0).
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+    log.add('-b');
+    // #5 pointer move to up 50.0, received delta should be (0.0, -50.0).
+    tester.route(pointer5.move(const Offset(0.0, 50.0)));
+
+    // Put down the second pointer 6.
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(Offset.zero);
+    drag.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+
+    // Currently, #5 pointer has the max move deltas and #6 pointer's move event
+    // may be merged.
+
+    log.add('-c');
+    // #6 pointer move to down 100.0, received delta should be (0.0, 0.0).
+    tester.route(pointer6.move(const Offset(0.0, 100.0)));
+    log.add('-d');
+    // #6 pointer move to up 50.0, received delta should be (0.0, 0.0).
+    tester.route(pointer6.move(const Offset(0.0, 50.0)));
+
+    // Currently, the two pointers have the same sum move deltas.
+
+    log.add('-e');
+    // #6 pointer move to down 1.0, received delta should be (0.0, 1.0).
+    tester.route(pointer6.move(const Offset(0.0, 51.0)));
+    log.add('-f');
+    // #6 pointer move to up 1.0, received delta should be (0.0, -1.0).
+    tester.route(pointer6.move(const Offset(0.0, 50.0)));
+
+    // Currently, #6 pointer has the max move deltas and #5 pointer's move event
+    // may be merged.
+
+    log.add('-g');
+    // #5 pointer move to down 1.0, received delta should be (0.0, 0.0).
+    tester.route(pointer5.move(const Offset(0.0, 51.0)));
+    log.add('-h');
+    // #5 pointer move to up 1.0, received delta should be (0.0, 0.0).
+    tester.route(pointer5.move(const Offset(0.0, 50.0)));
+
+    // Currently, the two pointers have the same sum move deltas.
+
+    log.add('-i');
+    // #6 pointer move to down 10.0, received delta should be (0.0, 10.0).
+    tester.route(pointer6.move(const Offset(0.0, 60.0)));
+    log.add('-j');
+    // #6 pointer move to up 10.0, received delta should be (0.0, -10.0).
+    tester.route(pointer6.move(const Offset(0.0, 50.0)));
+
+    // Currently, #6 pointer has the max move deltas.
+
+    // Trigger a new frame.
+    SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
+    SchedulerBinding.instance.handleDrawFrame();
+
+    log.add('-k');
+    // #5 pointer move to down 1.0, received delta should be (0.0, 1.0).
+    tester.route(pointer5.move(const Offset(0.0, 51.0)));
+    log.add('-l');
+    // #5 pointer move to up 1.0, received delta should be (0.0, -1.0).
+    tester.route(pointer5.move(const Offset(0.0, 50.0)));
+
+    tester.route(pointer5.up());
+    tester.route(pointer6.up());
+
+    // Tear down 'currentSystemFrameTimeStamp'
+    SchedulerBinding.instance.handleBeginFrame(Duration.zero);
+    SchedulerBinding.instance.handleDrawFrame();
+
+    expect(log, <String>[
+      '-a',
+      'drag-update (Offset(0.0, 100.0))',
+      '-b',
+      'drag-update (Offset(0.0, -50.0))',
+      '-c',
+      'drag-update (Offset(0.0, 0.0))',
+      '-d',
+      'drag-update (Offset(0.0, 0.0))',
+      '-e',
+      'drag-update (Offset(0.0, 1.0))',
+      '-f',
+      'drag-update (Offset(0.0, -1.0))',
+      '-g',
+      'drag-update (Offset(0.0, 0.0))',
+      '-h',
+      'drag-update (Offset(0.0, 0.0))',
+      '-i',
+      'drag-update (Offset(0.0, 10.0))',
+      '-j',
+      'drag-update (Offset(0.0, -10.0))',
+      '-k',
+      'drag-update (Offset(0.0, 1.0))',
+      '-l',
+      'drag-update (Offset(0.0, -1.0))',
+    ]);
+  });
+
+  testGesture('Pan drag with multiple pointers - maxAllPointers', (GestureTester tester) {
+    final PanGestureRecognizer drag =
+    PanGestureRecognizer()
+      ..multitouchDragStrategy = MultitouchDragStrategy.maxAllPointers;
+
+    final List<String> log = <String>[];
+    drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(Offset.zero);
+    drag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+
+    log.add('-a');
+    // #5 pointer move Offset(100.0, 100.0), received delta should be (100.0, 100.0).
+    tester.route(pointer5.move(const Offset(100.0, 100.0)));
+    log.add('-b');
+    // #5 pointer move Offset(-50.0, -50.0), received delta should be (-50.0, -50.0).
+    tester.route(pointer5.move(const Offset(50.0, 50.0)));
+
+    // Put down the second pointer 6.
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(Offset.zero);
+    drag.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+
+    // Currently, #5 pointer has the max move deltas and #6 pointer's move event
+    // may be merged.
+
+    log.add('-c');
+    // #6 pointer move Offset(100.0, 100.0), received delta should be (0.0, 0.0).
+    tester.route(pointer6.move(const Offset(100.0, 100.0)));
+    log.add('-d');
+    // #6 pointer move Offset(-50.0, -50.0), received delta should be (0.0, 0.0).
+    tester.route(pointer6.move(const Offset(50.0, 50.0)));
+
+    // Currently, the two pointers have the same sum move deltas.
+
+    log.add('-e');
+    // #6 pointer move Offset(1.0, 1.0), received delta should be (1.0, 1.0).
+    tester.route(pointer6.move(const Offset(51.0, 51.0)));
+    log.add('-f');
+    // #6 pointer move Offset(-1.0, -1.0), received delta should be (-1.0, -1.0).
+    tester.route(pointer6.move(const Offset(50.0, 50.0)));
+
+    // Currently, #6 pointer has the max move deltas and #5 pointer's move event
+    // may be merged.
+
+    log.add('-g');
+    // #5 pointer move Offset(1.0, 1.0), received delta should be (0.0, 0.0).
+    tester.route(pointer5.move(const Offset(51.0, 51.0)));
+    log.add('-h');
+    // #5 pointer move Offset(-1.0, -1.0), received delta should be (0.0, 0.0).
+    tester.route(pointer5.move(const Offset(50.0, 50.0)));
+
+    // Currently, the two pointers have the same sum move deltas.
+
+    log.add('-i');
+    // #6 pointer move Offset(10.0, 10.0), received delta should be (10.0, 10.0).
+    tester.route(pointer6.move(const Offset(60.0, 60.0)));
+    log.add('-j');
+    // #6 pointer move Offset(-10.0, -10.0), received delta should be (-10.0, -10.0).
+    tester.route(pointer6.move(const Offset(50.0, 50.0)));
+
+    // Currently, #6 pointer has the max move deltas.
+
+    // Trigger a new frame.
+    SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
+    SchedulerBinding.instance.handleDrawFrame();
+
+    log.add('-k');
+    // #5 pointer move Offset(1.0, 1.0), received delta should be (1.0, 1.0).
+    tester.route(pointer5.move(const Offset(51.0, 51.0)));
+    log.add('-l');
+    // #5 pointer move Offset(-1.0, -1.0), received delta should be (-1.0, -1.0).
+    tester.route(pointer5.move(const Offset(50.0, 50.0)));
+
+    tester.route(pointer5.up());
+    tester.route(pointer6.up());
+
+    // Tear down 'currentSystemFrameTimeStamp'
+    SchedulerBinding.instance.handleBeginFrame(Duration.zero);
+    SchedulerBinding.instance.handleDrawFrame();
+
+    expect(log, <String>[
+      '-a',
+      'drag-update (Offset(100.0, 100.0))',
+      '-b',
+      'drag-update (Offset(-50.0, -50.0))',
+      '-c',
+      'drag-update (Offset(0.0, 0.0))',
+      '-d',
+      'drag-update (Offset(0.0, 0.0))',
+      '-e',
+      'drag-update (Offset(1.0, 1.0))',
+      '-f',
+      'drag-update (Offset(-1.0, -1.0))',
+      '-g',
+      'drag-update (Offset(0.0, 0.0))',
+      '-h',
+      'drag-update (Offset(0.0, 0.0))',
+      '-i',
+      'drag-update (Offset(10.0, 10.0))',
+      '-j',
+      'drag-update (Offset(-10.0, -10.0))',
+      '-k',
+      'drag-update (Offset(1.0, 1.0))',
+      '-l',
+      'drag-update (Offset(-1.0, -1.0))',
     ]);
   });
 
