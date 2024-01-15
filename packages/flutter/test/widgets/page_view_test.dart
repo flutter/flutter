@@ -419,7 +419,10 @@ void main() {
     expect(previousPageCompleted, true);
   });
 
-  testWidgets('PageView in zero-size container', (WidgetTester tester) async {
+  testWidgets('PageView in zero-size container',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
