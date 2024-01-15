@@ -2973,7 +2973,7 @@ void main() {
 
   testWidgets('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final controller = TextEditingController(text: 'text');
+    final TextEditingController controller = TextEditingController(text: 'text');
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
