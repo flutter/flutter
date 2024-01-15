@@ -16,12 +16,12 @@
     "files.trimTrailingWhitespace": true,
     "cSpell.words": [
         "binpb",
-        "Cupertino",
+        "cupertino",
         "embedder",
         "GLSL",
         "goldens",
         "jank",
-        "Multidex",
+        "multidex",
         "objc",
         "overscroll",
         "overscrolled",
@@ -31,13 +31,13 @@
         "pubspec",
         "SIGUSR",
         "skia",
-        "sksl",
+        "SKSL",
         "systrace",
         "tappable",
         "unawaited",
         "vmservice",
         "vulkan",
-        "Wirelessly",
+        "wirelessly",
         "zanderso"
     ]
 }
