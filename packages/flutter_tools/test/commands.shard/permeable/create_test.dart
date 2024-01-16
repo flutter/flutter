@@ -2909,7 +2909,8 @@ void main() {
 
     expect(buildContent.contains('compileSdk flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
-    expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
+    expect(buildContent.contains('minSdk flutter.minSdkVersion'), true);
+    expect(buildContent.contains('targetSdk flutter.targetSdkVersion'), true);
   });
 
   testUsingContext('Android Java plugin contains namespace', () async {
