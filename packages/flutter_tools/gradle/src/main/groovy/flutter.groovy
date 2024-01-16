@@ -1436,14 +1436,20 @@ class FlutterPlugin implements Plugin<Project> {
             int firstInt = 0;
             int secondInt = 0
             try {
-                // Strip any chars after "-". For example "8.6-rc-2"
-                firstInt = firstAtIndex.substring(0, firstAtIndex.indexOf('-').toInteger())
+                if (firstAtIndex.contains("-")) {
+                    // Strip any chars after "-". For example "8.6-rc-2"
+                    firstAtIndex = firstAtIndex.substring(0, firstAtIndex.indexOf('-'))
+                }
+                firstInt = firstAtIndex.toInteger()
             } catch (NumberFormatException nfe) {
                 println(nfe)
             }
             try {
-                // Strip any chars after "-". For example "8.6-rc-2"
-                secondInt = secondAtIndex.substring(0, secondAtIndex.indexOf('-').toInteger())
+                if (firstAtIndex.contains("-")) {
+                    // Strip any chars after "-". For example "8.6-rc-2"
+                    secondAtIndex = secondAtIndex.substring(0, secondAtIndex.indexOf('-'))
+                }
+                secondInt = secondAtIndex.toInteger()
             } catch (NumberFormatException nfe) {
                 println(nfe)
             }
