@@ -1421,7 +1421,7 @@ void main() {
     );
 
     testWidgets(
-      'right-click mouse shows the context menu at position on Android, Fucshia, and Windows',
+      'right-click mouse shows the context menu at position on Android, Fuchsia, and Windows',
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
@@ -2077,7 +2077,7 @@ void main() {
       );
       final Offset gestureOffset = tester.getCenter(find.byKey(flutterLogo).first);
 
-      // Right click on unseletable element.
+      // Right click on unselectable element.
       final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
       await tester.pump();

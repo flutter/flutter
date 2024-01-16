@@ -75,6 +75,10 @@ platform_properties:
 
   mac:
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       dependencies: >-
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
@@ -87,6 +91,10 @@ platform_properties:
         }
   mac_arm64:
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       dependencies: >-
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
@@ -100,6 +108,10 @@ platform_properties:
         }
   mac_benchmark:
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       dependencies: >-
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
@@ -115,6 +127,10 @@ platform_properties:
         }
   mac_x64:
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       dependencies: >-
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
@@ -128,6 +144,10 @@ platform_properties:
         }
   mac_build_test:
     properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
@@ -173,6 +193,10 @@ platform_properties:
       device_type: "Pixel 7 Pro"
   mac_ios:
     properties:
+      contexts: >-
+        [
+          "osx_sdk_devicelab"
+        ]
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
@@ -187,6 +211,10 @@ platform_properties:
         }
   mac_arm64_ios:
     properties:
+      contexts: >-
+        [
+          "osx_sdk_devicelab"
+        ]
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
@@ -1693,6 +1721,10 @@ targets:
       cores: "8"
       machine_type: "n1-standard-8"
     properties:
+      contexts: >-
+        [
+          "android_virtual_device"
+        ]
       device_type: "none"
       tags: >
         ["devicelab", "linux"]
@@ -4185,7 +4217,7 @@ targets:
       # TODO(vashworth): Remove after Xcode 15 is default in CI (https://github.com/flutter/flutter/issues/132237)
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "15c500b"
         }
       os: Mac-13
     bringup: true
@@ -4228,7 +4260,7 @@ targets:
       # TODO(vashworth): Remove after Xcode 15 is default in CI (https://github.com/flutter/flutter/issues/132237)
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "15c500b"
         }
       os: Mac-13
     bringup: true
@@ -4338,7 +4370,7 @@ targets:
       # TODO(vashworth): Remove after Xcode 15 is default in CI (https://github.com/flutter/flutter/issues/132237)
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "15c500b"
         }
       os: Mac-13
     bringup: true
@@ -4518,7 +4550,7 @@ targets:
       # TODO(vashworth): Remove after Xcode 15 is default in CI (https://github.com/flutter/flutter/issues/132237)
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "15c500b"
         }
       os: Mac-13
     bringup: true
