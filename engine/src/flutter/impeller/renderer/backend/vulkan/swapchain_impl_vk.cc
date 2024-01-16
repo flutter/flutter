@@ -4,7 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain_impl_vk.h"
 
-#include "fml/synchronization/count_down_latch.h"
+#include "fml/synchronization/semaphore.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
@@ -32,12 +32,11 @@ struct FrameSynchronizer {
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
   /// @brief A latch that is signaled _after_ a given swapchain image is
   ///        presented.
-  std::shared_ptr<fml::CountDownLatch> present_latch;
+  std::shared_ptr<fml::Semaphore> present_semaphore;
   bool is_valid = false;
 
   explicit FrameSynchronizer(const vk::Device& device) {
-    auto acquire_res = device.createFenceUnique(
-        vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
+    auto acquire_res = device.createFenceUnique({});
     auto render_res = device.createSemaphoreUnique({});
     auto present_res = device.createSemaphoreUnique({});
     if (acquire_res.result != vk::Result::eSuccess ||
@@ -49,14 +48,21 @@ struct FrameSynchronizer {
     acquire = std::move(acquire_res.value);
     render_ready = std::move(render_res.value);
     present_ready = std::move(present_res.value);
-    present_latch = std::make_shared<fml::CountDownLatch>(0u);
     is_valid = true;
   }
 
   ~FrameSynchronizer() = default;
 
   bool WaitForFence(const vk::Device& device) {
-    present_latch->Wait();
+    if (!present_semaphore) {
+      return true;
+    }
+
+    if (!present_semaphore->Wait()) {
+      VALIDATION_LOG << "Present semaphore wait failed";
+      return false;
+    }
+    present_semaphore.reset();
     if (auto result = device.waitForFences(
             *acquire,                             // fence
             true,                                 // wait all
@@ -71,7 +77,6 @@ struct FrameSynchronizer {
       VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
       return false;
     }
-    present_latch = std::make_shared<fml::CountDownLatch>(1u);
     return true;
   }
 };
@@ -505,7 +510,7 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
     present_info.setWaitSemaphores(*sync->present_ready);
 
     auto result = present_queue_.presentKHR(present_info);
-    sync->present_latch->CountDown();
+    sync->present_semaphore->Signal();
 
     switch (result) {
       case vk::Result::eErrorOutOfDateKHR:
@@ -529,6 +534,8 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
     }
     FML_UNREACHABLE();
   };
+
+  sync->present_semaphore = std::make_shared<fml::Semaphore>(0u);
   if (context.GetSyncPresentation()) {
     task();
   } else {
