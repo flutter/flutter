@@ -335,7 +335,7 @@ void main() {
     });
 
     group('in release mode', () {
-      testUsingContext('suceeds when install and launch succeed', () async {
+      testUsingContext('succeeds when install and launch succeed', () async {
         final IOSDevice iosDevice = setUpIOSDevice(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),

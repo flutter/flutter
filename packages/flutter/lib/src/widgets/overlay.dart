@@ -1137,7 +1137,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
     // After adding `child` to the render tree, we want to make sure it will be
     // laid out in the same frame. This is done by calling markNeedsLayout on the
-    // layout surrgate. This ensures `child` is reachable via tree walk (see
+    // layout surrogate. This ensures `child` is reachable via tree walk (see
     // _RenderLayoutSurrogateProxyBox.performLayout).
     child._layoutSurrogate.markNeedsLayout();
   }
@@ -2107,7 +2107,7 @@ class _OverlayPortalElement extends RenderObjectElement {
     final Element? overlayChild = _overlayChild;
     // Instead of just detaching the render objects, removing them from the
     // render subtree entirely. This is a workaround for the
-    // !renderObject.attached assert in the `super.deactive()` method.
+    // !renderObject.attached assert in the `super.deactivate()` method.
     if (overlayChild != null) {
       final _RenderDeferredLayoutBox? box = overlayChild.renderObject as _RenderDeferredLayoutBox?;
       if (box != null) {

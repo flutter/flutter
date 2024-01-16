@@ -116,7 +116,7 @@ class SnackBarAction extends StatefulWidget {
   /// [SnackBarAction] is dismissed.
   final Color? disabledTextColor;
 
-  /// The button diabled background color. This color is shown after the
+  /// The button disabled background color. This color is shown after the
   /// [SnackBarAction] is dismissed.
   ///
   /// If not provided, defaults to [SnackBarThemeData.disabledActionBackgroundColor].

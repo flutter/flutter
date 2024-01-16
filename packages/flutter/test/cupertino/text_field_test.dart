@@ -9965,7 +9965,7 @@ void main() {
     expect(state.selectionOverlay!.handlesAreVisible, isTrue);
     expect(state.renderEditable.selectionColor, defaultSelectionColor);
 
-    // Single tapping a non-misspelled word shows a collpased cursor.
+    // Single tapping a non-misspelled word shows a collapsed cursor.
     await tester.tapAt(textOffsetToPosition(tester, 7));
     await tester.pumpAndSettle();
     expect(

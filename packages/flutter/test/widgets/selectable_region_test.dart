@@ -1421,7 +1421,7 @@ void main() {
     );
 
     testWidgets(
-      'right-click mouse shows the context menu at position on Android, Fucshia, and Windows',
+      'right-click mouse shows the context menu at position on Android, Fuchsia, and Windows',
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();

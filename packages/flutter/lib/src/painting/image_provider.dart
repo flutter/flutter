@@ -808,7 +808,7 @@ enum ResizeImagePolicy {
   /// If only one of `width` and `height` is non-null, then the output image
   /// will be scaled to the associated width or height, and the other dimension
   /// will take whatever value is needed to maintain the image's original aspect
-  /// ratio. These cases are simnilar to [BoxFit.fitWidth] and
+  /// ratio. These cases are similar to [BoxFit.fitWidth] and
   /// [BoxFit.fitHeight], respectively.
   ///
   /// If [ResizeImage.allowUpscaling] is false (the default), the width and the

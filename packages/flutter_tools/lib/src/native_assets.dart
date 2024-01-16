@@ -322,7 +322,7 @@ Future<Uri?> dryRunNativeAssets({
   required List<FlutterDevice> flutterDevices,
 }) async {
   if (flutterDevices.length != 1) {
-    return dryRunNativeAssetsMultipeOSes(
+    return dryRunNativeAssetsMultipleOSes(
       projectUri: projectUri,
       fileSystem: fileSystem,
       targetPlatforms: flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
@@ -412,7 +412,7 @@ Future<Uri?> dryRunNativeAssets({
 /// Dry run the native builds for multiple OSes.
 ///
 /// Needed for `flutter run -d all`.
-Future<Uri?> dryRunNativeAssetsMultipeOSes({
+Future<Uri?> dryRunNativeAssetsMultipleOSes({
   required NativeAssetsBuildRunner buildRunner,
   required Uri projectUri,
   required FileSystem fileSystem,
