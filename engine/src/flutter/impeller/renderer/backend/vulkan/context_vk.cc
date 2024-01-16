@@ -130,7 +130,7 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  queue_submit_thread_ = std::make_unique<fml::Thread>("QueueSubmitThread");
+  queue_submit_thread_ = std::make_unique<fml::Thread>("IplrVkQueueSub");
   queue_submit_thread_->GetTaskRunner()->PostTask([]() {
     // submitKHR is extremely cheap and mostly blocks on an internal fence.
     fml::RequestAffinity(fml::CpuAffinity::kEfficiency);
