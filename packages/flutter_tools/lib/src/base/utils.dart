@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -90,8 +91,10 @@ String getElapsedAsMilliseconds(Duration duration) {
 
 /// Return a String - with units - for the size in MB of the given number of bytes.
 String getSizeAsMB(int bytesLength) {
-  // TODO(guidezpl): verify me on Linux
-  return '${(bytesLength / (1000 * 1000)).toStringAsFixed(1)}MB';
+  // Because Windows displays 'MB' but actually reports MiB, we calculate MiB
+  // accordingly on Windows.
+  final int bytesInUnit = (Platform.isWindows ? 1024 : 1000)^2;
+  return '${(bytesLength / bytesInUnit).toStringAsFixed(1)}MB';
 }
 
 /// A class to maintain a list of items, fire events when items are added or
