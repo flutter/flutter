@@ -35,6 +35,7 @@ class PluginTest {
     this.dartOnlyPlugin = false,
     this.sharedDarwinSource = false,
     this.template = 'plugin',
+    this.cocoapodsTransitiveFlutterDependency = false,
   });
 
   final String buildTarget;
@@ -44,6 +45,7 @@ class PluginTest {
   final bool dartOnlyPlugin;
   final bool sharedDarwinSource;
   final String template;
+  final bool cocoapodsTransitiveFlutterDependency;
 
   Future<TaskResult> call() async {
     final Directory tempDir =
@@ -80,6 +82,11 @@ class PluginTest {
         await app.addPlugin('path_provider');
         section('Build app');
         await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
+        if (cocoapodsTransitiveFlutterDependency) {
+          section('Test app with Flutter as a transitive CocoaPods dependency');
+          await app.addCocoapodsTransitiveFlutterDependency();
+          await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
+        }
         if (runFlutterTest) {
           section('Test app');
           await app.runFlutterTest();
@@ -359,6 +366,57 @@ public class $pluginClass: NSObject, FlutterPlugin {
       project._reduceDarwinPluginMinimumVersion(name, target);
     }
     return project;
+  }
+
+  /// Creates a Pod that uses a Flutter plugin as a dependency and therefore
+  /// Flutter as a transitive dependency.
+  Future<void> addCocoapodsTransitiveFlutterDependency() async {
+    final String iosDirectoryPath = path.join(rootPath, 'ios');
+
+    final File nativePod = File(path.join(
+      iosDirectoryPath,
+      'NativePod',
+      'NativePod.podspec',
+    ));
+    nativePod.createSync(recursive: true);
+    nativePod.writeAsStringSync('''
+Pod::Spec.new do |s|
+  s.name             = 'NativePod'
+  s.version          = '1.0.0'
+  s.summary          = 'A pod to test Flutter as a transitive dependency.'
+  s.homepage         = 'https://flutter.dev'
+  s.license          = { :type => 'BSD' }
+  s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.source           = { :path => '.' }
+  s.source_files = "Classes", "Classes/**/*.{h,m}"
+  s.dependency 'plugintest'
+end
+''');
+
+    final File nativePodClass = File(path.join(
+      iosDirectoryPath,
+      'NativePod',
+      'Classes',
+      'NativePodTest.m',
+    ));
+    nativePodClass.createSync(recursive: true);
+    nativePodClass.writeAsStringSync('''
+#import <Flutter/Flutter.h>
+
+@interface NativePodTest : NSObject
+
+@end
+
+@implementation NativePodTest
+
+@end
+''');
+
+    final File podfileFile = File(path.join(iosDirectoryPath, 'Podfile'));
+    final List<String> podfileContents = podfileFile.readAsLinesSync();
+    final int index = podfileContents.indexWhere((String line) => line.contains('flutter_install_all_ios_pods'));
+    podfileContents.insert(index, "pod 'NativePod', :path => 'NativePod'");
+    podfileFile.writeAsStringSync(podfileContents.join('\n'));
   }
 
   // Make the platform version artificially low to test that the "deployment

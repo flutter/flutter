@@ -19,6 +19,20 @@ def flutter_ios_podfile_setup; end
 # Same as flutter_ios_podfile_setup for macOS.
 def flutter_macos_podfile_setup; end
 
+# Determine whether the target depends on Flutter (including transitive dependency)
+def depends_on_flutter(target, engine_pod_name)
+  target.dependencies.any? do |dependency|
+    if dependency.name == engine_pod_name
+      return true
+    end
+
+    if depends_on_flutter(dependency.target, engine_pod_name)
+      return true
+    end
+  end
+  return false
+end
+
 # Add iOS build settings to pod targets.
 #
 # @example
@@ -68,8 +82,8 @@ def flutter_additional_ios_build_settings(target)
     # ARC code targeting iOS 8 does not build on Xcode 14.3. Force to at least iOS 9.
     build_configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0' if force_to_arc_supported_min
 
-    # Skip other updates if it's not a Flutter plugin (transitive dependency).
-    next unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
+    # Skip other updates if it does not depend on Flutter (including transitive dependency)
+    next unless depends_on_flutter(target, 'Flutter')
 
     # Bitcode is deprecated, Flutter.framework bitcode blob will have been stripped.
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
@@ -139,8 +153,8 @@ def flutter_additional_macos_build_settings(target)
     # ARC code targeting macOS 10.10 does not build on Xcode 14.3. Force to at least macOS 10.11.
     build_configuration.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.11' if force_to_arc_supported_min
 
-    # Skip other updates if it's not a Flutter plugin (transitive dependency).
-    next unless target.dependencies.any? { |dependency| dependency.name == 'FlutterMacOS' }
+    # Skip other updates if it does not depend on Flutter (including transitive dependency)
+    next unless depends_on_flutter(target, 'FlutterMacOS')
 
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = local_engine || (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
