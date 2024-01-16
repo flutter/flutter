@@ -45,12 +45,11 @@ class WindowsVersionValidator extends DoctorValidator {
 
     // Use the string split method to extract the major version
     // and check against the [kUnsupportedVersions] list
-    ValidationType windowsVersionStatus;
+    final ValidationType windowsVersionStatus;
     final List<ValidationMessage> messages = <ValidationMessage>[];
     String statusInfo;
     if (matches.length == 1 &&
         !kUnsupportedVersions.contains(matches.elementAt(0).group(1))) {
-      windowsVersionStatus = ValidationType.success;
       statusInfo = 'Installed version of Windows is version 10 or higher';
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
@@ -72,8 +71,9 @@ class WindowsVersionValidator extends DoctorValidator {
             'The Topaz OFD Security Module process has been found running. '
             'If you are unable to build, you will need to disable it.'
           ));
+        } else {
+          windowsVersionStatus = ValidationType.success;}
         }
-      }
     } else {
       windowsVersionStatus = ValidationType.missing;
       statusInfo =
