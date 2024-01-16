@@ -4,9 +4,11 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -28,6 +30,10 @@ void main() {
       'FLUTTER_ROOT': '/',
     },
   );
+  late ProcessUtils processUtils;
+  late BufferLogger logger;
+  late ProcessManager processManager;
+  late Artifacts artifacts;
 
   setUpAll(() {
     Cache.flutterRoot = '';
@@ -42,15 +48,24 @@ void main() {
     fileSystem.file('.packages').createSync();
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    artifacts = Artifacts.test(fileSystem: fileSystem);
+    logger = BufferLogger.test();
+    processManager = FakeProcessManager.empty();
+    processUtils = ProcessUtils(
+      logger: logger,
+      processManager: processManager,
+    );
   });
 
   testUsingContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -62,15 +77,17 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Refuses to build a debug build for web', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -79,15 +96,17 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -99,15 +118,17 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Setup for a web build with default output directory', () async {
     final BuildCommand buildCommand = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -122,7 +143,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',
@@ -145,11 +166,13 @@ void main() {
 
   testUsingContext('Does not allow -O0 optimization level', () async {
     final BuildCommand buildCommand = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
+      processUtils: processUtils,
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
@@ -192,10 +215,12 @@ void main() {
   testUsingContext('Setup for a web build with a user specified output directory',
       () async {
     final BuildCommand buildCommand = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -221,7 +246,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',
@@ -248,7 +273,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('not hidden if feature flag is enabled', () async {
@@ -257,7 +282,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Defaults to web renderer auto mode when no option is specified', () async {
@@ -272,7 +297,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
@@ -297,7 +322,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
@@ -313,7 +338,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
@@ -329,7 +354,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 }

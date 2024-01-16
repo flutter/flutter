@@ -47,6 +47,28 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   /// The builder must not return null.
   final Widget Function(BuildContext context, ConstraintType constraints) builder;
 
+  /// Whether [builder] needs to be called again even if the layout constraints
+  /// are the same.
+  ///
+  /// When this widget's configuration is updated, the [builder] callback most
+  /// likely needs to be called to build this widget's child. However,
+  /// subclasses may provide ways in which the widget can be updated without
+  /// needing to rebuild the child. Such subclasses can use this method to tell
+  /// the framework when the child widget should be rebuilt.
+  ///
+  /// When this method is called by the framework, the newly configured widget
+  /// is asked if it requires a rebuild, and it is passed the old widget as a
+  /// parameter.
+  ///
+  /// See also:
+  ///
+  ///  * [State.setState] and [State.didUpdateWidget], which talk about widget
+  ///    configuration changes and how they're triggered.
+  ///  * [Element.update], the method that actually updates the widget's
+  ///    configuration.
+  @protected
+  bool updateShouldRebuild(covariant ConstrainedLayoutBuilder<ConstraintType> oldWidget) => true;
+
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
 
@@ -81,13 +103,14 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   @override
   void update(ConstrainedLayoutBuilder<ConstraintType> newWidget) {
     assert(widget != newWidget);
+    final ConstrainedLayoutBuilder<ConstraintType> oldWidget = widget as ConstrainedLayoutBuilder<ConstraintType>;
     super.update(newWidget);
     assert(widget == newWidget);
 
     renderObject.updateCallback(_layout);
-    // Force the callback to be called, even if the layout constraints are the
-    // same, because the logic in the callback might have changed.
-    renderObject.markNeedsBuild();
+    if (newWidget.updateShouldRebuild(oldWidget)) {
+      renderObject.markNeedsBuild();
+    }
   }
 
   @override

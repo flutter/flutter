@@ -257,7 +257,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// Whether a viewport is allowed to change [pixels] implicitly to respond to
   /// a call to [RenderObject.showOnScreen].
   ///
-  /// [RenderObject.showOnScreen] is for example used to bring a text field
+  /// [RenderObject.showOnScreen] is, for example, used to bring a text field
   /// fully on screen after it has received focus. This property controls
   /// whether the viewport associated with this offset is allowed to change the
   /// offset's [pixels] value to fulfill such a request.

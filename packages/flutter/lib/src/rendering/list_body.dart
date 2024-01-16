@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -62,7 +64,8 @@ class RenderListBody extends RenderBox
   Axis get mainAxis => axisDirectionToAxis(axisDirection);
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(_debugCheckConstraints(constraints));
     double mainAxisExtent = 0.0;
     RenderBox? child = firstChild;

@@ -5,12 +5,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
+import 'package:flutter/src/web.dart' as web_shim;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
 import '_test_http_request.dart';
-
 void runTests() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
@@ -24,7 +24,7 @@ void runTests() {
       ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
-      return testHttpRequest.getMock();
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{
@@ -50,7 +50,7 @@ void runTests() {
 
 
     httpRequestFactory = () {
-      return testHttpRequest.getMock();
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{
@@ -75,7 +75,7 @@ void runTests() {
       ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
-      return testHttpRequest.getMock();
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{

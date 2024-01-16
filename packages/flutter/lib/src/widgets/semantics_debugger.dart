@@ -94,7 +94,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
           // The generation of the _SemanticsDebuggerListener has changed.
         });
       }
-    });
+    }, debugLabel: 'SemanticsDebugger.update');
   }
 
   Offset? _lastPointerDownLocation;
@@ -182,6 +182,15 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
 class _SemanticsClient extends ChangeNotifier {
   _SemanticsClient(PipelineOwner pipelineOwner) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_SemanticsClient',
+        object: this,
+      );
+    }
     _semanticsHandle = pipelineOwner.ensureSemantics(
       listener: _didUpdateSemantics,
     );
@@ -191,6 +200,9 @@ class _SemanticsClient extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _semanticsHandle!.dispose();
     _semanticsHandle = null;
     super.dispose();

@@ -285,9 +285,6 @@ class WebDriverCommand {
 ///
 /// Depending on the platform the communication between `integration_tests` and
 /// the `driver_tests` can be different.
-///
-/// For the web implementation [WebCallbackManager].
-/// For the io implementation [IOCallbackManager].
 abstract class CallbackManager {
   /// The callback function to response the driver side input.
   Future<Map<String, dynamic>> callback(

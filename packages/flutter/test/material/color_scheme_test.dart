@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 
@@ -430,7 +429,7 @@ void main() {
     }, skip: isBrowser, // [intended] uses dart:isolate and io.
   );
 
-  test('fromImageProvider() propogates TimeoutException when image cannot be rendered', () async {
+  test('fromImageProvider() propagates TimeoutException when image cannot be rendered', () async {
     final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
     // Corrupt the image's bytelist so it cannot be read.
@@ -444,7 +443,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
     final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
     Widget label(String text, Color textColor, Color background) {

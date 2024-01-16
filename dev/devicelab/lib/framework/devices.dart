@@ -1346,7 +1346,7 @@ String get adbPath {
 
   if (androidHome == null) {
     throw const DeviceException(
-      'The ANDROID_SDK_ROOT environment variable is '
+      'The ANDROID_HOME environment variable is '
       'missing. The variable must point to the Android '
       'SDK directory containing platform-tools.'
     );

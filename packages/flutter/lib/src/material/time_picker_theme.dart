@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
+import 'colors.dart';
 import 'input_decorator.dart';
 import 'material_state.dart';
 import 'theme.dart';
@@ -43,7 +44,7 @@ class TimePickerThemeData with Diagnosticable {
     this.cancelButtonStyle,
     this.confirmButtonStyle,
     this.dayPeriodBorderSide,
-    this.dayPeriodColor,
+    Color? dayPeriodColor,
     this.dayPeriodShape,
     this.dayPeriodTextColor,
     this.dayPeriodTextStyle,
@@ -61,7 +62,7 @@ class TimePickerThemeData with Diagnosticable {
     this.inputDecorationTheme,
     this.padding,
     this.shape,
-  });
+  }) : _dayPeriodColor = dayPeriodColor;
 
   /// The background color of a time picker.
   ///
@@ -102,7 +103,21 @@ class TimePickerThemeData with Diagnosticable {
   /// brightness is [Brightness.dark].
   /// If the segment is not selected, [Colors.transparent] is used to allow the
   /// [Dialog]'s color to be used.
-  final Color? dayPeriodColor;
+  Color? get dayPeriodColor {
+    if (_dayPeriodColor == null || _dayPeriodColor is MaterialStateColor) {
+      return _dayPeriodColor;
+    }
+    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return _dayPeriodColor;
+      }
+      // The unselected day period should match the overall picker dialog color.
+      // Making it transparent enables that without being redundant and allows
+      // the optional elevation overlay for dark mode to be visible.
+      return Colors.transparent;
+    });
+  }
+  final Color? _dayPeriodColor;
 
   /// The shape of the day period that the time picker uses.
   ///

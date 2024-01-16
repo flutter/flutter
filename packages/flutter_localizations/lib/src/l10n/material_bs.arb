@@ -54,7 +54,6 @@
   "reorderItemRight": "Pomjeri desno",
   "expandedIconTapHint": "Suzi",
   "collapsedIconTapHint": "Proširi",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Još jedan znak",
   "remainingTextFieldCharacterCountOther": "Još $remainingCount znakova",
   "refreshIndicatorSemanticLabel": "Osvježi",

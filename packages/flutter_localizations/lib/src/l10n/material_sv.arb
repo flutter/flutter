@@ -51,7 +51,6 @@
   "reorderItemRight": "Flytta åt höger",
   "expandedIconTapHint": "Dölj",
   "collapsedIconTapHint": "Utöka",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 tecken kvar",
   "remainingTextFieldCharacterCountOther": "$remainingCount tecken kvar",
   "refreshIndicatorSemanticLabel": "Uppdatera",

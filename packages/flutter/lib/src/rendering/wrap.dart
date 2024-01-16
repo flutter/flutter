@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
@@ -493,7 +495,8 @@ class RenderWrap extends RenderBox
   bool _hasVisualOverflow = false;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeDryLayout(constraints);
   }
 

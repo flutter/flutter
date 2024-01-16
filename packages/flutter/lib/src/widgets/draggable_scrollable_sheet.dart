@@ -260,7 +260,7 @@ class DraggableScrollableController extends ChangeNotifier {
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 ///
 /// This is a sample widget which shows a [ListView] that has 25 [ListTile]s.
 /// It starts out as taking up half the body of the [Scaffold], and can be
@@ -269,36 +269,16 @@ class DraggableScrollableController extends ChangeNotifier {
 /// scrolled up or down, until they reach the top of the list again and the user
 /// drags the sheet back down.
 ///
-/// ```dart
-/// class HomePage extends StatelessWidget {
-///   const HomePage({super.key});
+/// On desktop and web running on desktop platforms, dragging to scroll with a mouse is disabled by default
+/// to align with the natural behavior found in other desktop applications.
 ///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: const Text('DraggableScrollableSheet'),
-///       ),
-///       body: SizedBox.expand(
-///         child: DraggableScrollableSheet(
-///           builder: (BuildContext context, ScrollController scrollController) {
-///             return Container(
-///               color: Colors.blue[100],
-///               child: ListView.builder(
-///                 controller: scrollController,
-///                 itemCount: 25,
-///                 itemBuilder: (BuildContext context, int index) {
-///                   return ListTile(title: Text('Item $index'));
-///                 },
-///               ),
-///             );
-///           },
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// This behavior is dictated by the [ScrollBehavior], and can be changed by adding
+/// [PointerDeviceKind.mouse] to [ScrollBehavior.dragDevices].
+/// For more info on this, please refer to https://docs.flutter.dev/release/breaking-changes/default-scroll-behavior-drag
+///
+/// Alternatively, this example illustrates how to add a drag handle for desktop applications.
+///
+/// ** See code in examples/api/lib/widgets/draggable_scrollable_sheet/draggable_scrollable_sheet.0.dart **
 /// {@end-tool}
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
@@ -514,7 +494,17 @@ class _DraggableSheetExtent {
         _currentSize = currentSize ?? ValueNotifier<double>(initialSize),
         availablePixels = double.infinity,
         hasDragged = hasDragged ?? false,
-        hasChanged = hasChanged ?? false;
+        hasChanged = hasChanged ?? false {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_DraggableSheetExtent',
+        object: this,
+      );
+    }
+  }
 
   VoidCallback? _cancelActivity;
 
@@ -610,6 +600,9 @@ class _DraggableSheetExtent {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _currentSize.dispose();
   }
 
@@ -763,7 +756,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
             _scrollController.positions.elementAt(index) as _DraggableScrollableSheetScrollPosition;
           position.goBallistic(0);
         }
-      });
+      }, debugLabel: 'DraggableScrollableSheet.snap');
     }
   }
 

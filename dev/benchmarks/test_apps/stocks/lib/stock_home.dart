@@ -265,7 +265,7 @@ class StockHomeState extends State<StockHome> {
         Navigator.pushNamed(context, '/stock', arguments: stock.symbol);
       },
       onShow: (Stock stock) {
-        _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
+        _scaffoldKey.currentState!.showBottomSheet((BuildContext context) => StockSymbolBottomSheet(stock: stock));
       },
     );
   }

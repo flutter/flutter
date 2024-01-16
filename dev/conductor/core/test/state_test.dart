@@ -15,24 +15,23 @@ void main() {
     final File stateFile = fileSystem.file('/path/to/statefile.json')
       ..createSync(recursive: true);
     const String candidateBranch = 'flutter-2.3-candidate.0';
-    final pb.ConductorState state = pb.ConductorState(
-      releaseChannel: 'stable',
-      releaseVersion: '2.3.4',
-      engine: pb.Repository(
-        candidateBranch: candidateBranch,
-        upstream: pb.Remote(
-          name: 'upstream',
-          url: 'git@github.com:flutter/engine.git',
-        ),
-      ),
-      framework: pb.Repository(
-        candidateBranch: candidateBranch,
-        upstream: pb.Remote(
-          name: 'upstream',
-          url: 'git@github.com:flutter/flutter.git',
-        ),
-      ),
-    );
+    final pb.ConductorState state = pb.ConductorState.create()
+      ..releaseChannel = 'stable'
+      ..releaseVersion = '2.3.4'
+      ..engine = (pb.Repository.create()
+        ..candidateBranch = candidateBranch
+        ..upstream = (pb.Remote.create()
+          ..name = 'upstream'
+          ..url = 'git@github.com:flutter/engine.git'
+        )
+      )
+      ..framework = (pb.Repository.create()
+        ..candidateBranch = candidateBranch
+        ..upstream = (pb.Remote.create()
+          ..name = 'upstream'
+          ..url = 'git@github.com:flutter/flutter.git'
+        )
+      );
     writeStateToFile(
       stateFile,
       state,

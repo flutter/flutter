@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('positions itself at anchorAbove if it fits and shifts up when not', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits and shifts up when not', (WidgetTester tester) async {
     late StateSetter setState;
     const double toolbarOverlap = 100;
     const double height = 500;

@@ -141,7 +141,6 @@
   "reorderItemRight": "Mover para a direita",
   "expandedIconTapHint": "Reduzir",
   "collapsedIconTapHint": "Expandir",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Resta 1 caráter",
   "remainingTextFieldCharacterCountOther": "Restam $remainingCount carateres",
   "refreshIndicatorSemanticLabel": "Atualizar"

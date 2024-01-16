@@ -51,7 +51,6 @@
   "reorderItemRight": "오른쪽으로 이동",
   "expandedIconTapHint": "접기",
   "collapsedIconTapHint": "펼치기",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1자 남음",
   "remainingTextFieldCharacterCountOther": "$remainingCount자 남음",
   "refreshIndicatorSemanticLabel": "새로고침",

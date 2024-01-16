@@ -148,7 +148,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
   bool get isRepaintBoundary => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -201,7 +202,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
         // Schedule a new post frame callback.
         _setOffset();
       }
-    });
+    }, debugLabel: 'RenderAndroidView.setOffset');
   }
 
   @override
@@ -319,7 +320,8 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   _UiKitViewGestureRecognizer? _gestureRecognizer;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -438,6 +440,12 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   void detach() {
     _gestureRecognizer!.reset();
     super.detach();
+  }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
   }
 }
 
@@ -711,7 +719,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   bool get isRepaintBoundary => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -806,5 +815,11 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void detach() {
     _gestureRecognizer!.reset();
     super.detach();
+  }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
   }
 }

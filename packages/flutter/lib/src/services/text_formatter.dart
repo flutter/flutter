@@ -265,8 +265,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   ///
   /// If [allow] is true, then the filter pattern is an allow list,
   /// and characters must match the pattern to be accepted. See also
-  /// the `FilteringTextInputFormatter.allow` constructor.
-  // TODO(goderbauer): Cannot link to the constructor because of https://github.com/dart-lang/dartdoc/issues/2276.
+  /// the [FilteringTextInputFormatter.allow()] constructor.
   ///
   /// If [allow] is false, then the filter pattern is a deny list,
   /// and characters that match the pattern are rejected. See also
@@ -420,7 +419,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
       return replacedLength - removedLength;
     }
 

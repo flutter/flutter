@@ -17,10 +17,12 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart' show fileSystem, platform;
+import 'test_utils.dart' show ProcessResultMatcher, fileSystem, platform;
 import 'transition_test_utils.dart';
 
 final String hostOs = platform.operatingSystem;
@@ -33,6 +35,7 @@ final List<String> devices = <String>[
 final List<String> buildSubcommands = <String>[
   hostOs,
   if (hostOs == 'macos') 'ios',
+  'apk',
 ];
 
 final List<String> add2appBuildSubcommands = <String>[
@@ -208,6 +211,8 @@ void main() {
             expectDylibIsBundledLinux(exampleDirectory, buildMode);
           } else if (buildSubcommand == 'windows') {
             expectDylibIsBundledWindows(exampleDirectory, buildMode);
+          } else if (buildSubcommand == 'apk') {
+            expectDylibIsBundledAndroid(exampleDirectory, buildMode);
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
@@ -246,11 +251,11 @@ void main() {
           ],
           workingDirectory: exampleDirectory.path,
         );
-        expect(result.exitCode, isNot(0));
         expect(
           (result.stdout as String) + (result.stderr as String),
           contains('link mode set to static, but this is not yet supported'),
         );
+        expect(result.exitCode, isNot(0));
       });
     });
   }
@@ -338,6 +343,37 @@ void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
   expect(dylib, exists);
 }
 
+void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
+  final File apk = appDirectory
+      .childDirectory('build')
+      .childDirectory('app')
+      .childDirectory('outputs')
+      .childDirectory('flutter-apk')
+      .childFile('app-$buildMode.apk');
+  expect(apk, exists);
+  final OperatingSystemUtils osUtils = OperatingSystemUtils(
+    fileSystem: fileSystem,
+    logger: BufferLogger.test(),
+    platform: platform,
+    processManager: processManager,
+  );
+  final Directory apkUnzipped = appDirectory.childDirectory('apk-unzipped');
+  apkUnzipped.createSync();
+  osUtils.unzip(apk, apkUnzipped);
+  final Directory lib = apkUnzipped.childDirectory('lib');
+  for (final String arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
+    final Directory archDir = lib.childDirectory(arch);
+    expect(archDir, exists);
+    // The dylibs should be next to the flutter and app so.
+    expect(archDir.childFile('libflutter.so'), exists);
+    if (buildMode != 'debug') {
+      expect(archDir.childFile('libapp.so'), exists);
+    }
+    final File dylib = archDir.childFile(OS.android.dylibFileName(packageName));
+    expect(dylib, exists);
+  }
+}
+
 /// For `flutter build` we can't easily test whether running the app works.
 /// Check that we have the dylibs in the app.
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
@@ -375,14 +411,16 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
     <String>[
       flutterBin,
       'create',
+      '--no-pub',
       '--template=package_ffi',
       packageName,
     ],
     workingDirectory: tempDirectory.path,
   );
-
   if (result.exitCode != 0) {
-    throw Exception('flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    throw Exception(
+      'flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+    );
   }
 
   final Directory packageDirectory = tempDirectory.childDirectory(packageName);
@@ -394,7 +432,29 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   expect(packageDirectory.childDirectory('macos/'), isNot(exists));
   expect(packageDirectory.childDirectory('windows/'), isNot(exists));
 
+  await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
+  await pinDependencies(
+      packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
+
+  final ProcessResult result2 = await processManager.run(
+    <String>[
+      flutterBin,
+      'pub',
+      'get',
+    ],
+    workingDirectory: packageDirectory.path,
+  );
+  expect(result2, const ProcessResultMatcher());
+
   return packageDirectory;
+}
+
+Future<void> pinDependencies(File pubspecFile) async {
+  expect(pubspecFile, exists);
+  final String oldPubspec = await pubspecFile.readAsString();
+  final String newPubspec = oldPubspec.replaceAll(RegExp(r':\s*\^'), ': ');
+  expect(newPubspec, isNot(oldPubspec));
+  await pubspecFile.writeAsString(newPubspec);
 }
 
 Future<void> inTempDir(Future<void> Function(Directory tempDirectory) fun) async {

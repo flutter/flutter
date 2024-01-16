@@ -45,34 +45,20 @@ enum Category {
 
 /// The platform sub-folder that a device type supports.
 enum PlatformType {
-  web._('web'),
-  android._('android'),
-  ios._('ios'),
-  linux._('linux'),
-  macos._('macos'),
-  windows._('windows'),
-  fuchsia._('fuchsia'),
-  custom._('custom');
-
-  const PlatformType._(this.value);
-
-  final String value;
+  web,
+  android,
+  ios,
+  linux,
+  macos,
+  windows,
+  fuchsia,
+  custom,
+  windowsPreview;
 
   @override
-  String toString() => value;
+  String toString() => name;
 
-  static PlatformType? fromString(String platformType) {
-    return const <String, PlatformType>{
-      'web': web,
-      'android': android,
-      'ios': ios,
-      'linux': linux,
-      'macos': macos,
-      'windows': windows,
-      'fuchsia': fuchsia,
-      'custom': custom,
-    }[platformType];
-  }
+  static PlatformType? fromString(String platformType) => values.asNameMap()[platformType];
 }
 
 /// A discovery mechanism for flutter-supported development devices.
@@ -772,6 +758,9 @@ abstract class Device {
   /// Whether the device supports the '--fast-start' development mode.
   bool get supportsFastStart => false;
 
+  /// Whether the Flavors feature ('--flavor') is supported for this device.
+  bool get supportsFlavors => false;
+
   /// Stop an app package on the current device.
   ///
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).
@@ -937,6 +926,7 @@ class DebuggingOptions {
     this.traceAllowlist,
     this.traceSkiaAllowlist,
     this.traceSystrace = false,
+    this.traceToFile,
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
     this.cacheSkSL = false,
@@ -950,6 +940,8 @@ class DebuggingOptions {
     this.devToolsServerAddress,
     this.hostname,
     this.port,
+    this.tlsCertPath,
+    this.tlsCertKeyPath,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
@@ -958,6 +950,7 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
+    this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
@@ -965,7 +958,6 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableVulkanValidation = false,
-    this.impellerForceGL = false,
     this.uninstallFirst = false,
     this.serveObservatory = false,
     this.enableDartProfiling = true,
@@ -977,6 +969,8 @@ class DebuggingOptions {
       this.dartEntrypointArgs = const <String>[],
       this.port,
       this.hostname,
+      this.tlsCertPath,
+      this.tlsCertKeyPath,
       this.webEnableExposeUrl,
       this.webUseSseForDebugProxy = true,
       this.webUseSseForDebugBackend = true,
@@ -985,11 +979,11 @@ class DebuggingOptions {
       this.webBrowserDebugPort,
       this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
+      this.webHeaders = const <String, String>{},
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
       this.enableVulkanValidation = false,
-      this.impellerForceGL = false,
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
@@ -1006,6 +1000,7 @@ class DebuggingOptions {
       traceSkia = false,
       traceSkiaAllowlist = null,
       traceSystrace = false,
+      traceToFile = null,
       endlessTraceBuffer = false,
       dumpSkpOnShaderCompilation = false,
       purgePersistentCache = false,
@@ -1037,6 +1032,7 @@ class DebuggingOptions {
     required this.traceAllowlist,
     required this.traceSkiaAllowlist,
     required this.traceSystrace,
+    required this.traceToFile,
     required this.endlessTraceBuffer,
     required this.dumpSkpOnShaderCompilation,
     required this.cacheSkSL,
@@ -1050,6 +1046,8 @@ class DebuggingOptions {
     required this.devToolsServerAddress,
     required this.port,
     required this.hostname,
+    required this.tlsCertPath,
+    required this.tlsCertKeyPath,
     required this.webEnableExposeUrl,
     required this.webUseSseForDebugProxy,
     required this.webUseSseForDebugBackend,
@@ -1058,6 +1056,7 @@ class DebuggingOptions {
     required this.webBrowserDebugPort,
     required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
+    required this.webHeaders,
     required this.webLaunchUrl,
     required this.vmserviceOutFile,
     required this.fastStart,
@@ -1065,7 +1064,6 @@ class DebuggingOptions {
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.enableVulkanValidation,
-    required this.impellerForceGL,
     required this.uninstallFirst,
     required this.serveObservatory,
     required this.enableDartProfiling,
@@ -1088,6 +1086,7 @@ class DebuggingOptions {
   final String? traceAllowlist;
   final String? traceSkiaAllowlist;
   final bool traceSystrace;
+  final String? traceToFile;
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;
   final bool cacheSkSL;
@@ -1101,13 +1100,14 @@ class DebuggingOptions {
   final Uri? devToolsServerAddress;
   final String? port;
   final String? hostname;
+  final String? tlsCertPath;
+  final String? tlsCertKeyPath;
   final bool? webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final ImpellerStatus enableImpeller;
   final bool enableVulkanValidation;
-  final bool impellerForceGL;
   final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
@@ -1136,6 +1136,9 @@ class DebuggingOptions {
 
   /// Allow developers to customize the browser's launch URL
   final String? webLaunchUrl;
+
+  /// Allow developers to add custom headers to web server
+  final Map<String, String> webHeaders;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1178,6 +1181,7 @@ class DebuggingOptions {
       ],
       if (enableSoftwareRendering) '--enable-software-rendering',
       if (traceSystrace) '--trace-systrace',
+      if (traceToFile != null) '--trace-to-file="$traceToFile"',
       if (skiaDeterministicRendering) '--skia-deterministic-rendering',
       if (traceSkia) '--trace-skia',
       if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
@@ -1218,6 +1222,7 @@ class DebuggingOptions {
     'traceAllowlist': traceAllowlist,
     'traceSkiaAllowlist': traceSkiaAllowlist,
     'traceSystrace': traceSystrace,
+    'traceToFile': traceToFile,
     'endlessTraceBuffer': endlessTraceBuffer,
     'dumpSkpOnShaderCompilation': dumpSkpOnShaderCompilation,
     'cacheSkSL': cacheSkSL,
@@ -1231,6 +1236,8 @@ class DebuggingOptions {
     'devToolsServerAddress': devToolsServerAddress.toString(),
     'port': port,
     'hostname': hostname,
+    'tlsCertPath': tlsCertPath,
+    'tlsCertKeyPath': tlsCertKeyPath,
     'webEnableExposeUrl': webEnableExposeUrl,
     'webUseSseForDebugProxy': webUseSseForDebugProxy,
     'webUseSseForDebugBackend': webUseSseForDebugBackend,
@@ -1240,13 +1247,13 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
+    'webHeaders': webHeaders,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
     'enableVulkanValidation': enableVulkanValidation,
-    'impellerForceGL': impellerForceGL,
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1269,6 +1276,7 @@ class DebuggingOptions {
       traceAllowlist: json['traceAllowlist'] as String?,
       traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
       traceSystrace: json['traceSystrace']! as bool,
+      traceToFile: json['traceToFile'] as String?,
       endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
       dumpSkpOnShaderCompilation: json['dumpSkpOnShaderCompilation']! as bool,
       cacheSkSL: json['cacheSkSL']! as bool,
@@ -1282,6 +1290,8 @@ class DebuggingOptions {
       devToolsServerAddress: json['devToolsServerAddress'] != null ? Uri.parse(json['devToolsServerAddress']! as String) : null,
       port: json['port'] as String?,
       hostname: json['hostname'] as String?,
+      tlsCertPath: json['tlsCertPath'] as String?,
+      tlsCertKeyPath: json['tlsCertKeyPath'] as String?,
       webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
       webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
       webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
@@ -1290,6 +1300,7 @@ class DebuggingOptions {
       webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
       webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
       webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
+      webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
@@ -1297,7 +1308,6 @@ class DebuggingOptions {
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
       enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
-      impellerForceGL: (json['impellerForceGL'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,

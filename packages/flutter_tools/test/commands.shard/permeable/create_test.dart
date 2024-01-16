@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateAndroidGradlePluginVersionForModule, templateDefaultGradleVersion;
 import 'package:flutter_tools/src/android/java.dart';
@@ -30,6 +31,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
@@ -71,6 +73,7 @@ void main() {
   late FakeProcessManager fakeProcessManager;
   late BufferLogger logger;
   late FakeStdio mockStdio;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -88,6 +91,10 @@ void main() {
     );
     fakeProcessManager = FakeProcessManager.empty();
     mockStdio = FakeStdio();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: fakeFlutterVersion,
+    );
   });
 
   tearDown(() {
@@ -171,10 +178,24 @@ void main() {
       ],
     );
     expect(logger.statusText, contains('In order to run your application, type:'));
-    // check that we're telling them about documentation
+    // Check that we're telling them about documentation
     expect(logger.statusText, contains('https://docs.flutter.dev/'));
     expect(logger.statusText, contains('https://api.flutter.dev/'));
-    // check that the tests run clean
+
+    // Check for usage values sent in analytics
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'create',
+          commandHasTerminal: false,
+          createAndroidLanguage: 'java',
+          createIosLanguage: 'objc',
+        ),
+      ),
+    );
+
+    // Check that the tests run clean
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     Pub: () => Pub.test(
@@ -187,6 +208,7 @@ void main() {
       stdio: mockStdio,
     ),
     Logger: () => logger,
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('can create a skeleton (list/detail) app', () async {
@@ -1263,7 +1285,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata'));
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
@@ -1344,7 +1366,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('ios', 'Runner.xcworkspace', 'xcshareddata'));
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
@@ -1589,7 +1611,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('path = "flutter_project.app";'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
 
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('macos', 'Runner.xcworkspace', 'xcshareddata'));
@@ -2035,7 +2057,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            Uri.parse('https://main-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() {}')),
           ),
         ]);
@@ -2058,7 +2080,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            Uri.parse('https://main-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); } // ignore: avoid_print')),
           ),
         ]);
@@ -2085,7 +2107,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
             response: FakeResponse(body: utf8.encode(samplesIndexJson)),
           ),
         ]);
@@ -2114,7 +2136,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
           ),
         ]);
       };
@@ -2138,7 +2160,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
             response: const FakeResponse(statusCode: HttpStatus.notFound),
           ),
         ]);
@@ -2865,7 +2887,7 @@ void main() {
 
     final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
-    expect(buildContent.contains('compileSdkVersion flutter.compileSdkVersion'), true);
+    expect(buildContent.contains('compileSdk flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
     expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
   });

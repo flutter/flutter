@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -45,7 +49,7 @@ Future<void> pumpCheckmarkChip(
   required Widget chip,
   Color? themeColor,
   Brightness brightness = Brightness.light,
-  bool useMaterial3 = false,
+  bool? useMaterial3,
 }) async {
   await tester.pumpWidget(
     wrapForChip(
@@ -90,6 +94,16 @@ RenderBox getMaterialBox(WidgetTester tester) {
   );
 }
 
+IconThemeData getIconData(WidgetTester tester) {
+  final IconTheme iconTheme = tester.firstWidget(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(IconTheme),
+    ),
+  );
+  return iconTheme.data;
+}
+
 void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
   final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
   // There should be two Material widgets, first Material is from the "_wrapForChip" and
@@ -100,14 +114,13 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('InputChip.color resolves material states', (WidgetTester tester) async {
+  testWidgets('InputChip.color resolves material states', (WidgetTester tester) async {
     const Color disabledSelectedColor = Color(0xffffff00);
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
     Widget buildApp({ required bool enabled, required bool selected }) {
       return wrapForChip(
-        useMaterial3: true,
         child: InputChip(
           onSelected: enabled ? (bool value) { } : null,
           selected: selected,
@@ -156,13 +169,12 @@ void main() {
     expect(getMaterialBox(tester), paints..rrect(color: disabledSelectedColor));
   });
 
-  testWidgetsWithLeakTracking('InputChip uses provided state color properties', (WidgetTester tester) async {
+  testWidgets('InputChip uses provided state color properties', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
     Widget buildApp({ required bool enabled, required bool selected }) {
       return wrapForChip(
-        useMaterial3: true,
         child: InputChip(
           onSelected: enabled ? (bool value) { } : null,
           selected: selected,
@@ -195,7 +207,7 @@ void main() {
     expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
   });
 
-  testWidgetsWithLeakTracking('InputChip can be tapped', (WidgetTester tester) async {
+  testWidgets('InputChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -210,7 +222,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('loses focus when disabled', (WidgetTester tester) async {
+  testWidgets('loses focus when disabled', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'InputChip');
     await tester.pumpWidget(
       wrapForChip(
@@ -244,7 +256,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('cannot be traversed to when disabled', (WidgetTester tester) async {
+  testWidgets('cannot be traversed to when disabled', (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'InputChip 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'InputChip 2');
     await tester.pumpWidget(
@@ -282,70 +294,73 @@ void main() {
     focusNode2.dispose();
   });
 
-  testWidgetsWithLeakTracking('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgets('Material2 - Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
+      useMaterial3: false,
     );
 
-    expectCheckmarkColor(
-      find.byType(InputChip),
-      Colors.black.withAlpha(0xde),
-    );
+    expectCheckmarkColor(find.byType(InputChip), Colors.black.withAlpha(0xde));
   });
 
-  testWidgetsWithLeakTracking('Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgets('Material3 - Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+    await pumpCheckmarkChip(tester, chip: selectedInputChip());
+
+    expectCheckmarkColor(find.byType(InputChip), Colors.black.withAlpha(0xde));
+  });
+
+  testWidgets('Material2 - Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+    await pumpCheckmarkChip(
+      tester,
+      chip: selectedInputChip(),
+      brightness: Brightness.dark,
+      useMaterial3: false,
+    );
+
+    expectCheckmarkColor(find.byType(InputChip), Colors.white.withAlpha(0xde));
+  });
+
+  testWidgets('Material3 - Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
       brightness: Brightness.dark,
     );
 
-    expectCheckmarkColor(
-      find.byType(InputChip),
-      Colors.white.withAlpha(0xde),
-    );
+    expectCheckmarkColor(find.byType(InputChip), Colors.white.withAlpha(0xde));
   });
 
-  testWidgetsWithLeakTracking('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
+  testWidgets('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
       themeColor: const Color(0xff00ff00),
     );
 
-    expectCheckmarkColor(
-      find.byType(InputChip),
-      const Color(0xff00ff00),
-    );
+    expectCheckmarkColor(find.byType(InputChip), const Color(0xff00ff00));
   });
 
-  testWidgetsWithLeakTracking('Input chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
+  testWidgets('Input chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(checkmarkColor: const Color(0xff00ff00)),
     );
 
-    expectCheckmarkColor(
-      find.byType(InputChip),
-      const Color(0xff00ff00),
-    );
+    expectCheckmarkColor(find.byType(InputChip), const Color(0xff00ff00));
   });
 
-  testWidgetsWithLeakTracking('Input chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
+  testWidgets('Input chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(checkmarkColor: const Color(0xffff0000)),
       themeColor: const Color(0xff00ff00),
     );
 
-    expectCheckmarkColor(
-      find.byType(InputChip),
-      const Color(0xffff0000),
-    );
+    expectCheckmarkColor(find.byType(InputChip), const Color(0xffff0000));
   });
 
-  testWidgetsWithLeakTracking('InputChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets('InputChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const InputChip(label: label)));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -354,7 +369,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgetsWithLeakTracking('Input chip has correct selected color when enabled - M3 defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - Input chip has correct selected color when enabled', (WidgetTester tester) async {
     final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
     await pumpCheckmarkChip(
       tester,
@@ -366,7 +381,7 @@ void main() {
     expect(materialBox, paints..rrect(color: material3ChipDefaults.backgroundColor));
   });
 
-  testWidgetsWithLeakTracking('Input chip has correct selected color when disabled - M3 defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - Input chip has correct selected color when disabled', (WidgetTester tester) async {
     final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
     await pumpCheckmarkChip(
       tester,
@@ -376,5 +391,44 @@ void main() {
 
     final RenderBox materialBox = getMaterialBox(tester);
     expect(materialBox, paints..path(color: material3ChipDefaults.disabledColor));
+  });
+
+  testWidgets('InputChip uses provided iconTheme', (WidgetTester tester) async {
+    Widget buildChip({ IconThemeData? iconTheme }) {
+      return MaterialApp(
+        home: Material(
+          child: InputChip(
+            iconTheme: iconTheme,
+            avatar: const Icon(Icons.add),
+            label: const Text('Test'),
+          ),
+        ),
+      );
+    }
+
+    // Test default icon theme.
+    await tester.pumpWidget(buildChip());
+
+    expect(getIconData(tester).color, ThemeData().iconTheme.color);
+
+    // Test provided icon theme.
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
+
+    expect(getIconData(tester).color, const Color(0xff00ff00));
+  });
+
+  testWidgets('Delete button is visible InputChip is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: InputChip(
+          isEnabled: false,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      ),
+    );
+
+    // Delete button should be visible.
+    expectLater(find.byType(RawChip), matchesGoldenFile('input_chip.disabled.delete_button.png'));
   });
 }

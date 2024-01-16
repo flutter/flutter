@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
@@ -391,6 +393,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
+
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment
         .outputDir
@@ -437,6 +440,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       assetDirectory,
       targetPlatform: TargetPlatform.darwin,
       shaderTarget: ShaderTarget.sksl,
+      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -628,6 +632,11 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
           label: buildSuccess ? 'success' : 'fail',
           flutterUsage: environment.usage,
         ).send();
+        environment.analytics.send(Event.appleUsageEvent(
+          workflow: 'assemble',
+          parameter: 'macos-archive',
+          result: buildSuccess ? 'success' : 'fail',
+        ));
       }
     }
   }

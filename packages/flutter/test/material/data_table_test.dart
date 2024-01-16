@@ -11,13 +11,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 import 'data_table_test_utils.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('DataTable control test', (WidgetTester tester) async {
+  testWidgets('DataTable control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     Widget buildTable({ int? sortColumnIndex, bool sortAscending = true }) {
@@ -160,7 +159,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('DataTable control test - tristate', (WidgetTester tester) async {
+  testWidgets('DataTable control test - tristate', (WidgetTester tester) async {
     final List<String> log = <String>[];
     const int numItems = 3;
     Widget buildTable(List<bool> selected, {int? disabledIndex}) {
@@ -230,7 +229,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('DataTable control test - no checkboxes', (WidgetTester tester) async {
+  testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     Widget buildTable({ bool checkboxes = false }) {
@@ -296,7 +295,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('DataTable overflow test - header', (WidgetTester tester) async {
+  testWidgets('DataTable overflow test - header', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -329,7 +328,7 @@ void main() {
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
   });
 
-  testWidgetsWithLeakTracking('DataTable overflow test - header with spaces', (WidgetTester tester) async {
+  testWidgets('DataTable overflow test - header with spaces', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -357,7 +356,7 @@ void main() {
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
-  testWidgetsWithLeakTracking('DataTable overflow test', (WidgetTester tester) async {
+  testWidgets('DataTable overflow test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -385,7 +384,7 @@ void main() {
     expect(tester.takeException(), isNull); // cell overflows table, but text doesn't overflow cell
   });
 
-  testWidgetsWithLeakTracking('DataTable overflow test', (WidgetTester tester) async {
+  testWidgets('DataTable overflow test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -413,7 +412,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('DataTable column onSort test', (WidgetTester tester) async {
+  testWidgets('DataTable column onSort test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -441,7 +440,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('DataTable sort indicator orientation', (WidgetTester tester) async {
+  testWidgets('DataTable sort indicator orientation', (WidgetTester tester) async {
     Widget buildTable({ bool sortAscending = true }) {
       return DataTable(
         sortColumnIndex: 0,
@@ -493,7 +492,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DataTable sort indicator orientation does not change on state update', (WidgetTester tester) async {
+  testWidgets('DataTable sort indicator orientation does not change on state update', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43724
     Widget buildTable({String title = 'Name1'}) {
       return DataTable(
@@ -545,7 +544,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DataTable sort indicator orientation does not change on state update - reverse', (WidgetTester tester) async {
+  testWidgets('DataTable sort indicator orientation does not change on state update - reverse', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43724
     Widget buildTable({String title = 'Name1'}) {
       return DataTable(
@@ -598,7 +597,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DataTable row onSelectChanged test', (WidgetTester tester) async {
+  testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -626,7 +625,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('DataTable custom row height', (WidgetTester tester) async {
+  testWidgets('DataTable custom row height', (WidgetTester tester) async {
     Widget buildCustomTable({
       int? sortColumnIndex,
       bool sortAscending = true,
@@ -739,7 +738,7 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, greaterThan(0.0));
   });
 
-  testWidgetsWithLeakTracking('DataTable custom row height one row taller than others', (WidgetTester tester) async {
+  testWidgets('DataTable custom row height one row taller than others', (WidgetTester tester) async {
     const String multilineText = 'Line one.\nLine two.\nLine three.\nLine four.';
 
     Widget buildCustomTable({
@@ -780,7 +779,7 @@ void main() {
     expect(multilineRowHeight, greaterThan(singleLineRowHeight));
   });
 
-  testWidgetsWithLeakTracking('DataTable custom row height - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgets('DataTable custom row height - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
     Widget buildCustomTable({
       double dataRowHeight = 48.0,
     }) {
@@ -830,7 +829,7 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 30.0);
   });
 
-  testWidgetsWithLeakTracking('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
+  testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
@@ -1053,7 +1052,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
+  testWidgets('DataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
@@ -1247,7 +1246,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DataTable set border width test', (WidgetTester tester) async {
+  testWidgets('DataTable set border width test', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1299,7 +1298,7 @@ void main() {
     expect(boxDecoration.border!.top.width, thickness);
   });
 
-  testWidgetsWithLeakTracking('DataTable set show bottom border', (WidgetTester tester) async {
+  testWidgets('DataTable set show bottom border', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1348,7 +1347,7 @@ void main() {
     expect(boxDecoration.border!.bottom.width, 0.0);
   });
 
-  testWidgetsWithLeakTracking('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
+  testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
     Widget buildTable({ int? sortColumnIndex, bool sortEnabled = true }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -1412,7 +1411,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('DataTable correctly renders with a mouse', (WidgetTester tester) async {
+  testWidgets('DataTable correctly renders with a mouse', (WidgetTester tester) async {
     // Regression test for a bug described in
     // https://github.com/flutter/flutter/pull/43735#issuecomment-589459947
     // Filed at https://github.com/flutter/flutter/issues/51152
@@ -1460,7 +1459,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
-  testWidgetsWithLeakTracking('DataRow renders default selected row colors', (WidgetTester tester) async {
+  testWidgets('DataRow renders default selected row colors', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.light();
     Widget buildTable({bool selected = false}) {
       return MaterialApp(
@@ -1502,7 +1501,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DataRow renders checkbox with colors from CheckboxTheme', (WidgetTester tester) async {
+  testWidgets('DataRow renders checkbox with colors from CheckboxTheme', (WidgetTester tester) async {
     const Color fillColor = Color(0xFF00FF00);
     const Color checkColor = Color(0xFF0000FF);
 
@@ -1547,7 +1546,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DataRow renders custom colors when selected', (WidgetTester tester) async {
+  testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
     const Color selectedColor = Colors.green;
     const Color defaultColor = Colors.red;
 
@@ -1596,7 +1595,7 @@ void main() {
     expect(lastTableRowBoxDecoration().color, selectedColor);
   });
 
-  testWidgetsWithLeakTracking('DataRow renders custom colors when disabled', (WidgetTester tester) async {
+  testWidgets('DataRow renders custom colors when disabled', (WidgetTester tester) async {
     const Color disabledColor = Colors.grey;
     const Color defaultColor = Colors.red;
 
@@ -1651,7 +1650,7 @@ void main() {
     expect(lastTableRowBoxDecoration().color, disabledColor);
   });
 
-  testWidgetsWithLeakTracking('DataRow renders custom colors when pressed', (WidgetTester tester) async {
+  testWidgets('Material2 - DataRow renders custom colors when pressed', (WidgetTester tester) async {
     const Color pressedColor = Color(0xff4caf50);
     Widget buildTable() {
       return DataTable(
@@ -1691,7 +1690,54 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('DataTable can render inside an AlertDialog', (WidgetTester tester) async {
+  testWidgets('Material3 - DataRow renders custom colors when pressed', (WidgetTester tester) async {
+    const Color pressedColor = Color(0xff4caf50);
+    Widget buildTable() {
+      return DataTable(
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Column1'),
+          ),
+        ],
+        rows: <DataRow>[
+          DataRow(
+            color: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return pressedColor;
+                }
+                return Colors.transparent;
+              },
+            ),
+            onSelectChanged: (bool? value) {},
+            cells: const <DataCell>[
+              DataCell(Text('Content1')),
+            ],
+          ),
+        ],
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Material(child: buildTable()),
+    ));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
+    await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods.
+    expect(
+      box,
+      paints
+        ..rect()
+        ..rect(rect: const Rect.fromLTRB(0.0, 56.0, 800.0, 104.0), color: pressedColor.withOpacity(0.0)),
+    );
+    await gesture.up();
+  });
+
+  testWidgets('DataTable can render inside an AlertDialog', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1713,7 +1759,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('DataTable renders with border and background decoration', (WidgetTester tester) async {
+  testWidgets('DataTable renders with border and background decoration', (WidgetTester tester) async {
     const double width = 800;
     const double height = 600;
     const double borderHorizontal = 5.0;
@@ -1762,7 +1808,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
+  testWidgets('checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
     const double customCheckboxHorizontalMargin = 15.0;
     const double customHorizontalMargin = 10.0;
     Finder cellContent;
@@ -1851,7 +1897,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DataRow is disabled when onSelectChanged is not set', (WidgetTester tester) async {
+  testWidgets('DataRow is disabled when onSelectChanged is not set', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1886,7 +1932,7 @@ void main() {
     expect(find.widgetWithText(TableRowInkWell, 'GitHub'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('DataTable set interior border test', (WidgetTester tester) async {
+  testWidgets('DataTable set interior border test', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1952,7 +1998,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100952
-  testWidgetsWithLeakTracking('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
+  testWidgets('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1989,7 +2035,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('DataTable clip behavior', (WidgetTester tester) async {
+  testWidgets('DataTable clip behavior', (WidgetTester tester) async {
     const Color selectedColor = Colors.green;
     const Color defaultColor = Colors.red;
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(30));
@@ -2038,7 +2084,7 @@ void main() {
     expect(material.borderRadius, borderRadius);
   });
 
-  testWidgetsWithLeakTracking('DataTable dataRowMinHeight smaller or equal dataRowMaxHeight validation', (WidgetTester tester) async {
+  testWidgets('DataTable dataRowMinHeight smaller or equal dataRowMaxHeight validation', (WidgetTester tester) async {
     DataTable createDataTable() =>
       DataTable(
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
@@ -2051,7 +2097,7 @@ void main() {
       e.toString().contains('dataRowMaxHeight >= dataRowMinHeight'))));
   });
 
-  testWidgetsWithLeakTracking('DataTable dataRowHeight is not used together with dataRowMinHeight or dataRowMaxHeight', (WidgetTester tester) async {
+  testWidgets('DataTable dataRowHeight is not used together with dataRowMinHeight or dataRowMaxHeight', (WidgetTester tester) async {
     DataTable createDataTable({double? dataRowHeight, double? dataRowMinHeight, double? dataRowMaxHeight}) =>
       DataTable(
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
@@ -2072,7 +2118,7 @@ void main() {
   });
 
   group('TableRowInkWell', () {
-    testWidgetsWithLeakTracking('can handle secondary taps', (WidgetTester tester) async {
+    testWidgets('can handle secondary taps', (WidgetTester tester) async {
       bool secondaryTapped = false;
       bool secondaryTappedDown = false;
 
@@ -2116,7 +2162,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Heading cell cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+  testWidgets('Heading cell cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2177,7 +2223,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 
-  testWidgetsWithLeakTracking('DataRow cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+  testWidgets('DataRow cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2238,7 +2284,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
   });
 
-  testWidgetsWithLeakTracking("DataRow cursor doesn't update checkbox cursor", (WidgetTester tester) async {
+  testWidgets("DataRow cursor doesn't update checkbox cursor", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2281,7 +2327,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/114470.
-  testWidgetsWithLeakTracking('DataTable text styles are merged with default text style', (WidgetTester tester) async {
+  testWidgets('DataTable text styles are merged with default text style', (WidgetTester tester) async {
     late DefaultTextStyle defaultTextStyle;
     await tester.pumpWidget(
       MaterialApp(

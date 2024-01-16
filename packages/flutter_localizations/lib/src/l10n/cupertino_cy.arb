@@ -39,6 +39,7 @@
   "cutButtonLabel": "Torri",
   "copyButtonLabel": "Copïo",
   "pasteButtonLabel": "Gludo",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Dewis y Cyfan",
   "searchTextFieldPlaceholderLabel": "Chwilio",
   "modalBarrierDismissLabel": "Diystyru",

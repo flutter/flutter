@@ -55,7 +55,6 @@
   "reorderItemRight": "Mutați la dreapta",
   "expandedIconTapHint": "Restrângeți",
   "collapsedIconTapHint": "Extindeți",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "un caracter rămas",
   "remainingTextFieldCharacterCountOther": "$remainingCount de caractere rămase",
   "refreshIndicatorSemanticLabel": "Actualizați",

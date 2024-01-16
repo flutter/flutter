@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
@@ -615,7 +616,8 @@ class RenderListWheelViewport
   bool get sizedByParent => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -822,9 +824,10 @@ class RenderListWheelViewport
   @override
   void dispose() {
     _clipRectLayer.layer = null;
+    _childOpacityLayerHandler.layer = null;
     super.dispose();
   }
-
+  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
     // The magnifier cannot be turned off if the opacity is less than 1.0.
@@ -835,7 +838,7 @@ class RenderListWheelViewport
 
     // In order to reduce the number of opacity layers, we first paint all
     // partially opaque children, then finally paint the fully opaque children.
-    context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
+    _childOpacityLayerHandler.layer = context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
       _paintAllChildren(context, offset, center: false);
     });
     _paintAllChildren(context, offset, center: true);
@@ -876,7 +879,7 @@ class RenderListWheelViewport
     // renderChildrenOutsideViewport is true. Otherwise, only children within
     // suitable angles (via _first/lastVisibleLayoutOffset) reach the paint
     // phase.
-    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0) {
+    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0 || angle.isNaN) {
       return;
     }
 
@@ -905,10 +908,10 @@ class RenderListWheelViewport
   // differently if it intersects with the magnifier.
   //
   // `center` controls how items that partially intersect the center magnifier
-  // are rendered. If `center` is false, items are only painted cynlindrically.
+  // are rendered. If `center` is false, items are only painted cylindrically.
   // If `center` is true, only the clipped magnifier items are painted.
   // If `center` is null, partially intersecting items are painted both as the
-  // magnifier and cynlidrical item, while non-intersecting items are painted
+  // magnifier and cylindrical item, while non-intersecting items are painted
   // only cylindrically.
   //
   // This property is used to lift the opacity that would be applied to each

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
@@ -91,6 +92,15 @@ class CreateCommand extends CreateBase {
     );
   }
 
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
+    workflow: commandPath,
+    commandHasTerminal: hasTerminal,
+    createProjectType: stringArg('template'),
+    createAndroidLanguage: stringArg('android-language'),
+    createIosLanguage: stringArg('ios-language'),
+  );
+
   // Lazy-initialize the net utilities with values from the context.
   late final Net _net = Net(
     httpClientFactory: context.get<HttpClientFactory>(),
@@ -101,7 +111,7 @@ class CreateCommand extends CreateBase {
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost => globals.flutterVersion.channel == 'stable'
         ? 'api.flutter.dev'
-        : 'master-api.flutter.dev';
+        : 'main-api.flutter.dev';
 
   Future<String?> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
@@ -967,8 +977,8 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
   final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
   final VersionRange validJavaRange = gradle.getJavaVersionFor(gradleV: templateGradleVersion, agpV: templateAgpVersion);
-  // validJavaRange should have non-null verisonMin and versionMax since it based on our template AGP and Gradle versions.
-  final String validJavaRangeMessage = '(minimum compatible version: ${validJavaRange.versionMin!}, maximum compatible version: ${validJavaRange.versionMax!})';
+  // validJavaRange should have non-null versionMin and versionMax since it based on our template AGP and Gradle versions.
+  final String validJavaRangeMessage = '(Java ${validJavaRange.versionMin!} <= compatible Java version < Java ${validJavaRange.versionMax!})';
 
   return '''
 The configured version of Java detected may conflict with the $incompatibleDependency version in your new Flutter $projectType.

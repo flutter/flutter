@@ -18,6 +18,7 @@ import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
+import 'device.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -26,7 +27,11 @@ class BundleBuilder {
   /// Builds the bundle for the given target platform.
   ///
   /// The default `mainPath` is `lib/main.dart`.
-  /// The default  `manifestPath` is `pubspec.yaml`
+  /// The default `manifestPath` is `pubspec.yaml`.
+  ///
+  /// If [buildNativeAssets], native assets are built and the mapping for native
+  /// assets lookup at runtime is embedded in the kernel file, otherwise an
+  /// empty native assets mapping is embedded in the kernel file.
   Future<void> build({
     required TargetPlatform platform,
     required BuildInfo buildInfo,
@@ -36,6 +41,7 @@ class BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
+    bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
@@ -60,12 +66,14 @@ class BundleBuilder {
         kTargetFile: mainPath,
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
+        if (!buildNativeAssets) kNativeAssets: 'false'
       },
       artifacts: globals.artifacts!,
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
@@ -107,6 +115,7 @@ Future<AssetBundle?> buildAssets({
   String? assetDirPath,
   String? packagesPath,
   TargetPlatform? targetPlatform,
+  String? flavor,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= globals.fs.path.absolute('.packages');
@@ -117,6 +126,7 @@ Future<AssetBundle?> buildAssets({
     manifestPath: manifestPath,
     packagesPath: packagesPath,
     targetPlatform: targetPlatform,
+    flavor: flavor,
   );
   if (result != 0) {
     return null;
@@ -131,6 +141,7 @@ Future<void> writeBundle(
   Map<String, AssetKind> entryKinds, {
   Logger? loggerOverride,
   required TargetPlatform targetPlatform,
+  required ImpellerStatus impellerStatus,
 }) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
@@ -159,6 +170,11 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
+  ShaderTarget shaderTarget = ShaderTarget.sksl;
+  if (targetPlatform == TargetPlatform.tester && impellerStatus == ImpellerStatus.enabled) {
+    shaderTarget = ShaderTarget.impellerSwiftShader;
+  }
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -186,7 +202,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
-                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+                target: shaderTarget,
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
             case AssetKind.model:

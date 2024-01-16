@@ -14,6 +14,7 @@ class TooltipExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(tooltipTheme: const TooltipThemeData(preferBelow: false)),
       home: Scaffold(
         appBar: AppBar(title: const Text('Tooltip Sample')),
         body: const Center(
@@ -37,7 +38,7 @@ class TooltipSample extends StatelessWidget {
       ),
       height: 50,
       padding: const EdgeInsets.all(8.0),
-      preferBelow: false,
+      preferBelow: true,
       textStyle: const TextStyle(
         fontSize: 24,
       ),

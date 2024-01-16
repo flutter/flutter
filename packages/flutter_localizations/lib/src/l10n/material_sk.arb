@@ -57,7 +57,6 @@
   "reorderItemRight": "Presunúť doprava",
   "expandedIconTapHint": "Zbaliť",
   "collapsedIconTapHint": "Rozbaliť",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Zostáva 1 znak",
   "remainingTextFieldCharacterCountOther": "Zostáva $remainingCount znakov",
   "refreshIndicatorSemanticLabel": "Obnoviť",

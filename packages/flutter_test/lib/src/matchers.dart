@@ -600,7 +600,11 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// provided, then they are not part of the comparison. All of the boolean
 /// flag and action fields must match, and default to false.
 ///
-/// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
+/// To find a [SemanticsNode] directly, use [CommonFinders.semantics].
+/// These methods will search the semantics tree directly and avoid the edge
+/// cases that [SemanticsController.find] sometimes runs into.
+///
+/// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -620,6 +624,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [containsSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
+  String? identifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -697,6 +702,7 @@ Matcher matchesSemantics({
   List<Matcher>? children,
 }) {
   return _MatchesSemanticsData(
+    identifier: identifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -780,7 +786,11 @@ Matcher matchesSemantics({
 /// There are no default expected values, so no unspecified values will be
 /// validated.
 ///
-/// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
+/// To find a [SemanticsNode] directly, use [CommonFinders.semantics].
+/// These methods will search the semantics tree directly and avoid the edge
+/// cases that [SemanticsController.find] sometimes runs into.
+///
+/// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -800,6 +810,7 @@ Matcher matchesSemantics({
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [matchesSemantics], a similar matcher with default values for flags and actions.
 Matcher containsSemantics({
+  String? identifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -877,6 +888,7 @@ Matcher containsSemantics({
   List<Matcher>? children,
 }) {
   return _MatchesSemanticsData(
+    identifier: identifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -1469,8 +1481,6 @@ double _matrix3Distance(Matrix3 a, Matrix3 b) {
 }
 
 double _sizeDistance(Size a, Size b) {
-  // TODO(a14n): remove ignore when lint is updated, https://github.com/dart-lang/linter/issues/1843
-  // ignore: unnecessary_parenthesis
   final Offset delta = (b - a) as Offset;
   return delta.distance;
 }
@@ -2199,6 +2209,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
 
 class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
+    required this.identifier,
     required this.label,
     required this.attributedLabel,
     required this.hint,
@@ -2336,6 +2347,7 @@ class _MatchesSemanticsData extends Matcher {
                 onLongPressHint: onLongPressHint,
               );
 
+  final String? identifier;
   final String? label;
   final AttributedString? attributedLabel;
   final String? hint;
@@ -2502,7 +2514,13 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'No SemanticsData provided. '
         'Maybe you forgot to enable semantics?');
     }
-    final SemanticsData data = node is SemanticsNode ? node.getSemanticsData() : (node as SemanticsData);
+
+    final SemanticsData data = switch (node) {
+      SemanticsNode() => node.getSemanticsData(),
+      FinderBase<SemanticsNode>() => node.evaluate().single.getSemanticsData(),
+      _ => node as SemanticsData,
+    };
+
     if (label != null && label != data.label) {
       return failWithDescription(matchState, 'label was: ${data.label}');
     }

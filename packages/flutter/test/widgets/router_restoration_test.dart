@@ -5,10 +5,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Router state restoration without RouteInformationProvider', (WidgetTester tester) async {
+  testWidgets('Router state restoration without RouteInformationProvider', (WidgetTester tester) async {
     final UniqueKey router = UniqueKey();
     _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
 
@@ -40,12 +39,7 @@ void main() {
     expect(find.text('Current config: /foo'), findsOneWidget);
     expect(delegate().newRoutePaths, isEmpty);
     expect(delegate().restoredRoutePaths, <String>['/foo', '/foo']);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134205
-    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 2},
-  ));
+  });
 
   testWidgets('Router state restoration with RouteInformationProvider', (WidgetTester tester) async {
     final UniqueKey router = UniqueKey();

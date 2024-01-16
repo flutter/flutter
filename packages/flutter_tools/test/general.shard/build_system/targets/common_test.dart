@@ -94,7 +94,7 @@ native-assets: {}
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -139,7 +139,7 @@ native-assets: {}
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -185,7 +185,7 @@ native-assets: {}
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -279,7 +279,7 @@ native-assets: {}
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -328,7 +328,7 @@ native-assets: {}
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -375,7 +375,7 @@ native-assets: {}
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -434,7 +434,7 @@ native-assets: {}
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -584,7 +584,7 @@ native-assets: {}
         'cc',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=11.0',
+        '-miphoneos-version-min=12.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-c',
@@ -597,7 +597,7 @@ native-assets: {}
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=11.0',
+        '-miphoneos-version-min=12.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-dynamiclib',

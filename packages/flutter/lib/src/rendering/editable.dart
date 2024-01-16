@@ -30,6 +30,13 @@ const EdgeInsets _kFloatingCursorSizeIncrease = EdgeInsets.symmetric(horizontal:
 // The corner radius of the floating cursor in pixels.
 const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 
+// This constant represents the shortest squared distance required between the floating cursor
+// and the regular cursor when both are present in the text field.
+// If the squared distance between the two cursors is less than this value,
+// it's not necessary to display both cursors at the same time.
+// This behavior is consistent with the one observed in iOS UITextField.
+const double _kShortestDistanceSquaredWithFloatingAndRegularCursors = 15.0 * 15.0;
+
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
 /// holds the selection.
@@ -364,7 +371,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior,
-       _hasFocus = hasFocus ?? false {
+       _hasFocus = hasFocus ?? false,
+       _disposeShowCursor = showCursor == null {
     assert(!_showCursor.value || cursorColor != null);
 
     _selectionPainter.highlightColor = selectionColor;
@@ -391,6 +399,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   void dispose() {
+    _leaderLayerHandler.layer = null;
     _foregroundRenderObject?.dispose();
     _foregroundRenderObject = null;
     _backgroundRenderObject?.dispose();
@@ -404,6 +413,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _selectionPainter.dispose();
     _caretPainter.dispose();
     _textPainter.dispose();
+    if (_disposeShowCursor) {
+      _showCursor.dispose();
+      _disposeShowCursor = false;
+    }
     super.dispose();
   }
 
@@ -878,6 +891,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _caretPainter.backgroundCursorColor = value;
   }
 
+  bool _disposeShowCursor;
+
   /// Whether to paint the cursor.
   ValueNotifier<bool> get showCursor => _showCursor;
   ValueNotifier<bool> _showCursor;
@@ -887,6 +902,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     if (attached) {
       _showCursor.removeListener(_showHideCursor);
+    }
+    if (_disposeShowCursor) {
+      _showCursor.dispose();
+      _disposeShowCursor = false;
     }
     _showCursor = value;
     if (attached) {
@@ -1816,12 +1835,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMinIntrinsicWidth(double height) {
+    if (!_canComputeIntrinsics) {
+      return 0.0;
+    }
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(
+      double.infinity,
+      (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
+    ));
     _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
+    if (!_canComputeIntrinsics) {
+      return 0.0;
+    }
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(
+      double.infinity,
+      // Height and baseline is irrelevant as all text will be laid
+      // out in a single line. Therefore, using 0.0 as a dummy for the height.
+      (RenderBox child, BoxConstraints constraints) => Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
+    ));
     _layoutText();
     return _textPainter.maxIntrinsicWidth + _caretMargin;
   }
@@ -1889,12 +1924,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
-    return _preferredHeight(width);
-  }
+  double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
 
   @override
   double computeMaxIntrinsicHeight(double width) {
+    if (!_canComputeIntrinsics) {
+      return 0.0;
+    }
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild));
     return _preferredHeight(width);
   }
 
@@ -1911,8 +1948,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     final Offset effectivePosition = position - _paintOffset;
-    final InlineSpan? textSpan = _textPainter.text;
-    switch (textSpan?.getSpanForPosition(_textPainter.getPositionForOffset(effectivePosition))) {
+    final GlyphInfo? glyph = _textPainter.getClosestGlyphForOffset(effectivePosition);
+    // The hit-test can't fall through the horizontal gaps between visually
+    // adjacent characters on the same line, even with a large letter-spacing or
+    // text justification, as graphemeClusterLayoutBounds.width is the advance
+    // width to the next character, so there's no gap between their
+    // graphemeClusterLayoutBounds rects.
+    final InlineSpan? spanHit = glyph != null && glyph.graphemeClusterLayoutBounds.contains(effectivePosition)
+      ? _textPainter.text!.getSpanForPosition(TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start))
+      : null;
+    switch (spanHit) {
       case final HitTestTarget span:
         result.add(HitTestEntry(span));
         return true;
@@ -2269,7 +2314,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool get _canComputeIntrinsics => _canComputeIntrinsicsCached ??= _canComputeDryLayoutForInlineWidgets();
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (!_canComputeIntrinsics) {
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
@@ -2321,19 +2367,35 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // difference in the rendering position and the raw offset value.
   Offset _relativeOrigin = Offset.zero;
   Offset? _previousOffset;
+  bool _shouldResetOrigin = true;
   bool _resetOriginOnLeft = false;
   bool _resetOriginOnRight = false;
   bool _resetOriginOnTop = false;
   bool _resetOriginOnBottom = false;
   double? _resetFloatingCursorAnimationValue;
 
+  static Offset _calculateAdjustedCursorOffset(Offset offset, Rect boundingRects) {
+    final double adjustedX = clampDouble(offset.dx, boundingRects.left, boundingRects.right);
+    final double adjustedY = clampDouble(offset.dy, boundingRects.top, boundingRects.bottom);
+    return Offset(adjustedX, adjustedY);
+  }
+
   /// Returns the position within the text field closest to the raw cursor offset.
-  Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset) {
+  Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset, {bool? shouldResetOrigin}) {
     Offset deltaPosition = Offset.zero;
     final double topBound = -floatingCursorAddedMargin.top;
-    final double bottomBound = _textPainter.height - preferredLineHeight + floatingCursorAddedMargin.bottom;
+    final double bottomBound = math.min(size.height, _textPainter.height) - preferredLineHeight + floatingCursorAddedMargin.bottom;
     final double leftBound = -floatingCursorAddedMargin.left;
-    final double rightBound = _textPainter.width + floatingCursorAddedMargin.right;
+    final double rightBound = math.min(size.width, _textPainter.width) + floatingCursorAddedMargin.right;
+    final Rect boundingRects = Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
+
+    if (shouldResetOrigin != null) {
+      _shouldResetOrigin = shouldResetOrigin;
+    }
+
+    if (!_shouldResetOrigin) {
+      return _calculateAdjustedCursorOffset(rawCursorOffset, boundingRects);
+    }
 
     if (_previousOffset != null) {
       deltaPosition = rawCursorOffset - _previousOffset!;
@@ -2342,34 +2404,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the raw cursor offset has gone off an edge, we want to reset the relative
     // origin of the dragging when the user drags back into the field.
     if (_resetOriginOnLeft && deltaPosition.dx > 0) {
-      _relativeOrigin = Offset(rawCursorOffset.dx - leftBound, _relativeOrigin.dy);
+      _relativeOrigin = Offset(rawCursorOffset.dx - boundingRects.left, _relativeOrigin.dy);
       _resetOriginOnLeft = false;
     } else if (_resetOriginOnRight && deltaPosition.dx < 0) {
-      _relativeOrigin = Offset(rawCursorOffset.dx - rightBound, _relativeOrigin.dy);
+      _relativeOrigin = Offset(rawCursorOffset.dx - boundingRects.right, _relativeOrigin.dy);
       _resetOriginOnRight = false;
     }
     if (_resetOriginOnTop && deltaPosition.dy > 0) {
-      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - topBound);
+      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - boundingRects.top);
       _resetOriginOnTop = false;
     } else if (_resetOriginOnBottom && deltaPosition.dy < 0) {
-      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - bottomBound);
+      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - boundingRects.bottom);
       _resetOriginOnBottom = false;
     }
 
     final double currentX = rawCursorOffset.dx - _relativeOrigin.dx;
     final double currentY = rawCursorOffset.dy - _relativeOrigin.dy;
-    final double adjustedX = math.min(math.max(currentX, leftBound), rightBound);
-    final double adjustedY = math.min(math.max(currentY, topBound), bottomBound);
-    final Offset adjustedOffset = Offset(adjustedX, adjustedY);
+    final Offset adjustedOffset = _calculateAdjustedCursorOffset(Offset(currentX, currentY), boundingRects);
 
-    if (currentX < leftBound && deltaPosition.dx < 0) {
+    if (currentX < boundingRects.left && deltaPosition.dx < 0) {
       _resetOriginOnLeft = true;
-    } else if (currentX > rightBound && deltaPosition.dx > 0) {
+    } else if (currentX > boundingRects.right && deltaPosition.dx > 0) {
       _resetOriginOnRight = true;
     }
-    if (currentY < topBound && deltaPosition.dy < 0) {
+    if (currentY < boundingRects.top && deltaPosition.dy < 0) {
       _resetOriginOnTop = true;
-    } else if (currentY > bottomBound && deltaPosition.dy > 0) {
+    } else if (currentY > boundingRects.bottom && deltaPosition.dy > 0) {
       _resetOriginOnBottom = true;
     }
 
@@ -2381,9 +2441,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Sets the screen position of the floating cursor and the text position
   /// closest to the cursor.
   void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset, TextPosition lastTextPosition, { double? resetLerpValue }) {
-    if (state == FloatingCursorDragState.Start) {
+    if (state == FloatingCursorDragState.End) {
       _relativeOrigin = Offset.zero;
       _previousOffset = null;
+      _shouldResetOrigin = true;
       _resetOriginOnBottom = false;
       _resetOriginOnTop = false;
       _resetOriginOnRight = false;
@@ -2471,14 +2532,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
+  final LayerHandle<LeaderLayer> _leaderLayerHandler = LayerHandle<LeaderLayer>();
+
   void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints, Offset offset) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
       clampDouble(startPoint.dx, 0.0, size.width),
       clampDouble(startPoint.dy, 0.0, size.height),
     );
+    _leaderLayerHandler.layer = LeaderLayer(link: startHandleLayerLink, offset: startPoint + offset);
     context.pushLayer(
-      LeaderLayer(link: startHandleLayerLink, offset: startPoint + offset),
+      _leaderLayerHandler.layer!,
       super.paint,
       Offset.zero,
     );
@@ -2626,7 +2690,8 @@ class _RenderEditableCustomPaint extends RenderBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.biggest;
 }
 
 /// An interface that paints within a [RenderEditable]'s bounds, above or
@@ -2855,6 +2920,12 @@ class _CaretPainter extends RenderEditablePainter {
   void paintRegularCursor(Canvas canvas, RenderEditable renderEditable, Color caretColor, TextPosition textPosition) {
     final Rect integralRect = renderEditable.getLocalRectForCaret(textPosition);
     if (shouldPaint) {
+      if (floatingCursorRect != null) {
+        final double distanceSquared = (floatingCursorRect!.center - integralRect.center).distanceSquared;
+        if (distanceSquared < _kShortestDistanceSquaredWithFloatingAndRegularCursors) {
+          return;
+        }
+      }
       final Radius? radius = cursorRadius;
       caretPaint.color = caretColor;
       if (radius == null) {
