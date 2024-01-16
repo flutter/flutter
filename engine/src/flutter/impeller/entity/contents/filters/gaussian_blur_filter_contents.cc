@@ -189,6 +189,9 @@ Rect MakeReferenceUVs(const Rect& reference, const Rect& rect) {
 }
 }  // namespace
 
+std::string_view GaussianBlurFilterContents::kNoMipsError =
+    "Applying gaussian blur without mipmap.";
+
 GaussianBlurFilterContents::GaussianBlurFilterContents(
     Scalar sigma_x,
     Scalar sigma_y,
@@ -280,7 +283,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   // In order to avoid shimmering in downsampling step, we should have mips.
   if (input_snapshot->texture->GetMipCount() <= 1) {
-    FML_DLOG(ERROR) << "Applying gaussian blur without mipmap.";
+    FML_DLOG(ERROR) << kNoMipsError;
   }
   FML_DCHECK(!input_snapshot->texture->NeedsMipmapGeneration());
 

@@ -157,10 +157,6 @@ class EntityPass {
     required_mip_count_ = mip_count;
   }
 
-  /// Returns the mip map count that should be required for the render target
-  /// receiving this EntityPass.
-  int32_t GetBackdropFilterMipCount() const;
-
   //----------------------------------------------------------------------------
   /// @brief  Computes the coverage of a given subpass. This is used to
   ///         determine the texture size of a given subpass before it's rendered
