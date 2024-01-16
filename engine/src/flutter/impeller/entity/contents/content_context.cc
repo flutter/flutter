@@ -504,4 +504,16 @@ ContentContext::GetCachedRuntimeEffectPipeline(
   return it->second;
 }
 
+void ContentContext::ClearCachedRuntimeEffectPipeline(
+    const std::string& unique_entrypoint_name) const {
+  for (auto it = runtime_effect_pipelines_.begin();
+       it != runtime_effect_pipelines_.end();) {
+    if (it->first.unique_entrypoint_name == unique_entrypoint_name) {
+      it = runtime_effect_pipelines_.erase(it);
+    } else {
+      it++;
+    }
+  }
+}
+
 }  // namespace impeller
