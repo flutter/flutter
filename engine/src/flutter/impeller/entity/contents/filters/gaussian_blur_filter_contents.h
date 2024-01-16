@@ -27,6 +27,8 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
 /// Note: This will replace `DirectionalGaussianBlurFilterContents`.
 class GaussianBlurFilterContents final : public FilterContents {
  public:
+  static std::string_view kNoMipsError;
+
   explicit GaussianBlurFilterContents(Scalar sigma_x,
                                       Scalar sigma_y,
                                       Entity::TileMode tile_mode);

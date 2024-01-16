@@ -344,7 +344,7 @@ bool EntityPass::Render(ContentContext& renderer,
   if (reads_from_onscreen_backdrop) {
     EntityPassTarget offscreen_target = CreateRenderTarget(
         renderer, root_render_target.GetRenderTargetSize(),
-        GetBackdropFilterMipCount(),
+        GetRequiredMipCount(),
         GetClearColorOrDefault(render_target.GetRenderTargetSize()));
 
     if (!OnRender(renderer,  // renderer
@@ -606,7 +606,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     auto subpass_target = CreateRenderTarget(
         renderer,      // renderer
         subpass_size,  // size
-        subpass->GetBackdropFilterMipCount(),
+        subpass->GetRequiredMipCount(),
         subpass->GetClearColorOrDefault(subpass_size));  // clear_color
 
     if (!subpass_target.IsValid()) {
@@ -1189,16 +1189,6 @@ void EntityPass::SetBackdropFilter(BackdropFilterProc proc) {
 
 void EntityPass::SetEnableOffscreenCheckerboard(bool enabled) {
   enable_offscreen_debug_checkerboard_ = enabled;
-}
-
-int32_t EntityPass::GetBackdropFilterMipCount() const {
-  int32_t result = 1;
-  for (auto& element : elements_) {
-    if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      result = std::max(result, subpass->get()->GetRequiredMipCount());
-    }
-  }
-  return result;
 }
 
 EntityPassClipRecorder::EntityPassClipRecorder() {}

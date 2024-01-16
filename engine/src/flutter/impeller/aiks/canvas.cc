@@ -189,7 +189,9 @@ void Canvas::Save(bool create_subpass,
       subpass->SetBackdropFilter(backdrop_filter_proc);
       MipCountVisitor mip_count_visitor;
       backdrop_filter->Visit(mip_count_visitor);
-      subpass->SetRequiredMipCount(mip_count_visitor.GetRequiredMipCount());
+      current_pass_->SetRequiredMipCount(
+          std::max(current_pass_->GetRequiredMipCount(),
+                   mip_count_visitor.GetRequiredMipCount()));
     }
     subpass->SetBlendMode(blend_mode);
     current_pass_ = GetCurrentPass().AddSubpass(std::move(subpass));
@@ -727,6 +729,12 @@ void Canvas::SaveLayer(const Paint& paint,
 
   auto& new_layer_pass = GetCurrentPass();
   new_layer_pass.SetBoundsLimit(bounds);
+
+  if (paint.image_filter) {
+    MipCountVisitor mip_count_visitor;
+    paint.image_filter->Visit(mip_count_visitor);
+    new_layer_pass.SetRequiredMipCount(mip_count_visitor.GetRequiredMipCount());
+  }
 
   // Only apply opacity peephole on default blending.
   if (paint.blend_mode == BlendMode::kSourceOver) {
