@@ -570,7 +570,7 @@ bool validateJavaAndGradle(Logger logger,
 /// Returns compatibility information for the valid range of Gradle versions for
 /// the specified Java version.
 ///
-/// Returns null when the tooling has not documented the compatibile Gradle
+/// Returns null when the tooling has not documented the compatible Gradle
 /// versions for the Java version (either the version is too old or too new). If
 /// this seems like a mistake, the caller may need to update the
 /// [_javaGradleCompatList] detailing Java/Gradle compatibility.

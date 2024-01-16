@@ -427,7 +427,7 @@ class Doctor {
             final DoctorValidator subValidator = validator.subValidators[i];
 
             // Ensure that all of the subvalidators in the group have
-            // a corresponding subresult incase a validator crashed
+            // a corresponding subresult in case a validator crashed
             final ValidationResult subResult;
             try {
               subResult = validator.subResults[i];

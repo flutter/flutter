@@ -131,7 +131,7 @@ void main() {
     });
 
     testWithoutContext(
-        'injects the wrapper and the Gradle version is derivated from the AGP version',
+        'injects the wrapper and the Gradle version is derived from the AGP version',
         () {
       const Map<String, String> testCases = <String, String>{
         // AGP version : Gradle version

@@ -782,7 +782,7 @@ void main() {
     });
 
     group('deviceNameMatchesTargetName', () {
-      testWithoutContext('compares case insensitive and without spaces, hypthens, .local', () {
+      testWithoutContext('compares case insensitive and without spaces, hyphens, .local', () {
         final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(
             <PtrResourceRecord>[],

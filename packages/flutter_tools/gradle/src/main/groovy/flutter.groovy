@@ -833,7 +833,7 @@ class FlutterPlugin implements Plugin<Project> {
     // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
     //
     // Format of the output of this task can be used in debugging what version of Java Gradle is using.
-    // Not recomended for use in time sensitive commands like `flutter run` or `flutter build` as
+    // Not recommended for use in time sensitive commands like `flutter run` or `flutter build` as
     // Gradle is slower than we want. Particularly in light of https://github.com/flutter/flutter/issues/119196.
     private static void addTaskForJavaVersion(Project project) {
         // Warning: the name of this task is used by other code. Change with caution.
@@ -1043,7 +1043,7 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
      * time of adding this code. Once released, this can be removed. However, after updating to
-     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Futher
+     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Further
      * investigation necessary to remove this.
      *
      * Tested cases:
