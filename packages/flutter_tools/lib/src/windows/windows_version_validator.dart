@@ -68,7 +68,10 @@ class WindowsVersionValidator extends DoctorValidator {
           windowsVersionStatus = ValidationType.partial;
           messages.add(ValidationMessage(statusInfo));
           statusInfo = 'Topaz OFD may be running';
-          messages.add(const ValidationMessage.hint('The Topaz OFD Security Module process has been found running. If you are unable to build, you will need to disable it.'));
+          messages.add(const ValidationMessage.hint(
+            'The Topaz OFD Security Module process has been found running. '
+            'If you are unable to build, you will need to disable it.'
+          ));
         }
       }
     } else {
