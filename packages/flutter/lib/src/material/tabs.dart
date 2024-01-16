@@ -437,6 +437,15 @@ class _IndicatorPainter extends CustomPainter {
     this.dividerHeight,
     required this.showDivider,
   }) : super(repaint: controller.animation) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_IndicatorPainter',
+        object: this,
+      );
+    }
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
     }
@@ -466,6 +475,9 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _painter?.dispose();
   }
 
@@ -1025,7 +1037,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// tabs with only icon or text, this padding is vertically
   /// adjusted to provide uniform padding to all tabs.
   ///
-  /// If this property is null, then kTabLabelPadding is used.
+  /// If this property is null, then [kTabLabelPadding] is used.
   final EdgeInsetsGeometry? labelPadding;
 
   /// Defines the ink response focus, hover, and splash colors.
@@ -1693,17 +1705,26 @@ class _TabBarState extends State<TabBar> {
           TabAlignment.start || TabAlignment.startOffset || TabAlignment.fill => AlignmentDirectional.centerStart,
         };
 
-        tabBar = CustomPaint(
-          painter: _DividerPainter(
-            dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
-            dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
-          ),
-          child: Align(
-            heightFactor: 1.0,
-            alignment: effectiveAlignment,
-            child: tabBar,
-          ),
+        final Color dividerColor = widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!;
+        final double dividerHeight = widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!;
+        final bool showDivider = dividerColor != Colors.transparent && dividerHeight > 0;
+
+        tabBar = Align(
+          heightFactor: 1.0,
+          widthFactor: showDivider ? null : 1.0,
+          alignment: effectiveAlignment,
+          child: tabBar,
         );
+
+        if (showDivider) {
+          tabBar = CustomPaint(
+            painter: _DividerPainter(
+              dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
+              dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
+            ),
+            child: tabBar,
+          );
+        }
       }
     } else if (widget.padding != null) {
       tabBar = Padding(
@@ -1851,12 +1872,14 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    // TODO(chunhtai): https://github.com/flutter/flutter/issues/134253
-    _pageController?.dispose();
-    _pageController = PageController(
-      initialPage: _currentIndex!,
-      viewportFraction: widget.viewportFraction,
-    );
+    if (_pageController == null) {
+      _pageController = PageController(
+        initialPage: _currentIndex!,
+        viewportFraction: widget.viewportFraction,
+      );
+    } else {
+      _pageController!.jumpToPage(_currentIndex!);
+    }
   }
 
   @override

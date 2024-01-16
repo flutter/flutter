@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show ViewConstraints;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,7 +16,12 @@ void main() {
     Size size = const Size(20, 20),
     double devicePixelRatio = 2.0,
   }) {
-    return ViewConfiguration(constraints: ViewConstraints.tight(size), devicePixelRatio: devicePixelRatio);
+    final BoxConstraints constraints = BoxConstraints.tight(size);
+    return ViewConfiguration(
+      logicalConstraints: constraints,
+      physicalConstraints: constraints * devicePixelRatio,
+      devicePixelRatio: devicePixelRatio,
+    );
   }
 
   group('RenderView', () {
@@ -128,18 +131,20 @@ void main() {
     final RenderView view = RenderView(
       view: RendererBinding.instance.platformDispatcher.views.single,
     );
-    view.configuration = ViewConfiguration(constraints: ViewConstraints.tight(const Size(100, 200)), devicePixelRatio: 3.0);
-    view.configuration = ViewConfiguration(constraints: ViewConstraints.tight(const Size(200, 300)), devicePixelRatio: 2.0);
+    view.configuration = ViewConfiguration(logicalConstraints: BoxConstraints.tight(const Size(100, 200)), devicePixelRatio: 3.0);
+    view.configuration = ViewConfiguration(logicalConstraints: BoxConstraints.tight(const Size(200, 300)), devicePixelRatio: 2.0);
     PipelineOwner().rootNode = view;
     view.prepareInitialFrame();
   });
 
   test('Constraints are derived from configuration', () {
-    const ViewConfiguration config = ViewConfiguration(
-      constraints: ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
-      devicePixelRatio: 3.0,
-    );
     const BoxConstraints constraints = BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4);
+    const double devicePixelRatio = 3.0;
+    final ViewConfiguration config = ViewConfiguration(
+      logicalConstraints: constraints,
+      physicalConstraints: constraints * devicePixelRatio,
+      devicePixelRatio: devicePixelRatio,
+    );
 
     // Configuration set via setter.
     final RenderView view = RenderView(

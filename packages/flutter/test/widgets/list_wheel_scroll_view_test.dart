@@ -8,10 +8,9 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
 
@@ -55,7 +54,7 @@ void main() {
   });
 
   group('construction check', () {
-    testWidgetsWithLeakTracking('ListWheelScrollView needs positive diameter ratio', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView needs positive diameter ratio', (WidgetTester tester) async {
       expect(
         () => ListWheelScrollView(
           diameterRatio: nonconst(-2.0),
@@ -70,7 +69,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('ListWheelScrollView can have zero child', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView can have zero child', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -83,7 +82,7 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelScrollView)), const Size(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('FixedExtentScrollController onAttach, onDetach', (WidgetTester tester) async {
+    testWidgets('FixedExtentScrollController onAttach, onDetach', (WidgetTester tester) async {
       int attach = 0;
       int detach = 0;
       final FixedExtentScrollController controller = FixedExtentScrollController(
@@ -114,7 +113,7 @@ void main() {
       expect(detach, 1);
     });
 
-    testWidgetsWithLeakTracking('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
         () {
           ListWheelScrollView(
@@ -128,7 +127,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('ListWheelScrollView needs valid overAndUnderCenterOpacity', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView needs valid overAndUnderCenterOpacity', (WidgetTester tester) async {
       expect(
         () {
           ListWheelScrollView(
@@ -175,7 +174,7 @@ void main() {
   });
 
   group('infinite scrolling', () {
-    testWidgetsWithLeakTracking('infinite looping list', (WidgetTester tester) async {
+    testWidgets('infinite looping list', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
@@ -221,7 +220,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('infinite child builder', (WidgetTester tester) async {
+    testWidgets('infinite child builder', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
@@ -262,7 +261,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('child builder with lower and upper limits', (WidgetTester tester) async {
+    testWidgets('child builder with lower and upper limits', (WidgetTester tester) async {
       // Adjust the content dimensions at the end of `RenderListWheelViewport.performLayout()`
       final List<int> paintedChildren = <int>[];
 
@@ -320,7 +319,7 @@ void main() {
   });
 
   group('layout', () {
-    testWidgetsWithLeakTracking('Flings with high velocity should not break the children lower and upper limits', (WidgetTester tester) async {
+    testWidgets('Flings with high velocity should not break the children lower and upper limits', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/112526
       final FixedExtentScrollController controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
@@ -361,7 +360,7 @@ void main() {
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
 
     // Regression test for https://github.com/flutter/flutter/issues/90953
-    testWidgetsWithLeakTracking('ListWheelScrollView childDelegate update test 2', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView childDelegate update test 2', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 2);
       addTearDown(controller.dispose);
 
@@ -426,7 +425,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/58144
-    testWidgetsWithLeakTracking('ListWheelScrollView childDelegate update test', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView childDelegate update test', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
@@ -459,7 +458,7 @@ void main() {
       expect(tester.renderObject(find.text('1')).attached, true);
     });
 
-    testWidgetsWithLeakTracking("ListWheelScrollView takes parent's size with small children", (WidgetTester tester) async {
+    testWidgets("ListWheelScrollView takes parent's size with small children", (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -480,7 +479,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(ListWheelScrollView)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking("ListWheelScrollView takes parent's size with large children", (WidgetTester tester) async {
+    testWidgets("ListWheelScrollView takes parent's size with large children", (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -501,7 +500,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(ListWheelScrollView)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking("ListWheelScrollView children can't be bigger than itemExtent", (WidgetTester tester) async {
+    testWidgets("ListWheelScrollView children can't be bigger than itemExtent", (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -523,7 +522,7 @@ void main() {
       expect(find.text('blah'), findsOneWidget);
     });
 
-    testWidgetsWithLeakTracking('builder is never called twice for same index', (WidgetTester tester) async {
+    testWidgets('builder is never called twice for same index', (WidgetTester tester) async {
       final Set<int> builtChildren = <int>{};
       final FixedExtentScrollController controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
@@ -560,7 +559,7 @@ void main() {
       await tester.pump();
     });
 
-    testWidgetsWithLeakTracking('only visible children are maintained as children of the rendered viewport', (WidgetTester tester) async {
+    testWidgets('only visible children are maintained as children of the rendered viewport', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
@@ -597,7 +596,7 @@ void main() {
       expect(viewport.childCount, 4);
     });
 
-    testWidgetsWithLeakTracking('a tighter squeeze lays out more children', (WidgetTester tester) async {
+    testWidgets('a tighter squeeze lays out more children', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
 
@@ -642,7 +641,7 @@ void main() {
       expect(viewport.childCount, 13);
     });
 
-    testWidgetsWithLeakTracking('Active children are laid out with correct offset', (WidgetTester tester) async {
+    testWidgets('Active children are laid out with correct offset', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/123497
       Future<void> buildWidget(double width) async {
         return tester.pumpWidget(
@@ -679,7 +678,7 @@ void main() {
   });
 
   group('pre-transform viewport', () {
-    testWidgetsWithLeakTracking('ListWheelScrollView starts and ends from the middle', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView starts and ends from the middle', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       final List<int> paintedChildren = <int>[];
@@ -722,7 +721,7 @@ void main() {
       expect(paintedChildren, <int>[96, 97, 98, 99]);
     });
 
-    testWidgetsWithLeakTracking('A child gets painted as soon as its first pixel is in the viewport', (WidgetTester tester) async {
+    testWidgets('A child gets painted as soon as its first pixel is in the viewport', (WidgetTester tester) async {
       final ScrollController controller = ScrollController(initialScrollOffset: 50.0);
       addTearDown(controller.dispose);
       final List<int> paintedChildren = <int>[];
@@ -757,7 +756,7 @@ void main() {
       expect(paintedChildren, <int>[0, 1, 2, 3, 4]);
     });
 
-    testWidgetsWithLeakTracking('A child is no longer painted after its last pixel leaves the viewport', (WidgetTester tester) async {
+    testWidgets('A child is no longer painted after its last pixel leaves the viewport', (WidgetTester tester) async {
       final ScrollController controller = ScrollController(initialScrollOffset: 250.0);
       addTearDown(controller.dispose);
       final List<int> paintedChildren = <int>[];
@@ -802,7 +801,7 @@ void main() {
   });
 
   group('viewport transformation', () {
-    testWidgetsWithLeakTracking('Center child is magnified', (WidgetTester tester) async {
+    testWidgets('Center child is magnified', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -826,7 +825,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Default middle transform', (WidgetTester tester) async {
+    testWidgets('Default middle transform', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -855,7 +854,7 @@ void main() {
       ));
     });
 
-    testWidgetsWithLeakTracking('Curve the wheel to the left', (WidgetTester tester) async {
+    testWidgets('Curve the wheel to the left', (WidgetTester tester) async {
       final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
       addTearDown(controller.dispose);
 
@@ -882,7 +881,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
+    testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
       final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
       addTearDown(controller.dispose);
 
@@ -1002,7 +1001,7 @@ void main() {
       ));
     });
 
-    testWidgetsWithLeakTracking('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
+    testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
       final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
       addTearDown(controller.dispose);
 
@@ -1102,7 +1101,7 @@ void main() {
   });
 
   group('scroll notifications', () {
-    testWidgetsWithLeakTracking('no onSelectedItemChanged callback on first build', (WidgetTester tester) async {
+    testWidgets('no onSelectedItemChanged callback on first build', (WidgetTester tester) async {
       bool itemChangeCalled = false;
       void onItemChange(int _) { itemChangeCalled = true; }
 
@@ -1127,7 +1126,7 @@ void main() {
       expect(itemChangeCalled, false);
     });
 
-    testWidgetsWithLeakTracking('onSelectedItemChanged when a new item is closest to center', (WidgetTester tester) async {
+    testWidgets('onSelectedItemChanged when a new item is closest to center', (WidgetTester tester) async {
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(
@@ -1164,7 +1163,7 @@ void main() {
       expect(selectedItems, <int>[1, 2, 1]);
     });
 
-    testWidgetsWithLeakTracking('onSelectedItemChanged reports only in valid range', (WidgetTester tester) async {
+    testWidgets('onSelectedItemChanged reports only in valid range', (WidgetTester tester) async {
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(
@@ -1200,7 +1199,7 @@ void main() {
   });
 
   group('scroll controller', () {
-    testWidgetsWithLeakTracking('initialItem', (WidgetTester tester) async {
+    testWidgets('initialItem', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
       final List<int> paintedChildren = <int>[];
@@ -1227,7 +1226,7 @@ void main() {
       expect(controller.selectedItem, 10);
     });
 
-    testWidgetsWithLeakTracking('controller jump', (WidgetTester tester) async {
+    testWidgets('controller jump', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
       final List<int> paintedChildren = <int>[];
@@ -1260,7 +1259,7 @@ void main() {
       expect(controller.selectedItem, 0);
     });
 
-    testWidgetsWithLeakTracking('controller animateToItem', (WidgetTester tester) async {
+    testWidgets('controller animateToItem', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
       final List<int> paintedChildren = <int>[];
@@ -1298,7 +1297,7 @@ void main() {
       expect(controller.selectedItem, 0);
     });
 
-    testWidgetsWithLeakTracking('onSelectedItemChanged and controller are in sync', (WidgetTester tester) async {
+    testWidgets('onSelectedItemChanged and controller are in sync', (WidgetTester tester) async {
       final List<int> selectedItems = <int>[];
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
@@ -1334,7 +1333,7 @@ void main() {
       expect(controller.selectedItem, 10);
     });
 
-    testWidgetsWithLeakTracking('controller hot swappable', (WidgetTester tester) async {
+    testWidgets('controller hot swappable', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1421,7 +1420,7 @@ void main() {
       expect(controller2.hasClients, isFalse);
     });
 
-    testWidgetsWithLeakTracking('controller can be reused', (WidgetTester tester) async {
+    testWidgets('controller can be reused', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 3);
       addTearDown(controller.dispose);
 
@@ -1472,7 +1471,7 @@ void main() {
   });
 
   group('physics', () {
-    testWidgetsWithLeakTracking('fling velocities too low snaps back to the same item', (WidgetTester tester) async {
+    testWidgets('fling velocities too low snaps back to the same item', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 40);
       addTearDown(controller.dispose);
       final List<double> scrolledPositions = <double>[];
@@ -1523,7 +1522,7 @@ void main() {
       expect(scrolledPositions.last, moreOrLessEquals(40 * 1000.0, epsilon: 0.2));
     });
 
-    testWidgetsWithLeakTracking('high fling velocities lands exactly on items', (WidgetTester tester) async {
+    testWidgets('high fling velocities lands exactly on items', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 40);
       addTearDown(controller.dispose);
       final List<double> scrolledPositions = <double>[];
@@ -1577,7 +1576,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
 
-  testWidgetsWithLeakTracking('ListWheelScrollView getOffsetToReveal', (WidgetTester tester) async {
+  testWidgets('ListWheelScrollView getOffsetToReveal', (WidgetTester tester) async {
     List<Widget> outerChildren;
     final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => Container());
     final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
@@ -1647,7 +1646,7 @@ void main() {
     expect(revealed.rect, const Rect.fromLTWH(165.0, 265.0, 10.0, 10.0));
   });
 
-  testWidgetsWithLeakTracking('will not assert on getOffsetToReveal Axis', (WidgetTester tester) async {
+  testWidgets('will not assert on getOffsetToReveal Axis', (WidgetTester tester) async {
     final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
     addTearDown(controller.dispose);
 
@@ -1681,7 +1680,7 @@ void main() {
     viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
   });
 
-  testWidgetsWithLeakTracking('ListWheelScrollView showOnScreen', (WidgetTester tester) async {
+  testWidgets('ListWheelScrollView showOnScreen', (WidgetTester tester) async {
     List<Widget> outerChildren;
     final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => Container());
     final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
@@ -1738,7 +1737,7 @@ void main() {
   });
 
   group('gestures', () {
-    testWidgetsWithLeakTracking('ListWheelScrollView allows taps for on its children', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView allows taps for on its children', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
       final List<int> children = List<int>.generate(100, (int index) => index);
@@ -1781,7 +1780,7 @@ void main() {
       expect(tappedChildren, paintedChildren);
     });
 
-    testWidgetsWithLeakTracking('ListWheelScrollView allows for horizontal drags on its children', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView allows for horizontal drags on its children', (WidgetTester tester) async {
       final PageController pageController = PageController();
       addTearDown(pageController.dispose);
 
@@ -1809,7 +1808,7 @@ void main() {
       expect(pageController.page, 1.0);
     });
 
-    testWidgetsWithLeakTracking('ListWheelScrollView does not crash and does not allow taps on children that were laid out, but not painted', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView does not crash and does not allow taps on children that were laid out, but not painted', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/126491
 
       final FixedExtentScrollController controller = FixedExtentScrollController();
@@ -1870,7 +1869,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('ListWheelScrollView creates only one opacity layer for all children', (WidgetTester tester) async {
+  testWidgets('ListWheelScrollView creates only one opacity layer for all children', (WidgetTester tester) async {
     await tester.pumpWidget(
       ListWheelScrollView(
         overAndUnderCenterOpacity: 0.5,
@@ -1883,5 +1882,29 @@ void main() {
     );
 
     expect(tester.layers.whereType<OpacityLayer>(), hasLength(1));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/140780.
+  testWidgets('ListWheelScrollView in an AnimatedContainer with zero height does not throw an error',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnimatedContainer(
+              height: 0,
+              duration: Duration.zero,
+              child: ListWheelScrollView(
+                itemExtent: 20.0,
+                children: <Widget>[
+                  for (int i = 0; i < 20; i++)
+                    Container(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
   });
 }

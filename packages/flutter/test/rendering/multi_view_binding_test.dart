@@ -18,7 +18,7 @@ void main() {
     binding.addRenderView(view);
     expect(binding.renderViews, contains(view));
     expect(view.configuration.devicePixelRatio, flutterView.devicePixelRatio);
-    expect(view.configuration.constraints, ViewConstraints.tight(flutterView.physicalSize) / flutterView.devicePixelRatio);
+    expect(view.configuration.logicalConstraints, BoxConstraints.tight(flutterView.physicalSize) / flutterView.devicePixelRatio);
 
     binding.removeRenderView(view);
     expect(binding.renderViews, isEmpty);
@@ -51,17 +51,17 @@ void main() {
     final RenderView view = RenderView(view: flutterView);
     binding.addRenderView(view);
     expect(view.configuration.devicePixelRatio, 2.5);
-    expect(view.configuration.constraints.isTight, isTrue);
-    expect(view.configuration.constraints.minWidth, 160.0);
-    expect(view.configuration.constraints.minHeight, 240.0);
+    expect(view.configuration.logicalConstraints.isTight, isTrue);
+    expect(view.configuration.logicalConstraints.minWidth, 160.0);
+    expect(view.configuration.logicalConstraints.minHeight, 240.0);
 
     flutterView.devicePixelRatio = 3.0;
     flutterView.physicalSize = const Size(300, 300);
     binding.handleMetricsChanged();
     expect(view.configuration.devicePixelRatio, 3.0);
-    expect(view.configuration.constraints.isTight, isTrue);
-    expect(view.configuration.constraints.minWidth, 100.0);
-    expect(view.configuration.constraints.minHeight, 100.0);
+    expect(view.configuration.logicalConstraints.isTight, isTrue);
+    expect(view.configuration.logicalConstraints.minWidth, 100.0);
+    expect(view.configuration.logicalConstraints.minHeight, 100.0);
 
     binding.removeRenderView(view);
   });
