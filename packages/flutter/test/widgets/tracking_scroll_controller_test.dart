@@ -64,7 +64,10 @@ void main() {
     expect(controller.initialScrollOffset, 0.0);
   });
 
-  testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
+  testWidgets('TrackingScrollController saves offset',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     int attach = 0;
     int detach = 0;
     final TrackingScrollController controller = TrackingScrollController(

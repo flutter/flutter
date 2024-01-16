@@ -1853,7 +1853,10 @@ void main() {
     skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
-  testWidgets('Reports image size when painted', (WidgetTester tester) async {
+  testWidgets('Reports image size when painted',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
