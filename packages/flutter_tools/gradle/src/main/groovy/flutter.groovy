@@ -1423,6 +1423,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     // compareTo implementation of version strings in the format of ints and periods
     // Requires non null objects.
+    // Will not crash on RC candidate strings but considers all RC candidates the same version.
     static int compareVersionStrings(String firstString, String secondString) {
         List firstVersion = firstString.tokenize(".")
         List secondVersion = secondString.tokenize(".")
@@ -1430,12 +1431,32 @@ class FlutterPlugin implements Plugin<Project> {
         def commonIndices = Math.min(firstVersion.size(), secondVersion.size())
 
         for (int i = 0; i < commonIndices; i++) {
-            def firstAtIndex = firstVersion[i].toInteger()
-            def secondAtIndex = secondVersion[i].toInteger()
+            String firstAtIndex = firstVersion[i]
+            String secondAtIndex = secondVersion[i]
+            int firstInt = 0;
+            int secondInt = 0
+            try {
+                if (firstAtIndex.contains("-")) {
+                    // Strip any chars after "-". For example "8.6-rc-2"
+                    firstAtIndex = firstAtIndex.substring(0, firstAtIndex.indexOf('-'))
+                }
+                firstInt = firstAtIndex.toInteger()
+            } catch (NumberFormatException nfe) {
+                println(nfe)
+            }
+            try {
+                if (firstAtIndex.contains("-")) {
+                    // Strip any chars after "-". For example "8.6-rc-2"
+                    secondAtIndex = secondAtIndex.substring(0, secondAtIndex.indexOf('-'))
+                }
+                secondInt = secondAtIndex.toInteger()
+            } catch (NumberFormatException nfe) {
+                println(nfe)
+            }
 
-            if (firstAtIndex != secondAtIndex) {
+            if (firstInt != secondInt) {
                 // <=> in groovy delegates to compareTo
-                return firstAtIndex <=> secondAtIndex
+                return firstInt <=> secondInt
             }
         }
 
