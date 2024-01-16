@@ -367,6 +367,7 @@
 ../../../flutter/shell/platform/glfw/client_wrapper/plugin_registrar_glfw_unittests.cc
 ../../../flutter/shell/platform/glfw/client_wrapper/testing
 ../../../flutter/shell/platform/linux/testing
+../../../flutter/shell/platform/windows/README.md
 ../../../flutter/shell/platform/windows/accessibility_bridge_windows_unittests.cc
 ../../../flutter/shell/platform/windows/client_wrapper/dart_project_unittests.cc
 ../../../flutter/shell/platform/windows/client_wrapper/flutter_engine_unittests.cc
