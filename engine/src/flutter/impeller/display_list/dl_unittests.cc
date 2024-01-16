@@ -801,6 +801,18 @@ TEST_P(DisplayListTest, CanDrawNinePatchImageCornersScaledDown) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, NinePatchImagePrecision) {
+  // Draw a nine patch image with colored corners and verify that the corner
+  // color does not leak outside the intended region.
+  auto texture = CreateTextureForFixture("nine_patch_corners.png");
+  flutter::DisplayListBuilder builder;
+  builder.DrawImageNine(DlImageImpeller::Make(texture),
+                        SkIRect::MakeXYWH(10, 10, 1, 1),
+                        SkRect::MakeXYWH(0, 0, 200, 100),
+                        flutter::DlFilterMode::kNearest, nullptr);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, CanDrawPoints) {
   flutter::DisplayListBuilder builder;
   SkPoint points[7] = {

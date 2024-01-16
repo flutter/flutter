@@ -89,6 +89,7 @@ test_fixtures("file_fixtures") {
     "flutter_logo_baked.glb",
     "kalimba.jpg",
     "multiple_stages.hlsl",
+    "nine_patch_corners.png",
     "resources_limit.vert",
     "sample.comp",
     "sample.frag",

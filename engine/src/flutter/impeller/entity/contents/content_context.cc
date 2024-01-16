@@ -332,6 +332,7 @@ ContentContext::ContentContext(
   rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
   texture_blend_pipelines_.CreateDefault(*context_, options);
   texture_pipelines_.CreateDefault(*context_, options);
+  texture_strict_src_pipelines_.CreateDefault(*context_, options);
   position_uv_pipelines_.CreateDefault(*context_, options);
   tiled_texture_pipelines_.CreateDefault(*context_, options);
   gaussian_blur_noalpha_decal_pipelines_.CreateDefault(*context_,

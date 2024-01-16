@@ -86,7 +86,7 @@ void NinePatchConverter::DrawNinePatch(const std::shared_ptr<Image>& image,
       // DrawImageAtlas.
       canvas->DrawImageRect(image, Rect::MakeLTRB(srcX0, srcY0, srcX1, srcY1),
                             Rect::MakeLTRB(dstX0, dstY0, dstX1, dstY1), *paint,
-                            sampler);
+                            sampler, SourceRectConstraint::kStrict);
     }
   }
 }
