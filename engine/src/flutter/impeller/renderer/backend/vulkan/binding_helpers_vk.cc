@@ -20,11 +20,6 @@
 
 namespace impeller {
 
-// Warning: if any of the constant values or layouts are changed in the
-// framebuffer fetch shader, then this input binding may need to be
-// manually changed.
-static constexpr size_t kMagicSubpassInputBinding = 64;
-
 static bool BindImages(
     const Bindings& bindings,
     Allocator& allocator,
@@ -123,67 +118,6 @@ static bool BindBuffers(
     write_workspace[write_offset++] = write_set;
   }
   return true;
-}
-
-fml::StatusOr<vk::DescriptorSet> AllocateAndBindDescriptorSets(
-    const ContextVK& context,
-    const std::shared_ptr<CommandEncoderVK>& encoder,
-    Allocator& allocator,
-    const Command& command,
-    const TextureVK& input_attachment,
-    std::array<vk::DescriptorImageInfo, kMaxBindings>& image_workspace,
-    std::array<vk::DescriptorBufferInfo, kMaxBindings>& buffer_workspace,
-    std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>&
-        write_workspace) {
-  auto descriptor_result = encoder->AllocateDescriptorSets(
-      PipelineVK::Cast(*command.pipeline).GetDescriptorSetLayout(), context);
-  if (!descriptor_result.ok()) {
-    return descriptor_result.status();
-  }
-  vk::DescriptorSet descriptor_set = descriptor_result.value();
-
-  size_t buffer_offset = 0u;
-  size_t image_offset = 0u;
-  size_t write_offset = 0u;
-
-  auto& pipeline_descriptor = command.pipeline->GetDescriptor();
-  auto& desc_set =
-      pipeline_descriptor.GetVertexDescriptor()->GetDescriptorSetLayouts();
-
-  if (!BindBuffers(command.vertex_bindings, allocator, encoder, descriptor_set,
-                   desc_set, buffer_workspace, buffer_offset, write_workspace,
-                   write_offset) ||
-      !BindBuffers(command.fragment_bindings, allocator, encoder,
-                   descriptor_set, desc_set, buffer_workspace, buffer_offset,
-                   write_workspace, write_offset) ||
-      !BindImages(command.fragment_bindings, allocator, encoder, descriptor_set,
-                  image_workspace, image_offset, write_workspace,
-                  write_offset)) {
-    return fml::Status(fml::StatusCode::kUnknown,
-                       "Failed to bind texture or buffer.");
-  }
-
-  if (pipeline_descriptor.UsesSubpassInput()) {
-    vk::DescriptorImageInfo image_info;
-    image_info.imageLayout = vk::ImageLayout::eGeneral;
-    image_info.sampler = VK_NULL_HANDLE;
-    image_info.imageView = input_attachment.GetImageView();
-    image_workspace[image_offset++] = image_info;
-
-    vk::WriteDescriptorSet write_set;
-    write_set.dstSet = descriptor_set;
-    write_set.dstBinding = kMagicSubpassInputBinding;
-    write_set.descriptorCount = 1u;
-    write_set.descriptorType = vk::DescriptorType::eInputAttachment;
-    write_set.pImageInfo = &image_workspace[image_offset - 1];
-
-    write_workspace[write_offset++] = write_set;
-  }
-
-  context.GetDevice().updateDescriptorSets(write_offset, write_workspace.data(),
-                                           0u, {});
-
-  return descriptor_set;
 }
 
 fml::StatusOr<vk::DescriptorSet> AllocateAndBindDescriptorSets(

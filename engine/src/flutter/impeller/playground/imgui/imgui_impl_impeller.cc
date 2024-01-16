@@ -126,7 +126,7 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
     return;  // Nothing to render.
   }
   auto host_buffer = impeller::HostBuffer::Create(
-      render_pass.GetContext().lock()->GetResourceAllocator());
+      render_pass.GetContext()->GetResourceAllocator());
 
   using VS = impeller::ImguiRasterVertexShader;
   using FS = impeller::ImguiRasterFragmentShader;
