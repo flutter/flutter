@@ -5261,6 +5261,7 @@ ORIGIN: ../../../flutter/impeller/entity/shaders/sweep_gradient_ssbo_fill.frag +
 ORIGIN: ../../../flutter/impeller/entity/shaders/texture_fill.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/texture_fill.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/texture_fill_external.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/texture_fill_strict_src.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/tiled_texture_fill_external.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/vertices.frag + ../../../flutter/LICENSE
@@ -8090,6 +8091,7 @@ FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_ssbo_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill_external.frag
+FILE: ../../../flutter/impeller/entity/shaders/texture_fill_strict_src.frag
 FILE: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/tiled_texture_fill_external.frag
 FILE: ../../../flutter/impeller/entity/shaders/vertices.frag

@@ -59,6 +59,7 @@
 #include "impeller/entity/sweep_gradient_fill.frag.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
+#include "impeller/entity/texture_fill_strict_src.frag.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/uv.comp.h"
 #include "impeller/entity/vertices.frag.h"
@@ -130,6 +131,9 @@ using RRectBlurPipeline =
 using BlendPipeline = RenderPipelineT<BlendVertexShader, BlendFragmentShader>;
 using TexturePipeline =
     RenderPipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
+using TextureStrictSrcPipeline =
+    RenderPipelineT<TextureFillVertexShader,
+                    TextureFillStrictSrcFragmentShader>;
 using PositionUVPipeline =
     RenderPipelineT<TextureFillVertexShader, TiledTextureFillFragmentShader>;
 using TiledTexturePipeline =
@@ -416,6 +420,11 @@ class ContentContext {
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetTexturePipeline(
       ContentContextOptions opts) const {
     return GetPipeline(texture_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetTextureStrictSrcPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(texture_strict_src_pipelines_, opts);
   }
 
 #ifdef IMPELLER_ENABLE_OPENGLES
@@ -871,6 +880,7 @@ class ContentContext {
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;
   mutable Variants<BlendPipeline> texture_blend_pipelines_;
   mutable Variants<TexturePipeline> texture_pipelines_;
+  mutable Variants<TextureStrictSrcPipeline> texture_strict_src_pipelines_;
 #ifdef IMPELLER_ENABLE_OPENGLES
   mutable Variants<TextureExternalPipeline> texture_external_pipelines_;
   mutable Variants<TiledTextureExternalPipeline>

@@ -52,6 +52,7 @@ impeller_shaders("entity_shaders") {
     "shaders/texture_fill.frag",
     "shaders/texture_fill.vert",
     "shaders/texture_fill_external.frag",
+    "shaders/texture_fill_strict_src.frag",
     "shaders/tiled_texture_fill.frag",
     "shaders/tiled_texture_fill_external.frag",
     "shaders/vertices.frag",

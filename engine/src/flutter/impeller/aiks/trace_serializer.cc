@@ -254,4 +254,9 @@ void TraceSerializer::Write(const std::vector<Rect>& matrices) {
 void TraceSerializer::Write(const std::vector<Color>& matrices) {
   buffer_ << "[std::vector<Color>] ";
 }
+
+void TraceSerializer::Write(const SourceRectConstraint& src_rect_constraint) {
+  buffer_ << "[SourceRectConstraint] ";
+}
+
 }  // namespace impeller

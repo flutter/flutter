@@ -662,7 +662,8 @@ void Canvas::DrawImageRect(const std::shared_ptr<Image>& image,
                            Rect source,
                            Rect dest,
                            const Paint& paint,
-                           SamplerDescriptor sampler) {
+                           SamplerDescriptor sampler,
+                           SourceRectConstraint src_rect_constraint) {
   if (!image || source.IsEmpty() || dest.IsEmpty()) {
     return;
   }
@@ -676,6 +677,8 @@ void Canvas::DrawImageRect(const std::shared_ptr<Image>& image,
   auto contents = TextureContents::MakeRect(dest);
   contents->SetTexture(image->GetTexture());
   contents->SetSourceRect(source);
+  contents->SetStrictSourceRect(src_rect_constraint ==
+                                SourceRectConstraint::kStrict);
   contents->SetSamplerDescriptor(std::move(sampler));
   contents->SetOpacity(paint.color.alpha);
   contents->SetDeferApplyingOpacity(paint.HasColorFilter());
