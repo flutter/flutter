@@ -20,6 +20,11 @@ export class FlutterTrustedTypesPolicy {
     if (window.trustedTypes) {
       this.policy = trustedTypes.createPolicy(policyName, {
         createScriptURL: function (url) {
+          // Return blob urls without manipulating them
+          if (url.startsWith('blob:')) {
+            return url;
+          }
+          // Validate other urls
           const parsed = new URL(url, window.location);
           const file = parsed.pathname.split("/").pop();
           const matches = patterns.some((pattern) => pattern.test(file));
