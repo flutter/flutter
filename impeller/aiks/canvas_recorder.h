@@ -237,13 +237,16 @@ class CanvasRecorder {
                                offset, paint, sampler);
   }
 
-  void DrawImageRect(const std::shared_ptr<Image>& image,
-                     Rect source,
-                     Rect dest,
-                     const Paint& paint,
-                     SamplerDescriptor sampler = {}) {
+  void DrawImageRect(
+      const std::shared_ptr<Image>& image,
+      Rect source,
+      Rect dest,
+      const Paint& paint,
+      SamplerDescriptor sampler = {},
+      SourceRectConstraint src_rect_constraint = SourceRectConstraint::kFast) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(DrawImageRect), image,
-                               source, dest, paint, sampler);
+                               source, dest, paint, sampler,
+                               src_rect_constraint);
   }
 
   void ClipPath(

@@ -45,6 +45,15 @@ enum class PointStyle {
   kSquare,
 };
 
+/// Controls the behavior of the source rectangle given to DrawImageRect.
+enum class SourceRectConstraint {
+  /// @brief Faster, but may sample outside the bounds of the source rectangle.
+  kFast,
+
+  /// @brief Sample only within the source rectangle. May be slower.
+  kStrict,
+};
+
 class Canvas {
  public:
   struct DebugOptions {
@@ -123,11 +132,13 @@ class Canvas {
                  const Paint& paint,
                  SamplerDescriptor sampler = {});
 
-  void DrawImageRect(const std::shared_ptr<Image>& image,
-                     Rect source,
-                     Rect dest,
-                     const Paint& paint,
-                     SamplerDescriptor sampler = {});
+  void DrawImageRect(
+      const std::shared_ptr<Image>& image,
+      Rect source,
+      Rect dest,
+      const Paint& paint,
+      SamplerDescriptor sampler = {},
+      SourceRectConstraint src_rect_constraint = SourceRectConstraint::kFast);
 
   void ClipPath(
       Path path,
