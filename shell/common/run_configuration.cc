@@ -12,7 +12,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/unique_fd.h"
 #include "flutter/runtime/dart_vm.h"
-#include "runtime/isolate_configuration.h"
+#include "flutter/runtime/isolate_configuration.h"
 
 namespace flutter {
 
