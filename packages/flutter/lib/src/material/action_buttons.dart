@@ -337,6 +337,7 @@ class DrawerButton extends _ActionButton {
   /// Creates a Material Design drawer icon button.
   const DrawerButton({
     super.key,
+    super.color,
     super.style,
     super.onPressed,
   }) : super(icon: const DrawerButtonIcon());
@@ -402,6 +403,7 @@ class EndDrawerButton extends _ActionButton {
   /// Creates a Material Design end drawer icon button.
   const EndDrawerButton({
     super.key,
+    super.color,
     super.style,
     super.onPressed,
   }) : super(icon: const EndDrawerButtonIcon());
