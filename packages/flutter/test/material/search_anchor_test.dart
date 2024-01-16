@@ -2951,6 +2951,7 @@ void main() {
   testWidgets('Block entering text on disabled widget', (WidgetTester tester) async {
     const String initValue = 'init';
     final TextEditingController controller = TextEditingController(text: initValue);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2972,13 +2973,15 @@ void main() {
 
   testWidgets('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController(text: 'text');
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: SearchBar(
-              controller: TextEditingController(text: 'text'),
+              controller: controller,
               enabled: false,
             ),
           ),
