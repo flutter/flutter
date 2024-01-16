@@ -2889,6 +2889,7 @@ void main() {
 
     expect(buildContent.contains('compileSdk flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
+    expect(buildContent.contains('minSdkVersion flutter.minSdkVersion'), true);
     expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
   });
 
