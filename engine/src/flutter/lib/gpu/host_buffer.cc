@@ -31,8 +31,9 @@ size_t HostBuffer::EmplaceBytes(const tonic::DartByteData& byte_data) {
       host_buffer_->Emplace(byte_data.data(), byte_data.length_in_bytes(),
                             impeller::DefaultUniformAlignment());
   emplacements_[current_offset_] = view;
+  size_t previous_offset = current_offset_;
   current_offset_ += view.range.length;
-  return view.range.offset;
+  return previous_offset;
 }
 
 std::optional<impeller::BufferView> HostBuffer::GetBufferViewForOffset(

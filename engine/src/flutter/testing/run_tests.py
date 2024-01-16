@@ -553,6 +553,16 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         extra_env=extra_env,
     )
 
+    # Run the Flutter GPU test suite.
+    run_engine_executable(
+        build_dir,
+        'impeller_dart_unittests',
+        executable_filter,
+        shuffle_flags + ['--enable_vulkan_validation'],
+        coverage=coverage,
+        extra_env=extra_env,
+    )
+
 
 def run_engine_benchmarks(build_dir, executable_filter):
   logger.info('Running Engine Benchmarks.')

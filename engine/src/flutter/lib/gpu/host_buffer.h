@@ -48,7 +48,9 @@ class HostBuffer : public RefCountedDartWrappable<HostBuffer> {
 extern "C" {
 
 FLUTTER_GPU_EXPORT
-extern void InternalFlutterGpu_HostBuffer_Initialize(Dart_Handle wrapper);
+extern void InternalFlutterGpu_HostBuffer_Initialize(
+    Dart_Handle wrapper,
+    flutter::gpu::Context* context);
 
 FLUTTER_GPU_EXPORT
 extern size_t InternalFlutterGpu_HostBuffer_EmplaceBytes(
