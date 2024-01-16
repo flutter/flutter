@@ -3405,7 +3405,7 @@ class SemanticsOwner extends ChangeNotifier {
           'and its semantic information is not merged into a visible parent.'
         ),
         ErrorHint(
-          'An invisible SemantiscNode makes the accessibility experience confusing, '
+          'An invisible SemanticsNode makes the accessibility experience confusing, '
           'as it does not provide any visual indication when the user selects it '
           'via accessibility technologies.'
         ),

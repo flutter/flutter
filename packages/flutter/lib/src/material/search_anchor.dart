@@ -35,6 +35,7 @@ const Curve _kViewFadeOnInterval = Interval(0.0, 1/2);
 const Curve _kViewIconsFadeOnInterval = Interval(1/6, 2/6);
 const Curve _kViewDividerFadeOnInterval = Interval(0.0, 1/6);
 const Curve _kViewListFadeOnInterval = Interval(133 / _kOpenViewMilliseconds, 233 / _kOpenViewMilliseconds);
+const double _kDisableSearchBarOpacity = 0.38;
 
 /// Signature for a function that creates a [Widget] which is used to open a search view.
 ///
@@ -1115,6 +1116,7 @@ class SearchBar extends StatefulWidget {
     this.textStyle,
     this.hintStyle,
     this.textCapitalization,
+    this.enabled = true,
     this.autoFocus = false,
     this.textInputAction,
     this.keyboardType,
@@ -1239,6 +1241,9 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
+  /// If false the text field is "disabled" so the SearchBar will ignore taps.
+  final bool enabled;
+
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autoFocus;
 
@@ -1340,62 +1345,69 @@ class _SearchBarState extends State<SearchBar> {
 
     return ConstrainedBox(
       constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,
-      child: Material(
-        elevation: effectiveElevation!,
-        shadowColor: effectiveShadowColor,
-        color: effectiveBackgroundColor,
-        surfaceTintColor: effectiveSurfaceTintColor,
-        shape: effectiveShape?.copyWith(side: effectiveSide),
-        child: InkWell(
-          onTap: () {
-            widget.onTap?.call();
-            if (!_focusNode.hasFocus) {
-              _focusNode.requestFocus();
-            }
-          },
-          overlayColor: effectiveOverlayColor,
-          customBorder: effectiveShape?.copyWith(side: effectiveSide),
-          statesController: _internalStatesController,
-          child: Padding(
-            padding: effectivePadding!,
-            child: Row(
-              textDirection: textDirection,
-              children: <Widget>[
-                if (leading != null) leading,
-                Expanded(
-                  child: Padding(
-                    padding: effectivePadding,
-                    child: TextField(
-                      autofocus: widget.autoFocus,
-                      onTap: widget.onTap,
-                      onTapAlwaysCalled: true,
-                      focusNode: _focusNode,
-                      onChanged: widget.onChanged,
-                      onSubmitted: widget.onSubmitted,
-                      controller: widget.controller,
-                      style: effectiveTextStyle,
-                      decoration: InputDecoration(
-                        hintText: widget.hintText,
-                      ).applyDefaults(InputDecorationTheme(
-                        hintStyle: effectiveHintStyle,
-                        // The configuration below is to make sure that the text field
-                        // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                        enabledBorder: InputBorder.none,
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        // Setting `isDense` to true to allow the text field height to be
-                        // smaller than 48.0
-                        isDense: true,
-                      )),
-                      textCapitalization: effectiveTextCapitalization,
-                      textInputAction: widget.textInputAction,
-                      keyboardType: widget.keyboardType,
+      child: Opacity(
+        opacity: widget.enabled ? 1 : _kDisableSearchBarOpacity,
+        child: Material(
+          elevation: effectiveElevation!,
+          shadowColor: effectiveShadowColor,
+          color: effectiveBackgroundColor,
+          surfaceTintColor: effectiveSurfaceTintColor,
+          shape: effectiveShape?.copyWith(side: effectiveSide),
+          child: IgnorePointer(
+            ignoring: !widget.enabled,
+            child: InkWell(
+              onTap: () {
+                widget.onTap?.call();
+                if (!_focusNode.hasFocus) {
+                  _focusNode.requestFocus();
+                }
+              },
+              overlayColor: effectiveOverlayColor,
+              customBorder: effectiveShape?.copyWith(side: effectiveSide),
+              statesController: _internalStatesController,
+              child: Padding(
+                padding: effectivePadding!,
+                child: Row(
+                  textDirection: textDirection,
+                  children: <Widget>[
+                    if (leading != null) leading,
+                    Expanded(
+                      child: Padding(
+                        padding: effectivePadding,
+                        child: TextField(
+                          autofocus: widget.autoFocus,
+                          onTap: widget.onTap,
+                          onTapAlwaysCalled: true,
+                          focusNode: _focusNode,
+                          onChanged: widget.onChanged,
+                          onSubmitted: widget.onSubmitted,
+                          controller: widget.controller,
+                          style: effectiveTextStyle,
+                          enabled: widget.enabled,
+                          decoration: InputDecoration(
+                            hintText: widget.hintText,
+                          ).applyDefaults(InputDecorationTheme(
+                            hintStyle: effectiveHintStyle,
+                            // The configuration below is to make sure that the text field
+                            // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                            enabledBorder: InputBorder.none,
+                            border: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            // Setting `isDense` to true to allow the text field height to be
+                            // smaller than 48.0
+                            isDense: true,
+                          )),
+                          textCapitalization: effectiveTextCapitalization,
+                          textInputAction: widget.textInputAction,
+                          keyboardType: widget.keyboardType,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (trailing != null) ...trailing,
+                  ],
                 ),
-                if (trailing != null) ...trailing,
-              ],
+              ),
             ),
           ),
         ),
