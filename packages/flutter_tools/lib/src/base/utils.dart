@@ -93,8 +93,8 @@ String getElapsedAsMilliseconds(Duration duration) {
 String getSizeAsMB(int bytesLength) {
   // Because Windows displays 'MB' but actually reports MiB, we calculate MiB
   // accordingly on Windows.
-  final int bytesInUnit = (Platform.isWindows ? 1024 : 1000)^2;
-  return '${(bytesLength / bytesInUnit).toStringAsFixed(1)}MB';
+  final int bytesInPlatformMB = Platform.isWindows ? 1024 * 1024 : 1000 * 1000;
+  return '${(bytesLength / bytesInPlatformMB).toStringAsFixed(1)}MB';
 }
 
 /// A class to maintain a list of items, fire events when items are added or
