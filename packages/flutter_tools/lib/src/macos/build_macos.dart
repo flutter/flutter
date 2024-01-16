@@ -165,6 +165,20 @@ Future<void> buildMacOS({
   if (result != 0) {
     throwToolExit('Build process failed');
   }
+  final String? applicationBundle = MacOSApp.fromMacOSProject(flutterProject.macos).applicationBundle(buildInfo);
+  if (applicationBundle != null) {
+    final Directory outputDirectory = globals.fs.directory(applicationBundle);
+    // This output directory is the .app folder itself.
+    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
+    final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsMB(directorySize)})';
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
+      color: TerminalColor.green,
+    );
+  }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
   final Duration elapsedDuration = sw.elapsed;
   globals.flutterUsage.sendTiming('build', 'xcode-macos', elapsedDuration);
@@ -185,22 +199,6 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
   if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
     return;
   }
-
-    final String? applicationBundle = MacOSApp.fromMacOSProject(flutterProject.macos).applicationBundle(buildInfo);
-  if (applicationBundle != null) {
-    final Directory outputDirectory = globals.fs.directory(applicationBundle);
-    // This output directory is the .app folder itself.
-    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-    final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
-        ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(directorySize)})';
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
-      color: TerminalColor.green,
-    );
-  }
-
   final String arch = DarwinArch.x86_64.name;
   final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
     .childFile('snapshot.$arch.json');
@@ -217,21 +215,6 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
     .firstWhere((Directory directory) {
     return globals.fs.path.extension(directory.path) == '.app';
   });
-
-
-    final Directory outputDirectory = globals.fs.directory(applicationBundle);
-    // This output directory is the .app folder itself.
-    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-    final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
-        ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(directorySize)})';
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
-      color: TerminalColor.green,
-    );
-  }
-
   final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
     aotSnapshot: aotSnapshot,
     precompilerTrace: precompilerTrace,
