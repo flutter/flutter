@@ -304,22 +304,13 @@ bool DartComponentController::SetUpFromKernel() {
           isolate_snapshot_data_)) {
     return false;
   }
-  if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "/pkg/data/isolate_core_snapshot_instructions.bin",
-          isolate_snapshot_instructions_, true /* executable */)) {
-    return false;
-  }
-
-  if (!CreateIsolate(isolate_snapshot_data_.address(),
-                     isolate_snapshot_instructions_.address())) {
-    return false;
-  }
-
-  Dart_EnterScope();
 
   std::string str(reinterpret_cast<const char*>(manifest.address()),
                   manifest.size());
   Dart_Handle library = Dart_Null();
+
+  bool first_library = true;
+  bool result_sound_null_safety = false;
   for (size_t start = 0; start < manifest.size();) {
     size_t end = str.find("\n", start);
     if (end == std::string::npos) {
@@ -339,6 +330,37 @@ bool DartComponentController::SetUpFromKernel() {
       Dart_ExitScope();
       return false;
     }
+    bool sound_null_safety = Dart_DetectNullSafety(
+        /*script_uri=*/nullptr, /*package_config=*/nullptr,
+        /*original_working_directory=*/nullptr,
+        isolate_snapshot_data_.address(),
+        /*isolate_snapshot_instructions=*/nullptr, kernel.address(),
+        kernel.size());
+
+    if (first_library) {
+      result_sound_null_safety = sound_null_safety;
+      first_library = false;
+    } else if (sound_null_safety != result_sound_null_safety) {
+      FX_LOG(ERROR, LOG_TAG, "Inconsistent sound null safety");
+      return false;
+    }
+
+    kernel_peices_.emplace_back(std::move(kernel));
+  }
+
+  Dart_IsolateFlags isolate_flags;
+  Dart_IsolateFlagsInitialize(&isolate_flags);
+  isolate_flags.null_safety = result_sound_null_safety;
+
+  if (!CreateIsolate(isolate_snapshot_data_.address(),
+                     /*isolate_snapshot_instructions=*/nullptr,
+                     &isolate_flags)) {
+    return false;
+  }
+
+  Dart_EnterScope();
+
+  for (const auto& kernel : kernel_peices_) {
     library = Dart_LoadLibraryFromKernel(kernel.address(), kernel.size());
     if (Dart_IsError(library)) {
       FX_LOGF(ERROR, LOG_TAG, "Cannot load library from kernel: %s",
@@ -346,9 +368,8 @@ bool DartComponentController::SetUpFromKernel() {
       Dart_ExitScope();
       return false;
     }
-
-    kernel_peices_.emplace_back(std::move(kernel));
   }
+
   Dart_SetRootLibrary(library);
 
   Dart_Handle result = Dart_FinalizeLoading(false);
@@ -381,19 +402,18 @@ bool DartComponentController::SetUpFromAppSnapshot() {
             isolate_snapshot_data_)) {
       return false;
     }
-    if (!dart_utils::MappedResource::LoadFromNamespace(
-            namespace_, data_path_ + "/isolate_snapshot_instructions.bin",
-            isolate_snapshot_instructions_, true /* executable */)) {
-      return false;
-    }
+    isolate_data = isolate_snapshot_data_.address();
+    isolate_instructions = nullptr;
   }
-  return CreateIsolate(isolate_data, isolate_instructions);
+  return CreateIsolate(isolate_data, isolate_instructions,
+                       /*isolate_flags=*/nullptr);
 #endif  // defined(AOT_RUNTIME)
 }
 
 bool DartComponentController::CreateIsolate(
     const uint8_t* isolate_snapshot_data,
-    const uint8_t* isolate_snapshot_instructions) {
+    const uint8_t* isolate_snapshot_instructions,
+    Dart_IsolateFlags* isolate_flags) {
   // Create the isolate from the snapshot.
   char* error = nullptr;
 
@@ -406,7 +426,7 @@ bool DartComponentController::CreateIsolate(
 
   isolate_ = Dart_CreateIsolateGroup(
       url_.c_str(), label_.c_str(), isolate_snapshot_data,
-      isolate_snapshot_instructions, nullptr /* flags */, state, state, &error);
+      isolate_snapshot_instructions, isolate_flags, state, state, &error);
   if (!isolate_) {
     FX_LOGF(ERROR, LOG_TAG, "Dart_CreateIsolateGroup failed: %s", error);
     return false;

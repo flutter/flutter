@@ -56,10 +56,6 @@ const char* kDartVMArgs[] = {
 #if !defined(DART_PRODUCT) && (!defined(FLUTTER_PROFILE) || !defined(NDEBUG))
     "--enable_asserts",
 #endif
-    // Run in unsound null safety mode as some packages used in Integration
-    // testing have not been migrated yet.
-    "--no-sound-null-safety",
-    // clang-format on
 };
 
 Dart_Isolate IsolateGroupCreateCallback(const char* uri,
@@ -226,13 +222,7 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
           nullptr, "/pkg/data/vm_snapshot_data.bin", vm_snapshot_data_)) {
     FX_LOG(FATAL, LOG_TAG, "Failed to load vm snapshot data");
   }
-  if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "/pkg/data/vm_snapshot_instructions.bin",
-          vm_snapshot_instructions_, true /* executable */)) {
-    FX_LOG(FATAL, LOG_TAG, "Failed to load vm snapshot instructions");
-  }
   params.vm_snapshot_data = vm_snapshot_data_.address();
-  params.vm_snapshot_instructions = vm_snapshot_instructions_.address();
 #endif
   params.create_group = IsolateGroupCreateCallback;
   params.shutdown_isolate = IsolateShutdownCallback;
