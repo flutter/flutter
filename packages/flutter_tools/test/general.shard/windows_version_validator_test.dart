@@ -61,14 +61,18 @@ const ValidationResult invalidWindowsValidationResult = ValidationResult(
 
 const ValidationResult ofdFoundRunning = ValidationResult(
   ValidationType.partial,
-  <ValidationMessage>[],
-  statusInfo: 'Topaz OFD may be running',
+  <ValidationMessage>[
+    ValidationMessage.hint('The Topaz OFD Security Module process has been found running. If you are unable to build, you will need to disable it.'),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
 );
 
 const ValidationResult getProcessFailed = ValidationResult(
   ValidationType.partial,
-  <ValidationMessage>[],
-  statusInfo: 'Failed to execute Get-Process',
+  <ValidationMessage>[
+    ValidationMessage.hint('Get-Process failed to complete'),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
 );
 
 void main() {
@@ -147,6 +151,8 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     final ValidationResult result = await validator.validate();
     expect(result.type, ofdFoundRunning.type, reason: 'The ValidationResult type should be the same (partial)');
     expect(result.statusInfo, ofdFoundRunning.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
+    expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
+    expect(result.messages[0].message, ofdFoundRunning.messages[0].message, reason: 'The ValidationMessage message should be the same');
   });
 
   testWithoutContext('Reports failure of Get-Process', () async {
@@ -157,5 +163,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     final ValidationResult result = await validator.validate();
     expect(result.type, getProcessFailed.type, reason: 'The ValidationResult type should be the same (partial)');
     expect(result.statusInfo, getProcessFailed.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
+    expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
+    expect(result.messages[0].message, getProcessFailed.messages[0].message, reason: 'The ValidationMessage message should be the same');
   });
 }

@@ -36,6 +36,20 @@ class WindowsVersionValidator extends DoctorValidator {
   final OperatingSystemUtils _operatingSystemUtils;
   final ProcessLister _processLister;
 
+  Future<ValidationResult> _topazScan() async {
+      final ProcessResult getProcessesResult = await _processLister.getProcessesWithPath();
+      if (getProcessesResult.exitCode != 0) {
+        return const ValidationResult(ValidationType.missing, <ValidationMessage>[ValidationMessage.hint('Get-Process failed to complete')]);
+      }
+      final RegExp topazRegex = RegExp(kCoreProcessPattern, caseSensitive: false,  multiLine: true);
+      final String processes = getProcessesResult.stdout as String;
+      final bool topazFound = topazRegex.hasMatch(processes);
+      if (topazFound) {
+        return const ValidationResult(ValidationType.missing, <ValidationMessage>[ValidationMessage.hint('The Topaz OFD Security Module process has been found running. If you are unable to build, you will need to disable it.')]);
+      }
+      return const ValidationResult(ValidationType.success, <ValidationMessage>[]);
+  }
+
   @override
   Future<ValidationResult> validate() async {
     final RegExp regex =
@@ -45,35 +59,26 @@ class WindowsVersionValidator extends DoctorValidator {
 
     // Use the string split method to extract the major version
     // and check against the [kUnsupportedVersions] list
-    final ValidationType windowsVersionStatus;
+    ValidationType windowsVersionStatus;
     final List<ValidationMessage> messages = <ValidationMessage>[];
     String statusInfo;
     if (matches.length == 1 &&
         !kUnsupportedVersions.contains(matches.elementAt(0).group(1))) {
+      windowsVersionStatus = ValidationType.success;
       statusInfo = 'Installed version of Windows is version 10 or higher';
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
-      final ProcessResult getProcessesResult = await _processLister.getProcessesWithPath();
-      if (getProcessesResult.exitCode != 0) {
-        windowsVersionStatus = ValidationType.partial;
-        statusInfo = 'Failed to execute Get-Process';
-        messages.add(ValidationMessage.error('Get-Process returned non-success exit code ${getProcessesResult.exitCode}'));
-      } else {
-        final RegExp topazRegex = RegExp(kCoreProcessPattern, caseSensitive: false,  multiLine: true);
-        final String processes = getProcessesResult.stdout as String;
-        final bool topazFound = topazRegex.hasMatch(processes);
-        if (topazFound) {
+      final List<ValidationResult> subResults = [
+        await _topazScan(),
+      ];
+      for (final ValidationResult subResult in subResults) {
+        if (subResult.type != ValidationType.success) {
+          statusInfo = 'Problem detected with Windows installation';
           windowsVersionStatus = ValidationType.partial;
-          messages.add(ValidationMessage(statusInfo));
-          statusInfo = 'Topaz OFD may be running';
-          messages.add(const ValidationMessage.hint(
-            'The Topaz OFD Security Module process has been found running. '
-            'If you are unable to build, you will need to disable it.'
-          ));
-        } else {
-          windowsVersionStatus = ValidationType.success;}
+          messages.addAll(subResult.messages);
         }
+      }
     } else {
       windowsVersionStatus = ValidationType.missing;
       statusInfo =
