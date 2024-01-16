@@ -1723,7 +1723,7 @@ targets:
     properties:
       contexts: >-
         [
-          "osx_sdk"
+          "android_virtual_device"
         ]
       device_type: "none"
       tags: >
