@@ -78,6 +78,8 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
 
   static double indicatorWeight = ${getToken('md.comp.primary-navigation-tab.active-indicator.height')};
 
+  // TODO(davidmartos96): This value doesn't currently exist in https://m3.material.io/components/tabs/specs
+  // Update this when the token is available.
   static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
