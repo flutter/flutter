@@ -772,8 +772,8 @@ Your $application code is in $relativeAppMain.
     final List<FileSystemEntity> files = testDir.listSync(recursive: true);
     try {
       testDir.deleteSync(recursive: true);
-    } on FileSystemException {
-      return 0;
+    } on FileSystemException catch (exception) {
+      throwToolExit('Failed to delete test directory: $exception');
     }
     return -files.length;
   }
