@@ -403,7 +403,7 @@ void main() {
       return labelRect.top - iconRect.bottom;
     }
 
-    expect(getIconMargin(), 10);
+    expect(getIconMargin(), equals(10));
   });
 
   testWidgets('Material3 - Default Tab iconMargin', (WidgetTester tester) async {
@@ -422,7 +422,7 @@ void main() {
       return labelRect.top - iconRect.bottom;
     }
 
-    expect(getIconMargin(), 2);
+    expect(getIconMargin(), equals(2));
   });
 
   testWidgets('Tab color - normal', (WidgetTester tester) async {
