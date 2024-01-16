@@ -477,28 +477,29 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return null;
     }
 
-    final Map<int, double> sumDeltas = <int, double>{};
+    int? ret;
+    double? max;
+    double sum;
     for (final int pointer in _moveDeltasBeforeFrame.keys) {
-      sumDeltas[pointer] = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
-    }
-
-    assert(sumDeltas.isNotEmpty);
-
-    int ret = sumDeltas.keys.first;
-    double max = sumDeltas[ret]!;
-    sumDeltas.forEach((int key, double value) {
-      if (positive) {
-        if (value > max) {
-          ret = key;
-          max = value;
-        }
+      sum = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
+      if (ret == null) {
+        ret = pointer;
+        max = sum;
       } else {
-        if (value < max) {
-          ret = key;
-          max = value;
+        if (positive) {
+          if (sum > max!) {
+            ret = pointer;
+            max = sum;
+          }
+        } else {
+          if (sum < max!) {
+            ret = pointer;
+            max = sum;
+          }
         }
       }
-    });
+    }
+    assert(ret != null);
     return ret;
   }
 
