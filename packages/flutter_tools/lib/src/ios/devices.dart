@@ -359,6 +359,9 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
     String? userIdentifier,
@@ -784,7 +787,7 @@ class IOSDevice extends Device {
         deviceLogReader.debuggerStream = iosDeployDebugger;
       }
     }
-    // Don't port foward if debugging with a wireless device.
+    // Don't port forward if debugging with a wireless device.
     return ProtocolDiscovery.vmService(
       deviceLogReader,
       portForwarder: isWirelesslyConnected ? null : portForwarder,
