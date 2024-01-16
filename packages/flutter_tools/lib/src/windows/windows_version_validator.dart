@@ -45,7 +45,15 @@ class WindowsVersionValidator extends DoctorValidator {
       final String processes = getProcessesResult.stdout as String;
       final bool topazFound = topazRegex.hasMatch(processes);
       if (topazFound) {
-        return const ValidationResult(ValidationType.missing, <ValidationMessage>[ValidationMessage.hint('The Topaz OFD Security Module process has been found running. If you are unable to build, you will need to disable it.')]);
+        return const ValidationResult(
+          ValidationType.missing,
+          <ValidationMessage>[
+            ValidationMessage.hint(
+              'The Topaz OFD Security Module process has been found running. '
+              'If you are unable to build, you will need to disable it.',
+            ),
+          ],
+        );
       }
       return const ValidationResult(ValidationType.success, <ValidationMessage>[]);
   }
