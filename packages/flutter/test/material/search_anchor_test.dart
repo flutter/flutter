@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   // Returns the RenderEditable at the given index, or the first if not given.
   RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
@@ -2944,6 +2946,72 @@ void main() {
     await tester.pumpAndSettle();
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.previous);
+  });
+
+  testWidgets('Block entering text on disabled widget', (WidgetTester tester) async {
+    const String initValue = 'init';
+    final TextEditingController controller = TextEditingController(text: initValue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              controller: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abcdefghi';
+    await tester.enterText(find.byType(SearchBar), testValue);
+    expect(controller.value.text, initValue);
+  });
+
+  testWidgets('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              controller: TextEditingController(text: 'text'),
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
+    semantics.dispose();
+  });
+
+  testWidgets('Check SearchBar opacity when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchBarFinder = find.byType(SearchBar);
+    expect(searchBarFinder, findsOneWidget);
+    final Finder opacityFinder = find.descendant(
+      of: searchBarFinder,
+      matching: find.byType(Opacity),
+    );
+    expect(opacityFinder, findsOneWidget);
+    final Opacity opacityWidget = tester.widget<Opacity>(opacityFinder);
+    expect(opacityWidget.opacity, 0.38);
   });
 }
 

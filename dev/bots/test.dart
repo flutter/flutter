@@ -815,6 +815,15 @@ Future<void> _runFrameworkTests() async {
     );
   }
 
+  Future<void> runImpeller() async {
+    printProgress('${green}Running packages/flutter tests $reset in Impeller$reset');
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--enable-impeller'],
+    );
+  }
+
+
   Future<void> runLibraries() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false)
@@ -984,6 +993,7 @@ Future<void> _runFrameworkTests() async {
     await runFixTests('flutter');
     await runFixTests('flutter_test');
     await runFixTests('integration_test');
+    await runFixTests('flutter_driver');
     await runPrivateTests();
   }
 
@@ -1063,6 +1073,7 @@ Future<void> _runFrameworkTests() async {
     'libraries': runLibraries,
     'slow': runSlow,
     'misc': runMisc,
+    'impeller': runImpeller,
   });
 }
 
@@ -1566,8 +1577,10 @@ Future<void> _runCustomerTesting() async {
   await runCommand(
     'git',
     <String>[
-      'checkout',
+      'branch',
+      '-f',
       'master',
+      'origin/master',
     ],
     workingDirectory: flutterRoot,
   );

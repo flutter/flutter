@@ -2430,7 +2430,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Hovered tooltips with showDuration set do dismiss when hovering elswhere', (WidgetTester tester) async {
+  testWidgets('Hovered tooltips with showDuration set do dismiss when hovering elsewhere', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     const Duration showDuration = Duration(seconds: 1);
 
@@ -2521,7 +2521,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsOneWidget,
-      reason: 'Tooltip should wait untill exitDuration expires before being hidden');
+      reason: 'Tooltip should wait until exitDuration expires before being hidden');
 
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();

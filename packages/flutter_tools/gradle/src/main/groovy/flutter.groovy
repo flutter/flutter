@@ -29,7 +29,8 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
 /**
- * For apps only. Provides the flutter extension used in app/build.gradle.
+ * For apps only. Provides the flutter extension used in the app-level Gradle
+ * build file (app/build.gradle or app/build.gradle.kts).
  *
  * The versions specified here should match the values in
  * packages/flutter_tools/lib/src/android/gradle_utils.dart, so when bumping,
@@ -40,10 +41,10 @@ import org.gradle.internal.os.OperatingSystem
 */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 34
+    final int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    static int minSdkVersion = 19
+    final int minSdkVersion = 19
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -51,23 +52,51 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    static int targetSdkVersion = 33
+    final int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    static String ndkVersion = "23.1.7779620"
+    final String ndkVersion = "23.1.7779620"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
-     * In an app project, this is ../.. since the app's build.gradle is under android/app.
+     * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
     String source = "../.."
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
+
+    /** The versionCode that was read from app's local.properties. */
+    String flutterVersionCode = null
+
+    /** The versionName that was read from app's local.properties. */
+    String flutterVersionName = null
+
+    /** Returns flutterVersionCode as an integer with error handling. */
+    Integer versionCode() {
+        if (flutterVersionCode == null) {
+            throw new GradleException("flutterVersionCode must not be null.")
+        }
+
+        if (!flutterVersionCode.isNumber()) {
+            throw new GradleException("flutterVersionCode must be an integer.")
+        }
+
+        return flutterVersionCode.toInteger()
+    }
+
+    /** Returns flutterVersionName with error handling. */
+    String versionName() {
+        if (flutterVersionName == null) {
+            throw new GradleException("flutterVersionName must not be null.")
+        }
+
+        return flutterVersionName
+    }
 }
 
 // This buildscript block supplies dependencies for this file's own import
@@ -90,7 +119,8 @@ buildscript {
 
 /**
  * Some apps don't set default compile options.
- * Apps can change these values in android/app/build.gradle.
+ * Apps can change these values in the app-level Gradle build file
+ * (android/app/build.gradle or android/app/build.gradle.kts).
  * This just ensures that default values are set.
  */
 android {
@@ -224,7 +254,28 @@ class FlutterPlugin implements Plugin<Project> {
         // Load shared gradle functions
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
 
-        project.extensions.create("flutter", FlutterExtension)
+        def extension = project.extensions.create("flutter", FlutterExtension)
+        def localProperties = new Properties()
+        def localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.withReader("UTF-8") { reader ->
+                localProperties.load(reader)
+            }
+        }
+
+        def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+        if (flutterVersionCode == null) {
+            flutterVersionCode = "1"
+        }
+        extension.flutterVersionCode = flutterVersionCode
+
+
+        def flutterVersionName = localProperties.getProperty("flutter.versionName")
+        if (flutterVersionName == null) {
+            flutterVersionName = "1.0"
+        }
+        extension.flutterVersionName = flutterVersionName
+
         this.addFlutterTasks(project)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
@@ -423,13 +474,12 @@ class FlutterPlugin implements Plugin<Project> {
      * just using the `plugins.android` list.
      */
     private configureLegacyPluginEachProjects(Project project) {
-        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         try {
-            if (!settingsGradle.text.contains("'.flutter-plugins'")) {
+            if (!settingsGradleFile(project).text.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
-            throw new GradleException("settings.gradle does not exist: ${settingsGradle.absolutePath}")
+            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${settingsGradleFile(project).absolutePath}")
         }
         List<Map<String, Object>> deps = getPluginDependencies(project)
         List<String> plugins = getPluginList(project).collect { it.name as String }
@@ -438,7 +488,7 @@ class FlutterPlugin implements Plugin<Project> {
             Project pluginProject = project.rootProject.findProject(":${it.name}")
             if (pluginProject == null) {
                 // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
-                project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle.")
+                project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
             } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
@@ -451,11 +501,38 @@ class FlutterPlugin implements Plugin<Project> {
 
     // TODO(54566): Can remove this function and its call sites once resolved.
     /**
-     * Returns `true` if the given path contains an `android/build.gradle` file.
+     * Returns `true` if the given path contains an `android` directory
+     * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private static Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, "android" + File.separator + "build.gradle")
-        return editableAndroidProject.exists()
+    private Boolean doesSupportAndroidPlatform(String path) {
+        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
+        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+        if (buildGradle.exists() && buildGradleKts.exists()) {
+            logger.error(
+                "Both build.gradle and build.gradle.kts exist, so " +
+                "build.gradle.kts is ignored. This is likely a mistake."
+            )
+        }
+
+        return buildGradle.exists() || buildGradleKts.exists()
+    }
+
+    /**
+     * Returns the Gradle settings script for the build. When both Groovy and
+     * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
+     * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
+     */
+    private File settingsGradleFile(Project project) {
+        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
+        File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
+        if (settingsGradle.exists() && settingsGradleKts.exists()) {
+            logger.error(
+                "Both settings.gradle and settings.gradle.kts exist, so " +
+                "settings.gradle.kts is ignored. This is likely a mistake."
+            )
+        }
+
+        return settingsGradle.exists() ? settingsGradle : settingsGradleKts
     }
 
     /** Adds the plugin project dependency to the app project. */
@@ -829,11 +906,36 @@ class FlutterPlugin implements Plugin<Project> {
                                 output.processResourcesProvider.get() : output.processResources
                         def manifest = new XmlParser().parse(processResources.manifestFile)
                         manifest.application.activity.each { activity ->
+                            activity."meta-data".each { metadata ->
+                                def nameAttribute = metadata.attributes().find { it.key == 'android:name' }?.value == 'flutter_deeplinking_enabled'
+                                def valueAttribute = metadata.attributes().find { it.key == 'android:value' }?.value == 'true'
+                                if (nameAttribute && valueAttribute) {
+                                    appLinkSettings.deeplinkingFlagEnabled = true
+                                }
+                            }
                             activity."intent-filter".each { appLinkIntent ->
                                 // Print out the host attributes in data tags.
                                 def schemes = [] as Set<String>
                                 def hosts = [] as Set<String>
                                 def paths = [] as Set<String>
+                                def intentFilterCheck = new IntentFilterCheck()
+
+                                if (appLinkIntent.attributes().find { it.key == 'android:autoVerify' }?.value == 'true') {
+                                    intentFilterCheck.hasAutoVerify = true
+                                }
+                                appLinkIntent.'action'.each { action ->
+                                    if (action.attributes().find { it.key == 'android:name' }?.value == 'android.intent.action.VIEW') {
+                                        intentFilterCheck.hasActionView = true
+                                    }
+                                }
+                                appLinkIntent.'category'.each { category ->
+                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.DEFAULT') {
+                                        intentFilterCheck.hasDefaultCategory = true
+                                    }
+                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.BROWSABLE') {
+                                        intentFilterCheck.hasBrowsableCategory = true
+                                    }
+                                }
                                 appLinkIntent.data.each { data ->
                                     data.attributes().each { entry ->
                                         if (entry.key instanceof QName) {
@@ -862,10 +964,10 @@ class FlutterPlugin implements Plugin<Project> {
                                 schemes.each {scheme ->
                                     hosts.each { host ->
                                         if (!paths) {
-                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*"))
+                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*", intentFilterCheck: intentFilterCheck))
                                         } else {
                                             paths.each { path ->
-                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path))
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path, intentFilterCheck: intentFilterCheck))
                                             }
                                         }
                                     }
@@ -1344,14 +1446,21 @@ class FlutterPlugin implements Plugin<Project> {
 }
 
 class AppLinkSettings {
-
     String applicationId
     Set<Deeplink> deeplinks
+    boolean deeplinkingFlagEnabled
+}
 
+class IntentFilterCheck {
+    boolean hasAutoVerify
+    boolean hasActionView
+    boolean hasDefaultCategory
+    boolean hasBrowsableCategory
 }
 
 class Deeplink {
     String scheme, host, path
+    IntentFilterCheck intentFilterCheck
     boolean equals(o) {
         if (o == null)
             throw new NullPointerException()
