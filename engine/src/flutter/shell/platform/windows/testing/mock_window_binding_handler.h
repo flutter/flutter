@@ -31,6 +31,7 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MOCK_METHOD(void, SetFlutterCursor, (HCURSOR cursor_name), (override));
   MOCK_METHOD(void, OnCursorRectUpdated, (const Rect& rect), (override));
   MOCK_METHOD(void, OnResetImeComposing, (), (override));
+  MOCK_METHOD(bool, OnBitmapSurfaceCleared, (), (override));
   MOCK_METHOD(bool,
               OnBitmapSurfaceUpdated,
               (const void* allocation, size_t row_bytes, size_t height),

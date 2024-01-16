@@ -48,7 +48,7 @@ static std::optional<GLuint> ConfigureFBO(
   }
 
   if (gl.CheckFramebufferStatus(fbo_type) != GL_FRAMEBUFFER_COMPLETE) {
-    VALIDATION_LOG << "Could not create a complete frambuffer.";
+    VALIDATION_LOG << "Could not create a complete framebuffer.";
     DeleteFBO(gl, fbo, fbo_type);
     return std::nullopt;
   }
