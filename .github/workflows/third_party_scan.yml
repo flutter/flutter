@@ -31,7 +31,7 @@ jobs:
       - name: "evaluate git history for common ancestors"
         run: python ci/scan_deps.py
       - name: "upload osv-scanner deps"
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595
         with:
           name: converted-osv-lockfile
           path: converted-osv-lockfile.json
