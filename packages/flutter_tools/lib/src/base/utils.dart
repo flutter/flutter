@@ -90,6 +90,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 
 /// Return a String - with units - for the size in MB of the given number of bytes.
 String getSizeAsMB(int bytesLength) {
+  // TODO(guidezpl): verify me on Linux
   return '${(bytesLength / (1000 * 1000)).toStringAsFixed(1)}MB';
 }
 
