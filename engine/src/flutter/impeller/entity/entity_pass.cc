@@ -249,7 +249,7 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
                                            ISize size,
                                            int mip_count,
                                            const Color& clear_color) {
-  auto context = renderer.GetContext();
+  const std::shared_ptr<Context>& context = renderer.GetContext();
 
   /// All of the load/store actions are managed by `InlinePassContext` when
   /// `RenderPasses` are created, so we just set them to `kDontCare` here.
@@ -843,7 +843,7 @@ bool EntityPass::OnRender(
         collapsed_parent_pass) const {
   TRACE_EVENT0("impeller", "EntityPass::OnRender");
 
-  auto context = renderer.GetContext();
+  const std::shared_ptr<Context>& context = renderer.GetContext();
   InlinePassContext pass_context(context, pass_target,
                                  GetTotalPassReads(renderer), GetElementCount(),
                                  collapsed_parent_pass);

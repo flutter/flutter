@@ -125,7 +125,6 @@ bool ClipContents::Render(const ContentContext& renderer,
   options.primitive_type = geometry_result.type;
   pass.SetPipeline(renderer.GetClipPipeline(options));
 
-  auto allocator = renderer.GetContext()->GetResourceAllocator();
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   info.mvp = geometry_result.transform;

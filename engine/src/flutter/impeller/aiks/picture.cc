@@ -53,7 +53,7 @@ std::shared_ptr<Texture> Picture::RenderToTexture(
 
   // This texture isn't host visible, but we might want to add host visible
   // features to Image someday.
-  auto impeller_context = context.GetContext();
+  const std::shared_ptr<Context>& impeller_context = context.GetContext();
   // Do not use the render target cache as the lifecycle of this texture
   // will outlive a particular frame.
   RenderTargetAllocator render_target_allocator =

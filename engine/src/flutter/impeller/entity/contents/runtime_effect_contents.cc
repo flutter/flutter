@@ -16,6 +16,7 @@
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/runtime_effect.vert.h"
+#include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/shader_function.h"
@@ -68,8 +69,8 @@ static std::shared_ptr<ShaderMetadata> MakeShaderMetadata(
 bool RuntimeEffectContents::Render(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const {
-  auto context = renderer.GetContext();
-  auto library = context->GetShaderLibrary();
+  const std::shared_ptr<Context>& context = renderer.GetContext();
+  const std::shared_ptr<ShaderLibrary>& library = context->GetShaderLibrary();
 
   //--------------------------------------------------------------------------
   /// Get or register shader.
@@ -138,7 +139,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   /// layouts are known from the uniforms.
   ///
 
-  const auto& caps = context->GetCapabilities();
+  const std::shared_ptr<const Capabilities>& caps = context->GetCapabilities();
   const auto color_attachment_format = caps->GetDefaultColorFormat();
   const auto stencil_attachment_format = caps->GetDefaultStencilFormat();
 
