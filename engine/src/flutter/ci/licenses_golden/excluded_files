@@ -375,6 +375,8 @@
 ../../../flutter/shell/platform/windows/client_wrapper/flutter_view_unittests.cc
 ../../../flutter/shell/platform/windows/client_wrapper/plugin_registrar_windows_unittests.cc
 ../../../flutter/shell/platform/windows/client_wrapper/testing
+../../../flutter/shell/platform/windows/compositor_opengl_unittests.cc
+../../../flutter/shell/platform/windows/compositor_software_unittests.cc
 ../../../flutter/shell/platform/windows/cursor_handler_unittests.cc
 ../../../flutter/shell/platform/windows/direct_manipulation_unittests.cc
 ../../../flutter/shell/platform/windows/dpi_utils_unittests.cc
