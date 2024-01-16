@@ -386,19 +386,16 @@ void main() {
       material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
   });
 
-  testWidgets('Material2 - Tab icon-label margin', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
-    Widget buildApp() {
-      return MaterialApp(
-        theme: theme,
-        home: const Center(child: Material(
-          child: Tab(
-            icon: Icon(Icons.house),
-            text: 'x',
-          ),
+  testWidgets('Material2 - Default Tab iconMargin', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Material(
+        child: Tab(
+          icon: Icon(Icons.house),
+          text: 'x',
         ),
-      ));
-    }
+      ),
+    ));
 
     double getIconMargin() {
       final Rect iconRect = tester.getRect(find.byIcon(Icons.house));
@@ -406,23 +403,18 @@ void main() {
       return labelRect.top - iconRect.bottom;
     }
 
-    await tester.pumpWidget(buildApp());
     expect(getIconMargin(), 10);
   });
 
-  testWidgets('Material3 - Tab icon-label margin', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
-    Widget buildApp() {
-      return MaterialApp(
-        theme: theme,
-        home: const Center(child: Material(
-          child: Tab(
-            icon: Icon(Icons.house),
-            text: 'x',
-          ),
+  testWidgets('Material3 - Default Tab iconMargin', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Tab(
+          icon: Icon(Icons.house),
+          text: 'x',
         ),
-      ));
-    }
+      ),
+    ));
 
     double getIconMargin() {
       final Rect iconRect = tester.getRect(find.byIcon(Icons.house));
@@ -430,7 +422,6 @@ void main() {
       return labelRect.top - iconRect.bottom;
     }
 
-    await tester.pumpWidget(buildApp());
     expect(getIconMargin(), 2);
   });
 
