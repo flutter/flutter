@@ -1423,7 +1423,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     // compareTo implementation of version strings in the format of ints and periods
     // Requires non null objects.
-    // Will not crash on RC canndiate strings but considers all rc candidates the same version.
+    // Will not crash on RC candidate strings but considers all RC candidates the same version.
     static int compareVersionStrings(String firstString, String secondString) {
         List firstVersion = firstString.tokenize(".")
         List secondVersion = secondString.tokenize(".")
