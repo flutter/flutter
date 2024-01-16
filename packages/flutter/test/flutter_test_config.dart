@@ -20,7 +20,7 @@ import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart'
 /// `--dart-define LEAK_TRACKING=true` or invoke `export LEAK_TRACKING=true`.
 ///
 /// See documentation for [testWidgets] on how to except individual tests.
-bool isLeakTrackingEnabled() {
+bool _isLeakTrackingEnabled() {
   if (kIsWeb) {
     return false;
   }
@@ -41,7 +41,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  if (isLeakTrackingEnabled()) {
+  if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;
