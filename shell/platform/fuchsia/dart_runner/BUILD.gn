@@ -250,18 +250,8 @@ template("jit_runner_package") {
       },
       {
         path = rebase_path(
-                "$target_gen_dir/kernel/vm_instructions${product_suffix}.bin")
-        dest = "vm_snapshot_instructions.bin"
-      },
-      {
-        path = rebase_path(
                 "$target_gen_dir/kernel/isolate_data${product_suffix}.bin")
         dest = "isolate_core_snapshot_data.bin"
-      },
-      {
-        path = rebase_path(
-                "$target_gen_dir/kernel/isolate_instructions${product_suffix}.bin")
-        dest = "isolate_core_snapshot_instructions.bin"
       },
     ]
 
