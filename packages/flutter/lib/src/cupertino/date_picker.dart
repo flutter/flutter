@@ -1757,13 +1757,10 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
     double totalColumnWidths = 3 * _kDatePickerPadSize;
 
     for (int i = 0; i < columnWidths.length; i++) {
-      late final double offAxisFraction;
-      switch (i) {
-        case 0:
-          offAxisFraction = -0.3 * textDirectionFactor;
-        default:
-          offAxisFraction = 0.5 * textDirectionFactor;
-      }
+      final double offAxisFraction = switch (i) {
+        0 => -0.3 * textDirectionFactor,
+        _ =>  0.5 * textDirectionFactor,
+      };
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (textDirectionFactor == -1) {
@@ -1958,12 +1955,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   late TextDirection textDirection;
   late CupertinoLocalizations localizations;
   int get textDirectionFactor {
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return 1;
-      case TextDirection.rtl:
-        return -1;
-    }
+    return switch (textDirection) {
+      TextDirection.ltr =>  1,
+      TextDirection.rtl => -1,
+    };
   }
 
   // The currently selected values of the picker.
