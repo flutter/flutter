@@ -989,7 +989,7 @@ deps = {
    },
 
   'src/third_party/impeller-cmake-example': {
-     'url': Var('flutter_git') + '/impeller-cmake-example.git' + '@' + 'd1a26a51dc6890e5f851749e3d8e048703f24f51',
+     'url': Var('flutter_git') + '/third_party/impeller-cmake-example.git' + '@' + 'd1a26a51dc6890e5f851749e3d8e048703f24f51',
      'condition': 'download_impeller_cmake_example',
   },
 
