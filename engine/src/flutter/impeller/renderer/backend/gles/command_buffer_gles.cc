@@ -49,8 +49,12 @@ std::shared_ptr<RenderPass> CommandBufferGLES::OnCreateRenderPass(
   if (!IsValid()) {
     return nullptr;
   }
+  auto context = context_.lock();
+  if (!context) {
+    return nullptr;
+  }
   auto pass = std::shared_ptr<RenderPassGLES>(
-      new RenderPassGLES(context_, target, reactor_));
+      new RenderPassGLES(context, target, reactor_));
   if (!pass->IsValid()) {
     return nullptr;
   }
