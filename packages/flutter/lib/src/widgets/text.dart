@@ -930,7 +930,192 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     } else {
       _lastStartEdgeUpdateGlobalPosition = event.globalPosition;
     }
+    if (event.granularity == TextGranularity.paragraph) {
+      return _handleSelectionEdgeUpdate(event);
+    }
     return super.handleSelectionEdgeUpdate(event);
+  }
+
+  SelectionResult _handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
+    if (event.type == SelectionEventType.endEdgeUpdate) {
+      return currentSelectionEndIndex == -1 ? _initSelection(event, isEnd: true) : _adjustSelection(event, isEnd: true);
+    }
+    return currentSelectionStartIndex == -1 ? _initSelection(event, isEnd: false) : _adjustSelection(event, isEnd: false);
+  }
+
+  /// Initializes the selection of the selectable children.
+  ///
+  /// The goal is to find the selectable child that contains the selection edge.
+  /// Returns [SelectionResult.end] if the selection edge ends on any of the
+  /// children. Otherwise, it returns [SelectionResult.previous] if the selection
+  /// does not reach any of its children. Returns [SelectionResult.next]
+  /// if the selection reaches the end of its children.
+  ///
+  /// Ideally, this method should only be called twice at the beginning of the
+  /// drag selection, once for start edge update event, once for end edge update
+  /// event.
+  SelectionResult _initSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
+    assert((isEnd && currentSelectionEndIndex == -1) || (!isEnd && currentSelectionStartIndex == -1));
+    int newIndex = -1;
+    bool hasFoundEdgeIndex = false;
+    SelectionResult? result;
+    for (int index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
+      final Selectable child = selectables[index];
+      final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
+      switch (childResult) {
+        case SelectionResult.next:
+        case SelectionResult.none:
+          newIndex = index;
+        case SelectionResult.end:
+          newIndex = index;
+          result = SelectionResult.end;
+          hasFoundEdgeIndex = true;
+        case SelectionResult.previous:
+          hasFoundEdgeIndex = true;
+          if (index == 0) {
+            newIndex = 0;
+            result = SelectionResult.previous;
+          }
+          result ??= SelectionResult.end;
+        case SelectionResult.pending:
+          newIndex = index;
+          result = SelectionResult.pending;
+          hasFoundEdgeIndex = true;
+      }
+    }
+
+    if (newIndex == -1) {
+      assert(selectables.isEmpty);
+      return SelectionResult.none;
+    }
+    if (isEnd) {
+      currentSelectionEndIndex = newIndex;
+    } else {
+      currentSelectionStartIndex = newIndex;
+    }
+    _flushInactiveSelections();
+    // The result can only be null if the loop went through the entire list
+    // without any of the selection returned end or previous. In this case, the
+    // caller of this method needs to find the next selectable in their list.
+    return result ?? SelectionResult.next;
+  }
+
+  /// Adjusts the selection based on the drag selection update event if there
+  /// is already a selectable child that contains the selection edge.
+  ///
+  /// This method starts by sending the selection event to the current
+  /// selectable that contains the selection edge, and finds forward or backward
+  /// if that selectable no longer contains the selection edge.
+  SelectionResult _adjustSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
+    debugPrint('adjustselection');
+    assert(() {
+      if (isEnd) {
+        assert(currentSelectionEndIndex < selectables.length && currentSelectionEndIndex >= 0);
+        return true;
+      }
+      assert(currentSelectionStartIndex < selectables.length && currentSelectionStartIndex >= 0);
+      return true;
+    }());
+    SelectionResult? finalResult;
+    // Determines if the edge being adjusted is within the current viewport.
+    //  - If so, we begin the search for the new selection edge position at the
+    //    currentSelectionEndIndex/currentSelectionStartIndex.
+    //  - If not, we attempt to locate the new selection edge starting from
+    //    the opposite end.
+    //  - If neither edge is in the current viewport, the search for the new
+    //    selection edge position begins at 0.
+    //
+    // This can happen when there is a scrollable child and the edge being adjusted
+    // has been scrolled out of view.
+    final bool isCurrentEdgeWithinViewport = isEnd ? value.endSelectionPoint != null : value.startSelectionPoint != null;
+    final bool isOppositeEdgeWithinViewport = isEnd ? value.startSelectionPoint != null : value.endSelectionPoint != null;
+    int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
+      (true, true, true) => currentSelectionEndIndex,
+      (true, true, false) => currentSelectionEndIndex,
+      (true, false, true) => currentSelectionStartIndex,
+      (true, false, false) => 0,
+      (false, true, true) => currentSelectionStartIndex,
+      (false, true, false) => currentSelectionStartIndex,
+      (false, false, true) => currentSelectionEndIndex,
+      (false, false, false) => 0,
+    };
+    bool? forward;
+    late SelectionResult currentSelectableResult;
+    bool foundStart = false;
+    // This loop sends the selection event to one of the following to determine
+    // the direction of the search.
+    //  - currentSelectionEndIndex/currentSelectionStartIndex if the current edge
+    //    is in the current viewport.
+    //  - The opposite edge index if the current edge is not in the current viewport.
+    //  - Index 0 if neither edge is in the current viewport.
+    //
+    // If the result is `SelectionResult.next`, this loop look backward.
+    // Otherwise, it looks forward.
+    //
+    // The terminate condition are:
+    // 1. the selectable returns end, pending, none.
+    // 2. the selectable returns previous when looking forward.
+    // 2. the selectable returns next when looking backward.
+    while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
+      debugPrint('$newIndex ${selectables[newIndex]}');
+      if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
+        debugPrint('at placeholder');
+        if (foundStart) {
+          dispatchSelectionEventToChild(selectables[newIndex], SelectAllSelectionEvent());
+        }
+        newIndex += 1;
+        continue;
+      }
+      debugPrint('not placeholder');
+      currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
+      switch (currentSelectableResult) {
+        case SelectionResult.end:
+        case SelectionResult.pending:
+        case SelectionResult.none:
+          debugPrint('end');
+          finalResult = currentSelectableResult;
+        case SelectionResult.next:
+          debugPrint('next');
+          if (selectables[newIndex].boundingBoxes.isNotEmpty) {
+            for (final Rect rect in selectables[newIndex].boundingBoxes) {
+              final Rect globalRect = MatrixUtils.transformRect(selectables[newIndex].getTransformTo(null), rect);
+              if (globalRect.contains(event.globalPosition)) {
+                debugPrint('found');
+                foundStart = true;
+                break;
+              }
+            }
+          }
+          if (forward == false) {
+            newIndex += 1;
+            finalResult = SelectionResult.end;
+          } else if (newIndex == selectables.length - 1) {
+            finalResult = currentSelectableResult;
+          } else {
+            forward = true;
+            newIndex += 1;
+          }
+        case SelectionResult.previous:
+          debugPrint('prev');
+          if (forward ?? false) {
+            newIndex -= 1;
+            finalResult = SelectionResult.end;
+          } else if (newIndex == 0) {
+            finalResult = currentSelectableResult;
+          } else {
+            forward = false;
+            newIndex -= 1;
+          }
+      }
+    }
+    if (isEnd) {
+      currentSelectionEndIndex = newIndex;
+    } else {
+      currentSelectionStartIndex = newIndex;
+    }
+    _flushInactiveSelections();
+    debugPrint('adjust selection end');
+    return finalResult!;
   }
 
   @override
