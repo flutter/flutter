@@ -1446,7 +1446,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           case TextGranularity.word:
             result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getWordBoundaryAtPosition);
           case TextGranularity.paragraph:
-            result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getClampedParagraphBoundaryAtPosition);
+            result = _updateSelectionEdgeByTextBoundary2(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getClampedParagraphBoundaryAtPosition);
           case TextGranularity.document:
           case TextGranularity.line:
             assert(false, 'Moving the selection edge by line or document is not supported.');
@@ -1732,6 +1732,101 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // not have a way to get accurate text length if its text is truncated due to
     // layout constraint.
     return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+  }
+
+  SelectionResult _updateSelectionEdgeByTextBoundary2(Offset globalPosition, {required bool isEnd, required _TextBoundaryAtPosition getTextBoundary}) {
+    // When the start/end edges are swapped, i.e. the start is after the end, and
+    // the scrollable synthesizes an event for the opposite edge, this will potentially
+    // move the opposite edge outside of the origin text boundary and we are unable to recover.
+    debugPrint('wowza $fullText');
+    final TextPosition? existingSelectionStart = _textSelectionStart;
+    final TextPosition? existingSelectionEnd = _textSelectionEnd;
+
+    _setSelectionPosition(null, isEnd: isEnd);
+    final Matrix4 transform = paragraph.getTransformTo(null);
+    transform.invert();
+    final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
+    if (_rect.isEmpty) {
+      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+    }
+    final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
+      _rect,
+      localPosition,
+      direction: paragraph.textDirection,
+    );
+
+    final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
+    // Check if the original local position is within the rect, if it is not then
+    // we do not need to look up the text boundary for that position. This is to
+    // maintain a selectables selection collapsed at 0 when the local position is
+    // not located inside its rect.
+    _TextBoundaryRecord? textBoundary = _rect.contains(localPosition) ? getTextBoundary(position) : null;
+    if (textBoundary != null
+        && (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset <= range.start
+        || textBoundary.boundaryStart.offset >= range.end && textBoundary.boundaryEnd.offset > range.end)) {
+      // When the position is located at a placeholder inside of the text, then we may compute
+      // a text boundary that does not belong to the current selectable fragment. In this case
+      // we should invalidate the text boundary so that it is not taken into account when
+      // computing the target position.
+      textBoundary = null;
+    }
+    final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
+    debugPrint('lol');
+    _setSelectionPosition(targetPosition, isEnd: isEnd);
+    if (targetPosition.offset == range.end) {
+      return SelectionResult.next;
+    }
+
+    if (targetPosition.offset == range.start) {
+      debugPrint('woah I dont like this prev $range ${targetPosition.offset} ${getTextBoundary(position)}');
+      return SelectionResult.previous;
+    }
+    // TODO(chunhtai): The geometry information should not be used to determine
+    // selection result. This is a workaround to RenderParagraph, where it does
+    // not have a way to get accurate text length if its text is truncated due to
+    // layout constraint.
+    debugPrint('$fullText hello world');
+    return _handleSelectMultiFragmentTextBoundary2(textBoundary!);
+  }
+
+  SelectionResult _handleSelectMultiFragmentTextBoundary2(_TextBoundaryRecord textBoundary) {
+    // This fragment may not contain the boundary, decide what direction the target
+    // fragment is located in. Because fragments are separated by placeholder
+    // spans, we also check if the beginning or end of the boundary is touching
+    // either edge of this fragment.
+    if (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset <= range.start) {
+      return SelectionResult.previous;
+    } else if (textBoundary.boundaryStart.offset >= range.end && textBoundary.boundaryEnd.offset > range.end) {
+      return SelectionResult.next;
+    }
+    late final TextRange? intersectRange;
+    if ((intersectRange = _intersect(range, TextRange(start: textBoundary.boundaryStart.offset, end: textBoundary.boundaryEnd.offset))) != null) {
+      // _textSelectionStart = TextPosition(offset: intersectRange!.start);
+      // _textSelectionEnd = TextPosition(offset: intersectRange!.end);
+      // _selectableContainsOriginTextBoundary = true;
+      if (range.end < textBoundary.boundaryEnd.offset) {
+        return SelectionResult.next;
+      }
+      return SelectionResult.end;
+    }
+    // _textSelectionStart = textBoundary.boundaryStart;
+    // _textSelectionEnd = textBoundary.boundaryEnd;
+    return SelectionResult.end;
+  }
+
+  SelectionResult _getResultBasedOnRect(Rect targetRect, Offset point) {
+    // if (targetRect.contains(point)) {
+    //   return SelectionResult.end;
+    // }
+    if (point.dy < targetRect.top) {
+      return SelectionResult.previous;
+    }
+    if (point.dy > targetRect.bottom) {
+      return SelectionResult.next;
+    }
+    return point.dx >= targetRect.right
+        ? SelectionResult.next
+        : SelectionResult.previous;
   }
 
   TextPosition _clampTextPosition(TextPosition position) {
