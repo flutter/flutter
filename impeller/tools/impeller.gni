@@ -315,7 +315,7 @@ template("impellerc") {
   if (defined(invoker.shader_bundle)) {
     assert(
         defined(invoker.shader_bundle_output),
-        "When shader_bundle is specified, shader_output_bundle must also be specified.")
+        "When shader_bundle is specified, shader_bundle_output must also be specified.")
   }
 
   if (defined(invoker.shader_target_flags)) {
