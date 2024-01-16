@@ -77,7 +77,8 @@ class DartTestComponentController
   bool SetUpFromAppSnapshot();
 
   bool CreateIsolate(const uint8_t* isolate_snapshot_data,
-                     const uint8_t* isolate_snapshot_instructions);
+                     const uint8_t* isolate_snapshot_instructions,
+                     Dart_IsolateFlags* isolate_flags);
 
   // |ComponentController|
   void Kill() override;
