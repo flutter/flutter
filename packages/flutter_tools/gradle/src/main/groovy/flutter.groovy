@@ -1423,6 +1423,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     // compareTo implementation of version strings in the format of ints and periods
     // Requires non null objects.
+    // Will not crash on RC canndiate strings but considers all rc candidates the same version.
     static int compareVersionStrings(String firstString, String secondString) {
         List firstVersion = firstString.tokenize(".")
         List secondVersion = secondString.tokenize(".")
@@ -1430,12 +1431,26 @@ class FlutterPlugin implements Plugin<Project> {
         def commonIndices = Math.min(firstVersion.size(), secondVersion.size())
 
         for (int i = 0; i < commonIndices; i++) {
-            def firstAtIndex = firstVersion[i].toInteger()
-            def secondAtIndex = secondVersion[i].toInteger()
+            String firstAtIndex = firstVersion[i]
+            String secondAtIndex = secondVersion[i]
+            int firstInt = 0;
+            int secondInt = 0
+            try {
+                // Strip any chars after "-". For example "8.6-rc-2"
+                firstInt = firstAtIndex.substring(0, firstAtIndex.indexOf('-').toInteger())
+            } catch (NumberFormatException nfe) {
+                println(nfe)
+            }
+            try {
+                // Strip any chars after "-". For example "8.6-rc-2"
+                secondInt = secondAtIndex.substring(0, secondAtIndex.indexOf('-').toInteger())
+            } catch (NumberFormatException nfe) {
+                println(nfe)
+            }
 
-            if (firstAtIndex != secondAtIndex) {
+            if (firstInt != secondInt) {
                 // <=> in groovy delegates to compareTo
-                return firstAtIndex <=> secondAtIndex
+                return firstInt <=> secondInt
             }
         }
 
