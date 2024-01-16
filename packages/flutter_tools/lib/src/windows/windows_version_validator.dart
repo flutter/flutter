@@ -69,7 +69,7 @@ class WindowsVersionValidator extends DoctorValidator {
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
-      final List<ValidationResult> subResults = [
+      final List<ValidationResult> subResults = <ValidationResult>[
         await _topazScan(),
       ];
       for (final ValidationResult subResult in subResults) {
