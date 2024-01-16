@@ -161,7 +161,7 @@ base class HostBuffer extends NativeFieldWrapperClass1 with Buffer {
   }
 
   /// Wrap with native counterpart.
-  @Native<Void Function(Handle, Handle)>(
+  @Native<Void Function(Handle, Pointer<Void>)>(
       symbol: 'InternalFlutterGpu_HostBuffer_Initialize')
   external void _initialize(GpuContext gpuContext);
 
