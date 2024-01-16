@@ -82,7 +82,8 @@ uint32_t fl_backing_store_provider_get_gl_format(FlBackingStoreProvider* self) {
   // In Linux kN32_SkColorType is assumed to be kBGRA_8888_SkColorType.
   // So we must choose a valid gl format to be compatible with surface format
   // BGRA8.
-  // Following logics are copied from Skia GrGLCaps.cpp.
+  // Following logic is copied from Skia GrGLCaps.cpp:
+  // https://github.com/google/skia/blob/4738ed711e03212aceec3cd502a4adb545f38e63/src/gpu/ganesh/gl/GrGLCaps.cpp#L1963-L2116
 
   if (epoxy_is_desktop_gl()) {
     // For OpenGL.

@@ -308,6 +308,13 @@ void FlutterWindow::OnResetImeComposing() {
   AbortImeComposing();
 }
 
+bool FlutterWindow::OnBitmapSurfaceCleared() {
+  HDC dc = ::GetDC(GetWindowHandle());
+  bool result = ::PatBlt(dc, 0, 0, current_width_, current_height_, BLACKNESS);
+  ::ReleaseDC(GetWindowHandle(), dc);
+  return result;
+}
+
 bool FlutterWindow::OnBitmapSurfaceUpdated(const void* allocation,
                                            size_t row_bytes,
                                            size_t height) {
@@ -320,8 +327,8 @@ bool FlutterWindow::OnBitmapSurfaceUpdated(const void* allocation,
   bmi.bmiHeader.biBitCount = 32;
   bmi.bmiHeader.biCompression = BI_RGB;
   bmi.bmiHeader.biSizeImage = 0;
-  int ret = SetDIBitsToDevice(dc, 0, 0, row_bytes / 4, height, 0, 0, 0, height,
-                              allocation, &bmi, DIB_RGB_COLORS);
+  int ret = ::SetDIBitsToDevice(dc, 0, 0, row_bytes / 4, height, 0, 0, 0,
+                                height, allocation, &bmi, DIB_RGB_COLORS);
   ::ReleaseDC(GetWindowHandle(), dc);
   return ret != 0;
 }

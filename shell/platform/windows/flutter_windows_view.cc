@@ -106,12 +106,28 @@ void FlutterWindowsView::SetEngine(FlutterWindowsEngine* engine) {
                     binding_handler_->GetDpiScale());
 }
 
-uint32_t FlutterWindowsView::GetFrameBufferId(size_t width, size_t height) {
-  // Called on an engine-controlled (non-platform) thread.
+void FlutterWindowsView::OnEmptyFrameGenerated() {
+  // Called on the raster thread.
   std::unique_lock<std::mutex> lock(resize_mutex_);
 
   if (resize_status_ != ResizeState::kResizeStarted) {
-    return kWindowFrameBufferID;
+    return;
+  }
+
+  // Platform thread is blocked for the entire duration until the
+  // resize_status_ is set to kDone.
+  engine_->surface_manager()->ResizeSurface(
+      GetWindowHandle(), resize_target_width_, resize_target_height_,
+      NeedsVsync());
+  resize_status_ = ResizeState::kFrameGenerated;
+}
+
+bool FlutterWindowsView::OnFrameGenerated(size_t width, size_t height) {
+  // Called on the raster thread.
+  std::unique_lock<std::mutex> lock(resize_mutex_);
+
+  if (resize_status_ != ResizeState::kResizeStarted) {
+    return true;
   }
 
   if (resize_target_width_ == width && resize_target_height_ == height) {
@@ -120,9 +136,10 @@ uint32_t FlutterWindowsView::GetFrameBufferId(size_t width, size_t height) {
     engine_->surface_manager()->ResizeSurface(GetWindowHandle(), width, height,
                                               NeedsVsync());
     resize_status_ = ResizeState::kFrameGenerated;
+    return true;
   }
 
-  return kWindowFrameBufferID;
+  return false;
 }
 
 void FlutterWindowsView::UpdateFlutterCursor(const std::string& cursor_name) {
@@ -610,6 +627,10 @@ bool FlutterWindowsView::SwapBuffers() {
     default:
       return engine_->surface_manager()->SwapBuffers();
   }
+}
+
+bool FlutterWindowsView::ClearSoftwareBitmap() {
+  return binding_handler_->OnBitmapSurfaceCleared();
 }
 
 bool FlutterWindowsView::PresentSoftwareBitmap(const void* allocation,
