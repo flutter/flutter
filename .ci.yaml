@@ -468,7 +468,6 @@ targets:
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
-    bringup: false
     presubmit: false
     recipe: firebaselab/firebaselab
     timeout: 60
@@ -3142,8 +3141,9 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac build_tests_1_4
+  - name: Mac_x64 build_tests_1_4
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3160,8 +3160,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac build_tests_2_4
+  - name: Mac_x64 build_tests_2_4
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3178,8 +3179,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac build_tests_3_4
+  - name: Mac_x64 build_tests_3_4
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3196,8 +3198,85 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac build_tests_4_4
+  - name: Mac_x64 build_tests_4_4
     recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: build_tests
+      subshard: "4_4"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_1_4
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: build_tests
+      subshard: "1_4"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_2_4
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: build_tests
+      subshard: "2_4"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_3_4
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: build_tests
+      subshard: "3_4"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_4_4
+    recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
