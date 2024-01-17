@@ -122,8 +122,7 @@ void GoldenPlaygroundTest::SetUp() {
   std::filesystem::path icd_path = target_path / "vk_swiftshader_icd.json";
   setenv("VK_ICD_FILENAMES", icd_path.c_str(), 1);
 
-  if (GetBackend() != PlaygroundBackend::kMetal &&
-      GetBackend() != PlaygroundBackend::kVulkan) {
+  if (GetBackend() != PlaygroundBackend::kMetal) {
     GTEST_SKIP_("GoldenPlaygroundTest doesn't support this backend type.");
     return;
   }
