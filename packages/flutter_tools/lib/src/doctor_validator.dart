@@ -37,6 +37,7 @@ enum ValidationType {
   partial,
   notAvailable,
   success,
+  test,
 }
 
 enum ValidationMessageType {
