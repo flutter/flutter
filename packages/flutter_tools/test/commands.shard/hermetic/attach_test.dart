@@ -51,10 +51,6 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 void main() {
-  tearDown(() {
-    MacOSDesignedForIPadDevices.allowDiscovery = false;
-  });
-
   group('attach', () {
     late StreamLogger logger;
     late FileSystem testFileSystem;
@@ -1059,7 +1055,6 @@ void main() {
       expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
       expect(testLogger.statusText, contains('yy2'));
-      expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

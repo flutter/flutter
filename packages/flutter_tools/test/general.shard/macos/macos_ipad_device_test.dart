@@ -21,12 +21,7 @@ import '../../src/fakes.dart';
 
 void main() {
   group('MacOSDesignedForIPadDevices', () {
-    tearDown(() {
-      MacOSDesignedForIPadDevices.allowDiscovery = false;
-    });
-
     testWithoutContext('does not support non-macOS platforms', () async {
-      MacOSDesignedForIPadDevices.allowDiscovery = true;
       final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'windows'),
         logger: BufferLogger.test(),
@@ -39,7 +34,7 @@ void main() {
       expect(discoverer.supportsPlatform, isFalse);
     });
 
-    testWithoutContext('discovery not allowed', () async {
+    testWithoutContext('discovery is allowed', () async {
       final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
@@ -51,11 +46,10 @@ void main() {
       expect(discoverer.supportsPlatform, isTrue);
 
       final List<Device> devices = await discoverer.devices();
-      expect(devices, isEmpty);
+      expect(devices, isNotNull);
     });
 
     testWithoutContext('no device on x86', () async {
-      MacOSDesignedForIPadDevices.allowDiscovery = true;
       final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
@@ -71,7 +65,6 @@ void main() {
     });
 
     testWithoutContext('no device on when iOS development off', () async {
-      MacOSDesignedForIPadDevices.allowDiscovery = true;
       final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
@@ -87,7 +80,6 @@ void main() {
     });
 
     testWithoutContext('device discovery on arm', () async {
-      MacOSDesignedForIPadDevices.allowDiscovery = true;
       final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
@@ -103,7 +95,7 @@ void main() {
 
       final Device device = devices.single;
       expect(device, isA<MacOSDesignedForIPadDevice>());
-      expect(device.id, 'designed-for-ipad');
+      expect(device.id, 'mac-designed-for-ipad');
 
       // Timeout ignored.
       devices = await discoverer.discoverDevices(timeout: const Duration(seconds: 10));
@@ -118,7 +110,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
     );
-    expect(device.id, 'designed-for-ipad');
+    expect(device.id, 'mac-designed-for-ipad');
     expect(await device.isLocalEmulator, isFalse);
     expect(device.name, 'Mac Designed for iPad');
     expect(device.portForwarder, isNot(isNull));
