@@ -581,15 +581,22 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// ```
   /// {@end-tool}
   ///
+  /// By default, the provided `widget` is rendered into [WidgetTester.view].
+  /// Tests that want to control the [FlutterView] into which the widget is
+  /// rendered can set `wrapWithView` to false. In that case, the provided
+  /// `widget` tree must specify a [View] widget as ancestor of all
+  /// [RenderObjectWidget]s.
+  ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
   Future<void> pumpWidget(
     Widget widget, {
     Duration? duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    bool wrapWithView = true,
   }) {
     return TestAsyncUtils.guard<void>(() {
-      binding.attachRootWidget(binding.wrapWithDefaultView(widget));
+      binding.attachRootWidget(wrapWithView ? binding.wrapWithDefaultView(widget) : widget);
       binding.scheduleFrame();
       return binding.pump(duration, phase);
     });
