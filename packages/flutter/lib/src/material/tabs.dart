@@ -444,6 +444,15 @@ class _IndicatorPainter extends CustomPainter {
     this.dividerHeight,
     required this.showDivider,
   }) : super(repaint: controller.animation) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_IndicatorPainter',
+        object: this,
+      );
+    }
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
     }
@@ -473,6 +482,9 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _painter?.dispose();
   }
 

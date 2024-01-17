@@ -171,7 +171,7 @@ class SegmentedButton<T> extends StatefulWidget {
   /// If false, only one segment may be selected at a time. When a segment
   /// is selected, any previously selected segment will be unselected.
   ///
-  /// The default is false, so only a single segement may be selected at one
+  /// The default is false, so only a single segment may be selected at one
   /// time.
   final bool multiSelectionEnabled;
 

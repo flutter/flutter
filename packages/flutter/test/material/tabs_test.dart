@@ -4718,12 +4718,12 @@ void main() {
     ));
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
-    final IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
     final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
     final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
     expect(selectedTabIcon.color, selectedColor);
-    expect(uselectedTabIcon.color, unselectedColor);
+    expect(unselectedTabIcon.color, unselectedColor);
     expect(selectedTextStyle.color, selectedColor);
     expect(unselectedTextStyle.color, unselectedColor);
   });
@@ -4762,12 +4762,12 @@ void main() {
     await tester.pumpWidget(buildTabBar());
 
     IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
-    IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
     TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
     TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
     expect(selectedTabIcon.color, selectedStateColor);
-    expect(uselectedTabIcon.color, unselectedStateColor);
+    expect(unselectedTabIcon.color, unselectedStateColor);
     expect(selectedTextStyle.color, selectedStateColor);
     expect(unselectedTextStyle.color, unselectedStateColor);
 
@@ -4775,12 +4775,12 @@ void main() {
     await tester.pumpWidget(buildTabBar(stateColor: false));
 
     selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
-    uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
     selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
     unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
     expect(selectedTabIcon.color, selectedColor);
-    expect(uselectedTabIcon.color, unselectedColor);
+    expect(unselectedTabIcon.color, unselectedColor);
     expect(selectedTextStyle.color, selectedColor);
     expect(unselectedTextStyle.color, unselectedColor);
   });
@@ -6592,7 +6592,7 @@ void main() {
     ));
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
-    final IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
     final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
     final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
@@ -6601,7 +6601,7 @@ void main() {
     expect(selectedTextStyle.color, labelStyle.color);
     expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
     // Unselected tab should use the unselectedLabelStyle color.
-    expect(uselectedTabIcon.color, unselectedLabelStyle.color);
+    expect(unselectedTabIcon.color, unselectedLabelStyle.color);
     expect(unselectedTextStyle.color, unselectedLabelStyle.color);
     expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
   });
@@ -6643,7 +6643,7 @@ void main() {
     await tester.pumpWidget(buildTabBar());
 
     IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
-    IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
     TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
     TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
@@ -6652,7 +6652,7 @@ void main() {
     expect(selectedTextStyle.color, labelStyle.color);
     expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
     // Unselected tab should use unselectedLabelStyle color.
-    expect(uselectedTabIcon.color, unselectedLabelStyle.color);
+    expect(unselectedTabIcon.color, unselectedLabelStyle.color);
     expect(unselectedTextStyle.color, unselectedLabelStyle.color);
     expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
 
@@ -6661,7 +6661,7 @@ void main() {
     await tester.pumpAndSettle();
 
     selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
-    uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
     selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
     unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
@@ -6670,7 +6670,7 @@ void main() {
     expect(selectedTextStyle.color, labelColor);
     expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
     // Unselected tab should use the unselectedLabelColor.
-    expect(uselectedTabIcon.color, unselectedLabelColor);
+    expect(unselectedTabIcon.color, unselectedLabelColor);
     expect(unselectedTextStyle.color, unselectedLabelColor);
     expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
   });
