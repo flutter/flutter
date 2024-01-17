@@ -1195,7 +1195,6 @@ void main() {
                           ),
                         ],
                       ),
-                      
                     ]
                   ),
                   TestSemantics(
@@ -1288,7 +1287,6 @@ void main() {
                           ),
                         ],
                       ),
-                      
                     ]
                   ),
                   TestSemantics(
@@ -1416,7 +1414,6 @@ void main() {
                           ),
                         ],
                       ),
-                      
                     ]
                   ),
                   TestSemantics(

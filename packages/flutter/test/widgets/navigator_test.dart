@@ -5251,10 +5251,10 @@ void main() {
               child: Container(),
             ),
             SizedBox(
-              height: 100, 
-              width: 100, 
+              height: 100,
+              width: 100,
               child: Navigator(
-                pages: const <Page<void>>[page], 
+                pages: const <Page<void>>[page],
                 onPopPage: (_, __) => false
               ),
             ),
@@ -5266,7 +5266,7 @@ void main() {
     expect(semantics, includesNodeWith(label: 'layer#1'));
 
     semantics.dispose();
-  }); 
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
