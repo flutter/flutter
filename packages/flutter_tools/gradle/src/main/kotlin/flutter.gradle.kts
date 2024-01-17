@@ -6,6 +6,11 @@ apply<FlutterPluginKts>()
 
 class FlutterPluginKts : Plugin<Project> {
     override fun apply(project: Project) {
+        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
+        // supported range.
+        println("GRAAAAAAAAAAAAAAAY")
+        println(project)
+
         // Use withGroovyBuilder and getProperty() to access Groovy metaprogramming.
         project.withGroovyBuilder {
             getProperty("android").withGroovyBuilder {
