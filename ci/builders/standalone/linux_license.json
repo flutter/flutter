@@ -4,9 +4,6 @@
         "os=Linux"
     ],
     "cas_archive": false,
-    "gclient_variables": {
-        "download_android_deps": false
-    },
     "name": "licenses",
     "tests": [
         {
