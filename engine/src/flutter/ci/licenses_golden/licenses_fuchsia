@@ -1,4 +1,4 @@
-Signature: 2dfe5bf58118b0e9fd89fd37c4d7f390
+Signature: 27ee9240fa250dba2cdaae61d4e267c3
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -11644,6 +11644,9 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/realm.fidl + ../../../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/connector.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/component.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/log_settings.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/development.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/iterators.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/types.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.test/realm.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/agis.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -11810,6 +11813,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/realm.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/connector.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/component.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/log_settings.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/development.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/iterators.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.test/realm.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/agis.fidl
@@ -12632,6 +12638,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/media_session.dart + ../../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.sandbox/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/names.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver_info.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/legacy_types.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -12721,6 +12728,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/media_session.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.sandbox/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/names.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/legacy_types.fidl
