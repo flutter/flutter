@@ -596,6 +596,15 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     this._onHasScrolledBodyChanged,
     this._floatHeaderSlivers,
   ) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_NestedScrollCoordinator',
+        object: this,
+      );
+    }
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     _outerController = _NestedScrollController(
       this,
@@ -1065,7 +1074,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           outerDelta = math.max(outerDelta, potentialOuterDelta);
         }
       }
-      if (outerDelta != 0.0) {
+      if (outerDelta.abs() > precisionErrorTolerance) {
         final double innerDelta = _outerPosition!.applyClampedDragUpdate(
           outerDelta,
         );
@@ -1123,6 +1132,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   @mustCallSuper
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _currentDrag?.dispose();
     _currentDrag = null;
     _outerController.dispose();
@@ -1302,8 +1314,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       this,
       delta,
     );
-    if (oldPixels == newPixels) {
-      // Delta must have been so small we dropped it during floating point addition.
+    if ((oldPixels - newPixels).abs() < precisionErrorTolerance) {
+      // Delta is so small we can drop it.
       return 0.0;
     }
     // Check for overscroll:
