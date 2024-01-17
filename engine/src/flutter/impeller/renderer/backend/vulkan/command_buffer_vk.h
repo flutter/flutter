@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMMAND_BUFFER_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMMAND_BUFFER_VK_H_
 
+#include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/command_buffer.h"

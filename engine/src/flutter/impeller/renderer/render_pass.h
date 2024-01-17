@@ -34,7 +34,7 @@ class RenderPass : public ResourceBinder {
  public:
   virtual ~RenderPass();
 
-  const std::shared_ptr<const Context>& GetContext() const;
+  const std::weak_ptr<const Context>& GetContext() const;
 
   const RenderTarget& GetRenderTarget() const;
 
@@ -46,18 +46,21 @@ class RenderPass : public ResourceBinder {
 
   void SetLabel(std::string label);
 
-  virtual void ReserveCommands(size_t command_count) {
+  /// @brief Reserve [command_count] commands in the HAL command buffer.
+  ///
+  /// Note: this is not the native command buffer.
+  void ReserveCommands(size_t command_count) {
     commands_.reserve(command_count);
   }
 
   //----------------------------------------------------------------------------
   /// The pipeline to use for this command.
-  virtual void SetPipeline(
+  void SetPipeline(
       const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline);
 
   //----------------------------------------------------------------------------
   /// The debugging label to use for the command.
-  virtual void SetCommandLabel(std::string_view label);
+  void SetCommandLabel(std::string_view label);
 
   //----------------------------------------------------------------------------
   /// The reference value to use in stenciling operations. Stencil configuration
@@ -66,9 +69,9 @@ class RenderPass : public ResourceBinder {
   /// @see         `Pipeline`
   /// @see         `PipelineDescriptor`
   ///
-  virtual void SetStencilReference(uint32_t value);
+  void SetStencilReference(uint32_t value);
 
-  virtual void SetBaseVertex(uint64_t value);
+  void SetBaseVertex(uint64_t value);
 
   //----------------------------------------------------------------------------
   /// The viewport coordinates that the rasterizer linearly maps normalized
@@ -76,14 +79,14 @@ class RenderPass : public ResourceBinder {
   /// If unset, the viewport is the size of the render target with a zero
   /// origin, znear=0, and zfar=1.
   ///
-  virtual void SetViewport(Viewport viewport);
+  void SetViewport(Viewport viewport);
 
   //----------------------------------------------------------------------------
   /// The scissor rect to use for clipping writes to the render target. The
   /// scissor rect must lie entirely within the render target.
   /// If unset, no scissor is applied.
   ///
-  virtual void SetScissor(IRect scissor);
+  void SetScissor(IRect scissor);
 
   //----------------------------------------------------------------------------
   /// The number of instances of the given set of vertices to render. Not all
@@ -92,7 +95,7 @@ class RenderPass : public ResourceBinder {
   /// @warning      Setting this to more than one will limit the availability of
   ///               backends to use with this command.
   ///
-  virtual void SetInstanceCount(size_t count);
+  void SetInstanceCount(size_t count);
 
   //----------------------------------------------------------------------------
   /// @brief      Specify the vertex and index buffer to use for this command.
@@ -102,32 +105,28 @@ class RenderPass : public ResourceBinder {
   ///
   /// @return     returns if the binding was updated.
   ///
-  virtual bool SetVertexBuffer(VertexBuffer buffer);
+  bool SetVertexBuffer(VertexBuffer buffer);
 
   /// Record the currently pending command.
-  virtual fml::Status Draw();
+  fml::Status Draw();
 
   // |ResourceBinder|
-  virtual bool BindResource(ShaderStage stage,
-                            DescriptorType type,
-                            const ShaderUniformSlot& slot,
-                            const ShaderMetadata& metadata,
-                            BufferView view) override;
+  bool BindResource(ShaderStage stage,
+                    const ShaderUniformSlot& slot,
+                    const ShaderMetadata& metadata,
+                    BufferView view) override;
 
-  virtual bool BindResource(
-      ShaderStage stage,
-      DescriptorType type,
-      const ShaderUniformSlot& slot,
-      const std::shared_ptr<const ShaderMetadata>& metadata,
-      BufferView view);
+  bool BindResource(ShaderStage stage,
+                    const ShaderUniformSlot& slot,
+                    const std::shared_ptr<const ShaderMetadata>& metadata,
+                    BufferView view);
 
   // |ResourceBinder|
-  virtual bool BindResource(ShaderStage stage,
-                            DescriptorType type,
-                            const SampledImageSlot& slot,
-                            const ShaderMetadata& metadata,
-                            std::shared_ptr<const Texture> texture,
-                            std::shared_ptr<const Sampler> sampler) override;
+  bool BindResource(ShaderStage stage,
+                    const SampledImageSlot& slot,
+                    const ShaderMetadata& metadata,
+                    std::shared_ptr<const Texture> texture,
+                    std::shared_ptr<const Sampler> sampler) override;
 
   //----------------------------------------------------------------------------
   /// @brief      Encode the recorded commands to the underlying command buffer.
@@ -142,7 +141,7 @@ class RenderPass : public ResourceBinder {
   ///
   /// @details    Visible for testing.
   ///
-  virtual const std::vector<Command>& GetCommands() const { return commands_; }
+  const std::vector<Command>& GetCommands() const { return commands_; }
 
   //----------------------------------------------------------------------------
   /// @brief      The sample count of the attached render target.
@@ -157,7 +156,7 @@ class RenderPass : public ResourceBinder {
   bool HasStencilAttachment() const;
 
  protected:
-  const std::shared_ptr<const Context> context_;
+  const std::weak_ptr<const Context> context_;
   // The following properties: sample_count, pixel_format,
   // has_stencil_attachment, and render_target_size are cached on the
   // RenderTarget to speed up numerous lookups during rendering. This is safe as
@@ -182,8 +181,7 @@ class RenderPass : public ResourceBinder {
   ///
   bool AddCommand(Command&& command);
 
-  RenderPass(std::shared_ptr<const Context> context,
-             const RenderTarget& target);
+  RenderPass(std::weak_ptr<const Context> context, const RenderTarget& target);
 
   virtual void OnSetLabel(std::string label) = 0;
 

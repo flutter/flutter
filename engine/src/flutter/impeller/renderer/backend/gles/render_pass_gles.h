@@ -26,7 +26,7 @@ class RenderPassGLES final
   std::string label_;
   bool is_valid_ = false;
 
-  RenderPassGLES(std::shared_ptr<const Context> context,
+  RenderPassGLES(std::weak_ptr<const Context> context,
                  const RenderTarget& target,
                  ReactorGLES::Ref reactor);
 

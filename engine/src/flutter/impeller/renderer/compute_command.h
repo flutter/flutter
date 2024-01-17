@@ -53,14 +53,12 @@ struct ComputeCommand : public ResourceBinder {
 
   // |ResourceBinder|
   bool BindResource(ShaderStage stage,
-                    DescriptorType type,
                     const ShaderUniformSlot& slot,
                     const ShaderMetadata& metadata,
                     BufferView view) override;
 
   // |ResourceBinder|
   bool BindResource(ShaderStage stage,
-                    DescriptorType type,
                     const SampledImageSlot& slot,
                     const ShaderMetadata& metadata,
                     std::shared_ptr<const Texture> texture,
