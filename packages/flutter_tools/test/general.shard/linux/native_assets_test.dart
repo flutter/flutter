@@ -108,7 +108,7 @@ void main() {
   testUsingContext('dry run for multiple OSes with no package config', overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    await dryRunNativeAssetsMultipeOSes(
+    await dryRunNativeAssetsMultipleOSes(
       projectUri: projectUri,
       fileSystem: fileSystem,
       targetPlatforms: <TargetPlatform>[

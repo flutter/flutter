@@ -393,6 +393,9 @@ class IOSSimulator extends Device {
   bool get supportsHotRestart => true;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<bool> get supportsHardwareRendering async => false;
 
   @override

@@ -758,6 +758,9 @@ abstract class Device {
   /// Whether the device supports the '--fast-start' development mode.
   bool get supportsFastStart => false;
 
+  /// Whether the Flavors feature ('--flavor') is supported for this device.
+  bool get supportsFlavors => false;
+
   /// Stop an app package on the current device.
   ///
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).

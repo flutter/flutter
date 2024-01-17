@@ -26,7 +26,7 @@ class UnderlineTabIndicator extends Decoration {
   /// The radius of the indicator's corners.
   ///
   /// If this value is non-null, rounded rectangular tab indicator is
-  /// drawn, otherwise rectangular tab indictor is drawn.
+  /// drawn, otherwise rectangular tab indicator is drawn.
   final BorderRadius? borderRadius;
 
   /// The color and weight of the horizontal line drawn below the selected tab.

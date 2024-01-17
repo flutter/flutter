@@ -3174,6 +3174,34 @@ void main() {
 
     addTearDown(tester.view.resetPhysicalSize);
   });
+
+  testWidgets('BottomNavigationBar keys passed through', (WidgetTester tester) async {
+    const Key key1 = Key('key1');
+    const Key key2 = Key('key2');
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              key: key1,
+              icon: Icon(Icons.favorite_border),
+              label: 'Favorite',
+            ),
+            BottomNavigationBarItem(
+              key: key2,
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byKey(key1), findsOneWidget);
+    expect(find.byKey(key2), findsOneWidget);
+  });
 }
 
 Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection, bool? useMaterial3 }) {

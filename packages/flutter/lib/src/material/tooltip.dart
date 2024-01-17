@@ -309,8 +309,8 @@ class Tooltip extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [exitDuration], which allows configuring the time untill a pointer
-  /// dissapears when hovering.
+  ///  * [exitDuration], which allows configuring the time until a pointer
+  /// disappears when hovering.
   final Duration? showDuration;
 
   /// The length of time that a pointer must have stopped hovering over a
@@ -529,7 +529,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _timer?.cancel();
     _timer = null;
     // Use _backingController instead of _controller to prevent the lazy getter
-    // from instaniating an AnimationController unnecessarily.
+    // from instantiating an AnimationController unnecessarily.
     switch (_backingController?.status) {
       case null:
       case AnimationStatus.reverse:
@@ -656,7 +656,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    both the delete icon tooltip and the chip tooltip at the same time.
   // 2. Hovered tooltips are dismissed when:
   //    i. [dismissAllToolTips] is called, even these tooltips are still hovered
-  //    ii. a unrecognized PointerDownEvent occured withint the application
+  //    ii. a unrecognized PointerDownEvent occurred within the application
   //    (even these tooltips are still hovered),
   //    iii. The last hovering device leaves the tooltip.
   void _handleMouseEnter(PointerEnterEvent event) {
