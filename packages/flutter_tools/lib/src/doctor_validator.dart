@@ -11,7 +11,7 @@ import 'globals.dart' as globals;
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
   final DoctorValidator validator;
-  final Future<ValidationResult> result // test141721;
+  final Future<ValidationResult> result; // test141721;
 }
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
