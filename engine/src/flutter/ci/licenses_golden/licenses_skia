@@ -1,4 +1,4 @@
-Signature: e0f6a89c592765faeefb2c2547a0194a
+Signature: 060d035c8dfcec9a4b371d11e16a782b
 
 ====================================================================================================
 LIBRARY: etc1
@@ -388,6 +388,7 @@ FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/BackendTextureFromView.md
 FILE: ../../../flutter/third_party/skia/relnotes/PDF_jpeg.md
+FILE: ../../../flutter/third_party/skia/relnotes/SwitchScopes.md
 FILE: ../../../flutter/third_party/skia/relnotes/Tick.md
 FILE: ../../../flutter/third_party/skia/relnotes/TopLevelShadowing.md
 FILE: ../../../flutter/third_party/skia/relnotes/font.md
@@ -3164,8 +3165,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegUtility.cpp + ../../..
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegUtility.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkMaskSwizzler.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkMaskSwizzler.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/codec/SkMasks.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/codec/SkMasks.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkPixmapUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkPixmapUtilsPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkPngCodec.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -3187,6 +3186,8 @@ ORIGIN: ../../../flutter/third_party/skia/src/core/SkFontMgr.cpp + ../../../flut
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkLatticeIter.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkLatticeIter.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkLocalMatrixImageFilter.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkMasks.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkMasks.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMipmapAccessor.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMipmapAccessor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkNextID.h + ../../../flutter/third_party/skia/LICENSE
@@ -3450,8 +3451,6 @@ FILE: ../../../flutter/third_party/skia/src/codec/SkJpegUtility.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegUtility.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkMaskSwizzler.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkMaskSwizzler.h
-FILE: ../../../flutter/third_party/skia/src/codec/SkMasks.cpp
-FILE: ../../../flutter/third_party/skia/src/codec/SkMasks.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkPixmapUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkPixmapUtilsPriv.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkPngCodec.cpp
@@ -3473,6 +3472,8 @@ FILE: ../../../flutter/third_party/skia/src/core/SkFontMgr.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkLatticeIter.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkLatticeIter.h
 FILE: ../../../flutter/third_party/skia/src/core/SkLocalMatrixImageFilter.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkMasks.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkMasks.h
 FILE: ../../../flutter/third_party/skia/src/core/SkMipmapAccessor.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkMipmapAccessor.h
 FILE: ../../../flutter/third_party/skia/src/core/SkNextID.h
