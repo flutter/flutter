@@ -17102,6 +17102,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(notifyCount, equals(1));
   });
+
+  testWidgets('ShowCaretOnScreen is correctly scheduled within a SliverMainAxisGroup', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    final Widget widget = MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+        controller: scrollController,
+        slivers: const <Widget>[
+          SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 600,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 44,
+                    child: TextField(),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 500,
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 77.0);
+  });
 }
 
 class UnsettableController extends TextEditingController {
