@@ -145,13 +145,17 @@ class MockMessageQueue {
 // Expect the |_target| FlutterKeyEvent has the required properties.
 #define EXPECT_EVENT_EQUALS(_target, _type, _physical, _logical, _character, \
                             _synthesized)                                    \
-  EXPECT_PRED_FORMAT2(_EventEquals, _target,                                 \
-                      (FlutterKeyEvent{                                      \
-                          .type = _type,                                     \
-                          .physical = _physical,                             \
-                          .logical = _logical,                               \
-                          .character = _character,                           \
-                          .synthesized = _synthesized,                       \
-                      }));
+  EXPECT_PRED_FORMAT2(                                                       \
+      _EventEquals, _target,                                                 \
+      (FlutterKeyEvent{                                                      \
+          /* struct_size = */ sizeof(FlutterKeyEvent),                       \
+          /* timestamp = */ 0,                                               \
+          /* type = */ _type,                                                \
+          /* physical = */ _physical,                                        \
+          /* logical = */ _logical,                                          \
+          /* character = */ _character,                                      \
+          /* synthesized = */ _synthesized,                                  \
+          /* device_type = */ kFlutterKeyEventDeviceTypeKeyboard,            \
+      }));
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_TEST_KEYBOARD_H_
