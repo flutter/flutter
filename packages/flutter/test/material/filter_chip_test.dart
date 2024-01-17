@@ -702,11 +702,10 @@ void main() {
   });
 
   testWidgets('Material2 - Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      theme: theme,
+      theme: ThemeData(useMaterial3: false),
     );
 
     expectCheckmarkColor(find.byType(FilterChip), Colors.black.withAlpha(0xde));
@@ -727,11 +726,10 @@ void main() {
   });
 
   testWidgets('Material2 - Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.dark(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      theme: theme,
+      theme: ThemeData.dark(useMaterial3: false),
     );
 
     expectCheckmarkColor(

@@ -302,40 +302,40 @@ void main() {
   });
 
   testWidgets('Material2 - Input chip disabled check mark color is determined by platform brightness when light', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      theme: theme,
+      theme: ThemeData(useMaterial3: false),
     );
 
     expectCheckmarkColor(find.byType(InputChip), Colors.black.withAlpha(0xde));
   });
 
   testWidgets('Material3 - Input chip disabled check mark color is determined by platform brightness when light', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await pumpCheckmarkChip(tester, chip: selectedInputChip(), theme: theme);
+
     expectCheckmarkColor(find.byType(InputChip), theme.colorScheme.onSurface);
   });
 
   testWidgets('Material2 - Input chip disabled check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.dark(useMaterial3: false);
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      theme: theme,
+      theme: ThemeData.dark(useMaterial3: false),
     );
 
     expectCheckmarkColor(find.byType(InputChip), Colors.white.withAlpha(0xde));
   });
 
   testWidgets('Material3 - Input chip disabled check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.dark(useMaterial3: true);
+    final ThemeData theme = ThemeData.dark();
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
       theme: theme,
     );
+
     expectCheckmarkColor(find.byType(InputChip), theme.colorScheme.onSurface);
   });
 
@@ -378,7 +378,7 @@ void main() {
   });
 
   testWidgets('Material3 - Input chip has correct selected color when enabled', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ChipThemeData material3ChipDefaults = theme.chipTheme;
     await pumpCheckmarkChip(
       tester,
@@ -391,7 +391,7 @@ void main() {
   });
 
   testWidgets('Material3 - Input chip has correct selected color when disabled', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ChipThemeData material3ChipDefaults = theme.chipTheme;
     await pumpCheckmarkChip(
       tester,
