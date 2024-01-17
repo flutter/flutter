@@ -39,6 +39,10 @@ Widget selectedInputChip({
     label: const Text('InputChip'),
     selected: true,
     isEnabled: enabled,
+    // When [enabled] is true we also need to provide one the the chip
+    // callbacks, otherwise the chip would have a 'disabled'
+    // [MaterialState], which is not the intention.
+    onSelected: enabled ? (_) {} : null,
     showCheckmark: true,
     checkmarkColor: checkmarkColor,
   );
@@ -379,7 +383,6 @@ void main() {
 
   testWidgets('Material3 - Input chip has correct selected color when enabled', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
-    final ChipThemeData material3ChipDefaults = theme.chipTheme;
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(enabled: true),
@@ -387,12 +390,11 @@ void main() {
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..rrect(color: material3ChipDefaults.backgroundColor));
+    expect(materialBox, paints..rrect(color: theme.colorScheme.secondaryContainer));
   });
 
   testWidgets('Material3 - Input chip has correct selected color when disabled', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
-    final ChipThemeData material3ChipDefaults = theme.chipTheme;
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
@@ -400,7 +402,7 @@ void main() {
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: material3ChipDefaults.disabledColor));
+    expect(materialBox, paints..path(color: theme.colorScheme.onSurface));
   });
 
   testWidgets('InputChip uses provided iconTheme', (WidgetTester tester) async {
