@@ -259,7 +259,7 @@ class FlutterPlugin implements Plugin<Project> {
         // Load shared gradle functions
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
 
-        Extention extension = project.extensions.create("flutter", FlutterExtension)
+        FlutterExtension extension = project.extensions.create("flutter", FlutterExtension)
         Properties localProperties = new Properties()
         File localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
@@ -590,7 +590,7 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * @return "debug", "profile", or "release" (fall-back).
      */
-    private static String buildModeFor(BuildType buildType) {
+    private static String buildModeFor(buildType) {
         if (buildType.name == "profile") {
             return "profile"
         } else if (buildType.debuggable) {
@@ -605,7 +605,7 @@ class FlutterPlugin implements Plugin<Project> {
      *    1. The embedding
      *    2. libflutter.so
      */
-    void addFlutterDependencies(BuildType buildType) {
+    void addFlutterDependencies(buildType) {
         String flutterBuildMode = buildModeFor(buildType)
         if (!supportsBuildMode(flutterBuildMode)) {
             return
@@ -1063,7 +1063,7 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private Task getAssembleTask(ApplicationVariant variant) {
+    private Task getAssembleTask(variant) {
         // `assemble` became `assembleProvider` in AGP 3.3.0.
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
