@@ -30,8 +30,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('letterSpacing', textStyle.letterSpacing),
     _propertyToString('wordSpacing', textStyle.wordSpacing),
     _propertyToString('height', textStyle.height),
-    // TODO(LongCatIsLooong): web support for
-    // https://github.com/flutter/flutter/issues/72521
+    // TODO(yjbanov): remove kIsWeb when https://github.com/flutter/engine/pull/49786 rolls in
     if (!kIsWeb) _propertyToString('leadingDistribution', textStyle.leadingDistribution),
     _propertyToString('locale', textStyle.locale),
     _propertyToString('background', textStyle.background),
@@ -74,12 +73,15 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+    final String itemAsString = item.toString();
     final String? property = matchState['missingProperty'] as String?;
     if (property != null) {
       description.add("expect property: '$property'");
       final int propertyIndex = propertiesInOrder.indexOf(property);
       if (propertyIndex > 0) {
-        description.add(" after: '${propertiesInOrder[propertyIndex - 1]}'");
+        final String lastProperty = propertiesInOrder[propertyIndex - 1];
+        description.add(" after: '$lastProperty'\n");
+        description.add('but found: ${itemAsString.substring(itemAsString.indexOf(lastProperty))}');
       }
       description.add('\n');
     }
