@@ -22,7 +22,7 @@ const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9\.]+)';
 /// Regex pattern for identifying a running instance of the Topaz OFD process.
 /// This is a known process that interferes with the build toolchain.
 /// See https://github.com/flutter/flutter/issues/121366
-const String kCoreProcessPattern = r'Topaz OFD\\Warsaw\\core\.exe';
+const String kCoreProcessPattern = r'Topaz\s+OFD\\Warsaw\\core\.exe';
 
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
