@@ -570,7 +570,7 @@ bool validateJavaAndGradle(Logger logger,
 /// Returns compatibility information for the valid range of Gradle versions for
 /// the specified Java version.
 ///
-/// Returns null when the tooling has not documented the compatibile Gradle
+/// Returns null when the tooling has not documented the compatible Gradle
 /// versions for the Java version (either the version is too old or too new). If
 /// this seems like a mistake, the caller may need to update the
 /// [_javaGradleCompatList] detailing Java/Gradle compatibility.
@@ -643,7 +643,7 @@ bool validateJavaAndAgp(Logger logger,
   return null;
 }
 
-/// Returns valid Java range for specified Gradle and AGP verisons.
+/// Returns valid Java range for specified Gradle and AGP versions.
 ///
 /// Assumes that gradleV and agpV are compatible versions.
 VersionRange getJavaVersionFor({required String gradleV, required String agpV}) {
@@ -793,7 +793,7 @@ void exitWithNoSdkMessage() {
       'Try setting the ANDROID_HOME environment variable.');
 }
 
-// Data class to hold normal/defined Java <-> Gradle compatability criteria.
+// Data class to hold normal/defined Java <-> Gradle compatibility criteria.
 //
 // The [javaMax] is exclusive in terms of supporting the noted [gradleMin],
 // whereas [javaMin] is inclusive.

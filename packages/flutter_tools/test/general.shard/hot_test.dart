@@ -683,7 +683,7 @@ void main() {
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       expect(result.isOk, true);
-      // Hot restart does not require reruning anything for native assets.
+      // Hot restart does not require rerunning anything for native assets.
       // The previous native assets mapping should be used.
       expect(buildRunner.buildInvocations, 0);
       expect(buildRunner.dryRunInvocations, 0);

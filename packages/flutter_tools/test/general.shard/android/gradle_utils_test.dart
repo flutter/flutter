@@ -131,7 +131,7 @@ void main() {
     });
 
     testWithoutContext(
-        'injects the wrapper and the Gradle version is derivated from the AGP version',
+        'injects the wrapper and the Gradle version is derived from the AGP version',
         () {
       const Map<String, String> testCases = <String, String>{
         // AGP version : Gradle version
@@ -714,7 +714,7 @@ include ":app"
       final List<JavaGradleTestData> testData = <JavaGradleTestData>[
         // Values too new *these need to be updated* when
         // max supported java and max known gradle versions are updated:
-        // Newer tools version does not even meet current gradle version requiremnts.
+        // Newer tools version does not even meet current gradle version requirements.
         JavaGradleTestData(false, javaVersion: '20', gradleVersion: '7.5'),
         // Newer tools version requires newer gradle version.
         JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.1'),
