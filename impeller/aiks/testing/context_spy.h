@@ -6,9 +6,7 @@
 #define FLUTTER_IMPELLER_AIKS_TESTING_CONTEXT_SPY_H_
 
 #include <memory>
-
 #include "impeller/aiks/testing/context_mock.h"
-#include "impeller/entity/contents/test/recording_render_pass.h"
 
 namespace impeller {
 namespace testing {
@@ -22,7 +20,7 @@ class ContextSpy : public std::enable_shared_from_this<ContextSpy> {
   std::shared_ptr<ContextMock> MakeContext(
       const std::shared_ptr<Context>& real_context);
 
-  std::vector<std::shared_ptr<RecordingRenderPass>> render_passes_;
+  std::vector<std::shared_ptr<RenderPass>> render_passes_;
 
  private:
   ContextSpy() = default;
