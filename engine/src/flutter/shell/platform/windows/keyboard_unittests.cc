@@ -544,9 +544,11 @@ class KeyboardTest : public WindowsTest {
 // Define compound `expect` in macros. If they're defined in functions, the
 // stacktrace wouldn't print where the function is called in the unit tests.
 
-#define EXPECT_CALL_IS_EVENT(_key_call, ...)         \
-  EXPECT_EQ(_key_call.type, KeyCall::kKeyCallOnKey); \
-  EXPECT_EVENT_EQUALS(_key_call.key_event, __VA_ARGS__);
+#define EXPECT_CALL_IS_EVENT(_key_call, _type, _physical, _logical,    \
+                             _character, _synthesized)                 \
+  EXPECT_EQ(_key_call.type, KeyCall::kKeyCallOnKey);                   \
+  EXPECT_EVENT_EQUALS(_key_call.key_event, _type, _physical, _logical, \
+                      _character, _synthesized);
 
 #define EXPECT_CALL_IS_TEXT(_key_call, u16_string)    \
   EXPECT_EQ(_key_call.type, KeyCall::kKeyCallOnText); \
