@@ -14,6 +14,9 @@
         "master"
     ],
     "files.trimTrailingWhitespace": true,
+    // The extension `streetsidesoftware.code-spell-checker` automatically adds words to
+    // this list if user chooses the quick fix to add the word to the dictionary.
+    // See https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker.
     "cSpell.words": [
         "binpb",
         "canonicalize",
