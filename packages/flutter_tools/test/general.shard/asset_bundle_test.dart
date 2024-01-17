@@ -33,11 +33,7 @@ void main() {
     late Platform platform;
 
     setUp(() async {
-      testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
+      testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
       logger = BufferLogger.test();
       platform = FakePlatform(operatingSystem: globals.platform.operatingSystem);
@@ -517,11 +513,7 @@ flutter:
     late FileSystem testFileSystem;
 
     setUp(() async {
-      testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
+      testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
 
