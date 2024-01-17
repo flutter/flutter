@@ -134,7 +134,8 @@ List<SuggestionSpan> _correctSpellCheckResults(
     final int spanLength = currentSpan.range.end - currentSpan.range.start;
 
     // Try finding SuggestionSpan from resultsText in new text.
-    final RegExp currentSpanTextRegexp = RegExp('\\b$currentSpanText\\b');
+    final String escapedText = RegExp.escape(currentSpanText);
+    final RegExp currentSpanTextRegexp = RegExp('\\b$escapedText\\b');
     final int foundIndex = newText.substring(searchStart).indexOf(currentSpanTextRegexp);
 
     // Check whether word was found exactly where expected or elsewhere in the newText.
@@ -143,7 +144,7 @@ List<SuggestionSpan> _correctSpellCheckResults(
     final bool currentSpanFoundElsewhere = foundIndex >= 0;
 
     if (currentSpanFoundExactly || currentSpanFoundExactlyWithOffset) {
-      // currentSpan was found at the same index in newText and resutsText
+      // currentSpan was found at the same index in newText and resultsText
       // or at the same index with the previously calculated adjustment by
       // the offset value, so apply it to new text by adding it to the list of
       // corrected results.
@@ -207,7 +208,7 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
 
   // We will draw the TextSpan tree based on the composing region, if it is
   // available.
-  // TODO(camsim99): The two separate stratgies for building TextSpan trees
+  // TODO(camsim99): The two separate strategies for building TextSpan trees
   // based on the availability of a composing region should be merged:
   // https://github.com/flutter/flutter/issues/124142.
   final bool shouldConsiderComposingRegion = defaultTargetPlatform == TargetPlatform.android;
