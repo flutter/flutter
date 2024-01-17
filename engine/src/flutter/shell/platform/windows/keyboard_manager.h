@@ -26,14 +26,14 @@ namespace flutter {
 // system calls (to allow mocking) and where to send the results of key calls
 // and text calls to.
 //
-// Typically, |KeyboardManager| is owned by a |Window|, which also implements
-// the window delegate. The key calls and text calls are forwarded to those of
-// |Window|'s, and consequently, those of |FlutterWindowsView|'s.
+// Typically, |KeyboardManager| is owned by a |FlutterWindow|, which also
+// implements the window delegate. The key calls and text calls are forwarded to
+// the |FlutterWindow|, and consequently, to the |FlutterWindowsView|.
 //
 // ## Terminology
 //
-// The keyboard system follows the following terminology instead of the
-// inconsistent/incomplete one used by Win32:
+// The keyboard system uses the following terminology (which is different
+// than Win32's terminology):
 //
 //  * Message: An invocation of |WndProc|, which consists of an
 //    action, an lparam, and a wparam.
