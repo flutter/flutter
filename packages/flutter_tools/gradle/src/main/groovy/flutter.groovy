@@ -179,8 +179,8 @@ class FlutterPlugin implements Plugin<Project> {
         PLATFORM_X86_64,
     ]
 
-    private final String propLocalEngineRepo = "local-engine-repo"
-    private final String propProcessResourcesProvider = "processResourcesProvider"
+    private final static String propLocalEngineRepo = "local-engine-repo"
+    private final static String propProcessResourcesProvider = "processResourcesProvider"
 
     /**
      * The name prefix for flutter builds. This is used to identify gradle tasks
@@ -573,12 +573,12 @@ class FlutterPlugin implements Plugin<Project> {
                                         }
                                     }
                                 }
-            }
-        }
-    }
+                            }
+                        }
+                    }
                     JsonGenerator generator = new JsonGenerator.Options().build()
                     new File(project.getProperty("outputPath")).write(generator.toJson(appLinkSettings))
-}
+                }
             }
         }
     }
