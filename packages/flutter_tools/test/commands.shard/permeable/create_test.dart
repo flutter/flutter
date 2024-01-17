@@ -2038,6 +2038,26 @@ void main() {
       isNot(contains('Getting Started')));
   });
 
+
+  testUsingContext("can't create an empty non-application project", () async {
+    final String outputDir = globals.fs.path.join(tempDir.path, 'test_project');
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--no-pub',
+      '--empty',
+      '--template=plugin',
+      outputDir,
+    ];
+
+    await expectLater(
+      runner.run(args),
+      throwsToolExit(
+        message: 'The --empty flag is only supported for the app template.',
+    ));
+  });
+
   testUsingContext('can create a sample-based project', () async {
     await _createAndAnalyzeProject(
       projectDir,
