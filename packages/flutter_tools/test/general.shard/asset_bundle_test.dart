@@ -153,8 +153,8 @@ flutter:
     });
 
     testUsingContext('throws ToolExit when directory entry contains invalid characters', () async {
-      globals.fs.file('.packages').createSync();
-      globals.fs.file('pubspec.yaml')
+      testFileSystem.file('.packages').createSync();
+      testFileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 name: example
