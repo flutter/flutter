@@ -12,7 +12,6 @@ import 'assets.dart';
 import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// The only files/subdirectories we care about.
 const List<String> _kWindowsArtifacts = <String>[
@@ -139,7 +138,6 @@ abstract class BundleWindowsAssets extends Target {
       environment,
       outputDirectory,
       targetPlatform: TargetPlatform.windows_x64,
-      shaderTarget: ShaderTarget.windows,
     );
     environment.depFileService.writeToFile(
       depfile,

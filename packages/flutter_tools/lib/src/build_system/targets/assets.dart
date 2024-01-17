@@ -32,7 +32,6 @@ Future<Depfile> copyAssets(
   Map<String, DevFSContent>? additionalContent,
   required TargetPlatform targetPlatform,
   BuildMode? buildMode,
-  required ShaderTarget shaderTarget,
   List<File> additionalInputs = const <File>[],
   String? flavor,
 }) async {
@@ -136,8 +135,7 @@ Future<Depfile> copyAssets(
               doCopy = !await shaderCompiler.compileShader(
                 input: content.file as File,
                 outputPath: file.path,
-                target: shaderTarget,
-                json: targetPlatform == TargetPlatform.web_javascript,
+                targetPlatform: targetPlatform,
               );
             case AssetKind.model:
               doCopy = !await sceneImporter.importScene(
@@ -324,7 +322,6 @@ class CopyAssets extends Target {
       environment,
       output,
       targetPlatform: TargetPlatform.android,
-      shaderTarget: ShaderTarget.android,
       flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(

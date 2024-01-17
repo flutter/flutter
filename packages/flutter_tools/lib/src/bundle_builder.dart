@@ -197,8 +197,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
-                target: ShaderTarget.fromTargetPlatform(targetPlatform),
-                json: targetPlatform == TargetPlatform.web_javascript,
+                targetPlatform: targetPlatform,
               );
             case AssetKind.model:
               doCopy = !await sceneImporter.importScene(

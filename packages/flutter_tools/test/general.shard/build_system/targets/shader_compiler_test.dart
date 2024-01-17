@@ -70,8 +70,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.web,
-        json: false,
+        targetPlatform: TargetPlatform.web_javascript,
       ),
       true,
     );
@@ -84,6 +83,7 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
+          '--sksl',
           '--runtime-stage-metal',
           '--iplr',
           '--sl=$outputPath',
@@ -109,8 +109,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.ios,
-        json: false,
+        targetPlatform: TargetPlatform.ios,
       ),
       true,
     );
@@ -122,6 +121,7 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
+          '--sksl',
           '--runtime-stage-gles',
           '--runtime-stage-vulkan',
           '--iplr',
@@ -148,8 +148,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.android,
-        json: false,
+        targetPlatform: TargetPlatform.android,
       ),
       true,
     );
@@ -187,8 +186,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        target: ShaderTarget.web,
-        json: false,
+        targetPlatform: TargetPlatform.web_javascript,
       ),
       true,
     );
@@ -226,8 +224,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        target: ShaderTarget.web,
-        json: false,
+        targetPlatform: TargetPlatform.web_javascript,
       );
       fail('unreachable');
     } on ShaderCompilerException catch (e) {
@@ -243,7 +240,7 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          // SkSL is implicit.
+          '--sksl',
           '--runtime-stage-gles',
           '--runtime-stage-vulkan',
           '--iplr',
@@ -335,6 +332,7 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
+          '--sksl',
           '--runtime-stage-gles',
           '--runtime-stage-vulkan',
           '--iplr',

@@ -79,7 +79,6 @@ class CopyFlutterBundle extends Target {
       environment.outputDir,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
-      shaderTarget: ShaderTarget.android,
       flavor: flavor,
     );
     environment.depFileService.writeToFile(
