@@ -2170,6 +2170,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSelectionOverlay? _selectionOverlay;
   ScrollNotificationObserverState? _scrollNotificationObserver;
   TextEditingValue? _valueWhenToolbarShowScheduled;
+  bool _listeningToScrollNotificationObserver = false;
 
   bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
 
@@ -2933,10 +2934,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
-    if (_scrollNotificationObserver != null) {
-      // Only update subscription when the scroll notification observer is not null.
-      // We only subscribe to the scroll notification observer when the context
-      // menu is shown on platforms that support _platformSupportsFadeOnScroll.
+    if (_listeningToScrollNotificationObserver) {
+      // Only update subscription when we have previously subscribed to the
+      // scroll notification observer. We only subscribe to the scroll
+      // notification observer when the context menu is shown on platforms that
+      // support _platformSupportsFadeOnScroll.
       _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
       _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
       _scrollNotificationObserver?.addListener(_handleContextMenuOnParentScroll);
@@ -3039,6 +3041,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _disposeScrollNotificationObserver() {
+    _listeningToScrollNotificationObserver = false;
     if (_scrollNotificationObserver != null) {
       _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
       _scrollNotificationObserver = null;
@@ -4472,6 +4475,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Listen to parent scroll events when the toolbar is visible so it can be
     // hidden during a scroll on supported platforms.
     if (_platformSupportsFadeOnScroll) {
+      _listeningToScrollNotificationObserver = true;
       _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
       _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
       _scrollNotificationObserver?.addListener(_handleContextMenuOnParentScroll);
