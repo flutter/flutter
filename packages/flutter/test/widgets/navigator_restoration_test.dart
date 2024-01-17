@@ -5,10 +5,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Restoration Smoke Test', (WidgetTester tester) async {
+  testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
 
     expect(findRoute('home', count: 0), findsOneWidget);
@@ -30,7 +29,7 @@ void main() {
     expect(findRoute('home', count: 2), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('restorablePushNamed', (WidgetTester tester) async {
+  testWidgets('restorablePushNamed', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -67,7 +66,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('restorablePushReplacementNamed', (WidgetTester tester) async {
+  testWidgets('restorablePushReplacementNamed', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -100,7 +99,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('restorablePopAndPushNamed', (WidgetTester tester) async {
+  testWidgets('restorablePopAndPushNamed', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -133,7 +132,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('restorablePushNamedAndRemoveUntil', (WidgetTester tester) async {
+  testWidgets('restorablePushNamedAndRemoveUntil', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -166,7 +165,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('restorablePush', (WidgetTester tester) async {
+  testWidgets('restorablePush', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -203,7 +202,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgetsWithLeakTracking('restorablePush adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorablePush adds route on all platforms', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -213,7 +212,7 @@ void main() {
     expect(findRoute('Foo'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('restorablePushReplacement', (WidgetTester tester) async {
+  testWidgets('restorablePushReplacement', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -246,7 +245,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgetsWithLeakTracking('restorablePushReplacement adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorablePushReplacement adds route on all platforms', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -256,7 +255,7 @@ void main() {
     expect(findRoute('Foo'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('restorablePushAndRemoveUntil', (WidgetTester tester) async {
+  testWidgets('restorablePushAndRemoveUntil', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -289,7 +288,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgetsWithLeakTracking('restorablePushAndRemoveUntil adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorablePushAndRemoveUntil adds route on all platforms', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -299,7 +298,7 @@ void main() {
     expect(findRoute('Foo'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('restorableReplace', (WidgetTester tester) async {
+  testWidgets('restorableReplace', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -335,7 +334,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgetsWithLeakTracking('restorableReplace adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorableReplace adds route on all platforms', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -347,7 +346,7 @@ void main() {
     expect(findRoute('Foo'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('restorableReplaceRouteBelow', (WidgetTester tester) async {
+  testWidgets('restorableReplaceRouteBelow', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -393,7 +392,7 @@ void main() {
     expect(findRoute('Anchor', count: 2), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgetsWithLeakTracking('restorableReplaceRouteBelow adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorableReplaceRouteBelow adds route on all platforms', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -413,7 +412,7 @@ void main() {
     expect(findRoute('Foo', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('restoring a popped route', (WidgetTester tester) async {
+  testWidgets('restoring a popped route', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -441,7 +440,7 @@ void main() {
     expect(findRoute('Foo', count: 2), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('popped routes are not restored', (WidgetTester tester) async {
+  testWidgets('popped routes are not restored', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -466,7 +465,7 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('routes that are in the process of push are restored', (WidgetTester tester) async {
+  testWidgets('routes that are in the process of push are restored', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -495,7 +494,7 @@ void main() {
     expect(route2.isActive, isTrue);
   });
 
-  testWidgetsWithLeakTracking('routes that are in the process of pop are not restored', (WidgetTester tester) async {
+  testWidgets('routes that are in the process of pop are not restored', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -532,7 +531,7 @@ void main() {
     expect(notifyCount, 1);
   });
 
-  testWidgetsWithLeakTracking('routes are restored in the right order', (WidgetTester tester) async {
+  testWidgets('routes are restored in the right order', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route1');
@@ -570,7 +569,7 @@ void main() {
     expect(findRoute('home'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('all routes up to first unrestorable are restored', (WidgetTester tester) async {
+  testWidgets('all routes up to first unrestorable are restored', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route1');
@@ -600,7 +599,7 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('removing unrestorable routes restores all of them', (WidgetTester tester) async {
+  testWidgets('removing unrestorable routes restores all of them', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route1');
@@ -634,7 +633,7 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('RestorableRouteFuture', (WidgetTester tester) async {
+  testWidgets('RestorableRouteFuture', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -674,7 +673,7 @@ void main() {
     expect(restoredRouteFuture.enabled, isFalse);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgetsWithLeakTracking('RestorableRouteFuture in unrestorable context', (WidgetTester tester) async {
+  testWidgets('RestorableRouteFuture in unrestorable context', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -705,7 +704,7 @@ void main() {
     expect(findRoute('home'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Illegal arguments throw', (WidgetTester tester) async {
+  testWidgets('Illegal arguments throw', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('Bar');
     await tester.pumpAndSettle();
@@ -788,7 +787,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Moving scopes', (WidgetTester tester) async {
+  testWidgets('Moving scopes', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
       child: TestWidget(
@@ -841,7 +840,7 @@ void main() {
     expect(findRoute('home', count: 0), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Restoring pages', (WidgetTester tester) async {
+  testWidgets('Restoring pages', (WidgetTester tester) async {
     await tester.pumpWidget(const PagedTestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
     await tapRouteCounter('home', tester);
@@ -883,7 +882,7 @@ void main() {
     expect(findRoute('bar', count: 0), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Unrestorable pages', (WidgetTester tester) async {
+  testWidgets('Unrestorable pages', (WidgetTester tester) async {
     await tester.pumpWidget(const PagedTestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -937,7 +936,7 @@ void main() {
     expect(findRoute('home', count: 1), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('removed page is not restored', (WidgetTester tester) async {
+  testWidgets('removed page is not restored', (WidgetTester tester) async {
     await tester.pumpWidget(const PagedTestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -977,7 +976,7 @@ void main() {
     expect(findRoute('p1', count: 0), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable', (WidgetTester tester) async {
+  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'material_app',

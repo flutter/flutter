@@ -559,8 +559,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     final FlutterView view = renderView.flutterView;
     if (_surfaceSize != null && view == platformDispatcher.implicitView) {
+      final BoxConstraints constraints = BoxConstraints.tight(_surfaceSize!);
       return ViewConfiguration(
-        constraints: ui.ViewConstraints.tight(_surfaceSize!),
+        logicalConstraints: constraints,
+        physicalConstraints: constraints * view.devicePixelRatio,
         devicePixelRatio: view.devicePixelRatio,
       );
     }
@@ -1159,17 +1161,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     _announcements = <CapturedAccessibilityAnnouncement>[];
 
+  // ignore: deprecated_member_use
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
 
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
-    // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
     RawKeyboard.instance.clearKeysPressed();
     // ignore: invalid_use_of_visible_for_testing_member
     HardwareKeyboard.instance.clearState();
-    // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
     keyEventManager.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
@@ -2118,7 +2121,11 @@ class TestViewConfiguration extends ViewConfiguration {
   TestViewConfiguration.fromView({required ui.FlutterView view, Size size = _kDefaultTestViewportSize})
       : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
         _physicalSize = view.physicalSize,
-        super(devicePixelRatio: view.devicePixelRatio, constraints: ui.ViewConstraints.tight(size));
+        super(
+          devicePixelRatio: view.devicePixelRatio,
+          logicalConstraints: BoxConstraints.tight(size),
+          physicalConstraints: BoxConstraints.tight(size) * view.devicePixelRatio,
+      );
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;

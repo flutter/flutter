@@ -4,10 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Align smoke test', (WidgetTester tester) async {
+  testWidgets('Align smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Align(
         alignment: const Alignment(0.50, 0.50),
@@ -39,7 +38,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Align control test (LTR)', (WidgetTester tester) async {
+  testWidgets('Align control test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -63,7 +62,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
   });
 
-  testWidgetsWithLeakTracking('Align control test (RTL)', (WidgetTester tester) async {
+  testWidgets('Align control test (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Align(
@@ -87,7 +86,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
   });
 
-  testWidgetsWithLeakTracking('Shrink wraps in finite space', (WidgetTester tester) async {
+  testWidgets('Shrink wraps in finite space', (WidgetTester tester) async {
     final GlobalKey alignKey = GlobalKey();
     await tester.pumpWidget(
       SingleChildScrollView(
@@ -106,7 +105,7 @@ void main() {
     expect(size.height, equals(10.0));
   });
 
-  testWidgetsWithLeakTracking('Align widthFactor', (WidgetTester tester) async {
+  testWidgets('Align widthFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -129,7 +128,7 @@ void main() {
     expect(box.size.width, equals(50.0));
   });
 
-  testWidgetsWithLeakTracking('Align heightFactor', (WidgetTester tester) async {
+  testWidgets('Align heightFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

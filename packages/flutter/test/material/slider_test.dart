@@ -13,7 +13,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -101,7 +100,7 @@ class _StateDependentMouseCursor extends MaterialStateMouseCursor {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('The initial value should respect the discrete value', (WidgetTester tester) async {
+  testWidgets('The initial value should respect the discrete value', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.20;
     final List<Offset> log = <Offset>[];
@@ -141,7 +140,7 @@ void main() {
     expect(log[0], const Offset(212.0, 300.0));
   });
 
-  testWidgetsWithLeakTracking('Slider can move when tapped (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     double? startValue;
@@ -200,7 +199,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Slider can move when tapped (RTL)', (WidgetTester tester) async {
+  testWidgets('Slider can move when tapped (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -245,7 +244,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
+  testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     late double startValue;
@@ -302,7 +301,7 @@ void main() {
     expect(endValueUpdates, equals(2));
   });
 
-  testWidgetsWithLeakTracking('Value indicator shows for a bit after being tapped', (WidgetTester tester) async {
+  testWidgets('Value indicator shows for a bit after being tapped', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -352,7 +351,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Discrete Slider repaints and animates when dragged', (WidgetTester tester) async {
+  testWidgets('Discrete Slider repaints and animates when dragged', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     final List<Offset> log = <Offset>[];
@@ -420,7 +419,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
+  testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     int updates = 0;
@@ -461,7 +460,7 @@ void main() {
     expect(updates, equals(1));
   });
 
-  testWidgetsWithLeakTracking('discrete Slider repaints when dragged', (WidgetTester tester) async {
+  testWidgets('discrete Slider repaints when dragged', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     final List<Offset> log = <Offset>[];
@@ -529,7 +528,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Slider take on discrete values', (WidgetTester tester) async {
+  testWidgets('Slider take on discrete values', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -581,7 +580,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Slider can be given zero values', (WidgetTester tester) async {
+  testWidgets('Slider can be given zero values', (WidgetTester tester) async {
     final List<double> log = <double>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -625,7 +624,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('Slider can tap in vertical scroller', (WidgetTester tester) async {
+  testWidgets('Slider can tap in vertical scroller', (WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -654,7 +653,7 @@ void main() {
     expect(value, equals(0.5));
   });
 
-  testWidgetsWithLeakTracking('Slider drags immediately (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider drags immediately (LTR)', (WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -686,7 +685,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Slider drags immediately (RTL)', (WidgetTester tester) async {
+  testWidgets('Slider drags immediately (RTL)', (WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -718,7 +717,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Slider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+  testWidgets('Slider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28115
 
     int startFired = 0;
@@ -758,7 +757,7 @@ void main() {
     expect(endFired, equals(1));
   });
 
-  testWidgetsWithLeakTracking('Slider sizing', (WidgetTester tester) async {
+  testWidgets('Slider sizing', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Directionality(
@@ -817,7 +816,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 24.0, 48.0));
   });
 
-  testWidgetsWithLeakTracking('Slider respects textScaleFactor', (WidgetTester tester) async {
+  testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       final Key sliderKey = UniqueKey();
@@ -972,7 +971,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
+  testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
     Widget buildSlider({
       required int divisions,
     }) {
@@ -1019,7 +1018,7 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
   });
 
-  testWidgetsWithLeakTracking('Slider has correct animations when reparented', (WidgetTester tester) async {
+  testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
     final Key sliderKey = GlobalKey(debugLabel: 'A');
     double value = 0.0;
 
@@ -1148,7 +1147,7 @@ void main() {
     await testReparenting(true);
   });
 
-  testWidgetsWithLeakTracking('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1325,7 +1324,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux }));
 
-  testWidgetsWithLeakTracking('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1446,7 +1445,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1630,7 +1629,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('Slider semantics with custom formatter', (WidgetTester tester) async {
+  testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1694,7 +1693,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101868
-  testWidgetsWithLeakTracking('Slider.label info should not write to semantic node', (WidgetTester tester) async {
+  testWidgets('Slider.label info should not write to semantic node', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1758,7 +1757,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -1807,7 +1806,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider has correct focus color from overlayColor property', (WidgetTester tester) async {
+  testWidgets('Slider has correct focus color from overlayColor property', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -1861,7 +1860,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final ThemeData theme = ThemeData(useMaterial3: true);
     double value = 0.5;
@@ -1931,7 +1930,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider has correct hovered color from overlayColor property', (WidgetTester tester) async {
+  testWidgets('Slider has correct hovered color from overlayColor property', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
@@ -1992,7 +1991,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+  testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -2067,7 +2066,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider has correct dragged color from overlayColor property', (WidgetTester tester) async {
+  testWidgets('Slider has correct dragged color from overlayColor property', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     final Key sliderKey = UniqueKey();
@@ -2137,7 +2136,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('OverlayColor property is correctly applied when activeColor is also provided', (WidgetTester tester) async {
+  testWidgets('OverlayColor property is correctly applied when activeColor is also provided', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2195,7 +2194,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double startValue = 0.0;
     double currentValue = 0.5;
@@ -2256,7 +2255,7 @@ void main() {
     expect(endValue, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double startValue = 0.0;
     double currentValue = 0.5;
@@ -2317,7 +2316,7 @@ void main() {
     expect(endValue, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double startValue = 0.0;
     double currentValue = 0.5;
@@ -2381,7 +2380,7 @@ void main() {
     expect(endValue, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double startValue = 0.0;
     double currentValue = 0.5;
@@ -2445,7 +2444,7 @@ void main() {
     expect(endValue, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('In directional nav, Slider can be navigated out of by using up and down arrows', (WidgetTester tester) async {
+  testWidgets('In directional nav, Slider can be navigated out of by using up and down arrows', (WidgetTester tester) async {
     const Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
       SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
@@ -2541,7 +2540,7 @@ void main() {
     expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by third arrowRight');
   });
 
-  testWidgetsWithLeakTracking('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
+  testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = FocusNode();
@@ -2614,7 +2613,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('Value indicator appears when it should', (WidgetTester tester) async {
+  testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
     final ThemeData baseTheme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -2698,7 +2697,7 @@ void main() {
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
   });
 
-  testWidgetsWithLeakTracking("Slider doesn't start any animations after dispose", (WidgetTester tester) async {
+  testWidgets("Slider doesn't start any animations after dispose", (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     await tester.pumpWidget(
@@ -2738,7 +2737,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+  testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     const Color fillColor = Color(0xf55f5f5f);
     double value = 0.0;
@@ -2835,7 +2834,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Slider.adaptive', (WidgetTester tester) async {
+  testWidgets('Slider.adaptive', (WidgetTester tester) async {
     double value = 0.5;
 
     Widget buildFrame(TargetPlatform platform) {
@@ -2890,7 +2889,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Slider respects height from theme', (WidgetTester tester) async {
+  testWidgets('Slider respects height from theme', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     await tester.pumpWidget(
@@ -2929,7 +2928,7 @@ void main() {
     expect(renderObject.size.height, 200);
   });
 
-  testWidgetsWithLeakTracking('Slider changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('Slider changes mouse cursor when hovered', (WidgetTester tester) async {
     // Test Slider() constructor
     await tester.pumpWidget(
       MaterialApp(
@@ -3004,7 +3003,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgetsWithLeakTracking('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
+  testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
     const MouseCursor disabledCursor = SystemMouseCursors.basic;
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
@@ -3054,7 +3053,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
 
-  testWidgetsWithLeakTracking('Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Slider(
@@ -3087,7 +3086,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Slider track paints correctly when the shape is rectangular', (WidgetTester tester) async {
+  testWidgets('Slider track paints correctly when the shape is rectangular', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -3122,7 +3121,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SliderTheme change should trigger re-layout', (WidgetTester tester) async {
+  testWidgets('SliderTheme change should trigger re-layout', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/118955
     double sliderValue = 0.0;
     Widget buildFrame(ThemeMode themeMode) {
@@ -3167,7 +3166,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
+  testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Directionality(
@@ -3203,7 +3202,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Update the divisions and value at the same time for Slider', (WidgetTester tester) async {
+  testWidgets('Update the divisions and value at the same time for Slider', (WidgetTester tester) async {
     // Regress test for https://github.com/flutter/flutter/issues/65943
     Widget buildFrame(double maxValue) {
       return MaterialApp(
@@ -3244,7 +3243,7 @@ void main() {
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
 
-  testWidgetsWithLeakTracking('Slider paints thumbColor', (WidgetTester tester) async {
+  testWidgets('Slider paints thumbColor', (WidgetTester tester) async {
     const Color color = Color(0xffffc107);
 
     final Widget sliderAdaptive = MaterialApp(
@@ -3266,7 +3265,7 @@ void main() {
     expect(material, paints..circle(color: color));
   });
 
-  testWidgetsWithLeakTracking('Slider.adaptive paints thumbColor on Android',
+  testWidgets('Slider.adaptive paints thumbColor on Android',
       (WidgetTester tester) async {
     const Color color = Color(0xffffc107);
 
@@ -3289,7 +3288,7 @@ void main() {
     expect(material, paints..circle(color: color));
   });
 
-  testWidgetsWithLeakTracking('If thumbColor is null, it defaults to CupertinoColors.white',
+  testWidgets('If thumbColor is null, it defaults to CupertinoColors.white',
       (WidgetTester tester) async {
     final Widget sliderAdaptive = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
@@ -3318,7 +3317,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider.adaptive passes thumbColor to CupertinoSlider',
+  testWidgets('Slider.adaptive passes thumbColor to CupertinoSlider',
       (WidgetTester tester) async {
     const Color color = Color(0xffffc107);
 
@@ -3345,7 +3344,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/103566
-  testWidgetsWithLeakTracking('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
     double value = 0.5;
     bool dragStarted = false;
     final Key sliderKey = UniqueKey();
@@ -3452,7 +3451,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/139281
-  testWidgetsWithLeakTracking('Slider does not request focus when the value is changed', (WidgetTester tester) async {
+  testWidgets('Slider does not request focus when the value is changed', (WidgetTester tester) async {
     double value = 0.5;
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -3474,7 +3473,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, equals(0.5));
     // Get FocusNode from the state of the slider to include auto-generated FocusNode.
-    // ignore: avoid_dynamic_calls, invalid_assignment
+    // ignore: invalid_assignment
     final FocusNode focusNode = (tester.firstState(find.byType(Slider)) as dynamic).focusNode;
     // The slider does not have focus.
     expect(focusNode.hasFocus, false);
@@ -3487,12 +3486,12 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(value, isNot(equals(0.5)));
-    // The slider does not have have focus after the value is changed.
+    // The slider does not have focus after the value is changed.
     expect(focusNode.hasFocus, false);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/139281
-  testWidgetsWithLeakTracking('Overlay remains when Slider thumb is interacted', (WidgetTester tester) async {
+  testWidgets('Overlay remains when Slider thumb is interacted', (WidgetTester tester) async {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
     await tester.pumpWidget(MaterialApp(
@@ -3544,7 +3543,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Overlay appear only when hovered on the thumb on desktop', (WidgetTester tester) async {
+  testWidgets('Overlay appear only when hovered on the thumb on desktop', (WidgetTester tester) async {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
 
@@ -3607,7 +3606,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Overlay remains when Slider is in focus on desktop', (WidgetTester tester) async {
+  testWidgets('Overlay remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
     final FocusNode focusNode = FocusNode();
@@ -3673,8 +3672,8 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Value indicator disappears after adjusting the slider', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/123313.
+  // Regression test for https://github.com/flutter/flutter/issues/123313, which only occurs on desktop platforms.
+  testWidgets('Value indicator disappears after adjusting the slider on desktop', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const double currentValue = 0.5;
     await tester.pumpWidget(MaterialApp(
@@ -3685,7 +3684,7 @@ void main() {
             value: currentValue,
             divisions: 5,
             label: currentValue.toStringAsFixed(1),
-            onChanged: (double value) {},
+            onChanged: (_) {},
           ),
         ),
       ),
@@ -3702,8 +3701,8 @@ void main() {
     final Offset sliderCenter = tester.getCenter(find.byType(Slider));
     final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
 
-    // Tap the slider to bring up the value indicator.
-    await tester.tapAt(tapLocation);
+    // Tap the slider by mouse to bring up the value indicator.
+    await tester.tapAt(tapLocation, kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
 
     // Value indicator is visible.
@@ -3721,9 +3720,9 @@ void main() {
       valueIndicatorBox,
       isNot(paints..scale()..path(color: theme.colorScheme.primary)),
     );
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
+  testWidgets('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -3793,7 +3792,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
+  testWidgets('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
     // Test covering crashing found in Google internal issue b/192329942.
     double value = 0.0;
     final ValueNotifier<bool> shouldShowSliderListenable =
@@ -3859,7 +3858,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
+    testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final ThemeData theme = ThemeData(useMaterial3: false);
       double value = 0.5;
@@ -3915,7 +3914,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+    testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
       addTearDown(focusNode.dispose);
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -3963,7 +3962,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+    testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       double value = 0.5;
       final ThemeData theme = ThemeData();
@@ -4029,7 +4028,7 @@ void main() {
   });
 
   group('Slider.allowedInteraction', () {
-    testWidgetsWithLeakTracking('SliderInteraction.tapOnly', (WidgetTester tester) async {
+    testWidgets('SliderInteraction.tapOnly', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
@@ -4087,7 +4086,7 @@ void main() {
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChangeEnd']);
     });
 
-    testWidgetsWithLeakTracking('SliderInteraction.tapAndSlide (default)', (WidgetTester tester) async {
+    testWidgets('SliderInteraction.tapAndSlide (default)', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
@@ -4149,7 +4148,7 @@ void main() {
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChanged', 'onChangeEnd']);
     });
 
-    testWidgetsWithLeakTracking('SliderInteraction.slideOnly', (WidgetTester tester) async {
+    testWidgets('SliderInteraction.slideOnly', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
@@ -4214,7 +4213,7 @@ void main() {
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChangeEnd']);
     });
 
-    testWidgetsWithLeakTracking('SliderInteraction.slideThumb', (WidgetTester tester) async {
+    testWidgets('SliderInteraction.slideThumb', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class OrderPainter extends CustomPainter {
   const OrderPainter(this.index);
@@ -29,7 +28,7 @@ Widget log(int index) => CustomPaint(painter: OrderPainter(index));
 void main() {
   // NO DIRECTION
 
-  testWidgetsWithLeakTracking('Row with one Flexible child - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with one Flexible child - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -60,7 +59,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgetsWithLeakTracking('Row with default main axis parameters - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with default main axis parameters - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -91,7 +90,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.center - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.center - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -121,7 +120,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.end - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.end - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -153,7 +152,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceBetween - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceBetween - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -185,7 +184,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceAround - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceAround - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -219,7 +218,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceEvenly - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceEvenly - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -251,7 +250,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgetsWithLeakTracking('Row and MainAxisSize.min - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row and MainAxisSize.min - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('rowKey');
     const Key child0Key = Key('child0');
@@ -281,7 +280,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgetsWithLeakTracking('Row MainAxisSize.min layout at zero size - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row MainAxisSize.min layout at zero size - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 
@@ -309,7 +308,7 @@ void main() {
 
   // LTR
 
-  testWidgetsWithLeakTracking('Row with one Flexible child - LTR', (WidgetTester tester) async {
+  testWidgets('Row with one Flexible child - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -359,7 +358,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row with default main axis parameters - LTR', (WidgetTester tester) async {
+  testWidgets('Row with default main axis parameters - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -409,7 +408,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.center - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.center - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -451,7 +450,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.end - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.end - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -501,7 +500,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceBetween - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceBetween - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -551,7 +550,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceAround - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceAround - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -609,7 +608,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3, 4]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceEvenly - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceEvenly - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -659,7 +658,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row and MainAxisSize.min - LTR', (WidgetTester tester) async {
+  testWidgets('Row and MainAxisSize.min - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('rowKey');
     const Key child0Key = Key('child0');
@@ -701,7 +700,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2]);
   });
 
-  testWidgetsWithLeakTracking('Row MainAxisSize.min layout at zero size - LTR', (WidgetTester tester) async {
+  testWidgets('Row MainAxisSize.min layout at zero size - LTR', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 
@@ -730,7 +729,7 @@ void main() {
 
   // RTL
 
-  testWidgetsWithLeakTracking('Row with one Flexible child - RTL', (WidgetTester tester) async {
+  testWidgets('Row with one Flexible child - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -780,7 +779,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row with default main axis parameters - RTL', (WidgetTester tester) async {
+  testWidgets('Row with default main axis parameters - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -830,7 +829,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.center - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.center - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -872,7 +871,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.end - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.end - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -922,7 +921,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceBetween - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceBetween - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -972,7 +971,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceAround - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceAround - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -1030,7 +1029,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3, 4]);
   });
 
-  testWidgetsWithLeakTracking('Row with MainAxisAlignment.spaceEvenly - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceEvenly - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -1080,7 +1079,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgetsWithLeakTracking('Row and MainAxisSize.min - RTL', (WidgetTester tester) async {
+  testWidgets('Row and MainAxisSize.min - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('rowKey');
     const Key child0Key = Key('child0');
@@ -1122,7 +1121,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2]);
   });
 
-  testWidgetsWithLeakTracking('Row MainAxisSize.min layout at zero size - RTL', (WidgetTester tester) async {
+  testWidgets('Row MainAxisSize.min layout at zero size - RTL', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 

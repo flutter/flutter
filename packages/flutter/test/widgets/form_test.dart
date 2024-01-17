@@ -6,10 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('onSaved callback is called', (WidgetTester tester) async {
+  testWidgets('onSaved callback is called', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? fieldValue;
 
@@ -49,7 +48,7 @@ void main() {
     await checkText('');
   });
 
-  testWidgetsWithLeakTracking('onChanged callback is called', (WidgetTester tester) async {
+  testWidgets('onChanged callback is called', (WidgetTester tester) async {
     String? fieldValue;
 
     Widget builder() {
@@ -86,7 +85,7 @@ void main() {
     await checkText('');
   });
 
-  testWidgetsWithLeakTracking('Validator sets the error text only when validate is called', (WidgetTester tester) async {
+  testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? errorText(String? value) => '${value ?? ''}/error';
 
@@ -140,7 +139,7 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgetsWithLeakTracking('Should announce error text when validate returns error', (WidgetTester tester) async {
+  testWidgets('Should announce error text when validate returns error', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -179,7 +178,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('isValid returns true when a field is valid', (WidgetTester tester) async {
+  testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
     const String validString = 'Valid string';
@@ -224,7 +223,7 @@ void main() {
     expect(fieldKey2.currentState!.isValid, isTrue);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'isValid returns false when the field is invalid and does not change error display',
     (WidgetTester tester) async {
       final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
@@ -273,7 +272,122 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Multiple TextFormFields communicate', (WidgetTester tester) async {
+  testWidgets(
+    'validateGranularly returns a set containing all, and only, invalid fields',
+    (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      final UniqueKey validFieldsKey = UniqueKey();
+      final UniqueKey invalidFieldsKey = UniqueKey();
+
+      const String validString = 'Valid string';
+      const String invalidString = 'Invalid string';
+      String? validator(String? s) => s == validString ? null : 'Error text';
+
+      Widget builder() {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    child: ListView(
+                      children: <Widget>[
+                        TextFormField(
+                          key: validFieldsKey,
+                          initialValue: validString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                        TextFormField(
+                          key: invalidFieldsKey,
+                          initialValue: invalidString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                        TextFormField(
+                          key: invalidFieldsKey,
+                          initialValue: invalidString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+
+      final Set<FormFieldState<dynamic>> validationResult = formKey.currentState!.validateGranularly();
+
+      expect(validationResult.length, equals(2));
+      expect(validationResult.where((FormFieldState<dynamic> field) => field.widget.key == invalidFieldsKey).length, equals(2));
+      expect(validationResult.where((FormFieldState<dynamic> field) => field.widget.key == validFieldsKey).length, equals(0));
+    },
+  );
+
+  testWidgets(
+    'Should announce error text when validateGranularly is called',
+    (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      const String validString = 'Valid string';
+      String? validator(String? s) => s == validString ? null : 'error';
+
+      Widget builder() {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    child: ListView(
+                      children: <Widget>[
+                        TextFormField(
+                          initialValue: validString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                        TextFormField(
+                          initialValue: '',
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+      expect(find.text('error'), findsNothing);
+
+      formKey.currentState!.validateGranularly();
+
+      await tester.pump();
+      expect(find.text('error'), findsOneWidget);
+
+      final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
+      expect(announcement.message, 'error');
+      expect(announcement.textDirection, TextDirection.ltr);
+      expect(announcement.assertiveness, Assertiveness.assertive);
+    },
+  );
+
+  testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
     // Input 2's validator depends on a input 1's value.
@@ -323,7 +437,7 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgetsWithLeakTracking('Provide initial value to input when no controller is specified', (WidgetTester tester) async {
+  testWidgets('Provide initial value to input when no controller is specified', (WidgetTester tester) async {
     const String initialValue = 'hello';
     final GlobalKey<FormFieldState<String>> inputKey = GlobalKey<FormFieldState<String>>();
 
@@ -367,7 +481,7 @@ void main() {
     expect(editableText.widget.controller.text, equals('world'));
   });
 
-  testWidgetsWithLeakTracking('Controller defines initial value', (WidgetTester tester) async {
+  testWidgets('Controller defines initial value', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'hello');
     addTearDown(controller.dispose);
     const String initialValue = 'hello';
@@ -415,7 +529,7 @@ void main() {
     expect(controller.text, equals('world'));
   });
 
-  testWidgetsWithLeakTracking('TextFormField resets to its initial value', (WidgetTester tester) async {
+  testWidgets('TextFormField resets to its initial value', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> inputKey = GlobalKey<FormFieldState<String>>();
     final TextEditingController controller = TextEditingController(text: 'Plover');
@@ -462,7 +576,7 @@ void main() {
     expect(controller.text, equals('Plover'));
   });
 
-  testWidgetsWithLeakTracking('TextEditingController updates to/from form field value', (WidgetTester tester) async {
+  testWidgets('TextEditingController updates to/from form field value', (WidgetTester tester) async {
     final TextEditingController controller1 = TextEditingController(text: 'Foo');
     addTearDown(controller1.dispose);
     final TextEditingController controller2 = TextEditingController(text: 'Bar');
@@ -571,7 +685,7 @@ void main() {
     expect(controller2.text, equals('Xyzzy'));
   });
 
-  testWidgetsWithLeakTracking('No crash when a TextFormField is removed from the tree', (WidgetTester tester) async {
+  testWidgets('No crash when a TextFormField is removed from the tree', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? fieldValue;
 
@@ -625,7 +739,7 @@ void main() {
     expect(formKey.currentState!.validate(), isTrue);
   });
 
-  testWidgetsWithLeakTracking('Does not auto-validate before value changes when autovalidateMode is set to onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Does not auto-validate before value changes when autovalidateMode is set to onUserInteraction', (WidgetTester tester) async {
     late FormFieldState<String> formFieldState;
 
     String? errorText(String? value) => '$value/error';
@@ -661,7 +775,7 @@ void main() {
     expect(find.text(errorText('foo')!), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('auto-validate before value changes if autovalidateMode was set to always', (WidgetTester tester) async {
+  testWidgets('auto-validate before value changes if autovalidateMode was set to always', (WidgetTester tester) async {
     late FormFieldState<String> formFieldState;
 
     String? errorText(String? value) => '$value/error';
@@ -694,7 +808,7 @@ void main() {
     expect(formFieldState.hasError, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Form auto-validates form fields only after one of them changes if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Form auto-validates form fields only after one of them changes if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
     const String initialValue = 'foo';
     String? errorText(String? value) => 'error/$value';
 
@@ -748,7 +862,7 @@ void main() {
     expect(find.text(errorText(initialValue)!), findsNWidgets(2));
   });
 
-  testWidgetsWithLeakTracking('Form auto-validates form fields even before any have changed if autovalidateMode is set to always', (WidgetTester tester) async {
+  testWidgets('Form auto-validates form fields even before any have changed if autovalidateMode is set to always', (WidgetTester tester) async {
     String? errorText(String? value) => 'error/$value';
 
     Widget builder() {
@@ -778,7 +892,7 @@ void main() {
     expect(find.text(errorText('')!), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
     String? errorText(String? value) => '$value/error';
 
@@ -823,7 +937,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/63753.
-  testWidgetsWithLeakTracking('Validate form should return correct validation if the value is composing', (WidgetTester tester) async {
+  testWidgets('Validate form should return correct validation if the value is composing', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? fieldValue;
 
@@ -860,7 +974,7 @@ void main() {
     expect(formKey.currentState!.validate(), isFalse);
   });
 
-  testWidgetsWithLeakTracking('hasInteractedByUser returns false when the input has not changed', (WidgetTester tester) async {
+  testWidgets('hasInteractedByUser returns false when the input has not changed', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
 
     final Widget widget = MaterialApp(
@@ -884,7 +998,7 @@ void main() {
     expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
   });
 
-  testWidgetsWithLeakTracking('hasInteractedByUser returns true after the input has changed', (WidgetTester tester) async {
+  testWidgets('hasInteractedByUser returns true after the input has changed', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
 
     final Widget widget = MaterialApp(
@@ -913,7 +1027,7 @@ void main() {
     expect(fieldKey.currentState!.hasInteractedByUser, isTrue);
   });
 
-  testWidgetsWithLeakTracking('hasInteractedByUser returns false after the field is reset', (WidgetTester tester) async {
+  testWidgets('hasInteractedByUser returns false after the field is reset', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
 
     final Widget widget = MaterialApp(

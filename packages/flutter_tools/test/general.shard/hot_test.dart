@@ -683,7 +683,7 @@ void main() {
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       expect(result.isOk, true);
-      // Hot restart does not require reruning anything for native assets.
+      // Hot restart does not require rerunning anything for native assets.
       // The previous native assets mapping should be used.
       expect(buildRunner.buildInvocations, 0);
       expect(buildRunner.dryRunInvocations, 0);
@@ -786,9 +786,6 @@ class FakeDevFs extends Fake implements DevFS {
   Uri? baseUri;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     TargetPlatform targetPlatform = TargetPlatform.tester,

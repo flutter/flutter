@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -82,7 +81,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgetsWithLeakTracking('AppBar centers title on iOS', (WidgetTester tester) async {
+  testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -163,7 +162,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('AppBar centerTitle:true centers on Android', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:true centers on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -183,7 +182,7 @@ void main() {
     expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar centerTitle:false title start edge is 16.0 (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 16.0 (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -200,7 +199,7 @@ void main() {
     expect(tester.getTopRight(titleWidget).dx, 800 - 16.0);
   });
 
-  testWidgetsWithLeakTracking('AppBar centerTitle:false title start edge is 16.0 (RTL)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 16.0 (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -220,7 +219,7 @@ void main() {
     expect(tester.getTopLeft(titleWidget).dx, 16.0);
   });
 
-  testWidgetsWithLeakTracking('AppBar titleSpacing:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -238,7 +237,7 @@ void main() {
     expect(tester.getTopRight(titleWidget).dx, 800 - 32.0);
   });
 
-  testWidgetsWithLeakTracking('AppBar titleSpacing:32 title start edge is 32.0 (RTL)', (WidgetTester tester) async {
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -259,7 +258,7 @@ void main() {
     expect(tester.getTopLeft(titleWidget).dx, 32.0);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -279,7 +278,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -302,7 +301,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('AppBar centerTitle:false title overflow OK', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title overflow OK', (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets.
 
@@ -363,7 +362,7 @@ void main() {
     expect(tester.getSize(title).width, equals(800.0 - 56.0 - 16.0 - 16.0 - 200.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar centerTitle:true title overflow OK (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:true title overflow OK (LTR)', (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets. When it's also centered it may
     // also be start or end justified if it doesn't fit in the overall center.
@@ -415,7 +414,7 @@ void main() {
     expect(tester.getSize(title).width, equals(620.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar centerTitle:true title overflow OK (RTL)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:true title overflow OK (RTL)', (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets. When it's also centered it may
     // also be start or end justified if it doesn't fit in the overall center.
@@ -470,7 +469,7 @@ void main() {
     expect(tester.getSize(title).width, equals(620.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar with no Scaffold', (WidgetTester tester) async {
+  testWidgets('AppBar with no Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SizedBox(
@@ -490,7 +489,7 @@ void main() {
     expect(find.text('A2'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('AppBar render at zero size', (WidgetTester tester) async {
+  testWidgets('AppBar render at zero size', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -509,7 +508,7 @@ void main() {
     expect(tester.getSize(title).isEmpty, isTrue);
   });
 
-  testWidgetsWithLeakTracking('AppBar actions are vertically centered', (WidgetTester tester) async {
+  testWidgets('AppBar actions are vertically centered', (WidgetTester tester) async {
     final UniqueKey appBarKey = UniqueKey();
     final UniqueKey leadingKey = UniqueKey();
     final UniqueKey titleKey = UniqueKey();
@@ -541,7 +540,7 @@ void main() {
     expect(yCenter(appBarKey), equals(yCenter(action1Key)));
   });
 
-  testWidgetsWithLeakTracking('AppBar drawer icon has default size', (WidgetTester tester) async {
+  testWidgets('AppBar drawer icon has default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -559,7 +558,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material2 - AppBar drawer icon has default color', (WidgetTester tester) async {
+  testWidgets('Material2 - AppBar drawer icon has default color', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(),
       useMaterial3: false,
@@ -579,7 +578,7 @@ void main() {
     expect(_iconStyle(tester, Icons.menu)?.color, themeData.colorScheme.onPrimary);
   });
 
-  testWidgetsWithLeakTracking('Material3 - AppBar drawer icon has default color', (WidgetTester tester) async {
+  testWidgets('Material3 - AppBar drawer icon has default color', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(),
       useMaterial3: true,
@@ -599,7 +598,7 @@ void main() {
     expect(_iconStyle(tester, Icons.menu)?.color, themeData.colorScheme.onSurfaceVariant);
   });
 
-  testWidgetsWithLeakTracking('AppBar drawer icon is sized by iconTheme', (WidgetTester tester) async {
+  testWidgets('AppBar drawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -617,7 +616,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('AppBar drawer icon is colored by iconTheme', (WidgetTester tester) async {
+  testWidgets('AppBar drawer icon is colored by iconTheme', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
     const Color color = Color(0xFF2196F3);
 
@@ -637,7 +636,7 @@ void main() {
     expect(_iconStyle(tester, Icons.menu)?.color, color);
   });
 
-  testWidgetsWithLeakTracking('AppBar endDrawer icon has default size', (WidgetTester tester) async {
+  testWidgets('AppBar endDrawer icon has default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -656,7 +655,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material2 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
+  testWidgets('Material2 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(),
       useMaterial3: false,
@@ -676,7 +675,7 @@ void main() {
     expect(_iconStyle(tester, Icons.menu)?.color, themeData.colorScheme.onPrimary);
   });
 
-  testWidgetsWithLeakTracking('Material3 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
+  testWidgets('Material3 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(),
       useMaterial3: true,
@@ -696,7 +695,7 @@ void main() {
     expect(_iconStyle(tester, Icons.menu)?.color, themeData.colorScheme.onSurfaceVariant);
   });
 
-  testWidgetsWithLeakTracking('AppBar endDrawer icon is sized by iconTheme', (WidgetTester tester) async {
+  testWidgets('AppBar endDrawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -714,7 +713,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('AppBar endDrawer icon is colored by iconTheme', (WidgetTester tester) async {
+  testWidgets('AppBar endDrawer icon is colored by iconTheme', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
     const Color color = Color(0xFF2196F3);
 
@@ -734,7 +733,7 @@ void main() {
     expect(_iconStyle(tester, Icons.menu)?.color, color);
   });
 
-  testWidgetsWithLeakTracking('Material2 - leading widget extends to edge and is square', (WidgetTester tester) async {
+  testWidgets('Material2 - leading widget extends to edge and is square', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
       platform: TargetPlatform.android,
       useMaterial3: false,
@@ -792,7 +791,7 @@ void main() {
     expect(tester.getSize(leading), const Size(56.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('Material3 - leading widget extends to edge and is square', (WidgetTester tester) async {
+  testWidgets('Material3 - leading widget extends to edge and is square', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
       platform: TargetPlatform.android,
       useMaterial3: true,
@@ -850,7 +849,7 @@ void main() {
     expect(tester.getSize(leading), const Size(56.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('Material2 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
+  testWidgets('Material2 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       useMaterial3: false,
@@ -890,7 +889,7 @@ void main() {
     expect(tester.getSize(shareButton), const Size(48.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('Material3 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
+  testWidgets('Material3 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       useMaterial3: true,
@@ -930,7 +929,7 @@ void main() {
     expect(tester.getSize(shareButton), const Size(48.0, 48.0));
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar default configuration', (WidgetTester tester) async {
+  testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp());
 
     final ScrollController controller = primaryScrollController(tester);
@@ -962,7 +961,7 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar expandedHeight, pinned', (WidgetTester tester) async {
+  testWidgets('SliverAppBar expandedHeight, pinned', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       pinned: true,
       expandedHeight: 128.0,
@@ -993,7 +992,7 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar expandedHeight, pinned and floating', (WidgetTester tester) async {
+  testWidgets('SliverAppBar expandedHeight, pinned and floating', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: true,
       pinned: true,
@@ -1025,7 +1024,7 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar expandedHeight, floating with snap:true', (WidgetTester tester) async {
+  testWidgets('SliverAppBar expandedHeight, floating with snap:true', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: true,
       snap: true,
@@ -1105,7 +1104,7 @@ void main() {
     expect(appBarBottom(tester), lessThanOrEqualTo(0.0));
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar expandedHeight, floating and pinned with snap:true', (WidgetTester tester) async {
+  testWidgets('SliverAppBar expandedHeight, floating and pinned with snap:true', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: true,
       pinned: true,
@@ -1191,7 +1190,7 @@ void main() {
     expect(appBarBottom(tester), kTextTabBarHeight);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar expandedHeight, collapsedHeight', (WidgetTester tester) async {
+  testWidgets('SliverAppBar expandedHeight, collapsedHeight', (WidgetTester tester) async {
     const double expandedAppBarHeight = 400.0;
     const double collapsedAppBarHeight = 200.0;
 
@@ -1229,7 +1228,7 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
-  testWidgetsWithLeakTracking('Material3 - SliverAppBar.medium defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - SliverAppBar.medium defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 112;
@@ -1318,7 +1317,7 @@ void main() {
     expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
   });
 
-  testWidgetsWithLeakTracking('Material3 - SliverAppBar.large defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - SliverAppBar.large defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 152;
@@ -1411,7 +1410,7 @@ void main() {
     expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
   });
 
-  testWidgetsWithLeakTracking('Material2 - AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
+  testWidgets('Material2 - AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
     Widget buildAppBar([double? elevation]) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1435,7 +1434,7 @@ void main() {
     expect(getMaterial().elevation, 8.0);
   });
 
-  testWidgetsWithLeakTracking('Material3 - AppBar uses the specified elevation or defaults to 0', (WidgetTester tester) async {
+  testWidgets('Material3 - AppBar uses the specified elevation or defaults to 0', (WidgetTester tester) async {
     Widget buildAppBar([double? elevation]) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1459,7 +1458,7 @@ void main() {
     expect(getMaterial().elevation, 8.0);
   });
 
-  testWidgetsWithLeakTracking('scrolledUnderElevation', (WidgetTester tester) async {
+  testWidgets('scrolledUnderElevation', (WidgetTester tester) async {
     Widget buildAppBar({double? elevation, double? scrolledUnderElevation}) {
       return MaterialApp(
         home: Scaffold(
@@ -1492,7 +1491,7 @@ void main() {
     expect(getMaterial().elevation, 10);
   });
 
-  testWidgetsWithLeakTracking('Material3 - scrolledUnderElevation with nested scroll view', (WidgetTester tester) async {
+  testWidgets('Material3 - scrolledUnderElevation with nested scroll view', (WidgetTester tester) async {
     Widget buildAppBar({double? scrolledUnderElevation}) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1561,7 +1560,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('Respects forceElevated parameter', (WidgetTester tester) async {
+    testWidgets('Respects forceElevated parameter', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/59158.
       AppBar getAppBar() => tester.widget<AppBar>(find.byType(AppBar));
       Material getMaterial() => tester.widget<Material>(find.byType(Material));
@@ -1584,7 +1583,7 @@ void main() {
       expect(getMaterial().elevation, 8.0);
     });
 
-    testWidgetsWithLeakTracking('Uses elevation of AppBarTheme by default', (WidgetTester tester) async {
+    testWidgets('Uses elevation of AppBarTheme by default', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/73525.
       Material getMaterial() => tester.widget<Material>(find.byType(Material));
 
@@ -1652,7 +1651,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
         'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
       bool buttonWasPressed = false;
       final (ScrollController controller, Widget widget) = buildWidget(
@@ -1672,7 +1671,7 @@ void main() {
       controller.dispose();
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
         'forceMaterialTransparency == false does not allow gestures beneath the app bar', (WidgetTester tester) async {
       // Set this, and tester.tap(warnIfMissed:false), to suppress
       // errors/warning that the button is not hittable (which is expected).
@@ -1697,7 +1696,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
+  testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
     await tester.pumpWidget(
@@ -1822,7 +1821,7 @@ void main() {
     expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar in body excludes bottom SafeArea padding', (WidgetTester tester) async {
+  testWidgets('AppBar in body excludes bottom SafeArea padding', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/26163
     await tester.pumpWidget(
       Localizations(
@@ -1852,7 +1851,7 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 100.0);
   });
 
-  testWidgetsWithLeakTracking('AppBar.title sees the correct padding from MediaQuery', (WidgetTester tester) async {
+  testWidgets('AppBar.title sees the correct padding from MediaQuery', (WidgetTester tester) async {
     bool titleBuilt = false;
     await tester.pumpWidget(
       Localizations(
@@ -1882,7 +1881,7 @@ void main() {
     expect(titleBuilt, isTrue);
   });
 
-  testWidgetsWithLeakTracking('AppBar updates when you add a drawer', (WidgetTester tester) async {
+  testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1902,7 +1901,7 @@ void main() {
     expect(find.byIcon(Icons.menu), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('AppBar does not draw menu for drawer if automaticallyImplyLeading is false', (WidgetTester tester) async {
+  testWidgets('AppBar does not draw menu for drawer if automaticallyImplyLeading is false', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1916,7 +1915,7 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
+  testWidgets('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
     final Page<void> page1 = MaterialPage<void>(
       key: const ValueKey<String>('1'),
       child: Scaffold(
@@ -1954,7 +1953,7 @@ void main() {
     expect(find.byType(BackButton), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('AppBar does not update the leading if a route is popped case 2', (WidgetTester tester) async {
+  testWidgets('AppBar does not update the leading if a route is popped case 2', (WidgetTester tester) async {
     final Page<void> page1 = MaterialPage<void>(
       key: const ValueKey<String>('1'),
       child: Scaffold(
@@ -2007,7 +2006,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material2 - AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
+  testWidgets('Material2 - AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/58665
     final Key key = UniqueKey();
     await tester.pumpWidget(
@@ -2054,7 +2053,7 @@ void main() {
     expect(painter, paints..save()..translate()..save()..translate()..circle(x: 24.0, y: 28.0));
   });
 
-  testWidgetsWithLeakTracking('Material3 - AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
+  testWidgets('Material3 - AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/58665
     final Key key = UniqueKey();
     await tester.pumpWidget(
@@ -2101,7 +2100,7 @@ void main() {
     expect(painter, paints..save()..translate()..save()..translate()..circle(x: 20.0, y: 20.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar handles loose children 0', (WidgetTester tester) async {
+  testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -2122,7 +2121,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar handles loose children 1', (WidgetTester tester) async {
+  testWidgets('AppBar handles loose children 1', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -2152,7 +2151,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar handles loose children 2', (WidgetTester tester) async {
+  testWidgets('AppBar handles loose children 2', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -2192,7 +2191,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar handles loose children 3', (WidgetTester tester) async {
+  testWidgets('AppBar handles loose children 3', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -2223,7 +2222,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
+  testWidgets('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100));
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
@@ -2266,7 +2265,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(10 + NavigationToolbar.kMiddleSpacing, 72));
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
+  testWidgets('SliverAppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
@@ -2303,7 +2302,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar positioning of leading and trailing widgets with bottom padding', (WidgetTester tester) async {
+  testWidgets('SliverAppBar positioning of leading and trailing widgets with bottom padding', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0, bottom: 50.0));
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
@@ -2339,7 +2338,7 @@ void main() {
     expect(tester.getRect(find.byKey(trailingKey)), const Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
+  testWidgets('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -2424,7 +2423,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar provides correct semantics in RTL', (WidgetTester tester) async {
+  testWidgets('SliverAppBar provides correct semantics in RTL', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -2521,7 +2520,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('AppBar excludes header semantics correctly', (WidgetTester tester) async {
+  testWidgets('AppBar excludes header semantics correctly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -2581,7 +2580,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar excludes header semantics correctly', (WidgetTester tester) async {
+  testWidgets('SliverAppBar excludes header semantics correctly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -2655,7 +2654,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar with flexible space has correct semantics order', (WidgetTester tester) async {
+  testWidgets('SliverAppBar with flexible space has correct semantics order', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/64922.
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -2737,7 +2736,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Material2 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
+  testWidgets('Material2 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
@@ -2755,7 +2754,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('Material3 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
+  testWidgets('Material3 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
@@ -2774,7 +2773,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('Material2 - AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
+  testWidgets('Material2 - AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue, useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
@@ -2794,7 +2793,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('Material3 - AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
+  testWidgets('Material3 - AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -2815,7 +2814,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('Material2 - Default system bar brightness based on AppBar background color brightness.', (WidgetTester tester) async {
+  testWidgets('Material2 - Default system bar brightness based on AppBar background color brightness.', (WidgetTester tester) async {
     Widget buildAppBar(ThemeData theme) {
       return MaterialApp(
         theme: theme,
@@ -2866,7 +2865,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Material3 - Default system bar brightness based on AppBar background color brightness.', (WidgetTester tester) async {
+  testWidgets('Material3 - Default system bar brightness based on AppBar background color brightness.', (WidgetTester tester) async {
     Widget buildAppBar(ThemeData theme) {
       return MaterialApp(
         theme: theme,
@@ -2919,7 +2918,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Material2 - Default status bar color', (WidgetTester tester) async {
+  testWidgets('Material2 - Default status bar color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         key: GlobalKey(),
@@ -2938,7 +2937,7 @@ void main() {
     expect(SystemChrome.latestStyle!.statusBarColor, null);
   });
 
-  testWidgetsWithLeakTracking('Material3 - Default status bar color', (WidgetTester tester) async {
+  testWidgets('Material3 - Default status bar color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         key: GlobalKey(),
@@ -2957,7 +2956,7 @@ void main() {
     expect(SystemChrome.latestStyle!.statusBarColor, Colors.transparent);
   });
 
-  testWidgetsWithLeakTracking('AppBar systemOverlayStyle is use to style status bar and navigation bar', (WidgetTester tester) async {
+  testWidgets('AppBar systemOverlayStyle is use to style status bar and navigation bar', (WidgetTester tester) async {
     final SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light.copyWith(
       statusBarColor: Colors.red,
       systemNavigationBarColor: Colors.green,
@@ -2977,7 +2976,7 @@ void main() {
     expect(SystemChrome.latestStyle!.systemNavigationBarColor, Colors.green);
   });
 
-  testWidgetsWithLeakTracking('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
+  testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17598
     const double appBarHeight = 256.0;
     bool snap = true;
@@ -3038,7 +3037,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgetsWithLeakTracking('AppBar shape default', (WidgetTester tester) async {
+  testWidgets('AppBar shape default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: AppBar(
@@ -3058,7 +3057,7 @@ void main() {
     expect(getMaterialWidget(materialFinder).shape, null);
   });
 
-  testWidgetsWithLeakTracking('AppBar with shape', (WidgetTester tester) async {
+  testWidgets('AppBar with shape', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(15.0)),
     );
@@ -3082,7 +3081,7 @@ void main() {
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar shape default', (WidgetTester tester) async {
+  testWidgets('SliverAppBar shape default', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: CustomScrollView(
@@ -3106,7 +3105,7 @@ void main() {
     expect(getMaterialWidget(materialFinder).shape, null);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar with shape', (WidgetTester tester) async {
+  testWidgets('SliverAppBar with shape', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(15.0)),
     );
@@ -3134,7 +3133,7 @@ void main() {
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 
-  testWidgetsWithLeakTracking('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2', (WidgetTester tester) async {
+  testWidgets('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2', (WidgetTester tester) async {
     late double textScaleFactor;
 
     Widget buildFrame() {
@@ -3172,7 +3171,7 @@ void main() {
     expect(tester.getRect(appBarTitle).height, 24);
   });
 
-  testWidgetsWithLeakTracking('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
+  testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
     double textScaleFactor = 1.0;
     TextDirection textDirection = TextDirection.ltr;
     bool centerTitle = false;
@@ -3242,7 +3241,7 @@ void main() {
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
+  testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
     Future<void> buildAndVerifyDelegate({ required bool pinned, required bool floating, required bool snap }) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -3278,7 +3277,7 @@ void main() {
     await buildAndVerifyDelegate(pinned: true, floating: true, snap: true);
   });
 
-  testWidgetsWithLeakTracking('AppBar respects toolbarHeight', (WidgetTester tester) async {
+  testWidgets('AppBar respects toolbarHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -3294,7 +3293,7 @@ void main() {
     expect(appBarHeight(tester), 48);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar default collapsedHeight with respect to toolbarHeight', (WidgetTester tester) async {
+  testWidgets('SliverAppBar default collapsedHeight with respect to toolbarHeight', (WidgetTester tester) async {
     const double toolbarHeight = 100.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(
@@ -3313,7 +3312,7 @@ void main() {
     expect(appBarHeight(tester), toolbarHeight + initialTabBarHeight);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar collapsedHeight with toolbarHeight', (WidgetTester tester) async {
+  testWidgets('SliverAppBar collapsedHeight with toolbarHeight', (WidgetTester tester) async {
     const double toolbarHeight = 100.0;
     const double collapsedHeight = 150.0;
 
@@ -3332,7 +3331,7 @@ void main() {
     expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar collapsedHeight', (WidgetTester tester) async {
+  testWidgets('SliverAppBar collapsedHeight', (WidgetTester tester) async {
     const double collapsedHeight = 56.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(
@@ -3349,7 +3348,7 @@ void main() {
     expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
   });
 
-  testWidgetsWithLeakTracking('AppBar respects leadingWidth', (WidgetTester tester) async {
+  testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {
     const Key key = Key('leading');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -3365,7 +3364,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar respects leadingWidth', (WidgetTester tester) async {
+  testWidgets('SliverAppBar respects leadingWidth', (WidgetTester tester) async {
     const Key key = Key('leading');
     await tester.pumpWidget(const MaterialApp(
       home: CustomScrollView(
@@ -3383,7 +3382,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
 
-  testWidgetsWithLeakTracking("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
+  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(),
@@ -3400,7 +3399,7 @@ void main() {
     expect(getAppBarWidget(appBarFinder).leading, null);
   });
 
-  testWidgetsWithLeakTracking('AppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
+  testWidgets('AppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -3413,14 +3412,14 @@ void main() {
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp());
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
   });
 
-  testWidgetsWithLeakTracking('AppBar foregroundColor and backgroundColor', (WidgetTester tester) async {
+  testWidgets('AppBar foregroundColor and backgroundColor', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff00ffff);
     final Key leadingIconKey = UniqueKey();
@@ -3471,7 +3470,7 @@ void main() {
     expect(actionIconColor(), foregroundColor);
   });
 
-  testWidgetsWithLeakTracking('Leading, title, and actions show correct default colors', (WidgetTester tester) async {
+  testWidgets('Leading, title, and actions show correct default colors', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(
         onPrimary: Colors.blue,
@@ -3509,7 +3508,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/107305
   group('Material3 - Icons are colored correctly by IconTheme and ActionIconTheme', () {
-    testWidgetsWithLeakTracking('Material3 - Icons and IconButtons are colored by IconTheme', (WidgetTester tester) async {
+    testWidgets('Material3 - Icons and IconButtons are colored by IconTheme', (WidgetTester tester) async {
       const Color iconColor = Color(0xff00ff00);
       final Key leadingIconKey = UniqueKey();
       final Key actionIconKey = UniqueKey();
@@ -3541,7 +3540,7 @@ void main() {
       expect(actionIconButtonColor(), iconColor);
     });
 
-    testWidgetsWithLeakTracking('Material3 - Action icons and IconButtons are colored by ActionIconTheme', (WidgetTester tester) async {
+    testWidgets('Material3 - Action icons and IconButtons are colored by ActionIconTheme', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData.from(
         colorScheme: const ColorScheme.light(),
         useMaterial3: true,
@@ -3577,7 +3576,7 @@ void main() {
       expect(actionIconButtonColor(), actionsIconColor);
     });
 
-    testWidgetsWithLeakTracking('Material3 - The actionIconTheme property overrides iconTheme', (WidgetTester tester) async {
+    testWidgets('Material3 - The actionIconTheme property overrides iconTheme', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData.from(
         colorScheme: const ColorScheme.light(),
         useMaterial3: true,
@@ -3615,7 +3614,7 @@ void main() {
       expect(actionIconButtonColor(), actionsIconColor);
     });
 
-    testWidgetsWithLeakTracking('Material3 - AppBar.iconTheme should override any IconButtonTheme present in the theme', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.iconTheme should override any IconButtonTheme present in the theme', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
           style: IconButton.styleFrom(
@@ -3654,7 +3653,7 @@ void main() {
       expect(actionIconButtonSize(), 30.0);
     });
 
-    testWidgetsWithLeakTracking('Material3 - AppBar.iconTheme should override any IconButtonTheme present in the theme for widgets containing an iconButton', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.iconTheme should override any IconButtonTheme present in the theme for widgets containing an iconButton', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
           style: IconButton.styleFrom(
@@ -3687,7 +3686,7 @@ void main() {
 
     });
 
-    testWidgetsWithLeakTracking('Material3 - AppBar.actionsIconTheme should override any IconButtonTheme present in the theme', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.actionsIconTheme should override any IconButtonTheme present in the theme', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
           style: IconButton.styleFrom(
@@ -3727,7 +3726,7 @@ void main() {
       expect(actionIconButtonSize(), 30.0);
     });
 
-    testWidgetsWithLeakTracking('Material3 - AppBar.actionsIconTheme should override any IconButtonTheme present in the theme for widgets containing an iconButton', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.actionsIconTheme should override any IconButtonTheme present in the theme for widgets containing an iconButton', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
           style: IconButton.styleFrom(
@@ -3761,7 +3760,7 @@ void main() {
       expect(actionIconButtonSize(), 30.0);
     });
 
-    testWidgetsWithLeakTracking('Material3 - The foregroundColor property of the AppBar overrides any IconButtonTheme present in the theme', (WidgetTester tester) async {
+    testWidgets('Material3 - The foregroundColor property of the AppBar overrides any IconButtonTheme present in the theme', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
           style: IconButton.styleFrom(
@@ -3795,7 +3794,7 @@ void main() {
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/130485.
-    testWidgetsWithLeakTracking('Material3 - AppBar.iconTheme is correctly applied in dark mode', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.iconTheme is correctly applied in dark mode', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.dark().copyWith(onSurfaceVariant: Colors.red),
         useMaterial3: true,
@@ -3823,7 +3822,7 @@ void main() {
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/130485.
-    testWidgetsWithLeakTracking('Material3 - AppBar.foregroundColor is correctly applied in dark mode', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.foregroundColor is correctly applied in dark mode', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.dark().copyWith(onSurfaceVariant: Colors.red),
         useMaterial3: true,
@@ -3851,7 +3850,7 @@ void main() {
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/130485.
-    testWidgetsWithLeakTracking('Material3 - AppBar.iconTheme is correctly applied in light mode', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.iconTheme is correctly applied in light mode', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
         useMaterial3: true,
@@ -3879,7 +3878,7 @@ void main() {
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/130485.
-    testWidgetsWithLeakTracking('Material3 - AppBar.foregroundColor is correctly applied in light mode', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.foregroundColor is correctly applied in light mode', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
         useMaterial3: true,
@@ -3958,7 +3957,7 @@ void main() {
         );
       }
 
-      testWidgetsWithLeakTracking('backgroundColor', (WidgetTester tester) async {
+      testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildSliverApp(contentHeight: 1200.0)
         );
@@ -3983,7 +3982,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
+      testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildSliverApp(contentHeight: 1200.0, includeFlexibleSpace: true)
         );
@@ -4008,7 +4007,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor - reverse', (WidgetTester tester) async {
+      testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildSliverApp(contentHeight: 1200.0, reverse: true)
         );
@@ -4033,7 +4032,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
+      testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildSliverApp(
             contentHeight: 1200.0,
@@ -4062,7 +4061,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
+      testWidgets('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildSliverApp(contentHeight: 200, reverse: true)
         );
@@ -4081,7 +4080,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
+      testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildSliverApp(
             contentHeight: 200,
@@ -4135,7 +4134,7 @@ void main() {
         );
       }
 
-      testWidgetsWithLeakTracking('backgroundColor for horizontal scrolling', (WidgetTester tester) async {
+      testWidgets('backgroundColor for horizontal scrolling', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -4193,7 +4192,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor', (WidgetTester tester) async {
+      testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildAppBar(contentHeight: 1200.0)
         );
@@ -4218,7 +4217,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
+      testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildAppBar(contentHeight: 1200.0, includeFlexibleSpace: true)
         );
@@ -4243,7 +4242,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor - reverse', (WidgetTester tester) async {
+      testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildAppBar(contentHeight: 1200.0, reverse: true)
         );
@@ -4271,7 +4270,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
+      testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildAppBar(
             contentHeight: 1200.0,
@@ -4303,7 +4302,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
 
-      testWidgetsWithLeakTracking('_handleScrollNotification safely calls setState()', (WidgetTester tester) async {
+      testWidgets('_handleScrollNotification safely calls setState()', (WidgetTester tester) async {
         // Regression test for failures found in Google internal issue b/185192049.
         final ScrollController controller = ScrollController(initialScrollOffset: 400);
         await tester.pumpWidget(
@@ -4331,7 +4330,7 @@ void main() {
         controller.dispose();
       });
 
-      testWidgetsWithLeakTracking('does not trigger on horizontal scroll', (WidgetTester tester) async {
+      testWidgets('does not trigger on horizontal scroll', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -4371,7 +4370,7 @@ void main() {
         expect(getAppBarBackgroundColor(tester), defaultColor);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
+      testWidgets('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildAppBar(
             contentHeight: 200.0,
@@ -4394,7 +4393,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
 
-      testWidgetsWithLeakTracking('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
+      testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildAppBar(
             contentHeight: 200.0,
@@ -4421,7 +4420,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/80256
-  testWidgetsWithLeakTracking('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
+  testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
     final Page<void> page1 = MaterialPage<void>(
         key: const ValueKey<String>('1'),
         child: Scaffold(
@@ -4458,7 +4457,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Only local entries that imply app bar dismissal will introduce an back button', (WidgetTester tester) async {
+  testWidgets('Only local entries that imply app bar dismissal will introduce an back button', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -4485,7 +4484,7 @@ void main() {
     expect(find.byType(BackButton), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('AppBar.preferredHeightFor', (WidgetTester tester) async {
+  testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {
     late double preferredHeight;
     late Size preferredSize;
 
@@ -4538,7 +4537,7 @@ void main() {
     expect(preferredSize.height, 64);
   });
 
-  testWidgetsWithLeakTracking('AppBar title with actions should have the same position regardless of centerTitle', (WidgetTester tester) async {
+  testWidgets('AppBar title with actions should have the same position regardless of centerTitle', (WidgetTester tester) async {
     final Key titleKey = UniqueKey();
     bool centerTitle = false;
 
@@ -4568,7 +4567,7 @@ void main() {
     expect(tester.getTopLeft(title).dx, 16.0);
   });
 
-  testWidgetsWithLeakTracking('AppBar leading widget can take up arbitrary space', (WidgetTester tester) async {
+  testWidgets('AppBar leading widget can take up arbitrary space', (WidgetTester tester) async {
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
     late double leadingWidth;
@@ -4598,7 +4597,7 @@ void main() {
     expect(tester.getSize(find.byKey(leadingKey)).width, leadingWidth);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'SliverAppBar.medium collapsed title does not overlap with leading/actions widgets',
     (WidgetTester tester) async {
       const String title = 'Medium SliverAppBar Very Long Title';
@@ -4650,7 +4649,7 @@ void main() {
       expect(titleOffset.dx, lessThan(searchOffset.dx));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'SliverAppBar.large collapsed title does not overlap with leading/actions widgets',
     (WidgetTester tester) async {
       const String title = 'Large SliverAppBar Very Long Title';
@@ -4702,7 +4701,7 @@ void main() {
       expect(titleOffset.dx, lessThan(searchOffset.dx));
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar.medium respects title spacing', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium respects title spacing', (WidgetTester tester) async {
     const String title = 'Medium SliverAppBar Very Long Title';
     const double titleSpacing = 16.0;
 
@@ -4795,7 +4794,7 @@ void main() {
     expect(titleOffset.dx, iconButtonOffset.dx);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar.large respects title spacing', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large respects title spacing', (WidgetTester tester) async {
     const String title = 'Large SliverAppBar Very Long Title';
     const double titleSpacing = 16.0;
 
@@ -4887,7 +4886,7 @@ void main() {
     expect(titleOffset.dx, iconButtonOffset.dx);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'SliverAppBar.medium without the leading widget updates collapsed title padding',
     (WidgetTester tester) async {
       const String title = 'Medium SliverAppBar Title';
@@ -4949,7 +4948,7 @@ void main() {
       expect(titleOffset.dx, titleSpacing);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'SliverAppBar.large without the leading widget updates collapsed title padding',
     (WidgetTester tester) async {
       const String title = 'Large SliverAppBar Title';
@@ -5011,7 +5010,7 @@ void main() {
       expect(titleOffset.dx, titleSpacing);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'SliverAppBar large & medium title respects automaticallyImplyLeading',
     (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/121511
@@ -5069,7 +5068,7 @@ void main() {
       expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar.medium with bottom widget', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium with bottom widget', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/115091
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 112;
@@ -5129,7 +5128,7 @@ void main() {
     expect(appBarHeight(tester), collapsedAppBarHeight + bottomHeight);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar.large with bottom widget', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large with bottom widget', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/115091
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 152;
@@ -5189,7 +5188,7 @@ void main() {
     expect(appBarHeight(tester), collapsedAppBarHeight + bottomHeight);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar.medium expanded title has upper limit on text scaling', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium expanded title has upper limit on text scaling', (WidgetTester tester) async {
     const String title = 'Medium AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
@@ -5230,7 +5229,7 @@ void main() {
     _verifyTextNotClipped(expandedTitle, tester);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-  testWidgetsWithLeakTracking('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
     const String title = 'Large AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
@@ -5268,7 +5267,7 @@ void main() {
     expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-  testWidgetsWithLeakTracking('SliverAppBar.medium expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
     const String title = 'Medium AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
@@ -5309,7 +5308,7 @@ void main() {
     _verifyTextNotClipped(expandedTitle, tester);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-  testWidgetsWithLeakTracking('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
     const String title = 'Large AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
@@ -5393,7 +5392,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
         'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
       bool buttonWasPressed = false;
       final Widget widget = buildWidget(
@@ -5411,7 +5410,7 @@ void main() {
       expect(buttonWasPressed, isTrue);
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'forceMaterialTransparency == false does not allow gestures beneath the app bar',
         (WidgetTester tester) async {
         // Set this, and tester.tap(warnIfMissed:false), to suppress
@@ -5440,7 +5439,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Material2 - SliverAppBar.medium defaults', (WidgetTester tester) async {
+    testWidgets('Material2 - SliverAppBar.medium defaults', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       const double collapsedAppBarHeight = 64;
       const double expandedAppBarHeight = 112;
@@ -5524,7 +5523,7 @@ void main() {
       expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
     });
 
-    testWidgetsWithLeakTracking('Material2 - SliverAppBar.large defaults', (WidgetTester tester) async {
+    testWidgets('Material2 - SliverAppBar.large defaults', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       const double collapsedAppBarHeight = 64;
       const double expandedAppBarHeight = 152;

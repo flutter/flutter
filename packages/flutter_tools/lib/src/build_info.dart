@@ -286,6 +286,8 @@ class BuildInfo {
       'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+      if (flavor != null)
+        'FLAVOR': flavor!,
     };
   }
 
@@ -930,13 +932,6 @@ const String kDarwinArchs = 'DarwinArchs';
 /// This is expected to be a space-delimited list of architectures.
 const String kAndroidArchs = 'AndroidArchs';
 
-/// If the current build is `flutter build aar`.
-///
-/// This is expected to be a boolean.
-///
-/// If not provided, defaults to false.
-const String kIsAndroidLibrary = 'IsAndroidLibrary';
-
 /// The define to control what min Android SDK version is built for.
 ///
 /// This is expected to be int.
@@ -988,6 +983,9 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 
 /// The define to pass build name
 const String kBuildName = 'BuildName';
+
+/// The app flavor to build.
+const String kFlavor = 'Flavor';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';

@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestFlowDelegate extends FlowDelegate {
   TestFlowDelegate({required this.startOffset}) : super(repaint: startOffset);
@@ -62,10 +61,11 @@ class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Flow control test', (WidgetTester tester) async {
+  testWidgets('Flow control test', (WidgetTester tester) async {
     final AnimationController startOffset = AnimationController.unbounded(
       vsync: tester,
     );
+    addTearDown(startOffset.dispose);
     final List<int> log = <int>[];
 
     Widget buildBox(int i) {
@@ -116,7 +116,7 @@ void main() {
     expect(log, equals(<int>[0]));
   });
 
-  testWidgetsWithLeakTracking('paintChild gets called twice', (WidgetTester tester) async {
+  testWidgets('paintChild gets called twice', (WidgetTester tester) async {
     await tester.pumpWidget(
       Flow(
         delegate: DuplicatePainterOpacityFlowDelegate(1.0),
@@ -138,7 +138,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('Flow opacity layer', (WidgetTester tester) async {
+  testWidgets('Flow opacity layer', (WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow(
@@ -158,7 +158,7 @@ void main() {
     expect(layer!.firstChild, isA<TransformLayer>());
   });
 
-  testWidgetsWithLeakTracking('Flow can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgets('Flow can set and update clipBehavior', (WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow(
@@ -187,7 +187,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Flow.unwrapped can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgets('Flow.unwrapped can set and update clipBehavior', (WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow.unwrapped(

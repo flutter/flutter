@@ -145,7 +145,7 @@ abstract class Route<T> {
   /// used instead.
   Route({ RouteSettings? settings }) : _settings = settings ?? const RouteSettings() {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
         className: '$Route<$T>',
         object: this,
@@ -518,7 +518,7 @@ abstract class Route<T> {
     _restorationScopeId.dispose();
     _disposeCompleter.complete();
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
   }
 
@@ -2923,7 +2923,7 @@ class _RouteEntry extends RouteTransitionRecord {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
         className: '$_RouteEntry',
         object: this,
@@ -3163,7 +3163,7 @@ class _RouteEntry extends RouteTransitionRecord {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     currentState = _RouteLifecycle.disposed;
     route.dispose();
@@ -5286,6 +5286,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(entry.route._popCompleter.isCompleted);
         entry.currentState = _RouteLifecycle.pop;
       }
+      entry.route.onPopInvoked(true);
     } else {
       entry.pop<T>(result);
       assert (entry.currentState == _RouteLifecycle.pop);

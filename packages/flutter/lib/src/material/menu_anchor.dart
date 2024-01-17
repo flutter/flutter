@@ -26,6 +26,7 @@ import 'menu_button_theme.dart';
 import 'menu_style.dart';
 import 'menu_theme.dart';
 import 'radio.dart';
+import 'scrollbar.dart';
 import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -3369,6 +3370,8 @@ class _MenuPanel extends StatefulWidget {
 }
 
 class _MenuPanelState extends State<_MenuPanel> {
+  ScrollController scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     final MenuStyle? themeStyle;
@@ -3417,7 +3420,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
-        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
       BoxConstraints(
@@ -3454,14 +3457,28 @@ class _MenuPanelState extends State<_MenuPanel> {
         clipBehavior: widget.clipBehavior,
         child: Padding(
           padding: resolvedPadding,
-          child: SingleChildScrollView(
-            scrollDirection: widget.orientation,
-            child: Flex(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              textDirection: Directionality.of(context),
-              direction: widget.orientation,
-              mainAxisSize: MainAxisSize.min,
-              children: widget.children,
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              scrollbars: false,
+              overscroll: false,
+              physics: const ClampingScrollPhysics(),
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  scrollDirection: widget.orientation,
+                  child: Flex(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    textDirection: Directionality.of(context),
+                    direction: widget.orientation,
+                    mainAxisSize: MainAxisSize.min,
+                    children: widget.children,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -3562,7 +3579,7 @@ class _Submenu extends StatelessWidget {
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
-        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     return Theme(
       data: Theme.of(context).copyWith(
