@@ -16754,7 +16754,6 @@ void main() {
       ),
     ),);
 
-    await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText), '\n');
     await tester.pumpAndSettle();
 
