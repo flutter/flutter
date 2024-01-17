@@ -33,14 +33,10 @@ void main() {
     late Platform platform;
 
     setUp(() async {
-      testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
+      testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
       logger = BufferLogger.test();
-      platform = FakePlatform(operatingSystem: globals.platform.operatingSystem);
+      platform = FakePlatform();
     });
 
     testUsingContext('nonempty', () async {
@@ -49,6 +45,7 @@ void main() {
       expect(ab.entries.length, greaterThan(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -75,6 +72,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -120,6 +118,7 @@ flutter:
       ]));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -150,6 +149,7 @@ flutter:
           'assets/foo/fizz.txt']));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -192,6 +192,7 @@ name: example''')
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -217,6 +218,7 @@ flutter:
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -252,6 +254,7 @@ flutter:
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -282,6 +285,7 @@ flutter:
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -330,6 +334,7 @@ flutter:
       expect(bundle.deferredComponentsEntries['component1']!.length, 3);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -515,14 +520,12 @@ flutter:
 
   group('AssetBundle.build (web builds)', () {
     late FileSystem testFileSystem;
+    late Platform testPlatform;
 
     setUp(() async {
-      testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
+      testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testPlatform = FakePlatform();
     });
 
     testUsingContext('empty pubspec', () async {
@@ -550,6 +553,7 @@ flutter:
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => testPlatform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -605,6 +609,7 @@ flutter:
         reason: 'JSON-encoded binary content should be identical to BIN file.');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => testPlatform,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -657,6 +662,7 @@ assets:
     expect(license, bundle.entries['NOTICES']);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -678,6 +684,7 @@ flutter:
     expect(bundle.additionalDependencies.single.path, contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -699,6 +706,7 @@ flutter:
     expect(bundle.additionalDependencies, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
