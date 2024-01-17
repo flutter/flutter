@@ -5236,7 +5236,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Navigator does not hide semantics node of its sibling', (WidgetTester tester) async {
+  testWidgets('Navigator does not hide semantics node of its sibling', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
 
