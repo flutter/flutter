@@ -41,13 +41,14 @@ class TextureGLES final : public Texture,
 
   [[nodiscard]] bool GenerateMipmap();
 
-  enum class AttachmentPoint {
+  enum class AttachmentType {
     kColor0,
     kDepth,
     kStencil,
   };
-  [[nodiscard]] bool SetAsFramebufferAttachment(GLenum target,
-                                                AttachmentPoint point) const;
+  [[nodiscard]] bool SetAsFramebufferAttachment(
+      GLenum target,
+      AttachmentType attachment_type) const;
 
   Type GetType() const;
 
