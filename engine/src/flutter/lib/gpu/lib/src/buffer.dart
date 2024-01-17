@@ -135,7 +135,7 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 with Buffer {
 /// and automatically inserts padding between emplaced data if necessary.
 base class HostBuffer extends NativeFieldWrapperClass1 with Buffer {
   /// Creates a new HostBuffer.
-  HostBuffer(GpuContext gpuContext) {
+  HostBuffer._initialize(GpuContext gpuContext) {
     _initialize(gpuContext);
   }
 

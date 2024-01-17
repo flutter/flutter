@@ -21,7 +21,7 @@ void instantiateDefaultContext() {
 
 @pragma('vm:entry-point')
 void canEmplaceHostBuffer() {
-  final gpu.HostBuffer hostBuffer = gpu.HostBuffer(gpu.gpuContext);
+  final gpu.HostBuffer hostBuffer = gpu.gpuContext.createHostBuffer();
 
   final gpu.BufferView view0 = hostBuffer
       .emplace(Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData());
@@ -216,7 +216,7 @@ void uniformBindFailsForInvalidHostBufferOffset() {
   final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
   encoder.bindPipeline(pipeline);
 
-  final gpu.HostBuffer transients = gpu.HostBuffer(gpu.gpuContext);
+  final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
   final gpu.BufferView vertInfoData = transients.emplace(float32(<double>[
     1, 0, 0, 0, // mvp
     0, 1, 0, 0, // mvp
@@ -262,7 +262,7 @@ void canCreateRenderPassAndSubmit() {
   encoder.setColorBlendEnable(true);
   encoder.setColorBlendEquation(gpu.ColorBlendEquation());
 
-  final gpu.HostBuffer transients = gpu.HostBuffer(gpu.gpuContext);
+  final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
   final gpu.BufferView vertices = transients.emplace(float32(<double>[
     -0.5, -0.5, //
     0.5, 0.5, //

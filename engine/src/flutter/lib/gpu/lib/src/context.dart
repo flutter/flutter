@@ -69,6 +69,10 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return result.isValid ? result : null;
   }
 
+  HostBuffer createHostBuffer() {
+    return HostBuffer._initialize(this);
+  }
+
   /// Allocates a new texture in GPU-resident memory.
   ///
   /// Returns [null] if the [Texture] creation failed.
