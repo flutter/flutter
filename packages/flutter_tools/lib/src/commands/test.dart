@@ -80,6 +80,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     addEnableImpellerFlag(verboseHelp: verboseHelp);
 
     argParser
+      ..addFlag('experimental-faster-testing',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Run each test in a separate lightweight Flutter Engine to speed up testing.'
+      )
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
         valueHelp: 'regexp',
@@ -350,6 +355,23 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
+    bool experimentalFasterTesting = boolArg('experimental-faster-testing');
+    if (experimentalFasterTesting) {
+      if (_isIntegrationTest || isWeb) {
+        experimentalFasterTesting = false;
+        globals.printStatus(
+          '--experimental-faster-testing was parsed but will be ignored. This '
+          'option is not supported when running integration tests or web tests.',
+        );
+      } else if (_testFileUris.length == 1) {
+        experimentalFasterTesting = false;
+        globals.printStatus(
+          '--experimental-faster-testing was parsed but will be ignored. This '
+          'option should not be used when running a single test file.',
+        );
+      }
+    }
+
     final bool startPaused = boolArg('start-paused');
     if (startPaused && _testFileUris.length != 1) {
       throwToolExit(
@@ -425,6 +447,22 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'If you set --shard-index you need to also set --total-shards.');
     }
 
+    final bool enableVmService = boolArg('enable-vmservice');
+    if (experimentalFasterTesting && enableVmService) {
+      globals.printStatus(
+        '--enable-vmservice was parsed but will be ignored. This option is not '
+        'compatible with --experimental-faster-testing.',
+      );
+    }
+
+    final bool ipv6 = boolArg('ipv6');
+    if (experimentalFasterTesting && enableVmService) {
+      globals.printStatus(
+        '--ipv6 was parsed but will be ignored. This option is not compatible '
+        'with --experimental-faster-testing.',
+      );
+    }
+
     final bool machine = boolArg('machine');
     CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage') ||
@@ -487,35 +525,61 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final Stopwatch? testRunnerTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.TestRunner);
-    final int result = await testRunner.runTests(
-      testWrapper,
-      _testFileUris.toList(),
-      debuggingOptions: debuggingOptions,
-      names: names,
-      plainNames: plainNames,
-      tags: tags,
-      excludeTags: excludeTags,
-      watcher: watcher,
-      enableVmService: collector != null || startPaused || boolArg('enable-vmservice'),
-      ipv6: boolArg('ipv6'),
-      machine: machine,
-      updateGoldens: boolArg('update-goldens'),
-      concurrency: jobs,
-      testAssetDirectory: testAssetDirectory,
-      flutterProject: flutterProject,
-      web: isWeb,
-      randomSeed: stringArg('test-randomize-ordering-seed'),
-      reporter: stringArg('reporter'),
-      fileReporter: stringArg('file-reporter'),
-      timeout: stringArg('timeout'),
-      runSkipped: boolArg('run-skipped'),
-      shardIndex: shardIndex,
-      totalShards: totalShards,
-      integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
-      testTimeRecorder: testTimeRecorder,
-      nativeAssetsBuilder: nativeAssetsBuilder,
-    );
+    final int result;
+    if (experimentalFasterTesting) {
+      assert(!isWeb && !_isIntegrationTest && _testFileUris.length > 1);
+      result = await testRunner.runTestsBySpawningLightweightEngines(
+        _testFileUris.toList(),
+        debuggingOptions: debuggingOptions,
+        names: names,
+        plainNames: plainNames,
+        tags: tags,
+        excludeTags: excludeTags,
+        machine: machine,
+        updateGoldens: boolArg('update-goldens'),
+        concurrency: jobs,
+        testAssetDirectory: testAssetDirectory,
+        flutterProject: flutterProject,
+        randomSeed: stringArg('test-randomize-ordering-seed'),
+        reporter: stringArg('reporter'),
+        fileReporter: stringArg('file-reporter'),
+        timeout: stringArg('timeout'),
+        runSkipped: boolArg('run-skipped'),
+        shardIndex: shardIndex,
+        totalShards: totalShards,
+        testTimeRecorder: testTimeRecorder,
+      );
+    } else {
+      result = await testRunner.runTests(
+        testWrapper,
+        _testFileUris.toList(),
+        debuggingOptions: debuggingOptions,
+        names: names,
+        plainNames: plainNames,
+        tags: tags,
+        excludeTags: excludeTags,
+        watcher: watcher,
+        enableVmService: collector != null || startPaused || enableVmService,
+        ipv6: ipv6,
+        machine: machine,
+        updateGoldens: boolArg('update-goldens'),
+        concurrency: jobs,
+        testAssetDirectory: testAssetDirectory,
+        flutterProject: flutterProject,
+        web: isWeb,
+        randomSeed: stringArg('test-randomize-ordering-seed'),
+        reporter: stringArg('reporter'),
+        fileReporter: stringArg('file-reporter'),
+        timeout: stringArg('timeout'),
+        runSkipped: boolArg('run-skipped'),
+        shardIndex: shardIndex,
+        totalShards: totalShards,
+        integrationTestDevice: integrationTestDevice,
+        integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
+        testTimeRecorder: testTimeRecorder,
+        nativeAssetsBuilder: nativeAssetsBuilder,
+      );
+    }
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
     if (collector != null) {

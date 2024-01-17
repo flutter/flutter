@@ -7,9 +7,11 @@ import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -25,6 +27,7 @@ import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
@@ -483,6 +486,132 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Pipes specified arguments to package:test when --experimental-faster-testing is set',
+      () async {
+    final TestCommand testCommand = TestCommand();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    bool caughtToolExit = false;
+    await asyncGuard<void>(
+      () => commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--experimental-faster-testing',
+        '--reporter=compact',
+        '--file-reporter=json:reports/tests.json',
+        '--timeout=100',
+        '--concurrency=1',
+        '--name=name1',
+        '--plain-name=name2',
+        '--test-randomize-ordering-seed=random',
+        '--tags=tag1',
+        '--exclude-tags=tag2',
+        '--run-skipped',
+        '--total-shards=1',
+        '--shard-index=1',
+        '--',
+        'fake_test.dart',
+        'fake_test_2.dart',
+      ]),
+      onError: (Object error) async {
+        expect(error, isA<ToolExit>());
+        // We expect this message because we are using a fake ProcessManager.
+        expect(
+          (error as ToolExit).message,
+          contains('the Dart compiler exited unexpectedly.'),
+        );
+        caughtToolExit = true;
+
+        final bool childTestIsolateSpawnerSourceFileExists = await fs.isFile(
+          globals.fs.path.join('build', 'child_test_isolate_spawner.dart'),
+        );
+        expect(childTestIsolateSpawnerSourceFileExists, true);
+
+        final File childTestIsolateSpawnerSourceFile = fs.file(
+          globals.fs.path.join('build', 'child_test_isolate_spawner.dart'),
+        );
+        expect(childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
+const List<String> packageTestArgs = <String>[
+  '--no-color',
+  '-r',
+  'compact',
+  '--file-reporter=json:reports/tests.json',
+  '--timeout',
+  '100',
+  '--concurrency=1',
+  '--name',
+  'name1',
+  '--plain-name',
+  'name2',
+  '--test-randomize-ordering-seed=random',
+  '--tags',
+  'tag1',
+  '--exclude-tags',
+  'tag2',
+  '--run-skipped',
+  '--total-shards=1',
+  '--shard-index=1',
+  '--chain-stack-traces',
+];
+'''), true);
+      }
+    );
+    expect(caughtToolExit, true);
+  }, overrides: <Type, Generator>{
+    AnsiTerminal: () => _FakeTerminal(),
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
+  testUsingContext('Only passes --no-color and --chain-stack-traces to package:test by default when --experimental-faster-testing is set',
+      () async {
+    final TestCommand testCommand = TestCommand();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    bool caughtToolExit = false;
+    await asyncGuard<void>(
+      () => commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--experimental-faster-testing',
+        '--',
+        'fake_test.dart',
+        'fake_test_2.dart',
+      ]),
+      onError: (Object error) async {
+        expect(error, isA<ToolExit>());
+        // We expect this message because we are using a fake ProcessManager.
+        expect(
+          (error as ToolExit).message,
+          contains('the Dart compiler exited unexpectedly.'),
+        );
+        caughtToolExit = true;
+
+        final bool childTestIsolateSpawnerSourceFileExists = await fs.isFile(
+          globals.fs.path.join('build', 'child_test_isolate_spawner.dart'),
+        );
+        expect(childTestIsolateSpawnerSourceFileExists, true);
+
+        final File childTestIsolateSpawnerSourceFile = fs.file(
+          globals.fs.path.join('build', 'child_test_isolate_spawner.dart'),
+        );
+        expect(childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
+const List<String> packageTestArgs = <String>[
+  '--no-color',
+  '--chain-stack-traces',
+];
+'''), true);
+      }
+    );
+    expect(caughtToolExit, true);
+  }, overrides: <Type, Generator>{
+    AnsiTerminal: () => _FakeTerminal(),
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
   testUsingContext('Verbose prints phase timings', () async {
@@ -1147,6 +1276,32 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
 
     return exitCode;
   }
+
+  @override
+  Never runTestsBySpawningLightweightEngines(
+    List<Uri> testFiles, {
+    required DebuggingOptions debuggingOptions,
+    List<String> names = const <String>[],
+    List<String> plainNames = const <String>[],
+    String? tags,
+    String? excludeTags,
+    bool machine = false,
+    bool updateGoldens = false,
+    required int? concurrency,
+    String? testAssetDirectory,
+    FlutterProject? flutterProject,
+    String? icudtlPath,
+    String? randomSeed,
+    String? reporter,
+    String? fileReporter,
+    String? timeout,
+    bool runSkipped = false,
+    int? shardIndex,
+    int? totalShards,
+    TestTimeRecorder? testTimeRecorder,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 class TestTestDevice extends TestDevice {
@@ -1178,6 +1333,14 @@ class FakePackageTest implements TestWrapper {
     Iterable<Runtime> runtimes,
     FutureOr<PlatformPlugin> Function() platforms,
   ) {}
+}
+
+class _FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  final bool supportsColor = false;
+
+  @override
+  bool get isCliAnimationEnabled => supportsColor;
 }
 
 class _FakeDeviceManager extends DeviceManager {
