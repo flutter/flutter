@@ -1508,6 +1508,60 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/141644.
+  // This allows the user to quickly explore the UI via tooltips.
+  testWidgets('Tooltip shows without delay when the mouse moves from another tooltip', (WidgetTester tester) async {
+    const Duration waitDuration = Durations.extralong1;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Tooltip(
+              message: 'first tooltip',
+              waitDuration: waitDuration,
+              child: SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+            Tooltip(
+              message: 'last tooltip',
+              waitDuration: waitDuration,
+              child: SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(Tooltip).first));
+    await tester.pump();
+    // Wait for the first tooltip to appear.
+    await tester.pump(waitDuration);
+    expect(find.text('first tooltip'), findsOneWidget);
+    expect(find.text('last tooltip'), findsNothing);
+
+    // Move to the second tooltip and expect it to show up immediately.
+    await gesture.moveTo(tester.getCenter(find.byType(Tooltip).last));
+    await tester.pump();
+    expect(find.text('first tooltip'), findsNothing);
+    expect(find.text('last tooltip'), findsOneWidget);
+  });
+
   testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
