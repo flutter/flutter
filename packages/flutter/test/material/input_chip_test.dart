@@ -39,7 +39,7 @@ Widget selectedInputChip({
     label: const Text('InputChip'),
     selected: true,
     isEnabled: enabled,
-    // When [enabled] is true we also need to provide one the the chip
+    // When [enabled] is true we also need to provide one of the chip
     // callbacks, otherwise the chip would have a 'disabled'
     // [MaterialState], which is not the intention.
     onSelected: enabled ? (_) {} : null,
