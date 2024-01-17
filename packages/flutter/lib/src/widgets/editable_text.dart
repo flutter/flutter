@@ -689,15 +689,11 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///
 /// ## Scrolling Considerations
 ///
-/// If a [Scaffold] is used as the parent of the [Scrollable]s that contain
-/// [EditableText], it will automatically create its own
-/// [ScrollNotificationObserver]. This ensures proper scroll coordination
-/// for [EditableText] and its components like [TextSelectionOverlay].
-///
-/// When using a [EditableText] within a [Scrollable] or nested [Scrollable]s
-/// without a [Scaffold] as the parent, ensure proper scroll coordination by
-/// placing a [ScrollNotificationObserver] above the root [Scrollable] that
-/// contains the [EditableText].
+/// If this [EditableText] is not a descendant of [Scaffold] and is being used
+/// within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [EditableText] to ensure proper scroll coordination for [EditableText] and
+/// its components like [TextSelectionOverlay].
 ///
 /// {@template flutter.widgets.editableText.accessibility}
 /// ## Troubleshooting Common Accessibility Issues

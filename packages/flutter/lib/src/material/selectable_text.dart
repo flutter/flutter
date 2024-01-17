@@ -203,12 +203,12 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// the desired behavior.
 ///
 /// ## Scrolling Considerations
-/// When [SelectableText] is placed within a [Scrollable] or within nested
-/// [Scrollable]s, consider placing a [ScrollNotificationObserver] above the
-/// root [Scrollable] to ensure proper scroll coordination for [SelectableText]
-/// and its components like [TextSelectionOverlay]. If a [Scaffold] is present
-/// above the [Scrollable]s in the widget hierarchy, it automatically creates
-/// its own [ScrollNotificationObserver].
+///
+/// If this [SelectableText] is not a descendant of [Scaffold] and is being used
+/// within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [SelectableText] to ensure proper scroll coordination for [SelectableText]
+/// and its components like [TextSelectionOverlay].
 ///
 /// See also:
 ///

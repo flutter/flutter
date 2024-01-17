@@ -165,15 +165,11 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///
 /// ## Scrolling Considerations
 ///
-/// If a [Scaffold] is used as the parent of the [Scrollable]s that contain
-/// [CupertinoTextField], it will automatically create its own
-/// [ScrollNotificationObserver]. This ensures proper scroll coordination
-/// for [CupertinoTextField] and its components like [TextSelectionOverlay].
-///
-/// When using a [CupertinoTextField] within a [Scrollable] or nested
-/// [Scrollable]s without a [Scaffold] as the parent, ensure proper scroll
-/// coordination by placing a [ScrollNotificationObserver] above the root
-/// [Scrollable] that contains the [CupertinoTextField].
+/// If this [CupertinoTextField] is not a descendant of [Scaffold] and is being
+/// used within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [CupertinoTextField] to ensure proper scroll coordination for
+/// [CupertinoTextField] and its components like [TextSelectionOverlay].
 ///
 /// See also:
 ///

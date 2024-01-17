@@ -188,15 +188,11 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// ## Scrolling Considerations
 ///
-/// If a [Scaffold] is used as the parent of the [Scrollable]s that contain
-/// [TextField], it will automatically create its own
-/// [ScrollNotificationObserver]. This ensures proper scroll coordination
-/// for [TextField] and its components like [TextSelectionOverlay].
-///
-/// When using a [TextField] within a [Scrollable] or nested [Scrollable]s
-/// without a [Scaffold] as the parent, ensure proper scroll coordination by
-/// placing a [ScrollNotificationObserver] above the root [Scrollable] that
-/// contains the [TextField].
+/// If this [TextField] is not a descendant of [Scaffold] and is being used
+/// within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [TextField] to ensure proper scroll coordination for [TextField] and its
+/// components like [TextSelectionOverlay].
 ///
 /// See also:
 ///
