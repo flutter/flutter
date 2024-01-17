@@ -7,7 +7,7 @@
 
 namespace impeller {
 
-RenderPass::RenderPass(std::shared_ptr<const Context> context,
+RenderPass::RenderPass(std::weak_ptr<const Context> context,
                        const RenderTarget& target)
     : context_(std::move(context)),
       sample_count_(target.GetSampleCount()),
@@ -77,10 +77,15 @@ bool RenderPass::AddCommand(Command&& command) {
 }
 
 bool RenderPass::EncodeCommands() const {
-  return OnEncodeCommands(*context_);
+  auto context = context_.lock();
+  // The context could have been collected in the meantime.
+  if (!context) {
+    return false;
+  }
+  return OnEncodeCommands(*context);
 }
 
-const std::shared_ptr<const Context>& RenderPass::GetContext() const {
+const std::weak_ptr<const Context>& RenderPass::GetContext() const {
   return context_;
 }
 
@@ -131,30 +136,27 @@ fml::Status RenderPass::Draw() {
 
 // |ResourceBinder|
 bool RenderPass::BindResource(ShaderStage stage,
-                              DescriptorType type,
                               const ShaderUniformSlot& slot,
                               const ShaderMetadata& metadata,
                               BufferView view) {
-  return pending_.BindResource(stage, type, slot, metadata, view);
+  return pending_.BindResource(stage, slot, metadata, view);
 }
 
 bool RenderPass::BindResource(
     ShaderStage stage,
-    DescriptorType type,
     const ShaderUniformSlot& slot,
     const std::shared_ptr<const ShaderMetadata>& metadata,
     BufferView view) {
-  return pending_.BindResource(stage, type, slot, metadata, std::move(view));
+  return pending_.BindResource(stage, slot, metadata, std::move(view));
 }
 
 // |ResourceBinder|
 bool RenderPass::BindResource(ShaderStage stage,
-                              DescriptorType type,
                               const SampledImageSlot& slot,
                               const ShaderMetadata& metadata,
                               std::shared_ptr<const Texture> texture,
                               std::shared_ptr<const Sampler> sampler) {
-  return pending_.BindResource(stage, type, slot, metadata, std::move(texture),
+  return pending_.BindResource(stage, slot, metadata, std::move(texture),
                                std::move(sampler));
 }
 

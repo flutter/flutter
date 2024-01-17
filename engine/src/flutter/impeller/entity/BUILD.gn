@@ -257,8 +257,6 @@ impeller_component("entity_test_helpers") {
   sources = [
     "contents/test/contents_test_helpers.cc",
     "contents/test/contents_test_helpers.h",
-    "contents/test/recording_render_pass.cc",
-    "contents/test/recording_render_pass.h",
   ]
 
   deps = [ ":entity" ]

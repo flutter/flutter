@@ -9,7 +9,6 @@
 
 #include "impeller/entity/contents/checkerboard_contents.h"
 #include "impeller/entity/contents/contents.h"
-#include "impeller/entity/contents/test/recording_render_pass.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/renderer/render_target.h"
@@ -39,14 +38,11 @@ TEST_P(EntityTest, RendersWithoutError) {
       *GetContentContext()->GetRenderTargetCache(), {100, 100},
       /*mip_count=*/1);
   auto render_pass = buffer->CreateRenderPass(render_target);
-  auto recording_pass = std::make_shared<RecordingRenderPass>(
-      render_pass, GetContext(), render_target);
-
   Entity entity;
 
-  ASSERT_TRUE(recording_pass->GetCommands().empty());
-  ASSERT_TRUE(contents->Render(*content_context, entity, *recording_pass));
-  ASSERT_FALSE(recording_pass->GetCommands().empty());
+  ASSERT_TRUE(render_pass->GetCommands().empty());
+  ASSERT_TRUE(contents->Render(*content_context, entity, *render_pass));
+  ASSERT_FALSE(render_pass->GetCommands().empty());
 }
 #endif  // IMPELLER_DEBUG
 

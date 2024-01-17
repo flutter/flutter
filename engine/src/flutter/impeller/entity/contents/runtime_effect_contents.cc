@@ -199,9 +199,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         ShaderUniformSlot uniform_slot;
         uniform_slot.name = uniform.name.c_str();
         uniform_slot.ext_res_0 = uniform.location;
-        pass.BindResource(ShaderStage::kFragment,
-                          DescriptorType::kUniformBuffer, uniform_slot,
-                          metadata, buffer_view);
+        pass.BindResource(ShaderStage::kFragment, uniform_slot, metadata,
+                          buffer_view);
         buffer_index++;
         buffer_offset += uniform.GetSize();
         break;
@@ -238,8 +237,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         auto buffer_view = renderer.GetTransientsBuffer().Emplace(
             reinterpret_cast<const void*>(uniform_buffer.data()),
             sizeof(float) * uniform_buffer.size(), alignment);
-        pass.BindResource(ShaderStage::kFragment,
-                          DescriptorType::kUniformBuffer, uniform_slot,
+        pass.BindResource(ShaderStage::kFragment, uniform_slot,
                           ShaderMetadata{}, buffer_view);
       }
     }
@@ -273,8 +271,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
         image_slot.binding = sampler_binding_location;
         image_slot.texture_index = uniform.location - minimum_sampler_index;
-        pass.BindResource(ShaderStage::kFragment, DescriptorType::kSampledImage,
-                          image_slot, *metadata, input.texture, sampler);
+        pass.BindResource(ShaderStage::kFragment, image_slot, *metadata,
+                          input.texture, sampler);
 
         sampler_index++;
         break;

@@ -33,7 +33,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   ~RenderPass() override;
 
-  const std::shared_ptr<const impeller::Context>& GetContext() const;
+  const std::weak_ptr<const impeller::Context>& GetContext() const;
 
   impeller::Command& GetCommand();
   const impeller::Command& GetCommand() const;

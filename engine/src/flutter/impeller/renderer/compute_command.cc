@@ -8,12 +8,10 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/shader_types.h"
 
 namespace impeller {
 
 bool ComputeCommand::BindResource(ShaderStage stage,
-                                  DescriptorType type,
                                   const ShaderUniformSlot& slot,
                                   const ShaderMetadata& metadata,
                                   BufferView view) {
@@ -31,7 +29,6 @@ bool ComputeCommand::BindResource(ShaderStage stage,
 }
 
 bool ComputeCommand::BindResource(ShaderStage stage,
-                                  DescriptorType type,
                                   const SampledImageSlot& slot,
                                   const ShaderMetadata& metadata,
                                   std::shared_ptr<const Texture> texture,

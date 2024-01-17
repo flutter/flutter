@@ -26,7 +26,7 @@ class RenderPassMTL final : public RenderPass {
   std::string label_;
   bool is_valid_ = false;
 
-  RenderPassMTL(std::shared_ptr<const Context> context,
+  RenderPassMTL(std::weak_ptr<const Context> context,
                 const RenderTarget& target,
                 id<MTLCommandBuffer> buffer);
 
