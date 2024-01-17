@@ -850,12 +850,10 @@ class _ViewContentState extends State<_ViewContent> {
       ?? viewTheme.dividerColor
       ?? dividerTheme.color
       ?? viewDefaults.dividerColor!;
-    final double? effectiveHeaderHeight = widget.viewHeaderHeight
-      ?? viewTheme.headerHeight;
-    BoxConstraints? headerConstraints;
-    if (effectiveHeaderHeight != null) {
-      headerConstraints = BoxConstraints.tightFor(height: effectiveHeaderHeight);
-    }
+    final double? effectiveHeaderHeight = widget.viewHeaderHeight ?? viewTheme.headerHeight;
+    final BoxConstraints? headerConstraints = effectiveHeaderHeight == null
+      ? null
+      : BoxConstraints.tightFor(height: effectiveHeaderHeight);
     final TextStyle? effectiveTextStyle = widget.viewHeaderTextStyle
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerTextStyle;

@@ -3037,9 +3037,8 @@ void main() {
     await tester.pump();
     await tester.tap(find.byIcon(Icons.search)); // Open search view.
     await tester.pumpAndSettle();
-    final Finder findHeader1 = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
-    final RenderBox box1 = tester.renderObject(findHeader1);
-    expect(box1.size.height, 32);
+    final Finder findHeader = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
+    expect(tester.getSize(findHeader).height, 32);
   });
 
   testWidgets('SearchAnchor.bar respects viewHeaderHeight', (WidgetTester tester) async {
