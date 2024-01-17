@@ -45,9 +45,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get checkmarkColor => isEnabled
-    ? ${color("$tokenGroup.with-leading-icon.unselected.leading-icon.color")}
-    : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")};
+  Color? get checkmarkColor => null;
 
   @override
   Color? get deleteIconColor => isEnabled
