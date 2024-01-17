@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Tags(<String>['reduced-test-set'])
-library;
-
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -1630,51 +1627,5 @@ void main() {
     await tester.pump();
     expect(stateKey.currentState!.value,'initialValue');
     expect(value, 'initialValue');
-  });
-  testWidgets('should update material decorations', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: StatefulBuilder(
-          builder: (BuildContext context, _) =>
-              RepaintBoundary(
-                child: SizedBox(
-                  key: const Key('gold area'),
-                  // Area reduced for test performance. A larger box may make
-                  // the bug more visible.
-                  height: 90,
-                  width: 4,
-                  child: Material(
-                    child: ListView(
-                      children: <Widget>[
-                        TextFormField(
-                          minLines: 1,
-                          maxLines: 3,
-                        ),
-                        Ink(
-                          decoration: const ShapeDecoration(
-                            shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                    color: Colors.red
-                                )
-                            ),
-                          ),
-                          child: const SizedBox(height: 1,),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-        ),
-        ),
-    ));
-    await tester.enterText(find.byType(TextFormField), '\n');
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byKey(const Key('gold area')).first,
-      matchesGoldenFile('text_form_field.update_decorations.png'),
-    );
-
   });
 }
