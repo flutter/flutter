@@ -109,13 +109,13 @@ class RenderTarget final {
 
   bool IsValid() const;
 
-  void SetupDepthStencilAttachments(const Context& context,
-                                    RenderTargetAllocator& allocator,
-                                    ISize size,
-                                    bool msaa,
-                                    const std::string& label = "Offscreen",
-                                    AttachmentConfig stencil_attachment_config =
-                                        kDefaultStencilAttachmentConfig);
+  void SetupStencilAttachment(const Context& context,
+                              RenderTargetAllocator& allocator,
+                              ISize size,
+                              bool msaa,
+                              const std::string& label = "Offscreen",
+                              AttachmentConfig stencil_attachment_config =
+                                  kDefaultStencilAttachmentConfig);
 
   SampleCount GetSampleCount() const;
 

@@ -3557,8 +3557,6 @@ TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
       .WillRepeatedly(::testing::Return(false));
   FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
   FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              GetDefaultDepthStencilFormat);
   FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
   FLT_FORWARD(mock_capabilities, old_capabilities,
               SupportsImplicitResolvingMSAA);
