@@ -123,6 +123,7 @@ class SearchAnchor extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.headerHeight,
     this.headerTextStyle,
     this.headerHintStyle,
     this.dividerColor,
@@ -169,6 +170,7 @@ class SearchAnchor extends StatefulWidget {
     double? viewElevation,
     BorderSide? viewSide,
     OutlinedBorder? viewShape,
+    double? viewHeaderHeight,
     TextStyle? viewHeaderTextStyle,
     TextStyle? viewHeaderHintStyle,
     Color? dividerColor,
@@ -260,6 +262,12 @@ class SearchAnchor extends StatefulWidget {
   /// If this is also null, then the default value is a rectangle shape for full-screen
   /// mode and a [RoundedRectangleBorder] shape with a 28.0 radius otherwise.
   final OutlinedBorder? viewShape;
+
+  /// The height of the search field on the search view.
+  ///
+  /// If null, the value of [SearchViewThemeData.headerHeight] will be used. If
+  /// this is also null, the default value is 56.0.
+  final double? headerHeight;
 
   /// The style to use for the text being edited on the search view.
   ///
@@ -396,6 +404,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       viewSurfaceTintColor: widget.viewSurfaceTintColor,
       viewSide: widget.viewSide,
       viewShape: widget.viewShape,
+      viewHeaderHeight: widget.headerHeight,
       viewHeaderTextStyle: widget.headerTextStyle,
       viewHeaderHintStyle: widget.headerHintStyle,
       dividerColor: widget.dividerColor,
@@ -474,6 +483,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
@@ -501,6 +511,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
@@ -644,6 +655,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewSurfaceTintColor: viewSurfaceTintColor,
                 viewSide: viewSide,
                 viewShape: viewShape,
+                viewHeaderHeight: viewHeaderHeight,
                 viewHeaderTextStyle: viewHeaderTextStyle,
                 viewHeaderHintStyle: viewHeaderHintStyle,
                 dividerColor: dividerColor,
@@ -683,6 +695,7 @@ class _ViewContent extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
@@ -709,6 +722,7 @@ class _ViewContent extends StatefulWidget {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
@@ -836,6 +850,10 @@ class _ViewContentState extends State<_ViewContent> {
       ?? viewTheme.dividerColor
       ?? dividerTheme.color
       ?? viewDefaults.dividerColor!;
+    final double? effectiveHeaderHeight = widget.viewHeaderHeight ?? viewTheme.headerHeight;
+    final BoxConstraints? headerConstraints = effectiveHeaderHeight == null
+      ? null
+      : BoxConstraints.tightFor(height: effectiveHeaderHeight);
     final TextStyle? effectiveTextStyle = widget.viewHeaderTextStyle
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerTextStyle;
@@ -885,7 +903,7 @@ class _ViewContentState extends State<_ViewContent> {
                           bottom: false,
                           child: SearchBar(
                             autoFocus: true,
-                            constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
+                            constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -956,6 +974,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.viewElevation,
     super.viewSide,
     super.viewShape,
+    double? viewHeaderHeight,
     TextStyle? viewHeaderTextStyle,
     TextStyle? viewHeaderHintStyle,
     super.dividerColor,
@@ -971,6 +990,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.keyboardType,
   }) : super(
     viewHintText: viewHintText ?? barHintText,
+    headerHeight: viewHeaderHeight,
     headerTextStyle: viewHeaderTextStyle,
     headerHintStyle: viewHeaderHintStyle,
     viewOnSubmitted: onSubmitted,

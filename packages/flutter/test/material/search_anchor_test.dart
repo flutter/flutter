@@ -3016,6 +3016,52 @@ void main() {
     final Opacity opacityWidget = tester.widget<Opacity>(opacityFinder);
     expect(opacityWidget.opacity, 0.38);
   });
+
+  testWidgets('SearchAnchor respects headerHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor(
+            isFullScreen: true,
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            headerHeight: 32,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+    final Finder findHeader = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
+    expect(tester.getSize(findHeader).height, 32);
+  });
+
+  testWidgets('SearchAnchor.bar respects viewHeaderHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor.bar(
+            isFullScreen: true,
+            viewHeaderHeight: 32,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byType(SearchBar)); // Open search view.
+    await tester.pumpAndSettle();
+    final Finder findHeader = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
+    final RenderBox box = tester.renderObject(findHeader);
+    expect(box.size.height, 32);
+  });
 }
 
 Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {
