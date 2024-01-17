@@ -1325,9 +1325,10 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// To listen for platform shutdown messages (and other lifecycle changes),
   /// consider the [AppLifecycleListener] API.
   ///
-  /// ### Dismissing Flutter UI via platform native methods
-  ///
   /// {@macro flutter.widgets.runApp.dismissal}
+  ///
+  /// See the method used to bootstrap the app (e.g. [runApp] or [runWidget])
+  /// for suggestions on how to release resources more eagerly.
   ///
   /// See also:
   ///
