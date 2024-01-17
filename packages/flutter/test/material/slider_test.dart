@@ -1179,27 +1179,32 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
+                                SemanticsFlag.isFocusable,
+                                SemanticsFlag.isSlider,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.increase,
+                                SemanticsAction.decrease,
+                              ],
+                              value: '50%',
+                              increasedValue: '55%',
+                              decreasedValue: '45%',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.increase,
-                            SemanticsAction.decrease,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1238,23 +1243,28 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            // isFocusable is delayed by 1 frame.
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasEnabledState,
+                                // isFocusable is delayed by 1 frame.
+                                SemanticsFlag.isFocusable,
+                                SemanticsFlag.isSlider,
+                              ],
+                              value: '50%',
+                              increasedValue: '55%',
+                              decreasedValue: '45%',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1281,21 +1291,26 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isSlider,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isSlider,
+                              ],
+                              value: '50%',
+                              increasedValue: '55%',
+                              decreasedValue: '45%',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1345,19 +1360,24 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                          value: '50%',
-                          increasedValue: '60%',
-                          decreasedValue: '40%',
-                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                              actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                              value: '50%',
+                              increasedValue: '60%',
+                              decreasedValue: '40%',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1396,18 +1416,23 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isSlider],
-                          value: '50%',
-                          increasedValue: '60%',
-                          decreasedValue: '40%',
-                          textDirection: TextDirection.ltr,
+                          id: 4,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 6,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isSlider],
+                              value: '50%',
+                              increasedValue: '60%',
+                              decreasedValue: '40%',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1452,28 +1477,33 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
+                                SemanticsFlag.isFocusable,
+                                SemanticsFlag.isSlider,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.increase,
+                                SemanticsAction.decrease,
+                                SemanticsAction.didGainAccessibilityFocus,
+                              ],
+                              value: '50%',
+                              increasedValue: '55%',
+                              decreasedValue: '45%',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.increase,
-                            SemanticsAction.decrease,
-                            SemanticsAction.didGainAccessibilityFocus,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1512,26 +1542,31 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            // isFocusable is delayed by 1 frame.
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasEnabledState,
+                                // isFocusable is delayed by 1 frame.
+                                SemanticsFlag.isFocusable,
+                                SemanticsFlag.isSlider,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.didGainAccessibilityFocus,
+                              ],
+                              value: '50%',
+                              increasedValue: '55%',
+                              decreasedValue: '45%',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.didGainAccessibilityFocus,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1558,24 +1593,29 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isSlider,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isSlider,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.didGainAccessibilityFocus,
+                              ],
+                              value: '50%',
+                              increasedValue: '55%',
+                              decreasedValue: '45%',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.didGainAccessibilityFocus,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1622,19 +1662,24 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                          value: '40',
-                          increasedValue: '60',
-                          decreasedValue: '20',
-                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                              actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                              value: '40',
+                              increasedValue: '60',
+                              decreasedValue: '20',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -1682,19 +1727,24 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                          value: '40',
-                          increasedValue: '60',
-                          decreasedValue: '20',
-                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                              actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                              value: '40',
+                              increasedValue: '60',
+                              decreasedValue: '20',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ]
+                    )
                   ],
                 ),
               ],
@@ -2520,28 +2570,33 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasEnabledState,
-                          SemanticsFlag.isEnabled,
-                          SemanticsFlag.isFocusable,
-                          SemanticsFlag.isSlider,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 5,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.isSlider,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.increase,
+                              SemanticsAction.decrease,
+                              SemanticsAction.didGainAccessibilityFocus,
+                            ],
+                            value: '50%',
+                            increasedValue: '55%',
+                            decreasedValue: '45%',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.increase,
-                          SemanticsAction.decrease,
-                          SemanticsAction.didGainAccessibilityFocus,
-                        ],
-                        value: '50%',
-                        increasedValue: '55%',
-                        decreasedValue: '45%',
-                        textDirection: TextDirection.ltr,
                       ),
-                    ],
-                  ),
+                    ]
+                  )
                 ],
               ),
             ],
@@ -2553,7 +2608,7 @@ void main() {
     ));
 
     expect(focusNode.hasFocus, isFalse);
-    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    semanticsOwner.performAction(5, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
     semantics.dispose();

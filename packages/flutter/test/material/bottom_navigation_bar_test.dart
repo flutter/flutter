@@ -2736,29 +2736,34 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                           children: <TestSemantics>[
                             TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isSelected,
-                                SemanticsFlag.isFocusable,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isSelected,
+                                    SemanticsFlag.isFocusable,
+                                  ],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                  label: 'A\nTab 1 of 2',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                  label: 'B\nTab 2 of 2',
+                                  textDirection: TextDirection.ltr,
+                                ),
                               ],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
-                              label: 'A\nTab 1 of 2',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
-                              label: 'B\nTab 2 of 2',
-                              textDirection: TextDirection.ltr,
                             ),
                           ],
                         ),
-                      ],
-                    ),
+
+                      ]
+                    )
                   ],
                 ),
               ],
