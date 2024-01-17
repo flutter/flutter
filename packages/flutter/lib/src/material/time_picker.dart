@@ -1662,7 +1662,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     registerForRestoration(minuteHasError, 'minute_has_error');
   }
 
-  int? _parseHour(String? value) {
+  int? _parseHour(String? value, bool use24HourFormat) {
     if (value == null) {
       return null;
     }
@@ -1672,7 +1672,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
       return null;
     }
 
-    if (MediaQuery.alwaysUse24HourFormatOf(context)) {
+    if (use24HourFormat) {
       if (newHour >= 0 && newHour < 24) {
         return newHour;
       }
@@ -1704,8 +1704,8 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     return null;
   }
 
-  void _handleHourSavedSubmitted(String? value) {
-    final int? newHour = _parseHour(value);
+  void _handleHourSavedSubmitted(String? value, bool use24HourFormat) {
+    final int? newHour = _parseHour(value, use24HourFormat);
     if (newHour != null) {
       _selectedTime.value = TimeOfDay(hour: newHour, minute: _selectedTime.value.minute);
       _TimePickerModel.setSelectedTime(context, _selectedTime.value);
@@ -1713,8 +1713,8 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     }
   }
 
-  void _handleHourChanged(String value) {
-    final int? newHour = _parseHour(value);
+  void _handleHourChanged(String value, bool use24HourFormat) {
+    final int? newHour = _parseHour(value, use24HourFormat);
     if (newHour != null && value.length == 2) {
       // If a valid hour is typed, move focus to the minute TextField.
       FocusScope.of(context).nextFocus();
@@ -1735,8 +1735,8 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     _TimePickerModel.setSelectedTime(context, _selectedTime.value);
   }
 
-  String? _validateHour(String? value) {
-    final int? newHour = _parseHour(value);
+  String? _validateHour(String? value, bool use24HourFormat) {
+    final int? newHour = _parseHour(value, use24HourFormat);
     setState(() {
       hourHasError.value = newHour == null;
     });
@@ -1805,9 +1805,9 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                               style: hourMinuteStyle,
                               autofocus: widget.autofocusHour,
                               inputAction: TextInputAction.next,
-                              validator: _validateHour,
-                              onSavedSubmitted: _handleHourSavedSubmitted,
-                              onChanged: _handleHourChanged,
+                              validator: (String? value) => _validateHour(value, use24HourDials),
+                              onSavedSubmitted: (String? value) => _handleHourSavedSubmitted(value, use24HourDials),
+                              onChanged: (String value) => _handleHourChanged(value, use24HourDials),
                               hourLabelText: widget.hourLabelText,
                             ),
                           ),
