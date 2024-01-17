@@ -656,6 +656,7 @@ class FlutterPlugin implements Plugin<Project> {
     private String getKGPVersion() {
         try {
             //TODO(gmackall): See if there is a more robust way to get this version.
+            println(project.plugins.getPlugin("kotlin-android").properties)
             return project.plugins.getPlugin("kotlin-android").properties.pluginVersion
         } catch (Exception ignored) {
             //TODO(gmackall): Log a warning
