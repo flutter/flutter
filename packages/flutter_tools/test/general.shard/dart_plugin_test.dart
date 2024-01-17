@@ -20,7 +20,7 @@ import '../src/context.dart';
 
 void main() {
   group('Dart plugin registrant', () {
-    late FileSystem fs;
+    late FileSystem fs; // test!
     late FakeFlutterProject flutterProject;
     late FakeFlutterManifest flutterManifest;
 
