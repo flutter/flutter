@@ -6,8 +6,8 @@ import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/rendering.dart';
-import 'package:web/web.dart' as web;
 
+import '../web.dart' as web;
 import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
@@ -85,7 +85,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // Converts the html right click event to flutter coordinate.
-        final Offset localOffset = Offset(event.offsetX, event.offsetY);
+        final Offset localOffset = Offset(event.offsetX.toDouble(), event.offsetY.toDouble());
         final Matrix4 transform = client.getTransformTo(null);
         final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
         client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
@@ -115,7 +115,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
 
       // Create css style for _kClassName.
       final web.HTMLStyleElement styleElement = web.document.createElement('style') as web.HTMLStyleElement;
-      web.document.head!.append(styleElement);
+      web.document.head!.append(styleElement as JSAny);
       final web.CSSStyleSheet sheet = styleElement.sheet!;
       sheet.insertRule(_kClassRule, 0);
       sheet.insertRule(_kClassSelectionRule, 1);

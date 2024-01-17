@@ -66,7 +66,6 @@ class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
   /// {@template flutter.widgets.AndroidView.constructorArgs}
-  /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   /// {@endtemplate}
   const AndroidView({
@@ -189,7 +188,7 @@ class AndroidView extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
@@ -420,30 +419,6 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// [onElementCreated] is called when the DOM element is created. It can be
   /// used by the app to customize the element by adding attributes and styles.
-  ///
-  /// ```dart
-  /// import 'package:flutter/widgets.dart';
-  /// import 'package:web/web.dart' as web;
-  ///
-  /// // ...
-  ///
-  /// class MyWidget extends StatelessWidget {
-  ///   const MyWidget({super.key});
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return HtmlElementView.fromTagName(
-  ///       tagName: 'div',
-  ///       onElementCreated: (Object element) {
-  ///         element as web.HTMLElement;
-  ///         element.style
-  ///             ..backgroundColor = 'blue'
-  ///             ..border = '1px solid red';
-  ///       },
-  ///     );
-  ///   }
-  /// }
-  /// ```
   factory HtmlElementView.fromTagName({
     Key? key,
     required String tagName,
@@ -665,6 +640,9 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
 
     if (widget.viewType != oldWidget.viewType) {
       _controller?.dispose();
+      _controller = null;
+      focusNode?.dispose();
+      focusNode = null;
       _createNewUiKitView();
       return;
     }
@@ -936,8 +914,6 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 class PlatformViewLink extends StatefulWidget {
   /// Construct a [PlatformViewLink] widget.
   ///
-  /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
-  ///
   /// See also:
   ///
   ///  * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
@@ -1079,8 +1055,6 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a [PlatformViewSurface].
-  ///
-  /// The [controller] must not be null.
   const PlatformViewSurface({
     super.key,
     required this.controller,
@@ -1303,7 +1277,7 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
     // A call to `localToGlobal` requires waiting for a frame to render first.
     SchedulerBinding.instance.addPostFrameCallback((_) {
       onLayout(size, localToGlobal(Offset.zero));
-    });
+    }, debugLabel: 'PlatformViewPlaceholderBox.onLayout');
   }
 }
 
@@ -1335,6 +1309,6 @@ extension on PlatformViewController {
   void disposePostFrame() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       dispose();
-    });
+    }, debugLabel: 'PlatformViewController.dispose');
   }
 }

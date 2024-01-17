@@ -52,7 +52,6 @@
   "reorderItemRight": "Déplacer vers la droite",
   "expandedIconTapHint": "Réduire",
   "collapsedIconTapHint": "Développer",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 caractère restant",
   "remainingTextFieldCharacterCountOther": "$remainingCount caractères restants",
   "refreshIndicatorSemanticLabel": "Actualiser",
@@ -144,7 +143,7 @@
   "expandedHint": "Réduit",
   "collapsedHint": "Développé",
   "menuDismissLabel": "Fermer le menu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Recherche visuelle",
+  "searchWebButtonLabel": "Rechercher sur le Web",
+  "shareButtonLabel": "Partager…"
 }

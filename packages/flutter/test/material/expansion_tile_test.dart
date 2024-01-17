@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -49,7 +48,7 @@ void main() {
   const Color unselectedWidgetColor = Colors.black54;
   const Color headerColor = Colors.black45;
 
-  testWidgetsWithLeakTracking('ExpansionTile initial state', (WidgetTester tester) async {
+  testWidgets('ExpansionTile initial state', (WidgetTester tester) async {
     final Key topKey = UniqueKey();
     const Key expandedKey = PageStorageKey<String>('expanded');
     const Key collapsedKey = PageStorageKey<String>('collapsed');
@@ -159,7 +158,7 @@ void main() {
     expect((collapsedContainerDecoration.shape as Border).bottom.color, dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('ExpansionTile Theme dependencies', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
     final Key collapsedTitleKey = UniqueKey();
     final Key expandedIconKey = UniqueKey();
@@ -218,7 +217,7 @@ void main() {
     expect(iconColor(collapsedIconKey), foregroundColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('ExpansionTile subtitle', (WidgetTester tester) async {
+  testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -234,7 +233,7 @@ void main() {
     expect(find.text('Subtitle'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile maintainState', (WidgetTester tester) async {
+  testWidgets('ExpansionTile maintainState', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -272,7 +271,7 @@ void main() {
      expect(find.text('Discarding State'), findsNothing);
    });
 
-  testWidgetsWithLeakTracking('ExpansionTile padding test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile padding test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -299,7 +298,7 @@ void main() {
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile expandedAlignment test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile expandedAlignment test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -328,7 +327,7 @@ void main() {
     expect(columnRect.right, 100.0);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
@@ -372,7 +371,7 @@ void main() {
     expect(child1Rect.left, 700.0);
   });
 
-  testWidgetsWithLeakTracking('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
+  testWidgets('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
     expect(
       () {
         MaterialApp(
@@ -392,7 +391,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
+  testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
     const Key child1Key = Key('child1');
 
     await tester.pumpWidget(const MaterialApp(
@@ -427,7 +426,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('childrenPadding default value', (WidgetTester tester) async {
+  testWidgets('childrenPadding default value', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -457,7 +456,7 @@ void main() {
     expect(columnRect.bottom, paddingRect.bottom);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile childrenPadding test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile childrenPadding test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -488,7 +487,7 @@ void main() {
     expect(columnRect.bottom, paddingRect.bottom - 4);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
+  testWidgets('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
     const Color backgroundColor = Colors.red;
     const Color collapsedBackgroundColor = Colors.brown;
@@ -525,7 +524,7 @@ void main() {
     expect(shapeDecoration.color, backgroundColor);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+  testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(MaterialApp(
@@ -554,7 +553,7 @@ void main() {
     expect(getTextColor(), theme.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
+  testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78281
 
     const Color iconColor = Color(0xff00ff00);
@@ -591,7 +590,7 @@ void main() {
     expect(getTextColor(), textColor);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile Border', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Border', (WidgetTester tester) async {
     const Key expansionTileKey = PageStorageKey<String>('expansionTile');
 
     const Border collapsedShape = Border(
@@ -639,7 +638,7 @@ void main() {
     expect(expandedContainerDecoration.shape, shape);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -653,7 +652,7 @@ void main() {
     expect(listTile.trailing.runtimeType, RotationTransition);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile trailing controlAffinity test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile trailing controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -668,7 +667,7 @@ void main() {
     expect(listTile.trailing.runtimeType, RotationTransition);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile leading controlAffinity test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile leading controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -683,7 +682,7 @@ void main() {
     expect(listTile.trailing, isNull);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile override rotating icon test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile override rotating icon test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -699,7 +698,7 @@ void main() {
     expect(listTile.trailing, isNull);
   });
 
-  testWidgetsWithLeakTracking('Nested ListTile Semantics', (WidgetTester tester) async {
+  testWidgets('Nested ListTile Semantics', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final SemanticsHandle handle = tester.ensureSemantics();
 
@@ -754,7 +753,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile Semantics announcement', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Semantics announcement', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(
@@ -793,7 +792,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Semantics with the onTapHint is an ancestor of ListTile', (WidgetTester tester) async {
+  testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/121624
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
@@ -845,7 +844,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Semantics hint for iOS and macOS', (WidgetTester tester) async {
+  testWidgets('Semantics hint for iOS and macOS', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
 
@@ -893,7 +892,7 @@ void main() {
     handle.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Collapsed ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
+  testWidgets('Collapsed ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
     ShapeBorder collapsedShape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(4)),
@@ -968,7 +967,7 @@ void main() {
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff000000));
   });
 
-  testWidgetsWithLeakTracking('Expanded ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
+  testWidgets('Expanded ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
     ShapeBorder shape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -1049,12 +1048,113 @@ void main() {
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
   });
 
+  testWidgets('Override ExpansionTile animation using AnimationStyle', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+
+    Widget buildExpansionTile({ AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              key: expansionTileKey,
+              expansionAnimationStyle: animationStyle,
+              title: const TestText('title'),
+              children: const <Widget>[
+                SizedBox(height: 100, width: 100),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildExpansionTile());
+
+    double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
+
+    // Test initial ExpansionTile height.
+    expect(getHeight(expansionTileKey), 58.0);
+
+    // Test the default expansion animation.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Override the animation duration.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(duration: const Duration(milliseconds: 800))));
+    await tester.pumpAndSettle();
+
+    // Test the overridden animation duration.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Override the animation curve.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(curve: Easing.emphasizedDecelerate)));
+    await tester.pumpAndSettle();
+
+    // Test the overridden animation curve.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(141.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(153, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+
+    // Test no animation.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle.noAnimation));
+
+    // Tap to expand the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+
+    expect(getHeight(expansionTileKey), 158.0);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+    testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
 
       await tester.pumpWidget(MaterialApp(
@@ -1084,7 +1184,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('ExpansionTileController isExpanded, expand() and collapse()', (WidgetTester tester) async {
+  testWidgets('ExpansionTileController isExpanded, expand() and collapse()', (WidgetTester tester) async {
     final ExpansionTileController controller = ExpansionTileController();
 
     await tester.pumpWidget(MaterialApp(
@@ -1112,7 +1212,7 @@ void main() {
     expect(find.text('Child 0'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Calling ExpansionTileController.expand/collapsed has no effect if it is already expanded/collapsed', (WidgetTester tester) async {
+  testWidgets('Calling ExpansionTileController.expand/collapsed has no effect if it is already expanded/collapsed', (WidgetTester tester) async {
     final ExpansionTileController controller = ExpansionTileController();
 
     await tester.pumpWidget(MaterialApp(
@@ -1148,7 +1248,7 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Call to ExpansionTileController.of()', (WidgetTester tester) async {
+  testWidgets('Call to ExpansionTileController.of()', (WidgetTester tester) async {
     final GlobalKey titleKey = GlobalKey();
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(MaterialApp(
@@ -1172,7 +1272,7 @@ void main() {
     expect(controller1, controller2);
   });
 
-  testWidgetsWithLeakTracking('Call to ExpansionTile.maybeOf()', (WidgetTester tester) async {
+  testWidgets('Call to ExpansionTile.maybeOf()', (WidgetTester tester) async {
     final GlobalKey titleKey = GlobalKey();
     final GlobalKey nonDescendantKey = GlobalKey();
     await tester.pumpWidget(MaterialApp(
@@ -1197,5 +1297,71 @@ void main() {
 
     final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
     expect(controller2, isNull);
+  });
+
+  testWidgets('Check if dense, enableFeedback, visualDensity parameter is working', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey nonDescendantKey = GlobalKey();
+
+    const bool dense = true;
+    const bool enableFeedback = false;
+    const VisualDensity visualDensity = VisualDensity.compact;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              dense: dense,
+              enableFeedback: enableFeedback,
+              visualDensity: visualDensity,
+              title: Text('Title', key: titleKey),
+              children: const <Widget>[
+                Text('Child 0'),
+              ],
+            ),
+            Text('Non descendant', key: nonDescendantKey),
+          ],
+        ),
+      ),
+    ));
+
+    final Finder tileFinder = find.byType(ListTile);
+    final ListTile tileWidget = tester.widget<ListTile>(tileFinder);
+    expect(tileWidget.dense, dense);
+    expect(tileWidget.enableFeedback, enableFeedback);
+    expect(tileWidget.visualDensity, visualDensity);
+  });
+
+  testWidgets('ExpansionTileController should not toggle if disabled', (WidgetTester tester) async {
+    final ExpansionTileController controller = ExpansionTileController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          controller: controller,
+          title: const Text('Title'),
+          children: const <Widget>[
+            Text('Child 0'),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Title'));
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    controller.expand();
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Title'));
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
   });
 }

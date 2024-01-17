@@ -46,7 +46,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
-      addPostFrameCallback(_handleWebFirstFrame);
+      addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
     }
     rootPipelineOwner.attach(_manifold);
   }
@@ -347,12 +347,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// using `flutter run`.
   @protected
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    final FlutterView view = renderView.flutterView;
-    final double devicePixelRatio = view.devicePixelRatio;
-    return ViewConfiguration(
-      size: view.physicalSize / devicePixelRatio,
-      devicePixelRatio: devicePixelRatio,
-    );
+    return ViewConfiguration.fromView(renderView.flutterView);
   }
 
   /// Called when the system metrics change.
@@ -385,7 +380,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// changes.
   ///
   /// {@tool snippet}
-  /// Querying [MediaQuery] directly. Preferred.
+  /// Querying [MediaQuery.platformBrightnessOf] directly. Preferred.
   ///
   /// ```dart
   /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
@@ -397,15 +392,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// ```dart
   /// final Brightness brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-  /// ```
-  /// {@end-tool}
-  ///
-  /// {@tool snippet}
-  /// Querying [MediaQueryData].
-  ///
-  /// ```dart
-  /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
-  /// final Brightness brightness = mediaQueryData.platformBrightness;
   /// ```
   /// {@end-tool}
   ///
@@ -472,7 +458,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         return true;
       }());
       _mouseTracker!.updateAllDevices();
-    });
+    }, debugLabel: 'RendererBinding.mouseTrackerUpdate');
   }
 
   int _firstFrameDeferredCount = 0;
@@ -768,6 +754,9 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
 /// A [PipelineManifold] implementation that is backed by the [RendererBinding].
 class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifold {
   _BindingPipelineManifold(this._binding) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _binding.addSemanticsEnabledListener(notifyListeners);
   }
 

@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Пребарувајте",
   "noSpellCheckReplacementsLabel": "Не се најдени заменски зборови",
   "menuDismissLabel": "Отфрлете го менито",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Погледнете нагоре",
+  "searchWebButtonLabel": "Пребарајте на интернет",
+  "shareButtonLabel": "Споделете...",
+  "clearButtonLabel": "Clear"
 }

@@ -184,8 +184,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
        RenderSliverHelpers, RenderSliverWithKeepAliveMixin {
 
   /// Creates a sliver with multiple box children.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverMultiBoxAdaptor({
     required RenderSliverBoxChildManager childManager,
   }) : _childManager = childManager {

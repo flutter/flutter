@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   setUp(() {
@@ -80,11 +79,12 @@ void main() {
     controller.dispose();
   });
 
-  testWidgetsWithLeakTracking('AnimationController with throwing listener', (WidgetTester tester) async {
+  testWidgets('AnimationController with throwing listener', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
+    addTearDown(controller.dispose);
     final List<String> log = <String>[];
 
     void listener1() { log.add('listener1'); }
@@ -103,7 +103,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('AnimationController with throwing status listener', (WidgetTester tester) async {
+  testWidgets('AnimationController with throwing status listener', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),

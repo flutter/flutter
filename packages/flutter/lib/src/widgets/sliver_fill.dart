@@ -45,14 +45,14 @@ class SliverFillViewport extends StatelessWidget {
   /// Whether to add padding to both ends of the list.
   ///
   /// If this is set to true and [viewportFraction] < 1.0, padding will be added
-  /// such that the first and last child slivers will be in the center of
-  /// the viewport when scrolled all the way to the start or end, respectively.
-  /// You may want to set this to false if this [SliverFillViewport] is not the only
+  /// such that the first and last child slivers will be in the center of the
+  /// viewport when scrolled all the way to the start or end, respectively. You
+  /// may want to set this to false if this [SliverFillViewport] is not the only
   /// widget along this main axis, such as in a [CustomScrollView] with multiple
   /// children.
   ///
-  /// This option cannot be null. If [viewportFraction] >= 1.0, this option has no
-  /// effect. Defaults to true.
+  /// If [viewportFraction] is greater than one, this option has no effect.
+  /// Defaults to true.
   final bool padEnds;
 
   /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
@@ -282,10 +282,9 @@ class SliverFillRemaining extends StatelessWidget {
 
   /// Indicates whether the child should stretch to fill the overscroll area
   /// created by certain scroll physics, such as iOS' default scroll physics.
-  /// This value cannot be null. This flag is only relevant when the
-  /// [hasScrollBody] value is false.
+  /// This flag is only relevant when [hasScrollBody] is false.
   ///
-  /// Defaults to false, meaning the default behavior is for the child to
+  /// Defaults to false, meaning that the default behavior is for the child to
   /// maintain its size and not extend into the overscroll area.
   final bool fillOverscroll;
 

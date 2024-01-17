@@ -16,6 +16,71 @@ import 'viewport_offset.dart';
 // CORE TYPES FOR SLIVERS
 // The RenderSliver base class and its helper types.
 
+/// Called to get the item extent by the index of item.
+///
+/// Used by [ListView.itemExtentBuilder] and [SliverVariedExtentList.itemExtentBuilder].
+typedef ItemExtentBuilder = double Function(int index, SliverLayoutDimensions dimensions);
+
+/// Relates the dimensions of the [RenderSliver] during layout.
+///
+/// Used by [ListView.itemExtentBuilder] and [SliverVariedExtentList.itemExtentBuilder].
+@immutable
+class SliverLayoutDimensions {
+  /// Constructs a [SliverLayoutDimensions] with the specified parameters.
+  const SliverLayoutDimensions({
+    required this.scrollOffset,
+    required this.precedingScrollExtent,
+    required this.viewportMainAxisExtent,
+    required this.crossAxisExtent
+  });
+
+  /// {@macro flutter.rendering.SliverConstraints.scrollOffset}
+  final double scrollOffset;
+
+  /// {@macro flutter.rendering.SliverConstraints.precedingScrollExtent}
+  final double precedingScrollExtent;
+
+  /// The number of pixels the viewport can display in the main axis.
+  ///
+  /// For a vertical list, this is the height of the viewport.
+  final double viewportMainAxisExtent;
+
+  /// The number of pixels in the cross-axis.
+  ///
+  /// For a vertical list, this is the width of the sliver.
+  final double crossAxisExtent;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! SliverLayoutDimensions) {
+      return false;
+    }
+    return other.scrollOffset == scrollOffset &&
+      other.precedingScrollExtent == precedingScrollExtent &&
+      other.viewportMainAxisExtent == viewportMainAxisExtent &&
+      other.crossAxisExtent == crossAxisExtent;
+  }
+
+  @override
+  String toString() {
+    return 'scrollOffset: $scrollOffset'
+      ' precedingScrollExtent: $precedingScrollExtent'
+      ' viewportMainAxisExtent: $viewportMainAxisExtent'
+      ' crossAxisExtent: $crossAxisExtent';
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    scrollOffset,
+    precedingScrollExtent,
+    viewportMainAxisExtent,
+    viewportMainAxisExtent
+  );
+}
+
 /// The direction in which a sliver's contents are ordered, relative to the
 /// scroll offset axis.
 ///
@@ -118,8 +183,6 @@ ScrollDirection applyGrowthDirectionToScrollDirection(ScrollDirection scrollDire
 /// offset.
 class SliverConstraints extends Constraints {
   /// Creates sliver constraints with the given information.
-  ///
-  /// All of the argument must not be null.
   const SliverConstraints({
     required this.axisDirection,
     required this.growthDirection,
@@ -224,12 +287,13 @@ class SliverConstraints extends Constraints {
   /// {@macro flutter.rendering.ScrollDirection.sample}
   final ScrollDirection userScrollDirection;
 
+  /// {@template flutter.rendering.SliverConstraints.scrollOffset}
   /// The scroll offset, in this sliver's coordinate system, that corresponds to
   /// the earliest visible part of this sliver in the [AxisDirection] if
-  /// [growthDirection] is [GrowthDirection.forward] or in the opposite
-  /// [AxisDirection] direction if [growthDirection] is [GrowthDirection.reverse].
+  /// [SliverConstraints.growthDirection] is [GrowthDirection.forward] or in the opposite
+  /// [AxisDirection] direction if [SliverConstraints.growthDirection] is [GrowthDirection.reverse].
   ///
-  /// For example, if [AxisDirection] is [AxisDirection.down] and [growthDirection]
+  /// For example, if [AxisDirection] is [AxisDirection.down] and [SliverConstraints.growthDirection]
   /// is [GrowthDirection.forward], then scroll offset is the amount the top of
   /// the sliver has been scrolled past the top of the viewport.
   ///
@@ -240,7 +304,7 @@ class SliverConstraints extends Constraints {
   ///
   /// For slivers whose top is not past the top of the viewport, the
   /// [scrollOffset] is `0` when [AxisDirection] is [AxisDirection.down] and
-  /// [growthDirection] is [GrowthDirection.forward]. The set of slivers with
+  /// [SliverConstraints.growthDirection] is [GrowthDirection.forward]. The set of slivers with
   /// [scrollOffset] `0` includes all the slivers that are below the bottom of the
   /// viewport.
   ///
@@ -249,9 +313,11 @@ class SliverConstraints extends Constraints {
   /// partially 'protrude in' from the bottom of the viewport.
   ///
   /// Whether this corresponds to the beginning or the end of the sliver's
-  /// contents depends on the [growthDirection].
+  /// contents depends on the [SliverConstraints.growthDirection].
+  /// {@endtemplate}
   final double scrollOffset;
 
+  /// {@template flutter.rendering.SliverConstraints.precedingScrollExtent}
   /// The scroll distance that has been consumed by all [RenderSliver]s that
   /// came before this [RenderSliver].
   ///
@@ -273,6 +339,7 @@ class SliverConstraints extends Constraints {
   /// content forever without reaching the end. For any [RenderSliver]s that
   /// appear after the infinite [RenderSliver], the [precedingScrollExtent] will
   /// be [double.infinity].
+  /// {@endtemplate}
   final double precedingScrollExtent;
 
   /// The number of pixels from where the pixels corresponding to the
@@ -551,8 +618,6 @@ class SliverGeometry with Diagnosticable {
   /// [paintExtent]. If the [hitTestExtent] argument is null, [hitTestExtent]
   /// defaults to the [paintExtent]. If [visible] is null, [visible] defaults to
   /// whether [paintExtent] is greater than zero.
-  ///
-  /// The other arguments must not be null.
   const SliverGeometry({
     this.scrollExtent = 0.0,
     this.paintExtent = 0.0,
@@ -928,8 +993,6 @@ class SliverHitTestResult extends HitTestResult {
 /// [AxisDirection] of the target sliver.
 class SliverHitTestEntry extends HitTestEntry<RenderSliver> {
   /// Creates a sliver hit test entry.
-  ///
-  /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
   SliverHitTestEntry(
     super.target, {
     required this.mainAxisPosition,

@@ -36,7 +36,8 @@ const String _kFlutterFirstRunMessage = '''
   ║ See Google's privacy policy:                                               ║
   ║ https://policies.google.com/privacy                                        ║
   ║                                                                            ║
-  ║ To disable animations in this tool, use 'flutter config --no-animations'.  ║
+  ║ To disable animations in this tool, use                                    ║
+  ║ 'flutter config --no-cli-animations'.                                      ║
   ╚════════════════════════════════════════════════════════════════════════════╝
 ''';
 

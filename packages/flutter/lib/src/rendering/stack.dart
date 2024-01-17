@@ -18,13 +18,9 @@ import 'object.dart';
 /// container, this class has no width and height members. To determine the
 /// width or height of the rectangle, convert it to a [Rect] using [toRect()]
 /// (passing the container's own Rect), and then examine that object.
-///
-/// The fields [left], [right], [bottom], and [top] must not be null.
 @immutable
 class RelativeRect {
   /// Creates a RelativeRect with the given values.
-  ///
-  /// The arguments must not be null.
   const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
@@ -551,7 +547,8 @@ class RenderStack extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,

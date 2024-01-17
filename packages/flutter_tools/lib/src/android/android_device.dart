@@ -373,6 +373,9 @@ class AndroidDevice extends Device {
   String get name => modelID;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
     String? userIdentifier,
@@ -608,7 +611,7 @@ class AndroidDevice extends Device {
     if (debuggingOptions.debuggingEnabled) {
       vmServiceDiscovery = ProtocolDiscovery.vmService(
         // Avoid using getLogReader, which returns a singleton instance, because the
-        // VM Service discovery will dipose at the end. creating a new logger here allows
+        // VM Service discovery will dispose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,
@@ -625,6 +628,7 @@ class AndroidDevice extends Device {
     final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final String? traceAllowlist = debuggingOptions.traceAllowlist;
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
+    final String? traceToFile = debuggingOptions.traceToFile;
     final List<String> cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
@@ -648,6 +652,8 @@ class AndroidDevice extends Device {
         ...<String>['--es', 'trace-skia-allowlist', traceSkiaAllowlist],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
+      if (traceToFile != null)
+        ...<String>['--es', 'trace-to-file', traceToFile],
       if (debuggingOptions.endlessTraceBuffer)
         ...<String>['--ez', 'endless-trace-buffer', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
@@ -662,8 +668,6 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'enable-impeller', 'false'],
       if (debuggingOptions.enableVulkanValidation)
         ...<String>['--ez', 'enable-vulkan-validation', 'true'],
-      if (debuggingOptions.impellerForceGL)
-        ...<String>['--ez', 'impeller-force-gl', 'true'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],

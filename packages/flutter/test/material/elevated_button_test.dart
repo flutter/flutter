@@ -7,11 +7,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('ElevatedButton, ElevatedButton.icon defaults', (WidgetTester tester) async {
+  testWidgets('ElevatedButton, ElevatedButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
     final bool material3 = theme.useMaterial3;
@@ -160,7 +159,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgetsWithLeakTracking('Default ElevatedButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('Default ElevatedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -200,7 +199,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgetsWithLeakTracking('ElevatedButton default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {
+  testWidgets('ElevatedButton default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final ThemeData theme = ThemeData(useMaterial3: true);
 
@@ -263,7 +262,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton uses stateful color for text color in different states', (WidgetTester tester) async {
+  testWidgets('ElevatedButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -341,7 +340,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('ElevatedButton uses stateful color for icon color in different states', (WidgetTester tester) async {
+  testWidgets('ElevatedButton uses stateful color for icon color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final Key buttonKey = UniqueKey();
 
@@ -418,7 +417,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+  testWidgets('ElevatedButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
     bool wasPressed;
     Finder elevatedButton;
 
@@ -461,7 +460,7 @@ void main() {
     expect(tester.widget<ElevatedButton>(elevatedButton).enabled, false);
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+  testWidgets('ElevatedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
@@ -492,7 +491,7 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
-  testWidgetsWithLeakTracking("ElevatedButton response doesn't hover when disabled", (WidgetTester tester) async {
+  testWidgets("ElevatedButton response doesn't hover when disabled", (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'ElevatedButton Focus');
     final GlobalKey childKey = GlobalKey();
@@ -544,7 +543,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('disabled and hovered ElevatedButton responds to mouse-exit', (WidgetTester tester) async {
+  testWidgets('disabled and hovered ElevatedButton responds to mouse-exit', (WidgetTester tester) async {
     int onHoverCount = 0;
     late bool hover;
 
@@ -606,7 +605,7 @@ void main() {
     expect(hover, false);
   });
 
-  testWidgetsWithLeakTracking('Can set ElevatedButton focus and Can set unFocus.', (WidgetTester tester) async {
+  testWidgets('Can set ElevatedButton focus and Can set unFocus.', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'ElevatedButton Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -637,7 +636,7 @@ void main() {
     node.dispose();
   });
 
-  testWidgetsWithLeakTracking('When ElevatedButton disable, Can not set ElevatedButton focus.', (WidgetTester tester) async {
+  testWidgets('When ElevatedButton disable, Can not set ElevatedButton focus.', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'ElevatedButton Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -663,7 +662,7 @@ void main() {
     node.dispose();
   });
 
-  testWidgetsWithLeakTracking('Does ElevatedButton work with hover', (WidgetTester tester) async {
+  testWidgets('Does ElevatedButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 
     await tester.pumpWidget(
@@ -690,7 +689,7 @@ void main() {
     expect(inkFeatures, paints..rect(color: hoverColor));
   });
 
-  testWidgetsWithLeakTracking('Does ElevatedButton work with focus', (WidgetTester tester) async {
+  testWidgets('Does ElevatedButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'ElevatedButton Node');
@@ -720,7 +719,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('Does ElevatedButton work with autofocus', (WidgetTester tester) async {
+  testWidgets('Does ElevatedButton work with autofocus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
@@ -752,7 +751,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('Does ElevatedButton contribute semantics', (WidgetTester tester) async {
+  testWidgets('Does ElevatedButton contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Theme(
@@ -800,7 +799,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('ElevatedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     const ButtonStyle style = ButtonStyle(
       // Specifying minimumSize to mimic the original minimumSize for
       // RaisedButton so that the corresponding button size matches
@@ -834,7 +833,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton has no clip by default', (WidgetTester tester) async {
+  testWidgets('ElevatedButton has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -851,7 +850,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton responds to density changes.', (WidgetTester tester) async {
+  testWidgets('ElevatedButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     const Key childKey = Key('test child');
 
@@ -920,7 +919,7 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton.icon responds to applied padding', (WidgetTester tester) async {
+  testWidgets('ElevatedButton.icon responds to applied padding', (WidgetTester tester) async {
     const Key buttonKey = Key('test');
     const Key labelKey = Key('label');
     await tester.pumpWidget(
@@ -1047,7 +1046,7 @@ void main() {
             if (textDirection == TextDirection.rtl)
               'RTL',
           ].join(', ');
-          testWidgetsWithLeakTracking(testName, (WidgetTester tester) async {
+          testWidgets(testName, (WidgetTester tester) async {
             await tester.pumpWidget(
               MaterialApp(
                 theme: ThemeData(
@@ -1189,7 +1188,38 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Override ElevatedButton default padding', (WidgetTester tester) async {
+  testWidgets('Override theme fontSize changes padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(
+          colorScheme: const ColorScheme.light(),
+          textTheme: const TextTheme(labelLarge: TextStyle(fontSize: 28.0)),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('text'),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byType(ElevatedButton),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 12));
+  });
+
+  testWidgets('Override ElevatedButton default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -1223,7 +1253,7 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
-  testWidgetsWithLeakTracking('M3 ElevatedButton has correct padding', (WidgetTester tester) async {
+  testWidgets('M3 ElevatedButton has correct padding', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1249,7 +1279,7 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 24));
   });
 
-  testWidgetsWithLeakTracking('M3 ElevatedButton.icon has correct padding', (WidgetTester tester) async {
+  testWidgets('M3 ElevatedButton.icon has correct padding', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1276,7 +1306,7 @@ void main() {
    expect(paddingWidget.padding, const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 24.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking('Elevated buttons animate elevation before color on disable', (WidgetTester tester) async {
+  testWidgets('Elevated buttons animate elevation before color on disable', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/387
 
     const ColorScheme colorScheme = ColorScheme.light();
@@ -1323,7 +1353,7 @@ void main() {
     expect(physicalShape().color, disabledBackgroundColor);
   });
 
-  testWidgetsWithLeakTracking('By default, ElevatedButton shape outline is defined by shape.side', (WidgetTester tester) async {
+  testWidgets('By default, ElevatedButton shape outline is defined by shape.side', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/69544
 
     const Color borderColor = Color(0xff4caf50);
@@ -1354,7 +1384,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Fixed size ElevatedButtons', (WidgetTester tester) async {
+  testWidgets('Fixed size ElevatedButtons', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1387,7 +1417,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(ElevatedButton, 'wx200')).height, 200);
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+  testWidgets('ElevatedButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
     Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
         home: Scaffold(
@@ -1427,7 +1457,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton uses InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
+  testWidgets('ElevatedButton uses InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -1454,7 +1484,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('ElevatedButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
+  testWidgets('ElevatedButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
 
     await tester.pumpWidget(
@@ -1476,7 +1506,7 @@ void main() {
     expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('ElevatedButton.icon does not overflow', (WidgetTester tester) async {
+  testWidgets('ElevatedButton.icon does not overflow', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/77815
     await tester.pumpWidget(
       MaterialApp(
@@ -1497,7 +1527,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton.icon icon,label layout', (WidgetTester tester) async {
+  testWidgets('ElevatedButton.icon icon,label layout', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
     final Key labelKey = UniqueKey();
@@ -1534,7 +1564,7 @@ void main() {
     expect(tester.getRect(find.byKey(labelKey)), const Rect.fromLTRB(104.0, 0.0, 154.0, 100.0));
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton maximumSize', (WidgetTester tester) async {
+  testWidgets('ElevatedButton maximumSize', (WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
 
@@ -1548,7 +1578,7 @@ void main() {
               children: <Widget>[
                 ElevatedButton(
                   key: key0,
-                  style: TextButton.styleFrom(
+                  style: ElevatedButton.styleFrom(
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(64),
                   ),
@@ -1557,7 +1587,7 @@ void main() {
                 ),
                 ElevatedButton.icon(
                   key: key1,
-                  style: TextButton.styleFrom(
+                  style: ElevatedButton.styleFrom(
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(104),
                   ),
@@ -1576,7 +1606,7 @@ void main() {
     expect(tester.getSize(find.byKey(key1)), const Size(104.0, 224.0));
   });
 
-  testWidgetsWithLeakTracking('Fixed size ElevatedButton, same as minimumSize == maximumSize', (WidgetTester tester) async {
+  testWidgets('Fixed size ElevatedButton, same as minimumSize == maximumSize', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1606,7 +1636,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(ElevatedButton, '200,200')), const Size(200, 200));
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('ElevatedButton changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1684,7 +1714,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('ElevatedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -1707,7 +1737,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgetsWithLeakTracking('Ink Response shape matches Material shape', (WidgetTester tester) async {
+  testWidgets('Ink Response shape matches Material shape', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/91844
 
     Widget buildFrame({BorderSide? side}) {
@@ -1752,7 +1782,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
+  testWidgets('ElevatedButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1782,6 +1812,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(
@@ -1896,7 +1927,9 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(

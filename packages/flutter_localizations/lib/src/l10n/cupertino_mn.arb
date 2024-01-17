@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Хайх",
   "noSpellCheckReplacementsLabel": "Ямар ч орлуулалт олдсонгүй",
   "menuDismissLabel": "Цэсийг хаах",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Дээшээ харах",
+  "searchWebButtonLabel": "Вебээс хайх",
+  "shareButtonLabel": "Хуваалцах...",
+  "clearButtonLabel": "Clear"
 }

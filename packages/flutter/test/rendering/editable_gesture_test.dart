@@ -6,11 +6,16 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  setUp(() => _GestureBindingSpy());
+  final TestWidgetsFlutterBinding binding = _GestureBindingSpy();
 
-  test('attach and detach correctly handle gesture', () {
+  testWidgets('attach and detach correctly handle gesture',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (_) async {
+    expect(WidgetsBinding.instance, binding);
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,

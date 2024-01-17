@@ -132,9 +132,7 @@ enum _ContextMenuLocation {
 class CupertinoContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
-  /// [actions] is required and cannot be null or empty.
-  ///
-  /// [child] is required and cannot be null.
+  /// The [actions] parameter cannot be empty.
   CupertinoContextMenu({
     super.key,
     required this.actions,
@@ -153,9 +151,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// Use instead of the default constructor when it is needed to have a more
   /// custom animation.
   ///
-  /// [actions] is required and cannot be null or empty.
-  ///
-  /// [builder] is required.
+  /// The [actions] parameter cannot be empty.
   CupertinoContextMenu.builder({
     super.key,
     required this.actions,
@@ -389,7 +385,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// These actions are typically [CupertinoContextMenuAction]s.
   ///
-  /// This parameter cannot be null or empty.
+  /// This parameter must not be empty.
   final List<Widget> actions;
 
   /// If true, clicking on the [CupertinoContextMenuAction]s will
@@ -589,7 +585,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           _lastOverlayEntry?.dispose();
           _lastOverlayEntry = null;
           _openController.reset();
-        });
+        }, debugLabel: 'removeContextMenuDecoy');
 
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
@@ -689,6 +685,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   void dispose() {
+    _tapGestureRecognizer.dispose();
     _openController.dispose();
     super.dispose();
   }
@@ -1013,7 +1010,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       _updateTweenRects();
       _internalOffstage = false;
       _setOffstageInternally();
-    });
+    }, debugLabel: 'renderContextMenuRouteOffstage');
     return super.didPush();
   }
 

@@ -87,6 +87,7 @@ void main() {
             globalGesturePosition: fakeTextFieldRect.center,
           ),
         );
+        addTearDown(magnifier.dispose);
 
         await showCupertinoMagnifier(context, tester, magnifier);
 
@@ -108,19 +109,21 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
+            currentLineBoundaries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            // The tap position is far out of the right side of the app.
+            globalGesturePosition:
+            Offset(MediaQuery.sizeOf(context).width + 100, 0),
+          ),
+        );
+        addTearDown(magnifierInfo.dispose);
         await showCupertinoMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
-            MagnifierInfo(
-              currentLineBoundaries: reasonableTextField,
-              fieldBounds: reasonableTextField,
-              caretRect: reasonableTextField,
-              // The tap position is far out of the right side of the app.
-              globalGesturePosition:
-                  Offset(MediaQuery.sizeOf(context).width + 100, 0),
-            ),
-          ),
+          magnifierInfo,
         );
 
         // Should be less than the right edge, since we have padding.
@@ -141,20 +144,23 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        final ValueNotifier<MagnifierInfo> magnifierInfo =
+            ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
+            currentLineBoundaries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            // The tap position is dragBelow units below the text field.
+            globalGesturePosition: Offset(
+                MediaQuery.sizeOf(context).width / 2,
+                dragPositionBelowTextField),
+          ),
+        );
+        addTearDown(magnifierInfo.dispose);
         await showCupertinoMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
-            MagnifierInfo(
-              currentLineBoundaries: reasonableTextField,
-              fieldBounds: reasonableTextField,
-              caretRect: reasonableTextField,
-              // The tap position is dragBelow units below the text field.
-              globalGesturePosition: Offset(
-                  MediaQuery.sizeOf(context).width / 2,
-                  dragPositionBelowTextField),
-            ),
-          ),
+          magnifierInfo,
         );
 
         // The magnifier Y should be greater than the text field, since we "dragged" it down.
@@ -177,7 +183,7 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierinfo =
+        final ValueNotifier<MagnifierInfo> magnifierInfo =
             ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
@@ -188,16 +194,17 @@ void main() {
                 MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
+        addTearDown(magnifierInfo.dispose);
 
         // Show the magnifier initially, so that we get it in a not hidden state.
-        await showCupertinoMagnifier(context, tester, magnifierinfo);
+        await showCupertinoMagnifier(context, tester, magnifierInfo);
 
         // Move the gesture to one that should hide it.
-        magnifierinfo.value = MagnifierInfo(
+        magnifierInfo.value = MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
-            globalGesturePosition: magnifierinfo.value.globalGesturePosition + const Offset(0, 100),
+            globalGesturePosition: magnifierInfo.value.globalGesturePosition + const Offset(0, 100),
         );
         await tester.pumpAndSettle();
 
@@ -227,6 +234,7 @@ void main() {
             globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
+        addTearDown(magnifierInfo.dispose);
 
         // Show the magnifier initially, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierInfo);

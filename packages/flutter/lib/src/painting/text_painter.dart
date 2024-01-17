@@ -6,13 +6,13 @@ import 'dart:math' show max, min;
 import 'dart:ui' as ui show
   BoxHeightStyle,
   BoxWidthStyle,
+  GlyphInfo,
   LineMetrics,
   Paragraph,
   ParagraphBuilder,
   ParagraphConstraints,
   ParagraphStyle,
   PlaceholderAlignment,
-  TextHeightBehavior,
   TextStyle;
 
 import 'package:flutter/foundation.dart';
@@ -25,12 +25,14 @@ import 'strut_style.dart';
 import 'text_scaler.dart';
 import 'text_span.dart';
 
+export 'dart:ui' show LineMetrics;
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
-// The default font size if none is specified. This should be kept in
-// sync with the default values in text_style.dart, as well as the
-// defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
-const double _kDefaultFontSize = 14.0;
+/// The default font size if none is specified.
+///
+/// This should be kept in sync with the defaults set in the engine (e.g.,
+/// LibTxt's text_style.h, paragraph_style.h).
+const double kDefaultFontSize = 14.0;
 
 /// How overflowing text should be handled.
 ///
@@ -55,8 +57,6 @@ enum TextOverflow {
 ///
 /// Placeholders specify an empty space in the text layout, which is used
 /// to later render arbitrary inline widgets into defined by a [WidgetSpan].
-///
-/// The [size] and [alignment] properties are required and cannot be null.
 ///
 /// See also:
 ///
@@ -276,7 +276,7 @@ class _TextLayout {
   // color of the text is changed).
   //
   // The creator of this _TextLayout is also responsible for disposing this
-  // object when it's no logner needed.
+  // object when it's no longer needed.
   ui.Paragraph _paragraph;
 
   /// Whether this layout has been invalidated and disposed.
@@ -440,6 +440,8 @@ final class _EmptyLineCaretMetrics implements _CaretMetrics {
   final double lineVerticalOffset;
 }
 
+const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
+
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -470,8 +472,6 @@ class TextPainter {
   /// The `text` and `textDirection` arguments are optional but [text] and
   /// [textDirection] must be non-null before calling [layout].
   ///
-  /// The [textAlign] property must not be null.
-  ///
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
     InlineSpan? text,
@@ -489,7 +489,7 @@ class TextPainter {
     Locale? locale,
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
+    TextHeightBehavior? textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling), 'Use textScaler instead.'),
@@ -502,7 +502,17 @@ class TextPainter {
        _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior;
+       _textHeightBehavior = textHeightBehavior {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
+        className: '$TextPainter',
+        object: this,
+      );
+    }
+  }
 
   /// Computes the width of a configured [TextPainter].
   ///
@@ -528,7 +538,7 @@ class TextPainter {
     Locale? locale,
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
+    TextHeightBehavior? textHeightBehavior,
     double minWidth = 0.0,
     double maxWidth = double.infinity,
   }) {
@@ -580,7 +590,7 @@ class TextPainter {
     Locale? locale,
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
+    TextHeightBehavior? textHeightBehavior,
     double minWidth = 0.0,
     double maxWidth = double.infinity,
   }) {
@@ -707,7 +717,7 @@ class TextPainter {
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
   ///
-  /// The [textAlign] property must not be null. It defaults to [TextAlign.start].
+  /// The [textAlign] property defaults to [TextAlign.start].
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
   set textAlign(TextAlign value) {
@@ -885,9 +895,9 @@ class TextPainter {
   }
 
   /// {@macro dart.ui.textHeightBehavior}
-  ui.TextHeightBehavior? get textHeightBehavior => _textHeightBehavior;
-  ui.TextHeightBehavior? _textHeightBehavior;
-  set textHeightBehavior(ui.TextHeightBehavior? value) {
+  TextHeightBehavior? get textHeightBehavior => _textHeightBehavior;
+  TextHeightBehavior? _textHeightBehavior;
+  set textHeightBehavior(TextHeightBehavior? value) {
     if (_textHeightBehavior == value) {
       return;
     }
@@ -963,7 +973,7 @@ class TextPainter {
       // Use the default font size to multiply by as RichText does not
       // perform inheriting [TextStyle]s and would otherwise
       // fail to apply textScaler.
-      fontSize: textScaler.scale(_kDefaultFontSize),
+      fontSize: textScaler.scale(kDefaultFontSize),
       maxLines: maxLines,
       textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,
@@ -1485,7 +1495,24 @@ class TextPainter {
       : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
   }
 
-  /// Returns the position within the text for the given pixel offset.
+  /// Returns the [GlyphInfo] of the glyph closest to the given `offset` in the
+  /// paragraph coordinate system, or null if the text is empty, or is entirely
+  /// clipped or ellipsized away.
+  ///
+  /// This method first finds the line closest to `offset.dy`, and then returns
+  /// the [GlyphInfo] of the closest glyph(s) within that line.
+   ui.GlyphInfo? getClosestGlyphForOffset(Offset offset) {
+    assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
+    final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
+    final ui.GlyphInfo? rawGlyphInfo = cachedLayout.paragraph.getClosestGlyphInfoForOffset(offset - cachedLayout.paintOffset);
+    if (rawGlyphInfo == null || cachedLayout.paintOffset == Offset.zero) {
+      return rawGlyphInfo;
+    }
+    return ui.GlyphInfo(rawGlyphInfo.graphemeClusterLayoutBounds.shift(cachedLayout.paintOffset), rawGlyphInfo.graphemeClusterCodeUnitRange, rawGlyphInfo.writingDirection);
+  }
+
+  /// Returns the closest position within the text for the given pixel offset.
   TextPosition getPositionForOffset(Offset offset) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
@@ -1602,6 +1629,11 @@ class TextPainter {
       _disposed = true;
       return true;
     }());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();

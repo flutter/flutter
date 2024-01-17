@@ -254,6 +254,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.traceSystrace) {
       addFlag('trace-systrace=true');
     }
+    if (debuggingOptions.traceToFile != null) {
+      addFlag('trace-to-file=${debuggingOptions.traceToFile}');
+    }
     if (debuggingOptions.endlessTraceBuffer) {
       addFlag('endless-trace-buffer=true');
     }

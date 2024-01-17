@@ -51,7 +51,6 @@
   "reorderItemRight": "انتقال به چپ",
   "expandedIconTapHint": "کوچک کردن",
   "collapsedIconTapHint": "بزرگ کردن",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "۱ نویسه باقی مانده است",
   "remainingTextFieldCharacterCountOther": "$remainingCount نویسه باقی مانده است",
   "refreshIndicatorSemanticLabel": "بازآوری",
@@ -143,7 +142,7 @@
   "expandedHint": "جمع‌شده",
   "collapsedHint": "ازهم بازشده",
   "menuDismissLabel": "بستن منو",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "جستجو",
+  "searchWebButtonLabel": "جستجو در وب",
+  "shareButtonLabel": "هم‌رسانی…"
 }

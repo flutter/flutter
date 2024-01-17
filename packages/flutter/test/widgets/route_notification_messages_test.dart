@@ -273,12 +273,14 @@ void main() {
         uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
     );
+    addTearDown(delegate.dispose);
 
     await tester.pumpWidget(MaterialApp.router(
       routeInformationProvider: provider,
@@ -316,7 +318,7 @@ void main() {
   });
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
@@ -340,7 +342,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.reportConfiguration = false,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 

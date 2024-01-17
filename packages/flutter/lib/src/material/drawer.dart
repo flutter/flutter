@@ -310,7 +310,7 @@ class DrawerController extends StatefulWidget {
   ///
   /// Rarely used directly.
   ///
-  /// The [child] argument must not be null and is typically a [Drawer].
+  /// The [child] argument is typically a [Drawer].
   const DrawerController({
     GlobalKey? key,
     required this.child,

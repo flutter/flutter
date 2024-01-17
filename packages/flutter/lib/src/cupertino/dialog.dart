@@ -23,7 +23,7 @@ import 'theme.dart';
 // Apple Design Resources(https://developer.apple.com/design/resources/).
 // However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
-  fontFamily: '.SF UI Display',
+  fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -33,7 +33,7 @@ const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -43,7 +43,7 @@ const TextStyle _kCupertinoDialogContentStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 16.8,
   fontWeight: FontWeight.w400,
@@ -52,15 +52,15 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
-  fontSize: 20.0,
+  fontSize: 17.0,
   fontWeight: FontWeight.w400,
   textBaseline: TextBaseline.alphabetic,
 );
 
 const TextStyle _kActionSheetContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -71,7 +71,7 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 // Generic constants shared between Dialog and ActionSheet.
 const double _kBlurAmount = 20.0;
 const double _kCornerRadius = 14.0;
-const double _kDividerThickness = 1.0;
+const double _kDividerThickness = 0.3;
 
 // Dialog specific constants.
 // iOS dialogs have a normal display width and another display width that is
@@ -87,8 +87,8 @@ const double _kDialogMinButtonFontSize = 10.0;
 const double _kActionSheetEdgeHorizontalPadding = 8.0;
 const double _kActionSheetCancelButtonPadding = 8.0;
 const double _kActionSheetEdgeVerticalPadding = 10.0;
-const double _kActionSheetContentHorizontalPadding = 40.0;
-const double _kActionSheetContentVerticalPadding = 14.0;
+const double _kActionSheetContentHorizontalPadding = 16.0;
+const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
@@ -190,8 +190,6 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatefulWidget {
   /// Creates an iOS-style alert dialog.
-  ///
-  /// The [actions] must not be null.
   const CupertinoAlertDialog({
     super.key,
     this.title,
@@ -474,7 +472,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 ///
 ///  * [CupertinoActionSheetAction], which is an iOS-style action sheet button.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
-class CupertinoActionSheet extends StatelessWidget {
+class CupertinoActionSheet extends StatefulWidget {
   /// Creates an iOS-style action sheet.
   ///
   /// An action sheet must have a non-null value for at least one of the
@@ -520,17 +518,11 @@ class CupertinoActionSheet extends StatelessWidget {
   /// short.
   final ScrollController? messageScrollController;
 
-  ScrollController get _effectiveMessageScrollController =>
-    messageScrollController ?? ScrollController();
-
   /// A scroll controller that can be used to control the scrolling of the
   /// [actions] in the action sheet.
   ///
   /// This attribute is typically not needed.
   final ScrollController? actionScrollController;
-
-  ScrollController get _effectiveActionScrollController =>
-    actionScrollController ?? ScrollController();
 
   /// The optional cancel button that is grouped separately from the other
   /// actions.
@@ -538,32 +530,54 @@ class CupertinoActionSheet extends StatelessWidget {
   /// Typically this is an [CupertinoActionSheetAction] widget.
   final Widget? cancelButton;
 
+  @override
+  State<CupertinoActionSheet> createState() => _CupertinoActionSheetState();
+}
+
+class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
+  ScrollController? _backupMessageScrollController;
+
+  ScrollController? _backupActionScrollController;
+
+  ScrollController get _effectiveMessageScrollController =>
+    widget.messageScrollController ?? (_backupMessageScrollController ??= ScrollController());
+
+  ScrollController get _effectiveActionScrollController =>
+    widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
+
+  @override
+  void dispose() {
+    _backupMessageScrollController?.dispose();
+    _backupActionScrollController?.dispose();
+    super.dispose();
+  }
+
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
-    if (title != null || message != null) {
+    if (widget.title != null || widget.message != null) {
       final Widget titleSection = _CupertinoAlertContentSection(
-        title: title,
-        message: message,
+        title: widget.title,
+        message: widget.message,
         scrollController: _effectiveMessageScrollController,
-        titlePadding: const EdgeInsets.only(
+        titlePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: _kActionSheetContentVerticalPadding,
+          bottom: widget.message == null ? _kActionSheetContentVerticalPadding : 0.0,
           top: _kActionSheetContentVerticalPadding,
         ),
         messagePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: title == null ? _kActionSheetContentVerticalPadding : 22.0,
-          top: title == null ? _kActionSheetContentVerticalPadding : 0.0,
+          bottom: _kActionSheetContentVerticalPadding,
+          top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
-        titleTextStyle: message == null
+        titleTextStyle: widget.message == null
             ? _kActionSheetContentStyle
             : _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
-        messageTextStyle: title == null
+        messageTextStyle: widget.title == null
             ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
             : _kActionSheetContentStyle,
-        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 8.0),
+        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       );
       content.add(Flexible(child: titleSection));
     }
@@ -579,26 +593,26 @@ class CupertinoActionSheet extends StatelessWidget {
   }
 
   Widget _buildActions() {
-    if (actions == null || actions!.isEmpty) {
+    if (widget.actions == null || widget.actions!.isEmpty) {
       return Container(
         height: 0.0,
       );
     }
     return _CupertinoAlertActionSection(
       scrollController: _effectiveActionScrollController,
-      hasCancelButton: cancelButton != null,
+      hasCancelButton: widget.cancelButton != null,
       isActionSheet: true,
-      children: actions!,
+      children: widget.actions!,
     );
   }
 
   Widget _buildCancelButton() {
-    final double cancelPadding = (actions != null || message != null || title != null)
+    final double cancelPadding = (widget.actions != null || widget.message != null || widget.title != null)
         ? _kActionSheetCancelButtonPadding : 0.0;
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
       child: _CupertinoActionSheetCancelButton(
-        child: cancelButton,
+        child: widget.cancelButton,
       ),
     );
   }
@@ -621,7 +635,7 @@ class CupertinoActionSheet extends StatelessWidget {
           ),
         ),
       ),
-      if (cancelButton != null) _buildCancelButton(),
+      if (widget.cancelButton != null) _buildCancelButton(),
     ];
 
     final Orientation orientation = MediaQuery.orientationOf(context);
@@ -670,8 +684,6 @@ class CupertinoActionSheet extends StatelessWidget {
 ///    more choices related to the current context.
 class CupertinoActionSheetAction extends StatelessWidget {
   /// Creates an action for an iOS-style action sheet.
-  ///
-  /// The [child] and [onPressed] arguments must not be null.
   const CupertinoActionSheetAction({
     super.key,
     required this.onPressed,
@@ -681,8 +693,6 @@ class CupertinoActionSheetAction extends StatelessWidget {
   });
 
   /// The callback that is called when the button is tapped.
-  ///
-  /// This attribute must not be null.
   final VoidCallback onPressed;
 
   /// Whether this action is the default choice in the action sheet.
@@ -809,7 +819,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoDialog(
-      dividerThickness: _kDividerThickness / MediaQuery.devicePixelRatioOf(context),
+      dividerThickness: _kDividerThickness,
       isInAccessibilityMode: _isInAccessibilityMode(context) && !isActionSheet,
       dividerColor: CupertinoDynamicColor.resolve(dividerColor, context),
       isActionSheet: isActionSheet,
@@ -1473,7 +1483,6 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < children.length; i += 1) {
@@ -1490,7 +1499,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
         controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
-          dividerThickness: _kDividerThickness / devicePixelRatio,
+          dividerThickness: _kDividerThickness,
           hasCancelButton: hasCancelButton,
           isActionSheet: isActionSheet,
         ),
@@ -1577,8 +1586,7 @@ class _ActionButtonParentDataWidget
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass =>
-      _CupertinoDialogActionsRenderWidget;
+  Type get debugTypicalAncestorWidgetClass => _CupertinoDialogActionsRenderWidget;
 }
 
 // ParentData applied to individual action buttons that report whether or not
@@ -1617,14 +1625,14 @@ class CupertinoDialogAction extends StatelessWidget {
   /// but more than one action can have this attribute set to true in the same
   /// [CupertinoAlertDialog].
   ///
-  /// This parameters defaults to false and cannot be null.
+  /// This parameters defaults to false.
   final bool isDefaultAction;
 
   /// Whether this action destroys an object.
   ///
   /// For example, an action that deletes an email is destructive.
   ///
-  /// Defaults to false and cannot be null.
+  /// Defaults to false.
   final bool isDestructiveAction;
 
   /// [TextStyle] to apply to any text that appears in this button.

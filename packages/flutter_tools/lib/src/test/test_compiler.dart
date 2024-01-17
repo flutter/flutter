@@ -16,9 +16,11 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../linux/native_assets.dart';
 import '../macos/native_assets.dart';
 import '../native_assets.dart';
 import '../project.dart';
+import '../windows/native_assets.dart';
 import 'test_time_recorder.dart';
 
 /// A request to the [TestCompiler] for recompilation.
@@ -121,6 +123,7 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       dartDefines: buildInfo.dartDefines,
       packagesPath: buildInfo.packagesPath,
+      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
@@ -167,23 +170,48 @@ class TestCompiler {
       }
 
       Uri? nativeAssetsYaml;
-      final Uri projectUri = FlutterProject.current().directory.uri;
-      final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(projectUri, globals.fs, globals.logger);
-      if (globals.platform.isMacOS) {
-        (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
-          buildMode: BuildMode.debug,
-          projectUri: projectUri,
-          flutterTester: true,
-          fileSystem: globals.fs,
-          buildRunner: buildRunner,
-      );
+      if (!buildInfo.buildNativeAssets) {
+        nativeAssetsYaml = null;
       } else {
-        await ensureNoNativeAssetsOrOsIsSupported(
+        final Uri projectUri = FlutterProject.current().directory.uri;
+        final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
           projectUri,
-          const LocalPlatform().operatingSystem,
+          buildInfo.packageConfig,
           globals.fs,
-          buildRunner,
+          globals.logger,
         );
+        if (globals.platform.isMacOS) {
+          (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
+            buildMode: buildInfo.mode,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else if (globals.platform.isLinux) {
+          (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+            buildMode: buildInfo.mode,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else if (globals.platform.isWindows) {
+          (nativeAssetsYaml, _) = await buildNativeAssetsWindows(
+            buildMode: buildInfo.mode,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else {
+          await ensureNoNativeAssetsOrOsIsSupported(
+            projectUri,
+            const LocalPlatform().operatingSystem,
+            globals.fs,
+            buildRunner,
+          );
+        }
       }
 
       final CompilerOutput? compilerOutput = await compiler!.recompile(

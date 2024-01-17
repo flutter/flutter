@@ -380,7 +380,10 @@ void main() {
 
   testWidgets("RenderPointerListener's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderPointerListener().debugFillProperties(builder);
+    final RenderPointerListener renderListener = RenderPointerListener();
+    addTearDown(renderListener.dispose);
+
+    renderListener.debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -398,7 +401,11 @@ void main() {
 
   testWidgets("RenderPointerListener's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderPointerListener(
+
+    final RenderErrorBox renderErrorBox = RenderErrorBox();
+    addTearDown(() => renderErrorBox.dispose());
+
+    final RenderPointerListener renderListener = RenderPointerListener(
       onPointerDown: (PointerDownEvent event) {},
       onPointerUp: (PointerUpEvent event) {},
       onPointerMove: (PointerMoveEvent event) {},
@@ -406,8 +413,11 @@ void main() {
       onPointerCancel: (PointerCancelEvent event) {},
       onPointerSignal: (PointerSignalEvent event) {},
       behavior: HitTestBehavior.opaque,
-      child: RenderErrorBox(),
-    ).debugFillProperties(builder);
+      child: renderErrorBox,
+    );
+    addTearDown(renderListener.dispose);
+
+    renderListener.debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))

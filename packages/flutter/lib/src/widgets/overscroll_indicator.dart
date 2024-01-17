@@ -79,9 +79,6 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// In order for this widget to display an overscroll indication, the [child]
   /// widget must contain a widget that generates a [ScrollNotification], such
   /// as a [ListView] or a [GridView].
-  ///
-  /// The [showLeading], [showTrailing], [axisDirection], [color], and
-  /// [notificationPredicate] arguments must not be null.
   const GlowingOverscrollIndicator({
     super.key,
     this.showLeading = true,
@@ -311,6 +308,9 @@ class _GlowController extends ChangeNotifier {
     required Axis axis,
   }) : _color = color,
        _axis = axis {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _glowController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
     final Animation<double> decelerator = CurvedAnimation(
@@ -633,8 +633,6 @@ class StretchingOverscrollIndicator extends StatefulWidget {
   /// In order for this widget to display an overscroll indication, the [child]
   /// widget must contain a widget that generates a [ScrollNotification], such
   /// as a [ListView] or a [GridView].
-  ///
-  /// The [axisDirection] and [notificationPredicate] arguments must not be null.
   const StretchingOverscrollIndicator({
     super.key,
     required this.axisDirection,
@@ -817,6 +815,9 @@ enum _StretchState {
 
 class _StretchController extends ChangeNotifier {
   _StretchController({ required TickerProvider vsync }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _stretchController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
     final Animation<double> decelerator = CurvedAnimation(
@@ -952,8 +953,6 @@ class _StretchController extends ChangeNotifier {
 class OverscrollIndicatorNotification extends Notification with ViewportNotificationMixin {
   /// Creates a notification that an [GlowingOverscrollIndicator] or a
   /// [StretchingOverscrollIndicator] will start showing an overscroll indication.
-  ///
-  /// The [leading] argument must not be null.
   OverscrollIndicatorNotification({
     required this.leading,
   });
@@ -984,7 +983,7 @@ class OverscrollIndicatorNotification extends Notification with ViewportNotifica
   /// Calling [disallowIndicator] sets this to false, preventing the over scroll
   /// indicator from showing.
   ///
-  /// Defaults to true, cannot be null.
+  /// Defaults to true.
   bool accepted = true;
 
   /// Call this method if the overscroll indicator should be prevented.

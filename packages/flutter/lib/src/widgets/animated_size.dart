@@ -23,8 +23,6 @@ import 'ticker_provider.dart';
 ///  * [SizeTransition], which changes its size based on an [Animation].
 class AnimatedSize extends StatefulWidget {
   /// Creates a widget that animates its size to match that of its child.
-  ///
-  /// The [curve] and [duration] arguments must not be null.
   const AnimatedSize({
     super.key,
     this.child,
@@ -33,6 +31,7 @@ class AnimatedSize extends StatefulWidget {
     required this.duration,
     this.reverseDuration,
     this.clipBehavior = Clip.hardEdge,
+    this.onEnd,
   });
 
   /// The widget below this widget in the tree.
@@ -77,8 +76,14 @@ class AnimatedSize extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// Called every time an animation completes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
+  final VoidCallback? onEnd;
 
   @override
   State<AnimatedSize> createState() => _AnimatedSizeState();
@@ -95,6 +100,7 @@ class _AnimatedSizeState
       reverseDuration: widget.reverseDuration,
       vsync: this,
       clipBehavior: widget.clipBehavior,
+      onEnd: widget.onEnd,
       child: widget.child,
     );
   }
@@ -109,6 +115,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
     this.reverseDuration,
     required this.vsync,
     this.clipBehavior = Clip.hardEdge,
+    this.onEnd,
   });
 
   final AlignmentGeometry alignment;
@@ -121,6 +128,8 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
 
   final Clip clipBehavior;
 
+  final VoidCallback? onEnd;
+
   @override
   RenderAnimatedSize createRenderObject(BuildContext context) {
     return RenderAnimatedSize(
@@ -131,6 +140,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
       vsync: vsync,
       textDirection: Directionality.maybeOf(context),
       clipBehavior: clipBehavior,
+      onEnd: onEnd,
     );
   }
 
@@ -143,7 +153,8 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
       ..curve = curve
       ..vsync = vsync
       ..textDirection = Directionality.maybeOf(context)
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..onEnd = onEnd;
   }
 
   @override

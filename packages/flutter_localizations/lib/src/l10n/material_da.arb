@@ -51,7 +51,6 @@
   "reorderItemRight": "Flyt til højre",
   "expandedIconTapHint": "Skjul",
   "collapsedIconTapHint": "Udvid",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Ét tegn tilbage",
   "remainingTextFieldCharacterCountOther": "$remainingCount tegn tilbage",
   "refreshIndicatorSemanticLabel": "Opdater",
@@ -143,7 +142,7 @@
   "expandedHint": "Skjult",
   "collapsedHint": "Udvidet",
   "menuDismissLabel": "Luk menu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Slå op",
+  "searchWebButtonLabel": "Søg på nettet",
+  "shareButtonLabel": "Del…"
 }

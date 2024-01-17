@@ -79,8 +79,6 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
        assert(height >= 0.0);
 
   /// The interactive items laid out within the bottom navigation bar.
-  ///
-  /// Must not be null.
   final List<BottomNavigationBarItem> items;
 
   /// The callback that is called when a item is tapped.
@@ -92,8 +90,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// The index into [items] of the current active item.
   ///
-  /// Must not be null and must inclusively be between 0 and the number of tabs
-  /// minus 1.
+  /// Must be between 0 and the number of tabs minus 1, inclusive.
   final int currentIndex;
 
   /// The background color of the tab bar. If it contains transparency, the
@@ -113,7 +110,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// in the unselected state.
   ///
   /// Defaults to a [CupertinoDynamicColor] that matches the disabled foreground
-  /// color of the native `UITabBar` component. Cannot be null.
+  /// color of the native `UITabBar` component.
   final Color inactiveColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
@@ -121,13 +118,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// This value is used to configure the [IconTheme] for the navigation bar.
   /// When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
   /// should configure itself to match the icon theme's size and color.
-  ///
-  /// Must not be null.
   final double iconSize;
 
   /// The height of the [CupertinoTabBar].
   ///
-  /// Defaults to 50.0. Must not be null.
+  /// Defaults to 50.
   final double height;
 
   /// The border of the [CupertinoTabBar].

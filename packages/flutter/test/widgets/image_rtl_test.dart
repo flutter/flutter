@@ -28,9 +28,15 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
 void main() {
   late ui.Image testImage;
+
   setUpAll(() async {
     testImage = await createTestImage(width: 16, height: 9);
   });
+
+  tearDownAll(() {
+    testImage.dispose();
+  });
+
   testWidgets('DecorationImage RTL with alignment topEnd and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

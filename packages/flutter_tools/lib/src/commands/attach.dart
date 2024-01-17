@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
@@ -274,7 +275,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             logger: _logger,
           ),
           notifyingLogger: (_logger is NotifyingLogger)
-            ? _logger as NotifyingLogger
+            ? _logger
             : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
         )
@@ -535,6 +536,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           dillOutputPath: stringArg('output-dill'),
           ipv6: usesIpv6,
           flutterProject: flutterProject,
+          analytics: analytics,
         )
       : ColdRunner(
           flutterDevices,
@@ -567,6 +569,7 @@ class HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
+    required Analytics analytics,
   }) => HotRunner(
     devices,
     target: target,
@@ -578,5 +581,6 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
+    analytics: analytics,
   );
 }

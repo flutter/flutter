@@ -68,8 +68,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   /// The 'Runner.xcscheme' file of [xcodeProject].
-  File get xcodeProjectSchemeFile =>
-      xcodeProject.childDirectory('xcshareddata').childDirectory('xcschemes').childFile('Runner.xcscheme');
+  File xcodeProjectSchemeFile({String? scheme}) {
+    final String schemeName = scheme ?? 'Runner';
+    return xcodeProject.childDirectory('xcshareddata').childDirectory('xcschemes').childFile('$schemeName.xcscheme');
+  }
 
   File get xcodeProjectWorkspaceData =>
       xcodeProject
@@ -221,18 +223,17 @@ class IosProject extends XcodeBasedProject {
   /// The return future will resolve to string path to the output file.
   Future<String> outputsUniversalLinkSettings({
     required String configuration,
-    required String scheme,
     required String target,
   }) async {
     final XcodeProjectBuildContext context = XcodeProjectBuildContext(
       configuration: configuration,
-      scheme: scheme,
       target: target,
     );
     final File file = await parent.buildDirectory
         .childDirectory('deeplink_data')
-        .childFile('universal-link-settings-$configuration-$scheme-$target.json')
+        .childFile('universal-link-settings-$configuration-$target.json')
         .create(recursive: true);
+
     await file.writeAsString(jsonEncode(<String, Object?>{
       'bundleIdentifier': await _productBundleIdentifierWithBuildContext(context),
       'teamIdentifier': await _getTeamIdentifier(context),

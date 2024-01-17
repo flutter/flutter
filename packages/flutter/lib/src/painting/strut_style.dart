@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show TextLeadingDistribution;
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -318,8 +316,6 @@ class StrutStyle with Diagnosticable {
   /// Builds a StrutStyle that contains values of the equivalent properties in
   /// the provided [textStyle].
   ///
-  /// The [textStyle] parameter must not be null.
-  ///
   /// The named parameters override the [textStyle]'s argument's properties.
   /// Since TextStyle does not contain [leading] or [forceStrutHeight], these
   /// values will take on default values (null and false) unless otherwise
@@ -405,7 +401,7 @@ class StrutStyle with Diagnosticable {
   /// constructor.
   List<String>? get fontFamilyFallback {
     if (_package != null && _fontFamilyFallback != null) {
-      return _fontFamilyFallback!.map((String family) => 'packages/$_package/$family').toList();
+      return _fontFamilyFallback.map((String family) => 'packages/$_package/$family').toList();
     }
     return _fontFamilyFallback;
   }

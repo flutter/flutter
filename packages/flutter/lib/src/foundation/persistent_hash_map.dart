@@ -53,7 +53,7 @@ class PersistentHashMap<K extends Object, V> {
 
     // Unfortunately can not use unsafeCast<V?>(...) here because it leads
     // to worse code generation on VM.
-    return _root!.get(0, key, key.hashCode) as V?;
+    return _root.get(0, key, key.hashCode) as V?;
   }
 }
 

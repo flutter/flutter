@@ -443,10 +443,6 @@ void main() {
           errorCode: RPCErrorCodes.kServiceDisappeared,
         ),
         const FakeVmServiceRequest(
-          method: kScreenshotMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
           method: kScreenshotSkpMethod,
           errorCode: RPCErrorCodes.kServiceDisappeared,
         ),
@@ -479,9 +475,6 @@ void main() {
 
     final List<FlutterView> views = await fakeVmServiceHost.vmService.getFlutterViews();
     expect(views, isEmpty);
-
-    final vm_service.Response? screenshot = await fakeVmServiceHost.vmService.screenshot();
-    expect(screenshot, isNull);
 
     final vm_service.Response? screenshotSkp = await fakeVmServiceHost.vmService.screenshotSkp();
     expect(screenshotSkp, isNull);
@@ -881,9 +874,6 @@ class MockVMService extends Fake implements vm_service.VmService {
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device { }
 
 /// A [WebSocketConnector] that always throws an [io.SocketException].

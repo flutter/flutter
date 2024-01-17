@@ -13,6 +13,7 @@ import 'states.dart';
 void main() {
   testWidgets('ScrollController control test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -77,6 +78,7 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -136,6 +138,7 @@ void main() {
     final ScrollController controller = ScrollController(
       initialScrollOffset: 209.0,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -179,6 +182,7 @@ void main() {
 
   testWidgets('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -200,12 +204,15 @@ void main() {
 
   testWidgets('Read operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     expect(() => controller.offset, throwsAssertionError);
     expect(() => controller.position, throwsAssertionError);
   });
 
   testWidgets('Read operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -240,12 +247,15 @@ void main() {
 
   testWidgets('Write operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
     expect(() => controller.jumpTo(1.0), throwsAssertionError);
   });
 
   testWidgets('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -341,6 +351,7 @@ void main() {
     // The initialScrollOffset is used in this case, because there's no saved
     // scroll offset.
     ScrollController controller = ScrollController(initialScrollOffset: 200.0);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildFrame(controller));
     expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 2')), Offset.zero);
 
@@ -351,6 +362,7 @@ void main() {
     // The initialScrollOffset isn't used in this case, because the scrolloffset
     // can be restored.
     controller = ScrollController(initialScrollOffset: 25.0);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 2000.0);
     expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 20')), Offset.zero);
@@ -360,6 +372,7 @@ void main() {
     // the initialScrollOffset is used.
 
     controller = ScrollController(keepScrollOffset: false, initialScrollOffset: 100.0);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 100.0);
     expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 1')), Offset.zero);
@@ -381,6 +394,7 @@ void main() {
 
     bool isScrolling = false;
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     controller.addListener((){
       isScrolling = controller.position.isScrollingNotifier.value;
     });
@@ -395,7 +409,10 @@ void main() {
     expect(isScrolling, isTrue);
   });
 
-  test('$ScrollController dispatches object creation in constructor', () {
-    expect(()=> ScrollController().dispose(), dispatchesMemoryEvents(ScrollController));
+  test('$ScrollController dispatches object creation in constructor', () async {
+    await expectLater(
+      await memoryEvents(() => ScrollController().dispose(), ScrollController),
+      areCreateAndDispose,
+    );
   });
 }

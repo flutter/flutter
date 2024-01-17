@@ -427,6 +427,7 @@ void main() {
     int buildCount = 0;
     final GlobalKey<void> inheritedKey = GlobalKey();
     final ChangeNotifier notifier = ChangeNotifier();
+    addTearDown(notifier.dispose);
 
     final Widget builder = Builder(
       builder: (BuildContext context) {
@@ -464,6 +465,7 @@ void main() {
   testWidgets('InheritedNotifier', (WidgetTester tester) async {
     int buildCount = 0;
     final ChangeNotifier notifier = ChangeNotifier();
+    addTearDown(notifier.dispose);
 
     final Widget builder = Builder(
       builder: (BuildContext context) {

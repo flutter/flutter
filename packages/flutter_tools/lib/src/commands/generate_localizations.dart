@@ -207,6 +207,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             'and "}" is treated as a string if it does not close any previous "{" '
             'that is treated as a special character.',
     );
+    argParser.addFlag(
+      'use-named-parameters',
+      help: 'Whether or not to use named parameters for the generated localization methods.',
+    );
   }
 
   final FileSystem _fileSystem;

@@ -9,7 +9,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -21,7 +20,38 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('SegmentedButton releases state controllers for deleted segments', (WidgetTester tester) async {
+  testWidgets('SegmentsButton when compositing does not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/135747
+    // If the render object holds on to a stale canvas reference, this will
+    // throw an exception.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SegmentedButton<int>(
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(
+                value: 0,
+                label: Opacity(
+                  opacity: 0.5,
+                  child: Text('option'),
+                ),
+                icon: Opacity(
+                  opacity: 0.5,
+                  child: Icon(Icons.add),
+                ),
+              ),
+            ],
+            selected: const <int>{0},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(SegmentedButton<int>), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('SegmentedButton releases state controllers for deleted segments', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final Key key = UniqueKey();
 
@@ -68,7 +98,7 @@ void main() {
     expect(state.statesControllers.keys.last.value, 3);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+  testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -97,7 +127,7 @@ void main() {
     expect(material.type, MaterialType.transparency);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton supports exclusive choice by default', (WidgetTester tester) async {
+  testWidgets('SegmentedButton supports exclusive choice by default', (WidgetTester tester) async {
     int callbackCount = 0;
     int selectedSegment = 2;
 
@@ -147,7 +177,7 @@ void main() {
     expect(selectedSegment, 3);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton supports multiple selected segments', (WidgetTester tester) async {
+  testWidgets('SegmentedButton supports multiple selected segments', (WidgetTester tester) async {
     int callbackCount = 0;
     Set<int> selection = <int>{1};
 
@@ -202,7 +232,7 @@ void main() {
     expect(selection, <int>{2, 3});
   });
 
-testWidgetsWithLeakTracking('SegmentedButton allows for empty selection', (WidgetTester tester) async {
+  testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
     int callbackCount = 0;
     int? selectedSegment = 1;
 
@@ -255,7 +285,7 @@ testWidgetsWithLeakTracking('SegmentedButton allows for empty selection', (Widge
     expect(selectedSegment, 3);
   });
 
-testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
+  testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
     Widget frameWithSelection(int selected) {
       return Material(
         child: boilerplate(
@@ -292,7 +322,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     expect(find.byIcon(Icons.check), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton shows selected checkboxes in place of icon if it has a label as well', (WidgetTester tester) async {
+  testWidgets('SegmentedButton shows selected checkboxes in place of icon if it has a label as well', (WidgetTester tester) async {
     Widget frameWithSelection(int selected) {
       return Material(
         child: boilerplate(
@@ -335,7 +365,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     expect(find.byIcon(Icons.add_alarm), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton shows selected checkboxes next to icon if there is no label', (WidgetTester tester) async {
+  testWidgets('SegmentedButton shows selected checkboxes next to icon if there is no label', (WidgetTester tester) async {
     Widget frameWithSelection(int selected) {
       return Material(
         child: boilerplate(
@@ -376,7 +406,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
 
   });
 
-  testWidgetsWithLeakTracking('SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgets('SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -455,7 +485,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
   });
 
 
-  testWidgetsWithLeakTracking('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgets('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -532,7 +562,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (WidgetTester tester) async {
+  testWidgets('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -580,7 +610,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
+  testWidgets('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -604,7 +634,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     expect(find.byType(Tooltip), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton has correct tooltips', (WidgetTester tester) async {
+  testWidgets('SegmentedButton has correct tooltips', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -616,10 +646,10 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
                 ButtonSegment<int>(value: 1, label: Text('1')),
                 ButtonSegment<int>(value: 2, label: Text('2'), tooltip: 't2'),
                 ButtonSegment<int>(
-                    value: 3,
-                    label: Text('3'),
-                    tooltip: 't3',
-                    enabled: false,
+                  value: 3,
+                  label: Text('3'),
+                  tooltip: 't3',
+                  enabled: false,
                 ),
               ],
               selected: const <int>{2},
@@ -634,4 +664,157 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     expect(find.byTooltip('t2'), findsOneWidget);
     expect(find.byTooltip('t3'), findsOneWidget);
   });
+
+  testWidgets('SegmentedButton.styleFrom is applied to the SegmentedButton', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xfffffff0);
+    const Color backgroundColor =  Color(0xfffffff1);
+    const Color selectedBackgroundColor = Color(0xfffffff2);
+    const Color selectedForegroundColor = Color(0xfffffff3);
+    const Color disabledBackgroundColor = Color(0xfffffff4);
+    const Color disabledForegroundColor = Color(0xfffffff5);
+    const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
+    const MouseCursor disabledMouseCursor = SystemMouseCursors.grab;
+
+    final ButtonStyle styleFromStyle = SegmentedButton.styleFrom(
+      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColor,
+      selectedForegroundColor: selectedForegroundColor,
+      selectedBackgroundColor: selectedBackgroundColor,
+      disabledForegroundColor: disabledForegroundColor,
+      disabledBackgroundColor: disabledBackgroundColor,
+      shadowColor: const Color(0xfffffff6),
+      surfaceTintColor: const Color(0xfffffff7),
+      elevation: 1,
+      textStyle: const TextStyle(color: Color(0xfffffff8)),
+      padding: const EdgeInsets.all(2),
+      side: const BorderSide(color: Color(0xfffffff9)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
+      enabledMouseCursor: enabledMouseCursor,
+      disabledMouseCursor: disabledMouseCursor,
+      visualDensity: VisualDensity.compact,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      animationDuration: const Duration(milliseconds: 100),
+      enableFeedback: true,
+      alignment: Alignment.center,
+      splashFactory: NoSplash.splashFactory,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SegmentedButton<int>(
+            style: styleFromStyle,
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('1')),
+              ButtonSegment<int>(value: 2, label: Text('2')),
+              ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
+            ],
+            selected: const <int>{2},
+            onSelectionChanged: (Set<int> selected) { },
+            selectedIcon: const Icon(Icons.alarm),
+          ),
+        ),
+      ),
+    ));
+
+    // Test provided button style is applied to the enabled button segment.
+    ButtonStyle? buttonStyle = tester.widget<TextButton>(find.byType(TextButton).first).style;
+    expect(buttonStyle?.foregroundColor?.resolve(enabled), foregroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(enabled), backgroundColor);
+    expect(buttonStyle?.overlayColor, styleFromStyle.overlayColor);
+    expect(buttonStyle?.surfaceTintColor, styleFromStyle.surfaceTintColor);
+    expect(buttonStyle?.elevation, styleFromStyle.elevation);
+    expect(buttonStyle?.textStyle, styleFromStyle.textStyle);
+    expect(buttonStyle?.padding, styleFromStyle.padding);
+    expect(buttonStyle?.mouseCursor?.resolve(enabled), enabledMouseCursor);
+    expect(buttonStyle?.visualDensity, styleFromStyle.visualDensity);
+    expect(buttonStyle?.tapTargetSize, styleFromStyle.tapTargetSize);
+    expect(buttonStyle?.animationDuration, styleFromStyle.animationDuration);
+    expect(buttonStyle?.enableFeedback, styleFromStyle.enableFeedback);
+    expect(buttonStyle?.alignment, styleFromStyle.alignment);
+    expect(buttonStyle?.splashFactory, styleFromStyle.splashFactory);
+
+    // Test provided button style is applied selected button segment.
+    buttonStyle = tester.widget<TextButton>(find.byType(TextButton).at(1)).style;
+    expect(buttonStyle?.foregroundColor?.resolve(selected), selectedForegroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(selected), selectedBackgroundColor);
+    expect(buttonStyle?.mouseCursor?.resolve(enabled), enabledMouseCursor);
+
+    // Test provided button style is applied disabled button segment.
+    buttonStyle = tester.widget<TextButton>(find.byType(TextButton).last).style;
+    expect(buttonStyle?.foregroundColor?.resolve(disabled), disabledForegroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(disabled), disabledBackgroundColor);
+    expect(buttonStyle?.mouseCursor?.resolve(disabled), disabledMouseCursor);
+
+    // Test provided button style is applied to the segmented button material.
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(SegmentedButton<int>),
+      matching: find.byType(Material),
+    ).first);
+    expect(material.shape, styleFromStyle.shape?.resolve(enabled)?.copyWith(side: BorderSide.none));
+    expect(material.elevation, styleFromStyle.elevation?.resolve(enabled));
+    expect(material.shadowColor, styleFromStyle.shadowColor?.resolve(enabled));
+    expect(material.surfaceTintColor, styleFromStyle.surfaceTintColor?.resolve(enabled));
+
+    // Test provided button style border is applied to the segmented button border.
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints..line(color: styleFromStyle.side?.resolve(enabled)?.color),
+    );
+
+    // Test foreground color is applied to the overlay color.
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.down(tester.getCenter(find.text('1')));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: foregroundColor.withOpacity(0.08)));
+  });
+
+  testWidgets('Disabled SegmentedButton has correct states when rebuilding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Column(
+                  children: <Widget>[
+                    SegmentedButton<int>(
+                      segments: const <ButtonSegment<int>>[
+                        ButtonSegment<int>(value: 0, label: Text('foo')),
+                      ],
+                      selected: const <int>{0},
+                    ),
+                    ElevatedButton(
+                      onPressed: () => setState(() {}),
+                      child: const Text('Trigger rebuild'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    final Set<MaterialState> states = <MaterialState>{ MaterialState.selected, MaterialState.disabled };
+    // Check the initial states.
+    SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers.values.first.value, states);
+    // Trigger a rebuild.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    // Check the states after the rebuild.
+    state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers.values.first.value, states);
+  });
 }
+
+Set<MaterialState> enabled = const <MaterialState>{};
+Set<MaterialState> disabled = const <MaterialState>{ MaterialState.disabled };
+Set<MaterialState> selected = const <MaterialState>{ MaterialState.selected };

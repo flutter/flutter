@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -904,7 +905,17 @@ class _DialPainter extends CustomPainter {
     required this.radius,
     required this.textDirection,
     required this.selectedValue,
-  }) : super(repaint: PaintingBinding.instance.systemFonts);
+  }) : super(repaint: PaintingBinding.instance.systemFonts) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_DialPainter',
+        object: this,
+      );
+    }
+  }
 
   final List<_TappableLabel> primaryLabels;
   final List<_TappableLabel> selectedLabels;
@@ -920,6 +931,9 @@ class _DialPainter extends CustomPainter {
   final int selectedValue;
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     for (final _TappableLabel label in primaryLabels) {
       label.painter.dispose();
     }
@@ -1631,6 +1645,14 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   final RestorableBool minuteHasError = RestorableBool(false);
 
   @override
+  void dispose() {
+    _selectedTime.dispose();
+    hourHasError.dispose();
+    minuteHasError.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -1989,6 +2011,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    controllerHasBeenSet.dispose();
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -2096,7 +2126,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 }
 
 /// Signature for when the time picker entry mode is changed.
-typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
+typedef EntryModeChangeCallback = void Function(TimePickerEntryMode mode);
 
 /// A Material Design time picker designed to appear inside a popup dialog.
 ///
@@ -2108,8 +2138,6 @@ typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
 /// Use [showTimePicker] to show a dialog already containing a [TimePickerDialog].
 class TimePickerDialog extends StatefulWidget {
   /// Creates a Material Design time picker.
-  ///
-  /// [initialTime] must not be null.
   const TimePickerDialog({
     super.key,
     required this.initialTime,

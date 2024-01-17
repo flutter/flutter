@@ -171,6 +171,39 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       ProcessManager: () => processManager,
     });
 
+    testUsingContext('retries if gradle fails downloading with bad gateway error', () async {
+      const String errorMessage = r'''
+Exception in thread "main" java.io.IOException: Server returned HTTP response code: 502 for URL: https://objects.githubusercontent.com/github-production-release-asset-2e65be/696192900/1e77bbfb-4cde-4376-92ea-fc4ff57b8362?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=FFFF%2F20231220%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231220T160553Z&X-Amz-Expires=300&X-Amz-Signature=ffff&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=696192900&response-content-disposition=attachment%3B%20filename%3Dgradle-8.2.1-all.zip&response-content-type=application%2Foctet-stream
+at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1997)
+at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1589)
+at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install$1.call(Install.java:61)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
+
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
     testUsingContext('retries if gradle times out waiting for exclusive access to zip', () async {
       const String errorMessage = '''
 Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached waiting for exclusive access to file: /User/documents/gradle-5.6.2-all.zip
@@ -1031,7 +1064,7 @@ A problem occurred evaluating project ':app'.
           "│     + classpath 'com.android.tools.build:gradle:7.3.0'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-          '│     + https://services.gradle.org/distributions/gradle-7.5-all.zip               │\n'
+          '│     + https://services.gradle.org/distributions/gradle-7.6.3-all.zip             │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -1081,13 +1114,13 @@ Execution failed for task ':app:checkDebugAarMetadata'.
         testLogger.statusText,
         contains(
           '\n'
-          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
-          '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
-          '│ android {                                                                     │\n'
-          '│   compileSdkVersion 31                                                        │\n'
-          '│ }                                                                             │\n'
-          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+          '┌─ Flutter Fix ──────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdk version.                         │\n'
+          '│ Fix this issue by bumping the compileSdk version in /android/app/build.gradle: │\n'
+          '│ android {                                                                      │\n'
+          '│   compileSdk 31                                                                │\n'
+          '│ }                                                                              │\n'
+          '└────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
@@ -1376,9 +1409,12 @@ Could not compile build file '…/example/android/build.gradle'.
         multidexEnabled: true,
       );
 
-      // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
+      // Ensure the error notes the incompatible Gradle/AGP/Java versions, links to related resources,
+      // and a portion of the path to where to change their gradle version.
       expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
       expect(testLogger.statusText, contains('docs.flutter.dev/go/android-java-gradle-error'));
+      expect(testLogger.statusText, contains('gradle-wrapper.properties'));
+      expect(testLogger.statusText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),

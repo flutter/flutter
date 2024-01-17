@@ -49,7 +49,7 @@ void main() {
 
     int? breakLine;
     await _timeoutAfter(
-      message: 'Timed out getting source location of top stack frome',
+      message: 'Timed out getting source location of top stack frame',
       work: () async => breakLine = (await flutter.getSourceLocation())?.line,
     );
 
@@ -637,7 +637,7 @@ class TestProject extends Project {
   final String pubspec = '''
     name: test
     environment:
-      sdk: '>=3.0.0-0 <4.0.0'
+      sdk: '>=3.2.0-0 <4.0.0'
 
     dependencies:
       flutter:

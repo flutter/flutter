@@ -185,8 +185,6 @@ abstract class AlignmentGeometry {
 ///    whether the horizontal direction depends on the [TextDirection].
 class Alignment extends AlignmentGeometry {
   /// Creates an alignment.
-  ///
-  /// The [x] and [y] arguments must not be null.
   const Alignment(this.x, this.y);
 
   /// The distance fraction in the horizontal direction.
@@ -401,8 +399,6 @@ class Alignment extends AlignmentGeometry {
 ///    whose horizontal component does not depend on the text direction).
 class AlignmentDirectional extends AlignmentGeometry {
   /// Creates a directional alignment.
-  ///
-  /// The [start] and [y] arguments must not be null.
   const AlignmentDirectional(this.start, this.y);
 
   /// The distance fraction in the horizontal direction.

@@ -68,21 +68,18 @@ void main() {
       final MockIosProject ios = MockIosProject();
       final MockFlutterProject project = MockFlutterProject(ios);
       const String expectedConfig = 'someConfig';
-      const String expectedScheme = 'someScheme';
-      const String expectedTarget = 'someConfig';
+      const String expectedTarget = 'someTarget';
       const String expectedOutputFile = '/someFile';
       ios.outputFileLocation = expectedOutputFile;
       await IOSAnalyze(
         project: project,
         option: IOSAnalyzeOption.outputUniversalLinkSettings,
         configuration: expectedConfig,
-        scheme: expectedScheme,
         target: expectedTarget,
         logger: logger,
       ).analyze();
       expect(logger.statusText, contains(expectedOutputFile));
       expect(ios.outputConfiguration, expectedConfig);
-      expect(ios.outputScheme, expectedScheme);
       expect(ios.outputTarget, expectedTarget);
     });
 
@@ -91,8 +88,7 @@ void main() {
       final MockFlutterProject project = MockFlutterProject(ios);
       const List<String> targets = <String>['target1', 'target2'];
       const List<String> configs = <String>['config1', 'config2'];
-      const List<String> schemes = <String>['scheme1', 'scheme2'];
-      ios.expectedProjectInfo = XcodeProjectInfo(targets, configs, schemes, logger);
+      ios.expectedProjectInfo = XcodeProjectInfo(targets, configs, const <String>[], logger);
       await IOSAnalyze(
         project: project,
         option: IOSAnalyzeOption.listBuildOptions,
@@ -101,7 +97,6 @@ void main() {
       final Map<String, Object?> jsonOutput = jsonDecode(logger.statusText) as Map<String, Object?>;
       expect(jsonOutput['targets'], unorderedEquals(targets));
       expect(jsonOutput['configurations'], unorderedEquals(configs));
-      expect(jsonOutput['schemes'], unorderedEquals(schemes));
     });
 
     testUsingContext('throws if provide multiple path', () async {
@@ -144,15 +139,13 @@ class MockFlutterProject extends Fake implements FlutterProject {
 
 class MockIosProject extends Fake implements IosProject {
   String? outputConfiguration;
-  String? outputScheme;
   String? outputTarget;
   late String outputFileLocation;
   late XcodeProjectInfo expectedProjectInfo;
 
   @override
-  Future<String> outputsUniversalLinkSettings({required String configuration, required String scheme, required String target}) async {
+  Future<String> outputsUniversalLinkSettings({required String configuration, required String target}) async {
     outputConfiguration = configuration;
-    outputScheme = scheme;
     outputTarget = target;
     return outputFileLocation;
   }
