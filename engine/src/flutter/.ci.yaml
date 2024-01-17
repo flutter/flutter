@@ -118,6 +118,7 @@ targets:
     timeout: 60
 
   - name: Mac builder_cache
+    bringup: true
     enabled_branches:
       - main
     recipe: engine_v2/cache
