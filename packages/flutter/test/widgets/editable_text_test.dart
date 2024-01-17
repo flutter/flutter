@@ -3817,6 +3817,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.paste,
           SemanticsAction.setText,
         ],
       ),
@@ -3837,6 +3838,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.paste,
           SemanticsAction.setText,
         ],
       ),
@@ -3854,6 +3856,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.paste,
           SemanticsAction.setText,
         ],
       ),
@@ -4453,6 +4456,7 @@ void main() {
                           actions: <SemanticsAction>[
                             SemanticsAction.moveCursorBackwardByCharacter,
                             SemanticsAction.setSelection,
+                            SemanticsAction.paste,
                             SemanticsAction.setText,
                             SemanticsAction.moveCursorBackwardByWord,
                           ],
@@ -4532,7 +4536,11 @@ void main() {
   });
 
   group('a11y copy/cut/paste', () {
-    Future<void> buildApp(MockTextSelectionControls controls, WidgetTester tester) {
+    Future<void> buildApp(MockTextSelectionControls controls, WidgetTester tester, {
+      bool testCanCopy = true,
+      bool testCanCut = true,
+      bool testCanPaste = true,
+    }) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -4541,13 +4549,20 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: controls,
-          /*
+          getSemanticsCanCopy: testCanCopy
+              ? EditableText.defaultGetSemanticsCanCopy
+              : (EditableTextState editableTextState) => false,
+          getSemanticsCanCut: testCanCut
+              ? EditableText.defaultGetSemanticsCanCut
+              : (EditableTextState editableTextState) => false,
+          getSemanticsCanPaste: testCanPaste
+              ? EditableText.defaultGetSemanticsCanPaste
+              : (EditableTextState editableTextState) => false,
           contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
             return AdaptiveTextSelectionToolbar.editableText(
               editableTextState: editableTextState,
             );
           },
-          */
         ),
       ));
     }
@@ -4565,11 +4580,13 @@ void main() {
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
-      controls.testCanCopy = false;
-      controls.testCanCut = false;
-      controls.testCanPaste = false;
-
-      await buildApp(controls, tester);
+      await buildApp(
+        controls,
+        tester,
+        testCanCopy: false,
+        testCanCut: false,
+        testCanPaste: false,
+      );
       await tester.tap(find.byType(EditableText));
       await tester.pump();
 
@@ -4586,8 +4603,18 @@ void main() {
         ),
       );
 
-      controls.testCanCopy = true;
-      await buildApp(controls, tester);
+      controller.value = controller.value.copyWith(
+        selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        ),
+      );
+      await buildApp(
+        controls,
+        tester,
+        testCanCut: false,
+        testCanPaste: false,
+      );
       expect(
         semantics,
         includesNodeWith(
@@ -4602,9 +4629,12 @@ void main() {
         ),
       );
 
-      controls.testCanCopy = false;
-      controls.testCanPaste = true;
-      await buildApp(controls, tester);
+      await buildApp(
+        controls,
+        tester,
+        testCanCopy: false,
+        testCanCut: false,
+      );
       await tester.pumpAndSettle();
       expect(
         semantics,
@@ -4620,9 +4650,12 @@ void main() {
         ),
       );
 
-      controls.testCanPaste = false;
-      controls.testCanCut = true;
-      await buildApp(controls, tester);
+      await buildApp(
+        controls,
+        tester,
+        testCanCopy: false,
+        testCanPaste: false,
+      );
       expect(
         semantics,
         includesNodeWith(
@@ -4637,9 +4670,10 @@ void main() {
         ),
       );
 
-      controls.testCanCopy = true;
-      controls.testCanCut = true;
-      controls.testCanPaste = true;
+      await buildApp(
+        controls,
+        tester,
+      );
       await buildApp(controls, tester);
       expect(
         semantics,
@@ -4662,12 +4696,16 @@ void main() {
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
-      // TODO(justinmc): Do this cancopy etc stuff in contextMenuBuilder and then see if it passes?
-      controls.testCanCopy = true;
-      controls.testCanCut = true;
-      controls.testCanPaste = true;
       await buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      final TextSelection selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.text.length,
+      );
+      controller.value = controller.value.copyWith(
+        selection: selection,
+      );
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
@@ -4680,6 +4718,7 @@ void main() {
             children: <TestSemantics>[
               TestSemantics.rootChild(
                 id: 1,
+                textDirection: TextDirection.ltr, // justin
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 2,
@@ -4696,15 +4735,15 @@ void main() {
                             ],
                             actions: <SemanticsAction>[
                               SemanticsAction.moveCursorBackwardByCharacter,
-                              SemanticsAction.moveCursorBackwardByWord,
                               SemanticsAction.setSelection,
-                              SemanticsAction.setText,
                               SemanticsAction.copy,
                               SemanticsAction.cut,
                               SemanticsAction.paste,
+                              SemanticsAction.moveCursorBackwardByWord,
+                              SemanticsAction.setText,
                             ],
                             value: 'test',
-                            textSelection: TextSelection.collapsed(offset: controller.text.length),
+                            textSelection: selection,
                             textDirection: TextDirection.ltr,
                           ),
                         ],
@@ -4721,13 +4760,23 @@ void main() {
       );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      expect(controls.copyCount, 1);
+      ClipboardData? clipboardData = await Clipboard.getData('text/plain');
+      expect(clipboardData?.text, controller.text);
+      expect(controller.selection.isCollapsed, isTrue);
+
+      controller.value = controller.value.copyWith(
+        selection: selection,
+      );
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
-      expect(controls.cutCount, 1);
+      await tester.pump();
+      clipboardData = await Clipboard.getData('text/plain');
+      expect(clipboardData?.text, 'test');
+      expect(controller.text, '');
 
       owner.performAction(expectedNodeId, SemanticsAction.paste);
-      expect(controls.pasteCount, 1);
+      clipboardData = await Clipboard.getData('text/plain');
+      expect(controller.text, clipboardData?.text);
 
       semantics.dispose();
     });
@@ -16598,42 +16647,8 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     this.onCut,
   });
 
-  static const double _kToolbarContentDistance = 8.0;
-
   final VoidCallback? onPaste;
   final VoidCallback? onCut;
-
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    final Offset selectionMidpoint = position;
-    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
-      ? endpoints[1]
-      : endpoints[0];
-    final Offset anchorAbove = Offset(
-      globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance
-    );
-    final Offset anchorBelow = Offset(
-      globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
-    );
-    return _CustomTextSelectionToolbar(
-      anchorAbove: anchorAbove,
-      anchorBelow: anchorBelow,
-      handlePaste: () => handlePaste(delegate),
-      handleCut: () => handleCut(delegate),
-    );
-  }
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
@@ -16648,71 +16663,6 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
-  }
-
-  @override
-  bool canCut(TextSelectionDelegate delegate) {
-    return true;
-  }
-
-  @override
-  bool canPaste(TextSelectionDelegate delegate) {
-    return true;
-  }
-
-  @override
-  Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    onPaste?.call();
-    return;
-    //return super.handlePaste(delegate);
-  }
-
-  @override
-  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) async {
-    onCut?.call();
-    return;
-    //return super.handleCut(delegate);
-  }
-}
-
-// A fake text selection toolbar with only a paste button.
-class _CustomTextSelectionToolbar extends StatelessWidget {
-  const _CustomTextSelectionToolbar({
-    required this.anchorAbove,
-    required this.anchorBelow,
-    this.handlePaste,
-    this.handleCut,
-  });
-
-  final Offset anchorAbove;
-  final Offset anchorBelow;
-  final VoidCallback? handlePaste;
-  final VoidCallback? handleCut;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextSelectionToolbar(
-      anchorAbove: anchorAbove,
-      anchorBelow: anchorBelow,
-      toolbarBuilder: (BuildContext context, Widget child) {
-        return ColoredBox(
-          color: Colors.pink,
-          child: child,
-        );
-      },
-      children: <Widget>[
-        TextSelectionToolbarTextButton(
-          padding: TextSelectionToolbarTextButton.getPadding(0, 2),
-          onPressed: handleCut,
-          child: const Text('Cut'),
-        ),
-        TextSelectionToolbarTextButton(
-          padding: TextSelectionToolbarTextButton.getPadding(1, 2),
-          onPressed: handlePaste,
-          child: const Text('Paste'),
-        ),
-      ],
-    );
   }
 }
 

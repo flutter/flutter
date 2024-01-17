@@ -750,6 +750,9 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
+    this.getSemanticsCanCopy = defaultGetSemanticsCanCopy,
+    this.getSemanticsCanCut = defaultGetSemanticsCanCut,
+    this.getSemanticsCanPaste = defaultGetSemanticsCanPaste,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -880,6 +883,15 @@ class EditableText extends StatefulWidget {
   ///
   /// If null, this widget will create its own [UndoHistoryController].
   final UndoHistoryController? undoController;
+
+  /// Determines whether or not copying through [Semantics] is possible.
+  final SemanticsEnabledCallback getSemanticsCanCopy;
+
+  /// Determines whether or not cutting through [Semantics] is possible.
+  final SemanticsEnabledCallback getSemanticsCanCut;
+
+  /// Determines whether or not pasting through [Semantics] is possible.
+  final SemanticsEnabledCallback getSemanticsCanPaste;
 
   /// {@template flutter.widgets.editableText.strutStyle}
   /// The strut style used for the vertical layout.
@@ -1980,6 +1992,39 @@ class EditableText extends StatefulWidget {
     };
 
     return inferKeyboardType[effectiveHint] ?? TextInputType.text;
+  }
+
+  /// The default way for [EditableText] to determine when a semantics copy is
+  /// possible.
+  ///
+  /// Used if [EditableText.getSemanticsCanCopy] is not passed.
+  static bool defaultGetSemanticsCanCopy(EditableTextState editableTextState) {
+    return editableTextState.widget.selectionEnabled
+        && editableTextState._hasFocus
+        && editableTextState.copyEnabled;
+  }
+
+
+  /// The default way for [EditableText] to determine when a semantics cut is
+  /// possible.
+  ///
+  /// Used if [EditableText.getSemanticsCanCut] is not passed.
+  static bool defaultGetSemanticsCanCut(EditableTextState editableTextState) {
+    return editableTextState.widget.selectionEnabled
+        && editableTextState._hasFocus
+        && editableTextState.cutEnabled;
+  }
+
+
+  /// The default way for [EditableText] to determine when a semantics paste is
+  /// possible.
+  ///
+  /// Used if [EditableText.getSemanticsCanPaste] is not passed.
+  static bool defaultGetSemanticsCanPaste(EditableTextState editableTextState) {
+    return editableTextState.widget.selectionEnabled
+        && editableTextState._hasFocus
+        && editableTextState.pasteEnabled
+        && (editableTextState.clipboardStatus.value == ClipboardStatus.pasteable);
   }
 
   @override
@@ -4333,27 +4378,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  VoidCallback? _semanticsOnCopy(TextSelectionControls? controls) {
-    return widget.selectionEnabled && _hasFocus && copyEnabled
+  VoidCallback? _semanticsOnCopy() {
+    return widget.getSemanticsCanCopy(this)
       ? () {
         copySelection(SelectionChangedCause.toolbar);
       }
       : null;
   }
 
-  VoidCallback? _semanticsOnCut(TextSelectionControls? controls) {
-    return widget.selectionEnabled && _hasFocus && cutEnabled
+  VoidCallback? _semanticsOnCut() {
+    return widget.getSemanticsCanCut(this)
       ? () {
         cutSelection(SelectionChangedCause.toolbar);
       }
       : null;
   }
 
-  VoidCallback? _semanticsOnPaste(TextSelectionControls? controls) {
-    return widget.selectionEnabled
-        && _hasFocus
-        && pasteEnabled
-        && (clipboardStatus.value == ClipboardStatus.pasteable)
+  VoidCallback? _semanticsOnPaste() {
+    return widget.getSemanticsCanPaste(this)
       ? () {
         pasteText(SelectionChangedCause.toolbar);
       }
@@ -4768,9 +4810,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                     return CompositedTransformTarget(
                       link: _toolbarLayerLink,
                       child: Semantics(
-                        onCopy: _semanticsOnCopy(controls),
-                        onCut: _semanticsOnCut(controls),
-                        onPaste: _semanticsOnPaste(controls),
+                        onCopy: _semanticsOnCopy(),
+                        onCut: _semanticsOnCut(),
+                        onPaste: _semanticsOnPaste(),
                         child: _ScribbleFocusable(
                           focusNode: widget.focusNode,
                           editableKey: _editableKey,
@@ -5581,3 +5623,7 @@ class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
     return Future<void>.value();
   }
 }
+
+/// Signature that returns a bool indicating whether the given
+/// [EditableTextState] should enable some operation.
+typedef SemanticsEnabledCallback = bool Function(EditableTextState editableTextState);
