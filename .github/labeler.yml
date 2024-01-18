@@ -107,6 +107,7 @@ framework:
       - packages/flutter_driver/**/*
       - packages/flutter_goldens/**/*
       - packages/flutter_goldens_client/**/*
+      - packages/flutter_localizations/**/*
       - packages/flutter_test/**/*
       - packages/integration_test/**/*
       - examples/api/**/*

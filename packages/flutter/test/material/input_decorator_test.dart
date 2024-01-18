@@ -6900,7 +6900,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     expect(decoratorRight, lessThanOrEqualTo(prefixRight));
   });
 
-  testWidgets('instrinic width with prefixIcon/suffixIcon', (WidgetTester tester) async {
+  testWidgets('intrinsic width with prefixIcon/suffixIcon', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/137937
     for (final TextDirection direction in TextDirection.values) {
       Future<Size> measureText(InputDecoration decoration) async {
