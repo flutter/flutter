@@ -50,6 +50,12 @@
             from: "framework",
             to: "#realm_builder",
         },
+        // See common.shard.cml.
+        {
+            directory: "tzdata-icu",
+            from: "framework",
+            to: "#realm_builder",
+        },
     ],
     // TODO(https://fxbug.dev/114584): Figure out how to bring these in as deps (if possible oot).
     facets: {
