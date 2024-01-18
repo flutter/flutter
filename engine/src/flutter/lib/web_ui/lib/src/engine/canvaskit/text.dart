@@ -12,7 +12,7 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
-String? _effectiveFontFamily(String? fontFamily) {
+String? _computeEffectiveFontFamily(String? fontFamily) {
   return ui_web.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
     ? _testFonts.first
     : fontFamily;
@@ -38,7 +38,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           textAlign,
           textDirection,
           maxLines,
-          _effectiveFontFamily(fontFamily),
+          _computeEffectiveFontFamily(fontFamily),
           fontSize,
           height,
           textHeightBehavior,
@@ -49,20 +49,36 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           locale,
           applyRoundingHack,
         ),
-        _fontFamily = _effectiveFontFamily(fontFamily),
+        _textAlign = textAlign,
+        _textDirection = textDirection,
+        _fontWeight = fontWeight,
+        _fontStyle = fontStyle,
+        _maxLines = maxLines,
+        _originalFontFamily = fontFamily,
+        _effectiveFontFamily = _computeEffectiveFontFamily(fontFamily),
         _fontSize = fontSize,
         _height = height,
-        _leadingDistribution = textHeightBehavior?.leadingDistribution,
-        _fontWeight = fontWeight,
-        _fontStyle = fontStyle;
+        _textHeightBehavior = textHeightBehavior,
+        _strutStyle = strutStyle,
+        _ellipsis = ellipsis,
+        _locale = locale;
+
 
   final SkParagraphStyle skParagraphStyle;
-  final String? _fontFamily;
-  final double? _fontSize;
-  final double? _height;
+
+  final ui.TextAlign? _textAlign;
+  final ui.TextDirection? _textDirection;
   final ui.FontWeight? _fontWeight;
   final ui.FontStyle? _fontStyle;
-  final ui.TextLeadingDistribution? _leadingDistribution;
+  final int? _maxLines;
+  final String? _originalFontFamily;
+  final String? _effectiveFontFamily;
+  final double? _fontSize;
+  final double? _height;
+  final ui.TextHeightBehavior? _textHeightBehavior;
+  final ui.StrutStyle? _strutStyle;
+  final String? _ellipsis;
+  final ui.Locale? _locale;
 
   static SkTextStyleProperties toSkTextStyleProperties(
     String? fontFamily,
@@ -84,7 +100,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       skTextStyle.heightMultiplier = height;
     }
 
-    skTextStyle.fontFamilies = _getEffectiveFontFamilies(fontFamily);
+    skTextStyle.fontFamilies = _computeCombinedFontFamilies(fontFamily);
 
     return skTextStyle;
   }
@@ -94,7 +110,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     final CkStrutStyle style = value as CkStrutStyle;
     final SkStrutStyleProperties skStrutStyle = SkStrutStyleProperties();
     skStrutStyle.fontFamilies =
-        _getEffectiveFontFamilies(style._fontFamily, style._fontFamilyFallback);
+        _computeCombinedFontFamilies(style._fontFamily, style._fontFamilyFallback);
 
     if (style._fontSize != null) {
       skStrutStyle.fontSize = style._fontSize;
@@ -190,14 +206,101 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   }
 
   CkTextStyle getTextStyle() {
-    return CkTextStyle(
-      fontFamily: _fontFamily,
+    return CkTextStyle._(
+      originalFontFamily: _originalFontFamily,
+      effectiveFontFamily: _effectiveFontFamily,
       fontSize: _fontSize,
       height: _height,
-      leadingDistribution: _leadingDistribution,
+      leadingDistribution: _textHeightBehavior?.leadingDistribution,
       fontWeight: _fontWeight,
       fontStyle: _fontStyle,
+
+      // Use defaults for everything else.
+      color: null,
+      decoration: null,
+      decorationColor: null,
+      decorationStyle: null,
+      decorationThickness: null,
+      textBaseline: null,
+      originalFontFamilyFallback: null,
+      effectiveFontFamilyFallback: null,
+      letterSpacing: null,
+      wordSpacing: null,
+      locale: null,
+      background: null,
+      foreground: null,
+      shadows: null,
+      fontFeatures: null,
+      fontVariations: null,
     );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CkParagraphStyle &&
+        other._textAlign == _textAlign &&
+        other._textDirection == _textDirection &&
+        other._fontWeight == _fontWeight &&
+        other._fontStyle == _fontStyle &&
+        other._maxLines == _maxLines &&
+        other._originalFontFamily == _originalFontFamily &&
+        // effectiveFontFamily is not compared as it's a computed value.
+        other._fontSize == _fontSize &&
+        other._height == _height &&
+        other._textHeightBehavior == _textHeightBehavior &&
+        other._strutStyle == _strutStyle &&
+        other._ellipsis == _ellipsis &&
+        other._locale == _locale;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      _textAlign,
+      _textDirection,
+      _fontWeight,
+      _fontStyle,
+      _maxLines,
+      _originalFontFamily,
+      // effectiveFontFamily is not included as it's a computed value.
+      _fontSize,
+      _height,
+      _textHeightBehavior,
+      _strutStyle,
+      _ellipsis,
+      _locale,
+    );
+  }
+
+  @override
+  String toString() {
+    String result = super.toString();
+    assert(() {
+      final double? fontSize = _fontSize;
+      final double? height = _height;
+      result = 'ParagraphStyle('
+          'textAlign: ${_textAlign ?? "unspecified"}, '
+          'textDirection: ${_textDirection ?? "unspecified"}, '
+          'fontWeight: ${_fontWeight ?? "unspecified"}, '
+          'fontStyle: ${_fontStyle ?? "unspecified"}, '
+          'maxLines: ${_maxLines ?? "unspecified"}, '
+          'textHeightBehavior: ${_textHeightBehavior ?? "unspecified"}, '
+          'fontFamily: ${_originalFontFamily ?? "unspecified"}, '
+          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"}, '
+          'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
+          'strutStyle: ${_strutStyle ?? "unspecified"}, '
+          'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
+          'locale: ${_locale ?? "unspecified"}'
+          ')';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -232,53 +335,57 @@ class CkTextStyle implements ui.TextStyle {
       'The color argument is just a shorthand for "foreground: Paint()..color = color".',
     );
     return CkTextStyle._(
-      color,
-      decoration,
-      decorationColor,
-      decorationStyle,
-      decorationThickness,
-      fontWeight,
-      fontStyle,
-      textBaseline,
-      _effectiveFontFamily(fontFamily),
-      ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
-      fontSize,
-      letterSpacing,
-      wordSpacing,
-      height,
-      leadingDistribution,
-      locale,
-      background,
-      foreground,
-      shadows,
-      fontFeatures,
-      fontVariations,
+      color: color,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationStyle: decorationStyle,
+      decorationThickness: decorationThickness,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      textBaseline: textBaseline,
+      originalFontFamily: fontFamily,
+      effectiveFontFamily: _computeEffectiveFontFamily(fontFamily),
+      originalFontFamilyFallback: fontFamilyFallback,
+      effectiveFontFamilyFallback: ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
+      fontSize: fontSize,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      height: height,
+      leadingDistribution: leadingDistribution,
+      locale: locale,
+      background: background,
+      foreground: foreground,
+      shadows: shadows,
+      fontFeatures: fontFeatures,
+      fontVariations: fontVariations,
     );
   }
 
-  CkTextStyle._(
-    this.color,
-    this.decoration,
-    this.decorationColor,
-    this.decorationStyle,
-    this.decorationThickness,
-    this.fontWeight,
-    this.fontStyle,
-    this.textBaseline,
-    this.fontFamily,
-    this.fontFamilyFallback,
-    this.fontSize,
-    this.letterSpacing,
-    this.wordSpacing,
-    this.height,
-    this.leadingDistribution,
-    this.locale,
-    this.background,
-    this.foreground,
-    this.shadows,
-    this.fontFeatures,
-    this.fontVariations,
-  );
+  CkTextStyle._({
+    required this.color,
+    required this.decoration,
+    required this.decorationColor,
+    required this.decorationStyle,
+    required this.decorationThickness,
+    required this.fontWeight,
+    required this.fontStyle,
+    required this.textBaseline,
+    required this.originalFontFamily,
+    required this.effectiveFontFamily,
+    required this.originalFontFamilyFallback,
+    required this.effectiveFontFamilyFallback,
+    required this.fontSize,
+    required this.letterSpacing,
+    required this.wordSpacing,
+    required this.height,
+    required this.leadingDistribution,
+    required this.locale,
+    required this.background,
+    required this.foreground,
+    required this.shadows,
+    required this.fontFeatures,
+    required this.fontVariations,
+  });
 
   final ui.Color? color;
   final ui.TextDecoration? decoration;
@@ -288,8 +395,10 @@ class CkTextStyle implements ui.TextStyle {
   final ui.FontWeight? fontWeight;
   final ui.FontStyle? fontStyle;
   final ui.TextBaseline? textBaseline;
-  final String? fontFamily;
-  final List<String>? fontFamilyFallback;
+  final String? originalFontFamily;
+  final String? effectiveFontFamily;
+  final List<String>? originalFontFamilyFallback;
+  final List<String>? effectiveFontFamilyFallback;
   final double? fontSize;
   final double? letterSpacing;
   final double? wordSpacing;
@@ -307,7 +416,7 @@ class CkTextStyle implements ui.TextStyle {
   /// The values in this text style are used unless [other] specifically
   /// overrides it.
   CkTextStyle mergeWith(CkTextStyle other) {
-    return CkTextStyle(
+    return CkTextStyle._(
       color: other.color ?? color,
       decoration: other.decoration ?? decoration,
       decorationColor: other.decorationColor ?? decorationColor,
@@ -316,8 +425,10 @@ class CkTextStyle implements ui.TextStyle {
       fontWeight: other.fontWeight ?? fontWeight,
       fontStyle: other.fontStyle ?? fontStyle,
       textBaseline: other.textBaseline ?? textBaseline,
-      fontFamily: other.fontFamily ?? fontFamily,
-      fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
+      originalFontFamily: other.originalFontFamily ?? originalFontFamily,
+      effectiveFontFamily: other.effectiveFontFamily ?? effectiveFontFamily,
+      originalFontFamilyFallback: other.originalFontFamilyFallback ?? originalFontFamilyFallback,
+      effectiveFontFamilyFallback: other.effectiveFontFamilyFallback ?? effectiveFontFamilyFallback,
       fontSize: other.fontSize ?? fontSize,
       letterSpacing: other.letterSpacing ?? letterSpacing,
       wordSpacing: other.wordSpacing ?? wordSpacing,
@@ -332,9 +443,9 @@ class CkTextStyle implements ui.TextStyle {
     );
   }
 
-  /// Lazy-initialized list of font families sent to Skia.
-  late final List<String> effectiveFontFamilies =
-      _getEffectiveFontFamilies(fontFamily, fontFamilyFallback);
+  /// Lazy-initialized combination of font family and font family fallback sent to Skia.
+  late final List<String> combinedFontFamilies =
+      _computeCombinedFontFamilies(effectiveFontFamily, effectiveFontFamilyFallback);
 
   /// Lazy-initialized Skia style used to pass the style to Skia.
   ///
@@ -430,7 +541,7 @@ class CkTextStyle implements ui.TextStyle {
       properties.locale = locale.toLanguageTag();
     }
 
-    properties.fontFamilies = effectiveFontFamilies;
+    properties.fontFamilies = combinedFontFamilies;
 
     if (fontWeight != null || fontStyle != null) {
       properties.fontStyle = toSkFontStyle(fontWeight, fontStyle);
@@ -491,7 +602,7 @@ class CkTextStyle implements ui.TextStyle {
         && other.fontStyle == fontStyle
         && other.textBaseline == textBaseline
         && other.leadingDistribution == leadingDistribution
-        && other.fontFamily == fontFamily
+        && other.originalFontFamily == originalFontFamily
         && other.fontSize == fontSize
         && other.letterSpacing == letterSpacing
         && other.wordSpacing == wordSpacing
@@ -501,7 +612,7 @@ class CkTextStyle implements ui.TextStyle {
         && other.background == background
         && other.foreground == foreground
         && listEquals<ui.Shadow>(other.shadows, shadows)
-        && listEquals<String>(other.fontFamilyFallback, fontFamilyFallback)
+        && listEquals<String>(other.originalFontFamilyFallback, originalFontFamilyFallback)
         && listEquals<ui.FontFeature>(other.fontFeatures, fontFeatures)
         && listEquals<ui.FontVariation>(other.fontVariations, fontVariations);
   }
@@ -511,7 +622,7 @@ class CkTextStyle implements ui.TextStyle {
     final List<ui.Shadow>? shadows = this.shadows;
     final List<ui.FontFeature>? fontFeatures = this.fontFeatures;
     final List<ui.FontVariation>? fontVariations = this.fontVariations;
-    final List<String>? fontFamilyFallback = this.fontFamilyFallback;
+    final List<String>? fontFamilyFallback = originalFontFamilyFallback;
     return Object.hash(
       color,
       decoration,
@@ -521,7 +632,7 @@ class CkTextStyle implements ui.TextStyle {
       fontStyle,
       textBaseline,
       leadingDistribution,
-      fontFamily,
+      originalFontFamily,
       fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback),
       fontSize,
       letterSpacing,
@@ -542,31 +653,37 @@ class CkTextStyle implements ui.TextStyle {
 
   @override
   String toString() {
-    final List<String>? fontFamilyFallback = this.fontFamilyFallback;
-    final String? fontFamily = this.fontFamily;
-    return 'TextStyle('
-             'color: ${color ?? "unspecified"}, '
-             'decoration: ${decoration ?? "unspecified"}, '
-             'decorationColor: ${decorationColor ?? "unspecified"}, '
-             'decorationStyle: ${decorationStyle ?? "unspecified"}, '
-             'decorationThickness: ${decorationThickness ?? "unspecified"}, '
-             'fontWeight: ${fontWeight ?? "unspecified"}, '
-             'fontStyle: ${fontStyle ?? "unspecified"}, '
-             'textBaseline: ${textBaseline ?? "unspecified"}, '
-             'fontFamily: ${fontFamily != null && fontFamily.isNotEmpty ? fontFamily : "unspecified"}, '
-             'fontFamilyFallback: ${fontFamilyFallback != null && fontFamilyFallback.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
-             'fontSize: ${fontSize ?? "unspecified"}, '
-             'letterSpacing: ${letterSpacing != null ? "${letterSpacing}x" : "unspecified"}, '
-             'wordSpacing: ${wordSpacing != null ? "${wordSpacing}x" : "unspecified"}, '
-             'height: ${height != null ? "${height}x" : "unspecified"}, '
-             'leadingDistribution: ${leadingDistribution ?? "unspecified"}, '
-             'locale: ${locale ?? "unspecified"}, '
-             'background: ${background ?? "unspecified"}, '
-             'foreground: ${foreground ?? "unspecified"}, '
-             'shadows: ${shadows ?? "unspecified"}, '
-             'fontFeatures: ${fontFeatures ?? "unspecified"}, '
-             'fontVariations: ${fontVariations ?? "unspecified"}'
-           ')';
+    String result = super.toString();
+    assert(() {
+      final List<String>? fontFamilyFallback = originalFontFamilyFallback;
+      final double? fontSize = this.fontSize;
+      final double? height = this.height;
+      result = 'TextStyle('
+          'color: ${color ?? "unspecified"}, '
+          'decoration: ${decoration ?? "unspecified"}, '
+          'decorationColor: ${decorationColor ?? "unspecified"}, '
+          'decorationStyle: ${decorationStyle ?? "unspecified"}, '
+          'decorationThickness: ${decorationThickness ?? "unspecified"}, '
+          'fontWeight: ${fontWeight ?? "unspecified"}, '
+          'fontStyle: ${fontStyle ?? "unspecified"}, '
+          'textBaseline: ${textBaseline ?? "unspecified"}, '
+          'fontFamily: ${originalFontFamily ?? "unspecified"}, '
+          'fontFamilyFallback: ${fontFamilyFallback != null && fontFamilyFallback.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
+          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"}, '
+          'letterSpacing: ${letterSpacing != null ? "${letterSpacing}x" : "unspecified"}, '
+          'wordSpacing: ${wordSpacing != null ? "${wordSpacing}x" : "unspecified"}, '
+          'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
+          'leadingDistribution: ${leadingDistribution ?? "unspecified"}, '
+          'locale: ${locale ?? "unspecified"}, '
+          'background: ${background ?? "unspecified"}, '
+          'foreground: ${foreground ?? "unspecified"}, '
+          'shadows: ${shadows ?? "unspecified"}, '
+          'fontFeatures: ${fontFeatures ?? "unspecified"}, '
+          'fontVariations: ${fontVariations ?? "unspecified"}'
+          ')';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -582,7 +699,7 @@ class CkStrutStyle implements ui.StrutStyle {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  })  : _fontFamily = _effectiveFontFamily(fontFamily),
+  })  : _fontFamily = _computeEffectiveFontFamily(fontFamily),
         _fontFamilyFallback = ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
         _fontSize = fontSize,
         _height = height,
@@ -620,9 +737,11 @@ class CkStrutStyle implements ui.StrutStyle {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    final List<String>? fontFamilyFallback = _fontFamilyFallback;
+    return Object.hash(
         _fontFamily,
-        _fontFamilyFallback,
+        fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback) : null,
         _fontSize,
         _height,
         _leading,
@@ -631,6 +750,7 @@ class CkStrutStyle implements ui.StrutStyle {
         _fontStyle,
         _forceStrutHeight,
       );
+  }
 }
 
 SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
@@ -806,9 +926,11 @@ class CkParagraph implements ui.Paragraph {
       _boxesForPlaceholders =
           skRectsToTextBoxes(paragraph.getRectsForPlaceholders());
     } catch (e) {
-      printWarning('CanvasKit threw an exception while laying '
-          'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
-          'Exception:\n$e');
+      printWarning(
+        'CanvasKit threw an exception while laying '
+        'out the paragraph. The font was "${_paragraphStyle._originalFontFamily}". '
+        'Exception:\n$e',
+      );
       rethrow;
     }
   }
@@ -993,11 +1115,11 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   void addText(String text) {
     final List<String> fontFamilies = <String>[];
     final CkTextStyle style = _peekStyle();
-    if (style.fontFamily != null) {
-      fontFamilies.add(style.fontFamily!);
+    if (style.effectiveFontFamily != null) {
+      fontFamilies.add(style.effectiveFontFamily!);
     }
-    if (style.fontFamilyFallback != null) {
-      fontFamilies.addAll(style.fontFamilyFallback!);
+    if (style.effectiveFontFamilyFallback != null) {
+      fontFamilies.addAll(style.effectiveFontFamilyFallback!);
     }
     renderer.fontCollection.fontFallbackManager!.ensureFontsSupportText(text, fontFamilies);
     _paragraphBuilder.addText(text);
@@ -1099,7 +1221,7 @@ class _CkParagraphPlaceholder {
   final double offset;
 }
 
-List<String> _getEffectiveFontFamilies(String? fontFamily,
+List<String> _computeCombinedFontFamilies(String? fontFamily,
     [List<String>? fontFamilyFallback]) {
   final List<String> fontFamilies = <String>[];
   if (fontFamily != null) {

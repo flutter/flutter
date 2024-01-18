@@ -54,6 +54,9 @@ abstract class SimpleCkShader implements CkShader {
   void dispose() {
     _ref.dispose();
   }
+
+  @override
+  String toString() => 'Gradient()';
 }
 
 class CkGradientSweep extends SimpleCkShader implements ui.Gradient {
@@ -133,6 +136,9 @@ class CkGradientLinear extends SimpleCkShader implements ui.Gradient {
       matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
     );
   }
+
+  @override
+  String toString() => 'Gradient()';
 }
 
 class CkGradientRadial extends SimpleCkShader implements ui.Gradient {
@@ -161,6 +167,9 @@ class CkGradientRadial extends SimpleCkShader implements ui.Gradient {
       0,
     );
   }
+
+  @override
+  String toString() => 'Gradient()';
 }
 
 class CkGradientConical extends SimpleCkShader implements ui.Gradient {

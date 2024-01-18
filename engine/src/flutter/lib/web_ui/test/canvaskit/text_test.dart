@@ -105,23 +105,23 @@ void testMain() {
       test('The default test font is used when a non-test fontFamily is specified', () {
         final String defaultTestFontFamily = testFonts.first;
 
-        expect(CkTextStyle(fontFamily: 'BogusFontFamily').fontFamily, defaultTestFontFamily);
-        expect(CkParagraphStyle(fontFamily: 'BogusFontFamily').getTextStyle().fontFamily, defaultTestFontFamily);
+        expect(CkTextStyle(fontFamily: 'BogusFontFamily').effectiveFontFamily, defaultTestFontFamily);
+        expect(CkParagraphStyle(fontFamily: 'BogusFontFamily').getTextStyle().effectiveFontFamily, defaultTestFontFamily);
         expect(CkStrutStyle(fontFamily: 'BogusFontFamily'), CkStrutStyle(fontFamily: defaultTestFontFamily));
       });
 
       test('The default test font is used when fontFamily is unspecified', () {
         final String defaultTestFontFamily = testFonts.first;
 
-        expect(CkTextStyle().fontFamily, defaultTestFontFamily);
-        expect(CkParagraphStyle().getTextStyle().fontFamily, defaultTestFontFamily);
+        expect(CkTextStyle().effectiveFontFamily, defaultTestFontFamily);
+        expect(CkParagraphStyle().getTextStyle().effectiveFontFamily, defaultTestFontFamily);
         expect(CkStrutStyle(), CkStrutStyle(fontFamily: defaultTestFontFamily));
       });
 
       test('Can specify test fontFamily to use', () {
         for (final String testFont in testFonts) {
-          expect(CkTextStyle(fontFamily: testFont).fontFamily, testFont);
-          expect(CkParagraphStyle(fontFamily: testFont).getTextStyle().fontFamily, testFont);
+          expect(CkTextStyle(fontFamily: testFont).effectiveFontFamily, testFont);
+          expect(CkParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamily, testFont);
         }
       });
     });

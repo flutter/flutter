@@ -854,3 +854,17 @@ class LruCache<K extends Object, V extends Object> {
     _itemQueue.removeLast();
   }
 }
+
+/// Returns the VM-compatible string for the tile mode.
+String tileModeString(ui.TileMode tileMode) {
+  switch (tileMode) {
+    case ui.TileMode.clamp:
+      return 'clamp';
+    case ui.TileMode.mirror:
+      return 'mirror';
+    case ui.TileMode.repeated:
+      return 'repeated';
+    case ui.TileMode.decal:
+      return 'decal';
+  }
+}
