@@ -724,14 +724,14 @@ TextAffinity? _toTextAffinity(String? affinity) {
 /// The state of a "floating cursor" drag on an iOS soft keyboard.
 ///
 /// The "floating cursor" cursor-positioning mode is an iOS feature used to
-/// precisely position the caret in some editable text. When the user
-/// long-presses the spacebar on the iOS virtual keyboard, iOS enters floating
-/// cursor mode where the whole keyboard becomes a trackpad. In this mode,
-/// there are two visible cursors. One, the floating cursor, hovers over the
-/// text, following the user's horizontal movements exactly and snapping to
-/// lines vertically. The other, the placeholder cursor, is a "shadow" that also
-/// snaps to the actual location where the cursor will go horizontally when the
-/// user releases the trackpad.
+/// precisely position the caret in some editable text using certain touch
+/// gestures. As an example, when the user long-presses the spacebar on the iOS
+/// virtual keyboard, iOS enters floating cursor mode where the whole keyboard
+/// becomes a trackpad. In this mode, there are two visible cursors. One, the
+/// floating cursor, hovers over the text, following the user's horizontal
+/// movements exactly and snapping to lines vertically. The other, the
+/// placeholder cursor, is a "shadow" that also snaps to the actual location
+/// where the cursor will go horizontally when the user releases the trackpad.
 ///
 /// The floating cursor renders over the text field, while the placeholder
 /// cursor is a faint shadow of the cursor rendered in the text field in the
