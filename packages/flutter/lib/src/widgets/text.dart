@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui show TextHeightBehavior;
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -656,7 +658,11 @@ class Text extends StatelessWidget {
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
     final GlobalKey _textKey = GlobalKey();
-    final _SelectableTextContainerDelegate _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
+    final _SelectableTextContainerDelegate _selectionDelegate = _SelectableTextContainerDelegate(_textKey, TextSpan(
+        style: effectiveTextStyle,
+        text: data,
+        children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+      ));
     Widget result = RichText(
       key: _textKey,
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
@@ -720,16 +726,79 @@ class Text extends StatelessWidget {
 }
 
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _SelectableTextContainerDelegate(GlobalKey textKey) : _textKey = textKey;
+  _SelectableTextContainerDelegate(GlobalKey textKey, InlineSpan text) : _textKey = textKey {
+    _slots = _getSlots(text);
+  }
 
   final GlobalKey _textKey;
-  late final RenderParagraph paragraph = _textKey.currentContext!.findRenderObject()! as RenderParagraph;
+  // late final RenderParagraph paragraph = _textKey.currentContext!.findRenderObject()! as RenderParagraph;
+  RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
+  // RenderParagraph? get paragraph => _textKey.currentContext?.findRenderObject() as RenderParagraph?;
   
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
 
   Offset? _lastStartEdgeUpdateGlobalPosition;
   Offset? _lastEndEdgeUpdateGlobalPosition;
+
+  late List<_SelectableSlot> _slots;
+
+  List<_SelectableSlot> _getSlots(InlineSpan text) {
+    final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
+    final String plainText = text.toPlainText(includeSemanticsLabels: false);
+    final List<_SelectableSlot> result = <_SelectableSlot>[];
+    int start = 0;
+    while (start < plainText.length) {
+      int end = plainText.indexOf(_placeholderCharacter, start);
+      int prevEnd = end;
+      if (start != end) {
+        if (end == -1) {
+          end = plainText.length;
+          result.add(
+            _SelectableSlot(type: _SlotType.text),
+          );
+        } else {
+          result.add(
+            _SelectableSlot(type: _SlotType.text),
+          );
+          result.add(
+            _SelectableSlot(type: _SlotType.placeholder),
+          );
+        }
+        start = end;
+      } else {
+        result.add(
+          _SelectableSlot(type: _SlotType.placeholder),
+        );
+      }
+      start += 1;
+    }
+    return result;
+  }
+
+  void _fillNextSlot(Selectable selectable) {
+    debugPrint('adding $selectable');
+    // Iterate through slots.
+    for (int index = 0; index < _slots.length; index += 1) {
+      // Find an empty slot.
+      if (_slots[index].selectable == null) {
+        final bool isRootSelectable = paragraph.selectables?.contains(selectable) ?? false;
+        if (_slots[index].type == _SlotType.placeholder) {
+          if (isRootSelectable) {
+            continue;
+          }
+          _slots[index] = _SelectableSlot(type: _SlotType.placeholder, selectable: selectable);
+          break;
+        }
+        if (_slots[index].type == _SlotType.text) {
+          if (isRootSelectable) {
+            _slots[index] = _SelectableSlot(type: _SlotType.text, selectable: selectable);
+            break;
+          }
+        }
+      }
+    }
+  }
 
   @override
   Comparator<Selectable> get compareOrder {
@@ -844,6 +913,11 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   /// [SelectParagraphSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    debugPrint('hello');
+    for (final _SelectableSlot slot in _slots) {
+      debugPrint('${slot.type} ${slot.selectable}');
+    }
+    debugPrint('hello end');
     final SelectionResult result = _handleSelectParagraph(event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
@@ -1193,4 +1267,18 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     _hasReceivedStartEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
     super.didChangeSelectables();
   }
+}
+
+class _SelectableSlot {
+  const _SelectableSlot({
+    required this.type,
+    this.selectable,
+  });
+  final _SlotType type;
+  final Selectable? selectable;
+}
+
+enum _SlotType {
+  text,
+  placeholder,
 }
