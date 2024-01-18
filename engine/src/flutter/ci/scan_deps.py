@@ -4,18 +4,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
-# Usage: scan_deps.py --osv-lockfile <lockfile> --output <parsed lockfile>
+# Usage: scan_deps.py --deps <DEPS file> --output <parsed lockfile>
 #
-# This script parses the dependencies provided in lockfile format for
-# osv-scanner so that the common ancestor commits from the mirrored and
-# upstream for each dependency are provided in the lockfile
-# It is expected that the osv-lockfile input is updated by this script
-# and then uploaded using GitHub actions to be used by the osv-scanner
-# reusable action.
+# This script extracts the dependencies provided from the DEPS file and
+# finds the appropriate git commit hash per dependency for osv-scanner
+# to use in checking for vulnerabilities.
+# It is expected that the lockfile output of this script is then
+# uploaded using GitHub actions to be used by the osv-scanner reusable action.
 
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -23,54 +23,68 @@ from compatibility_helper import byte_str_decode
 
 SCRIPT_DIR = os.path.dirname(sys.argv[0])
 CHECKOUT_ROOT = os.path.realpath(os.path.join(SCRIPT_DIR, '..'))
+CHROMIUM_README_FILE = 'third_party/accessibility/README.md'
+CHROMIUM_README_COMMIT_LINE = 4  # The fifth line will always contain the commit hash.
+CHROMIUM = 'https://chromium.googlesource.com/chromium/src'
 DEP_CLONE_DIR = CHECKOUT_ROOT + '/clone-test'
 DEPS = os.path.join(CHECKOUT_ROOT, 'DEPS')
 UPSTREAM_PREFIX = 'upstream_'
 
-failed_deps = []  # Deps which fail to be cloned or git-merge based.
+
+# Used in parsing the DEPS file.
+class VarImpl:
+  _env_vars = {
+      'host_cpu': 'x64',
+      'host_os': 'linux',
+  }
+
+  def __init__(self, local_scope):
+    self._local_scope = local_scope
+
+  def lookup(self, var_name):
+    """Implements the Var syntax."""
+    if var_name in self._local_scope.get('vars', {}):
+      return self._local_scope['vars'][var_name]
+    # Inject default values for env variables.
+    if var_name in self._env_vars:
+      return self._env_vars[var_name]
+    raise Exception('Var is not defined: %s' % var_name)
 
 
-def parse_deps_file(lockfile, output_file):
-  """
-  Takes input of fully qualified dependencies,
-  for each dep find the common ancestor commit SHA
-  from the upstream and query OSV API using that SHA
-
-  If the commit cannot be found or the dep cannot be
-  compared to an upstream, prints list of those deps
-  """
-  deps_list = []
-  with open(DEPS, 'r') as file:
-    local_scope = {}
-    global_scope = {'Var': lambda x: x}  # Dummy lambda.
-    # Read the content.
+def extract_deps(deps_file):
+  local_scope = {}
+  var = VarImpl(local_scope)
+  global_scope = {
+      'Var': var.lookup,
+      'deps_os': {},
+  }
+  # Read the content.
+  with open(deps_file, 'r') as file:
     deps_content = file.read()
 
-    # Eval the content.
-    exec(deps_content, global_scope, local_scope)
-
-    # Extract the deps and filter.
-    deps_list = local_scope.get('vars')
-
-  with open(lockfile, 'r') as file:
-    data = json.load(file)
-
-  results = data['results']
+  # Eval the content.
+  exec(deps_content, global_scope, local_scope)
 
   if not os.path.exists(DEP_CLONE_DIR):
     os.mkdir(DEP_CLONE_DIR)  # Clone deps with upstream into temporary dir.
 
-  # Extract commit hash, save in dictionary.
-  for result in results:
-    packages = result['packages']
-    for package in packages:
-      mirror_url = package['package']['name']
-      commit = package['package']['commit']
-      ancestor_result = get_common_ancestor([mirror_url, commit], deps_list)
-      if ancestor_result:
-        common_commit, upstream = ancestor_result
-        package['package']['commit'] = common_commit
-        package['package']['name'] = upstream
+  # Extract the deps and filter.
+  deps = local_scope.get('deps', {})
+  deps_list = local_scope.get('vars')
+  filtered_osv_deps = []
+  for _, dep in deps.items():
+    # We currently do not support packages or cipd which are represented
+    # as dictionaries.
+    if not isinstance(dep, str):
+      continue
+
+    dep_split = dep.rsplit('@', 1)
+    ancestor_result = get_common_ancestor([dep_split[0], dep_split[1]],
+                                          deps_list)
+    if ancestor_result:
+      filtered_osv_deps.append({
+          'package': {'name': ancestor_result[1], 'commit': ancestor_result[0]}
+      })
 
   try:
     # Clean up cloned upstream dependency directory.
@@ -83,11 +97,32 @@ def parse_deps_file(lockfile, output_file):
         (DEP_CLONE_DIR, clone_dir_error.strerror)
     )
 
-  # Write common ancestor commit data to new file to be
-  # used in next github action step with osv-scanner.
-  # The output_file name defaults to converted-osv-lockfile.json
-  with open(output_file, 'w') as file:
-    json.dump(data, file)
+  osv_result = {
+      'packageSource': {'path': deps_file, 'type': 'lockfile'},
+      'packages': filtered_osv_deps
+  }
+  return osv_result
+
+
+def parse_readme():
+  """
+  Opens the Flutter Accessibility Library README and uses the commit hash
+  found in the README to check for viulnerabilities.
+  The commit hash in this README will always be in the same format
+  """
+  file_path = os.path.join(CHECKOUT_ROOT, CHROMIUM_README_FILE)
+  with open(file_path) as file:
+    # Read the content of the file opened.
+    content = file.readlines()
+    commit_line = content[CHROMIUM_README_COMMIT_LINE]
+    commit = re.search(r'(?<=\[).*(?=\])', commit_line)
+
+    osv_result = {
+        'packageSource': {'path': file_path, 'type': 'lockfile'},
+        'packages': [{'package': {'name': CHROMIUM, 'commit': commit.group()}}]
+    }
+
+    return osv_result
 
 
 def get_common_ancestor(dep, deps_list):
@@ -181,26 +216,35 @@ def parse_args(args):
   )
 
   parser.add_argument(
-      '--osv-lockfile',
+      '--deps',
       '-d',
       type=str,
-      help='Input osv-scanner compatible lockfile of dependencies to parse.',
-      default=os.path.join(CHECKOUT_ROOT, 'osv-lockfile.json')
+      help='Input DEPS file to extract.',
+      default=os.path.join(CHECKOUT_ROOT, 'DEPS')
   )
   parser.add_argument(
       '--output',
       '-o',
       type=str,
       help='Output osv-scanner compatible deps file.',
-      default=os.path.join(CHECKOUT_ROOT, 'converted-osv-lockfile.json')
+      default=os.path.join(CHECKOUT_ROOT, 'osv-lockfile.json')
   )
 
   return parser.parse_args(args)
 
 
+def write_manifest(deps, manifest_file):
+  output = {'results': deps}
+  print(json.dumps(output, indent=2))
+  with open(manifest_file, 'w') as manifest:
+    json.dump(output, manifest, indent=2)
+
+
 def main(argv):
   args = parse_args(argv)
-  parse_deps_file(args.osv_lockfile, args.output)
+  deps = extract_deps(args.deps)
+  readme_deps = parse_readme()
+  write_manifest([deps, readme_deps], args.output)
   return 0
 
 
