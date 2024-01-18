@@ -3978,6 +3978,7 @@ targets:
 
   - name: Mac_pixel_7pro entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
