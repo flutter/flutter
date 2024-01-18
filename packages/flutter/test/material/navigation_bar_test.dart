@@ -307,9 +307,9 @@ void main() {
   testWidgets('Material2 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({ required TextScaler textScaler }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -346,7 +346,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
@@ -357,7 +357,7 @@ void main() {
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4.0)));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(tester.getSize(find.text(label).last), Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
@@ -366,9 +366,9 @@ void main() {
   testWidgets('Material3 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({ required TextScaler textScaler }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -405,7 +405,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
@@ -416,7 +416,7 @@ void main() {
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4.0)));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
 
@@ -597,10 +597,10 @@ void main() {
   testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
     const int animationMilliseconds = 800;
 
-    Widget widget({double textScaleFactor = 1}) {
+    Widget widget({ TextScaler textScaler = TextScaler.noScaling }) {
       return _buildWidget(
         MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: NavigationBar(
             animationDuration: const Duration(milliseconds: animationMilliseconds),
             destinations: const <NavigationDestination>[
@@ -621,7 +621,7 @@ void main() {
     await tester.pumpWidget(widget());
     final double initialHeight = tester.getSize(find.byType(NavigationBar)).height;
 
-    await tester.pumpWidget(widget(textScaleFactor: 2));
+    await tester.pumpWidget(widget(textScaler: const TextScaler.linear(2)));
     final double newHeight = tester.getSize(find.byType(NavigationBar)).height;
 
     expect(newHeight, equals(initialHeight));

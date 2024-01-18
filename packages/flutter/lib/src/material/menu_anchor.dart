@@ -3886,6 +3886,8 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
     if (visualDensity.horizontal > 0) {
       visualDensity = VisualDensity(vertical: visualDensity.vertical);
     }
+    final double defaultFontSize = Theme.of(context).textTheme.labelLarge?.fontSize ?? 14.0;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
     return ButtonStyleButton.scaledPadding(
       EdgeInsets.symmetric(horizontal: math.max(
         _kMenuViewPadding,
@@ -3896,7 +3898,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
         8 + visualDensity.baseSizeAdjustment.dx,
       )),
       const EdgeInsets.symmetric(horizontal: _kMenuViewPadding),
-      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
+      effectiveTextScale,
     );
   }
 }
