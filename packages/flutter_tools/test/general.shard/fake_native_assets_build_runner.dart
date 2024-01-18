@@ -5,7 +5,7 @@
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:native_assets_builder/native_assets_builder.dart'
     as native_assets_builder;
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
 /// Mocks all logic instead of using `package:native_assets_builder`, which
