@@ -1183,6 +1183,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Defaults to a padding with left, top and right set to 4, bottom to 5.
   EdgeInsets floatingCursorAddedMargin;
 
+  /// Returns true if the floating cursor is visible, false otherwise.
+  bool get floatingCursorOn => _floatingCursorOn;
   bool _floatingCursorOn = false;
   late TextPosition _floatingCursorTextPosition;
 

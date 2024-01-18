@@ -3215,11 +3215,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.Update:
-        // The cursor blinking is reset in [_didChangeTextEditingValue] when the selection changes.
-        // Stop cursor blinking and making it visible.
-        _stopCursorBlink(resetCharTicks: false);
-        _cursorBlinkOpacityController.value = 1.0;
-
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
         final Offset rawCursorOffset = _startCaretCenter! + centeredPoint - _floatingCursorOffset;
 
@@ -3952,7 +3947,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor && (EditableText.debugDeterministicCursor || _cursorBlinkOpacityController.value > 0);
   }
 
-  bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled;
+  bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled && !renderEditable.floatingCursorOn;
 
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
@@ -4026,7 +4021,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _startOrStopCursorTimerIfNeeded() {
     if (!_showBlinkingCursor) {
-      _stopCursorBlink();
+      if (_cursorTimer != null) {
+        _stopCursorBlink();
+      }
     } else if (_cursorTimer == null) {
       _startCursorBlink();
     }
