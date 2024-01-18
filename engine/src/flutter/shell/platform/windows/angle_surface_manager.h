@@ -77,7 +77,7 @@ class AngleSurfaceManager {
 
   // Swaps the front and back buffers of the DX11 swapchain backing surface if
   // not null.
-  EGLBoolean SwapBuffers();
+  virtual bool SwapBuffers();
 
   // Creates a |EGLSurface| from the provided handle.
   EGLSurface CreateSurfaceFromHandle(EGLenum handle_type,

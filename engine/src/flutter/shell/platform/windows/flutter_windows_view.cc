@@ -590,26 +590,20 @@ void FlutterWindowsView::SendPointerEventWithData(
   }
 }
 
-bool FlutterWindowsView::SwapBuffers() {
-  // Called on an engine-controlled (non-platform) thread.
+void FlutterWindowsView::OnFramePresented() {
+  // Called on the engine's raster thread.
   std::unique_lock<std::mutex> lock(resize_mutex_);
 
   switch (resize_status_) {
-    // SwapBuffer requests during resize are ignored until the frame with the
-    // right dimensions has been generated. This is marked with
-    // kFrameGenerated resize status.
     case ResizeState::kResizeStarted:
-      return false;
+      // The caller must first call |OnFrameGenerated| or
+      // |OnEmptyFrameGenerated| before calling this method. This status
+      // indicates the caller did not call these methods or ignored their
+      // result.
+      FML_UNREACHABLE();
     case ResizeState::kFrameGenerated: {
-      bool visible = binding_handler_->IsVisible();
-      bool swap_buffers_result;
-      // For visible windows swap the buffers while resize handler is waiting.
-      // For invisible windows unblock the handler first and then swap buffers.
-      // SwapBuffers waits for vsync and there's no point doing that for
-      // invisible windows.
-      if (visible) {
-        swap_buffers_result = engine_->surface_manager()->SwapBuffers();
-      }
+      // A frame was generated for a pending resize.
+      // Unblock the platform thread.
       resize_status_ = ResizeState::kDone;
       lock.unlock();
       resize_cv_.notify_all();
@@ -617,15 +611,9 @@ bool FlutterWindowsView::SwapBuffers() {
       // Blocking the raster thread until DWM flushes alleviates glitches where
       // previous size surface is stretched over current size view.
       windows_proc_table_->DwmFlush();
-
-      if (!visible) {
-        swap_buffers_result = engine_->surface_manager()->SwapBuffers();
-      }
-      return swap_buffers_result;
     }
     case ResizeState::kDone:
-    default:
-      return engine_->surface_manager()->SwapBuffers();
+      return;
   }
 }
 
