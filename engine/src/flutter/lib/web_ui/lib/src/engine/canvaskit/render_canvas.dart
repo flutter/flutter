@@ -8,6 +8,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../display.dart';
 import '../dom.dart';
+import 'rasterizer.dart';
 
 /// A visible (on-screen) canvas that can display bitmaps produced by CanvasKit
 /// in the (off-screen) SkSurface which is backed by an OffscreenCanvas.
@@ -26,12 +27,12 @@ import '../dom.dart';
 /// on the maximum amount of WebGL contexts which can be live at once. Using
 /// a single OffscreenCanvas and multiple RenderCanvases allows us to only
 /// create a single WebGL context.
-class RenderCanvas {
+class RenderCanvas extends DisplayCanvas {
   RenderCanvas() {
     canvasElement.setAttribute('aria-hidden', 'true');
     canvasElement.style.position = 'absolute';
     _updateLogicalHtmlCanvasSize();
-    htmlElement.append(canvasElement);
+    hostElement.append(canvasElement);
   }
 
   /// The root HTML element for this canvas.
@@ -43,7 +44,8 @@ class RenderCanvas {
   /// Conversely, the canvas that lives inside this element can be swapped, for
   /// example, when the screen size changes, or when the WebGL context is lost
   /// due to the browser tab becoming dormant.
-  final DomElement htmlElement = createDomElement('flt-canvas-container');
+  @override
+  final DomElement hostElement = createDomElement('flt-canvas-container');
 
   /// The underlying `<canvas>` element used to display the pixels.
   final DomCanvasElement canvasElement = createDomCanvasElement();
@@ -68,7 +70,8 @@ class RenderCanvas {
   /// match the size of the window precisely we use the most precise floating
   /// point value we can get.
   void _updateLogicalHtmlCanvasSize() {
-    final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+    final double devicePixelRatio =
+        EngineFlutterDisplay.instance.devicePixelRatio;
     final double logicalWidth = _pixelWidth / devicePixelRatio;
     final double logicalHeight = _pixelHeight / devicePixelRatio;
     final DomCSSStyleDeclaration style = canvasElement.style;
@@ -113,7 +116,8 @@ class RenderCanvas {
         size.height.ceil() == _pixelHeight) {
       // The existing canvas doesn't need to be resized (unless the device pixel
       // ratio changed).
-      if (EngineFlutterDisplay.instance.devicePixelRatio != _currentDevicePixelRatio) {
+      if (EngineFlutterDisplay.instance.devicePixelRatio !=
+          _currentDevicePixelRatio) {
         _updateLogicalHtmlCanvasSize();
       }
       return;
@@ -130,7 +134,16 @@ class RenderCanvas {
     _updateLogicalHtmlCanvasSize();
   }
 
+  @override
+  bool get isConnected => canvasElement.isConnected!;
+
+  @override
+  void initialize() {
+    // No extra initialization needed.
+  }
+
+  @override
   void dispose() {
-    htmlElement.remove();
+    hostElement.remove();
   }
 }

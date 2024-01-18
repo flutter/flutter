@@ -5,26 +5,30 @@ import 'package:meta/meta.dart';
 
 import '../../engine.dart';
 
-/// Caches canvases used to overlay platform views.
-class RenderCanvasFactory {
-  RenderCanvasFactory() {
+/// Caches canvases used to display Skia-drawn content.
+class DisplayCanvasFactory<T extends DisplayCanvas> {
+  DisplayCanvasFactory({required this.createCanvas}) {
     assert(() {
       registerHotRestartListener(dispose);
       return true;
     }());
   }
 
+  /// A function which is passed in as a constructor parameter which is used to
+  /// create new display canvases.
+  final T Function() createCanvas;
+
   /// The base canvas to paint on. This is the default canvas which will be
   /// painted to. If there are no platform views, then this canvas will render
   /// the entire scene.
-  final RenderCanvas baseCanvas = RenderCanvas();
+  late final T baseCanvas = createCanvas()..initialize();
 
   /// Canvases created by this factory which are currently in use.
-  final List<RenderCanvas> _liveCanvases = <RenderCanvas>[];
+  final List<T> _liveCanvases = <T>[];
 
   /// Canvases created by this factory which are no longer in use. These can be
   /// reused.
-  final List<RenderCanvas> _cache = <RenderCanvas>[];
+  final List<T> _cache = <T>[];
 
   /// The number of canvases which have been created by this factory.
   int get _canvasCount => _liveCanvases.length + _cache.length + 1;
@@ -38,15 +42,16 @@ class RenderCanvasFactory {
   /// Useful in tests.
   int get debugCacheSize => _cache.length;
 
-  /// Gets an overlay canvas from the cache or creates a new one if there are
+  /// Gets a display canvas from the cache or creates a new one if there are
   /// none in the cache.
-  RenderCanvas getCanvas() {
+  T getCanvas() {
     if (_cache.isNotEmpty) {
-      final RenderCanvas canvas = _cache.removeLast();
+      final T canvas = _cache.removeLast();
       _liveCanvases.add(canvas);
       return canvas;
     } else {
-      final RenderCanvas canvas = RenderCanvas();
+      final T canvas = createCanvas();
+      canvas.initialize();
       _liveCanvases.add(canvas);
       return canvas;
     }
@@ -63,27 +68,35 @@ class RenderCanvasFactory {
     _liveCanvases.clear();
   }
 
-  /// Removes all surfaces except the base surface from the DOM.
+  /// Removes all canvases except the base canvas from the DOM.
   ///
   /// This is called at the beginning of the frame to prepare for painting into
-  /// the new surfaces.
-  void removeSurfacesFromDom() {
+  /// the new canvases.
+  void removeCanvasesFromDom() {
     _cache.forEach(_removeFromDom);
+    _liveCanvases.forEach(_removeFromDom);
+  }
+
+  /// Calls [callback] on each canvas created by this factory.
+  void forEachCanvas(void Function(T canvas) callback) {
+    callback(baseCanvas);
+    _cache.forEach(callback);
+    _liveCanvases.forEach(callback);
   }
 
   // Removes [canvas] from the DOM.
-  void _removeFromDom(RenderCanvas canvas) {
-    canvas.htmlElement.remove();
+  void _removeFromDom(T canvas) {
+    canvas.hostElement.remove();
   }
 
   /// Signals that a canvas is no longer being used. It can be reused.
-  void releaseCanvas(RenderCanvas canvas) {
+  void releaseCanvas(T canvas) {
     assert(canvas != baseCanvas, 'Attempting to release the base canvas');
     assert(
         _liveCanvases.contains(canvas),
         'Attempting to release a Canvas which '
         'was not created by this factory');
-    canvas.htmlElement.remove();
+    canvas.hostElement.remove();
     _liveCanvases.remove(canvas);
     _cache.add(canvas);
   }
@@ -94,7 +107,7 @@ class RenderCanvasFactory {
   ///
   /// If a canvas is not live, then it must be in the cache and ready to be
   /// reused.
-  bool isLive(RenderCanvas canvas) {
+  bool isLive(T canvas) {
     if (canvas == baseCanvas || _liveCanvases.contains(canvas)) {
       return true;
     }
@@ -104,10 +117,10 @@ class RenderCanvasFactory {
 
   /// Dispose all canvases created by this factory.
   void dispose() {
-    for (final RenderCanvas canvas in _cache) {
+    for (final T canvas in _cache) {
       canvas.dispose();
     }
-    for (final RenderCanvas canvas in _liveCanvases) {
+    for (final T canvas in _liveCanvases) {
       canvas.dispose();
     }
     baseCanvas.dispose();
