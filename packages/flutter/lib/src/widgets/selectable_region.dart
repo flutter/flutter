@@ -2329,12 +2329,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    final bool selectionWillbeInProgress = event is! ClearSelectionEvent;
-    if (!_selectionInProgress && selectionWillbeInProgress) {
+    final bool selectionWillBeInProgress = event is! ClearSelectionEvent;
+    if (!_selectionInProgress && selectionWillBeInProgress) {
       // Sort the selectable every time a selection start.
       selectables.sort(compareOrder);
     }
-    _selectionInProgress = selectionWillbeInProgress;
+    _selectionInProgress = selectionWillBeInProgress;
     _isHandlingSelectionEvent = true;
     late SelectionResult result;
     switch (event.type) {

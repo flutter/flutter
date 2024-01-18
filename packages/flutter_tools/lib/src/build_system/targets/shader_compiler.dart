@@ -24,6 +24,7 @@ import '../build_system.dart';
 enum ShaderTarget {
   impellerAndroid(<String>['--runtime-stage-gles', '--runtime-stage-vulkan']),
   impelleriOS(<String>['--runtime-stage-metal']),
+  impellerSwiftShader(<String>['--runtime-stage-vulkan']),
   sksl(<String>['--sksl']);
 
   const ShaderTarget(this.stages);
@@ -68,11 +69,13 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
-        assert(impellerStatus != ImpellerStatus.enabled);
-        _shaderTarget = ShaderTarget.sksl;
+        _shaderTarget =  impellerStatus == ImpellerStatus.enabled
+          ? ShaderTarget.impellerSwiftShader
+          : ShaderTarget.sksl;
       case TargetPlatform.web_javascript:
         assert(impellerStatus != ImpellerStatus.enabled);
         _shaderTarget = ShaderTarget.sksl;
