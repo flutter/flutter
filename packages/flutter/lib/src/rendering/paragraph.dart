@@ -165,7 +165,7 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
   /// The `boxes` list must be in logical order, which is the order each child
   /// is encountered when the user reads the text. Usually the length of the
   /// list equals [childCount], but it can be less than that, when some children
-  /// are ommitted due to ellipsing. It never exceeds [childCount].
+  /// are omitted due to ellipsing. It never exceeds [childCount].
   ///
   /// See also:
   ///
@@ -303,6 +303,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
+
   final TextPainter _textPainter;
 
   List<AttributedString>? _cachedAttributedLabels;
@@ -730,9 +731,18 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   bool hitTestSelf(Offset position) => true;
 
   @override
+  @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
-    switch (_textPainter.text!.getSpanForPosition(textPosition)) {
+    final GlyphInfo? glyph = _textPainter.getClosestGlyphForOffset(position);
+    // The hit-test can't fall through the horizontal gaps between visually
+    // adjacent characters on the same line, even with a large letter-spacing or
+    // text justification, as graphemeClusterLayoutBounds.width is the advance
+    // width to the next character, so there's no gap between their
+    // graphemeClusterLayoutBounds rects.
+    final InlineSpan? spanHit = glyph != null && glyph.graphemeClusterLayoutBounds.contains(position)
+      ? _textPainter.text!.getSpanForPosition(TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start))
+      : null;
+    switch (spanHit) {
       case final HitTestTarget span:
         result.add(HitTestEntry(span));
         return true;
@@ -1034,6 +1044,16 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return _textPainter.size;
   }
 
+  /// Whether the text was truncated or ellipsized as laid out.
+  ///
+  /// This returns the [TextPainter.didExceedMaxLines] of the underlying [TextPainter].
+  ///
+  /// Valid only after [layout].
+  bool get didExceedMaxLines {
+    assert(!debugNeedsLayout);
+    return _textPainter.didExceedMaxLines;
+  }
+
   /// Collected during [describeSemanticsConfiguration], used by
   /// [assembleSemanticsNode] and [_combineSemanticsInfo].
   List<InlineSpanSemanticsInformation>? _semanticsInfo;
@@ -1043,19 +1063,19 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
     bool needsAssembleSemanticsNode = false;
-    bool needsChildConfigrationsDelegate = false;
+    bool needsChildConfigurationsDelegate = false;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.recognizer != null) {
         needsAssembleSemanticsNode = true;
         break;
       }
-      needsChildConfigrationsDelegate = needsChildConfigrationsDelegate || info.isPlaceholder;
+      needsChildConfigurationsDelegate = needsChildConfigurationsDelegate || info.isPlaceholder;
     }
 
     if (needsAssembleSemanticsNode) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
-    } else if (needsChildConfigrationsDelegate) {
+    } else if (needsChildConfigurationsDelegate) {
       config.childConfigurationsDelegate = _childSemanticsConfigurationsDelegate;
     } else {
       if (_cachedAttributedLabels == null) {

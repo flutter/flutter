@@ -32,7 +32,7 @@ void main() {
       await driver.tap(defaultTextField);
 
       bool heightTextDidShrink = false;
-      for (int i = 0; i < 3; ++i) {
+      for (int i = 0; i < 6; ++i) {
         await Future<void>.delayed(const Duration(seconds: 1));
         // Measure the height with keyboard displayed.
         final String heightWithKeyboardShown = await driver.getText(heightText);

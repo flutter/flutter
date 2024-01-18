@@ -3321,7 +3321,7 @@ class SemanticsOwner extends ChangeNotifier {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/semantics.dart',
         className: '$SemanticsOwner',
         object: this,
@@ -3349,7 +3349,7 @@ class SemanticsOwner extends ChangeNotifier {
   @override
   void dispose() {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _dirtyNodes.clear();
     _nodes.clear();
@@ -3405,7 +3405,7 @@ class SemanticsOwner extends ChangeNotifier {
           'and its semantic information is not merged into a visible parent.'
         ),
         ErrorHint(
-          'An invisible SemantiscNode makes the accessibility experience confusing, '
+          'An invisible SemanticsNode makes the accessibility experience confusing, '
           'as it does not provide any visual indication when the user selects it '
           'via accessibility technologies.'
         ),
