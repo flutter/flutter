@@ -581,11 +581,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// ```
   /// {@end-tool}
   ///
-  /// By default, the provided `widget` is rendered into [WidgetTester.view].
-  /// Tests that want to control the [FlutterView] into which the widget is
-  /// rendered can set `wrapWithView` to false. In that case, the provided
-  /// `widget` tree must specify a [View] widget as ancestor of all
-  /// [RenderObjectWidget]s.
+  /// By default, the provided `widget` is rendered into [WidgetTester.view],
+  /// whose properties tests can modify to simulate different scenarios (e.g.
+  /// running on a large/small screen). Tests that want to control the
+  /// [FlutterView] into which the widget is rendered can set `wrapWithView` to
+  /// false. In that case, the provided `widget` tree must specify a [View]
+  /// widget as ancestor of all [RenderObjectWidget]s.
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
