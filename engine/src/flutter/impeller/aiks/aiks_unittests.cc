@@ -3758,10 +3758,13 @@ TEST_P(AiksTest, GaussianBlurSetsMipCountOnPass) {
   canvas.Restore();
 
   Picture picture = canvas.EndRecordingAsPicture();
-  EXPECT_EQ(1, picture.pass->GetRequiredMipCount());
+  EXPECT_EQ(4, picture.pass->GetRequiredMipCount());
 }
 
 TEST_P(AiksTest, GaussianBlurAllocatesCorrectMipCountRenderTarget) {
+  size_t blur_required_mip_count =
+      GetParam() == PlaygroundBackend::kMetal ? 4 : 1;
+
   Canvas canvas;
   canvas.DrawCircle({100, 100}, 50, {.color = Color::CornflowerBlue()});
   canvas.SaveLayer({}, std::nullopt,
@@ -3782,11 +3785,14 @@ TEST_P(AiksTest, GaussianBlurAllocatesCorrectMipCountRenderTarget) {
     max_mip_count =
         std::max(it->texture->GetTextureDescriptor().mip_count, max_mip_count);
   }
-  EXPECT_EQ(max_mip_count, 1lu);
+  EXPECT_EQ(max_mip_count, blur_required_mip_count);
 }
 
 TEST_P(AiksTest, GaussianBlurMipMapNestedLayer) {
   fml::testing::LogCapture log_capture;
+  size_t blur_required_mip_count =
+      GetParam() == PlaygroundBackend::kMetal ? 4 : 1;
+
   Canvas canvas;
   canvas.DrawPaint({.color = Color::Wheat()});
   canvas.SaveLayer({.blend_mode = BlendMode::kMultiply});
@@ -3809,12 +3815,19 @@ TEST_P(AiksTest, GaussianBlurMipMapNestedLayer) {
     max_mip_count =
         std::max(it->texture->GetTextureDescriptor().mip_count, max_mip_count);
   }
-  EXPECT_EQ(max_mip_count, 1lu);
-  EXPECT_EQ(log_capture.str().find(GaussianBlurFilterContents::kNoMipsError),
-            std::string::npos);
+  EXPECT_EQ(max_mip_count, blur_required_mip_count);
+  if (GetParam() == PlaygroundBackend::kMetal) {
+    EXPECT_EQ(log_capture.str().find(GaussianBlurFilterContents::kNoMipsError),
+              std::string::npos);
+  } else {
+    EXPECT_NE(log_capture.str().find(GaussianBlurFilterContents::kNoMipsError),
+              std::string::npos);
+  }
 }
 
 TEST_P(AiksTest, GaussianBlurMipMapImageFilter) {
+  size_t blur_required_mip_count =
+      GetParam() == PlaygroundBackend::kMetal ? 4 : 1;
   fml::testing::LogCapture log_capture;
   Canvas canvas;
   canvas.SaveLayer(
@@ -3835,9 +3848,14 @@ TEST_P(AiksTest, GaussianBlurMipMapImageFilter) {
     max_mip_count =
         std::max(it->texture->GetTextureDescriptor().mip_count, max_mip_count);
   }
-  EXPECT_EQ(max_mip_count, 1lu);
-  EXPECT_EQ(log_capture.str().find(GaussianBlurFilterContents::kNoMipsError),
-            std::string::npos);
+  EXPECT_EQ(max_mip_count, blur_required_mip_count);
+  if (GetParam() == PlaygroundBackend::kMetal) {
+    EXPECT_EQ(log_capture.str().find(GaussianBlurFilterContents::kNoMipsError),
+              std::string::npos);
+  } else {
+    EXPECT_NE(log_capture.str().find(GaussianBlurFilterContents::kNoMipsError),
+              std::string::npos);
+  }
 }
 
 }  // namespace testing

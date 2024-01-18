@@ -256,6 +256,14 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
   /// What's important is the `StorageMode` of the textures, which cannot be
   /// changed for the lifetime of the textures.
 
+  if (context->GetBackendType() != Context::BackendType::kMetal) {
+    // TODO(https://github.com/flutter/flutter/issues/141495): Implement mip map
+    // generation on vulkan.
+    // TODO(https://github.com/flutter/flutter/issues/141732): Implement mip map
+    // generation on opengles.
+    mip_count = 1;
+  }
+
   RenderTarget target;
   if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
     target = RenderTarget::CreateOffscreenMSAA(
