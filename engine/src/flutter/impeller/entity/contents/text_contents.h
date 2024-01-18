@@ -5,12 +5,8 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_TEXT_CONTENTS_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_TEXT_CONTENTS_H_
 
-#include <functional>
 #include <memory>
-#include <variant>
-#include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/typographer/glyph_atlas.h"
@@ -69,11 +65,6 @@ class TextContents final : public Contents {
   Scalar inherited_opacity_ = 1.0;
   Vector2 offset_;
   bool force_text_color_ = false;
-
-  std::shared_ptr<GlyphAtlas> ResolveAtlas(
-      Context& context,
-      GlyphAtlas::Type type,
-      const std::shared_ptr<LazyGlyphAtlas>& lazy_atlas) const;
 
   TextContents(const TextContents&) = delete;
 

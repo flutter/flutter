@@ -731,11 +731,11 @@ class ContentContext {
       const RenderTarget& subpass_target,
       const SubpassCallback& subpass_callback) const;
 
-  std::shared_ptr<LazyGlyphAtlas> GetLazyGlyphAtlas() const {
+  const std::shared_ptr<LazyGlyphAtlas>& GetLazyGlyphAtlas() const {
     return lazy_glyph_atlas_;
   }
 
-  std::shared_ptr<RenderTargetAllocator> GetRenderTargetCache() const {
+  const std::shared_ptr<RenderTargetAllocator>& GetRenderTargetCache() const {
     return render_target_cache_;
   }
 

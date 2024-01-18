@@ -190,7 +190,7 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
   };
   auto atlas =
       context->CreateGlyphAtlas(*GetContext(), GlyphAtlas::Type::kAlphaBitmap,
-                                std::move(atlas_context), font_glyph_map);
+                                atlas_context, font_glyph_map);
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
 

@@ -35,7 +35,7 @@ class TypographerContext {
   virtual std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
       Context& context,
       GlyphAtlas::Type type,
-      std::shared_ptr<GlyphAtlasContext> atlas_context,
+      const std::shared_ptr<GlyphAtlasContext>& atlas_context,
       const FontGlyphMap& font_glyph_map) const = 0;
 
  protected:
