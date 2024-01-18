@@ -7,7 +7,7 @@
 import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
 import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder show NativeAssetsBuildRunner;
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
 import 'android/native_assets.dart';

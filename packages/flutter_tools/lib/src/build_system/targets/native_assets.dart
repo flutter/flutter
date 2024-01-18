@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart' show Asset;
+import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
 import 'package:package_config/package_config_types.dart';
 
 import '../../android/gradle_utils.dart';
