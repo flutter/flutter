@@ -329,10 +329,7 @@ void main() {
     expect(paint.color, const Color(0x7F000000)); // 0.5 opacity
     expect(paint.filterQuality, FilterQuality.high);
     expect(paint.isAntiAlias, true);
-    // TODO(yjbanov): remove kIsWeb when https://github.com/flutter/engine/pull/49786 rolls in
-    if (!kIsWeb) {
-      expect(paint.invertColors, isTrue);
-    }
+    expect(paint.invertColors, isTrue);
   });
 
   test('DecorationImage.toString', () async {
