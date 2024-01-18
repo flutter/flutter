@@ -1482,7 +1482,7 @@ void main() {
     expect(tabController.index, 1);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
@@ -1531,7 +1531,7 @@ void main() {
     expect(tabController.index, 0);
 
     final PageView pageView = tester.widget<PageView>(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     expect(position.pixels, 0.0);
@@ -1592,7 +1592,7 @@ void main() {
     expect(tabController.index, 1);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
 
     // The TabView was initialized with viewportFraction as 0.8
     // So it's expected the PageView inside would obtain the same viewportFraction
@@ -1635,7 +1635,7 @@ void main() {
     expect(tabController.index, 1);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
 
     // The TabView was initialized with default viewportFraction
     // So it's expected the PageView inside would obtain the value 1
@@ -1680,13 +1680,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame(0.8));
     PageView pageView = tester.widget(find.byType(PageView));
-    PageController pageController = pageView.controller;
+    PageController pageController = pageView.controller!;
     expect(pageController.viewportFraction, 0.8);
 
     // Rebuild with a different viewport fraction.
     await tester.pumpWidget(buildFrame(0.5));
     pageView = tester.widget(find.byType(PageView));
-    pageController = pageView.controller;
+    pageController = pageView.controller!;
     expect(pageController.viewportFraction, 0.5);
   });
 
@@ -1861,7 +1861,7 @@ void main() {
     expect(tabController.index, 1);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
@@ -1905,7 +1905,7 @@ void main() {
     expect(tabController.index, 0);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
@@ -1950,7 +1950,7 @@ void main() {
     expect(tabController.index, 0);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
@@ -1999,7 +1999,7 @@ void main() {
     expect(tabController.index, 0);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
@@ -2050,7 +2050,7 @@ void main() {
     expect(tabController.index, 0);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
@@ -2246,7 +2246,7 @@ void main() {
     expect(tabController.index, 1);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
@@ -2432,7 +2432,7 @@ void main() {
     expect(tabController.index, 1);
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
@@ -4208,7 +4208,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(15));
     PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController1 = pageView.controller;
+    final PageController pageController1 = pageView.controller!;
     TabController tabController = DefaultTabController.of(tester.element(find.text('Page 14')));
     expect(tabController.index, 14);
     expect(pageController1.page, 14);
@@ -4216,7 +4216,7 @@ void main() {
     // Rebuild with a new default tab controller with more tabs.
     await tester.pumpWidget(buildFrame(10));
     pageView = tester.widget(find.byType(PageView));
-    final PageController pageController2 = pageView.controller;
+    final PageController pageController2 = pageView.controller!;
     tabController = DefaultTabController.of(tester.element(find.text('Page 9')));
     expect(tabController.index, 9);
     expect(pageController2.page, 9);
@@ -5065,7 +5065,7 @@ void main() {
     double expectedIndicatorLeft = canvas.indicatorRect.left;
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     void pageControllerListener() {
       // Whenever TabBarView scrolls due to changing TabController's index,
       // check if indicator stays idle in its expectedIndicatorLeft
@@ -5225,7 +5225,7 @@ void main() {
     ));
 
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     final ScrollPosition position = pageController.position;
 
     expect(tabController.index, 0);
@@ -5715,7 +5715,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(controller1, showLast: true));
     final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
+    final PageController pageController = pageView.controller!;
     await tester.tap(find.text('three'));
     await tester.pumpAndSettle();
     expect(controller1.index, 2);
@@ -5782,7 +5782,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(controller1, showLast: true));
     PageView pageView = tester.widget(find.byType(PageView));
-    PageController pageController = pageView.controller;
+    PageController pageController = pageView.controller!;
     await tester.tap(find.text('three'));
     await tester.pumpAndSettle();
     expect(controller1.index, 2);
@@ -5792,7 +5792,7 @@ void main() {
     await tester.pumpWidget(buildFrame(controller2, showLast: false));
     await tester.pumpAndSettle();
     pageView = tester.widget(find.byType(PageView));
-    pageController = pageView.controller;
+    pageController = pageView.controller!;
     expect(controller2.index, 0);
     expect(pageController.page, 0);
 
@@ -5800,7 +5800,7 @@ void main() {
     await tester.pumpWidget(buildFrame(controller1, showLast: true));
     await tester.pumpAndSettle();
     pageView = tester.widget(find.byType(PageView));
-    pageController = pageView.controller;
+    pageController = pageView.controller!;
     expect(controller1.index, 2);
     expect(pageController.page, 2);
   });
