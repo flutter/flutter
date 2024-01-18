@@ -13,7 +13,7 @@
         },
     ],
     use: [
-	// This is used by the Dart VM to communicate from Dart code to C++ code.
+        // This is used by the Dart VM to communicate from Dart code to C++ code.
         {
             storage: "tmp",
             path: "/tmp",
@@ -23,6 +23,14 @@
             directory: "config-data",
             rights: [ "r*" ],
             path: "/config/data",
+        },
+        // The ICU time zone data, factored out of `config-data`.
+        // See:
+        // https://fuchsia.dev/fuchsia-src/concepts/process/namespaces?typical_directory_structure
+        {
+            directory: "tzdata-icu",
+            rights: [ "r*" ],
+            path: "/config/tzdata/icu",
         },
         {
             directory: "root-ssl-certificates",
