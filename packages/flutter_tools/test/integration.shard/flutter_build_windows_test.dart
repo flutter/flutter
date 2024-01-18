@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -42,18 +41,11 @@ void main() {
 
       projectRoot = tempDir.childDirectory('hello');
 
-      final String arch;
-      if (Abi.current() == Abi.windowsArm64) {
-        arch = 'arm64';
-      } else {
-        arch = 'x64';
-      }
-
       releaseDir = fileSystem.directory(fileSystem.path.join(
         projectRoot.path,
         'build',
         'windows',
-        arch,
+        'x64',
         'runner',
         'Release',
       ));

@@ -104,7 +104,6 @@ class NativeAssets extends Target {
             fileSystem,
             buildRunner,
           );
-        case TargetPlatform.windows_arm64:
         case TargetPlatform.windows_x64:
           dependencies = await _buildWindows(
             environment,
@@ -355,7 +354,6 @@ class NativeAssets extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
         throwToolExit('Unsupported Android target platform: $targetPlatform.');
     }
   }

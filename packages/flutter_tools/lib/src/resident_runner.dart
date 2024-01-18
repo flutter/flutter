@@ -1630,7 +1630,6 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
     case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
       return null;
   }
 }

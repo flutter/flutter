@@ -30,10 +30,7 @@ import 'visual_studio.dart';
 const String _kBadCharacters = r"'#!$^&*=|,;<>?";
 
 /// Builds the Windows project using msbuild.
-Future<void> buildWindows(
-  WindowsProject windowsProject,
-  BuildInfo buildInfo,
-  TargetPlatform targetPlatform, {
+Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String? target,
   VisualStudio? visualStudioOverride,
   SizeAnalyzer? sizeAnalyzer,
@@ -59,6 +56,8 @@ Future<void> buildWindows(
       'to learn about adding Windows support to a project.');
   }
 
+  // TODO(pbo-linaro): Add support for windows-arm64 platform, https://github.com/flutter/flutter/issues/129807
+  const TargetPlatform targetPlatform = TargetPlatform.windows_x64;
   final Directory buildDirectory = globals.fs.directory(globals.fs.path.join(
     projectPath,
     getWindowsBuildDirectory(targetPlatform),
@@ -84,7 +83,6 @@ Future<void> buildWindows(
     platform: globals.platform,
     logger: globals.logger,
     processManager: globals.processManager,
-    osUtils: globals.os,
   );
   final String? cmakePath = visualStudio.cmakePath;
   final String? cmakeGenerator = visualStudio.cmakeGenerator;
@@ -101,9 +99,9 @@ Future<void> buildWindows(
     await _runCmakeGeneration(
       cmakePath: cmakePath,
       generator: cmakeGenerator,
-      targetPlatform: targetPlatform,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
+      targetPlatform: targetPlatform,
     );
     if (visualStudio.displayVersion == '17.1.0') {
       _fixBrokenCmakeGeneration(buildDirectory);
@@ -130,7 +128,7 @@ Future<void> buildWindows(
   }
 
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = getNameForTargetPlatform(targetPlatform);
+    final String arch = getNameForTargetPlatform(TargetPlatform.windows_x64);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('snapshot.$arch.json');
     final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
@@ -167,26 +165,23 @@ Future<void> buildWindows(
   }
 }
 
-String getCmakeWindowsArch(TargetPlatform targetPlatform) {
-  return switch (targetPlatform) {
-    TargetPlatform.windows_x64 => 'x64',
-    TargetPlatform.windows_arm64 => 'ARM64',
-    _ => throw Exception('Unsupported target platform "$targetPlatform".'),
-  };
-}
-
 Future<void> _runCmakeGeneration({
   required String cmakePath,
   required String generator,
-  required TargetPlatform targetPlatform,
   required Directory buildDir,
   required Directory sourceDir,
+  required TargetPlatform targetPlatform,
 }) async {
+  if (targetPlatform != TargetPlatform.windows_x64) {
+    throwToolExit('Windows build supports only x64 target architecture');
+  }
+
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
   int result;
-
+  const String arch = 'x64';
+  const String flutterTargetPlatform = 'windows-x64';
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -198,8 +193,8 @@ Future<void> _runCmakeGeneration({
         '-G',
         generator,
         '-A',
-        getCmakeWindowsArch(targetPlatform),
-        '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
+        arch,
+        '-DFLUTTER_TARGET_PLATFORM=$flutterTargetPlatform',
       ],
       trace: true,
     );

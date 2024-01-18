@@ -31,9 +31,7 @@ const String _kWindowsDepfile = 'windows_engine_sources.d';
 
 /// Copies the Windows desktop embedding files to the copy directory.
 class UnpackWindows extends Target {
-  const UnpackWindows(this.targetPlatform);
-
-  final TargetPlatform targetPlatform;
+  const UnpackWindows();
 
   @override
   String get name => 'unpack_windows';
@@ -62,13 +60,13 @@ class UnpackWindows extends Target {
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsDesktopPath,
-        platform: targetPlatform,
+        platform: TargetPlatform.windows_x64,
         mode: buildMode,
       );
     final String clientSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsCppClientWrapper,
-        platform: targetPlatform,
+        platform: TargetPlatform.windows_x64,
         mode: buildMode,
       );
     final Directory outputDirectory = environment.fileSystem.directory(
@@ -87,7 +85,7 @@ class UnpackWindows extends Target {
       clientSourcePaths: <String>[clientSourcePath],
       icuDataPath: environment.artifacts.getArtifactPath(
         Artifact.icuData,
-        platform: targetPlatform,
+        platform: TargetPlatform.windows_x64
       )
     );
     environment.depFileService.writeToFile(
@@ -99,14 +97,12 @@ class UnpackWindows extends Target {
 
 /// Creates a bundle for the Windows desktop target.
 abstract class BundleWindowsAssets extends Target {
-  const BundleWindowsAssets(this.targetPlatform);
-
-  final TargetPlatform targetPlatform;
+  const BundleWindowsAssets();
 
   @override
-  List<Target> get dependencies => <Target>[
-    const KernelSnapshot(),
-    UnpackWindows(targetPlatform),
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+    UnpackWindows(),
   ];
 
   @override
@@ -142,7 +138,7 @@ abstract class BundleWindowsAssets extends Target {
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,
-      targetPlatform: targetPlatform,
+      targetPlatform: TargetPlatform.windows_x64,
       shaderTarget: ShaderTarget.sksl,
     );
     environment.depFileService.writeToFile(
@@ -191,10 +187,10 @@ class WindowsAotBundle extends Target {
 }
 
 class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
-  const ReleaseBundleWindowsAssets(super.targetPlatform);
+  const ReleaseBundleWindowsAssets();
 
   @override
-  String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'release_bundle_windows_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -202,15 +198,15 @@ class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    WindowsAotBundle(AotElfRelease(targetPlatform)),
+    const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)),
   ];
 }
 
 class ProfileBundleWindowsAssets extends BundleWindowsAssets {
-  const ProfileBundleWindowsAssets(super.targetPlatform);
+  const ProfileBundleWindowsAssets();
 
   @override
-  String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'profile_bundle_windows_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -218,15 +214,15 @@ class ProfileBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    WindowsAotBundle(AotElfProfile(targetPlatform)),
+    const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)),
   ];
 }
 
 class DebugBundleWindowsAssets extends BundleWindowsAssets {
-  const DebugBundleWindowsAssets(super.targetPlatform);
+  const DebugBundleWindowsAssets();
 
   @override
-  String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'debug_bundle_windows_assets';
 
   @override
   List<Source> get inputs => <Source>[

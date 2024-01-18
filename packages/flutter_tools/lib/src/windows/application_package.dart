@@ -78,7 +78,7 @@ abstract class WindowsApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String executable(BuildMode buildMode, TargetPlatform targetPlatform);
+  String executable(BuildMode buildMode);
 }
 
 class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackage {
@@ -91,7 +91,7 @@ class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackag
   final String _executable;
 
   @override
-  String executable(BuildMode buildMode, TargetPlatform targetPlatform) => _executable;
+  String executable(BuildMode buildMode) => _executable;
 
   @override
   String get name => _executable;
@@ -108,10 +108,10 @@ class BuildableWindowsApp extends WindowsApp {
   final WindowsProject project;
 
   @override
-  String executable(BuildMode buildMode, TargetPlatform targetPlatform) {
+  String executable(BuildMode buildMode) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
-        getWindowsBuildDirectory(targetPlatform),
+        getWindowsBuildDirectory(TargetPlatform.windows_x64),
         'runner',
         sentenceCase(buildMode.cliName),
         '$binaryName.exe',
