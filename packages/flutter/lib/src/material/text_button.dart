@@ -82,7 +82,7 @@ class TextButton extends ButtonStyleButton {
     super.style,
     super.focusNode,
     super.autofocus = false,
-    super.clipBehavior = Clip.none,
+    super.clipBehavior,
     super.statesController,
     super.isSemanticButton,
     required Widget super.child,
@@ -113,7 +113,12 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The [foregroundColor] and [disabledForegroundColor] colors are used
   /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
-  /// a derived [ButtonStyle.overlayColor].
+  /// a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
+  ///
+  /// If [overlayColor] is specified and its value is [Colors.transparent]
+  /// then the pressed/focused/hovered highlights are effectively defeated.
+  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// default is created.
   ///
   /// The [backgroundColor] and [disabledBackgroundColor] colors are
   /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
@@ -151,6 +156,7 @@ class TextButton extends ButtonStyleButton {
     Color? surfaceTintColor,
     Color? iconColor,
     Color? disabledIconColor,
+    Color? overlayColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -167,6 +173,8 @@ class TextButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    ButtonLayerBuilder? backgroundBuilder,
+    ButtonLayerBuilder? foregroundBuilder,
   }) {
     final Color? foreground = foregroundColor;
     final Color? disabledForeground = disabledForegroundColor;
@@ -178,9 +186,11 @@ class TextButton extends ButtonStyleButton {
       : disabledBackgroundColor == null
         ? ButtonStyleButton.allOrNull<Color?>(backgroundColor)
         : _TextButtonDefaultColor(backgroundColor, disabledBackgroundColor);
-    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
+    final MaterialStateProperty<Color?>? overlayColorProp = (foreground == null && overlayColor == null)
       ? null
-      : _TextButtonDefaultOverlay(foreground);
+      : overlayColor != null && overlayColor.value == 0
+        ? const MaterialStatePropertyAll<Color?>(Colors.transparent)
+        : _TextButtonDefaultOverlay((overlayColor ?? foreground)!);
     final MaterialStateProperty<Color?>? iconColorProp = (iconColor == null && disabledIconColor == null)
       ? null
       : disabledIconColor == null
@@ -192,7 +202,7 @@ class TextButton extends ButtonStyleButton {
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
       foregroundColor: foregroundColorProp,
       backgroundColor: backgroundColorProp,
-      overlayColor: overlayColor,
+      overlayColor: overlayColorProp,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       iconColor: iconColorProp,
@@ -210,6 +220,8 @@ class TextButton extends ButtonStyleButton {
       enableFeedback: enableFeedback,
       alignment: alignment,
       splashFactory: splashFactory,
+      backgroundBuilder: backgroundBuilder,
+      foregroundBuilder: foregroundBuilder,
     );
   }
 
@@ -250,7 +262,7 @@ class TextButton extends ButtonStyleButton {
   ///   * disabled - Theme.colorScheme.onSurface(0.38)
   ///   * others - Theme.colorScheme.primary
   /// * `overlayColor`
-  ///   * hovered - Theme.colorScheme.primary(0.04)
+  ///   * hovered - Theme.colorScheme.primary(0.08)
   ///   * focused or pressed - Theme.colorScheme.primary(0.12)
   /// * `shadowColor` - Theme.shadowColor
   /// * `elevation` - 0
@@ -471,13 +483,12 @@ class _TextButtonWithIcon extends TextButton {
     super.style,
     super.focusNode,
     bool? autofocus,
-    Clip? clipBehavior,
+    super.clipBehavior,
     super.statesController,
     required Widget icon,
     required Widget label,
   }) : super(
          autofocus: autofocus ?? false,
-         clipBehavior: clipBehavior ?? Clip.none,
          child: _TextButtonWithIconChild(icon: icon, label: label, buttonStyle: style),
       );
 

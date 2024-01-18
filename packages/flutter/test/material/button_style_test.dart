@@ -42,6 +42,8 @@ void main() {
     expect(style.tapTargetSize, null);
     expect(style.animationDuration, null);
     expect(style.enableFeedback, null);
+    expect(style.backgroundBuilder, null);
+    expect(style.foregroundBuilder, null);
   });
 
   testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
@@ -107,6 +109,9 @@ void main() {
   });
 
   testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
+    Widget backgroundBuilder(BuildContext context, Set<MaterialState> states, Widget? child) => child!;
+    Widget foregroundBuilder(BuildContext context, Set<MaterialState> states, Widget? child) => child!;
+
     const MaterialStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10));
     const MaterialStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const MaterialStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
@@ -128,7 +133,7 @@ void main() {
     const Duration animationDuration = Duration(seconds: 1);
     const bool enableFeedback = true;
 
-    const ButtonStyle style = ButtonStyle(
+    ButtonStyle style = ButtonStyle(
       textStyle: textStyle,
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
@@ -149,6 +154,8 @@ void main() {
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
+      backgroundBuilder: backgroundBuilder,
+      foregroundBuilder: foregroundBuilder,
     );
 
     expect(
@@ -174,6 +181,8 @@ void main() {
         tapTargetSize: tapTargetSize,
         animationDuration: animationDuration,
         enableFeedback: enableFeedback,
+        backgroundBuilder: backgroundBuilder,
+        foregroundBuilder:foregroundBuilder,
       ),
     );
 

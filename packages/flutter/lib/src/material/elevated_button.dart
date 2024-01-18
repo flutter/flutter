@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'button_style_button.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'elevated_button_theme.dart';
 import 'ink_ripple.dart';
@@ -70,7 +71,7 @@ class ElevatedButton extends ButtonStyleButton {
     super.style,
     super.focusNode,
     super.autofocus = false,
-    super.clipBehavior = Clip.none,
+    super.clipBehavior,
     super.statesController,
     required super.child,
   });
@@ -100,7 +101,12 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// The [foregroundColor] and [disabledForegroundColor] colors are used
   /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
-  /// a derived [ButtonStyle.overlayColor].
+  /// a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
+  ///
+  /// If [overlayColor] is specified and its value is [Colors.transparent]
+  /// then the pressed/focused/hovered highlights are effectively defeated.
+  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// default is created.
   ///
   /// The [backgroundColor] and [disabledBackgroundColor] colors are
   /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
@@ -154,6 +160,7 @@ class ElevatedButton extends ButtonStyleButton {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? overlayColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -170,6 +177,8 @@ class ElevatedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    ButtonLayerBuilder? backgroundBuilder,
+    ButtonLayerBuilder? foregroundBuilder,
   }) {
     final Color? background = backgroundColor;
     final Color? disabledBackground = disabledBackgroundColor;
@@ -181,9 +190,11 @@ class ElevatedButton extends ButtonStyleButton {
     final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
       : _ElevatedButtonDefaultColor(foreground, disabledForeground);
-    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
+    final MaterialStateProperty<Color?>? overlayColorProp = (foreground == null && overlayColor == null)
       ? null
-      : _ElevatedButtonDefaultOverlay(foreground);
+      : overlayColor != null && overlayColor.value == 0
+        ? const MaterialStatePropertyAll<Color?>(Colors.transparent)
+        : _ElevatedButtonDefaultOverlay((overlayColor ?? foreground)!);
     final MaterialStateProperty<double>? elevationValue = (elevation == null)
       ? null
       : _ElevatedButtonDefaultElevation(elevation);
@@ -193,7 +204,7 @@ class ElevatedButton extends ButtonStyleButton {
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
       backgroundColor: backgroundColorProp,
       foregroundColor: foregroundColorProp,
-      overlayColor: overlayColor,
+      overlayColor: overlayColorProp,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       elevation: elevationValue,
@@ -210,6 +221,8 @@ class ElevatedButton extends ButtonStyleButton {
       enableFeedback: enableFeedback,
       alignment: alignment,
       splashFactory: splashFactory,
+      backgroundBuilder: backgroundBuilder,
+      foregroundBuilder: foregroundBuilder,
     );
   }
 
@@ -251,7 +264,7 @@ class ElevatedButton extends ButtonStyleButton {
   ///   * others - Theme.colorScheme.onPrimary
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.onPrimary(0.08)
-  ///   * focused or pressed - Theme.colorScheme.onPrimary(0.24)
+  ///   * focused or pressed - Theme.colorScheme.onPrimary(0.12)
   /// * `shadowColor` - Theme.shadowColor
   /// * `elevation`
   ///   * disabled - 0
@@ -475,13 +488,12 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     super.style,
     super.focusNode,
     bool? autofocus,
-    Clip? clipBehavior,
+    super.clipBehavior,
     super.statesController,
     required Widget icon,
     required Widget label,
   }) : super(
          autofocus: autofocus ?? false,
-         clipBehavior: clipBehavior ?? Clip.none,
          child: _ElevatedButtonWithIconChild(icon: icon, label: label, buttonStyle: style),
       );
 
