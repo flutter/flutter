@@ -273,12 +273,17 @@ class SelectableRegion extends StatefulWidget {
     final bool canSelectAll = selectionGeometry.hasContent;
     final bool canShare = onShare != null && switch (defaultTargetPlatform) {
       TargetPlatform.android
-      || TargetPlatform.iOS
         => selectionGeometry.status == SelectionStatus.uncollapsed,
       TargetPlatform.macOS
       || TargetPlatform.fuchsia
       || TargetPlatform.linux
       || TargetPlatform.windows
+        => false,
+      // TODO(bleroux): the share button should be proposed on iOS but the share
+      // functionality requires some changes on the engine side because, on iPad,
+      // it needs an anchor for the popup.
+      // See: https://github.com/flutter/flutter/issues/141775.
+      TargetPlatform.iOS
         => false,
     };
 

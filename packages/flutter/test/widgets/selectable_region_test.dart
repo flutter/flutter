@@ -3337,7 +3337,7 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
-  testWidgets('Selection behavior when clicking the `Share` button on Android and iOS', (WidgetTester tester) async {
+  testWidgets('Selection behavior when clicking the `Share` button on Android', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -3368,6 +3368,7 @@ void main() {
     );
     await tester.longPressAt(textOffsetToPosition(paragraph, 6)); // at the 'r'
     await tester.pump(kLongPressTimeout);
+
     // `are` is selected.
     expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
@@ -3383,34 +3384,16 @@ void main() {
     addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        // Press the `Share` button.
-        expect(buttonItems[1].type, ContextMenuButtonType.share);
-        buttonItems[1].onPressed?.call();
-        expect(lastShare, 'are');
-        // On Android, share should clear the selection.
-        expect(regionState.selectionOverlay, isNull);
-        expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
-        expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
-      case TargetPlatform.iOS:
-        // Press the `Share` button.
-        expect(buttonItems[2].type, ContextMenuButtonType.share);
-        buttonItems[2].onPressed?.call();
-        expect(lastShare, 'are');
-        // On iOS, share should not clear the selection.
-        expect(regionState.selectionOverlay, isNotNull);
-        expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
-        expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        // Test doesn't run these platforms.
-        break;
-    }
+
+    // Press the `Share` button.
+    expect(buttonItems[1].type, ContextMenuButtonType.share);
+    buttonItems[1].onPressed?.call();
+    expect(lastShare, 'are');
+    // On Android, share should clear the selection.
+    expect(regionState.selectionOverlay, isNull);
+    expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
+    expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
   },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
@@ -3462,11 +3445,6 @@ void main() {
         expect(buttonItems[1].type, ContextMenuButtonType.share);
         expect(buttonItems[2].type, ContextMenuButtonType.selectAll);
       case TargetPlatform.iOS:
-        // On iOS, the share button is before the select all button.
-        expect(buttonItems.length, 3);
-        expect(buttonItems[0].type, ContextMenuButtonType.copy);
-        expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
-        expect(buttonItems[2].type, ContextMenuButtonType.share);
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:

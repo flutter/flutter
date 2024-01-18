@@ -145,7 +145,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     super.key,
     required VoidCallback onCopy,
     required VoidCallback onSelectAll,
-    required VoidCallback? onShare,
     required SelectionGeometry selectionGeometry,
     required this.anchors,
   }) : children = null,
@@ -153,7 +152,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onSelectAll: onSelectAll,
-         onShare: onShare,
+         onShare: null, // See https://github.com/flutter/flutter/issues/141775.
        );
 
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.anchors}
