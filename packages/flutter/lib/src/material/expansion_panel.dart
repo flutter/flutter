@@ -215,7 +215,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.elevation = 2,
     this.expandIconColor,
     this.materialGapSize = 16.0,
-  })  : _allowOnlyOnePanelOpen = false, initialOpenPanelValue = null;
+  })  : _allowOnlyOnePanelOpen = false,
+    initialOpenPanelValue = null;
 
   /// Creates a radio expansion panel list widget.
   ///
@@ -313,12 +314,10 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   void initState() {
     super.initState();
     if (widget._allowOnlyOnePanelOpen) {
-      assert(_allIdentifiersUnique(),
-          'All ExpansionPanelRadio identifier values must be unique.');
+      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
       if (widget.initialOpenPanelValue != null) {
-        _currentOpenPanel = searchPanelByValue(
-            widget.children.cast<ExpansionPanelRadio>(),
-            widget.initialOpenPanelValue);
+        _currentOpenPanel =
+          searchPanelByValue(widget.children.cast<ExpansionPanelRadio>(),widget.initialOpenPanelValue);
       }
     }
   }
