@@ -26,6 +26,12 @@
             rights: [ "r*" ],
             path: "/config/data",
         },
+        // See common.shard.cml.
+        {
+            directory: "tzdata-icu",
+            rights: [ "r*" ],
+            path: "/config/tzdata/icu",
+        },
     ],
     expose: [
         {
