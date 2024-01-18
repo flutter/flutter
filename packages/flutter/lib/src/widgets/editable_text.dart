@@ -4011,7 +4011,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _stopCursorBlink({ bool resetCharTicks = true }) {
-    _cursorBlinkOpacityController.value = 0.0;
+    _cursorBlinkOpacityController.value = renderEditable.floatingCursorOn ? 1.0 : 0.0;
     _cursorTimer?.cancel();
     _cursorTimer = null;
     if (resetCharTicks) {
@@ -4021,9 +4021,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _startOrStopCursorTimerIfNeeded() {
     if (!_showBlinkingCursor) {
-      if (_cursorTimer != null) {
-        _stopCursorBlink();
-      }
+      _stopCursorBlink();
     } else if (_cursorTimer == null) {
       _startCursorBlink();
     }
