@@ -569,6 +569,10 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
     lastClientRect = null;
+
+    // Call restartInput to reset IME internal states. Otherwise some IMEs (Gboard for instance)
+    // keep reacting based on the previous input configuration until a new configuration is set.
+    mImm.restartInput(mView);
   }
 
   private static class InputTarget {
