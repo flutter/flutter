@@ -303,9 +303,11 @@ STDERR STUFF
 
   testUsingContext('macOS build outputs path and size when successful', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      processUtils: processUtils,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );

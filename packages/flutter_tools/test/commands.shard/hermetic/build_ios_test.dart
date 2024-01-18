@@ -285,10 +285,12 @@ void main() {
 
   testUsingContext('ios build outputs path and size when successful', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();

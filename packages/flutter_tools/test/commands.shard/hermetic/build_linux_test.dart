@@ -196,10 +196,12 @@ void main() {
 
   testUsingContext('Linux build outputs path when successful', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     processManager = FakeProcessManager.list(<FakeCommand>[
