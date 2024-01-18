@@ -172,4 +172,8 @@ class SkwasmPaint extends SkwasmObjectWrapper<RawPaint> implements ui.Paint {
     _invertColors = invertColors;
     _setEffectiveColorFilter();
   }
+
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/141639
+  @override
+  String toString() => 'Paint()';
 }
