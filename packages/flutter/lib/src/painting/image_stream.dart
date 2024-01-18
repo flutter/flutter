@@ -15,22 +15,32 @@ const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
 ///
-/// The receiver of an [ImageInfo] object must call [dispose]. To safely share
-/// the object with other clients, use the [clone] method before calling
-/// dispose.
+/// The receiver of an [ImageInfo] object must call [dispose].
 @immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
+  /// The created [ImageInfo] will dispose the [image] when [dispose] is called.
+  /// If the [image] needs to be shared with other clients, pass `image.clone()`
+  /// The cloning will not increase memory footprint, because it clones
+  /// just handler to the image.
+  ///
+  /// After passing [image] to the constructor,
+  /// remove any references to it so that the image can be garbage collected,
+  /// after ImageInfo disposal.
+  ///
   /// The [debugLabel] may be used to identify the source of this image.
+  ///
+  /// See also:
+  ///
+  ///  * [Image.clone], which describes how and why to clone images.
   ImageInfo({
     required this.image,
     this.scale = 1.0,
     this.debugLabel,
-    this.shouldDisposeImage = true, // The default is true for backwards compatibility.
   })
   {
-    if (kFlutterMemoryAllocationsEnabled && shouldDisposeImage) {
+    if (kFlutterMemoryAllocationsEnabled) {
       MemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterPaintingLibrary,
         className: '$ImageInfo',
@@ -41,13 +51,8 @@ class ImageInfo {
 
   /// Creates an [ImageInfo] with a cloned [image].
   ///
-  /// Once all outstanding references to the [image] are disposed, it is no
-  /// longer safe to access properties of it or attempt to draw it. Clones serve
-  /// to create new references to the underlying image data that can safely be
-  /// disposed without knowledge of whether some other reference holder will
-  /// still need access to the underlying image. Once a client disposes of its
-  /// own image reference, it can no longer access the image, but other clients
-  /// will be able to access their own references.
+  /// Cloning of the image will not increase memory foot print, because it clones
+  /// just handler to the image.
   ///
   /// This method must be used in cases where a client holding an [ImageInfo]
   /// needs to share the image info object with another client and will still
@@ -114,15 +119,6 @@ class ImageInfo {
   /// the image.
   final ui.Image image;
 
-  /// If true, the [image] will be disposed when this object is disposed.
-  ///
-  /// If false, the object will not dispatch its lifecicle events to [FlutterMemoryAllocations].
-  ///
-  /// This is used to:
-  /// * avoid disposing the [image] when it is owned by other object (when false)
-  /// * transfer the [image] ownership to this object (when true)
-  final bool shouldDisposeImage;
-
   /// The size of raw image pixels in bytes.
   int get sizeBytes => image.height * image.width * 4;
 
@@ -149,11 +145,9 @@ class ImageInfo {
   @mustCallSuper
   void dispose() {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
-    if (shouldDisposeImage) {
-      image.dispose();
-      if (kFlutterMemoryAllocationsEnabled) {
-        MemoryAllocations.instance.dispatchObjectDisposed(object: this);
-      }
+    image.dispose();
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
   }
 
