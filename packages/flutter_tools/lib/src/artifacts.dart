@@ -144,7 +144,6 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
@@ -527,7 +526,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
         return _getDesktopArtifactPath(artifact, platform, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -745,9 +743,8 @@ class CachedArtifacts implements Artifacts {
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, _platform, mode));
       case Artifact.windowsCppClientWrapper:
-        final String platformDirName = _enginePlatformDirectoryName(platform);
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, _platform, mode));
+        return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, _platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact, _platform));
@@ -778,7 +775,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -817,11 +813,10 @@ TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils oper
   }
   if (platform.isLinux) {
     return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?
-        TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
+             TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
   }
   if (platform.isWindows) {
-    return operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64 ?
-        TargetPlatform.windows_arm64 : TargetPlatform.windows_x64;
+    return TargetPlatform.windows_x64;
   }
   throw UnimplementedError('Host OS not supported.');
 }
@@ -1094,8 +1089,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return 'linux-x64';
       case TargetPlatform.windows_x64:
         return 'windows-x64';
-      case TargetPlatform.windows_arm64:
-        return 'windows-arm64';
       case TargetPlatform.ios:
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -1297,8 +1290,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         return 'linux-x64';
       case TargetPlatform.windows_x64:
         return 'windows-x64';
-      case TargetPlatform.windows_arm64:
-        return 'windows-arm64';
       case TargetPlatform.ios:
       case TargetPlatform.android:
       case TargetPlatform.android_arm:

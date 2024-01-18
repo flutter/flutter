@@ -10,7 +10,6 @@ import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../base/os.dart' show HostPlatform;
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -198,15 +197,8 @@ class TestCompiler {
             buildRunner: buildRunner,
           );
         } else if (globals.platform.isWindows) {
-          final TargetPlatform targetPlatform;
-          if (globals.os.hostPlatform == HostPlatform.windows_x64) {
-            targetPlatform = TargetPlatform.windows_x64;
-          } else {
-            targetPlatform = TargetPlatform.windows_arm64;
-          }
           (nativeAssetsYaml, _) = await buildNativeAssetsWindows(
             buildMode: buildInfo.mode,
-            targetPlatform: targetPlatform,
             projectUri: projectUri,
             flutterTester: true,
             fileSystem: globals.fs,

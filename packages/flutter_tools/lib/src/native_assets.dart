@@ -379,7 +379,6 @@ Future<Uri?> dryRunNativeAssets({
         fileSystem: fileSystem,
         buildRunner: buildRunner,
       );
-    case build_info.TargetPlatform.windows_arm64:
     case build_info.TargetPlatform.windows_x64:
       nativeAssetsYaml = await dryRunNativeAssetsWindows(
         projectUri: projectUri,
@@ -442,8 +441,7 @@ Future<Uri?> dryRunNativeAssetsMultipleOSes({
         false,
         buildRunner,
       ),
-    if (targetPlatforms.contains(build_info.TargetPlatform.windows_arm64) ||
-        targetPlatforms.contains(build_info.TargetPlatform.windows_x64) ||
+    if (targetPlatforms.contains(build_info.TargetPlatform.windows_x64) ||
         (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.windows))
       ...await dryRunNativeAssetsWindowsInternal(
         fileSystem,
@@ -654,8 +652,6 @@ Target _getNativeTarget(build_info.TargetPlatform targetPlatform) {
       return Target.linuxArm64;
     case build_info.TargetPlatform.windows_x64:
       return Target.windowsX64;
-    case build_info.TargetPlatform.windows_arm64:
-      return Target.windowsArm64;
     case build_info.TargetPlatform.android:
     case build_info.TargetPlatform.ios:
     case build_info.TargetPlatform.darwin:
