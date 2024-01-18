@@ -31,7 +31,6 @@ uint8_t* DeviceBufferVK::OnGetContents() const {
 bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
                                       Range source_range,
                                       size_t offset) {
-  TRACE_EVENT0("impeller", "CopyToDeviceBuffer");
   uint8_t* dest = OnGetContents();
 
   if (!dest) {
