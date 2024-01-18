@@ -912,8 +912,16 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage,
     List<String>? flavors,
   }) {
-    final String directoryPath = _fileSystem.path.join(
-        assetBase, assetUri.toFilePath(windows: _platform.isWindows));
+    final String directoryPath;
+    try {
+      directoryPath = _fileSystem.path
+        .join(assetBase, assetUri.toFilePath(windows: _platform.isWindows));
+    } on UnsupportedError catch (e) {
+      throwToolExit(
+        'Unable to search for asset files in directory path "${assetUri.path}". '
+        'Please ensure that this is valid URI that points to a directory '
+        'that is available on the local file system.\nError details:\n$e');
+    }
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
       _logger.printError('Error: unable to find directory entry in pubspec.yaml: $directoryPath');
