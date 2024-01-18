@@ -808,7 +808,7 @@ enum ResizeImagePolicy {
   /// If only one of `width` and `height` is non-null, then the output image
   /// will be scaled to the associated width or height, and the other dimension
   /// will take whatever value is needed to maintain the image's original aspect
-  /// ratio. These cases are simnilar to [BoxFit.fitWidth] and
+  /// ratio. These cases are similar to [BoxFit.fitWidth] and
   /// [BoxFit.fitHeight], respectively.
   ///
   /// If [ResizeImage.allowUpscaling] is false (the default), the width and the
@@ -1399,6 +1399,9 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 // our cache if the headers describe the image as having expired at that point.
 abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
+  ///
+  /// The [scale] argument is the linear scale factor for drawing this image at
+  /// its intended size. See [ImageInfo.scale] for more information.
   const factory NetworkImage(String url, { double scale, Map<String, String>? headers }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.

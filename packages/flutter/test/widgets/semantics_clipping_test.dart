@@ -5,12 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SemanticNode.rect is clipped', (WidgetTester tester) async {
+  testWidgets('SemanticNode.rect is clipped', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const Directionality(
@@ -68,7 +67,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SemanticsNode is not removed if out of bounds and merged into something within bounds', (WidgetTester tester) async {
+  testWidgets('SemanticsNode is not removed if out of bounds and merged into something within bounds', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const Directionality(

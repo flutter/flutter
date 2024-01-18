@@ -287,7 +287,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         if (shouldContinue()) {
           PlatformDispatcher.instance.scheduleFrame();
         } else {
-          profileCompleter.complete(_profile);
+          profileCompleter.complete(_profile!);
         }
       } catch (error, stackTrace) {
         profileCompleter.completeError(error, stackTrace);

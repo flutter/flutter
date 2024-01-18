@@ -9,11 +9,16 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
@@ -23,15 +28,15 @@ const String shaderLibDir = '/./shader_lib';
 
 void main() {
   group('AssetBundle.build', () {
+    late Logger logger;
     late FileSystem testFileSystem;
+    late Platform platform;
 
     setUp(() async {
-      testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
+      testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      logger = BufferLogger.test();
+      platform = FakePlatform();
     });
 
     testUsingContext('nonempty', () async {
@@ -40,6 +45,7 @@ void main() {
       expect(ab.entries.length, greaterThan(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -66,6 +72,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -111,6 +118,7 @@ flutter:
       ]));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -141,6 +149,7 @@ flutter:
           'assets/foo/fizz.txt']));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -183,6 +192,7 @@ name: example''')
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -208,6 +218,7 @@ flutter:
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -243,6 +254,7 @@ flutter:
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -273,6 +285,7 @@ flutter:
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -321,20 +334,198 @@ flutter:
       expect(bundle.deferredComponentsEntries['component1']!.length, 3);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    group('flavors feature', () {
+      Future<ManifestAssetBundle> buildBundleWithFlavor(String? flavor) async {
+        final ManifestAssetBundle bundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: testFileSystem,
+          platform: platform,
+          splitDeferredAssets: true,
+        );
+
+        await bundle.build(
+          packagesPath: '.packages',
+          flutterProject: FlutterProject.fromDirectoryTest(testFileSystem.currentDirectory),
+          flavor: flavor,
+        );
+        return bundle;
+      }
+
+      late String? previousCacheFlutterRootValue;
+
+      setUp(() {
+        previousCacheFlutterRootValue = Cache.flutterRoot;
+        Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: testFileSystem, userMessages: UserMessages());
+      });
+
+      tearDown(() => Cache.flutterRoot = previousCacheFlutterRootValue);
+
+      testWithoutContext('correctly bundles assets given a simple asset manifest with flavors', () async {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file(testFileSystem.path.join('assets', 'common', 'image.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'vanilla', 'ice-cream.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'strawberry', 'ice-cream.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'orange', 'ice-cream.png')).createSync(recursive: true);
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/common/
+    - path: assets/vanilla/
+      flavors:
+        - vanilla
+    - path: assets/strawberry/
+      flavors:
+        - strawberry
+    - path: assets/orange/ice-cream.png
+      flavors:
+        - orange
+  ''');
+
+        ManifestAssetBundle bundle;
+        bundle = await buildBundleWithFlavor(null);
+        expect(bundle.entries.keys, contains('assets/common/image.png'));
+        expect(bundle.entries.keys, isNot(contains('assets/vanilla/ice-cream.png')));
+        expect(bundle.entries.keys, isNot(contains('assets/strawberry/ice-cream.png')));
+        expect(bundle.entries.keys, isNot(contains('assets/orange/ice-cream.png')));
+
+        bundle = await buildBundleWithFlavor('strawberry');
+        expect(bundle.entries.keys, contains('assets/common/image.png'));
+        expect(bundle.entries.keys, isNot(contains('assets/vanilla/ice-cream.png')));
+        expect(bundle.entries.keys, contains('assets/strawberry/ice-cream.png'));
+        expect(bundle.entries.keys, isNot(contains('assets/orange/ice-cream.png')));
+
+        bundle = await buildBundleWithFlavor('orange');
+        expect(bundle.entries.keys, contains('assets/common/image.png'));
+        expect(bundle.entries.keys, isNot(contains('assets/vanilla/ice-cream.png')));
+        expect(bundle.entries.keys, isNot(contains('assets/strawberry/ice-cream.png')));
+        expect(bundle.entries.keys, contains('assets/orange/ice-cream.png'));
+      });
+
+      testWithoutContext('throws a tool exit when a non-flavored folder contains a flavored asset', () async {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file(testFileSystem.path.join('assets', 'unflavored.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'vanillaOrange.png')).createSync(recursive: true);
+
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - assets/
+      - path: assets/vanillaOrange.png
+        flavors:
+          - vanilla
+          - orange
+  ''');
+
+        expect(
+          buildBundleWithFlavor(null),
+          throwsToolExit(message: 'Multiple assets entries include the file '
+            '"assets/vanillaOrange.png", but they specify different lists of flavors.\n'
+            'An entry with the path "assets/" does not specify any flavors.\n'
+            'An entry with the path "assets/vanillaOrange.png" specifies the flavor(s): "vanilla", "orange".\n\n'
+            'Consider organizing assets with different flavors into different directories.'),
+        );
+      });
+
+      testWithoutContext('throws a tool exit when a flavored folder contains a flavorless asset', () async {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file(testFileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('vanilla', 'flavorless.png')).createSync(recursive: true);
+
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - path: vanilla/
+        flavors:
+          - vanilla
+      - vanilla/flavorless.png
+  ''');
+        expect(
+          buildBundleWithFlavor(null),
+          throwsToolExit(message: 'Multiple assets entries include the file '
+            '"vanilla/flavorless.png", but they specify different lists of flavors.\n'
+            'An entry with the path "vanilla/" specifies the flavor(s): "vanilla".\n'
+            'An entry with the path "vanilla/flavorless.png" does not specify any flavors.\n\n'
+            'Consider organizing assets with different flavors into different directories.'),
+        );
+      });
+
+      testWithoutContext('tool exits when two file-explicit entries give the same asset different flavors', () {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file('orange.png').createSync(recursive: true);
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - path: orange.png
+        flavors:
+          - orange
+      - path: orange.png
+        flavors:
+          - mango
+  ''');
+
+        expect(
+          buildBundleWithFlavor(null),
+          throwsToolExit(message: 'Multiple assets entries include the file '
+            '"orange.png", but they specify different lists of flavors.\n'
+            'An entry with the path "orange.png" specifies the flavor(s): "orange".\n'
+            'An entry with the path "orange.png" specifies the flavor(s): "mango".'),
+        );
+    });
+
+      testWithoutContext('throws ToolExit when flavor from file-level declaration has different flavor from containing folder flavor declaration', () async {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file(testFileSystem.path.join('vanilla', 'actually-strawberry.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
+
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - path: vanilla/
+        flavors:
+          - vanilla
+      - path: vanilla/actually-strawberry.png
+        flavors:
+          - strawberry
+  ''');
+        expect(
+          buildBundleWithFlavor(null),
+          throwsToolExit(message: 'Multiple assets entries include the file '
+            '"vanilla/actually-strawberry.png", but they specify different lists of flavors.\n'
+            'An entry with the path "vanilla/" specifies the flavor(s): "vanilla".\n'
+            'An entry with the path "vanilla/actually-strawberry.png" '
+            'specifies the flavor(s): "strawberry".'),
+        );
+      });
     });
   });
 
   group('AssetBundle.build (web builds)', () {
     late FileSystem testFileSystem;
+    late Platform testPlatform;
 
     setUp(() async {
-      testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
+      testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testPlatform = FakePlatform();
     });
 
     testUsingContext('empty pubspec', () async {
@@ -362,6 +553,7 @@ flutter:
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => testPlatform,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -417,6 +609,7 @@ flutter:
         reason: 'JSON-encoded binary content should be identical to BIN file.');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      Platform: () => testPlatform,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -435,6 +628,7 @@ flutter:
       <String, AssetKind>{},
       loggerOverride: testLogger,
       targetPlatform: TargetPlatform.android,
+      impellerStatus: ImpellerStatus.disabled,
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -468,6 +662,7 @@ assets:
     expect(license, bundle.entries['NOTICES']);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -489,6 +684,7 @@ flutter:
     expect(bundle.additionalDependencies.single.path, contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -510,6 +706,7 @@ flutter:
     expect(bundle.additionalDependencies, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -557,6 +754,7 @@ flutter:
         bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.android,
+        impellerStatus: ImpellerStatus.disabled,
       );
 
     }, overrides: <Type, Generator>{
@@ -603,6 +801,7 @@ flutter:
         bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
+        impellerStatus: ImpellerStatus.disabled,
       );
 
     }, overrides: <Type, Generator>{
@@ -686,6 +885,7 @@ flutter:
         bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
+        impellerStatus: ImpellerStatus.disabled,
       );
       expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{

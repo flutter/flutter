@@ -173,9 +173,9 @@ extension WebHTMLElementExtension on web.HTMLElement {
         web.HTMLDivElement;
     div.innerHTML = html;
     final web.DocumentFragment fragment = web.document.createDocumentFragment();
-    fragment.append(div);
+    fragment.append(div as JSAny);
     web.document.adoptNode(fragment);
-    append(fragment);
+    append(fragment as JSAny);
   }
 }
 
@@ -217,7 +217,7 @@ void _printResultsToScreen(Profile profile) {
   profile.scoreData.forEach((String scoreKey, Timeseries timeseries) {
     web.document.body!.appendHtml('<h2>$scoreKey</h2>');
     web.document.body!.appendHtml('<pre>${timeseries.computeStats()}</pre>');
-    web.document.body!.append(TimeseriesVisualization(timeseries).render());
+    web.document.body!.append(TimeseriesVisualization(timeseries).render() as JSAny);
   });
 }
 

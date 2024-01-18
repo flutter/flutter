@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import '../../src/common.dart';
 
@@ -15,18 +16,27 @@ void main() {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
-        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+        assets: <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+        ],
       );
       expect(component.name, 'bestcomponent');
       expect(component.libraries, <String>['lib1', 'lib2']);
-      expect(component.assets, <Uri>[Uri.file('asset1'), Uri.file('asset2')]);
+      expect(component.assets, <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+      ]);
     });
 
     testWithoutContext('assignLoadingUnits selects the needed loading units and sets assigned', () {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
-        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+        assets: <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+        ],
       );
       expect(component.libraries, <String>['lib1', 'lib2']);
       expect(component.assigned, false);
@@ -94,7 +104,10 @@ void main() {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
-        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+        assets: <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+        ],
       );
       expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  Assets:\n    - asset1\n    - asset2');
     });
@@ -103,7 +116,10 @@ void main() {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
-        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+        assets: <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+        ],
       );
       component.assignLoadingUnits(<LoadingUnit>[LoadingUnit(id: 2, libraries: <String>['lib1'])]);
       expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  LoadingUnits:\n    - 2\n  Assets:\n    - asset1\n    - asset2');

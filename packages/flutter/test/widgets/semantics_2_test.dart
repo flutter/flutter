@@ -5,12 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Semantics 2', (WidgetTester tester) async {
+  testWidgets('Semantics 2', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // this test is the same as the test in Semantics 1, but

@@ -18,6 +18,7 @@ import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
+import 'device.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -72,6 +73,7 @@ class BundleBuilder {
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
@@ -113,6 +115,7 @@ Future<AssetBundle?> buildAssets({
   String? assetDirPath,
   String? packagesPath,
   TargetPlatform? targetPlatform,
+  String? flavor,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= globals.fs.path.absolute('.packages');
@@ -123,6 +126,7 @@ Future<AssetBundle?> buildAssets({
     manifestPath: manifestPath,
     packagesPath: packagesPath,
     targetPlatform: targetPlatform,
+    flavor: flavor,
   );
   if (result != 0) {
     return null;
@@ -137,6 +141,7 @@ Future<void> writeBundle(
   Map<String, AssetKind> entryKinds, {
   Logger? loggerOverride,
   required TargetPlatform targetPlatform,
+  required ImpellerStatus impellerStatus,
 }) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
@@ -165,6 +170,11 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
+  ShaderTarget shaderTarget = ShaderTarget.sksl;
+  if (targetPlatform == TargetPlatform.tester && impellerStatus == ImpellerStatus.enabled) {
+    shaderTarget = ShaderTarget.impellerSwiftShader;
+  }
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -192,7 +202,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
-                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+                target: shaderTarget,
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
             case AssetKind.model:

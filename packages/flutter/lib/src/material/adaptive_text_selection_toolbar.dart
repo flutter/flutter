@@ -226,7 +226,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           case ContextMenuButtonType.searchWeb:
             return localizations.searchWebButtonLabel;
           case ContextMenuButtonType.share:
-            return localizations.searchWebButtonLabel;
+            return localizations.shareButtonLabel;
           case ContextMenuButtonType.liveTextInput:
             return localizations.scanTextButtonLabel;
           case ContextMenuButtonType.custom:

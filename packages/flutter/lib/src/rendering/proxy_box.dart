@@ -2264,6 +2264,12 @@ class RenderDecoratedBox extends RenderProxyBox {
   }
 
   @override
+  void dispose() {
+    _painter?.dispose();
+    super.dispose();
+  }
+
+  @override
   bool hitTestSelf(Offset position) {
     return _decoration.hitTest(size, position, textDirection: configuration.textDirection);
   }
@@ -4349,6 +4355,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     }
     if (_properties.image != null) {
       config.isImage = _properties.image!;
+    }
+    if (_properties.identifier != null) {
+      config.identifier = _properties.identifier!;
     }
     if (_attributedLabel != null) {
       config.attributedLabel = _attributedLabel!;

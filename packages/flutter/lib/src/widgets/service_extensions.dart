@@ -216,7 +216,7 @@ enum WidgetInspectorServiceExtensions {
   ///   extension is registered.
   @Deprecated(
     'Use addPubRootDirectories instead. '
-    'This feature was deprecated after v3.1.0-9.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   setPubRootDirectories,
 

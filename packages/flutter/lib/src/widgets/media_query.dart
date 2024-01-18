@@ -290,7 +290,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [FlutterView.physicalSize], which returns the size in physical pixels.
+  /// * [FlutterView.physicalSize], which returns the size of the view in physical pixels.
+  /// * [FlutterView.display], which returns reports display information like size, and refresh rate.
   /// * [MediaQuery.sizeOf], a method to find and depend on the size defined for
   ///   a [BuildContext].
   final Size size;
@@ -1329,7 +1330,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;
 
   /// Returns the [MediaQueryData.textScaler] for the nearest [MediaQuery]
-  /// ancestor or null if no such ancestor exists.
+  /// ancestor or [TextScaler.noScaling] if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
@@ -1339,7 +1340,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static TextScaler textScalerOf(BuildContext context) => maybeTextScalerOf(context) ?? TextScaler.noScaling;
 
   /// Returns the [MediaQueryData.textScaler] for the nearest [MediaQuery]
-  /// ancestor or [TextScaler.noScaling] if no such ancestor exists.
+  /// ancestor or null if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]

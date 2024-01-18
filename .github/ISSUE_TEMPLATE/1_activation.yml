@@ -17,15 +17,12 @@ body:
 
         If you have found a bug or if our documentation doesn't have an answer
         to what you're looking for, then fill out the template below.
-  - type: checkboxes
+  - type: markdown
     attributes:
-      label: Is there an existing issue for this?
-      description: Please search to see if an issue already exists for the bug you encountered.
-      options:
-      - label: I have searched the [existing issues](https://github.com/flutter/flutter/issues)
-        required: true
-      - label: I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
-        required: true
+      value: |
+        Before filling the form fields, please consider the following:
+        - Ensure that you have searched the [existing issues](https://github.com/flutter/flutter/issues)
+        - Read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
   - type: textarea
     attributes:
       label: Steps to reproduce
@@ -58,7 +55,7 @@ body:
         Note: Please do not upload screenshots of text. Instead, use code blocks
         or the above mentioned ways to upload logs.
       value: |
-        <details>
+        <details open>
         <summary>Logs</summary>
 
         ```console
@@ -74,7 +71,7 @@ body:
       description: |
         Please provide the full output of running `flutter doctor -v`
       value: |
-        <details>
+        <details open>
         <summary>Doctor output</summary>
 
         ```console
