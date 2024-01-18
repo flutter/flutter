@@ -3464,9 +3464,40 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac framework_tests_misc
+  - name: Mac_x64 framework_tests_misc
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "android_sdk", "version": "version:34v3"}
+        ]
+      shard: framework_tests
+      subshard: misc
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - dev/**
+      - examples/api/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64 framework_tests_misc
+    recipe: flutter/flutter_drone
+    timeout: 60
+    bringup: true
     properties:
       dependencies: >-
         [
