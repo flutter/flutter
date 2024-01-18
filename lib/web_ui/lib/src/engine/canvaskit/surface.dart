@@ -8,12 +8,14 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../configuration.dart';
+import '../display.dart';
 import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'picture.dart';
+import 'rasterizer.dart';
 import 'render_canvas.dart';
 import 'util.dart';
 
@@ -47,10 +49,18 @@ class SurfaceFrame {
 /// The underlying representation is a [CkSurface], which can be reused by
 /// successive frames if they are the same size. Otherwise, a new [CkSurface] is
 /// created.
-class Surface {
-  Surface();
+class Surface extends DisplayCanvas {
+  Surface({this.isDisplayCanvas = false})
+      : useOffscreenCanvas =
+            Surface.offscreenCanvasSupported && !isDisplayCanvas;
 
   CkSurface? _surface;
+
+  /// Whether or not to use an `OffscreenCanvas` to back this [Surface].
+  final bool useOffscreenCanvas;
+
+  /// If `true`, this [Surface] is used as a [DisplayCanvas].
+  final bool isDisplayCanvas;
 
   /// If true, forces a new WebGL context to be created, even if the window
   /// size is the same. This is used to restore the UI after the browser tab
@@ -90,8 +100,14 @@ class Surface {
   /// supported.
   DomCanvasElement? _canvasElement;
 
+  /// Note, if this getter is called, then this Surface is being used as an
+  /// overlay and must be backed by an onscreen <canvas> element.
+  @override
+  final DomElement hostElement = createDomElement('flt-canvas-container');
+
   int _pixelWidth = -1;
   int _pixelHeight = -1;
+  double _currentDevicePixelRatio = -1;
   int _sampleCount = -1;
   int _stencilBits = -1;
 
@@ -107,16 +123,25 @@ class Surface {
     }
   }
 
+  /// The CanvasKit canvas associated with this surface.
+  CkCanvas getCanvas() {
+    return _surface!.getCanvas();
+  }
+
+  void flush() {
+    _surface!.flush();
+  }
+
   Future<void> rasterizeToCanvas(
       ui.Size frameSize, RenderCanvas canvas, List<CkPicture> pictures) async {
-    final CkCanvas skCanvas = _surface!.getCanvas();
+    final CkCanvas skCanvas = getCanvas();
     skCanvas.clear(const ui.Color(0x00000000));
     pictures.forEach(skCanvas.drawPicture);
-    _surface!.flush();
+    flush();
 
     if (browserSupportsCreateImageBitmap) {
       JSObject bitmapSource;
-      if (Surface.offscreenCanvasSupported) {
+      if (useOffscreenCanvas) {
         bitmapSource = _offscreenCanvas! as JSObject;
       } else {
         bitmapSource = _canvasElement! as JSObject;
@@ -132,7 +157,7 @@ class Surface {
       // If the browser doesn't support `createImageBitmap` (e.g. Safari 14)
       // then render using `drawImage` instead.
       DomCanvasImageSource imageSource;
-      if (Surface.offscreenCanvasSupported) {
+      if (useOffscreenCanvas) {
         imageSource = _offscreenCanvas! as DomCanvasImageSource;
       } else {
         imageSource = _canvasElement! as DomCanvasImageSource;
@@ -158,6 +183,44 @@ class Surface {
 
   ui.Size? _currentCanvasPhysicalSize;
   ui.Size? _currentSurfaceSize;
+
+  /// Sets the CSS size of the canvas so that canvas pixels are 1:1 with device
+  /// pixels.
+  ///
+  /// The logical size of the canvas is not based on the size of the window
+  /// but on the size of the canvas, which, due to `ceil()` above, may not be
+  /// the same as the window. We do not round/floor/ceil the logical size as
+  /// CSS pixels can contain more than one physical pixel and therefore to
+  /// match the size of the window precisely we use the most precise floating
+  /// point value we can get.
+  void _updateLogicalHtmlCanvasSize() {
+    final double devicePixelRatio =
+        EngineFlutterDisplay.instance.devicePixelRatio;
+    final double logicalWidth = _pixelWidth / devicePixelRatio;
+    final double logicalHeight = _pixelHeight / devicePixelRatio;
+    final DomCSSStyleDeclaration style = _canvasElement!.style;
+    style.width = '${logicalWidth}px';
+    style.height = '${logicalHeight}px';
+    _currentDevicePixelRatio = devicePixelRatio;
+  }
+
+  /// The <canvas> element backing this surface may be larger than the screen.
+  /// The Surface will draw the frame to the bottom left of the <canvas>, but
+  /// the <canvas> is, by default, positioned so that the top left corner is in
+  /// the top left of the window. We need to shift the canvas down so that the
+  /// bottom left of the <canvas> is the the bottom left corner of the window.
+  void positionToShowFrame(ui.Size frameSize) {
+    assert(isDisplayCanvas,
+        'Should not position Surface if not used as a render canvas');
+    final double devicePixelRatio =
+        EngineFlutterDisplay.instance.devicePixelRatio;
+    final double logicalHeight = _pixelHeight / devicePixelRatio;
+    final double logicalFrameHeight = frameSize.height / devicePixelRatio;
+
+    // Shift the canvas up so the bottom left is in the window.
+    _canvasElement!.style.transform =
+        'translate(0px, ${logicalFrameHeight - logicalHeight}px)';
+  }
 
   /// This is only valid after the first frame or if [ensureSurface] has been
   /// called
@@ -198,6 +261,11 @@ class Surface {
       if (previousSurfaceSize != null &&
           size.width == previousSurfaceSize.width &&
           size.height == previousSurfaceSize.height) {
+        final double devicePixelRatio =
+            EngineFlutterDisplay.instance.devicePixelRatio;
+        if (isDisplayCanvas && devicePixelRatio != _currentDevicePixelRatio) {
+          _updateLogicalHtmlCanvasSize();
+        }
         return _surface!;
       }
 
@@ -210,16 +278,20 @@ class Surface {
         final ui.Size newSize = size * 1.4;
         _surface?.dispose();
         _surface = null;
-        if (Surface.offscreenCanvasSupported) {
-          _offscreenCanvas!.width = newSize.width;
-          _offscreenCanvas!.height = newSize.height;
-        } else {
-          _canvasElement!.width = newSize.width;
-          _canvasElement!.height = newSize.height;
-        }
-        _currentCanvasPhysicalSize = newSize;
         _pixelWidth = newSize.width.ceil();
         _pixelHeight = newSize.height.ceil();
+        if (useOffscreenCanvas) {
+          _offscreenCanvas!.width = _pixelWidth.toDouble();
+          _offscreenCanvas!.height = _pixelHeight.toDouble();
+        } else {
+          _canvasElement!.width = _pixelWidth.toDouble();
+          _canvasElement!.height = _pixelHeight.toDouble();
+        }
+        _currentCanvasPhysicalSize =
+            ui.Size(_pixelWidth.toDouble(), _pixelHeight.toDouble());
+        if (isDisplayCanvas) {
+          _updateLogicalHtmlCanvasSize();
+        }
       }
     }
 
@@ -291,6 +363,7 @@ class Surface {
         _cachedContextLostListener,
         false,
       );
+      _canvasElement!.remove();
       _canvasElement = null;
       _cachedContextRestoredListener = null;
       _cachedContextLostListener = null;
@@ -301,7 +374,7 @@ class Surface {
     _pixelWidth = physicalSize.width.ceil();
     _pixelHeight = physicalSize.height.ceil();
     DomEventTarget htmlCanvas;
-    if (Surface.offscreenCanvasSupported) {
+    if (useOffscreenCanvas) {
       final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(
         _pixelWidth,
         _pixelHeight,
@@ -315,6 +388,12 @@ class Surface {
       htmlCanvas = canvas;
       _canvasElement = canvas;
       _offscreenCanvas = null;
+      if (isDisplayCanvas) {
+        _canvasElement!.setAttribute('aria-hidden', 'true');
+        _canvasElement!.style.position = 'absolute';
+        hostElement.append(_canvasElement!);
+        _updateLogicalHtmlCanvasSize();
+      }
     }
 
     // When the browser tab using WebGL goes dormant the browser and/or OS may
@@ -347,7 +426,7 @@ class Surface {
         antialias: _kUsingMSAA ? 1 : 0,
         majorVersion: webGLVersion.toDouble(),
       );
-      if (Surface.offscreenCanvasSupported) {
+      if (useOffscreenCanvas) {
         glContext = canvasKit.GetOffscreenWebGLContext(
           _offscreenCanvas!,
           options,
@@ -379,7 +458,7 @@ class Surface {
 
   void _initWebglParams() {
     WebGLContext gl;
-    if (Surface.offscreenCanvasSupported) {
+    if (useOffscreenCanvas) {
       gl = _offscreenCanvas!.getGlContext(webGLVersion);
     } else {
       gl = _canvasElement!.getGlContext(webGLVersion);
@@ -399,8 +478,8 @@ class Surface {
     } else {
       final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
           _grContext!,
-          size.width.roundToDouble(),
-          size.height.roundToDouble(),
+          size.width.ceilToDouble(),
+          size.height.ceilToDouble(),
           SkColorSpaceSRGB,
           _sampleCount,
           _stencilBits);
@@ -422,7 +501,7 @@ class Surface {
     }
 
     SkSurface surface;
-    if (Surface.offscreenCanvasSupported) {
+    if (useOffscreenCanvas) {
       surface = canvasKit.MakeOffscreenSWCanvasSurface(_offscreenCanvas!);
     } else {
       surface = canvasKit.MakeSWCanvasSurface(_canvasElement!);
@@ -438,6 +517,15 @@ class Surface {
     return true;
   }
 
+  @override
+  bool get isConnected => _canvasElement!.isConnected!;
+
+  @override
+  void initialize() {
+    ensureSurface();
+  }
+
+  @override
   void dispose() {
     _offscreenCanvas?.removeEventListener(
         'webglcontextlost', _cachedContextLostListener, false);
@@ -478,8 +566,8 @@ class CkSurface {
 
   int? get context => _glContext;
 
-  int width() => surface.width().round();
-  int height() => surface.height().round();
+  int width() => surface.width().ceil();
+  int height() => surface.height().ceil();
 
   void dispose() {
     if (_isDisposed) {

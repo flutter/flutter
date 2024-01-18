@@ -5,31 +5,40 @@
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-/// A class that can rasterize [LayerTree]s into a given `sceneHost` element.
-class Rasterizer {
-  Rasterizer(this.view);
+abstract class Rasterizer {
+  /// Creates a [ViewRasterizer] for a given [view].
+  ViewRasterizer createViewRasterizer(EngineFlutterView view);
 
+  /// Sets the maximum size of the resource cache to [bytes].
+  void setResourceCacheMaxBytes(int bytes);
+
+  /// Disposes this rasterizer and all [ViewRasterizer]s that it created.
+  void dispose();
+}
+
+abstract class ViewRasterizer {
+  ViewRasterizer(this.view);
+
+  /// The view this rasterizer renders into.
   final EngineFlutterView view;
-  DomElement get sceneHost => view.dom.sceneHost;
+
+  /// The size of the current frame being rasterized.
+  ui.Size currentFrameSize = ui.Size.zero;
+
+  /// The context which is persisted between frames.
   final CompositorContext context = CompositorContext();
-  final RenderCanvasFactory renderCanvasFactory = RenderCanvasFactory();
-  late final HtmlViewEmbedder viewEmbedder =
-      HtmlViewEmbedder(sceneHost, this, renderCanvasFactory);
 
-  ui.Size _currentFrameSize = ui.Size.zero;
+  /// The platform view embedder.
+  late final HtmlViewEmbedder viewEmbedder = HtmlViewEmbedder(sceneHost, this);
 
-  /// Render the given [pictures] so it is displayed by the given [canvas].
-  Future<void> rasterizeToCanvas(
-      RenderCanvas canvas, List<CkPicture> pictures) async {
-    await CanvasKitRenderer.instance.offscreenSurface.rasterizeToCanvas(
-      _currentFrameSize,
-      canvas,
-      pictures,
-    );
-  }
+  /// A factory for creating overlays.
+  DisplayCanvasFactory<DisplayCanvas> get displayFactory;
 
-  /// Creates a new frame from this rasterizer's surface, draws the given
-  /// [LayerTree] into it, and then submits the frame.
+  /// The scene host which this rasterizer should raster into.
+  DomElement get sceneHost => view.dom.sceneHost;
+
+  /// Draws the [layerTree] to the screen for the view associated with this
+  /// rasterizer.
   Future<void> draw(LayerTree layerTree) async {
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
@@ -37,27 +46,78 @@ class Rasterizer {
       return;
     }
 
-    _currentFrameSize = frameSize;
-    CanvasKitRenderer.instance.offscreenSurface.acquireFrame(_currentFrameSize);
-    viewEmbedder.frameSize = _currentFrameSize;
+    currentFrameSize = frameSize;
+    prepareToDraw();
+    viewEmbedder.frameSize = currentFrameSize;
     final CkPictureRecorder pictureRecorder = CkPictureRecorder();
-    pictureRecorder.beginRecording(ui.Offset.zero & _currentFrameSize);
+    pictureRecorder.beginRecording(ui.Offset.zero & currentFrameSize);
     pictureRecorder.recordingCanvas!.clear(const ui.Color(0x00000000));
     final Frame compositorFrame =
         context.acquireFrame(pictureRecorder.recordingCanvas!, viewEmbedder);
 
     compositorFrame.raster(layerTree, ignoreRasterCache: true);
 
-    sceneHost.prepend(renderCanvasFactory.baseCanvas.htmlElement);
-    await rasterizeToCanvas(renderCanvasFactory.baseCanvas,
-        <CkPicture>[pictureRecorder.endRecording()]);
+    sceneHost.prepend(displayFactory.baseCanvas.hostElement);
+    await rasterizeToCanvas(
+        displayFactory.baseCanvas, <CkPicture>[pictureRecorder.endRecording()]);
 
     await viewEmbedder.submitFrame();
   }
 
-  /// Disposes of this rasterizer.
+  /// Do some initialization to prepare to draw a frame.
+  ///
+  /// For example, in the [OffscreenCanvasRasterizer], this ensures the backing
+  /// [OffscreenCanvas] is the correct size to draw the frame.
+  void prepareToDraw();
+
+  /// Rasterize the [pictures] to the given [canvas].
+  Future<void> rasterizeToCanvas(
+      DisplayCanvas canvas, List<CkPicture> pictures);
+
+  /// Get a [DisplayCanvas] to use as an overlay.
+  DisplayCanvas getOverlay() {
+    return displayFactory.getCanvas();
+  }
+
+  /// Release the given [overlay] so it may be reused.
+  void releaseOverlay(DisplayCanvas overlay) {
+    displayFactory.releaseCanvas(overlay);
+  }
+
+  /// Release all overlays.
+  void releaseOverlays() {
+    displayFactory.releaseCanvases();
+  }
+
+  /// Remove all overlays that have been created from the DOM.
+  void removeOverlaysFromDom() {
+    displayFactory.removeCanvasesFromDom();
+  }
+
+  /// Disposes this rasterizer.
   void dispose() {
     viewEmbedder.dispose();
-    renderCanvasFactory.dispose();
+    displayFactory.dispose();
   }
+}
+
+/// A [DisplayCanvas] is an abstraction for a canvas element which displays
+/// Skia-drawn pictures to the screen. They are also sometimes called "overlays"
+/// because they can be overlaid on top of platform views, which are HTML
+/// content that isn't rendered by Skia.
+///
+/// [DisplayCanvas]es are drawn into with [ViewRasterizer.rasterizeToCanvas].
+abstract class DisplayCanvas {
+  /// The DOM element which, when appended to the scene host, will display the
+  /// Skia-rendered content to the screen.
+  DomElement get hostElement;
+
+  /// Whether or not this overlay canvas is attached to the DOM.
+  bool get isConnected;
+
+  /// Initialize the overlay.
+  void initialize();
+
+  /// Disposes this overlay.
+  void dispose();
 }

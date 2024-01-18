@@ -44,12 +44,17 @@ class CanvasKitRenderer implements Renderer {
   DomElement? _sceneHost;
   DomElement? get sceneHost => _sceneHost;
 
-  /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
-  /// used to render to many RenderCanvases to produce the rendered scene.
-  final Surface offscreenSurface = Surface();
+  final Rasterizer _rasterizer = _createRasterizer();
+
+  static Rasterizer _createRasterizer() {
+    if (isSafari || isFirefox) {
+      return MultiSurfaceRasterizer();
+    }
+    return OffscreenCanvasRasterizer();
+  }
 
   set resourceCacheMaxBytes(int bytes) =>
-      offscreenSurface.setSkiaResourceCacheMaxBytes(bytes);
+      _rasterizer.setResourceCacheMaxBytes(bytes);
 
   /// A surface used specifically for `Picture.toImage` when software rendering
   /// is supported.
@@ -418,19 +423,19 @@ class CanvasKitRenderer implements Renderer {
 
     assert(_rasterizers.containsKey(view.viewId),
         "Unable to render to a view which hasn't been registered");
-    final Rasterizer rasterizer = _rasterizers[view.viewId]!;
+    final ViewRasterizer rasterizer = _rasterizers[view.viewId]!;
 
     await rasterizer.draw((scene as LayerScene).layerTree);
     frameTimingsOnRasterFinish();
   }
 
   // Map from view id to the associated Rasterizer for that view.
-  final Map<int, Rasterizer> _rasterizers = <int, Rasterizer>{};
+  final Map<int, ViewRasterizer> _rasterizers = <int, ViewRasterizer>{};
 
   void _onViewCreated(int viewId) {
     final EngineFlutterView view =
         EnginePlatformDispatcher.instance.viewManager[viewId]!;
-    _rasterizers[view.viewId] = Rasterizer(view);
+    _rasterizers[view.viewId] = _rasterizer.createViewRasterizer(view);
   }
 
   void _onViewDisposed(int viewId) {
@@ -438,11 +443,11 @@ class CanvasKitRenderer implements Renderer {
     if (!_rasterizers.containsKey(viewId)) {
       return;
     }
-    final Rasterizer rasterizer = _rasterizers.remove(viewId)!;
+    final ViewRasterizer rasterizer = _rasterizers.remove(viewId)!;
     rasterizer.dispose();
   }
 
-  Rasterizer? debugGetRasterizerForView(EngineFlutterView view) {
+  ViewRasterizer? debugGetRasterizerForView(EngineFlutterView view) {
     return _rasterizers[view.viewId];
   }
 
@@ -450,7 +455,7 @@ class CanvasKitRenderer implements Renderer {
   void dispose() {
     _onViewCreatedListener?.cancel();
     _onViewDisposedListener?.cancel();
-    for (final Rasterizer rasterizer in _rasterizers.values) {
+    for (final ViewRasterizer rasterizer in _rasterizers.values) {
       rasterizer.dispose();
     }
     _rasterizers.clear();
