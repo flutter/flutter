@@ -160,10 +160,7 @@ const String _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
 ///
 ///
 /// Finally, returns [true] if the plugins list has changed, otherwise returns [false].
-bool _writeFlutterPluginsList(
-  FlutterProject project,
-  List<Plugin> plugins,
-) {
+bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
     return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
@@ -216,8 +213,7 @@ List<Map<String, Object>> _createPluginMapOfPlatform(
     return p.platforms.containsKey(platformKey);
   });
 
-  final Set<String> pluginNames =
-      resolvedPlatformPlugins.map((Plugin plugin) => plugin.name).toSet();
+  final Set<String> pluginNames = resolvedPlatformPlugins.map((Plugin plugin) => plugin.name).toSet();
   final List<Map<String, Object>> pluginInfo = <Map<String, Object>>[];
   for (final Plugin plugin in resolvedPlatformPlugins) {
     // This is guaranteed to be non-null due to the `where` filter above.
@@ -225,17 +221,11 @@ List<Map<String, Object>> _createPluginMapOfPlatform(
     pluginInfo.add(<String, Object>{
       _kFlutterPluginsNameKey: plugin.name,
       _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
-      if (platformPlugin is DarwinPlugin &&
-          (platformPlugin as DarwinPlugin).sharedDarwinSource)
-        _kFlutterPluginsSharedDarwinSource:
-            (platformPlugin as DarwinPlugin).sharedDarwinSource,
+      if (platformPlugin is DarwinPlugin && (platformPlugin as DarwinPlugin).sharedDarwinSource)
+        _kFlutterPluginsSharedDarwinSource: (platformPlugin as DarwinPlugin).sharedDarwinSource,
       if (platformPlugin is NativeOrDartPlugin)
-        _kFlutterPluginsHasNativeBuildKey:
-            (platformPlugin as NativeOrDartPlugin).hasMethodChannel() ||
-                (platformPlugin as NativeOrDartPlugin).hasFfi(),
-      _kFlutterPluginsDependenciesKey: <String>[
-        ...plugin.dependencies.where(pluginNames.contains)
-      ],
+        _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).hasMethodChannel() || (platformPlugin as NativeOrDartPlugin).hasFfi(),
+      _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
   return pluginInfo;
