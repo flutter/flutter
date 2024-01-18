@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -20,10 +21,14 @@ import 'build.dart';
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
     required super.logger,
+    required OperatingSystemUtils operatingSystemUtils,
     bool verboseHelp = false,
-  }) : super(verboseHelp: verboseHelp) {
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
   }
+
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   final String name = 'windows';
@@ -52,10 +57,16 @@ class BuildWindowsCommand extends BuildSubCommand {
     if (!globals.platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
+
+    final String defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64) ?
+            'windows-arm64' : 'windows-x64';
+    final TargetPlatform targetPlatform = getTargetPlatformForName(defaultTargetPlatform);
+
     displayNullSafetyMode(buildInfo);
     await buildWindows(
       flutterProject.windows,
       buildInfo,
+      targetPlatform,
       target: targetFile,
       visualStudioOverride: visualStudioOverride,
       sizeAnalyzer: SizeAnalyzer(
