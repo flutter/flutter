@@ -897,9 +897,9 @@ transforms:
         oldName: 'showTrackOnHover'
         newName: 'trackVisibility'
 
-  # Changes made in https://github.com/flutter/flutter/pull/129942
+  # Changes made in https://github.com/flutter/flutter/pull/134417
   - title: "Migrate to 'Easing.legacy'"
-    date: 2023-07-04
+    date: 2023-12-12
     element:
       uris: [ 'material.dart' ]
       variable: 'standardEasing'
@@ -910,9 +910,9 @@ transforms:
           field: legacy
           inClass: Easing
 
-  # Changes made in https://github.com/flutter/flutter/pull/129942
+  # Changes made in https://github.com/flutter/flutter/pull/134417
   - title: "Migrate to 'Easing.legacyAccelerate'"
-    date: 2023-07-04
+    date: 2023-12-12
     element:
       uris: [ 'material.dart' ]
       variable: 'accelerateEasing'
@@ -923,9 +923,9 @@ transforms:
           field: legacyAccelerate
           inClass: Easing
 
-  # Changes made in https://github.com/flutter/flutter/pull/129942
+  # Changes made in https://github.com/flutter/flutter/pull/134417
   - title: "Migrate to 'Easing.legacyDecelerate'"
-    date: 2023-07-04
+    date: 2023-12-12
     element:
       uris: [ 'material.dart' ]
       variable: 'decelerateEasing'
