@@ -62,7 +62,10 @@ const ValidationResult invalidWindowsValidationResult = ValidationResult(
 const ValidationResult ofdFoundRunning = ValidationResult(
   ValidationType.partial,
   <ValidationMessage>[
-    ValidationMessage.hint('The Topaz OFD Security Module process has been found running. If you are unable to build, you will need to disable it.'),
+    ValidationMessage.hint(
+      'The Topaz OFD Security Module was detected on your machine. '
+      'You may need to disable it to build Flutter applications.',
+    ),
   ],
   statusInfo: 'Problem detected with Windows installation',
 );
