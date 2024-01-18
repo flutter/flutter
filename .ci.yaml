@@ -3643,6 +3643,7 @@ targets:
 
   - name: Mac_x64 module_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3660,6 +3661,7 @@ targets:
 
   - name: Mac_arm64 module_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
