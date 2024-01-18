@@ -298,7 +298,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
     );
-    expect(testLogger.statusText, contains('✓ Built build/ios/iphoneos/Runner.app (10.0MB)'));
+    expect(testLogger.statusText, contains('✓ Built build/ios/iphoneos/Runner.app (9.5MB)'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

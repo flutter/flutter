@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -11,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../convert.dart';
+import 'platform.dart';
 
 /// A path jointer for URL paths.
 final path.Context urlContext = path.url;
@@ -93,7 +93,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 String getSizeAsMB(int bytesLength) {
   // Because Windows displays 'MB' but actually reports MiB, we calculate MiB
   // accordingly on Windows.
-  final int bytesInPlatformMB = Platform.isWindows ? 1024 * 1024 : 1000 * 1000;
+  final int bytesInPlatformMB = const LocalPlatform().isWindows ? 1024 * 1024 : 1000 * 1000;
   return '${(bytesLength / bytesInPlatformMB).toStringAsFixed(1)}MB';
 }
 
