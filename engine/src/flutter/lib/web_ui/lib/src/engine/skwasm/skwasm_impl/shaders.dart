@@ -144,6 +144,9 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
   });
 
   SkwasmGradient._(super.handle);
+
+  @override
+  String toString() => 'Gradient()';
 }
 
 class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
