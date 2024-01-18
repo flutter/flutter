@@ -618,61 +618,6 @@ class FlutterPlugin implements Plugin<Project> {
         return version2
     }
 
-    /**
-     * Checks if the project's Android build time dependencies are each within the respective
-     * version range that we support. When we can't find a version for a given dependency
-     * we treat it as within the range for the purpose of this check.
-     */
-    private void checkDependencyVersions() {
-        String gradleVersion = getGradleVersion()
-        JavaVersion javaVersion = getJavaVersion()
-        String kgpVersion = getKGPVersion()
-        AndroidPluginVersion agpVersion = getAGPVersion()
-        // TODO: check each version and project.logger.error if it doesn't meet. Or warn. Also
-        // check inter-compatibility if we want. AndroidPluginVersion is already a comparable,
-        // will need to manually compare the others.
-
-        print("HI GRAY, VERSIONS ARE:\nGradle: $gradleVersion\nJava: $javaVersion\nKGP: $kgpVersion\nAGP: ${agpVersion.toString()}\n")
-    }
-
-    private String getGradleVersion() {
-        try {
-            return project.gradle.gradleVersion
-        } catch (Exception ignored) {
-            //TODO(gmackall): Log a warning
-            return null;
-        }
-    }
-
-    private JavaVersion getJavaVersion() {
-        try {
-            return JavaVersion.current()
-        } catch (Exception ignored) {
-            //TODO(gmackall): Log a warning
-            return null;
-        }
-    }
-
-    private String getKGPVersion() {
-        try {
-            //TODO(gmackall): See if there is a more robust way to get this version.
-            println(project.plugins.getPlugin("kotlin-android").properties)
-            return project.plugins.getPlugin("kotlin-android").properties.pluginVersion
-        } catch (Exception ignored) {
-            //TODO(gmackall): Log a warning
-            return null;
-        }
-    }
-
-    private AndroidPluginVersion getAGPVersion() {
-        try {
-            return project.androidComponents.pluginVersion
-        } catch (Exception ignored) {
-            //TODO(gmackall): Log a warning
-            return null;
-        }
-    }
-
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
@@ -1151,13 +1096,6 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private void addFlutterTasks(Project project) {
-        //TODO(gmackall): Determine if this is the right place.
-        if (project.hasProperty('skipDependencyChecks') && project.property('skipDependencyChecks')) {
-            println('HI GRAY, SKIPPING!')
-        } else {
-            println('HI GRAY, NOT SKIPPING!')
-            checkDependencyVersions()
-        }
         if (project.state.failure) {
             return
         }
