@@ -4273,6 +4273,17 @@ targets:
       task_name: flutter_gallery_ios__start_up_xcode_debug
     bringup: true
 
+  - name: Mac_arm64_ios flutter_gallery_ios__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: flutter_gallery_ios__start_up
+      os: Mac-14
+    bringup: true
+
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
