@@ -833,7 +833,7 @@ class FlutterPlugin implements Plugin<Project> {
     // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
     //
     // Format of the output of this task can be used in debugging what version of Java Gradle is using.
-    // Not recomended for use in time sensitive commands like `flutter run` or `flutter build` as
+    // Not recommended for use in time sensitive commands like `flutter run` or `flutter build` as
     // Gradle is slower than we want. Particularly in light of https://github.com/flutter/flutter/issues/119196.
     private static void addTaskForJavaVersion(Project project) {
         // Warning: the name of this task is used by other code. Change with caution.
@@ -1043,7 +1043,7 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
      * time of adding this code. Once released, this can be removed. However, after updating to
-     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Futher
+     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Further
      * investigation necessary to remove this.
      *
      * Tested cases:
@@ -1423,6 +1423,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     // compareTo implementation of version strings in the format of ints and periods
     // Requires non null objects.
+    // Will not crash on RC candidate strings but considers all RC candidates the same version.
     static int compareVersionStrings(String firstString, String secondString) {
         List firstVersion = firstString.tokenize(".")
         List secondVersion = secondString.tokenize(".")
@@ -1430,12 +1431,32 @@ class FlutterPlugin implements Plugin<Project> {
         def commonIndices = Math.min(firstVersion.size(), secondVersion.size())
 
         for (int i = 0; i < commonIndices; i++) {
-            def firstAtIndex = firstVersion[i].toInteger()
-            def secondAtIndex = secondVersion[i].toInteger()
+            String firstAtIndex = firstVersion[i]
+            String secondAtIndex = secondVersion[i]
+            int firstInt = 0;
+            int secondInt = 0
+            try {
+                if (firstAtIndex.contains("-")) {
+                    // Strip any chars after "-". For example "8.6-rc-2"
+                    firstAtIndex = firstAtIndex.substring(0, firstAtIndex.indexOf('-'))
+                }
+                firstInt = firstAtIndex.toInteger()
+            } catch (NumberFormatException nfe) {
+                println(nfe)
+            }
+            try {
+                if (firstAtIndex.contains("-")) {
+                    // Strip any chars after "-". For example "8.6-rc-2"
+                    secondAtIndex = secondAtIndex.substring(0, secondAtIndex.indexOf('-'))
+                }
+                secondInt = secondAtIndex.toInteger()
+            } catch (NumberFormatException nfe) {
+                println(nfe)
+            }
 
-            if (firstAtIndex != secondAtIndex) {
+            if (firstInt != secondInt) {
                 // <=> in groovy delegates to compareTo
-                return firstAtIndex <=> secondAtIndex
+                return firstInt <=> secondInt
             }
         }
 
