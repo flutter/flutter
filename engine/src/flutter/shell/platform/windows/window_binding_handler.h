@@ -51,9 +51,6 @@ class WindowBindingHandler {
   // Returns the scale factor for the backing window.
   virtual float GetDpiScale() = 0;
 
-  // Returns whether the HWND is currently visible.
-  virtual bool IsVisible() = 0;
-
   // Returns the bounds of the backing window in physical pixels.
   virtual PhysicalWindowBounds GetPhysicalWindowBounds() = 0;
 

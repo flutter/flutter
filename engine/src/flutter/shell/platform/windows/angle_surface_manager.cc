@@ -329,7 +329,7 @@ bool AngleSurfaceManager::MakeResourceCurrent() {
                          egl_resource_context_) == EGL_TRUE);
 }
 
-EGLBoolean AngleSurfaceManager::SwapBuffers() {
+bool AngleSurfaceManager::SwapBuffers() {
   return (eglSwapBuffers(egl_display_, render_surface_));
 }
 

@@ -159,9 +159,6 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual float GetDpiScale() override;
 
   // |FlutterWindowBindingHandler|
-  virtual bool IsVisible() override;
-
-  // |FlutterWindowBindingHandler|
   virtual PhysicalWindowBounds GetPhysicalWindowBounds() override;
 
   // |FlutterWindowBindingHandler|

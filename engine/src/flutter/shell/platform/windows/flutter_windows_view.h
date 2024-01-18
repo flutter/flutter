@@ -62,17 +62,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Tells the engine to generate a new frame
   void ForceRedraw();
 
-  // Swap the view's surface buffers. Must be called on the engine's raster
-  // thread. Returns true if the buffers were swapped.
-  //
-  // |OnFrameGenerated| or |OnEmptyFrameGenerated| must be called before this
-  // method.
-  //
-  // If the view is resizing, this returns false if the frame is not the target
-  // size. Otherwise, it unblocks the platform thread and blocks the raster
-  // thread until the v-blank.
-  virtual bool SwapBuffers();
-
   // Callback to clear a previously presented software bitmap.
   virtual bool ClearSoftwareBitmap();
 
@@ -102,6 +91,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // This resizes the surface if a resize is pending and |width| and
   // |height| match the target size.
   bool OnFrameGenerated(size_t width, size_t height);
+
+  // Called on the raster thread after |CompositorOpenGL| presents a frame.
+  //
+  // This completes a view resize if one is pending.
+  virtual void OnFramePresented();
 
   // Sets the cursor that should be used when the mouse is over the Flutter
   // content. See mouse_cursor.dart for the values and meanings of cursor_name.

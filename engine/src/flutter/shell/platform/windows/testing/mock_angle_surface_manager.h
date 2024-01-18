@@ -25,6 +25,8 @@ class MockAngleSurfaceManager : public AngleSurfaceManager {
   MOCK_METHOD(bool, ClearCurrent, (), (override));
   MOCK_METHOD(void, SetVSyncEnabled, (bool), (override));
 
+  MOCK_METHOD(bool, SwapBuffers, (), (override));
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockAngleSurfaceManager);
 };
