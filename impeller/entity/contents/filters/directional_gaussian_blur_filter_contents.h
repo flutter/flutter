@@ -43,6 +43,9 @@ namespace impeller {
 ///   - `FilterContents::MakeGaussianBlur`
 ///   - //flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.glsl
 ///
+///\deprecated Previously 2 of these were chained to do 2D blurs, use
+///            \ref GaussianBlurFilterContents instead since it has better
+///            performance.
 class DirectionalGaussianBlurFilterContents final : public FilterContents {
  public:
   DirectionalGaussianBlurFilterContents();
