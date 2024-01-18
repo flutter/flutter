@@ -64,7 +64,7 @@ echo ""
 if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
   -resultBundlePath "$RESULT_BUNDLE_PATH/ios_scenario.xcresult" \
-  -destination 'platform=iOS Simulator,OS=16.2,name=iPhone SE (3rd generation)' \
+  -destination 'platform=iOS Simulator,OS=17.0,name=iPhone SE (3rd generation)' \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE"; then
   echo "test success."
@@ -82,7 +82,7 @@ echo ""
 if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
   -resultBundlePath "$RESULT_BUNDLE_PATH/ios_scenario.xcresult" \
-  -destination 'platform=iOS Simulator,OS=16.2,name=iPhone SE (3rd generation)' \
+  -destination 'platform=iOS Simulator,OS=17.0,name=iPhone SE (3rd generation)' \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE" \
   -skip-testing ScenariosUITests/MultiplePlatformViewsBackgroundForegroundTest/testPlatformView \
