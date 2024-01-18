@@ -33,7 +33,7 @@ const double _kFinalLabelScale = 0.75;
 // The default duration for hint fade in/out transitions.
 //
 // Animating hint is not mentioned in the Material specification.
-// The animation is kept for backard compatibility and a short duration
+// The animation is kept for backward compatibility and a short duration
 // is used to mitigate the UX impact.
 const Duration _kHintFadeTransitionDuration = Duration(milliseconds: 20);
 
