@@ -33,9 +33,9 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
           repository: flutteractionsbot/flutter
-          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           path: flutter
           ref: master
+          persist-credentials: false
           # Checkout all history commits on master branch, so that the cp commit is a known object
           fetch-depth: 0
       # use same name when checking out branch, since the marketplace action does a hard reset.
@@ -58,8 +58,8 @@ jobs:
         if: ${{ steps.attempt-cp.conclusion == 'success' }}
         working-directory: ./flutter
         run: |
-          git push -u origin cp-${CHANNEL}-${COMMIT_SHA}
-          gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter
+          git push https://${{ env.GITHUB_TOKEN }}@github.com/flutteractionsbot/flutter cp-${CHANNEL}-${COMMIT_SHA}
+          gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter --head flutteractionsbot:cp-${CHANNEL}-${COMMIT_SHA}
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
