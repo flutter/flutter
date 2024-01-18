@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show FontFeature, FontVariation, ParagraphStyle, Shadow, TextStyle;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,8 +29,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('letterSpacing', textStyle.letterSpacing),
     _propertyToString('wordSpacing', textStyle.wordSpacing),
     _propertyToString('height', textStyle.height),
-    // TODO(yjbanov): remove kIsWeb when https://github.com/flutter/engine/pull/49786 rolls in
-    if (!kIsWeb) _propertyToString('leadingDistribution', textStyle.leadingDistribution),
+    _propertyToString('leadingDistribution', textStyle.leadingDistribution),
     _propertyToString('locale', textStyle.locale),
     _propertyToString('background', textStyle.background),
     _propertyToString('foreground', textStyle.foreground),
