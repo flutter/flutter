@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -22,18 +21,15 @@ class VisualStudio {
     required ProcessManager processManager,
     required Platform platform,
     required Logger logger,
-    required OperatingSystemUtils osUtils,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _logger = logger,
-       _osUtils = osUtils;
+       _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final ProcessUtils _processUtils;
   final Logger _logger;
-  final OperatingSystemUtils _osUtils;
 
   /// Matches the description property from the vswhere.exe JSON output.
   final RegExp _vswhereDescriptionProperty = RegExp(r'\s*"description"\s*:\s*".*"\s*,?');
@@ -212,8 +208,6 @@ class VisualStudio {
       return null;
     }
 
-    final String arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64': 'x64';
-
     return _fileSystem.path.joinAll(<String>[
       details.installationPath!,
       'VC',
@@ -221,8 +215,8 @@ class VisualStudio {
       'MSVC',
       details.msvcVersion!,
       'bin',
-      'Host$arch',
-      arch,
+      'Hostx64',
+      'x64',
       executable,
     ]);
   }
@@ -235,14 +229,12 @@ class VisualStudio {
       return null;
     }
 
-    final String arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64': '64';
-
     return _fileSystem.path.joinAll(<String>[
       details.installationPath!,
       'VC',
       'Auxiliary',
       'Build',
-      'vcvars$arch.bat',
+      'vcvars64.bat',
     ]);
   }
 
