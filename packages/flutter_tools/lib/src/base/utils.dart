@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../convert.dart';
@@ -90,10 +91,12 @@ String getElapsedAsMilliseconds(Duration duration) {
 }
 
 /// Return a String - with units - for the size in MB of the given number of bytes.
-String getSizeAsMB(int bytesLength) {
+String getSizeAsMB(int bytesLength, {
+    @visibleForTesting Platform platform = const LocalPlatform()
+  }) {
   // Because Windows displays 'MB' but actually reports MiB, we calculate MiB
   // accordingly on Windows.
-  final int bytesInPlatformMB = const LocalPlatform().isWindows ? 1024 * 1024 : 1000 * 1000;
+  final int bytesInPlatformMB = platform.isWindows ? 1024 * 1024 : 1000 * 1000;
   return '${(bytesLength / bytesInPlatformMB).toStringAsFixed(1)}MB';
 }
 
