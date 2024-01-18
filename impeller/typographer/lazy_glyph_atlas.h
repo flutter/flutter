@@ -26,7 +26,7 @@ class LazyGlyphAtlas {
 
   void ResetTextFrames();
 
-  std::shared_ptr<GlyphAtlas> CreateOrGetGlyphAtlas(
+  const std::shared_ptr<GlyphAtlas>& CreateOrGetGlyphAtlas(
       Context& context,
       GlyphAtlas::Type type) const;
 
@@ -37,8 +37,8 @@ class LazyGlyphAtlas {
   FontGlyphMap color_glyph_map_;
   std::shared_ptr<GlyphAtlasContext> alpha_context_;
   std::shared_ptr<GlyphAtlasContext> color_context_;
-  mutable std::unordered_map<GlyphAtlas::Type, std::shared_ptr<GlyphAtlas>>
-      atlas_map_;
+  mutable std::shared_ptr<GlyphAtlas> alpha_atlas_;
+  mutable std::shared_ptr<GlyphAtlas> color_atlas_;
 
   LazyGlyphAtlas(const LazyGlyphAtlas&) = delete;
 

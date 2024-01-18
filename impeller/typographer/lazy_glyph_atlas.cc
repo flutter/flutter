@@ -4,12 +4,16 @@
 
 #include "impeller/typographer/lazy_glyph_atlas.h"
 
+#include "fml/logging.h"
 #include "impeller/base/validation.h"
+#include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/typographer_context.h"
 
 #include <utility>
 
 namespace impeller {
+
+static const std::shared_ptr<GlyphAtlas> kNullGlyphAtlas = nullptr;
 
 LazyGlyphAtlas::LazyGlyphAtlas(
     std::shared_ptr<TypographerContext> typographer_context)
@@ -24,7 +28,7 @@ LazyGlyphAtlas::LazyGlyphAtlas(
 LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
 void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame, Scalar scale) {
-  FML_DCHECK(atlas_map_.empty());
+  FML_DCHECK(alpha_atlas_ == nullptr && color_atlas_ == nullptr);
   if (frame.GetAtlasType() == GlyphAtlas::Type::kAlphaBitmap) {
     frame.CollectUniqueFontGlyphPairs(alpha_glyph_map_, scale);
   } else {
@@ -35,42 +39,52 @@ void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame, Scalar scale) {
 void LazyGlyphAtlas::ResetTextFrames() {
   alpha_glyph_map_.clear();
   color_glyph_map_.clear();
-  atlas_map_.clear();
+  alpha_atlas_.reset();
+  color_atlas_.reset();
 }
 
-std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
+const std::shared_ptr<GlyphAtlas>& LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     Context& context,
     GlyphAtlas::Type type) const {
   {
-    auto atlas_it = atlas_map_.find(type);
-    if (atlas_it != atlas_map_.end()) {
-      return atlas_it->second;
+    if (type == GlyphAtlas::Type::kAlphaBitmap && alpha_atlas_) {
+      return alpha_atlas_;
+    }
+    if (type == GlyphAtlas::Type::kColorBitmap && color_atlas_) {
+      return color_atlas_;
     }
   }
 
   if (!typographer_context_) {
     VALIDATION_LOG << "Unable to render text because a TypographerContext has "
                       "not been set.";
-    return nullptr;
+    return kNullGlyphAtlas;
   }
   if (!typographer_context_->IsValid()) {
     VALIDATION_LOG
         << "Unable to render text because the TypographerContext is invalid.";
-    return nullptr;
+    return kNullGlyphAtlas;
   }
 
   auto& glyph_map = type == GlyphAtlas::Type::kAlphaBitmap ? alpha_glyph_map_
                                                            : color_glyph_map_;
-  auto atlas_context =
+  const std::shared_ptr<GlyphAtlasContext>& atlas_context =
       type == GlyphAtlas::Type::kAlphaBitmap ? alpha_context_ : color_context_;
-  auto atlas = typographer_context_->CreateGlyphAtlas(context, type,
-                                                      atlas_context, glyph_map);
+  std::shared_ptr<GlyphAtlas> atlas = typographer_context_->CreateGlyphAtlas(
+      context, type, atlas_context, glyph_map);
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Could not create valid atlas.";
-    return nullptr;
+    return kNullGlyphAtlas;
   }
-  atlas_map_[type] = atlas;
-  return atlas;
+  if (type == GlyphAtlas::Type::kAlphaBitmap) {
+    alpha_atlas_ = std::move(atlas);
+    return alpha_atlas_;
+  }
+  if (type == GlyphAtlas::Type::kColorBitmap) {
+    color_atlas_ = std::move(atlas);
+    return color_atlas_;
+  }
+  FML_UNREACHABLE();
 }
 
 }  // namespace impeller
