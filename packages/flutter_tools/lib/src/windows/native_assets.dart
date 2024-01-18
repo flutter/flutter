@@ -72,6 +72,7 @@ Future<CCompilerConfig> cCompilerConfigWindows() async {
     platform: globals.platform,
     logger: globals.logger,
     processManager: globals.processManager,
+    osUtils: globals.os,
   );
 
   return CCompilerConfig(
