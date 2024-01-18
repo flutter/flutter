@@ -1903,6 +1903,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       _textSelectionEnd = TextPosition(offset: intersectRange!.end);
       // _selectableContainsOriginTextBoundary = true;
       if (range.end < textBoundary.boundaryEnd.offset) {
+        debugPrint('the end $range $fullText ${fullText.length} $textBoundary');
         return SelectionResult.next;
       }
       return SelectionResult.end;
