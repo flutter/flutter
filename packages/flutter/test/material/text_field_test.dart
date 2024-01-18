@@ -14966,6 +14966,31 @@ void main() {
     expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/140607.
+  testWidgets('TextFields can inherit errorStyle color from InputDecorationTheme.', (WidgetTester tester) async {
+    Widget textFieldBuilder() {
+      return MaterialApp(
+        theme: ThemeData(
+          inputDecorationTheme: const InputDecorationTheme(
+            errorStyle: TextStyle(color: Colors.green),
+          ),
+        ),
+        home: const Scaffold(
+          body: TextField(
+            decoration: InputDecoration(
+              errorText: 'error',
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(textFieldBuilder());
+    await tester.pumpAndSettle();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.cursorColor, Colors.green);
+  });
+
   group('MaxLengthEnforcement', () {
     const int maxLength = 5;
 
