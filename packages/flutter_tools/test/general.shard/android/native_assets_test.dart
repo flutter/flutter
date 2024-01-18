@@ -15,10 +15,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    as native_assets_cli;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode, Target;
+import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode, Target;
 import 'package:package_config/package_config_types.dart';
 
 import '../../src/common.dart';
