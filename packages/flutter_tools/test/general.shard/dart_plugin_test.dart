@@ -430,7 +430,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects user selected implementation despites default implementation', () async {
+      testWithoutContext('selects user selected implementation despite default implementation', () async {
         final Set<String> directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',

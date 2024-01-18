@@ -21,7 +21,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// Enables control over a single [ExpansionTile]'s expanded/collapsed state.
 ///
 /// It can be useful to expand or collapse an [ExpansionTile]
-/// programatically, for example to reconfigure an existing expansion
+/// programmatically, for example to reconfigure an existing expansion
 /// tile based on a system event. To do so, create an [ExpansionTile]
 /// with an [ExpansionTileController] that's owned by a stateful widget
 /// or look up the tile's automatically created [ExpansionTileController]
@@ -209,7 +209,7 @@ class ExpansionTileController {
 ///
 /// {@tool dartpad}
 /// This example demonstrates how an [ExpansionTileController] can be used to
-/// programatically expand or collapse an [ExpansionTile].
+/// programmatically expand or collapse an [ExpansionTile].
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
 /// {@end-tool}
