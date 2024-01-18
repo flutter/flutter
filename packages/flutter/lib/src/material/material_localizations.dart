@@ -32,7 +32,7 @@ abstract class MaterialLocalizations {
   /// The [BackButton]'s tooltip.
   String get backButtonTooltip;
 
-  /// The tooltip to clear the text input in [TextField].
+  /// The tooltip for the clear button to clear text on [SearchAnchor]'s search view.
   String get clearButtonTooltip;
 
   /// The [CloseButton]'s tooltip.
