@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -127,6 +128,14 @@ DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
       of: find.text(labelText),
       matching: find.byType(DefaultTextStyle),
     ).first,
+  );
+}
+
+// Finds any container of a tooltip.
+Finder findTooltipContainer(String tooltipText) {
+  return find.ancestor(
+    of: find.text(tooltipText),
+    matching: find.byType(Container),
   );
 }
 
@@ -1040,7 +1049,7 @@ void main() {
     feedback.dispose();
   });
 
-  testWidgets('Delete button is visible FilterChip is disabled', (WidgetTester tester) async {
+  testWidgets('Delete button is visible on disabled FilterChip', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         child: FilterChip(
@@ -1053,5 +1062,35 @@ void main() {
 
     // Delete button should be visible.
     expectLater(find.byType(RawChip), matchesGoldenFile('filter_chip.disabled.delete_button.png'));
+  });
+
+  testWidgets('Delete button tooltip is not shown on disabled FilterChip', (WidgetTester tester) async {
+    Widget buildChip({ bool enabled = true }) {
+      return wrapForChip(
+        child: FilterChip(
+          onSelected: enabled ? (bool value) { } : null,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      );
+    }
+
+    // Test enabled chip.
+    await tester.pumpWidget(buildChip());
+
+    final Offset deleteButtonLocation = tester.getCenter(find.byType(Icon));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(deleteButtonLocation);
+    await tester.pump();
+
+    // Delete button tooltip should be visible.
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+
+    // Test disabled chip.
+    await tester.pumpWidget(buildChip(enabled: false));
+    await tester.pump();
+
+    // Delete button tooltip should not be visible.
+    expect(findTooltipContainer('Delete'), findsNothing);
   });
 }
