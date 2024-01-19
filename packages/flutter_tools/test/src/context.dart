@@ -125,9 +125,21 @@ void testUsingContext(
           Analytics: () => NoOpAnalytics(),
         },
         body: () {
-          return runZonedGuarded<Future<dynamic>>(() {
+          // runZonedGuarded has a scary documenation that says:
+          //
+          // "returning a future created inside the zone, and waiting for it
+          // outside of the zone, will risk the future not being seen to
+          // complete."
+          //
+          // for example, see our own test suite:
+          // https://github.com/flutter/flutter/blob/5987563e4aecb34fca446ea804943bb8d27d8fcd/packages/flutter_tools/test/general.shard/base/async_guard_test.dart#L279-L306
+          //
+          // so, we create a completer outside the zone, and complete it inside
+          // the zone in baiscally every terminal condition.
+          final Completer<void> completer = Completer<void>();
+          runZonedGuarded<Future<dynamic>>(() async {
             try {
-              return context.run<dynamic>(
+              return await context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
                 // instantiation may reference items already stored on the context.
                 overrides: overrides,
@@ -145,14 +157,22 @@ void testUsingContext(
             } catch (error) { // ignore: avoid_catches_without_on_clauses
               _printBufferedErrors(context);
               rethrow;
+            } finally {
+              if (!completer.isCompleted) {
+                completer.complete();
+              }
             }
           }, (Object error, StackTrace stackTrace) {
             // When things fail, it's ok to print to the console!
             print(error); // ignore: avoid_print
             print(stackTrace); // ignore: avoid_print
             _printBufferedErrors(context);
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
             throw error; //ignore: only_throw_errors
           });
+          return completer.future;
         },
       );
     }, overrides: <Type, Generator>{
