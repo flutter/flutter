@@ -13,10 +13,7 @@ class FlutterPluginKts : Plugin<Project> {
     override fun apply(project: Project) {
         // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
         // supported range.
-        if (project.hasProperty("skipDependencyChecks")) {
-            println("HI GRAY, SKIPPING!")
-        } else {
-            println("HI GRAY, NOT SKIPPING!")
+        if (!project.hasProperty("skipDependencyChecks")) {
             checkDependencyVersions(project)
         }
 
@@ -77,28 +74,28 @@ class FlutterPluginKts : Plugin<Project> {
         try {
             gradleVersion = getGradleVersion(project)
         } catch (ignored : Exception){
-            project.logger.quiet("Warning: unable to detect project Gradle version. Skipping " +
+            project.logger.error("Warning: unable to detect project Gradle version. Skipping " +
                     "version checking.")
         }
         if (gradleVersion != null) checkGradleVersion(gradleVersion!!, project)
         try {
             javaVersion = getJavaVersion(project)
         } catch (ignored : Exception){
-            project.logger.quiet("Warning: unable to detect project Java version. Skipping " +
+            project.logger.error("Warning: unable to detect project Java version. Skipping " +
                     "version checking.")
         }
         if (javaVersion != null) checkJavaVersion(javaVersion!!, project)
         try {
             agpVersion = getAGPVersion(project)
         } catch (ignored : Exception){
-            project.logger.quiet("Warning: unable to detect project AGP version. Skipping " +
+            project.logger.error("Warning: unable to detect project AGP version. Skipping " +
                     "version checking.")
         }
         if (agpVersion != null) checkAGPVersion(agpVersion!!, project)
         try {
             kgpVersion = getKGPVersion(project)
         } catch (ignored : Exception){
-            project.logger.quiet("Warning: unable to detect project KGP version. Skipping " +
+            project.logger.error("Warning: unable to detect project KGP version. Skipping " +
                     "version checking.")
         }
         if (kgpVersion != null) checkKGPVersion(kgpVersion!!, project)
@@ -128,16 +125,28 @@ class FlutterPluginKts : Plugin<Project> {
         )
     }
 
+    private fun getErrorMessage(dependencyName : String,
+                        versionString : String,
+                        errorVersion : String) : String {
+        return "Error: Your project's $dependencyName version ($versionString) is lower " +
+                "than Flutter's minimum supported version of $errorVersion. Please upgrade " +
+                "your $dependencyName version. \nAlternatively, use the flag " +
+                "\"--android-skip-build-dependency-validation\" to bypass this check."
+    }
+
     fun checkGradleVersion(version : Version, project : Project) {
         println("Gradle version is: " + version.toString())
         if (version < errorGradleVersion) {
-            project.logger.error("Error: Your project's Gradle version ($version) is lower " +
-                    "than our minimum supported version of $errorGradleVersion. Please upgrade " +
-                    "your Gradle version. \nAlternatively, use the flag " +
-                    "\"--android-skip-build-dependency-validation\" to bypass this check.")
+            throw GradleException(
+                getErrorMessage(
+                    "Gradle",
+                    version.toString(),
+                    errorGradleVersion.toString()
+                )
+            )
         }
         else if (version < warnGradleVersion) {
-            project.logger.quiet("Warning: Flutter support for your project's Gradle version " +
+            project.logger.error("Warning: Flutter support for your project's Gradle version " +
                     "($version) will soon be dropped. Please upgrade your Gradle version soon. " +
                     "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
                     " to bypass this check.")
@@ -147,13 +156,16 @@ class FlutterPluginKts : Plugin<Project> {
     fun checkJavaVersion(version : JavaVersion, project : Project) {
         println("Java version is: " + version.toString())
         if (version < errorJavaVersion) {
-            project.logger.error("Error: Your project's Java version ($version) is lower " +
-                    "than our minimum supported version of $errorJavaVersion. Please upgrade " +
-                    "your Java version. \nAlternatively, use the flag " +
-                    "\"--android-skip-build-dependency-validation\" to bypass this check.")
+            throw GradleException(
+                getErrorMessage(
+                    "Java",
+                    version.toString(),
+                    errorJavaVersion.toString()
+                )
+            )
         }
         else if (version < warnJavaVersion) {
-            project.logger.quiet("Warning: Flutter support for your project's Java version " +
+            project.logger.error("Warning: Flutter support for your project's Java version " +
                     "($version) will soon be dropped. Please upgrade your Java version soon. " +
                     "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
                     " to bypass this check.")
@@ -163,13 +175,16 @@ class FlutterPluginKts : Plugin<Project> {
     fun checkAGPVersion(version : AndroidPluginVersion, project : Project) {
         println("AGP version is: " + version.toString())
         if (version < errorAGPVersion) {
-            project.logger.error("Error: Your project's Android Gradle Plugin version ($version) " +
-                    "is lower than our minimum supported version of $errorAGPVersion. " +
-                    "Please upgrade your AGP version. \nAlternatively, use the flag " +
-                    "\"--android-skip-build-dependency-validation\" to bypass this check.")
+            throw GradleException(
+                getErrorMessage(
+                    "AGP",
+                    version.toString(),
+                    errorAGPVersion.toString()
+                )
+            )
         }
         else if (version < warnAGPVersion) {
-            project.logger.quiet("Warning: Flutter support for your project's Android Gradle Plugin" +
+            project.logger.error("Warning: Flutter support for your project's Android Gradle Plugin" +
                     " version ($version) will soon be dropped. Please upgrade your AGP version soon. " +
                     "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
                     " to bypass this check.")
@@ -179,13 +194,16 @@ class FlutterPluginKts : Plugin<Project> {
     fun checkKGPVersion(version : Version, project : Project) {
         println("KGP version is: " + version.toString())
         if (version < errorKGPVersion) {
-            project.logger.error("Error: Your project's Kotlin version ($version) is lower " +
-                    "than our minimum supported version of $errorKGPVersion. Please upgrade " +
-                    "your Kotlin version. \nAlternatively, use the flag " +
-                    "\"--android-skip-build-dependency-validation\" to bypass this check.")
+            throw GradleException(
+                getErrorMessage(
+                    "Kotlin",
+                    version.toString(),
+                    errorKGPVersion.toString()
+                )
+            )
         }
         else if (version < warnKGPVersion) {
-            project.logger.quiet("Warning: Flutter support for your project's Kotlin version " +
+            project.logger.error("Warning: Flutter support for your project's Kotlin version " +
                     "($version) will soon be dropped. Please upgrade your Kotlin version soon. " +
                     "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
                     " to bypass this check.")

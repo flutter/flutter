@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
-import com.android.build.api.AndroidPluginVersion
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
