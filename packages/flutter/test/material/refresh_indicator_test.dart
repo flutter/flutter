@@ -1141,7 +1141,7 @@ void main() {
   });
 
   group('RefreshIndicator.noSpinner', () {
-    testWidgets('onModeChange and onRefresh Trigger',
+    testWidgets('onStatusChange and onRefresh Trigger',
             (WidgetTester tester) async {
           refreshCalled = false;
           bool modeSnap = false;
@@ -1151,17 +1151,17 @@ void main() {
 
           await tester.pumpWidget(MaterialApp(
             home: RefreshIndicator.noSpinner(
-              onModeChange: (String? mode) {
-                if (mode == 'armed') {
+              onStatusChange: (RefreshIndicatorStatus? mode) {
+                if (mode == RefreshIndicatorStatus.armed) {
                   modeArmed = true;
                 }
-                if (mode == 'drag') {
+                if (mode == RefreshIndicatorStatus.drag) {
                   modeDrag = true;
                 }
-                if (mode == 'snap') {
+                if (mode == RefreshIndicatorStatus.snap) {
                   modeSnap = true;
                 }
-                if (mode == 'done') {
+                if (mode == RefreshIndicatorStatus.done) {
                   modeDone = true;
                 }
               },
