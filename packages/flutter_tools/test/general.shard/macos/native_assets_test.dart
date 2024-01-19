@@ -149,13 +149,13 @@ void main() {
               id: 'package:bar/bar.dart',
               linkMode: LinkMode.dynamic,
               target: native_assets_cli.Target.macOSArm64,
-              path: AssetAbsolutePath(Uri.file('bar.dylib')),
+              path: AssetAbsolutePath(Uri.file('libbar.dylib')),
             ),
             Asset(
               id: 'package:bar/bar.dart',
               linkMode: LinkMode.dynamic,
               target: native_assets_cli.Target.macOSX64,
-              path: AssetAbsolutePath(Uri.file('bar.dylib')),
+              path: AssetAbsolutePath(Uri.file('libbar.dylib')),
             ),
           ],
         ),
@@ -236,35 +236,47 @@ void main() {
     if (flutterTester) {
       testName += ' flutter tester';
     }
+    final String dylibPath;
+    final String signPath;
+    if (flutterTester) {
+      // Just the dylib.
+      dylibPath = '/build/native_assets/macos/libbar.dylib';
+      signPath = '/build/native_assets/macos/libbar.dylib';
+    } else {
+      // Packaged in framework.
+      dylibPath = '/build/native_assets/macos/bar.framework/Versions/A/bar';
+      signPath = '/build/native_assets/macos/bar.framework';
+    }
     testUsingContext('build with assets$testName', overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager: () => FakeProcessManager.list(
         <FakeCommand>[
-          const FakeCommand(
+          FakeCommand(
             command: <Pattern>[
               'lipo',
               '-create',
               '-output',
-              '/build/native_assets/macos/bar.dylib',
-              'bar.dylib',
+              dylibPath,
+              'libbar.dylib',
             ],
           ),
-          const FakeCommand(
-            command: <Pattern>[
-              'install_name_tool',
-              '-id',
-              '@executable_path/Frameworks/bar.dylib',
-              '/build/native_assets/macos/bar.dylib',
-            ],
-          ),
-          const FakeCommand(
+          if  (!flutterTester)
+            FakeCommand(
+              command: <Pattern>[
+                'install_name_tool',
+                '-id',
+                '@rpath/bar.framework/bar',
+                dylibPath,
+              ],
+            ),
+          FakeCommand(
             command: <Pattern>[
               'codesign',
               '--force',
               '--sign',
               '-',
               '--timestamp=none',
-              '/build/native_assets/macos/bar.dylib',
+              signPath,
             ],
           ),
         ],
@@ -292,7 +304,7 @@ void main() {
                 id: 'package:bar/bar.dart',
                 linkMode: LinkMode.dynamic,
                 target: native_assets_cli.Target.macOSArm64,
-                path: AssetAbsolutePath(Uri.file('bar.dylib')),
+                path: AssetAbsolutePath(Uri.file('libbar.dylib')),
               ),
             ],
           ),
@@ -315,10 +327,10 @@ void main() {
           'package:bar/bar.dart',
           if (flutterTester)
             // Tests run on host system, so the have the full path on the system.
-            '- ${projectUri.resolve('build/native_assets/macos/bar.dylib').toFilePath()}'
+            '- ${projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()}'
           else
             // Apps are a bundle with the dylibs on their dlopen path.
-            '- bar.dylib',
+            '- bar.framework/bar',
         ]),
       );
     });
