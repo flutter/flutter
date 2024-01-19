@@ -19,6 +19,10 @@ export 'skia_client.dart';
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
+// If you are trying to debug this package, you may like to use the golden test
+// titled "Inconsequential golden test" in this file:
+//   /packages/flutter/test/widgets/basic_test.dart
+
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 bool _isMainBranch(String? branch) {
@@ -38,7 +42,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   const FileSystem fs = LocalFileSystem();
   const ProcessManager process = LocalProcessManager();
   final io.HttpClient httpClient = io.HttpClient();
-  if (FlutterPostSubmitFileComparator.isRecommendedForEnvironment(platform)) {
+  if (true || FlutterPostSubmitFileComparator.isRecommendedForEnvironment(platform)) {
     goldenFileComparator = await FlutterPostSubmitFileComparator.fromLocalFileComparator(
       localFileComparator: goldenFileComparator as LocalFileComparator,
       namePrefix: namePrefix,
