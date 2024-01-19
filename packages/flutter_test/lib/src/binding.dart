@@ -1181,8 +1181,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 }
 
-/// A variant of [TestWidgetsFlutterBinding] for executing tests in
-/// the `flutter test` environment.
+/// A variant of [TestWidgetsFlutterBinding] for executing tests typically
+/// the `flutter test` environment, unless it is an integration test.
+///
+/// When doing integration test, [LiveTestWidgetsFlutterBinding] is utilized
+/// instead.
 ///
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
@@ -1632,9 +1635,9 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   benchmarkLive,
 }
 
-/// A variant of [TestWidgetsFlutterBinding] for executing tests in
-/// the `flutter run` environment, on a device. This is intended to
-/// allow interactive test development.
+/// A variant of [TestWidgetsFlutterBinding] for executing tests
+/// on a device, typically via `flutter run`, or via integration tests.
+/// This is intended to allow interactive test development.
 ///
 /// This is not the way to run a remote-control test. To run a test on
 /// a device from a development computer, see the [flutter_driver]
