@@ -5465,8 +5465,8 @@ TestSemantics _expectedSemantics() {
                       ),
                     ],
                   ),
-                ]
-              )
+                ],
+              ),
             ],
           ),
         ],
