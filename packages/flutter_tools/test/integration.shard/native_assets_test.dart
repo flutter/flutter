@@ -330,9 +330,10 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
   expect(frameworksFolder, exists);
+  final String frameworkName = packageName.substring(0, 15);
   final File dylib = frameworksFolder
-      .childDirectory('$packageName.framework')
-      .childFile(packageName);
+      .childDirectory('$frameworkName.framework')
+      .childFile(frameworkName);
   expect(dylib, exists);
 }
 
@@ -408,9 +409,10 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
   final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
+  final String frameworkName = packageName.substring(0, 15);
   final File dylib = frameworksFolder
-      .childDirectory('$packageName.framework')
-      .childFile(packageName);
+      .childDirectory('$frameworkName.framework')
+      .childFile(frameworkName);
   expect(dylib, exists);
 }
 
