@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import com.android.build.api.AndroidPluginVersion
-import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
@@ -14,7 +12,7 @@ class FlutterPluginKts : Plugin<Project> {
         // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
         // supported range.
         if (!project.hasProperty("skipDependencyChecks")) {
-            DependencyChecker.checkDependencyVersions(project)
+            DependencyVersionChecker.checkDependencyVersions(project)
         }
 
         // Use withGroovyBuilder and getProperty() to access Groovy metaprogramming.
@@ -43,7 +41,7 @@ class FlutterPluginKts : Plugin<Project> {
     }
 }
 
-class DependencyChecker {
+class DependencyVersionChecker {
     companion object {
         // The following versions define our support policy for Gradle, Java, AGP, and KGP.
         // All "error" versions are currently set to 0 as this policy is new. They will be increased
@@ -57,8 +55,8 @@ class DependencyChecker {
         val warnJavaVersion : JavaVersion = JavaVersion.VERSION_11
         val errorJavaVersion : JavaVersion = JavaVersion.VERSION_1_1
 
-        val warnAGPVersion : AndroidPluginVersion = AndroidPluginVersion(7,0,0)
-        val errorAGPVersion : AndroidPluginVersion = AndroidPluginVersion(0,0,0)
+        val warnAGPVersion : Version = Version(7,0,0)
+        val errorAGPVersion : Version = Version(0,0,0)
 
         val warnKGPVersion : Version = Version(1,5,0)
         val errorKGPVersion : Version = Version(0,0,0)
@@ -71,7 +69,7 @@ class DependencyChecker {
         fun checkDependencyVersions(project : Project) {
             var gradleVersion : Version? = null
             var javaVersion : JavaVersion? = null
-            var agpVersion : AndroidPluginVersion? = null
+            var agpVersion : Version? = null
             var kgpVersion : Version? = null
 
             try {
@@ -92,7 +90,7 @@ class DependencyChecker {
                 agpVersion = getAGPVersion(project)
             } catch (ignored : Exception){
                 project.logger.error("Warning: unable to detect project AGP version. Skipping " +
-                        "version checking.")
+                        "version checking. " + ignored)
             }
             if (agpVersion != null) checkAGPVersion(agpVersion!!, project)
             try {
@@ -114,10 +112,18 @@ class DependencyChecker {
             return JavaVersion.current()
         }
 
-        // https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-main:build-system/gradle-api/src/main/java/com/android/build/api/variant/AndroidComponentsExtension.kt;l=38?q=AndroidComponents&ss=android-studio%2Fplatform%2Ftools%2Fbase:build-system%2Fgradle-api%2Fsrc%2Fmain%2Fjava%2Fcom%2Fandroid%2Fbuild%2Fapi%2F
-        fun getAGPVersion(project : Project) : AndroidPluginVersion {
-            return project.extensions
-                .getByType(ApplicationAndroidComponentsExtension::class.java)!!.pluginVersion
+        // This approach is taken from AGP's own version checking plugin:
+        // https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/agpVersionChecker.kt#58.
+        fun getAGPVersion(project : Project) : Version? {
+            var agpVersion : Version? = null
+            try {
+                agpVersion = Version.fromString(project.plugins.getPlugin("com.android.base")::class.java.classLoader.loadClass(com.android.Version::class.java.name).fields.find { it.name == "ANDROID_GRADLE_PLUGIN_VERSION" }!!.get(null) as String)
+            } catch (ignored: ClassNotFoundException) {
+                // Use deprecated Version class as it exists in older AGP (com.android.Version) does
+                // not exist in those versions.
+                agpVersion = Version.fromString(project.plugins.getPlugin("com.android.base")::class.java.classLoader.loadClass(com.android.builder.model.Version::class.java.name).fields.find { it.name == "ANDROID_GRADLE_PLUGIN_VERSION" }!!.get(null) as String)
+            }
+            return agpVersion
         }
 
         fun getKGPVersion(project : Project) : Version {
@@ -175,7 +181,7 @@ class DependencyChecker {
             }
         }
 
-        fun checkAGPVersion(version : AndroidPluginVersion, project : Project) {
+        fun checkAGPVersion(version : Version, project : Project) {
             println("AGP version is: " + version.toString())
             if (version < errorAGPVersion) {
                 throw GradleException(

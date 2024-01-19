@@ -72,9 +72,9 @@ void main() {
       '--platforms=android',
     ], workingDirectory: tempDir.path);
     expect(result, const ProcessResultMatcher());
-    const String gradleVersion = '7.6.3';
-    const String agpVersion = '7.4.0';
-    const String kgpVersion = '1.8.10';
+    const String gradleVersion = '7.5';
+    const String agpVersion = '4.2.0';
+    const String kgpVersion = '1.7.10';
 
     final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
 
@@ -94,12 +94,121 @@ void main() {
         .replaceFirst('KGPREPLACEME', kgpVersion);
     await gradleSettings.writeAsString(settingsContent, flush: true);
 
+
     // Ensure that gradle files exists from templates.
     result = await processManager.run(<String>[
       flutterBin,
       'build',
       'apk',
+      '--debug',
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
+    expect(result.stderr, contains('Please upgrade your AGP version soon.'));
+    
+    print(result.stderr.toString());
+    print("hi gray");
+    print(result.stdout.toString());
+    //expect(stdout.toString().contains('Built build/app'), true);
   });
+
+  testUsingContext(
+      'Gradle version out of support band prints warning but still builds', () async {
+    // Create a new flutter project.
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'create',
+      'dependency_checker_app',
+      '--platforms=android',
+    ], workingDirectory: tempDir.path);
+    expect(result, const ProcessResultMatcher());
+    const String gradleVersion = '7.0';
+    const String agpVersion = '4.2.0';
+    const String kgpVersion = '1.7.10';
+
+    final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
+
+    // Modify gradle version to passed in version.
+    final File gradleWrapperProperties = File(fileSystem.path.join(
+        app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
+    final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
+      'REPLACEME',
+      gradleVersion,
+    );
+    await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
+
+    final File gradleSettings = File(fileSystem.path.join(
+        app.path, 'android', 'settings.gradle'));
+    final String settingsContent = gradleSettingsFileContent
+        .replaceFirst('AGPREPLACEME', agpVersion)
+        .replaceFirst('KGPREPLACEME', kgpVersion);
+    await gradleSettings.writeAsString(settingsContent, flush: true);
+
+
+    // Ensure that gradle files exists from templates.
+    result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--debug',
+    ], workingDirectory: app.path);
+    expect(result, const ProcessResultMatcher());
+    expect(result.stderr, contains('Please upgrade your Gradle version soon.'));
+
+    print(result.stderr.toString());
+    print("hi gray");
+    print(result.stdout.toString());
+  });
+
+  testUsingContext(
+      'Kotlin version out of support band prints warning but still builds', () async {
+    // Create a new flutter project.
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'create',
+      'dependency_checker_app',
+      '--platforms=android',
+    ], workingDirectory: tempDir.path);
+    expect(result, const ProcessResultMatcher());
+    const String gradleVersion = '7.5';
+    const String agpVersion = '7.4.0';
+    const String kgpVersion = '1.3.10';
+
+    final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
+
+    // Modify gradle version to passed in version.
+    final File gradleWrapperProperties = File(fileSystem.path.join(
+        app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
+    final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
+      'REPLACEME',
+      gradleVersion,
+    );
+    await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
+
+    final File gradleSettings = File(fileSystem.path.join(
+        app.path, 'android', 'settings.gradle'));
+    final String settingsContent = gradleSettingsFileContent
+        .replaceFirst('AGPREPLACEME', agpVersion)
+        .replaceFirst('KGPREPLACEME', kgpVersion);
+    await gradleSettings.writeAsString(settingsContent, flush: true);
+
+
+    // Ensure that gradle files exists from templates.
+    result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--debug',
+    ], workingDirectory: app.path);
+    expect(result, const ProcessResultMatcher());
+    expect(result.stderr, contains('Please upgrade your Kotlin version soon.'));
+
+    print(result.stderr.toString());
+    print("hi gray");
+    print(result.stdout.toString());
+  });
+
+  // TODO(gmackall): Add tests for build blocking when we enable the
+  // corresponding error versions.
 }
