@@ -1232,11 +1232,10 @@ void runApp(Widget app) {
 /// Unlike [runApp], this method does not define a [FlutterView] into which the
 /// provided `app` widget is rendered into. It is up to the caller to include at
 /// least one [View] widget in the provided `app` widget that will bootstrap a
-/// render tree and define the [FlutterView] into which the provided widget is
-/// rendered. [RenderObjectWidget]s without an ancestor [View] widget will
-/// result in an exception. Apps that want to render into the default view
-/// without dealing with view management should consider calling [runApp]
-/// instead.
+/// render tree and define the [FlutterView] into which content is rendered.
+/// [RenderObjectWidget]s without an ancestor [View] widget will result in an
+/// exception. Apps that want to render into the default view without dealing
+/// with view management should consider calling [runApp] instead.
 ///
 /// {@tool snippet}
 /// The sample shows how to utilize [runWidget] to specify the [FlutterView]
