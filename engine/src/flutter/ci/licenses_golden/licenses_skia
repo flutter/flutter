@@ -1,4 +1,4 @@
-Signature: d8e92dfe0442790e39015dc9c42ffaec
+Signature: e054cfbfeb0c96063ee55f8920d98ecc
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9496,8 +9496,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/src/sksl/analysis/SkSLCheckSymbolTableCorrectness.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLSymbol.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/src/sksl/analysis/SkSLCheckSymbolTableCorrectness.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/ir/SkSLSymbol.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 Google LLC
