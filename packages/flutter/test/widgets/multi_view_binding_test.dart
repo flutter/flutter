@@ -52,7 +52,6 @@ void main() {
         contains('passing it to "runWidget" instead of "runApp"'),
       ),
     );
-    runApp(const SizedBox());
   });
 
   testWidgets('runWidget throws if not given a View', (WidgetTester tester) async {
@@ -75,6 +74,11 @@ void main() {
       ),
     );
     expect(find.byType(View), findsOne);
+  });
+
+  testWidgets('can call runWidget with an empty ViewCollection', (WidgetTester tester) async {
+    runWidget(const ViewCollection(views: <Widget>[]));
+    expect(find.byType(ViewCollection), findsOne);
   });
 }
 
