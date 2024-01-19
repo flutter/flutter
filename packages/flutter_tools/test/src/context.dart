@@ -135,7 +135,7 @@ void testUsingContext(
           // https://github.com/flutter/flutter/blob/5987563e4aecb34fca446ea804943bb8d27d8fcd/packages/flutter_tools/test/general.shard/base/async_guard_test.dart#L279-L306
           //
           // so, we create a completer outside the zone, and complete it inside
-          // the zone in baiscally every terminal condition.
+          // the zone in basically every terminal condition.
           final Completer<void> completer = Completer<void>();
           runZonedGuarded<Future<dynamic>>(() async {
             try {
