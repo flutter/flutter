@@ -306,7 +306,7 @@ void main() {
           indicatorPadding: indicatorPadding + const EdgeInsets.all(7.0),
         ),
       ),
-    ), Duration.zero, EnginePhase.build);
+    ), duration: Duration.zero, phase: EnginePhase.build);
 
     expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
   });

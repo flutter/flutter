@@ -18,8 +18,7 @@ void main() {
     await tester.pumpWidget(
       const Placeholder(),
       // Stops right after the warm up frame.
-      null,
-      EnginePhase.build,
+      phase: EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
@@ -91,8 +90,7 @@ void main() {
     await tester.pumpWidget(
       const Placeholder(),
       // Stops right after the warm up frame.
-      null,
-      EnginePhase.build,
+      phase: EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
