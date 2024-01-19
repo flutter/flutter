@@ -7,13 +7,10 @@
 #include <memory>
 #include <utility>
 
-#include "flutter/fml/logging.h"
-#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/blit_pass_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pass_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_vk.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_target.h"
@@ -73,9 +70,9 @@ std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
     return nullptr;
   }
   auto pass =
-      std::shared_ptr<RenderPassVK>(new RenderPassVK(context,          //
-                                                     target,           //
-                                                     weak_from_this()  //
+      std::shared_ptr<RenderPassVK>(new RenderPassVK(context,            //
+                                                     target,             //
+                                                     shared_from_this()  //
                                                      ));
   if (!pass->IsValid()) {
     return nullptr;

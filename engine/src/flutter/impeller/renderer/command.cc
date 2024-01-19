@@ -23,6 +23,7 @@ bool Command::BindVertices(VertexBuffer buffer) {
 }
 
 bool Command::BindResource(ShaderStage stage,
+                           DescriptorType type,
                            const ShaderUniformSlot& slot,
                            const ShaderMetadata& metadata,
                            BufferView view) {
@@ -31,6 +32,7 @@ bool Command::BindResource(ShaderStage stage,
 
 bool Command::BindResource(
     ShaderStage stage,
+    DescriptorType type,
     const ShaderUniformSlot& slot,
     const std::shared_ptr<const ShaderMetadata>& metadata,
     BufferView view) {
@@ -66,6 +68,7 @@ bool Command::DoBindResource(ShaderStage stage,
 }
 
 bool Command::BindResource(ShaderStage stage,
+                           DescriptorType type,
                            const SampledImageSlot& slot,
                            const ShaderMetadata& metadata,
                            std::shared_ptr<const Texture> texture,

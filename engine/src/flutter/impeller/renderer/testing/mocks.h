@@ -92,7 +92,7 @@ class MockBlitPass : public BlitPass {
 
 class MockRenderPass : public RenderPass {
  public:
-  MockRenderPass(std::weak_ptr<const Context> context,
+  MockRenderPass(std::shared_ptr<const Context> context,
                  const RenderTarget& target)
       : RenderPass(std::move(context), target) {}
   MOCK_METHOD(bool, IsValid, (), (const, override));

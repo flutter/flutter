@@ -66,8 +66,6 @@ TEST(GPUTracerVK, DoesNotTraceOutsideOfFrameWorkload) {
   auto called = GetMockVulkanFunctions(context->GetDevice());
 
   ASSERT_NE(called, nullptr);
-  ASSERT_TRUE(std::find(called->begin(), called->end(), "vkCreateQueryPool") ==
-              called->end());
   ASSERT_TRUE(std::find(called->begin(), called->end(),
                         "vkGetQueryPoolResults") == called->end());
 }

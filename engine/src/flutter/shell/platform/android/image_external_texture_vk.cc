@@ -5,6 +5,8 @@
 #include "flutter/impeller/core/texture_descriptor.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/vulkan/android_hardware_buffer_texture_source_vk.h"
+#include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
+#include "flutter/impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
 #include "flutter/shell/platform/android/ndk_helpers.h"
 
@@ -59,6 +61,31 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
 
   auto texture =
       std::make_shared<impeller::TextureVK>(impeller_context_, texture_source);
+  // Transition the layout to shader read.
+  {
+    auto buffer = impeller_context_->CreateCommandBuffer();
+    impeller::CommandBufferVK& buffer_vk =
+        impeller::CommandBufferVK::Cast(*buffer);
+
+    impeller::BarrierVK barrier;
+    barrier.cmd_buffer = buffer_vk.GetEncoder()->GetCommandBuffer();
+    barrier.src_access = impeller::vk::AccessFlagBits::eColorAttachmentWrite |
+                         impeller::vk::AccessFlagBits::eTransferWrite;
+    barrier.src_stage =
+        impeller::vk::PipelineStageFlagBits::eColorAttachmentOutput |
+        impeller::vk::PipelineStageFlagBits::eTransfer;
+    barrier.dst_access = impeller::vk::AccessFlagBits::eShaderRead;
+    barrier.dst_stage = impeller::vk::PipelineStageFlagBits::eFragmentShader;
+
+    barrier.new_layout = impeller::vk::ImageLayout::eShaderReadOnlyOptimal;
+
+    if (!texture->SetLayout(barrier)) {
+      return;
+    }
+    if (!buffer->SubmitCommands()) {
+      return;
+    }
+  }
 
   dl_image_ = impeller::DlImageImpeller::Make(texture);
   CloseHardwareBuffer(hardware_buffer);
