@@ -1,4 +1,4 @@
-Signature: 7e833d89e9dfe743ef3cae39ed5d23a3
+Signature: 82c366768f5e4af04cf706343810a69b
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -12266,6 +12266,13 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any.h + ../../
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/inline_any.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/input_report_reader/reader.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/component.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/component.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/service.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/testing.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/tree_handler_settings.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/service.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/testing.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/service/cpp/tree_handler_settings.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland_types.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -12580,6 +12587,13 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/inline_any.h
 FILE: ../../../fuchsia/sdk/linux/pkg/input_report_reader/reader.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/component.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/component.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/service.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/testing.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/tree_handler_settings.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/service.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/testing.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/service/cpp/tree_handler_settings.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland_types.cc
