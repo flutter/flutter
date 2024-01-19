@@ -28,4 +28,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'test_api': '0.6.1', // https://github.com/flutter/flutter/issues/140169
   'test_core': '0.5.9', // https://github.com/flutter/flutter/issues/140169
   'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
+  'native_assets_builder': '0.3.0', // https://github.com/flutter/flutter/pull/141814
+  'native_assets_cli': '0.3.2', // https://github.com/flutter/flutter/pull/141814
 };
