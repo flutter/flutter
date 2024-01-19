@@ -234,7 +234,7 @@ class SampleChecker {
     final RegExp validExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
     // Looks for some common broken versions of example links. This looks for
     // something that is at minimum "///*seecode<something>*" to indicate that it
-    // looks like an example link. It should be narrowed if we start gettting false
+    // looks like an example link. It should be narrowed if we start getting false
     // positives.
     final RegExp malformedLinkRe = RegExp(r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)');
     for (final File file in files) {

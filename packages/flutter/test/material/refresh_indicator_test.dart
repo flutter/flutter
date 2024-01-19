@@ -252,12 +252,82 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 200.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator - drag back not far enough to cancel', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(height: 1000),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset startLocation = tester.getCenter(find.text('X'), warnIfMissed: true, callee: 'drag');
+    final TestPointer testPointer = TestPointer();
+    await tester.sendEventToBinding(testPointer.down(startLocation));
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 175)));
+    await tester.pump();
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 150)));
+    await tester.pump();
+    await tester.sendEventToBinding(testPointer.up());
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator - drag back far enough to cancel', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(height: 1000),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset startLocation = tester.getCenter(find.text('X'), warnIfMissed: true, callee: 'drag');
+    final TestPointer testPointer = TestPointer();
+    await tester.sendEventToBinding(testPointer.down(startLocation));
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 175)));
+    await tester.pump();
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 149)));
+    await tester.pump();
+    await tester.sendEventToBinding(testPointer.up());
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, false);
   });
 
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
