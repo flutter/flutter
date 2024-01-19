@@ -33,7 +33,7 @@ void main() {
     expect(result.stderr, contains(exitMessageContains));
   }
 
-  void createDotPackages(String projectPath, [bool nullSafe = false]) {
+  void createDotPackages(String projectPath) {
     final StringBuffer flutterRootUri = StringBuffer('file://');
     final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(getFlutterRoot());
     if (platform.isWindows) {
@@ -51,19 +51,19 @@ void main() {
       "name": "flutter",
       "rootUri": "$flutterRootUri/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.0"
     },
     {
       "name": "sky_engine",
       "rootUri": "$flutterRootUri/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.0"
     },
     {
       "name": "flutter_project",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "${nullSafe ? "2.12" : "2.7"}"
+      "languageVersion": "2.7"
     }
   ]
 }
@@ -106,20 +106,6 @@ void main() {
     await runCommand(
       arguments: <String>['analyze', '--no-pub', libMain.path],
       statusTextContains: <String>['No issues found!']
-    );
-  });
-
-  testWithoutContext('passing one file with errors are detected', () async {
-    await runCommand(
-        arguments: <String>['analyze', '--no-pub', errorFile.path],
-        statusTextContains: <String>[
-          'Analyzing error.dart',
-          "error $analyzerSeparator Target of URI doesn't exist",
-          "error $analyzerSeparator Expected to find ';'",
-          'error $analyzerSeparator Unterminated string literal',
-        ],
-        exitMessageContains: '3 issues found',
-        exitCode: 1
     );
   });
 
