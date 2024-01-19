@@ -3659,11 +3659,29 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac module_test_ios
+  - name: Mac_x64 module_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
-      cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: module_test_ios
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64 module_test_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
