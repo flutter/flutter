@@ -153,6 +153,30 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('throws ToolExit when directory entry contains invalid characters', () async {
+      testFileSystem.file('.packages').createSync();
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - https://mywebsite.com/images/
+''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      expect(() => bundle.build(packagesPath: '.packages'), throwsToolExit(
+        message: 'Unable to search for asset files in directory path "https%3A//mywebsite.com/images/". '
+        'Please ensure that this is valid URI that points to a directory that is '
+        'available on the local file system.\n'
+        'Error details:\n'
+        'Unsupported operation: Illegal character in path: https:',
+      ));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+    });
+
     testUsingContext('handle removal of wildcard directories', () async {
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       final File pubspec = globals.fs.file('pubspec.yaml')
