@@ -1140,10 +1140,6 @@ void main() {
     // Default search view has a leading back button on the start of the header.
     expect(find.widgetWithIcon(IconButton, Icons.arrow_back), findsOneWidget);
 
-    // Default search view has a trailing close button on the end of the header.
-    // It is used to clear the input in the text field.
-    expect(find.widgetWithIcon(IconButton, Icons.close), findsOneWidget);
-
     final Text helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, colorScheme.onSurfaceVariant);
     expect(helperText.style?.fontSize, 16.0);
@@ -1443,7 +1439,9 @@ void main() {
     await tester.pumpWidget(buildAnchor());
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    // Default is a icon button with close icon.
+    // Default is a icon button with close icon when input is not empty.
+    await tester.enterText(findTextField(), 'a');
+    await tester.pump();
     expect(find.widgetWithIcon(IconButton, Icons.close), findsOneWidget);
 
     await tester.pumpWidget(Container());
@@ -3061,6 +3059,35 @@ void main() {
     final Finder findHeader = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
     final RenderBox box = tester.renderObject(findHeader);
     expect(box.size.height, 32);
+  });
+
+  testWidgets('The default clear button only shows when text input is not empty '
+      'on the search view', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithIcon(IconButton, Icons.close), findsNothing);
+    await tester.enterText(findTextField(), 'a');
+    await tester.pump();
+    expect(find.widgetWithIcon(IconButton, Icons.close), findsOneWidget);
+    await tester.enterText(findTextField(), '');
+    await tester.pump();
+    expect(find.widgetWithIcon(IconButton, Icons.close), findsNothing);
   });
 }
 
