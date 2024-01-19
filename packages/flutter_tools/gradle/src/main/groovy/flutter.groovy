@@ -165,7 +165,7 @@ class FlutterPlugin implements Plugin<Project> {
      * For each APK variant, use the following versions to override the version of the Universal APK.
      * Otherwise, the Play Store will complain that the APK variants have the same version.
      */
-    private static final Map<String, int> ABI_VERSION = [
+    private static final Map<String, Integer> ABI_VERSION = [
         (ARCH_ARM32)        : 1,
         (ARCH_ARM64)        : 2,
         (ARCH_X86)          : 3,
