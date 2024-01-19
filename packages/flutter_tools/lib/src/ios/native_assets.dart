@@ -145,21 +145,25 @@ Target _getNativeTarget(DarwinArch darwinArch) {
 }
 
 Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
+  final Set<String> alreadyTakenNames = <String>{};
   final Map<AssetPath, List<Asset>> result = <AssetPath, List<Asset>>{};
   for (final Asset asset in nativeAssets) {
-    final AssetPath path = _targetLocationIOS(asset).path;
+    final AssetPath path = _targetLocationIOS(asset, alreadyTakenNames).path;
     result[path] ??= <Asset>[];
     result[path]!.add(asset);
   }
   return result;
 }
 
-Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) => <Asset, Asset>{
-  for (final Asset asset in nativeAssets)
-    asset: _targetLocationIOS(asset),
-};
+Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) {
+  final Set<String> alreadyTakenNames = <String>{};
+  return <Asset, Asset>{
+    for (final Asset asset in nativeAssets)
+      asset: _targetLocationIOS(asset, alreadyTakenNames),
+  };
+}
 
-Asset _targetLocationIOS(Asset asset) {
+Asset _targetLocationIOS(Asset asset, Set<String> alreadyTakenNames) {
   final AssetPath path = asset.path;
   switch (path) {
     case AssetSystemPath _:
@@ -169,7 +173,7 @@ Asset _targetLocationIOS(Asset asset) {
     case AssetAbsolutePath _:
       final String fileName = path.uri.pathSegments.last;
       return asset.copyWith(
-        path: AssetAbsolutePath(frameworkUri(fileName)),
+        path: AssetAbsolutePath(frameworkUri(fileName, alreadyTakenNames)),
       );
   }
   throw Exception(

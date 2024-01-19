@@ -141,22 +141,40 @@ Target _getNativeTarget(DarwinArch darwinArch) {
   }
 }
 
-Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets, Uri? absolutePath) {
+Map<AssetPath, List<Asset>> _fatAssetTargetLocations(
+  List<Asset> nativeAssets,
+  Uri? absolutePath,
+) {
+  final Set<String> alreadyTakenNames = <String>{};
   final Map<AssetPath, List<Asset>> result = <AssetPath, List<Asset>>{};
   for (final Asset asset in nativeAssets) {
-    final AssetPath path = _targetLocationMacOS(asset, absolutePath).path;
+    final AssetPath path = _targetLocationMacOS(
+      asset,
+      absolutePath,
+      alreadyTakenNames,
+    ).path;
     result[path] ??= <Asset>[];
     result[path]!.add(asset);
   }
   return result;
 }
 
-Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets, Uri? absolutePath) => <Asset, Asset>{
-  for (final Asset asset in nativeAssets)
-    asset: _targetLocationMacOS(asset, absolutePath),
-};
+Map<Asset, Asset> _assetTargetLocations(
+  List<Asset> nativeAssets,
+  Uri? absolutePath,
+) {
+  final Set<String> alreadyTakenNames = <String>{};
+  return <Asset, Asset>{
+    for (final Asset asset in nativeAssets)
+      asset: _targetLocationMacOS(asset, absolutePath, alreadyTakenNames),
+  };
+}
 
-Asset _targetLocationMacOS(Asset asset, Uri? absolutePath) {
+Asset _targetLocationMacOS(
+  Asset asset,
+  Uri? absolutePath,
+  Set<String> alreadyTakenNames,
+) {
   final AssetPath path = asset.path;
   switch (path) {
     case AssetSystemPath _:
@@ -173,7 +191,7 @@ Asset _targetLocationMacOS(Asset asset, Uri? absolutePath) {
         // Flutter Desktop needs "absolute" paths inside the app.
         // "relative" in the context of native assets would be relative to the
         // kernel or aot snapshot.
-        uri = frameworkUri(fileName);
+        uri = frameworkUri(fileName, alreadyTakenNames);
 
       }
       return asset.copyWith(path: AssetAbsolutePath(uri));

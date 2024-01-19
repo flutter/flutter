@@ -20,7 +20,6 @@ Future<void> createInfoPlist(
   String name,
   Directory target,
 ) async {
-
   final File infoPlistFile = target.childFile('Info.plist');
   await infoPlistFile.writeAsString('''
   <?xml version="1.0" encoding="UTF-8"?>
@@ -89,7 +88,9 @@ Future<void> setInstallNameDylib(File dylibFile) async {
     ],
   );
   if (installNameResult.exitCode != 0) {
-    throwToolExit('Failed to change the install name of $dylibFile:\n${installNameResult.stderr}');
+    throwToolExit(
+      'Failed to change the install name of $dylibFile:\n${installNameResult.stderr}',
+    );
   }
 }
 
@@ -113,7 +114,9 @@ Future<void> codesignDylib(
     target.path,
   ];
   globals.logger.printTrace(codesignCommand.join(' '));
-  final ProcessResult codesignResult = await globals.processManager.run(codesignCommand);
+  final ProcessResult codesignResult = await globals.processManager.run(
+    codesignCommand,
+  );
   if (codesignResult.exitCode != 0) {
     throwToolExit(
       'Failed to code sign binary: exit code: ${codesignResult.exitCode} '
@@ -128,14 +131,16 @@ Future<void> codesignDylib(
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
 Future<CCompilerConfig> cCompilerConfigMacOS() async {
-  final ProcessResult xcrunResult = await globals.processManager.run(<String>['xcrun', 'clang', '--version']);
+  final ProcessResult xcrunResult = await globals.processManager.run(
+    <String>['xcrun', 'clang', '--version'],
+  );
   if (xcrunResult.exitCode != 0) {
     throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
   }
   final String installPath = LineSplitter.split(xcrunResult.stdout as String)
-    .firstWhere((String s) => s.startsWith('InstalledDir: '))
-    .split(' ')
-    .last;
+      .firstWhere((String s) => s.startsWith('InstalledDir: '))
+      .split(' ')
+      .last;
   return CCompilerConfig(
     cc: Uri.file('$installPath/clang'),
     ar: Uri.file('$installPath/ar'),
@@ -143,6 +148,8 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
   );
 }
 
+/// Converts [fileName] into a suitable framework name.
+///
 /// On MacOS and iOS, dylibs need to be packaged in a framework.
 ///
 /// In order for resolution to work, the file name inside the framework must be
@@ -152,17 +159,49 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
 ///
 /// Dylib names on MacOS/iOS are usually prefixed with 'lib'. So, if the file is
 /// a dylib, try to remove the prefix.
-Uri frameworkUri(String fileName) {
+///
+/// The bundle ID string must contain only alphanumeric characters
+/// (A–Z, a–z, and 0–9), hyphens (-), and periods (.).
+/// https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleidentifier
+///
+/// This name can contain up to 15 characters.
+/// https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundlename
+///
+/// The [alreadyTakenNames] are used to ensure that the framework name does not
+/// conflict with previously chosen names.
+Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   final List<String> splitFileName = fileName.split('.');
   final bool isDylib;
   if (splitFileName.length >= 2) {
     isDylib = splitFileName.last == 'dylib';
-    fileName = splitFileName.sublist(0, splitFileName.length - 1).join('.');
+    if (isDylib) {
+      fileName = splitFileName.sublist(0, splitFileName.length - 1).join('.');
+    }
   } else {
     isDylib = false;
   }
   if (isDylib && fileName.startsWith('lib')) {
     fileName = fileName.replaceFirst('lib', '');
   }
+  fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '');
+  if (fileName.length > 15) {
+    fileName = fileName.substring(0, 15);
+  }
+  if (alreadyTakenNames.contains(fileName)) {
+    if (fileName.length > 12) {
+      fileName = fileName.substring(0, 12);
+    }
+    final String prefixName = fileName;
+    for (int i = 1; i < 1000; i++) {
+      fileName = '$prefixName$i';
+      if (!alreadyTakenNames.contains(fileName)) {
+        break;
+      }
+    }
+    if (alreadyTakenNames.contains(fileName)) {
+      throwToolExit('Failed to rename $fileName in native assets packaging.');
+    }
+  }
+  alreadyTakenNames.add(fileName);
   return Uri(path: '$fileName.framework/$fileName');
 }
