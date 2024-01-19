@@ -91,13 +91,14 @@ void main() {
                       ),
                     ],
                   ),
-                ])
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
     expect(semantics, hasSemantics(expected, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });

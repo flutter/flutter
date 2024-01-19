@@ -854,7 +854,7 @@ void main() {
                         ),
                       ],
                     ),
-                  ]
+                  ],
                 ),
                 TestSemantics(
                   children: <TestSemantics>[
@@ -1035,7 +1035,7 @@ void main() {
                         ),
                       ],
                     ),
-                  ]
+                  ],
                 ),
                 TestSemantics(
                   children: <TestSemantics>[
@@ -1116,7 +1116,7 @@ void main() {
                         ),
                       ],
                     ),
-                  ]
+                  ],
                 ),
                 TestSemantics(
                   children: <TestSemantics>[
@@ -1189,7 +1189,7 @@ void main() {
                         ),
                       ],
                     ),
-                  ]
+                  ],
                 ),
                 TestSemantics(
                   children: <TestSemantics>[
