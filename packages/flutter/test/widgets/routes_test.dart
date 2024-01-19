@@ -1720,7 +1720,7 @@ void main() {
                           ),
                         ],
                       ),
-                    ]
+                    ],
                   ),
                   TestSemantics(
                     id: 6,

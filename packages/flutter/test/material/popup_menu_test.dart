@@ -1195,7 +1195,7 @@ void main() {
                           ),
                         ],
                       ),
-                    ]
+                    ],
                   ),
                   TestSemantics(
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
@@ -1287,7 +1287,7 @@ void main() {
                           ),
                         ],
                       ),
-                    ]
+                    ],
                   ),
                   TestSemantics(
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
@@ -1414,7 +1414,7 @@ void main() {
                           ),
                         ],
                       ),
-                    ]
+                    ],
                   ),
                   TestSemantics(
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
