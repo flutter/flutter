@@ -197,8 +197,6 @@ targets:
       config_name: linux_fuchsia
     drone_dimensions:
       - os=Linux
-    dimensions:
-      kvm: "1"
     # TODO(https://github.com/flutter/flutter/issues/138559): Re-enable/delete.
     # runIfNot:
     #   - lib/web_ui/**
