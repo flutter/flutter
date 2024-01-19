@@ -104,8 +104,7 @@ TargetPlatform? get debugDefaultTargetPlatformOverride =>
 set debugDefaultTargetPlatformOverride(TargetPlatform? value) {
   if (!kDebugMode) {
     throw FlutterError(
-      'Cannot modify debugDefaultTargetPlatformOverride in non-debug builds.\n'
-    );
+      'Cannot modify debugDefaultTargetPlatformOverride in non-debug builds.');
   }
   _debugDefaultTargetPlatformOverride = value;
 }
