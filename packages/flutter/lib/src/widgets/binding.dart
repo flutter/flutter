@@ -1213,6 +1213,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///
 /// See also:
 ///
+///  * [runWidget], which bootstraps a widget tree without assuming the
+///    [FlutterView] into which it will be rendered.
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
 ///    widget hierarchy.
 ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
@@ -1231,10 +1233,10 @@ void runApp(Widget app) {
 /// provided `app` widget is rendered into. It is up to the caller to include at
 /// least one [View] widget in the provided `app` widget that will bootstrap a
 /// render tree and define the [FlutterView] into which the provided widget is
-/// rendered. Failure to include a [View] widget as an ancestor to all
-/// [RenderObjectWidget]s included in `app` will result in an exception. Apps
-/// that want to render into the default view without dealing with view
-/// management should consider calling [runApp] instead.
+/// rendered. [RenderObjectWidget]s without an ancestor [View] widget will
+/// result in an exception. Apps that want to render into the default view
+/// without dealing with view management should consider calling [runApp]
+/// instead.
 ///
 /// {@tool snippet}
 /// The sample shows how to utilize [runWidget] to specify the [FlutterView]
@@ -1274,6 +1276,8 @@ void runApp(Widget app) {
 ///
 /// See also:
 ///
+///  * [runApp], which bootstraps a widget tree and renders it into a default
+///    [FlutterView].
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
 ///    widget hierarchy.
 ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
