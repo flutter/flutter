@@ -8,19 +8,25 @@
 #include <optional>
 #include <thread>
 #include <utility>
+
 #include "fml/logging.h"
 #include "fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+
 #include "vulkan/vulkan.hpp"
 
 namespace impeller {
 
-static constexpr uint32_t kPoolSize = 1024u;
+static constexpr uint32_t kPoolSize = 128u;
 
-GPUTracerVK::GPUTracerVK(const std::shared_ptr<DeviceHolder>& device_holder)
-    : device_holder_(device_holder) {
-  timestamp_period_ = device_holder_->GetPhysicalDevice()
+GPUTracerVK::GPUTracerVK(std::weak_ptr<ContextVK> context)
+    : context_(std::move(context)) {
+  timestamp_period_ = context_.lock()
+                          ->GetDeviceHolder()
+                          ->GetPhysicalDevice()
                           .getProperties()
                           .limits.timestampPeriod;
   if (timestamp_period_ <= 0) {
@@ -30,7 +36,35 @@ GPUTracerVK::GPUTracerVK(const std::shared_ptr<DeviceHolder>& device_holder)
   // Disable tracing in release mode.
 #ifdef IMPELLER_DEBUG
   enabled_ = true;
-#endif
+#endif  // IMPELLER_DEBUG
+}
+
+void GPUTracerVK::InitializeQueryPool(const ContextVK& context) {
+  if (!enabled_) {
+    return;
+  }
+  Lock lock(trace_state_mutex_);
+  std::shared_ptr<CommandBuffer> buffer = context.CreateCommandBuffer();
+  CommandBufferVK& buffer_vk = CommandBufferVK::Cast(*buffer);
+
+  for (auto i = 0u; i < kTraceStatesSize; i++) {
+    vk::QueryPoolCreateInfo info;
+    info.queryCount = kPoolSize;
+    info.queryType = vk::QueryType::eTimestamp;
+
+    auto [status, pool] = context.GetDevice().createQueryPoolUnique(info);
+    if (status != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Failed to create query pool.";
+      return;
+    }
+    trace_states_[i].query_pool = std::move(pool);
+    buffer_vk.GetEncoder()->GetCommandBuffer().resetQueryPool(
+        trace_states_[i].query_pool.get(), 0, kPoolSize);
+  }
+  if (!buffer->SubmitCommands()) {
+    VALIDATION_LOG << "Failed to reset query pool for trace events.";
+    enabled_ = false;
+  }
 }
 
 bool GPUTracerVK::IsEnabled() const {
@@ -58,7 +92,6 @@ void GPUTracerVK::MarkFrameEnd() {
   // encoder logic. We set it to zero anyway to prevent a validation error
   // from becoming a memory leak.
   FML_DCHECK(state.pending_buffers == 0u);
-
   state.pending_buffers = 0;
   state.current_index = 0;
   in_frame_ = false;
@@ -77,21 +110,13 @@ void GPUTracerVK::RecordCmdBufferStart(const vk::CommandBuffer& buffer,
   Lock lock(trace_state_mutex_);
   auto& state = trace_states_[current_state_];
 
-  // Initialize the query pool for the first query on each frame.
-  if (state.pending_buffers == 0) {
-    vk::QueryPoolCreateInfo info;
-    info.queryCount = kPoolSize;
-    info.queryType = vk::QueryType::eTimestamp;
-
-    auto [status, pool] =
-        device_holder_->GetDevice().createQueryPoolUnique(info);
-    if (status != vk::Result::eSuccess) {
-      VALIDATION_LOG << "Failed to create query pool.";
-      return;
+  // Reset previously completed queries.
+  if (!states_to_reset_.empty()) {
+    for (auto i = 0u; i < states_to_reset_.size(); i++) {
+      buffer.resetQueryPool(trace_states_[states_to_reset_[i]].query_pool.get(),
+                            0, kPoolSize);
     }
-    trace_states_[current_state_].query_pool = std::move(pool);
-    buffer.resetQueryPool(trace_states_[current_state_].query_pool.get(), 0,
-                          kPoolSize);
+    states_to_reset_.clear();
   }
 
   // We size the query pool to kPoolSize, but Flutter applications can create an
@@ -105,16 +130,14 @@ void GPUTracerVK::RecordCmdBufferStart(const vk::CommandBuffer& buffer,
                         trace_states_[current_state_].query_pool.get(),
                         state.current_index);
   state.current_index += 1;
-  if (!probe.index_.has_value()) {
-    state.pending_buffers += 1;
-    probe.index_ = current_state_;
-  }
+  probe.index_ = current_state_;
+  state.pending_buffers += 1;
 }
 
 void GPUTracerVK::RecordCmdBufferEnd(const vk::CommandBuffer& buffer,
                                      GPUProbe& probe) {
   if (!enabled_ || std::this_thread::get_id() != raster_thread_id_ ||
-      !in_frame_) {
+      !in_frame_ || !probe.index_.has_value()) {
     return;
   }
   Lock lock(trace_state_mutex_);
@@ -128,30 +151,37 @@ void GPUTracerVK::RecordCmdBufferEnd(const vk::CommandBuffer& buffer,
                         state.query_pool.get(), state.current_index);
 
   state.current_index += 1;
-  if (!probe.index_.has_value()) {
-    state.pending_buffers += 1;
-    probe.index_ = current_state_;
-  }
 }
 
 void GPUTracerVK::OnFenceComplete(size_t frame_index) {
   if (!enabled_) {
     return;
   }
-  Lock lock(trace_state_mutex_);
-  GPUTraceState& state = trace_states_[frame_index];
 
-  FML_DCHECK(state.pending_buffers > 0);
-  state.pending_buffers -= 1;
+  size_t pending = 0;
+  size_t query_count = 0;
+  vk::QueryPool pool;
+  {
+    Lock lock(trace_state_mutex_);
+    GPUTraceState& state = trace_states_[frame_index];
 
-  if (state.pending_buffers == 0) {
-    auto buffer_count = state.current_index;
-    std::vector<uint64_t> bits(buffer_count);
+    FML_DCHECK(state.pending_buffers > 0);
+    state.pending_buffers -= 1;
+    pending = state.pending_buffers;
+    query_count = state.current_index;
+    pool = state.query_pool.get();
+  }
 
-    auto result = device_holder_->GetDevice().getQueryPoolResults(
-        state.query_pool.get(), 0, state.current_index,
-        buffer_count * sizeof(uint64_t), bits.data(), sizeof(uint64_t),
-        vk::QueryResultFlagBits::e64);
+  if (pending == 0) {
+    std::vector<uint64_t> bits(query_count);
+    std::shared_ptr<ContextVK> context = context_.lock();
+    if (!context) {
+      return;
+    }
+
+    auto result = context->GetDevice().getQueryPoolResults(
+        pool, 0, query_count, query_count * sizeof(uint64_t), bits.data(),
+        sizeof(uint64_t), vk::QueryResultFlagBits::e64);
     // This may return VK_NOT_READY if the query couldn't be completed, or if
     // there are queries still pending. From local testing, this happens
     // occassionally on very expensive frames. Its unclear if we can do anything
@@ -160,22 +190,24 @@ void GPUTracerVK::OnFenceComplete(size_t frame_index) {
     // passed to getQueryPoolResults seems like it would fix this, but actually
     // seems to result in more stuck query errors. Better to just drop them and
     // move on.
-    if (result != vk::Result::eSuccess) {
-      return;
+    if (result == vk::Result::eSuccess) {
+      uint64_t smallest_timestamp = std::numeric_limits<uint64_t>::max();
+      uint64_t largest_timestamp = 0;
+      for (auto i = 0u; i < bits.size(); i++) {
+        smallest_timestamp = std::min(smallest_timestamp, bits[i]);
+        largest_timestamp = std::max(largest_timestamp, bits[i]);
+      }
+      auto gpu_ms =
+          (((largest_timestamp - smallest_timestamp) * timestamp_period_) /
+           1000000);
+      FML_TRACE_COUNTER("flutter", "GPUTracer",
+                        reinterpret_cast<int64_t>(this),  // Trace Counter ID
+                        "FrameTimeMS", gpu_ms);
     }
 
-    uint64_t smallest_timestamp = std::numeric_limits<uint64_t>::max();
-    uint64_t largest_timestamp = 0;
-    for (auto i = 0u; i < bits.size(); i++) {
-      smallest_timestamp = std::min(smallest_timestamp, bits[i]);
-      largest_timestamp = std::max(largest_timestamp, bits[i]);
-    }
-    auto gpu_ms =
-        (((largest_timestamp - smallest_timestamp) * timestamp_period_) /
-         1000000);
-    FML_TRACE_COUNTER("flutter", "GPUTracer",
-                      reinterpret_cast<int64_t>(this),  // Trace Counter ID
-                      "FrameTimeMS", gpu_ms);
+    // Record this query to be reset the next time a command is recorded.
+    Lock lock(trace_state_mutex_);
+    states_to_reset_.push_back(frame_index);
   }
 }
 

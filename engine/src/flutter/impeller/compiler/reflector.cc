@@ -1308,6 +1308,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
     auto& proto = prototypes.emplace_back(BindPrototype{});
     proto.return_type = "bool";
     proto.name = ToCamelCase(uniform_buffer.name);
+    proto.descriptor_type = "DescriptorType::kUniformBuffer";
     {
       std::stringstream stream;
       stream << "Bind uniform buffer for resource named " << uniform_buffer.name
@@ -1327,6 +1328,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
     auto& proto = prototypes.emplace_back(BindPrototype{});
     proto.return_type = "bool";
     proto.name = ToCamelCase(storage_buffer.name);
+    proto.descriptor_type = "DescriptorType::kStorageBuffer";
     {
       std::stringstream stream;
       stream << "Bind storage buffer for resource named " << storage_buffer.name
@@ -1346,6 +1348,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
     auto& proto = prototypes.emplace_back(BindPrototype{});
     proto.return_type = "bool";
     proto.name = ToCamelCase(sampled_image.name);
+    proto.descriptor_type = "DescriptorType::kSampledImage";
     {
       std::stringstream stream;
       stream << "Bind combined image sampler for resource named "
@@ -1369,6 +1372,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
     auto& proto = prototypes.emplace_back(BindPrototype{});
     proto.return_type = "bool";
     proto.name = ToCamelCase(separate_image.name);
+    proto.descriptor_type = "DescriptorType::kImage";
     {
       std::stringstream stream;
       stream << "Bind separate image for resource named " << separate_image.name
@@ -1388,6 +1392,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
     auto& proto = prototypes.emplace_back(BindPrototype{});
     proto.return_type = "bool";
     proto.name = ToCamelCase(separate_sampler.name);
+    proto.descriptor_type = "DescriptorType::kSampler";
     {
       std::stringstream stream;
       stream << "Bind separate sampler for resource named "
@@ -1416,6 +1421,7 @@ nlohmann::json::array_t Reflector::EmitBindPrototypes(
     item["return_type"] = res.return_type;
     item["name"] = res.name;
     item["docstring"] = res.docstring;
+    item["descriptor_type"] = res.descriptor_type;
     auto& args = item["args"] = nlohmann::json::array_t{};
     for (const auto& arg : res.args) {
       auto& json_arg = args.emplace_back(nlohmann::json::object_t{});

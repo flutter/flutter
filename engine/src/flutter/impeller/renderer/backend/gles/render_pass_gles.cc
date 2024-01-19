@@ -20,7 +20,7 @@
 
 namespace impeller {
 
-RenderPassGLES::RenderPassGLES(std::weak_ptr<const Context> context,
+RenderPassGLES::RenderPassGLES(std::shared_ptr<const Context> context,
                                const RenderTarget& target,
                                ReactorGLES::Ref reactor)
     : RenderPass(std::move(context), target),

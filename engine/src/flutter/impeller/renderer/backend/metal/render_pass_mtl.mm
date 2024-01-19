@@ -134,7 +134,7 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
   return result;
 }
 
-RenderPassMTL::RenderPassMTL(std::weak_ptr<const Context> context,
+RenderPassMTL::RenderPassMTL(std::shared_ptr<const Context> context,
                              const RenderTarget& target,
                              id<MTLCommandBuffer> buffer)
     : RenderPass(std::move(context), target),

@@ -449,7 +449,8 @@ void ContextVK::Setup(Settings settings) {
 
   // Create the GPU Tracer later because it depends on state from
   // the ContextVK.
-  gpu_tracer_ = std::make_shared<GPUTracerVK>(GetDeviceHolder());
+  gpu_tracer_ = std::make_shared<GPUTracerVK>(weak_from_this());
+  gpu_tracer_->InitializeQueryPool(*this);
 
   //----------------------------------------------------------------------------
   /// Label all the relevant objects. This happens after setup so that the
