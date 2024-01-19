@@ -133,7 +133,7 @@ void main() {
     const Duration animationDuration = Duration(seconds: 1);
     const bool enableFeedback = true;
 
-    ButtonStyle style = ButtonStyle(
+    final ButtonStyle style = ButtonStyle(
       textStyle: textStyle,
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,

@@ -327,8 +327,7 @@ class ButtonStyle with Diagnosticable {
   /// and whose child is the rest of the button, including the button's
   /// `child` parameter.
   ///
-  /// By default the returned widget is clipped to the Material's [ButtonStyle.shape],
-  /// see [clipBehavior].
+  /// By default the returned widget is clipped to the Material's [ButtonStyle.shape].
   final ButtonLayerBuilder? backgroundBuilder;
 
   /// Creates a Widget that contains the button's child parameter which is used
