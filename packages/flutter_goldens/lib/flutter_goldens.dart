@@ -18,6 +18,10 @@ export 'package:flutter_goldens_client/skia_client.dart';
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
+// If you are trying to debug this package, you may like to use the golden test
+// titled "Inconsequential golden test" in this file:
+//   /packages/flutter/test/widgets/basic_test.dart
+
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 final RegExp _kMainBranch = RegExp(r'master|main');
 
@@ -41,7 +45,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
   }
-
   await testMain();
 }
 
