@@ -280,6 +280,8 @@ abstract interface class DeletableChipAttributes {
   ///
   /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
   /// used.
+  ///
+  /// If the chip is disabled, the delete button tooltip will not be shown.
   String? get deleteButtonTooltipMessage;
 }
 
@@ -1128,7 +1130,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       child: _wrapWithTooltip(
         tooltip: widget.deleteButtonTooltipMessage
           ?? MaterialLocalizations.of(context).deleteButtonTooltip,
-        enabled: widget.onDeleted != null,
+        enabled: widget.isEnabled && widget.onDeleted != null,
         child: InkWell(
           // Radius should be slightly less than the full size of the chip.
           radius: (_kChipHeight + (widget.padding?.vertical ?? 0.0)) * .45,
