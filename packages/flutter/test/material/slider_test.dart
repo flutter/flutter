@@ -833,9 +833,8 @@ void main() {
             textDirection: TextDirection.ltr,
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return MediaQuery.withClampedTextScaling(
-                  minScaleFactor: textScaleFactor,
-                  maxScaleFactor: textScaleFactor,
+                return MediaQuery(
+                  data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
                   child: Material(
                     child: Theme(
                       data: Theme.of(context).copyWith(
