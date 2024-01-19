@@ -1394,12 +1394,12 @@ void main() {
                   label: 'Dismiss',
                   textDirection: TextDirection.ltr,
                   children: <TestSemantics>[]
-                )
-              ]
-            )
+                ),
+              ],
+            ),
           ],
         ),
-      ]
+      ],
     ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });
