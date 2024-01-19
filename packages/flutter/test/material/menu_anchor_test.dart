@@ -3519,6 +3519,7 @@ void main() {
 
   testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     int onFocusChangeCalled = 0;
     await tester.pumpWidget(
       MaterialApp(
