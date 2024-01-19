@@ -1,4 +1,4 @@
-Signature: 9686414f5769d601aa77232594d232d5
+Signature: 70ee7913bc3418bef9f60de46ba0c100
 
 ====================================================================================================
 LIBRARY: etc1
@@ -394,6 +394,7 @@ FILE: ../../../flutter/third_party/skia/relnotes/Tick.md
 FILE: ../../../flutter/third_party/skia/relnotes/TopLevelShadowing.md
 FILE: ../../../flutter/third_party/skia/relnotes/font.md
 FILE: ../../../flutter/third_party/skia/relnotes/fontmgr.md
+FILE: ../../../flutter/third_party/skia/relnotes/grglmakeinterface.md
 FILE: ../../../flutter/third_party/skia/relnotes/skfontarguments_type.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
