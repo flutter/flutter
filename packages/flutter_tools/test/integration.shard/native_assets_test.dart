@@ -305,13 +305,14 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   //       Resources/
   //         Info.plist
   //     Current  -> A
+  final String frameworkName = packageName.substring(0, 15);
   final Directory frameworkDir =
-      frameworksFolder.childDirectory('$packageName.framework');
+      frameworksFolder.childDirectory('$frameworkName.framework');
   final Directory versionsDir = frameworkDir.childDirectory('Versions');
   final Directory versionADir = versionsDir.childDirectory('A');
   final Directory resourcesDir = versionADir.childDirectory('Resources');
   expect(resourcesDir, exists);
-  final File dylibFile = versionADir.childFile(packageName);
+  final File dylibFile = versionADir.childFile(frameworkName);
   expect(dylibFile, exists);
   final Link currentLink = versionsDir.childLink('Current');
   expect(currentLink, exists);
@@ -319,7 +320,7 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   final Link resourcesLink = frameworkDir.childLink('Resources');
   expect(resourcesLink, exists);
   expect(resourcesLink.resolveSymbolicLinksSync(), resourcesDir.path);
-  final Link dylibLink = frameworkDir.childLink(packageName);
+  final Link dylibLink = frameworkDir.childLink(frameworkName);
   expect(dylibLink, exists);
   expect(dylibLink.resolveSymbolicLinksSync(), dylibFile.path);
 }
