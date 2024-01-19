@@ -283,14 +283,14 @@ void _analyze() {}
 
   testWithoutContext('analyze once with no-fatal-infos has info issue finally exit code 0.', () async {
     const String infoSourceCode = '''
-int analyze() {}
+void _analyze() {}
 ''';
 
     final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
     optionsFile.writeAsStringSync('''
 analyzer:
   errors:
-    missing_return: info
+    unused_element: info
   ''');
 
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
@@ -298,7 +298,7 @@ analyzer:
       arguments: <String>['analyze', '--no-pub', '--no-fatal-infos'],
       statusTextContains: <String>[
         'info',
-        'missing_return',
+        'unused_element',
       ],
       exitMessageContains: '1 issue found.',
     );
@@ -306,14 +306,14 @@ analyzer:
 
   testWithoutContext('analyze once only fatal-warnings has info issue finally exit code 0.', () async {
     const String infoSourceCode = '''
-int analyze() {}
+void _analyze() {}
 ''';
 
     final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
     optionsFile.writeAsStringSync('''
 analyzer:
   errors:
-    missing_return: info
+    unused_element: info
   ''');
 
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
@@ -321,7 +321,7 @@ analyzer:
       arguments: <String>['analyze', '--no-pub', '--fatal-warnings', '--no-fatal-infos'],
       statusTextContains: <String>[
         'info',
-        'missing_return',
+        'unused_element',
       ],
       exitMessageContains: '1 issue found.',
     );
@@ -329,14 +329,14 @@ analyzer:
 
   testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 0.', () async {
     const String warningSourceCode = '''
-int analyze() {}
+void _analyze() {}
 ''';
 
     final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
     optionsFile.writeAsStringSync('''
 analyzer:
   errors:
-    missing_return: warning
+    unused_element: warning
   ''');
 
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
@@ -344,7 +344,7 @@ analyzer:
       arguments: <String>['analyze','--no-pub', '--fatal-infos', '--no-fatal-warnings'],
       statusTextContains: <String>[
         'warning',
-        'missing_return',
+        'unused_element',
       ],
       exitMessageContains: '1 issue found.',
     );
@@ -353,14 +353,14 @@ analyzer:
 
   testWithoutContext('analyze once only fatal-warnings has warning issue finally exit code 1.', () async {
     const String warningSourceCode = '''
-int analyze() {}
+void _analyze() {}
 ''';
 
     final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
     optionsFile.writeAsStringSync('''
 analyzer:
   errors:
-    missing_return: warning
+    unused_element: warning
   ''');
 
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
@@ -368,7 +368,7 @@ analyzer:
       arguments: <String>['analyze','--no-pub', '--no-fatal-infos', '--fatal-warnings'],
       statusTextContains: <String>[
         'warning',
-        'missing_return',
+        'unused_element',
       ],
       exitMessageContains: '1 issue found.',
       exitCode: 1,
