@@ -541,7 +541,7 @@ public class KeyboardManagerTest {
   }
 
   @Test
-  public void channelReponderHandlesEvents() {
+  public void channelResponderHandlesEvents() {
     final KeyboardTester tester = new KeyboardTester();
     final KeyEvent keyEvent = new FakeKeyEvent(ACTION_DOWN, 65);
     final ArrayList<CallRecord> calls = new ArrayList<>();
@@ -567,7 +567,7 @@ public class KeyboardManagerTest {
   }
 
   @Test
-  public void embedderReponderHandlesEvents() {
+  public void embedderResponderHandlesEvents() {
     final KeyboardTester tester = new KeyboardTester();
     final KeyEvent keyEvent = new FakeKeyEvent(ACTION_DOWN, SCAN_KEY_A, KEYCODE_A, 0, 'a', 0);
     final ArrayList<CallRecord> calls = new ArrayList<>();
@@ -597,6 +597,38 @@ public class KeyboardManagerTest {
     calls.get(0).reply.accept(true);
     verify(tester.mockView, times(0)).onTextInputKeyEvent(any(KeyEvent.class));
     verify(tester.mockView, times(0)).redispatch(any(KeyEvent.class));
+  }
+
+  @Test
+  public void embedderResponderHandlesNullReply() {
+    // Regression test for https://github.com/flutter/flutter/issues/141662.
+    final BinaryMessenger mockMessenger = mock(BinaryMessenger.class);
+    doAnswer(
+            invocation -> {
+              final BinaryMessenger.BinaryReply reply = invocation.getArgument(2);
+              // Simulate a null reply.
+              // In release mode, a null reply might happen when the engine sends a message
+              // before the framework has started.
+              reply.reply(null);
+              return null;
+            })
+        .when(mockMessenger)
+        .send(any(String.class), any(ByteBuffer.class), any(BinaryMessenger.BinaryReply.class));
+
+    final KeyboardManager.ViewDelegate mockView = mock(KeyboardManager.ViewDelegate.class);
+    doAnswer(invocation -> mockMessenger).when(mockView).getBinaryMessenger();
+
+    final KeyboardManager keyboardManager = new KeyboardManager(mockView);
+    final KeyEvent keyEvent = new FakeKeyEvent(ACTION_DOWN, SCAN_KEY_A, KEYCODE_A, 0, 'a', 0);
+
+    boolean exceptionThrown = false;
+    try {
+      final boolean result = keyboardManager.handleEvent(keyEvent);
+    } catch (Exception exception) {
+      exceptionThrown = true;
+    }
+
+    assertEquals(false, exceptionThrown);
   }
 
   @Test
