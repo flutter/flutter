@@ -1158,11 +1158,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
 /// Inflate the given widget and attach it to the view.
 ///
-// TODO(goderbauer): Update the paragraph bellow to include the Window widget once that exists.
+// TODO(goderbauer): Update the paragraph below to include the Window widget once that exists.
 /// The [runApp] method renders the provided `app` widget into the
 /// [PlatformDispatcher.implicitView] by wrapping it in a [View] widget, which
 /// will bootstrap the render tree for the app. Apps that want to control which
-/// [FlutterView] they render into may use [runWidget] instead.
+/// [FlutterView] they render into can use [runWidget] instead.
 ///
 /// The widget is given constraints during layout that force it to fill the
 /// entire view. If you wish to align your widget to one side of the view
@@ -1226,7 +1226,7 @@ void runApp(Widget app) {
 
 /// Inflate the given widget and bootstrap the widget tree.
 ///
-// TODO(goderbauer): Update the paragraph bellow to include the Window widget once that exists.
+// TODO(goderbauer): Update the paragraph below to include the Window widget once that exists.
 /// Unlike [runApp], this method does not define a [FlutterView] into which the
 /// provided `app` widget is rendered into. It is up to the caller to include at
 /// least one [View] widget in the provided `app` widget that will bootstrap a
@@ -1261,7 +1261,7 @@ void runApp(Widget app) {
 /// {@macro flutter.widgets.runApp.shutdown}
 ///
 /// To artificially cause the entire widget tree to be disposed, consider
-/// calling [runWidget] with a [ViewCollection] that is not specifying any
+/// calling [runWidget] with a [ViewCollection] that does not specify any
 /// [ViewCollection.views].
 ///
 /// ## Dismissing Flutter UI via platform native methods
