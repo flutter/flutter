@@ -11,7 +11,7 @@ void main() {
   testWidgets('initialLifecycleState is used to init state paused', (WidgetTester tester) async {
     expect(ServicesBinding.instance.lifecycleState, isNull);
     final TestWidgetsFlutterBinding binding = tester.binding;
-    binding.resetLifecycleState();
+    binding.clearState();
     // Use paused as the initial state.
     binding.platformDispatcher.initialLifecycleStateTestValue = 'AppLifecycleState.paused';
     binding.readTestInitialLifecycleStateFromNativeWindow(); // Re-attempt the initialization.
@@ -23,7 +23,7 @@ void main() {
   testWidgets('Handles all of the allowed states of AppLifecycleState', (WidgetTester tester) async {
     final TestWidgetsFlutterBinding binding = tester.binding;
     for (final AppLifecycleState state in AppLifecycleState.values) {
-      binding.resetLifecycleState();
+      binding.clearState();
       binding.platformDispatcher.initialLifecycleStateTestValue = state.toString();
       binding.readTestInitialLifecycleStateFromNativeWindow();
       expect(ServicesBinding.instance.lifecycleState.toString(), equals(state.toString()));

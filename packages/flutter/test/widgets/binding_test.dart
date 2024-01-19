@@ -397,6 +397,21 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('clearState resets lifecycle state and framesEnabled to initial state', (WidgetTester tester) async {
+    // Initial state
+    expect(tester.binding.lifecycleState, isNull);
+    expect(tester.binding.framesEnabled, isTrue);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    expect(tester.binding.lifecycleState, AppLifecycleState.paused);
+    expect(tester.binding.framesEnabled, isFalse);
+
+    tester.binding.clearState();
+
+    expect(tester.binding.lifecycleState, isNull);
+    expect(tester.binding.framesEnabled, isTrue);
+  });
+
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
     late FlutterError error;
     try {
