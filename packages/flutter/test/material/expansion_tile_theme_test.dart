@@ -48,10 +48,10 @@ class TestTextState extends State<TestText> {
 
 void main() {
   Material getMaterial(WidgetTester tester) {
-    return tester.widget<Material>(find.ancestor(
-      of: find.byType(Column).last,
+    return tester.widget<Material>(find.descendant(
+      of: find.byType(ExpansionTile),
       matching: find.byType(Material),
-    ).first);
+    ));
   }
 
   test('ExpansionTileThemeData copyWith, ==, hashCode basics', () {
@@ -239,6 +239,7 @@ void main() {
       top: BorderSide(color: Colors.green),
       bottom: BorderSide(color: Colors.green),
     );
+    const Clip clipBehavior = Clip.none;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -255,6 +256,7 @@ void main() {
             collapsedTextColor: collapsedTextColor,
             shape: shape,
             collapsedShape: collapsedShape,
+            clipBehavior: clipBehavior,
           ),
         ),
         home: Material(
@@ -301,6 +303,8 @@ void main() {
     expect(getTextColor(), textColor);
     // Check the expanded ShapeBorder when shape is applied.
     expect(material.shape, shape);
+    // Check the clipBehavior when shape is applied.
+    expect(material.clipBehavior, clipBehavior);
 
     // Check the child position when expandedAlignment is applied.
     final Rect childRect = tester.getRect(find.text('Tile 1'));

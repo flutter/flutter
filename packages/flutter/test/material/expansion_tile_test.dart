@@ -54,25 +54,21 @@ void main() {
   const Color headerColor = Colors.black45;
 
   Material getMaterial(WidgetTester tester) {
-    return tester.widget<Material>(find.ancestor(
-      of: find.byType(Column).last,
+    return tester.widget<Material>(find.descendant(
+      of: find.byType(ExpansionTile),
       matching: find.byType(Material),
-    ).first);
+    ));
   }
 
   testWidgets('ExpansionTile initial state', (WidgetTester tester) async {
     final Key topKey = UniqueKey();
+    final Key tileKey = UniqueKey();
     const Key expandedKey = PageStorageKey<String>('expanded');
     const Key collapsedKey = PageStorageKey<String>('collapsed');
     const Key defaultKey = PageStorageKey<String>('default');
 
-    final Key tileKey = UniqueKey();
-    const Clip clipBehavior = Clip.antiAlias;
-
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        dividerColor: dividerColor,
-      ),
+      theme: ThemeData(dividerColor: dividerColor),
       home: Material(
         child: SingleChildScrollView(
           child: Column(
@@ -83,7 +79,6 @@ void main() {
                 initiallyExpanded: true,
                 title: const Text('Expanded'),
                 backgroundColor: Colors.red,
-                clipBehavior: clipBehavior,
                 children: <Widget>[
                   ListTile(
                     key: tileKey,
@@ -630,7 +625,7 @@ void main() {
     Material material = getMaterial(tester);
     // ExpansionTile should be collapsed initially.
     expect(material.shape, collapsedShape);
-
+    expect(material.clipBehavior, Clip.antiAlias);
 
     await tester.tap(find.text('ExpansionTile'));
     await tester.pumpAndSettle();
@@ -638,6 +633,7 @@ void main() {
     // ExpansionTile should be Expanded now.
     material = getMaterial(tester);
     expect(material.shape, shape);
+    expect(material.clipBehavior, Clip.antiAlias);
   });
 
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
@@ -950,6 +946,7 @@ void main() {
     // Test initial ExpansionTile properties.
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
     expect(material.color, const Color(0xffff0000));
+    expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
 
@@ -962,6 +959,7 @@ void main() {
     // Test updated ExpansionTile properties.
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))));
     expect(material.color, const Color(0xffffff00));
+    expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff000000));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff000000));
   });
@@ -1026,6 +1024,7 @@ void main() {
     // Test initial ExpansionTile properties.
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
     expect(material.color, const Color(0xff0000ff));
+    expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff00ffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff00ffff));
 
@@ -1040,6 +1039,7 @@ void main() {
     // Test updated ExpansionTile properties.
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))));
     expect(material.color, const Color(0xff123456));
+    expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
   });
@@ -1167,7 +1167,6 @@ void main() {
               collapsedBackgroundColor: collapsedBackgroundColor,
               backgroundColor: backgroundColor,
               collapsedShape: collapsedShape,
-              clipBehavior: Clip.hardEdge,
               title: TestText('title'),
               trailing: TestIcon(),
               children: <Widget>[
@@ -1196,6 +1195,41 @@ void main() {
     // Finish gesture to release resources.
     await gesture.up();
     await tester.pumpAndSettle();
+  });
+
+ testWidgets('Default clipBehavior when a shape is provided', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ExpansionTile(
+            title: Text('Title'),
+            subtitle: Text('Subtitle'),
+            shape: StadiumBorder(),
+            children: <Widget>[ListTile(title: Text('0'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(getMaterial(tester).clipBehavior, Clip.antiAlias);
+  });
+
+ testWidgets('Can override clipBehavior when a shape is provided', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ExpansionTile(
+            title: Text('Title'),
+            subtitle: Text('Subtitle'),
+            shape: StadiumBorder(),
+            clipBehavior: Clip.none,
+            children: <Widget>[ListTile(title: Text('0'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(getMaterial(tester).clipBehavior, Clip.none);
   });
 
   group('Material 2', () {
@@ -1256,7 +1290,6 @@ void main() {
                 collapsedBackgroundColor: collapsedBackgroundColor,
                 backgroundColor: backgroundColor,
                 collapsedShape: collapsedShape,
-                clipBehavior: Clip.hardEdge,
                 title: TestText('title'),
                 trailing: TestIcon(),
                 children: <Widget>[

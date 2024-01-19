@@ -476,10 +476,10 @@ class ExpansionTile extends StatefulWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// If this is not null and a custom collapsed or expanded shape is provided,
-  /// specified clip behavior will be used to clip the expansion tile.
+  /// the value of [clipBehavior] will be used to clip the expansion tile.
   ///
   /// If this property is null, the [ExpansionTileThemeData.clipBehavior] is used. If that
-  /// is also null, a [Clip.none] is used
+  /// is also null, defaults to [Clip.antiAlias].
   ///
   /// See also:
   ///
@@ -664,7 +664,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       top: BorderSide(color: Colors.transparent),
       bottom: BorderSide(color: Colors.transparent),
     );
-    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
+    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.antiAlias;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint = _isExpanded
       ? localizations.expansionTileExpandedTapHint
