@@ -21,11 +21,11 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'material_color_utilities': '0.8.0', // Keep pinned to latest until 1.0.0.
   'archive': '3.3.2', // https://github.com/flutter/flutter/issues/115660
   'leak_tracker': '10.0.1', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_testing': '2.0.2', // https://github.com/flutter/devtools/issues/3951
   'leak_tracker_flutter_testing': '2.0.3', // https://github.com/flutter/devtools/issues/3951
-  'path_provider_android':
-      '2.2.1', // https://github.com/flutter/flutter/issues/140796
+  'leak_tracker_testing': '2.0.2', // https://github.com/flutter/devtools/issues/3951
+  'native_assets_cli': '0.3.2', // https://github.com/flutter/flutter/issues/141827
+  'path_provider_android': '2.2.1', // https://github.com/flutter/flutter/issues/140796
+  'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
   'test_api': '0.6.1', // https://github.com/flutter/flutter/issues/140169
   'test_core': '0.5.9', // https://github.com/flutter/flutter/issues/140169
-  'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
 };
