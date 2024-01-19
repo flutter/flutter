@@ -19,7 +19,7 @@ MetalScreenshotter::MetalScreenshotter() {
       PlaygroundImpl::Create(PlaygroundBackend::kMetal, PlaygroundSwitches{});
 }
 
-std::unique_ptr<MetalScreenshot> MetalScreenshotter::MakeScreenshot(
+std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     AiksContext& aiks_context,
     const Picture& picture,
     const ISize& size,

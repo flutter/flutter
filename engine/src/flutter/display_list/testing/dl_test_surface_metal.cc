@@ -58,10 +58,9 @@ std::shared_ptr<DlSurfaceInstance> DlMetalSurfaceProvider::MakeOffscreenSurface(
 }
 
 class DlMetalPixelData : public DlPixelData {
-  using MetalScreenshot = impeller::testing::MetalScreenshot;
-
  public:
-  explicit DlMetalPixelData(std::unique_ptr<MetalScreenshot> screenshot)
+  explicit DlMetalPixelData(
+      std::unique_ptr<impeller::testing::Screenshot> screenshot)
       : screenshot_(std::move(screenshot)),
         addr_(reinterpret_cast<const uint32_t*>(screenshot_->GetBytes())),
         ints_per_row_(screenshot_->GetBytesPerRow() / 4) {
@@ -79,7 +78,7 @@ class DlMetalPixelData : public DlPixelData {
   }
 
  private:
-  std::unique_ptr<MetalScreenshot> screenshot_;
+  std::unique_ptr<impeller::testing::Screenshot> screenshot_;
   const uint32_t* addr_;
   const uint32_t ints_per_row_;
 };

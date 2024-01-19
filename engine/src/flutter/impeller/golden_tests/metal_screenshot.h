@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_METAL_SCREENSHOT_H_
 #define FLUTTER_IMPELLER_GOLDEN_TESTS_METAL_SCREENSHOT_H_
 
+#include "flutter/impeller/golden_tests/screenshot.h"
+
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreImage/CoreImage.h>
 #include <string>
@@ -15,23 +17,23 @@ namespace impeller {
 namespace testing {
 
 /// A screenshot that was produced from `MetalScreenshotter`.
-class MetalScreenshot {
+class MetalScreenshot : public Screenshot {
  public:
+  explicit MetalScreenshot(CGImageRef cgImage);
+
   ~MetalScreenshot();
 
-  const UInt8* GetBytes() const;
+  const uint8_t* GetBytes() const override;
 
-  size_t GetHeight() const;
+  size_t GetHeight() const override;
 
-  size_t GetWidth() const;
+  size_t GetWidth() const override;
 
-  size_t GetBytesPerRow() const;
+  size_t GetBytesPerRow() const override;
 
-  bool WriteToPNG(const std::string& path) const;
+  bool WriteToPNG(const std::string& path) const override;
 
  private:
-  friend class MetalScreenshotter;
-  explicit MetalScreenshot(CGImageRef cgImage);
   MetalScreenshot(const MetalScreenshot&) = delete;
 
   MetalScreenshot& operator=(const MetalScreenshot&) = delete;

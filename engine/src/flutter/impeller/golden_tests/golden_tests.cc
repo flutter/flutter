@@ -34,7 +34,7 @@ std::string GetGoldenFilename() {
   return GetTestName() + ".png";
 }
 
-bool SaveScreenshot(std::unique_ptr<MetalScreenshot> screenshot) {
+bool SaveScreenshot(std::unique_ptr<Screenshot> screenshot) {
   if (!screenshot || !screenshot->GetBytes()) {
     return false;
   }

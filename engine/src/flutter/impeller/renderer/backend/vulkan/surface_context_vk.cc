@@ -115,4 +115,8 @@ vk::UniqueSurfaceKHR SurfaceContextVK::CreateAndroidSurface(
 
 #endif  // FML_OS_ANDROID
 
+const vk::Device& SurfaceContextVK::GetDevice() const {
+  return parent_->GetDevice();
+}
+
 }  // namespace impeller

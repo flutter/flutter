@@ -175,8 +175,39 @@ void PlaygroundImplVK::InitGlobalVulkanInstance() {
   application_info.setPEngineName("PlaygroundImplVK");
   application_info.setPApplicationName("PlaygroundImplVK");
 
-  auto instance_result =
-      vk::createInstanceUnique(vk::InstanceCreateInfo({}, &application_info));
+  auto caps = std::shared_ptr<CapabilitiesVK>(
+      new CapabilitiesVK(/*enable_validations=*/true));
+  FML_DCHECK(caps->IsValid());
+
+  std::optional<std::vector<std::string>> enabled_layers =
+      caps->GetEnabledLayers();
+  std::optional<std::vector<std::string>> enabled_extensions =
+      caps->GetEnabledInstanceExtensions();
+  FML_DCHECK(enabled_layers.has_value() && enabled_extensions.has_value());
+
+  std::vector<const char*> enabled_layers_c;
+  std::vector<const char*> enabled_extensions_c;
+
+  if (enabled_layers.has_value()) {
+    for (const auto& layer : enabled_layers.value()) {
+      enabled_layers_c.push_back(layer.c_str());
+    }
+  }
+
+  if (enabled_extensions.has_value()) {
+    for (const auto& ext : enabled_extensions.value()) {
+      enabled_extensions_c.push_back(ext.c_str());
+    }
+  }
+
+  vk::InstanceCreateFlags instance_flags = {};
+  instance_flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+  vk::InstanceCreateInfo instance_info;
+  instance_info.setPEnabledLayerNames(enabled_layers_c);
+  instance_info.setPEnabledExtensionNames(enabled_extensions_c);
+  instance_info.setPApplicationInfo(&application_info);
+  instance_info.setFlags(instance_flags);
+  auto instance_result = vk::createInstanceUnique(instance_info);
   FML_CHECK(instance_result.result == vk::Result::eSuccess)
       << "Unable to initialize global Vulkan instance";
   global_instance_ = std::move(instance_result.value);
