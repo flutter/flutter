@@ -13,31 +13,133 @@
 #include "fml/logging.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/saturated_math.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
 
+#define ONLY_ON_FLOAT_M(Modifiers, Return) \
+  template <typename U = T>                \
+  Modifiers std::enable_if_t<std::is_floating_point_v<U>, Return>
+#define ONLY_ON_FLOAT(Return) DL_ONLY_ON_FLOAT_M(, Return)
+
+/// Templated struct for holding an axis-aligned rectangle.
+///
+/// Rectangles are defined as 4 axis-aligned edges that might contain
+/// space. They can be viewed as 2 X coordinates that define the
+/// left and right edges and 2 Y coordinates that define the top and
+/// bottom edges; or they can be viewed as an origin and horizontal
+/// and vertical dimensions (width and height).
+///
+/// When the left and right edges are equal or reversed (right <= left)
+/// or the top and bottom edges are equal or reversed (bottom <= top),
+/// the rectangle is considered empty. Considering the rectangle in XYWH
+/// form, the width and/or the height would be negative or zero. Such
+/// reversed/empty rectangles contain no space and act as such in the
+/// methods that operate on them (Intersection, Union, IntersectsWithRect,
+/// Contains, Cutout, etc.)
+///
+/// Rectangles cannot be modified by any method and a new value can only
+/// be stored into an existing rect using assignment. This keeps the API
+/// clean compared to implementations that might have similar methods
+/// that produce the answer in place, or construct a new object with
+/// the answer, or place the result in an indicated result object.
+///
+/// Methods that might fail to produce an answer will use |std::optional|
+/// to indicate that success or failure (see |Intersection| and |CutOut|).
+/// For convenience, |Intersection| and |Union| both have overloaded
+/// variants that take |std::optional| arguments and treat them as if
+/// the argument was an empty rect to allow chaining multiple such methods
+/// and only needing to check the optional condition of the final result.
+/// The primary methods also provide |...OrEmpty| overloaded variants that
+/// translate an empty optional answer into a simple empty rectangle of the
+/// same type.
+///
+/// Rounding instance methods are not provided as the return value might
+/// be wanted as another floating point rectangle or sometimes as an integer
+/// rectangle. Instead a |RoundOut| factory, defined only for floating point
+/// input rectangles, is provided to provide control over the result type.
+///
+/// NaN and Infinity values
+///
+/// Constructing an LTRB rectangle using Infinity values should work as
+/// expected with either 0 or +Infinity returned as dimensions depending on
+/// which side the Infinity values are on and the sign.
+///
+/// Constructing an XYWH rectangle using Infinity values will usually
+/// not work if the math requires the object to compute a right or bottom
+/// edge from ([xy] -Infinity + [wh] +Infinity). Other combinations might
+/// work.
+///
+/// The special factory |MakeMaximum| is provided to construct a rectangle
+/// of the indicated coordinate type that covers all finite coordinates.
+/// It does not use infinity values, but rather the largest finite values
+/// to avoid math that might produce a NaN value from various getters.
+///
+/// Any rectangle that is constructed with, or computed to have a NaN value
+/// will be considered the same as any empty rectangle.
+///
+/// Empty Rectangle canonical results summary:
+///
+/// Union will ignore any empty rects and return the other rect
+/// Intersection will return nullopt if either rect is empty
+/// IntersectsWithRect will return false if either rect is empty
+/// Cutout will return the source rect if the argument is empty
+/// Cutout will return nullopt if the source rectangle is empty
+/// Contains(Point) will return false if the source rectangle is empty
+/// Contains(Rect) will return false if the source rectangle is empty
+/// Contains(Rect) will otherwise return true if the argument is empty
+/// Specifically, EmptyRect.Contains(EmptyRect) returns false
+///
+/// ---------------
+/// Special notes on problems using the XYWH form of specifying rectangles:
+///
+/// It is possible to have integer rectangles whose dimensions exceed
+/// the maximum number that their coordinates can represent since
+/// (MAX_INT - MIN_INT) overflows the representable positive numbers.
+/// Floating point rectangles technically have a similar issue in that
+/// overflow can occur, but it will be automatically converted into
+/// either an infinity, or a finite-overflow value and still be
+/// representable, just with little to no precision.
+///
+/// Secondly, specifying a rectangle using XYWH leads to cases where the
+/// math for (x+w) and/or (y+h) are also beyond the maximum representable
+/// coordinates. For N-bit integer rectangles declared as XYWH, the
+/// maximum right coordinate will require N+1 signed bits which cannot be
+/// stored in storage that uses N-bit integers.
+///
+/// Saturated math is used when constructing a rectangle from XYWH values
+/// and when returning the dimensions of the rectangle. Constructing an
+/// integer rectangle from values such that xy + wh is beyond the range
+/// of the integer type will place the right or bottom edges at the maximum
+/// value for the integer type. Similarly, constructing an integer rectangle
+/// such that the distance from the left to the right (or top to bottom) is
+/// greater than the range of the integer type will simply return the
+/// maximum integer value as the dimension. Floating point rectangles are
+/// naturally saturated by the rules of IEEE arithmetic.
 template <class T>
 struct TRect {
+ private:
   using Type = T;
 
-  constexpr TRect() : origin({0, 0}), size({0, 0}) {}
+ public:
+  constexpr TRect() : left_(0), top_(0), right_(0), bottom_(0) {}
 
   constexpr static TRect MakeLTRB(Type left,
                                   Type top,
                                   Type right,
                                   Type bottom) {
-    return TRect(left, top, right - left, bottom - top);
+    return TRect(left, top, right, bottom);
   }
 
   constexpr static TRect MakeXYWH(Type x, Type y, Type width, Type height) {
-    return TRect(x, y, width, height);
+    return TRect(x, y, saturated::Add(x, width), saturated::Add(y, height));
   }
 
   constexpr static TRect MakeOriginSize(const TPoint<Type>& origin,
                                         const TSize<Type>& size) {
-    return TRect(origin, size);
+    return MakeXYWH(origin.x, origin.y, size.width, size.height);
   }
 
   template <class U>
@@ -69,185 +171,224 @@ struct TRect {
     return TRect::MakeLTRB(left, top, right, bottom);
   }
 
-  constexpr static TRect MakeMaximum() {
-    return TRect::MakeLTRB(-std::numeric_limits<Type>::infinity(),
-                           -std::numeric_limits<Type>::infinity(),
-                           std::numeric_limits<Type>::infinity(),
-                           std::numeric_limits<Type>::infinity());
-  }
-
-  template <class U>
-  constexpr explicit TRect(const TRect<U>& other)
-      : origin(static_cast<T>(other.GetX()), static_cast<T>(other.GetY())),
-        size(static_cast<T>(other.GetWidth()),
-             static_cast<T>(other.GetHeight())) {}
-
-  [[nodiscard]] constexpr TRect operator+(const TRect& r) const {
-    return TRect({origin.x + r.origin.x, origin.y + r.origin.y},
-                 {size.width + r.size.width, size.height + r.size.height});
-  }
-
-  [[nodiscard]] constexpr TRect operator-(const TRect& r) const {
-    return TRect({origin.x - r.origin.x, origin.y - r.origin.y},
-                 {size.width - r.size.width, size.height - r.size.height});
-  }
-
-  [[nodiscard]] constexpr TRect operator*(Type scale) const {
-    return Scale(scale);
-  }
-
-  [[nodiscard]] constexpr TRect operator*(const TRect& r) const {
-    return TRect({origin.x * r.origin.x, origin.y * r.origin.y},
-                 {size.width * r.size.width, size.height * r.size.height});
+  [[nodiscard]] constexpr static TRect MakeMaximum() {
+    return TRect::MakeLTRB(std::numeric_limits<Type>::lowest(),
+                           std::numeric_limits<Type>::lowest(),
+                           std::numeric_limits<Type>::max(),
+                           std::numeric_limits<Type>::max());
   }
 
   [[nodiscard]] constexpr bool operator==(const TRect& r) const {
-    return origin == r.origin && size == r.size;
+    return left_ == r.left_ &&    //
+           top_ == r.top_ &&      //
+           right_ == r.right_ &&  //
+           bottom_ == r.bottom_;
   }
 
   [[nodiscard]] constexpr TRect Scale(Type scale) const {
-    return TRect({origin.x * scale, origin.y * scale},
-                 {size.width * scale, size.height * scale});
+    return TRect(left_ * scale,   //
+                 top_ * scale,    //
+                 right_ * scale,  //
+                 bottom_ * scale);
   }
 
   [[nodiscard]] constexpr TRect Scale(Type scale_x, Type scale_y) const {
-    return TRect({origin.x * scale_x, origin.y * scale_y},
-                 {size.width * scale_x, size.height * scale_y});
+    return TRect(left_ * scale_x,   //
+                 top_ * scale_y,    //
+                 right_ * scale_x,  //
+                 bottom_ * scale_y);
   }
 
   [[nodiscard]] constexpr TRect Scale(TPoint<T> scale) const {
-    return TRect({origin.x * scale.x, origin.y * scale.y},
-                 {size.width * scale.x, size.height * scale.y});
+    return Scale(scale.x, scale.y);
   }
 
   [[nodiscard]] constexpr TRect Scale(TSize<T> scale) const {
-    return Scale(TPoint<T>(scale));
+    return Scale(scale.width, scale.height);
   }
 
+  /// @brief  Returns true iff the provided point |p| is inside the
+  ///         half-open interior of this rectangle.
+  ///
+  ///         For purposes of containment, a rectangle contains points
+  ///         along the top and left edges but not points along the
+  ///         right and bottom edges so that a point is only ever
+  ///         considered inside one of two abutting rectangles.
   [[nodiscard]] constexpr bool Contains(const TPoint<Type>& p) const {
-    return p.x >= GetLeft() && p.x < GetRight() && p.y >= GetTop() &&
-           p.y < GetBottom();
+    return !this->IsEmpty() &&  //
+           p.x >= left_ &&      //
+           p.y >= top_ &&       //
+           p.x < right_ &&      //
+           p.y < bottom_;
   }
 
+  /// @brief  Returns true iff this rectangle is not empty and it also
+  ///         contains every point considered inside the provided
+  ///         rectangle |o| (as determined by |Contains(TPoint)|).
+  ///
+  ///         This is similar to a definition where the result is true iff
+  ///         the union of the two rectangles is equal to this rectangle,
+  ///         ignoring precision issues with performing those operations
+  ///         and assuming that empty rectangles are never equal.
+  ///
+  ///         An empty rectangle can contain no other rectangle.
+  ///
+  ///         An empty rectangle is, however, contained within any
+  ///         other non-empy rectangle as the set of points it contains
+  ///         is an empty set and so there are no points to fail the
+  ///         containment criteria.
   [[nodiscard]] constexpr bool Contains(const TRect& o) const {
-    return o.GetLeft() >= GetLeft() && o.GetTop() >= GetTop() &&
-           o.GetRight() <= GetRight() && o.GetBottom() <= GetBottom();
+    return !this->IsEmpty() &&                     //
+           (o.IsEmpty() || (o.left_ >= left_ &&    //
+                            o.top_ >= top_ &&      //
+                            o.right_ <= right_ &&  //
+                            o.bottom_ <= bottom_));
   }
 
-  /// Returns true if either of the width or height are 0, negative, or NaN.
-  [[nodiscard]] constexpr bool IsEmpty() const { return size.IsEmpty(); }
+  /// @brief  Returns true if all of the fields of this floating point
+  ///         rectangle are finite.
+  ///
+  ///         Note that the results of |GetWidth()| and |GetHeight()| may
+  ///         still be infinite due to overflow even if the fields themselves
+  ///         are finite.
+  ONLY_ON_FLOAT_M([[nodiscard]] constexpr, bool)
+  IsFinite() const {
+    return std::isfinite(left_) &&   //
+           std::isfinite(top_) &&    //
+           std::isfinite(right_) &&  //
+           std::isfinite(bottom_);
+  }
 
-  /// Returns true if width and height are equal and neither is NaN.
-  [[nodiscard]] constexpr bool IsSquare() const { return size.IsSquare(); }
+  /// @brief  Returns true if either of the width or height are 0, negative,
+  ///         or NaN.
+  [[nodiscard]] constexpr bool IsEmpty() const {
+    // Computing the non-empty condition and negating the result causes any
+    // NaN value to return true - i.e. is considered empty.
+    return !(left_ < right_ && top_ < bottom_);
+  }
+
+  /// @brief  Returns true if width and height are equal and neither is NaN.
+  [[nodiscard]] constexpr bool IsSquare() const {
+    // empty rectangles can technically be "square", but would be
+    // misleading to most callers. Using |IsEmpty| also prevents
+    // "non-empty and non-overflowing" computations from happening
+    // to be equal to "empty and overflowing" results.
+    // (Consider LTRB(10, 15, MAX-2, MIN+2) which is empty, but both
+    //  w/h subtractions equal "5").
+    return !IsEmpty() && (right_ - left_) == (bottom_ - top_);
+  }
 
   [[nodiscard]] constexpr bool IsMaximum() const {
     return *this == MakeMaximum();
   }
 
   /// @brief Returns the upper left corner of the rectangle as specified
-  ///        when it was constructed.
-  ///
-  ///        Note that unlike the |GetLeft|, |GetTop|, and |GetLeftTop|
-  ///        methods which will return values as if the rectangle had been
-  ///        "unswapped" by calling |GetPositive| on it, this method
-  ///        returns the raw origin values.
-  [[nodiscard]] constexpr TPoint<Type> GetOrigin() const { return origin; }
+  ///        by the left/top or x/y values when it was constructed.
+  [[nodiscard]] constexpr TPoint<Type> GetOrigin() const {
+    return {left_, top_};
+  }
 
-  /// @brief Returns the size of the rectangle as specified when it was
-  ///        constructed and which may be negative in either width or
-  ///        height.
-  [[nodiscard]] constexpr TSize<Type> GetSize() const { return size; }
+  /// @brief Returns the size of the rectangle which may be negative in
+  ///        either width or height and may have been clipped to the
+  ///        maximum integer values for integer rects whose size overflows.
+  [[nodiscard]] constexpr TSize<Type> GetSize() const {
+    return {GetWidth(), GetHeight()};
+  }
 
   /// @brief Returns the X coordinate of the upper left corner, equivalent
   ///        to |GetOrigin().x|
-  [[nodiscard]] constexpr Type GetX() const { return origin.x; }
+  [[nodiscard]] constexpr Type GetX() const { return left_; }
 
   /// @brief Returns the Y coordinate of the upper left corner, equivalent
   ///        to |GetOrigin().y|
-  [[nodiscard]] constexpr Type GetY() const { return origin.y; }
+  [[nodiscard]] constexpr Type GetY() const { return top_; }
 
   /// @brief Returns the width of the rectangle, equivalent to
   ///        |GetSize().width|
-  [[nodiscard]] constexpr Type GetWidth() const { return size.width; }
+  [[nodiscard]] constexpr Type GetWidth() const {
+    return saturated::Sub(right_, left_);
+  }
 
   /// @brief Returns the height of the rectangle, equivalent to
   ///        |GetSize().height|
-  [[nodiscard]] constexpr Type GetHeight() const { return size.height; }
-
-  [[nodiscard]] constexpr auto GetLeft() const {
-    if (IsMaximum()) {
-      return -std::numeric_limits<Type>::infinity();
-    }
-    return std::min(origin.x, origin.x + size.width);
+  [[nodiscard]] constexpr Type GetHeight() const {
+    return saturated::Sub(bottom_, top_);
   }
 
-  [[nodiscard]] constexpr auto GetTop() const {
-    if (IsMaximum()) {
-      return -std::numeric_limits<Type>::infinity();
-    }
-    return std::min(origin.y, origin.y + size.height);
-  }
+  [[nodiscard]] constexpr auto GetLeft() const { return left_; }
 
-  [[nodiscard]] constexpr auto GetRight() const {
-    if (IsMaximum()) {
-      return std::numeric_limits<Type>::infinity();
-    }
-    return std::max(origin.x, origin.x + size.width);
-  }
+  [[nodiscard]] constexpr auto GetTop() const { return top_; }
 
-  [[nodiscard]] constexpr auto GetBottom() const {
-    if (IsMaximum()) {
-      return std::numeric_limits<Type>::infinity();
-    }
-    return std::max(origin.y, origin.y + size.height);
-  }
+  [[nodiscard]] constexpr auto GetRight() const { return right_; }
 
-  [[nodiscard]] constexpr TPoint<T> GetLeftTop() const {
-    return {GetLeft(), GetTop()};
+  [[nodiscard]] constexpr auto GetBottom() const { return bottom_; }
+
+  [[nodiscard]] constexpr TPoint<T> GetLeftTop() const {  //
+    return {left_, top_};
   }
 
   [[nodiscard]] constexpr TPoint<T> GetRightTop() const {
-    return {GetRight(), GetTop()};
+    return {right_, top_};
   }
 
   [[nodiscard]] constexpr TPoint<T> GetLeftBottom() const {
-    return {GetLeft(), GetBottom()};
+    return {left_, bottom_};
   }
 
   [[nodiscard]] constexpr TPoint<T> GetRightBottom() const {
-    return {GetRight(), GetBottom()};
+    return {right_, bottom_};
   }
 
   /// @brief  Get the area of the rectangle, equivalent to |GetSize().Area()|
-  [[nodiscard]] constexpr T Area() const { return size.Area(); }
+  [[nodiscard]] constexpr T Area() const {
+    // TODO(flutter/flutter#141710) - Use saturated math to avoid overflow
+    // https://github.com/flutter/flutter/issues/141710
+    return IsEmpty() ? 0 : (right_ - left_) * (bottom_ - top_);
+  }
 
   /// @brief  Get the center point as a |Point|.
   [[nodiscard]] constexpr Point GetCenter() const {
-    return Point(origin.x + size.width * 0.5f, origin.y + size.height * 0.5f);
+    return {saturated::AverageScalar(left_, right_),
+            saturated::AverageScalar(top_, bottom_)};
   }
 
   [[nodiscard]] constexpr std::array<T, 4> GetLTRB() const {
-    return {GetLeft(), GetTop(), GetRight(), GetBottom()};
+    return {left_, top_, right_, bottom_};
   }
 
   /// @brief  Get the x, y coordinates of the origin and the width and
   ///         height of the rectangle in an array.
   [[nodiscard]] constexpr std::array<T, 4> GetXYWH() const {
-    return {origin.x, origin.y, size.width, size.height};
+    return {left_, top_, GetWidth(), GetHeight()};
   }
 
   /// @brief  Get a version of this rectangle that has a non-negative size.
   [[nodiscard]] constexpr TRect GetPositive() const {
-    auto ltrb = GetLTRB();
-    return MakeLTRB(ltrb[0], ltrb[1], ltrb[2], ltrb[3]);
+    if (!IsEmpty()) {
+      return *this;
+    }
+    return {
+        std::min(left_, right_),
+        std::min(top_, bottom_),
+        std::max(left_, right_),
+        std::max(top_, bottom_),
+    };
   }
 
-  /// @brief  Get the points that represent the 4 corners of this rectangle.
+  /// @brief  Get the points that represent the 4 corners of this rectangle
+  ///         in a Z order that is compatible with triangle strips or a set
+  ///         of all zero points if the rectangle is empty.
   ///         The order is: Top left, top right, bottom left, bottom right.
   [[nodiscard]] constexpr std::array<TPoint<T>, 4> GetPoints() const {
-    auto [left, top, right, bottom] = GetLTRB();
-    return {TPoint(left, top), TPoint(right, top), TPoint(left, bottom),
-            TPoint(right, bottom)};
+    if (IsEmpty()) {
+      return {};
+    }
+    return {
+        TPoint{left_, top_},
+        TPoint{right_, top_},
+        TPoint{left_, bottom_},
+        TPoint{right_, bottom_},
+    };
   }
 
   [[nodiscard]] constexpr std::array<TPoint<T>, 4> GetTransformedPoints(
@@ -262,6 +403,9 @@ struct TRect {
   /// @brief  Creates a new bounding box that contains this transformed
   ///         rectangle.
   [[nodiscard]] constexpr TRect TransformBounds(const Matrix& transform) const {
+    if (IsEmpty()) {
+      return {};
+    }
     auto points = GetTransformedPoints(transform);
     auto bounds = TRect::MakePointBounds(points.begin(), points.end());
     if (bounds.has_value()) {
@@ -279,10 +423,10 @@ struct TRect {
   ///         transform that maps all points to (0, 0).
   [[nodiscard]] constexpr Matrix GetNormalizingTransform() const {
     if (!IsEmpty()) {
-      Scalar sx = 1.0 / size.width;
-      Scalar sy = 1.0 / size.height;
-      Scalar tx = origin.x * -sx;
-      Scalar ty = origin.y * -sy;
+      Scalar sx = 1.0 / GetWidth();
+      Scalar sy = 1.0 / GetHeight();
+      Scalar tx = left_ * -sx;
+      Scalar ty = top_ * -sy;
 
       // Exclude NaN and infinities and either scale underflowing to zero
       if (sx != 0.0 && sy != 0.0 && 0.0 * sx * sy * tx * ty == 0.0) {
@@ -300,38 +444,55 @@ struct TRect {
   }
 
   [[nodiscard]] constexpr TRect Union(const TRect& o) const {
-    auto this_ltrb = GetLTRB();
-    auto other_ltrb = o.GetLTRB();
-    return TRect::MakeLTRB(std::min(this_ltrb[0], other_ltrb[0]),  //
-                           std::min(this_ltrb[1], other_ltrb[1]),  //
-                           std::max(this_ltrb[2], other_ltrb[2]),  //
-                           std::max(this_ltrb[3], other_ltrb[3])   //
-    );
+    if (IsEmpty()) {
+      return o;
+    }
+    if (o.IsEmpty()) {
+      return *this;
+    }
+    return {
+        std::min(left_, o.left_),
+        std::min(top_, o.top_),
+        std::max(right_, o.right_),
+        std::max(bottom_, o.bottom_),
+    };
   }
 
-  [[nodiscard]] constexpr std::optional<TRect<T>> Intersection(
+  [[nodiscard]] constexpr std::optional<TRect> Intersection(
       const TRect& o) const {
-    auto this_ltrb = GetLTRB();
-    auto other_ltrb = o.GetLTRB();
-    auto intersection =
-        TRect::MakeLTRB(std::max(this_ltrb[0], other_ltrb[0]),  //
-                        std::max(this_ltrb[1], other_ltrb[1]),  //
-                        std::min(this_ltrb[2], other_ltrb[2]),  //
-                        std::min(this_ltrb[3], other_ltrb[3])   //
-        );
-    if (intersection.size.IsEmpty()) {
+    if (IntersectsWithRect(o)) {
+      return TRect{
+          std::max(left_, o.left_),
+          std::max(top_, o.top_),
+          std::min(right_, o.right_),
+          std::min(bottom_, o.bottom_),
+      };
+    } else {
       return std::nullopt;
     }
-    return intersection;
   }
 
   [[nodiscard]] constexpr bool IntersectsWithRect(const TRect& o) const {
-    return Intersection(o).has_value();
+    return !IsEmpty() &&        //
+           !o.IsEmpty() &&      //
+           left_ < o.right_ &&  //
+           top_ < o.bottom_ &&  //
+           right_ > o.left_ &&  //
+           bottom_ > o.top_;
   }
 
-  /// @brief Returns the new boundary rectangle that would result from the
-  ///        rectangle being cutout by a second rectangle.
+  /// @brief Returns the new boundary rectangle that would result from this
+  ///        rectangle being cut out by the specified rectangle.
   [[nodiscard]] constexpr std::optional<TRect<T>> Cutout(const TRect& o) const {
+    if (IsEmpty()) {
+      // This test isn't just a short-circuit, it also prevents the concise
+      // math below from returning the wrong answer on empty rects.
+      // Once we know that this rectangle is not empty, the math below can
+      // only succeed in computing a value if o is also non-empty and non-nan.
+      // Otherwise, the method returns *this by default.
+      return std::nullopt;
+    }
+
     const auto& [a_left, a_top, a_right, a_bottom] = GetLTRB();  // Source rect.
     const auto& [b_left, b_top, b_right, b_bottom] = o.GetLTRB();  // Cutout.
     if (b_left <= a_left && b_right >= a_right) {
@@ -344,17 +505,17 @@ struct TRect {
         return TRect::MakeLTRB(a_left, b_bottom, a_right, a_bottom);
       }
       if (b_bottom >= a_bottom && b_top < a_bottom) {
-        // Cuts out the bottom.
+        // Cuts off the bottom.
         return TRect::MakeLTRB(a_left, a_top, a_right, b_top);
       }
     }
     if (b_top <= a_top && b_bottom >= a_bottom) {
       if (b_left <= a_left && b_right > a_left) {
-        // Cuts out the left.
+        // Cuts off the left.
         return TRect::MakeLTRB(b_right, a_top, a_right, a_bottom);
       }
       if (b_right >= a_right && b_left < a_right) {
-        // Cuts out the right.
+        // Cuts off the right.
         return TRect::MakeLTRB(a_left, a_top, b_left, a_bottom);
       }
     }
@@ -362,10 +523,23 @@ struct TRect {
     return *this;
   }
 
+  [[nodiscard]] constexpr TRect CutoutOrEmpty(const TRect& o) const {
+    return Cutout(o).value_or(TRect());
+  }
+
+  /// @brief  Returns a new rectangle translated by the given offset.
+  [[nodiscard]] constexpr TRect<T> Shift(T dx, T dy) const {
+    return {
+        saturated::Add(left_, dx),    //
+        saturated::Add(top_, dy),     //
+        saturated::Add(right_, dx),   //
+        saturated::Add(bottom_, dy),  //
+    };
+  }
+
   /// @brief  Returns a new rectangle translated by the given offset.
   [[nodiscard]] constexpr TRect<T> Shift(TPoint<T> offset) const {
-    return TRect(origin.x + offset.x, origin.y + offset.y, size.width,
-                 size.height);
+    return Shift(offset.x, offset.y);
   }
 
   /// @brief  Returns a rectangle with expanded edges. Negative expansion
@@ -374,62 +548,68 @@ struct TRect {
                                           T top,
                                           T right,
                                           T bottom) const {
-    return TRect(origin.x - left,            //
-                 origin.y - top,             //
-                 size.width + left + right,  //
-                 size.height + top + bottom);
+    return {
+        saturated::Sub(left_, left),      //
+        saturated::Sub(top_, top),        //
+        saturated::Add(right_, right),    //
+        saturated::Add(bottom_, bottom),  //
+    };
   }
 
   /// @brief  Returns a rectangle with expanded edges in all directions.
   ///         Negative expansion results in shrinking.
   [[nodiscard]] constexpr TRect<T> Expand(T amount) const {
-    return TRect(origin.x - amount,        //
-                 origin.y - amount,        //
-                 size.width + amount * 2,  //
-                 size.height + amount * 2);
+    return {
+        saturated::Sub(left_, amount),    //
+        saturated::Sub(top_, amount),     //
+        saturated::Add(right_, amount),   //
+        saturated::Add(bottom_, amount),  //
+    };
   }
 
   /// @brief  Returns a rectangle with expanded edges in all directions.
   ///         Negative expansion results in shrinking.
   [[nodiscard]] constexpr TRect<T> Expand(T horizontal_amount,
                                           T vertical_amount) const {
-    return TRect(origin.x - horizontal_amount,        //
-                 origin.y - vertical_amount,          //
-                 size.width + horizontal_amount * 2,  //
-                 size.height + vertical_amount * 2);
+    return {
+        saturated::Sub(left_, horizontal_amount),   //
+        saturated::Sub(top_, vertical_amount),      //
+        saturated::Add(right_, horizontal_amount),  //
+        saturated::Add(bottom_, vertical_amount),   //
+    };
   }
 
   /// @brief  Returns a rectangle with expanded edges in all directions.
   ///         Negative expansion results in shrinking.
   [[nodiscard]] constexpr TRect<T> Expand(TPoint<T> amount) const {
-    return TRect(origin.x - amount.x,        //
-                 origin.y - amount.y,        //
-                 size.width + amount.x * 2,  //
-                 size.height + amount.y * 2);
+    return Expand(amount.x, amount.y);
   }
 
   /// @brief  Returns a rectangle with expanded edges in all directions.
   ///         Negative expansion results in shrinking.
   [[nodiscard]] constexpr TRect<T> Expand(TSize<T> amount) const {
-    return TRect(origin.x - amount.width,        //
-                 origin.y - amount.height,       //
-                 size.width + amount.width * 2,  //
-                 size.height + amount.height * 2);
+    return Expand(amount.width, amount.height);
   }
 
   /// @brief  Returns a new rectangle that represents the projection of the
   ///         source rectangle onto this rectangle. In other words, the source
-  ///         rectangle is redefined in terms of the corrdinate space of this
+  ///         rectangle is redefined in terms of the coordinate space of this
   ///         rectangle.
   [[nodiscard]] constexpr TRect<T> Project(TRect<T> source) const {
-    return source.Shift(-origin).Scale(
-        TSize<T>(1.0 / static_cast<Scalar>(size.width),
-                 1.0 / static_cast<Scalar>(size.height)));
+    if (IsEmpty()) {
+      return {};
+    }
+    return source.Shift(-left_, -top_)
+        .Scale(1.0 / static_cast<Scalar>(GetWidth()),
+               1.0 / static_cast<Scalar>(GetHeight()));
   }
 
-  [[nodiscard]] constexpr static TRect RoundOut(const TRect& r) {
-    return TRect::MakeLTRB(floor(r.GetLeft()), floor(r.GetTop()),
-                           ceil(r.GetRight()), ceil(r.GetBottom()));
+  ONLY_ON_FLOAT_M([[nodiscard]] constexpr static, TRect)
+  RoundOut(const TRect<U>& r) {
+    return TRect::MakeLTRB(saturated::Cast<U, Type>(floor(r.GetLeft())),
+                           saturated::Cast<U, Type>(floor(r.GetTop())),
+                           saturated::Cast<U, Type>(ceil(r.GetRight())),
+                           saturated::Cast<U, Type>(ceil(r.GetBottom())));
   }
 
   [[nodiscard]] constexpr static std::optional<TRect> Union(
@@ -441,7 +621,7 @@ struct TRect {
   [[nodiscard]] constexpr static std::optional<TRect> Union(
       const std::optional<TRect> a,
       const TRect& b) {
-    return Union(b, a);
+    return a.has_value() ? a->Union(b) : b;
   }
 
   [[nodiscard]] constexpr static std::optional<TRect> Union(
@@ -459,7 +639,7 @@ struct TRect {
   [[nodiscard]] constexpr static std::optional<TRect> Intersection(
       const std::optional<TRect> a,
       const TRect& b) {
-    return Intersection(b, a);
+    return a.has_value() ? a->Intersection(b) : b;
   }
 
   [[nodiscard]] constexpr static std::optional<TRect> Intersection(
@@ -469,24 +649,20 @@ struct TRect {
   }
 
  private:
-  constexpr TRect(Type x, Type y, Type width, Type height)
-      : origin(x, y), size(width, height) {}
+  constexpr TRect(Type left, Type top, Type right, Type bottom)
+      : left_(left), top_(top), right_(right), bottom_(bottom) {}
 
-  constexpr TRect(TPoint<Type> origin, TSize<Type> size)
-      : origin(origin), size(size) {}
-
-  // NOLINTBEGIN
-  // These fields should be named origin_ and size_, but will be renamed to
-  // left_/top_/right_/bottom_ during the next phase of the reworking of the
-  // TRect class and we will deal with the renaming of all the usages here
-  // and in path_builder.cc at that time
-  TPoint<Type> origin;
-  TSize<Type> size;
-  // NOLINTEND
+  Type left_;
+  Type top_;
+  Type right_;
+  Type bottom_;
 };
 
 using Rect = TRect<Scalar>;
 using IRect = TRect<int64_t>;
+
+#undef ONLY_ON_FLOAT
+#undef ONLY_ON_FLOAT_M
 
 }  // namespace impeller
 
