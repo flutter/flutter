@@ -125,17 +125,12 @@ void testUsingContext(
           Analytics: () => NoOpAnalytics(),
         },
         body: () {
-          // runZonedGuarded has scary documenation that says:
+          // To catch all errors thrown by the test, even uncaught async errors, we use a zone.
           //
-          // "returning a future created inside the zone, and waiting for it
-          // outside of the zone, will risk the future not being seen to
-          // complete."
-          //
-          // for example, see our own test suite:
-          // https://github.com/flutter/flutter/blob/5987563e4aecb34fca446ea804943bb8d27d8fcd/packages/flutter_tools/test/general.shard/base/async_guard_test.dart#L279-L306
-          //
-          // so, we create a completer outside the zone, and complete it inside
-          // the zone in basically every terminal condition.
+          // Zones introduce their own event loop, so we do not await futures created inside
+          // the zone from outside the zone. Instead, we create a Completer outside the zone,
+          // and have the test complete it when the test ends (in success or failure), and we
+          // await that.
           final Completer<void> completer = Completer<void>();
           runZonedGuarded<Future<dynamic>>(() async {
             try {
