@@ -128,6 +128,10 @@ targets:
           "builder",
           "git"
         ]
+      ignore_cache_paths: >-
+        [
+          "builder/src/flutter/prebuilts/SDKs"
+        ]
       gclient_variables: >-
         {
           "download_android_deps": "true"
