@@ -13,41 +13,40 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 
-/// The target location for native assets on macOS.
+/// Create an `Info.plist` in [target] for a framework with a single dylib.
 ///
-/// Because we need to have a multi-architecture solution for
-/// `flutter run --release`, we use `lipo` to combine all target architectures
-/// into a single file.
-///
-/// We need to set the install name so that it matches what the place it will
-/// be bundled in the final app.
-///
-/// Code signing is also done here, so that we don't have to worry about it
-/// in xcode_backend.dart and macos_assemble.sh.
-Future<void> copyNativeAssetsMacOSHost(
-  Uri buildUri,
-  Map<AssetPath, List<Asset>> assetTargetLocations,
-  String? codesignIdentity,
-  BuildMode buildMode,
-  FileSystem fileSystem,
+/// The framework must be named [name].framework and the dylib [name].
+Future<void> createInfoPlist(
+  String name,
+  Directory target,
 ) async {
-  if (assetTargetLocations.isNotEmpty) {
-    globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    final Directory buildDir = fileSystem.directory(buildUri.toFilePath());
-    if (!buildDir.existsSync()) {
-      buildDir.createSync(recursive: true);
-    }
-    for (final MapEntry<AssetPath, List<Asset>> assetMapping in assetTargetLocations.entries) {
-      final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
-      final List<Uri> sources = <Uri>[for (final Asset source in assetMapping.value) (source.path as AssetAbsolutePath).uri];
-      final Uri targetUri = buildUri.resolveUri(target);
-      final String targetFullPath = targetUri.toFilePath();
-      await lipoDylibs(targetFullPath, sources);
-      await setInstallNameDylib(targetUri);
-      await codesignDylib(codesignIdentity, buildMode, targetFullPath);
-    }
-    globals.logger.printTrace('Copying native assets done.');
-  }
+  final File infoPlistFile = target.childFile('Info.plist');
+  await infoPlistFile.writeAsString('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	 <string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>$name</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.flutter.flutter.native_assets.$name</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$name</string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+  ''');
 }
 
 /// Combines dylibs from [sources] into a fat binary at [targetFullPath].
@@ -55,13 +54,13 @@ Future<void> copyNativeAssetsMacOSHost(
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
-Future<void> lipoDylibs(String targetFullPath, List<Uri> sources) async {
+Future<void> lipoDylibs(File target, List<Uri> sources) async {
   final ProcessResult lipoResult = await globals.processManager.run(
     <String>[
       'lipo',
       '-create',
       '-output',
-      targetFullPath,
+      target.path,
       for (final Uri source in sources) source.toFilePath(),
     ],
   );
@@ -78,25 +77,27 @@ Future<void> lipoDylibs(String targetFullPath, List<Uri> sources) async {
 /// dylib itself does not correspond to the path that the file is at. Therefore,
 /// native assets copied into their final location also need their install name
 /// updated with the `install_name_tool`.
-Future<void> setInstallNameDylib(Uri targetUri) async {
-  final String fileName = targetUri.pathSegments.last;
+Future<void> setInstallNameDylib(File dylibFile) async {
+  final String fileName = dylibFile.basename;
   final ProcessResult installNameResult = await globals.processManager.run(
     <String>[
       'install_name_tool',
       '-id',
-      '@executable_path/Frameworks/$fileName',
-      targetUri.toFilePath(),
+      '@rpath/$fileName.framework/$fileName',
+      dylibFile.path,
     ],
   );
   if (installNameResult.exitCode != 0) {
-    throwToolExit('Failed to change the install name of $targetUri:\n${installNameResult.stderr}');
+    throwToolExit(
+      'Failed to change the install name of $dylibFile:\n${installNameResult.stderr}',
+    );
   }
 }
 
 Future<void> codesignDylib(
   String? codesignIdentity,
   BuildMode buildMode,
-  String targetFullPath,
+  FileSystemEntity target,
 ) async {
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     codesignIdentity = '-';
@@ -110,12 +111,17 @@ Future<void> codesignDylib(
       // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
       '--timestamp=none',
     ],
-    targetFullPath,
+    target.path,
   ];
   globals.logger.printTrace(codesignCommand.join(' '));
-  final ProcessResult codesignResult = await globals.processManager.run(codesignCommand);
+  final ProcessResult codesignResult = await globals.processManager.run(
+    codesignCommand,
+  );
   if (codesignResult.exitCode != 0) {
-    throwToolExit('Failed to code sign binary:\n${codesignResult.stderr}');
+    throwToolExit(
+      'Failed to code sign binary: exit code: ${codesignResult.exitCode} '
+      '${codesignResult.stdout} ${codesignResult.stderr}',
+    );
   }
   globals.logger.printTrace(codesignResult.stdout as String);
   globals.logger.printTrace(codesignResult.stderr as String);
@@ -125,17 +131,77 @@ Future<void> codesignDylib(
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
 Future<CCompilerConfig> cCompilerConfigMacOS() async {
-  final ProcessResult xcrunResult = await globals.processManager.run(<String>['xcrun', 'clang', '--version']);
+  final ProcessResult xcrunResult = await globals.processManager.run(
+    <String>['xcrun', 'clang', '--version'],
+  );
   if (xcrunResult.exitCode != 0) {
     throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
   }
   final String installPath = LineSplitter.split(xcrunResult.stdout as String)
-    .firstWhere((String s) => s.startsWith('InstalledDir: '))
-    .split(' ')
-    .last;
+      .firstWhere((String s) => s.startsWith('InstalledDir: '))
+      .split(' ')
+      .last;
   return CCompilerConfig(
     cc: Uri.file('$installPath/clang'),
     ar: Uri.file('$installPath/ar'),
     ld: Uri.file('$installPath/ld'),
   );
+}
+
+/// Converts [fileName] into a suitable framework name.
+///
+/// On MacOS and iOS, dylibs need to be packaged in a framework.
+///
+/// In order for resolution to work, the file name inside the framework must be
+/// equal to the framework name.
+///
+/// Dylib names on MacOS/iOS usually have a dylib extension. If so, remove it.
+///
+/// Dylib names on MacOS/iOS are usually prefixed with 'lib'. So, if the file is
+/// a dylib, try to remove the prefix.
+///
+/// The bundle ID string must contain only alphanumeric characters
+/// (A–Z, a–z, and 0–9), hyphens (-), and periods (.).
+/// https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleidentifier
+///
+/// This name can contain up to 15 characters.
+/// https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundlename
+///
+/// The [alreadyTakenNames] are used to ensure that the framework name does not
+/// conflict with previously chosen names.
+Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
+  final List<String> splitFileName = fileName.split('.');
+  final bool isDylib;
+  if (splitFileName.length >= 2) {
+    isDylib = splitFileName.last == 'dylib';
+    if (isDylib) {
+      fileName = splitFileName.sublist(0, splitFileName.length - 1).join('.');
+    }
+  } else {
+    isDylib = false;
+  }
+  if (isDylib && fileName.startsWith('lib')) {
+    fileName = fileName.replaceFirst('lib', '');
+  }
+  fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '');
+  if (fileName.length > 15) {
+    fileName = fileName.substring(0, 15);
+  }
+  if (alreadyTakenNames.contains(fileName)) {
+    if (fileName.length > 12) {
+      fileName = fileName.substring(0, 12);
+    }
+    final String prefixName = fileName;
+    for (int i = 1; i < 1000; i++) {
+      fileName = '$prefixName$i';
+      if (!alreadyTakenNames.contains(fileName)) {
+        break;
+      }
+    }
+    if (alreadyTakenNames.contains(fileName)) {
+      throwToolExit('Failed to rename $fileName in native assets packaging.');
+    }
+  }
+  alreadyTakenNames.add(fileName);
+  return Uri(path: '$fileName.framework/$fileName');
 }
