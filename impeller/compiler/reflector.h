@@ -187,6 +187,7 @@ class Reflector {
     std::string name;
     std::string return_type;
     std::string docstring;
+    std::string descriptor_type = "";
     std::vector<BindPrototypeArgument> args;
   };
 

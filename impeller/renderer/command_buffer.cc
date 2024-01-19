@@ -38,7 +38,6 @@ void CommandBuffer::WaitUntilScheduled() {
 
 bool CommandBuffer::EncodeAndSubmit(
     const std::shared_ptr<RenderPass>& render_pass) {
-  TRACE_EVENT0("impeller", "CommandBuffer::EncodeAndSubmit");
   if (!render_pass->IsValid() || !IsValid()) {
     return false;
   }
@@ -52,7 +51,6 @@ bool CommandBuffer::EncodeAndSubmit(
 bool CommandBuffer::EncodeAndSubmit(
     const std::shared_ptr<BlitPass>& blit_pass,
     const std::shared_ptr<Allocator>& allocator) {
-  TRACE_EVENT0("impeller", "CommandBuffer::EncodeAndSubmit");
   if (!blit_pass->IsValid() || !IsValid()) {
     return false;
   }

@@ -21,17 +21,6 @@ fml::StatusOr<vk::DescriptorSet> AllocateAndBindDescriptorSets(
     const ContextVK& context,
     const std::shared_ptr<CommandEncoderVK>& encoder,
     Allocator& allocator,
-    const Command& command,
-    const TextureVK& input_attachment,
-    std::array<vk::DescriptorImageInfo, kMaxBindings>& image_workspace,
-    std::array<vk::DescriptorBufferInfo, kMaxBindings>& buffer_workspace,
-    std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>&
-        write_workspace);
-
-fml::StatusOr<vk::DescriptorSet> AllocateAndBindDescriptorSets(
-    const ContextVK& context,
-    const std::shared_ptr<CommandEncoderVK>& encoder,
-    Allocator& allocator,
     const ComputeCommand& command,
     std::array<vk::DescriptorImageInfo, kMaxBindings>& image_workspace,
     std::array<vk::DescriptorBufferInfo, kMaxBindings>& buffer_workspace,
