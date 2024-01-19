@@ -250,9 +250,7 @@ dependencies:
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$dartPluginName.framework'));
 
       // Native assets embedded, no embedded framework.
-      const String libFfiPackageDylib = 'lib$ffiPackageName.dylib';
-      checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', libFfiPackageDylib));
-      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$ffiPackageName.framework'));
+      checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$ffiPackageName.framework', ffiPackageName));
 
       section('Clean and pub get module');
 
@@ -385,7 +383,8 @@ end
 
       checkFileExists(path.join(
         hostFrameworksDirectory,
-        libFfiPackageDylib,
+        '$ffiPackageName.framework',
+        ffiPackageName,
       ));
 
       section('Check the NOTICE file is correct');
@@ -491,7 +490,8 @@ end
         checkFileExists(path.join(
           archivedAppPath,
           'Frameworks',
-          libFfiPackageDylib,
+          '$ffiPackageName.framework',
+          ffiPackageName,
         ));
 
         // The host app example builds plugins statically, url_launcher_ios.framework
