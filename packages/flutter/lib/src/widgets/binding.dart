@@ -1161,8 +1161,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 // TODO(goderbauer): Update the paragraph bellow to include the Window widget once that exists.
 /// The [runApp] method renders the provided `app` widget into the
 /// [PlatformDispatcher.implicitView] by wrapping it in a [View] widget, which
-/// will bootstrap the render tree for the app. Apps, that want to control which
-/// [FlutterView] they render into, may use [runWidget] instead.
+/// will bootstrap the render tree for the app. Apps that want to control which
+/// [FlutterView] they render into may use [runWidget] instead.
 ///
 /// The widget is given constraints during layout that force it to fill the
 /// entire view. If you wish to align your widget to one side of the view
@@ -1224,7 +1224,7 @@ void runApp(Widget app) {
   _runWidget(binding.wrapWithDefaultView(app), binding, 'runApp');
 }
 
-/// Inflate the given widget and bootstraps the widget tree.
+/// Inflate the given widget and bootstrap the widget tree.
 ///
 // TODO(goderbauer): Update the paragraph bellow to include the Window widget once that exists.
 /// Unlike [runApp], this method does not define a [FlutterView] into which the
@@ -1232,7 +1232,7 @@ void runApp(Widget app) {
 /// least one [View] widget in the provided `app` widget that will bootstrap a
 /// render tree and define the [FlutterView] into which the provided widget is
 /// rendered. Failure to include a [View] widget as an ancestor to all
-/// [RenderObjectWidget]s included in `app` will result in an exception. Apps,
+/// [RenderObjectWidget]s included in `app` will result in an exception. Apps
 /// that want to render into the default view without dealing with view
 /// management should consider calling [runApp] instead.
 ///
