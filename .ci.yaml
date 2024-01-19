@@ -3659,8 +3659,9 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac module_test_ios
+  - name: Mac_x64_ios module_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
