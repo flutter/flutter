@@ -161,6 +161,7 @@
 ../../../flutter/impeller/geometry/matrix_unittests.cc
 ../../../flutter/impeller/geometry/path_unittests.cc
 ../../../flutter/impeller/geometry/rect_unittests.cc
+../../../flutter/impeller/geometry/saturated_math_unittests.cc
 ../../../flutter/impeller/geometry/size_unittests.cc
 ../../../flutter/impeller/geometry/trig_unittests.cc
 ../../../flutter/impeller/golden_tests/README.md
