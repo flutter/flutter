@@ -6,7 +6,9 @@ import '../test_utils.dart';
 import 'project.dart';
 
 class HotReloadProject extends Project {
-  HotReloadProject({super.indexHtml});
+  HotReloadProject({super.indexHtml, this.constApp = false});
+
+  final bool constApp;
 
   @override
   final String pubspec = '''
@@ -20,7 +22,7 @@ class HotReloadProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  String get main => '''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';
@@ -34,17 +36,19 @@ class HotReloadProject extends Project {
     // See https://github.com/flutter/flutter/issues/86202
     if (kIsWeb) {
       while (true) {
-        runApp(MyApp());
+        runApp(${constApp ? 'const ': ''}MyApp());
         await Future.delayed(const Duration(seconds: 1));
       }
     } else {
-     runApp(MyApp());
+     runApp(${constApp ? 'const ': ''}MyApp());
     }
   }
 
   int count = 1;
 
   class MyApp extends StatelessWidget {
+    ${constApp ? 'const MyApp({super.key});': ''}
+
     @override
     Widget build(BuildContext context) {
       // This method gets called each time we hot reload, during reassemble.
@@ -53,7 +57,7 @@ class HotReloadProject extends Project {
       // hot reloading worked:
       // printHotReloadWorked();
 
-      print('((((TICK $count))))');
+      print('((((TICK \$count))))');
       // tick 1 = startup warmup frame
       // tick 2 = hot reload warmup reassemble frame
       // after that there's a post-hot-reload frame scheduled by the tool that
