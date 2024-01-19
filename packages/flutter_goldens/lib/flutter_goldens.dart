@@ -48,6 +48,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       httpClient: httpClient,
       log: print,
     );
+    print('Selected a post-submit comparator for golden tests.'); // ignore: avoid_print
   } else if (FlutterPreSubmitFileComparator.isRecommendedForEnvironment(platform)) {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromLocalFileComparator(
       localFileComparator: goldenFileComparator as LocalFileComparator,
@@ -58,6 +59,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       httpClient: httpClient,
       log: print,
     );
+    print('Selected a pre-submit comparator for golden tests.'); // ignore: avoid_print
   } else if (FlutterSkippingFileComparator.isRecommendedForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingFileComparator.fromLocalFileComparator(
       localFileComparator: goldenFileComparator as LocalFileComparator,
