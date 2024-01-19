@@ -11,7 +11,7 @@
 // Logs an EGL error to stderr. This automatically calls eglGetError()
 // and logs the error code.
 static void LogEglError(std::string message) {
-  EGLint error = eglGetError();
+  EGLint error = ::eglGetError();
   FML_LOG(ERROR) << "EGL: " << message;
   FML_LOG(ERROR) << "EGL: eglGetError returned " << error;
 }
@@ -24,18 +24,28 @@ std::unique_ptr<AngleSurfaceManager> AngleSurfaceManager::Create(
     bool enable_impeller) {
   std::unique_ptr<AngleSurfaceManager> manager;
   manager.reset(new AngleSurfaceManager(enable_impeller));
-  if (!manager->initialize_succeeded_) {
+  if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-AngleSurfaceManager::AngleSurfaceManager(bool enable_impeller)
-    : egl_config_(nullptr),
-      egl_display_(EGL_NO_DISPLAY),
-      egl_context_(EGL_NO_CONTEXT) {
-  initialize_succeeded_ = Initialize(enable_impeller);
+AngleSurfaceManager::AngleSurfaceManager(bool enable_impeller) {
   ++instance_count_;
+
+  if (!InitializeDisplay()) {
+    return;
+  }
+
+  if (!InitializeConfig(enable_impeller)) {
+    return;
+  }
+
+  if (!InitializeContexts()) {
+    return;
+  }
+
+  is_valid_ = true;
 }
 
 AngleSurfaceManager::~AngleSurfaceManager() {
@@ -43,48 +53,7 @@ AngleSurfaceManager::~AngleSurfaceManager() {
   --instance_count_;
 }
 
-bool AngleSurfaceManager::InitializeEGL(
-    PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT,
-    const EGLint* config,
-    bool should_log) {
-  egl_display_ = egl_get_platform_display_EXT(EGL_PLATFORM_ANGLE_ANGLE,
-                                              EGL_DEFAULT_DISPLAY, config);
-
-  if (egl_display_ == EGL_NO_DISPLAY) {
-    if (should_log) {
-      LogEglError("Failed to get a compatible EGLdisplay");
-    }
-    return false;
-  }
-
-  if (eglInitialize(egl_display_, nullptr, nullptr) == EGL_FALSE) {
-    if (should_log) {
-      LogEglError("Failed to initialize EGL via ANGLE");
-    }
-    return false;
-  }
-
-  return true;
-}
-
-bool AngleSurfaceManager::Initialize(bool enable_impeller) {
-  const EGLint config_attributes[] = {EGL_RED_SIZE,   8, EGL_GREEN_SIZE,   8,
-                                      EGL_BLUE_SIZE,  8, EGL_ALPHA_SIZE,   8,
-                                      EGL_DEPTH_SIZE, 8, EGL_STENCIL_SIZE, 8,
-                                      EGL_NONE};
-
-  const EGLint impeller_config_attributes[] = {
-      EGL_RED_SIZE,       8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE,    8,
-      EGL_ALPHA_SIZE,     8, EGL_DEPTH_SIZE, 0, EGL_STENCIL_SIZE, 8,
-      EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES,    4, EGL_NONE};
-  const EGLint impeller_config_attributes_no_msaa[] = {
-      EGL_RED_SIZE,   8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE,    8,
-      EGL_ALPHA_SIZE, 8, EGL_DEPTH_SIZE, 0, EGL_STENCIL_SIZE, 8,
-      EGL_NONE};
-
-  const EGLint display_context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
-                                               EGL_NONE};
-
+bool AngleSurfaceManager::InitializeDisplay() {
   // These are preferred display attributes and request ANGLE's D3D11
   // renderer. eglInitialize will only succeed with these attributes if the
   // hardware supports D3D11 Feature Level 10_0+.
@@ -138,7 +107,7 @@ bool AngleSurfaceManager::Initialize(bool enable_impeller) {
 
   PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT =
       reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
-          eglGetProcAddress("eglGetPlatformDisplayEXT"));
+          ::eglGetProcAddress("eglGetPlatformDisplayEXT"));
   if (!egl_get_platform_display_EXT) {
     LogEglError("eglGetPlatformDisplayEXT not available");
     return false;
@@ -147,50 +116,131 @@ bool AngleSurfaceManager::Initialize(bool enable_impeller) {
   // Attempt to initialize ANGLE's renderer in order of: D3D11, D3D11 Feature
   // Level 9_3 and finally D3D11 WARP.
   for (auto config : display_attributes_configs) {
-    bool should_log = (config == display_attributes_configs.back());
-    if (InitializeEGL(egl_get_platform_display_EXT, config, should_log)) {
-      break;
-    }
-  }
+    bool is_last = (config == display_attributes_configs.back());
 
-  EGLint numConfigs = 0;
-  if (enable_impeller) {
-    // First try the MSAA configuration.
-    if ((eglChooseConfig(egl_display_, impeller_config_attributes, &egl_config_,
-                         1, &numConfigs) == EGL_FALSE) ||
-        (numConfigs == 0)) {
-      // Next fall back to disabled MSAA.
-      if ((eglChooseConfig(egl_display_, impeller_config_attributes_no_msaa,
-                           &egl_config_, 1, &numConfigs) == EGL_FALSE) ||
-          (numConfigs == 0)) {
-        LogEglError("Failed to choose first context");
+    display_ = egl_get_platform_display_EXT(EGL_PLATFORM_ANGLE_ANGLE,
+                                            EGL_DEFAULT_DISPLAY, config);
+
+    if (display_ == EGL_NO_DISPLAY) {
+      if (is_last) {
+        LogEglError("Failed to get a compatible EGLdisplay");
         return false;
       }
+
+      // Try the next config.
+      continue;
+    }
+
+    if (::eglInitialize(display_, nullptr, nullptr) == EGL_FALSE) {
+      if (is_last) {
+        LogEglError("Failed to initialize EGL via ANGLE");
+        return false;
+      }
+
+      // Try the next config.
+      continue;
+    }
+
+    return true;
+  }
+
+  FML_UNREACHABLE();
+}
+
+bool AngleSurfaceManager::InitializeConfig(bool enable_impeller) {
+  const EGLint config_attributes[] = {EGL_RED_SIZE,   8, EGL_GREEN_SIZE,   8,
+                                      EGL_BLUE_SIZE,  8, EGL_ALPHA_SIZE,   8,
+                                      EGL_DEPTH_SIZE, 8, EGL_STENCIL_SIZE, 8,
+                                      EGL_NONE};
+
+  const EGLint impeller_config_attributes[] = {
+      EGL_RED_SIZE,       8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE,    8,
+      EGL_ALPHA_SIZE,     8, EGL_DEPTH_SIZE, 0, EGL_STENCIL_SIZE, 8,
+      EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES,    4, EGL_NONE};
+  const EGLint impeller_config_attributes_no_msaa[] = {
+      EGL_RED_SIZE,   8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE,    8,
+      EGL_ALPHA_SIZE, 8, EGL_DEPTH_SIZE, 0, EGL_STENCIL_SIZE, 8,
+      EGL_NONE};
+
+  EGLBoolean result;
+  EGLint num_config = 0;
+
+  if (enable_impeller) {
+    // First try the MSAA configuration.
+    result = ::eglChooseConfig(display_, impeller_config_attributes, &config_,
+                               1, &num_config);
+
+    if (result == EGL_TRUE && num_config > 0) {
+      return true;
+    }
+
+    // Next fall back to disabled MSAA.
+    result = ::eglChooseConfig(display_, impeller_config_attributes_no_msaa,
+                               &config_, 1, &num_config);
+    if (result == EGL_TRUE && num_config == 0) {
+      return true;
     }
   } else {
-    if ((eglChooseConfig(egl_display_, config_attributes, &egl_config_, 1,
-                         &numConfigs) == EGL_FALSE) ||
-        (numConfigs == 0)) {
-      LogEglError("Failed to choose first context");
-      return false;
+    result = ::eglChooseConfig(display_, config_attributes, &config_, 1,
+                               &num_config);
+
+    if (result == EGL_TRUE && num_config > 0) {
+      return true;
     }
   }
 
-  egl_context_ = eglCreateContext(egl_display_, egl_config_, EGL_NO_CONTEXT,
-                                  display_context_attributes);
-  if (egl_context_ == EGL_NO_CONTEXT) {
-    LogEglError("Failed to create EGL context");
+  LogEglError("Failed to choose EGL config");
+  return false;
+}
+
+bool AngleSurfaceManager::InitializeContexts() {
+  const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+
+  render_context_ =
+      ::eglCreateContext(display_, config_, EGL_NO_CONTEXT, context_attributes);
+  if (render_context_ == EGL_NO_CONTEXT) {
+    LogEglError("Failed to create EGL render context");
     return false;
   }
 
-  egl_resource_context_ = eglCreateContext(
-      egl_display_, egl_config_, egl_context_, display_context_attributes);
-
-  if (egl_resource_context_ == EGL_NO_CONTEXT) {
+  resource_context_ = ::eglCreateContext(display_, config_, render_context_,
+                                         context_attributes);
+  if (resource_context_ == EGL_NO_CONTEXT) {
     LogEglError("Failed to create EGL resource context");
     return false;
   }
 
+  return true;
+}
+
+bool AngleSurfaceManager::InitializeDevice() {
+  const auto query_display_attrib_EXT =
+      reinterpret_cast<PFNEGLQUERYDISPLAYATTRIBEXTPROC>(
+          ::eglGetProcAddress("eglQueryDisplayAttribEXT"));
+  const auto query_device_attrib_EXT =
+      reinterpret_cast<PFNEGLQUERYDEVICEATTRIBEXTPROC>(
+          ::eglGetProcAddress("eglQueryDeviceAttribEXT"));
+
+  if (query_display_attrib_EXT == nullptr ||
+      query_device_attrib_EXT == nullptr) {
+    return false;
+  }
+
+  EGLAttrib egl_device = 0;
+  EGLAttrib angle_device = 0;
+
+  auto result = query_display_attrib_EXT(display_, EGL_DEVICE_EXT, &egl_device);
+  if (result != EGL_TRUE) {
+    return false;
+  }
+
+  result = query_device_attrib_EXT(reinterpret_cast<EGLDeviceEXT>(egl_device),
+                                   EGL_D3D11_DEVICE_ANGLE, &angle_device);
+  if (result != EGL_TRUE) {
+    return false;
+  }
+
+  resolved_device_ = reinterpret_cast<ID3D11Device*>(angle_device);
   return true;
 }
 
@@ -200,39 +250,42 @@ void AngleSurfaceManager::CleanUp() {
   // Needs to be reset before destroying the EGLContext.
   resolved_device_.Reset();
 
-  if (egl_display_ != EGL_NO_DISPLAY && egl_context_ != EGL_NO_CONTEXT) {
-    result = eglDestroyContext(egl_display_, egl_context_);
-    egl_context_ = EGL_NO_CONTEXT;
+  if (display_ != EGL_NO_DISPLAY && render_context_ != EGL_NO_CONTEXT) {
+    result = ::eglDestroyContext(display_, render_context_);
+    render_context_ = EGL_NO_CONTEXT;
 
     if (result == EGL_FALSE) {
       LogEglError("Failed to destroy context");
     }
   }
 
-  if (egl_display_ != EGL_NO_DISPLAY &&
-      egl_resource_context_ != EGL_NO_CONTEXT) {
-    result = eglDestroyContext(egl_display_, egl_resource_context_);
-    egl_resource_context_ = EGL_NO_CONTEXT;
+  if (display_ != EGL_NO_DISPLAY && resource_context_ != EGL_NO_CONTEXT) {
+    result = ::eglDestroyContext(display_, resource_context_);
+    resource_context_ = EGL_NO_CONTEXT;
 
     if (result == EGL_FALSE) {
       LogEglError("Failed to destroy resource context");
     }
   }
 
-  if (egl_display_ != EGL_NO_DISPLAY) {
+  if (display_ != EGL_NO_DISPLAY) {
     // Display is reused between instances so only terminate display
     // if destroying last instance
     if (instance_count_ == 1) {
-      eglTerminate(egl_display_);
+      ::eglTerminate(display_);
     }
-    egl_display_ = EGL_NO_DISPLAY;
+    display_ = EGL_NO_DISPLAY;
   }
+}
+
+bool AngleSurfaceManager::IsValid() const {
+  return is_valid_;
 }
 
 bool AngleSurfaceManager::CreateSurface(HWND hwnd,
                                         EGLint width,
                                         EGLint height) {
-  if (!hwnd || !initialize_succeeded_) {
+  if (!hwnd || !is_valid_) {
     return false;
   }
 
@@ -241,13 +294,13 @@ bool AngleSurfaceManager::CreateSurface(HWND hwnd,
   // Disable ANGLE's automatic surface resizing and provide an explicit size.
   // The surface will need to be destroyed and re-created if the HWND is
   // resized.
-  const EGLint surfaceAttributes[] = {
+  const EGLint surface_attributes[] = {
       EGL_FIXED_SIZE_ANGLE, EGL_TRUE, EGL_WIDTH, width,
       EGL_HEIGHT,           height,   EGL_NONE};
 
-  surface = eglCreateWindowSurface(egl_display_, egl_config_,
-                                   static_cast<EGLNativeWindowType>(hwnd),
-                                   surfaceAttributes);
+  surface = ::eglCreateWindowSurface(display_, config_,
+                                     static_cast<EGLNativeWindowType>(hwnd),
+                                     surface_attributes);
   if (surface == EGL_NO_SURFACE) {
     LogEglError("Surface creation failed.");
     return false;
@@ -255,7 +308,7 @@ bool AngleSurfaceManager::CreateSurface(HWND hwnd,
 
   surface_width_ = width;
   surface_height_ = height;
-  render_surface_ = surface;
+  surface_ = surface;
   return true;
 }
 
@@ -284,7 +337,7 @@ void AngleSurfaceManager::ResizeSurface(HWND hwnd,
 }
 
 void AngleSurfaceManager::GetSurfaceDimensions(EGLint* width, EGLint* height) {
-  if (render_surface_ == EGL_NO_SURFACE || !initialize_succeeded_) {
+  if (surface_ == EGL_NO_SURFACE || !is_valid_) {
     *width = 0;
     *height = 0;
     return;
@@ -299,46 +352,46 @@ void AngleSurfaceManager::GetSurfaceDimensions(EGLint* width, EGLint* height) {
 }
 
 void AngleSurfaceManager::DestroySurface() {
-  if (egl_display_ != EGL_NO_DISPLAY && render_surface_ != EGL_NO_SURFACE) {
-    eglDestroySurface(egl_display_, render_surface_);
+  if (display_ != EGL_NO_DISPLAY && surface_ != EGL_NO_SURFACE) {
+    ::eglDestroySurface(display_, surface_);
   }
-  render_surface_ = EGL_NO_SURFACE;
+  surface_ = EGL_NO_SURFACE;
 }
 
 bool AngleSurfaceManager::HasContextCurrent() {
-  return eglGetCurrentContext() != EGL_NO_CONTEXT;
+  return ::eglGetCurrentContext() != EGL_NO_CONTEXT;
 }
 
 bool AngleSurfaceManager::MakeCurrent() {
-  return (eglMakeCurrent(egl_display_, render_surface_, render_surface_,
-                         egl_context_) == EGL_TRUE);
+  return (::eglMakeCurrent(display_, surface_, surface_, render_context_) ==
+          EGL_TRUE);
 }
 
 bool AngleSurfaceManager::ClearCurrent() {
-  return (eglMakeCurrent(egl_display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                         EGL_NO_CONTEXT) == EGL_TRUE);
+  return (::eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                           EGL_NO_CONTEXT) == EGL_TRUE);
 }
 
 bool AngleSurfaceManager::ClearContext() {
-  return (eglMakeCurrent(egl_display_, nullptr, nullptr, egl_context_) ==
+  return (::eglMakeCurrent(display_, nullptr, nullptr, render_context_) ==
           EGL_TRUE);
 }
 
 bool AngleSurfaceManager::MakeResourceCurrent() {
-  return (eglMakeCurrent(egl_display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                         egl_resource_context_) == EGL_TRUE);
+  return (::eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                           resource_context_) == EGL_TRUE);
 }
 
 bool AngleSurfaceManager::SwapBuffers() {
-  return (eglSwapBuffers(egl_display_, render_surface_));
+  return (::eglSwapBuffers(display_, surface_));
 }
 
 EGLSurface AngleSurfaceManager::CreateSurfaceFromHandle(
     EGLenum handle_type,
     EGLClientBuffer handle,
     const EGLint* attributes) const {
-  return eglCreatePbufferFromClientBuffer(egl_display_, handle_type, handle,
-                                          egl_config_, attributes);
+  return ::eglCreatePbufferFromClientBuffer(display_, handle_type, handle,
+                                            config_, attributes);
 }
 
 void AngleSurfaceManager::SetVSyncEnabled(bool enabled) {
@@ -352,7 +405,7 @@ void AngleSurfaceManager::SetVSyncEnabled(bool enabled) {
   // This is unnecessary if DWM composition is enabled.
   // See: https://www.khronos.org/opengl/wiki/Swap_Interval
   // See: https://learn.microsoft.com/windows/win32/dwm/composition-ovw
-  if (eglSwapInterval(egl_display_, enabled ? 1 : 0) != EGL_TRUE) {
+  if (::eglSwapInterval(display_, enabled ? 1 : 0) != EGL_TRUE) {
     LogEglError("Unable to update the swap interval");
     return;
   }
@@ -360,27 +413,8 @@ void AngleSurfaceManager::SetVSyncEnabled(bool enabled) {
 
 bool AngleSurfaceManager::GetDevice(ID3D11Device** device) {
   if (!resolved_device_) {
-    PFNEGLQUERYDISPLAYATTRIBEXTPROC egl_query_display_attrib_EXT =
-        reinterpret_cast<PFNEGLQUERYDISPLAYATTRIBEXTPROC>(
-            eglGetProcAddress("eglQueryDisplayAttribEXT"));
-
-    PFNEGLQUERYDEVICEATTRIBEXTPROC egl_query_device_attrib_EXT =
-        reinterpret_cast<PFNEGLQUERYDEVICEATTRIBEXTPROC>(
-            eglGetProcAddress("eglQueryDeviceAttribEXT"));
-
-    if (!egl_query_display_attrib_EXT || !egl_query_device_attrib_EXT) {
+    if (!InitializeDevice()) {
       return false;
-    }
-
-    EGLAttrib egl_device = 0;
-    EGLAttrib angle_device = 0;
-    if (egl_query_display_attrib_EXT(egl_display_, EGL_DEVICE_EXT,
-                                     &egl_device) == EGL_TRUE) {
-      if (egl_query_device_attrib_EXT(
-              reinterpret_cast<EGLDeviceEXT>(egl_device),
-              EGL_D3D11_DEVICE_ANGLE, &angle_device) == EGL_TRUE) {
-        resolved_device_ = reinterpret_cast<ID3D11Device*>(angle_device);
-      }
     }
   }
 
