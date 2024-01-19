@@ -17,7 +17,7 @@ MetalScreenshot::~MetalScreenshot() {
   CGImageRelease(cg_image_);
 }
 
-const UInt8* MetalScreenshot::GetBytes() const {
+const uint8_t* MetalScreenshot::GetBytes() const {
   return CFDataGetBytePtr(pixel_data_);
 }
 

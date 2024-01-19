@@ -49,6 +49,10 @@ if (is_mac) {
       "metal_screenshot.mm",
       "metal_screenshotter.h",
       "metal_screenshotter.mm",
+      "screenshot.h",
+      "screenshotter.h",
+      "vulkan_screenshotter.h",
+      "vulkan_screenshotter.mm",
     ]
 
     deps = [
@@ -56,6 +60,7 @@ if (is_mac) {
       "//flutter/impeller/display_list",
       "//flutter/impeller/playground",
       "//flutter/impeller/renderer/backend/metal:metal",
+      "//flutter/impeller/renderer/backend/vulkan",
     ]
   }
 

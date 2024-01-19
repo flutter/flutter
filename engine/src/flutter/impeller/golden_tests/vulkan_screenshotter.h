@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_METAL_SCREENSHOTTER_H_
-#define FLUTTER_IMPELLER_GOLDEN_TESTS_METAL_SCREENSHOTTER_H_
+#ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_VULKAN_SCREENSHOTTER_H_
+#define FLUTTER_IMPELLER_GOLDEN_TESTS_VULKAN_SCREENSHOTTER_H_
 
 #include "flutter/fml/macros.h"
 #include "flutter/impeller/aiks/picture.h"
@@ -16,9 +16,9 @@ namespace testing {
 
 /// Converts `Picture`s and `DisplayList`s to `MetalScreenshot`s with the
 /// playground backend.
-class MetalScreenshotter : public Screenshotter {
+class VulkanScreenshotter : public Screenshotter {
  public:
-  MetalScreenshotter();
+  VulkanScreenshotter();
 
   std::unique_ptr<Screenshot> MakeScreenshot(
       AiksContext& aiks_context,
@@ -35,4 +35,4 @@ class MetalScreenshotter : public Screenshotter {
 }  // namespace testing
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_GOLDEN_TESTS_METAL_SCREENSHOTTER_H_
+#endif  // FLUTTER_IMPELLER_GOLDEN_TESTS_VULKAN_SCREENSHOTTER_H_

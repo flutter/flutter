@@ -76,6 +76,8 @@ class SurfaceContextVK : public Context,
   vk::UniqueSurfaceKHR CreateAndroidSurface(ANativeWindow* window) const;
 #endif  // FML_OS_ANDROID
 
+  const vk::Device& GetDevice() const;
+
  private:
   std::shared_ptr<ContextVK> parent_;
   std::shared_ptr<SwapchainVK> swapchain_;
