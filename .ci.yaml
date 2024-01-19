@@ -209,6 +209,24 @@ platform_properties:
         {
           "sdk_version": "15a240d"
         }
+  mac_x64_ios:
+    properties:
+      contexts: >-
+        [
+          "osx_sdk_devicelab"
+        ]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "apple_signing", "version": "version:to_2024"}
+        ]
+      os: Mac-13
+      cpu: x86
+      device_os: iOS-16|iOS-17
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "15a240d"
+        }
   mac_arm64_ios:
     properties:
       contexts: >-
