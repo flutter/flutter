@@ -18,6 +18,11 @@
 
 namespace impeller {
 
+#define ONLY_ON_FLOAT_M(Modifiers, Return) \
+  template <typename U = T>                \
+  Modifiers std::enable_if_t<std::is_floating_point_v<U>, Return>
+#define ONLY_ON_FLOAT(Return) DL_ONLY_ON_FLOAT_M(, Return)
+
 template <class T>
 struct TPoint {
   using Type = T;
@@ -227,6 +232,9 @@ struct TPoint {
   }
 
   constexpr bool IsZero() const { return x == 0 && y == 0; }
+
+  ONLY_ON_FLOAT_M(constexpr, bool)
+  IsFinite() const { return std::isfinite(x) && std::isfinite(y); }
 };
 
 // Specializations for mixed (float & integer) algebraic operations.
@@ -311,6 +319,9 @@ using IPoint32 = TPoint<int32_t>;
 using UintPoint32 = TPoint<uint32_t>;
 using Vector2 = Point;
 using Quad = std::array<Point, 4>;
+
+#undef ONLY_ON_FLOAT
+#undef ONLY_ON_FLOAT_M
 
 }  // namespace impeller
 
