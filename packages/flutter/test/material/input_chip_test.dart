@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -111,6 +112,14 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
   expect(materials.length, 2);
   // The last Material from `RawChip` should have the clip behavior.
   expect(materials.last.clipBehavior, clipBehavior);
+}
+
+// Finds any container of a tooltip.
+Finder findTooltipContainer(String tooltipText) {
+  return find.ancestor(
+    of: find.text(tooltipText),
+    matching: find.byType(Container),
+  );
 }
 
 void main() {
@@ -417,7 +426,7 @@ void main() {
     expect(getIconData(tester).color, const Color(0xff00ff00));
   });
 
-  testWidgets('Delete button is visible InputChip is disabled', (WidgetTester tester) async {
+  testWidgets('Delete button is visible on disabled InputChip', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         child: InputChip(
@@ -430,5 +439,35 @@ void main() {
 
     // Delete button should be visible.
     expectLater(find.byType(RawChip), matchesGoldenFile('input_chip.disabled.delete_button.png'));
+  });
+
+  testWidgets('Delete button tooltip is not shown on disabled InputChip', (WidgetTester tester) async {
+    Widget buildChip({ bool enabled = true }) {
+      return wrapForChip(
+        child: InputChip(
+          isEnabled: enabled,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      );
+    }
+
+    // Test enabled chip.
+    await tester.pumpWidget(buildChip());
+
+    final Offset deleteButtonLocation = tester.getCenter(find.byType(Icon));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(deleteButtonLocation);
+    await tester.pump();
+
+    // Delete button tooltip should be visible.
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+
+    // Test disabled chip.
+    await tester.pumpWidget(buildChip(enabled: false));
+    await tester.pump();
+
+    // Delete button tooltip should not be visible.
+    expect(findTooltipContainer('Delete'), findsNothing);
   });
 }
