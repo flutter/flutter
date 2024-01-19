@@ -2,6 +2,8 @@ name: Third party deps scan
 on:
   # Only the default branch is supported.
   branch_protection_rule:
+  push:
+    branches: [ main ]
   pull_request:
     types: [ labeled ]
 
