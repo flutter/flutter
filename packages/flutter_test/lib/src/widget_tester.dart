@@ -584,10 +584,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
   Future<void> pumpWidget(
-    Widget widget, [
+    Widget widget, {
     Duration? duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-  ]) {
+  }) {
     return TestAsyncUtils.guard<void>(() {
       binding.attachRootWidget(binding.wrapWithDefaultView(widget));
       binding.scheduleFrame();

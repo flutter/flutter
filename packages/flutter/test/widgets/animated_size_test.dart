@@ -378,7 +378,7 @@ void main() {
               ),
             ),
           ),
-          duration,
+          duration: duration,
         );
       }
 
