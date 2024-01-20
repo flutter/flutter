@@ -397,7 +397,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('clearState resets lifecycle state and framesEnabled to initial state', (WidgetTester tester) async {
+  testWidgets('resetInternalState resets lifecycleState and framesEnabled to initial state', (WidgetTester tester) async {
     // Initial state
     expect(tester.binding.lifecycleState, isNull);
     expect(tester.binding.framesEnabled, isTrue);
@@ -406,7 +406,7 @@ void main() {
     expect(tester.binding.lifecycleState, AppLifecycleState.paused);
     expect(tester.binding.framesEnabled, isFalse);
 
-    tester.binding.clearState();
+    tester.binding.resetInternalState();
 
     expect(tester.binding.lifecycleState, isNull);
     expect(tester.binding.framesEnabled, isTrue);

@@ -394,7 +394,7 @@ mixin SchedulerBinding on BindingBase {
   /// Allows the test framework to reset the lifecycle state and framesEnabled
   /// back to their initial values.
   @visibleForTesting
-  void clearState() {
+  void resetInternalState() {
     _lifecycleState = null;
     _framesEnabled = true;
   }
