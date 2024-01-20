@@ -1183,7 +1183,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
           : contentBottom;
       }
 
-      final double xOffset = hasCustomWidth ? (size.width - snackBarWidth!) / 2 : 0.0;
+      double xOffset = 0.0;
+      if (hasCustomWidth) {
+        xOffset = switch (textDirection) {
+          TextDirection.rtl => (snackBarWidth! - size.width) / 2,
+          TextDirection.ltr => (size.width - snackBarWidth!) / 2,
+        };
+      }
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
 
       assert((){
@@ -2300,6 +2306,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     Clip? clipBehavior,
     BoxConstraints? constraints,
     bool? enableDrag,
+    bool? showDragHandle,
     bool shouldDisposeAnimationController = true,
   }) {
     assert(() {
@@ -2374,6 +2381,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       key: bottomSheetKey,
       animationController: animationController,
       enableDrag: enableDrag ?? !isPersistent,
+      showDragHandle: showDragHandle,
       onClosing: () {
         if (_currentBottomSheet == null) {
           return;
@@ -2475,6 +2483,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     Clip? clipBehavior,
     BoxConstraints? constraints,
     bool? enableDrag,
+    bool? showDragHandle,
     AnimationController? transitionAnimationController,
   }) {
     assert(() {
@@ -2502,6 +2511,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         clipBehavior: clipBehavior,
         constraints: constraints,
         enableDrag: enableDrag,
+        showDragHandle: showDragHandle,
         shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
@@ -3127,6 +3137,7 @@ class _StandardBottomSheet extends StatefulWidget {
     super.key,
     required this.animationController,
     this.enableDrag = true,
+    this.showDragHandle,
     required this.onClosing,
     required this.onDismissed,
     required this.builder,
@@ -3141,6 +3152,7 @@ class _StandardBottomSheet extends StatefulWidget {
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
   final bool enableDrag;
+  final bool? showDragHandle;
   final VoidCallback? onClosing;
   final VoidCallback? onDismissed;
   final VoidCallback? onDispose;
@@ -3246,6 +3258,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           child: BottomSheet(
             animationController: widget.animationController,
             enableDrag: widget.enableDrag,
+            showDragHandle: widget.showDragHandle,
             onDragStart: _handleDragStart,
             onDragEnd: _handleDragEnd,
             onClosing: widget.onClosing!,

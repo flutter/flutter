@@ -7,10 +7,9 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('TapRegionSurface detects outside taps', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects outside taps', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -102,7 +101,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface consumes outside taps when asked', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface consumes outside taps when asked', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     int propagatedTaps = 0;
     await tester.pumpWidget(
@@ -207,7 +206,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface detects inside taps', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside taps', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -294,7 +293,7 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface detects inside taps correctly with behavior', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside taps correctly with behavior', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     const ValueKey<String> noGroupKey = ValueKey<String>('No Group');
     const ValueKey<String> group1AKey = ValueKey<String>('Group 1 A');
@@ -380,7 +379,7 @@ void main() {
     tappedInside.clear();
   });
 
-  testWidgetsWithLeakTracking('Setting the group updates the registration', (WidgetTester tester) async {
+  testWidgets('Setting the group updates the registration', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -481,7 +480,7 @@ void main() {
     tappedOutside.clear();
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface detects outside right click', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects outside right click', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -574,7 +573,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface detects outside middle click', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects outside middle click', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -667,7 +666,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface consumes outside right click when asked', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface consumes outside right click when asked', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     int propagatedTaps = 0;
     await tester.pumpWidget(
@@ -773,7 +772,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface consumes outside middle click when asked', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface consumes outside middle click when asked', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     int propagatedTaps = 0;
     await tester.pumpWidget(
@@ -879,7 +878,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface detects inside right click', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside right click', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -967,7 +966,7 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface detects inside middle click', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside middle click', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(

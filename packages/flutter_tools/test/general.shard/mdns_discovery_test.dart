@@ -782,7 +782,7 @@ void main() {
     });
 
     group('deviceNameMatchesTargetName', () {
-      testWithoutContext('compares case insensitive and without spaces, hypthens, .local', () {
+      testWithoutContext('compares case insensitive and without spaces, hyphens, .local', () {
         final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(
             <PtrResourceRecord>[],
@@ -1038,9 +1038,6 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   void stop() {}
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({this.name = 'iPhone'});
 

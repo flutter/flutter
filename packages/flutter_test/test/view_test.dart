@@ -124,6 +124,19 @@ void main() {
       );
     });
 
+    testWidgets('faking physicalSize fakes physicalConstraints', (WidgetTester tester) async {
+      const Size fakeSize = Size(50, 50);
+      verifyPropertyFaked<ViewConstraints>(
+        tester: tester,
+        realValue: trueImplicitView().physicalConstraints,
+        fakeValue: ViewConstraints.tight(fakeSize),
+        propertyRetriever: () => boundImplicitView().physicalConstraints,
+        propertyFaker: (_, __) {
+          tester.view.physicalSize = fakeSize;
+        },
+      );
+    });
+
     testWidgets('can reset physicalSize', (WidgetTester tester) async {
       verifyPropertyReset<Size>(
         tester: tester,
@@ -134,6 +147,47 @@ void main() {
         },
         propertyFaker: (Size fakeValue) {
           tester.view.physicalSize = fakeValue;
+        },
+      );
+    });
+
+    testWidgets('resetting physicalSize resets physicalConstraints', (WidgetTester tester) async {
+      const Size fakeSize = Size(50, 50);
+      verifyPropertyReset<ViewConstraints>(
+        tester: tester,
+        fakeValue: ViewConstraints.tight(fakeSize),
+        propertyRetriever: () => boundImplicitView().physicalConstraints,
+        propertyResetter: () {
+          tester.view.resetPhysicalSize();
+        },
+        propertyFaker: (_) {
+          tester.view.physicalSize = fakeSize;
+        },
+      );
+    });
+
+    testWidgets('can fake physicalConstraints', (WidgetTester tester) async {
+      verifyPropertyFaked<ViewConstraints>(
+        tester: tester,
+        realValue: trueImplicitView().physicalConstraints,
+        fakeValue: const ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
+        propertyRetriever: () => boundImplicitView().physicalConstraints,
+        propertyFaker: (_, ViewConstraints fakeValue) {
+          tester.view.physicalConstraints = fakeValue;
+        },
+      );
+    });
+
+    testWidgets('can reset physicalConstraints', (WidgetTester tester) async {
+      verifyPropertyReset<ViewConstraints>(
+        tester: tester,
+        fakeValue: const ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
+        propertyRetriever: () => boundImplicitView().physicalConstraints,
+        propertyResetter: () {
+          tester.view.resetPhysicalConstraints();
+        },
+        propertyFaker: (ViewConstraints fakeValue) {
+          tester.view.physicalConstraints = fakeValue;
         },
       );
     });
@@ -259,8 +313,7 @@ void main() {
     });
 
     testWidgets('updateSemantics is passed through to backing FlutterView', (WidgetTester tester) async {
-      // ignore: deprecated_member_use
-      final SemanticsUpdate expectedUpdate = SemanticsUpdateBuilderNew().build();
+      final SemanticsUpdate expectedUpdate = SemanticsUpdateBuilder().build();
       final _FakeFlutterView backingView = _FakeFlutterView();
       final TestFlutterView view = TestFlutterView(
         view: backingView,

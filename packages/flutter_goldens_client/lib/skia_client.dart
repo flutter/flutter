@@ -20,6 +20,7 @@ const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
+const String _kImpellerKey = 'FLUTTER_TEST_IMPELLER';
 
 /// Exception thrown when an error is returned from the [SkiaClient].
 class SkiaException implements Exception {
@@ -489,6 +490,8 @@ class SkiaGoldClient {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'CI' : 'luci',
+      if (_isImpeller)
+        'impeller': 'swiftshader',
     };
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;
@@ -544,6 +547,10 @@ class SkiaGoldClient {
     return _isBrowserTest && platform.environment[_kWebRendererKey] == 'canvaskit';
   }
 
+  bool get _isImpeller {
+    return (platform.environment[_kImpellerKey] != null);
+  }
+
   String get _browserKey {
     assert(_isBrowserTest);
     return platform.environment[_kTestBrowserKey]!;
@@ -553,7 +560,7 @@ class SkiaGoldClient {
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
   String getTraceID(String testName) {
-    final Map<String, dynamic> keys = <String, dynamic>{
+    final Map<String, Object?> keys = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
       if (_isBrowserCanvasKitTest)
@@ -562,6 +569,8 @@ class SkiaGoldClient {
       'Platform' : platform.operatingSystem,
       'name' : testName,
       'source_type' : 'flutter',
+      if (_isImpeller)
+        'impeller': 'swiftshader',
     };
     final String jsonTrace = json.encode(keys);
     final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
