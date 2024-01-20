@@ -46,6 +46,10 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
   ASSERT_EQ(commands.size(), 1u);
   ASSERT_STREQ(commands[0].pipeline->GetDescriptor().GetLabel().c_str(),
                "TextureFill Pipeline V#1");
+
+  if (GetParam() == PlaygroundBackend::kMetal) {
+    recording_pass->EncodeCommands();
+  }
 }
 
 // GL_OES_EGL_image_external isn't supported on MacOS hosts.
