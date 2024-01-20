@@ -423,8 +423,7 @@ void RenderPassVK::SetPipeline(
 // |RenderPass|
 void RenderPassVK::SetCommandLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
-  std::string label_copy(label);
-  command_buffer_->GetEncoder()->PushDebugGroup(label_copy.c_str());
+  command_buffer_->GetEncoder()->PushDebugGroup(label);
   has_label_ = true;
 #endif  // IMPELLER_DEBUG
 }

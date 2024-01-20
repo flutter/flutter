@@ -76,11 +76,11 @@ class CommandEncoderVK {
 
   vk::CommandBuffer GetCommandBuffer() const;
 
-  void PushDebugGroup(const char* label) const;
+  void PushDebugGroup(std::string_view label) const;
 
   void PopDebugGroup() const;
 
-  void InsertDebugMarker(const char* label) const;
+  void InsertDebugMarker(std::string_view label) const;
 
   fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
       const vk::DescriptorSetLayout& layout,
