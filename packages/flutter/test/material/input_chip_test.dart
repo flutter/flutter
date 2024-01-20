@@ -23,8 +23,9 @@ Widget wrapForChip({
     theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: textDirection,
-      child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+      child: MediaQuery.withClampedTextScaling(
+        minScaleFactor: textScaleFactor,
+        maxScaleFactor: textScaleFactor,
         child: Material(child: child),
       ),
     ),

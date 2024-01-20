@@ -718,7 +718,9 @@ class AlertDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScalerOf(context).textScaleFactor);
+    const double fontSizeToScale = 14.0;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double paddingScaleFactor = _scalePadding(effectiveTextScale);
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? iconWidget;
@@ -1213,7 +1215,11 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScalerOf(context).textScaleFactor);
+    final TextStyle defaultTextStyle = titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!;
+    final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
+    final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double paddingScaleFactor = _scalePadding(effectiveTextScale);
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? titleWidget;
@@ -1227,7 +1233,7 @@ class SimpleDialog extends StatelessWidget {
           bottom: children == null ? effectiveTitlePadding.bottom * paddingScaleFactor : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!,
+          style: defaultTextStyle,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
@@ -1577,7 +1583,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
        );
 }
 
-double _paddingScaleFactor(double textScaleFactor) {
+double _scalePadding(double textScaleFactor) {
   final double clampedTextScaleFactor = clampDouble(textScaleFactor, 1.0, 2.0);
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.

@@ -14,9 +14,10 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
-    await tester.pumpWidget(const MediaQuery(
-      data: MediaQueryData(textScaleFactor: 1.3),
-      child: Center(
+    await tester.pumpWidget(MediaQuery.withClampedTextScaling(
+      minScaleFactor: 1.3,
+      maxScaleFactor: 1.3,
+      child: const Center(
         child: Text('Hello', textDirection: TextDirection.ltr),
       ),
     ));

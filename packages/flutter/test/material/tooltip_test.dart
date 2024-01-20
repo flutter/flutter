@@ -1930,12 +1930,12 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Material2 - Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, { required double textScaleFactor }) {
+  testWidgets('Material2 - Tooltip text scales with textScaler', (WidgetTester tester) async {
+    Widget buildApp(String text, { required TextScaler textScaler }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Navigator(
@@ -1961,7 +1961,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: TextScaler.noScaling));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(42.0, 14.0)));
@@ -1970,7 +1970,7 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: const TextScaler.linear(4.0)));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(168.0, 56.0)));
@@ -1981,10 +1981,10 @@ void main() {
   });
 
   testWidgets('Material3 - Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, { required double textScaleFactor }) {
+    Widget buildApp(String text, { required TextScaler textScaler }) {
       return MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
@@ -2007,7 +2007,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: TextScaler.noScaling));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)).width, equals(42.75));
@@ -2017,7 +2017,7 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: const TextScaler.linear(4.0)));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)).width, equals(168.75));

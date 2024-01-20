@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -479,7 +478,7 @@ class _TextButtonWithIcon extends TextButton {
   }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _TextButtonWithIconChild(icon: icon, label: label),
+         child: _TextButtonWithIconChild(icon: icon, label: label, buttonStyle: style),
       );
 
   @override
@@ -504,15 +503,18 @@ class _TextButtonWithIconChild extends StatelessWidget {
   const _TextButtonWithIconChild({
     required this.label,
     required this.icon,
+    required this.buttonStyle,
   });
 
   final Widget label;
   final Widget icon;
+  final ButtonStyle? buttonStyle;
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.textScalerOf(context).textScaleFactor;
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
+    final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
+    final double gap = lerpDouble(8, 4, scale)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],

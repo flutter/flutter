@@ -532,8 +532,9 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 99,
+            maxScaleFactor: 99,
             child: const CupertinoPageScaffold(
               navigationBar: CupertinoNavigationBar(
                 middle: Text('middle'),
