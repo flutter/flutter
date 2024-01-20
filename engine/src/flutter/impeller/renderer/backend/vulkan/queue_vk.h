@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -40,7 +39,7 @@ class QueueVK {
   vk::Result Submit(const vk::SubmitInfo& submit_info,
                     const vk::Fence& fence) const;
 
-  void InsertDebugMarker(const char* label) const;
+  void InsertDebugMarker(std::string_view label) const;
 
  private:
   mutable Mutex queue_mutex_;
