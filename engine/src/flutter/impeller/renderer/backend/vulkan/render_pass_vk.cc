@@ -468,7 +468,7 @@ void RenderPassVK::SetInstanceCount(size_t count) {
 // |RenderPass|
 bool RenderPassVK::SetVertexBuffer(VertexBuffer buffer) {
   vertex_count_ = buffer.vertex_count;
-  if (buffer.index_type == IndexType::kUnknown) {
+  if (buffer.index_type == IndexType::kUnknown || !buffer.vertex_buffer) {
     return false;
   }
 
