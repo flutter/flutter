@@ -78,6 +78,10 @@ TEST_P(EntityTest, RendersDstPerColorWithAlpha) {
 
   ASSERT_TRUE(frag_uniforms);
   ASSERT_EQ(frag_uniforms->alpha, 0.5);
+
+  if (GetParam() == PlaygroundBackend::kMetal) {
+    recording_pass->EncodeCommands();
+  }
 }
 
 }  // namespace testing

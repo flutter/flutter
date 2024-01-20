@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/command_buffer.h"
 
-#include "flutter/fml/trace_event.h"
 #include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
@@ -17,7 +16,6 @@ CommandBuffer::CommandBuffer(std::weak_ptr<const Context> context)
 CommandBuffer::~CommandBuffer() = default;
 
 bool CommandBuffer::SubmitCommands(const CompletionCallback& callback) {
-  TRACE_EVENT0("impeller", "CommandBuffer::SubmitCommands");
   if (!IsValid()) {
     // Already committed or was never valid. Either way, this is caller error.
     if (callback) {

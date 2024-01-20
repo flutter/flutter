@@ -8,6 +8,7 @@
 #include <Metal/Metal.h>
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/metal/pass_bindings_cache_mtl.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 
@@ -22,13 +23,34 @@ class RenderPassMTL final : public RenderPass {
   friend class CommandBufferMTL;
 
   id<MTLCommandBuffer> buffer_ = nil;
+  id<MTLRenderCommandEncoder> encoder_ = nil;
   MTLRenderPassDescriptor* desc_ = nil;
   std::string label_;
+  bool is_metal_trace_active_ = false;
   bool is_valid_ = false;
+  // Many parts of the codebase will start writing to a render pass but
+  // never submit them. This boolean is used to track if a submit happened
+  // so that in the dtor we can always ensure the render pass is finished.
+  mutable bool did_finish_encoding_ = false;
+
+  PassBindingsCacheMTL pass_bindings_;
+
+  // Per-command state
+  size_t instance_count_ = 1u;
+  size_t base_vertex_ = 0u;
+  size_t vertex_count_ = 0u;
+  bool has_valid_pipeline_ = false;
+  bool has_label_ = false;
+  BufferView index_buffer_ = {};
+  PrimitiveType primitive_type_ = {};
+  MTLIndexType index_type_ = {};
 
   RenderPassMTL(std::shared_ptr<const Context> context,
                 const RenderTarget& target,
                 id<MTLCommandBuffer> buffer);
+
+  // |RenderPass|
+  void ReserveCommands(size_t command_count) override {}
 
   // |RenderPass|
   bool IsValid() const override;
@@ -39,8 +61,55 @@ class RenderPassMTL final : public RenderPass {
   // |RenderPass|
   bool OnEncodeCommands(const Context& context) const override;
 
-  bool EncodeCommands(const std::shared_ptr<Allocator>& transients_allocator,
-                      id<MTLRenderCommandEncoder> pass) const;
+  // |RenderPass|
+  void SetPipeline(
+      const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) override;
+
+  // |RenderPass|
+  void SetCommandLabel(std::string_view label) override;
+
+  // |RenderPass|
+  void SetStencilReference(uint32_t value) override;
+
+  // |RenderPass|
+  void SetBaseVertex(uint64_t value) override;
+
+  // |RenderPass|
+  void SetViewport(Viewport viewport) override;
+
+  // |RenderPass|
+  void SetScissor(IRect scissor) override;
+
+  // |RenderPass|
+  void SetInstanceCount(size_t count) override;
+
+  // |RenderPass|
+  bool SetVertexBuffer(VertexBuffer buffer) override;
+
+  // |RenderPass|
+  fml::Status Draw() override;
+
+  // |RenderPass|
+  bool BindResource(ShaderStage stage,
+                    DescriptorType type,
+                    const ShaderUniformSlot& slot,
+                    const ShaderMetadata& metadata,
+                    BufferView view) override;
+
+  // |RenderPass|
+  bool BindResource(ShaderStage stage,
+                    DescriptorType type,
+                    const ShaderUniformSlot& slot,
+                    const std::shared_ptr<const ShaderMetadata>& metadata,
+                    BufferView view) override;
+
+  // |RenderPass|
+  bool BindResource(ShaderStage stage,
+                    DescriptorType type,
+                    const SampledImageSlot& slot,
+                    const ShaderMetadata& metadata,
+                    std::shared_ptr<const Texture> texture,
+                    std::shared_ptr<const Sampler> sampler) override;
 
   RenderPassMTL(const RenderPassMTL&) = delete;
 
