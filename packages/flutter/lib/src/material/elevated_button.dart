@@ -111,13 +111,15 @@ class ElevatedButton extends ButtonStyleButton {
   /// The [backgroundColor] and [disabledBackgroundColor] colors are
   /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
+  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
+  /// parameters are used to construct [ButtonStyle].mouseCursor and
+  /// [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor].
+  ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
   /// value, [elevation] + 2 is used when the button is hovered
   /// or focused, and elevation + 6 is used when the button is pressed.
-  ///
-  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle].mouseCursor.
   ///
   /// All of the other parameters are either used directly or used to
   /// create a [MaterialStateProperty] with a single value for all
@@ -160,6 +162,8 @@ class ElevatedButton extends ButtonStyleButton {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
+    Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
     TextStyle? textStyle,
@@ -180,24 +184,27 @@ class ElevatedButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final Color? background = backgroundColor;
-    final Color? disabledBackground = disabledBackgroundColor;
-    final MaterialStateProperty<Color?>? backgroundColorProp = (background == null && disabledBackground == null)
-      ? null
-      : _ElevatedButtonDefaultColor(background, disabledBackground);
-    final Color? foreground = foregroundColor;
-    final Color? disabledForeground = disabledForegroundColor;
-    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
-      ? null
-      : _ElevatedButtonDefaultColor(foreground, disabledForeground);
-    final MaterialStateProperty<Color?>? overlayColorProp = (foreground == null && overlayColor == null)
-      ? null
-      : overlayColor != null && overlayColor.value == 0
-        ? const MaterialStatePropertyAll<Color?>(Colors.transparent)
-        : _ElevatedButtonDefaultOverlay((overlayColor ?? foreground)!);
-    final MaterialStateProperty<double>? elevationValue = (elevation == null)
-      ? null
-      : _ElevatedButtonDefaultElevation(elevation);
+    final MaterialStateProperty<Color?>? foregroundColorProp = switch((foregroundColor, disabledForegroundColor)) {
+      (null, null) => null,
+      (_, _) => _ElevatedButtonDefaultColor(foregroundColor, disabledForegroundColor),
+    };
+    final MaterialStateProperty<Color?>? backgroundColorProp = switch((backgroundColor, disabledBackgroundColor)) {
+      (null, null) => null,
+      (_, _) => _ElevatedButtonDefaultColor(backgroundColor, disabledBackgroundColor),
+    };
+    final MaterialStateProperty<Color?>? iconColorProp = switch((iconColor, disabledIconColor)) {
+      (null, null) => null,
+      (_, _) => _ElevatedButtonDefaultColor(iconColor, disabledIconColor),
+    };
+    final MaterialStateProperty<Color?>? overlayColorProp = switch((foregroundColor, overlayColor)) {
+      (null, null) => null,
+      (_, final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
+      (_, _) => _ElevatedButtonDefaultOverlay((overlayColor ?? foregroundColor)!),
+    };
+    final MaterialStateProperty<double>? elevationValue = switch(elevation) {
+      null => null,
+      _ => _ElevatedButtonDefaultElevation(elevation),
+    };
     final MaterialStateProperty<MouseCursor?> mouseCursor = _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
@@ -207,6 +214,7 @@ class ElevatedButton extends ButtonStyleButton {
       overlayColor: overlayColorProp,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
+      iconColor: iconColorProp,
       elevation: elevationValue,
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),

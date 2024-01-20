@@ -105,16 +105,18 @@ class OutlinedButton extends ButtonStyleButton {
   /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
   /// a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
   ///
-  /// If [overlayColor] is specified and its value is [Colors.transparent]
-  /// then the pressed/focused/hovered highlights are effectively defeated.
-  /// Otherwise a [MaterialStateProperty] with the same opacities as the
-  /// default is created.
-  ///
   /// The [backgroundColor] and [disabledBackgroundColor] colors are
   /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  /// parameters are used to construct [ButtonStyle].mouseCursor and
+  /// [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor].
+  ///
+  /// If [overlayColor] is specified and its value is [Colors.transparent]
+  /// then the pressed/focused/hovered highlights are effectively defeated.
+  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// default is created.
   ///
   /// All of the other parameters are either used directly or used to
   /// create a [MaterialStateProperty] with a single value for all
@@ -145,6 +147,8 @@ class OutlinedButton extends ButtonStyleButton {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
+    Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
     TextStyle? textStyle,
@@ -165,21 +169,23 @@ class OutlinedButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final Color? foreground = foregroundColor;
-    final Color? disabledForeground = disabledForegroundColor;
-    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
-      ? null
-      : _OutlinedButtonDefaultColor(foreground, disabledForeground);
-    final MaterialStateProperty<Color?>? backgroundColorProp = (backgroundColor == null && disabledBackgroundColor == null)
-      ? null
-      : disabledBackgroundColor == null
-        ? ButtonStyleButton.allOrNull<Color?>(backgroundColor)
-        : _OutlinedButtonDefaultColor(backgroundColor, disabledBackgroundColor);
-    final MaterialStateProperty<Color?>? overlayColorProp = (foreground == null && overlayColor == null)
-      ? null
-      : overlayColor != null && overlayColor.value == 0
-        ? const MaterialStatePropertyAll<Color?>(Colors.transparent)
-        : _OutlinedButtonDefaultOverlay((overlayColor ?? foreground)!);
+    final MaterialStateProperty<Color?>? foregroundColorProp = switch((foregroundColor, disabledForegroundColor)) {
+      (null, null) => null,
+      (_, _) => _OutlinedButtonDefaultColor(foregroundColor, disabledForegroundColor),
+    };
+    final MaterialStateProperty<Color?>? backgroundColorProp = switch((backgroundColor, disabledBackgroundColor)) {
+      (null, null) => null,
+      (_, _) => _OutlinedButtonDefaultColor(backgroundColor, disabledBackgroundColor),
+    };
+    final MaterialStateProperty<Color?>? iconColorProp = switch((iconColor, disabledIconColor)) {
+      (null, null) => null,
+      (_, _) => _OutlinedButtonDefaultColor(iconColor, disabledIconColor),
+    };
+    final MaterialStateProperty<Color?>? overlayColorProp = switch((foregroundColor, overlayColor)) {
+      (null, null) => null,
+      (_, final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
+      (_, _) => _OutlinedButtonDefaultOverlay((overlayColor ?? foregroundColor)!),
+    };
     final MaterialStateProperty<MouseCursor?> mouseCursor = _OutlinedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
@@ -189,6 +195,7 @@ class OutlinedButton extends ButtonStyleButton {
       overlayColor: overlayColorProp,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
+      iconColor: iconColorProp,
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -322,9 +329,7 @@ class OutlinedButton extends ButtonStyleButton {
           padding: _scaledPadding(context),
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-          ),
+          side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
           enabledMouseCursor: SystemMouseCursors.click,
           disabledMouseCursor: SystemMouseCursors.basic,

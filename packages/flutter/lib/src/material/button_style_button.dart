@@ -90,7 +90,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none] unless [ButtonStyle.backgroundBuilder] or
-  /// [ButtonStyle.foregroundBulder] is specified. In those
+  /// [ButtonStyle.foregroundBuilder] is specified. In those
   /// cases the default is [Clip.antiAlias].
   final Clip? clipBehavior;
 
@@ -399,7 +399,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         heightFactor: 1.0,
         child: resolvedForegroundBuilder != null
           ? resolvedForegroundBuilder(context, statesController.value, widget.child)
-          : widget.child
+          : widget.child,
       ),
     );
     if (resolvedBackgroundBuilder != null) {

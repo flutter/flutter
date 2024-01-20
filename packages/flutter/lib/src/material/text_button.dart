@@ -115,16 +115,18 @@ class TextButton extends ButtonStyleButton {
   /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
   /// a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
   ///
-  /// If [overlayColor] is specified and its value is [Colors.transparent]
-  /// then the pressed/focused/hovered highlights are effectively defeated.
-  /// Otherwise a [MaterialStateProperty] with the same opacities as the
-  /// default is created.
-  ///
   /// The [backgroundColor] and [disabledBackgroundColor] colors are
   /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  /// parameters are used to construct [ButtonStyle.mouseCursor] and
+  /// [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor].
+  ///
+  /// If [overlayColor] is specified and its value is [Colors.transparent]
+  /// then the pressed/focused/hovered highlights are effectively defeated.
+  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// default is created.
   ///
   /// All of the other parameters are either used directly or used to
   /// create a [MaterialStateProperty] with a single value for all
@@ -176,26 +178,23 @@ class TextButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final Color? foreground = foregroundColor;
-    final Color? disabledForeground = disabledForegroundColor;
-    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
-      ? null
-      : _TextButtonDefaultColor(foreground, disabledForeground);
-    final MaterialStateProperty<Color?>? backgroundColorProp = (backgroundColor == null && disabledBackgroundColor == null)
-      ? null
-      : disabledBackgroundColor == null
-        ? ButtonStyleButton.allOrNull<Color?>(backgroundColor)
-        : _TextButtonDefaultColor(backgroundColor, disabledBackgroundColor);
-    final MaterialStateProperty<Color?>? overlayColorProp = (foreground == null && overlayColor == null)
-      ? null
-      : overlayColor != null && overlayColor.value == 0
-        ? const MaterialStatePropertyAll<Color?>(Colors.transparent)
-        : _TextButtonDefaultOverlay((overlayColor ?? foreground)!);
-    final MaterialStateProperty<Color?>? iconColorProp = (iconColor == null && disabledIconColor == null)
-      ? null
-      : disabledIconColor == null
-        ? ButtonStyleButton.allOrNull<Color?>(iconColor)
-        : _TextButtonDefaultIconColor(iconColor, disabledIconColor);
+    final MaterialStateProperty<Color?>? foregroundColorProp = switch((foregroundColor, disabledForegroundColor)) {
+      (null, null) => null,
+      (_, _) => _TextButtonDefaultColor(foregroundColor, disabledForegroundColor),
+    };
+    final MaterialStateProperty<Color?>? backgroundColorProp = switch((backgroundColor, disabledBackgroundColor)) {
+      (null, null) => null,
+      (_, _) => _TextButtonDefaultColor(backgroundColor, disabledBackgroundColor),
+    };
+    final MaterialStateProperty<Color?>? iconColorProp = switch((iconColor, disabledIconColor)) {
+      (null, null) => null,
+      (_, _) => _TextButtonDefaultColor(iconColor, disabledIconColor),
+    };
+    final MaterialStateProperty<Color?>? overlayColorProp = switch((foregroundColor, overlayColor)) {
+      (null, null) => null,
+      (_, final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
+      (_, _) => _TextButtonDefaultOverlay((overlayColor ?? foregroundColor)!),
+    };
     final MaterialStateProperty<MouseCursor?> mouseCursor = _TextButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
@@ -433,27 +432,6 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   @override
   String toString() {
     return '{hovered: ${primary.withOpacity(0.04)}, focused,pressed: ${primary.withOpacity(0.12)}, otherwise: null}';
-  }
-}
-
-@immutable
-class _TextButtonDefaultIconColor extends MaterialStateProperty<Color?> {
-  _TextButtonDefaultIconColor(this.iconColor, this.disabledIconColor);
-
-  final Color? iconColor;
-  final Color? disabledIconColor;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return disabledIconColor;
-    }
-    return iconColor;
-  }
-
-  @override
-  String toString() {
-    return '{disabled: $disabledIconColor, color: $iconColor}';
   }
 }
 

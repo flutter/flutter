@@ -327,7 +327,21 @@ class ButtonStyle with Diagnosticable {
   /// and whose child is the rest of the button, including the button's
   /// `child` parameter.
   ///
+  /// The widget created by [backgroundBuilder] is constrained to be
+  /// the same size as the overall button and will appear behind the
+  /// button's child. The widget created by [foregroundBuilder] is
+  /// constrained to be the same size as the button's child, i.e. it's
+  /// inset by [ButtonStyle.padding] and aligned by the button's
+  /// [ButtonStyle.alignment].
+  ///
   /// By default the returned widget is clipped to the Material's [ButtonStyle.shape].
+  ///
+  /// See also:
+  ///
+  ///  * [foregroundBuilder], to create a widget that's as big as the button's
+  ///    child and is layered behind the child.
+  ///  * [ButtonStyleButton.clipBehavior], for more information about
+  ///    configuring clipping.
   final ButtonLayerBuilder? backgroundBuilder;
 
   /// Creates a Widget that contains the button's child parameter which is used
@@ -336,7 +350,13 @@ class ButtonStyle with Diagnosticable {
   /// The returned widget is clipped by the button's
   /// [ButtonStyle.shape] inset by the button's [ButtonStyle.padding]
   /// and aligned by the button's [ButtonStyle.alignment].
-  /// [ButtonStyle.shape].
+  ///
+  /// See also:
+  ///
+  ///  * [backgroundBuilder], to create a widget that's as big as the button and
+  ///    is layered behind the button's child.
+  ///  * [ButtonStyleButton.clipBehavior], for more information about
+  ///    configuring clipping.
   final ButtonLayerBuilder? foregroundBuilder;
 
   /// Returns a copy of this ButtonStyle with the given fields replaced with
