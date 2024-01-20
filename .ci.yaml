@@ -3663,7 +3663,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3677,7 +3676,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_arm64 module_test_ios # Must be run on devicelab bot for codesigning https://github.com/flutter/flutter/issues/112033
+  - name: Mac_arm64 module_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
