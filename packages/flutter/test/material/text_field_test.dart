@@ -8854,7 +8854,7 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 4.0),
+            data: const MediaQueryData(textScaler: TextScaler.linear(4.0)),
             child: Center(
               child: TextField(
                 decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),

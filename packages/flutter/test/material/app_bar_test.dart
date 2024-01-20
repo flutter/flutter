@@ -3119,8 +3119,9 @@ void main() {
         theme: ThemeData(textTheme: Typography.englishLike2014),
         home: Builder(
           builder: (BuildContext context) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: textScaleFactor,
+              maxScaleFactor: textScaleFactor,
               child: Scaffold(
                 appBar: AppBar(
                   centerTitle: false,
@@ -3166,8 +3167,9 @@ void main() {
                   return Scaffold(
                     appBar: AppBar(
                       centerTitle: centerTitle,
-                      title: MediaQuery(
-                        data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                      title: MediaQuery.withClampedTextScaling(
+                        minScaleFactor: textScaleFactor,
+                        maxScaleFactor: textScaleFactor,
                         child: const Text('Jumbo'),
                       ),
                     ),
@@ -5170,8 +5172,9 @@ void main() {
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
-        home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+        home: MediaQuery.withClampedTextScaling(
+          minScaleFactor: textScaleFactor,
+          maxScaleFactor: textScaleFactor,
           child: Material(
             child: CustomScrollView(
               slivers: <Widget>[
@@ -5211,8 +5214,9 @@ void main() {
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
-        home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+        home: MediaQuery.withClampedTextScaling(
+          minScaleFactor: textScaleFactor,
+          maxScaleFactor: textScaleFactor,
           child: Material(
             child: CustomScrollView(
               slivers: <Widget>[
@@ -5249,8 +5253,9 @@ void main() {
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
-        home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+        home: MediaQuery.withClampedTextScaling(
+          minScaleFactor: textScaleFactor,
+          maxScaleFactor: textScaleFactor,
           child: Material(
             child: CustomScrollView(
               slivers: <Widget>[
@@ -5290,8 +5295,9 @@ void main() {
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
-        home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+        home: MediaQuery.withClampedTextScaling(
+          minScaleFactor: textScaleFactor,
+          maxScaleFactor: textScaleFactor,
           child: Material(
             child: CustomScrollView(
               slivers: <Widget>[

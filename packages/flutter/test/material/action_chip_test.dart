@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
+  TextScaler textScaler = TextScaler.noScaling,
   Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
@@ -17,7 +17,7 @@ Widget wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Material(child: child),
       ),
     ),

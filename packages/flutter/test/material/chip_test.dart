@@ -76,7 +76,7 @@ double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.de
 Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
+  TextScaler textScaler = TextScaler.noScaling,
   ThemeData? theme,
 }) {
   return MaterialApp(
@@ -84,7 +84,7 @@ Widget wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Material(child: child),
       ),
     ),
@@ -836,7 +836,7 @@ void main() {
 
     await tester.pumpWidget(
       wrapForChip(
-        textScaleFactor: 3.0,
+        textScaler: const TextScaler.linear(3.0),
         child: const Column(
           children: <Widget>[
             Chip(
@@ -906,7 +906,7 @@ void main() {
 
     await tester.pumpWidget(
       wrapForChip(
-        textScaleFactor: 3.0,
+        textScaler: const TextScaler.linear(3.0),
         child: const Column(
           children: <Widget>[
             Chip(

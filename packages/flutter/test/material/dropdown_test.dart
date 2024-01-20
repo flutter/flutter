@@ -2269,16 +2269,16 @@ void main() {
       'three',
     ];
     String? item = items[0];
-    late MediaQueryData mediaQuery;
+    late double textScale;
 
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             builder: (BuildContext context, Widget? child) {
-              mediaQuery = MediaQuery.of(context);
+              textScale = MediaQuery.of(context).textScaler.scale(14) / 14;
               return MediaQuery(
-                data: mediaQuery,
+                data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
                 child: child!,
               );
             },
@@ -2292,9 +2292,7 @@ void main() {
                 onChanged: (String? newItem) {
                   setState(() {
                     item = newItem;
-                    mediaQuery = mediaQuery.copyWith(
-                      textScaleFactor: mediaQuery.textScaleFactor + 0.1,
-                    );
+                    textScale += 0.1;
                   });
                 },
               ),

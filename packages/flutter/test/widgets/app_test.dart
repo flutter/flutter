@@ -624,13 +624,13 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(textScaleFactor: 10), child: widget),
+      MediaQuery(data: const MediaQueryData(textScaler: TextScaler.linear(10)), child: widget),
     );
 
     expect(routeBuildCount, equals(1));
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(textScaleFactor: 20), child: widget),
+      MediaQuery(data: const MediaQueryData(textScaler: TextScaler.linear(20)), child: widget),
     );
 
     expect(routeBuildCount, equals(1));
