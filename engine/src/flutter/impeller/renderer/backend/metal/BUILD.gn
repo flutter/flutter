@@ -28,6 +28,8 @@ impeller_component("metal") {
     "gpu_tracer_mtl.mm",
     "lazy_drawable_holder.h",
     "lazy_drawable_holder.mm",
+    "pass_bindings_cache_mtl.h",
+    "pass_bindings_cache_mtl.mm",
     "pipeline_library_mtl.h",
     "pipeline_library_mtl.mm",
     "pipeline_mtl.h",

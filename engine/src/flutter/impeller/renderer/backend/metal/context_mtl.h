@@ -93,8 +93,6 @@ class ContextMTL final : public Context,
 
   id<MTLCommandBuffer> CreateMTLCommandBuffer(const std::string& label) const;
 
-  const std::shared_ptr<fml::ConcurrentTaskRunner> GetWorkerTaskRunner() const;
-
   std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const;
 
 #ifdef IMPELLER_DEBUG
@@ -122,7 +120,6 @@ class ContextMTL final : public Context,
   std::shared_ptr<SamplerLibrary> sampler_library_;
   std::shared_ptr<AllocatorMTL> resource_allocator_;
   std::shared_ptr<const Capabilities> device_capabilities_;
-  std::shared_ptr<fml::ConcurrentMessageLoop> raster_message_loop_;
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
 #ifdef IMPELLER_DEBUG
   std::shared_ptr<GPUTracerMTL> gpu_tracer_;

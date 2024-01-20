@@ -46,6 +46,9 @@ class RenderPass : public ResourceBinder {
 
   void SetLabel(std::string label);
 
+  /// @brief Reserve [command_count] commands in the HAL command buffer.
+  ///
+  /// Note: this is not the native command buffer.
   virtual void ReserveCommands(size_t command_count) {
     commands_.reserve(command_count);
   }
