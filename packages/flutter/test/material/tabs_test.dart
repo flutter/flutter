@@ -2557,6 +2557,72 @@ void main() {
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, moreOrLessEquals(tabRight));
   });
 
+  testWidgets('Material3 - Indicator stretch animation', (WidgetTester tester) async {
+    const double indicatorWidth = 50.0;
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth));
+    });
+
+    final TabController controller = _tabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+    final double tabWidth = tabBarBox.size.width / tabs.length;
+
+    void expectIndicatorAttrs(RenderBox tabBarBox, {required double offset, required double width}) {
+      const double indicatorWeight = 3.0;
+
+      final double centerX = offset * tabWidth + tabWidth / 2;
+
+      final RRect rrect = RRect.fromLTRBAndCorners(
+        centerX - width / 2,
+        tabBarBox.size.height - indicatorWeight,
+        centerX + width / 2,
+        tabBarBox.size.height,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      );
+
+      expect(
+        tabBarBox,
+        paints
+          ..rrect(rrect: rrect),
+      );
+    }
+
+    // Idle at tab 0
+    expectIndicatorAttrs(tabBarBox, offset: 0.0, width: indicatorWidth);
+
+    // Peak stretch at 20 %
+    controller.offset = 0.2;
+    await tester.pump();
+    expectIndicatorAttrs(tabBarBox, offset: 0.2, width: indicatorWidth * 2);
+
+    // Idle at tab 1
+    controller.offset = 1;
+    await tester.pump();
+    expectIndicatorAttrs(tabBarBox, offset: 1, width: indicatorWidth);
+  });
+
   testWidgets('TabBar with indicatorWeight, indicatorPadding (LTR)', (WidgetTester tester) async {
     const Color indicatorColor = Color(0xFF00FF00);
     const double indicatorWeight = 8.0;
