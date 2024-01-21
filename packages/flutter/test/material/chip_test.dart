@@ -76,7 +76,7 @@ double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.de
 Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
+  TextScaler textScaler = TextScaler.noScaling,
   ThemeData? theme,
 }) {
   return MaterialApp(
@@ -84,7 +84,7 @@ Widget wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Material(child: child),
       ),
     ),
@@ -836,7 +836,7 @@ void main() {
 
     await tester.pumpWidget(
       wrapForChip(
-        textScaleFactor: 3.0,
+        textScaler: const TextScaler.linear(3.0),
         child: const Column(
           children: <Widget>[
             Chip(
@@ -906,7 +906,7 @@ void main() {
 
     await tester.pumpWidget(
       wrapForChip(
-        textScaleFactor: 3.0,
+        textScaler: const TextScaler.linear(3.0),
         child: const Column(
           children: <Widget>[
             Chip(
@@ -5112,7 +5112,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Delete button is visible RawChip is disabled', (WidgetTester tester) async {
+  testWidgets('Delete button is visible on disabled RawChip', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         child: RawChip(
@@ -5125,6 +5125,36 @@ void main() {
 
     // Delete button should be visible.
     expectLater(find.byType(RawChip), matchesGoldenFile('raw_chip.disabled.delete_button.png'));
+  });
+
+  testWidgets('Delete button tooltip is not shown on disabled RawChip', (WidgetTester tester) async {
+    Widget buildChip({ bool enabled = true }) {
+      return wrapForChip(
+        child: RawChip(
+          isEnabled: enabled,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      );
+    }
+
+    // Test enabled chip.
+    await tester.pumpWidget(buildChip());
+
+    final Offset deleteButtonLocation = tester.getCenter(find.byType(Icon));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(deleteButtonLocation);
+    await tester.pump();
+
+    // Delete button tooltip should be visible.
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+
+    // Test disabled chip.
+    await tester.pumpWidget(buildChip(enabled: false));
+    await tester.pump();
+
+    // Delete button tooltip should not be visible.
+    expect(findTooltipContainer('Delete'), findsNothing);
   });
 
   group('Material 2', () {
