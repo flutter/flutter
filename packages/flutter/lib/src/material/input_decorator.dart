@@ -2229,7 +2229,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
     );
-    print("${widget._labelShouldWithdraw}");
     final Widget? label = decoration.labelText == null && decoration.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
