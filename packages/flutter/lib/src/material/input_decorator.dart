@@ -2123,9 +2123,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
-      .copyWith(height: 1)
       .merge(defaultTextStyle)
-      .merge(style);
+      .merge(style)
+      .copyWith(height: 1);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData, InputDecorationTheme defaults) {
@@ -2229,7 +2229,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
     );
-
+    print("${widget._labelShouldWithdraw}");
     final Widget? label = decoration.labelText == null && decoration.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
