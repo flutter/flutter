@@ -601,7 +601,6 @@ class TextField extends StatefulWidget {
 
   /// Determines whether this widget ignores pointer events.
   ///
-  /// If true, this widget does not respond to pointer events,
   /// If false this widget responds to all pointer events.
   final bool? ignorePointers;
 
