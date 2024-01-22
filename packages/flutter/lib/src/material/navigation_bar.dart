@@ -422,9 +422,11 @@ class NavigationDestination extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(top: 4),
           child: MediaQuery.withClampedTextScaling(
-            // Don't scale labels of destinations, instead, tooltip text will
-            // upscale.
-            maxScaleFactor: 1.0,
+          // Set maximum text scale factor to 1.3 for the
+          // label to keep the visual hierarchy the same even with larger font
+          // sizes. To opt out, wrap the [label] widget in a [MediaQuery] widget
+          // with a different `TextScaler`.
+            maxScaleFactor: 1.3,
             child: Text(label, style: textStyle),
           ),
         );
