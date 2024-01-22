@@ -24,7 +24,6 @@
 #include "impeller/geometry/path_component.h"
 #include "impeller/playground/compute_playground_test.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/compute_command.h"
 #include "impeller/renderer/compute_pipeline_builder.h"
 #include "impeller/renderer/compute_tessellator.h"
 #include "impeller/renderer/path_polyline.comp.h"

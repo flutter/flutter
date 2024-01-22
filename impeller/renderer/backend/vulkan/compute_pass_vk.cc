@@ -4,19 +4,25 @@
 
 #include "impeller/renderer/backend/vulkan/compute_pass_vk.h"
 
-#include "flutter/fml/trace_event.h"
-#include "impeller/renderer/backend/vulkan/binding_helpers_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pipeline_vk.h"
+#include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
-#include "impeller/renderer/command.h"
+#include "vulkan/vulkan_structs.hpp"
 
 namespace impeller {
 
-ComputePassVK::ComputePassVK(std::weak_ptr<const Context> context,
-                             std::weak_ptr<CommandBufferVK> command_buffer)
+ComputePassVK::ComputePassVK(std::shared_ptr<const Context> context,
+                             std::shared_ptr<CommandBufferVK> command_buffer)
     : ComputePass(std::move(context)),
       command_buffer_(std::move(command_buffer)) {
+  // TOOD(dnfield): This should be moved to caps. But for now keeping this
+  // in parallel with Metal.
+  max_wg_size_ = ContextVK::Cast(*context_)
+                     .GetPhysicalDevice()
+                     .getProperties()
+                     .limits.maxComputeWorkGroupSize;
   is_valid_ = true;
 }
 
@@ -33,125 +39,182 @@ void ComputePassVK::OnSetLabel(const std::string& label) {
   label_ = label;
 }
 
-static bool UpdateBindingLayouts(const Bindings& bindings,
-                                 const vk::CommandBuffer& buffer) {
-  BarrierVK barrier;
-  barrier.cmd_buffer = buffer;
-  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
-  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
-  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-  barrier.dst_stage = vk::PipelineStageFlagBits::eComputeShader;
-
-  barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-
-  for (const TextureAndSampler& data : bindings.sampled_images) {
-    if (!TextureVK::Cast(*data.texture.resource).SetLayout(barrier)) {
-      return false;
-    }
-  }
-  return true;
+// |RenderPass|
+void ComputePassVK::SetCommandLabel(std::string_view label) {
+#ifdef IMPELLER_DEBUG
+  command_buffer_->GetEncoder()->PushDebugGroup(label);
+  has_label_ = true;
+#endif  // IMPELLER_DEBUG
 }
 
-static bool UpdateBindingLayouts(const ComputeCommand& command,
-                                 const vk::CommandBuffer& buffer) {
-  return UpdateBindingLayouts(command.bindings, buffer);
+// |ComputePass|
+void ComputePassVK::SetPipeline(
+    const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
+  const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline);
+  const vk::CommandBuffer& command_buffer_vk =
+      command_buffer_->GetEncoder()->GetCommandBuffer();
+  command_buffer_vk.bindPipeline(vk::PipelineBindPoint::eCompute,
+                                 pipeline_vk.GetPipeline());
+  pipeline_layout_ = pipeline_vk.GetPipelineLayout();
+
+  auto descriptor_result =
+      command_buffer_->GetEncoder()->AllocateDescriptorSets(
+          pipeline_vk.GetDescriptorSetLayout(), ContextVK::Cast(*context_));
+  if (!descriptor_result.ok()) {
+    return;
+  }
+  descriptor_set_ = descriptor_result.value();
+  pipeline_valid_ = true;
 }
 
-static bool UpdateBindingLayouts(const std::vector<ComputeCommand>& commands,
-                                 const vk::CommandBuffer& buffer) {
-  for (const ComputeCommand& command : commands) {
-    if (!UpdateBindingLayouts(command, buffer)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool ComputePassVK::OnEncodeCommands(const Context& context,
-                                     const ISize& grid_size,
-                                     const ISize& thread_group_size) const {
-  TRACE_EVENT0("impeller", "ComputePassVK::EncodeCommands");
-  if (!IsValid()) {
-    return false;
+// |ComputePass|
+fml::Status ComputePassVK::Compute(const ISize& grid_size) {
+  if (grid_size.IsEmpty() || !pipeline_valid_) {
+    bound_image_offset_ = 0u;
+    bound_buffer_offset_ = 0u;
+    descriptor_write_offset_ = 0u;
+    has_label_ = false;
+    pipeline_valid_ = false;
+    return fml::Status(fml::StatusCode::kCancelled,
+                       "Invalid pipeline or empty grid.");
   }
 
-  FML_DCHECK(!grid_size.IsEmpty() && !thread_group_size.IsEmpty());
-
-  const auto& vk_context = ContextVK::Cast(context);
-  auto command_buffer = command_buffer_.lock();
-  if (!command_buffer) {
-    VALIDATION_LOG << "Command buffer died before commands could be encoded.";
-    return false;
-  }
-  auto encoder = command_buffer->GetEncoder();
-  if (!encoder) {
-    return false;
+  const ContextVK& context_vk = ContextVK::Cast(*context_);
+  for (auto i = 0u; i < descriptor_write_offset_; i++) {
+    write_workspace_[i].dstSet = descriptor_set_;
   }
 
-  fml::ScopedCleanupClosure pop_marker(
-      [&encoder]() { encoder->PopDebugGroup(); });
-  if (!label_.empty()) {
-    encoder->PushDebugGroup(label_.c_str());
+  context_vk.GetDevice().updateDescriptorSets(descriptor_write_offset_,
+                                              write_workspace_.data(), 0u, {});
+  const vk::CommandBuffer& command_buffer_vk =
+      command_buffer_->GetEncoder()->GetCommandBuffer();
+
+  command_buffer_vk.bindDescriptorSets(
+      vk::PipelineBindPoint::eCompute,  // bind point
+      pipeline_layout_,                 // layout
+      0,                                // first set
+      1,                                // set count
+      &descriptor_set_,                 // sets
+      0,                                // offset count
+      nullptr                           // offsets
+  );
+
+  int64_t width = grid_size.width;
+  int64_t height = grid_size.height;
+
+  // Special case for linear processing.
+  if (height == 1) {
+    int64_t minimum = 1;
+    int64_t threadGroups = std::max(
+        static_cast<int64_t>(std::ceil(width * 1.0 / max_wg_size_[0] * 1.0)),
+        minimum);
+    command_buffer_vk.dispatch(threadGroups, 1, 1);
   } else {
-    pop_marker.Release();
+    while (width > max_wg_size_[0]) {
+      width = std::max(static_cast<int64_t>(1), width / 2);
+    }
+    while (height > max_wg_size_[1]) {
+      height = std::max(static_cast<int64_t>(1), height / 2);
+    }
+    command_buffer_vk.dispatch(width, height, 1);
   }
-  auto cmd_buffer = encoder->GetCommandBuffer();
 
-  if (!UpdateBindingLayouts(commands_, cmd_buffer)) {
-    VALIDATION_LOG << "Could not update binding layouts for compute pass.";
+#ifdef IMPELLER_DEBUG
+  if (has_label_) {
+    command_buffer_->GetEncoder()->PopDebugGroup();
+  }
+  has_label_ = false;
+#endif  // IMPELLER_DEBUG
+
+  bound_image_offset_ = 0u;
+  bound_buffer_offset_ = 0u;
+  descriptor_write_offset_ = 0u;
+  has_label_ = false;
+  pipeline_valid_ = false;
+
+  return fml::Status();
+}
+
+// |ResourceBinder|
+bool ComputePassVK::BindResource(ShaderStage stage,
+                                 DescriptorType type,
+                                 const ShaderUniformSlot& slot,
+                                 const ShaderMetadata& metadata,
+                                 BufferView view) {
+  return BindResource(slot.binding, type, view);
+}
+
+// |ResourceBinder|
+bool ComputePassVK::BindResource(ShaderStage stage,
+                                 DescriptorType type,
+                                 const SampledImageSlot& slot,
+                                 const ShaderMetadata& metadata,
+                                 std::shared_ptr<const Texture> texture,
+                                 std::shared_ptr<const Sampler> sampler) {
+  if (bound_image_offset_ >= kMaxBindings) {
     return false;
   }
-  auto& allocator = *context.GetResourceAllocator();
+  const TextureVK& texture_vk = TextureVK::Cast(*texture);
+  const SamplerVK& sampler_vk = SamplerVK::Cast(*sampler);
 
-  TRACE_EVENT0("impeller", "EncodeComputePassCommands");
-  for (const auto& command : commands_) {
-    auto desc_set_result = AllocateAndBindDescriptorSets(
-        vk_context, encoder, allocator, command, image_workspace_,
-        buffer_workspace_, write_workspace_);
-    if (!desc_set_result.ok()) {
-      return false;
-    }
-    auto desc_set = desc_set_result.value();
-
-    const auto& pipeline_vk = ComputePipelineVK::Cast(*command.pipeline);
-
-    cmd_buffer.bindPipeline(vk::PipelineBindPoint::eCompute,
-                            pipeline_vk.GetPipeline());
-    cmd_buffer.bindDescriptorSets(
-        vk::PipelineBindPoint::eCompute,  // bind point
-        pipeline_vk.GetPipelineLayout(),  // layout
-        0,                                // first set
-        {vk::DescriptorSet{desc_set}},    // sets
-        nullptr                           // offsets
-    );
-
-    // TOOD(dnfield): This should be moved to caps. But for now keeping this
-    // in parallel with Metal.
-    auto device_properties = vk_context.GetPhysicalDevice().getProperties();
-
-    auto max_wg_size = device_properties.limits.maxComputeWorkGroupSize;
-
-    int64_t width = grid_size.width;
-    int64_t height = grid_size.height;
-
-    // Special case for linear processing.
-    if (height == 1) {
-      int64_t minimum = 1;
-      int64_t threadGroups = std::max(
-          static_cast<int64_t>(std::ceil(width * 1.0 / max_wg_size[0] * 1.0)),
-          minimum);
-      cmd_buffer.dispatch(threadGroups, 1, 1);
-    } else {
-      while (width > max_wg_size[0]) {
-        width = std::max(static_cast<int64_t>(1), width / 2);
-      }
-      while (height > max_wg_size[1]) {
-        height = std::max(static_cast<int64_t>(1), height / 2);
-      }
-      cmd_buffer.dispatch(width, height, 1);
-    }
+  if (!command_buffer_->GetEncoder()->Track(texture) ||
+      !command_buffer_->GetEncoder()->Track(sampler_vk.GetSharedSampler())) {
+    return false;
   }
 
+  vk::DescriptorImageInfo image_info;
+  image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+  image_info.sampler = sampler_vk.GetSampler();
+  image_info.imageView = texture_vk.GetImageView();
+  image_workspace_[bound_image_offset_++] = image_info;
+
+  vk::WriteDescriptorSet write_set;
+  write_set.dstBinding = slot.binding;
+  write_set.descriptorCount = 1u;
+  write_set.descriptorType = ToVKDescriptorType(type);
+  write_set.pImageInfo = &image_workspace_[bound_image_offset_ - 1];
+
+  write_workspace_[descriptor_write_offset_++] = write_set;
+  return true;
+}
+
+bool ComputePassVK::BindResource(size_t binding,
+                                 DescriptorType type,
+                                 const BufferView& view) {
+  if (bound_buffer_offset_ >= kMaxBindings) {
+    return false;
+  }
+
+  const std::shared_ptr<const DeviceBuffer>& device_buffer = view.buffer;
+  auto buffer = DeviceBufferVK::Cast(*device_buffer).GetBuffer();
+  if (!buffer) {
+    return false;
+  }
+
+  if (!command_buffer_->GetEncoder()->Track(device_buffer)) {
+    return false;
+  }
+
+  uint32_t offset = view.range.offset;
+
+  vk::DescriptorBufferInfo buffer_info;
+  buffer_info.buffer = buffer;
+  buffer_info.offset = offset;
+  buffer_info.range = view.range.length;
+  buffer_workspace_[bound_buffer_offset_++] = buffer_info;
+
+  vk::WriteDescriptorSet write_set;
+  write_set.dstBinding = binding;
+  write_set.descriptorCount = 1u;
+  write_set.descriptorType = ToVKDescriptorType(type);
+  write_set.pBufferInfo = &buffer_workspace_[bound_buffer_offset_ - 1];
+
+  write_workspace_[descriptor_write_offset_++] = write_set;
+  return true;
+}
+
+// |ComputePass|
+bool ComputePassVK::EncodeCommands() const {
   return true;
 }
 

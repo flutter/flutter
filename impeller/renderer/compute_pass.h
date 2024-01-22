@@ -7,12 +7,12 @@
 
 #include <string>
 
-#include "impeller/renderer/compute_command.h"
+#include "fml/status.h"
+#include "impeller/core/resource_binder.h"
+#include "impeller/renderer/compute_pipeline_descriptor.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
-
-class HostBuffer;
-class Allocator;
 
 //------------------------------------------------------------------------------
 /// @brief      Compute passes encode compute shader into the underlying command
@@ -20,7 +20,7 @@ class Allocator;
 ///
 /// @see        `CommandBuffer`
 ///
-class ComputePass {
+class ComputePass : public ResourceBinder {
  public:
   virtual ~ComputePass();
 
@@ -28,48 +28,29 @@ class ComputePass {
 
   void SetLabel(const std::string& label);
 
-  void SetGridSize(const ISize& size);
+  virtual void SetCommandLabel(std::string_view label) = 0;
 
-  void SetThreadGroupSize(const ISize& size);
+  virtual void SetPipeline(
+      const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) = 0;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Record a command for subsequent encoding to the underlying
-  ///             command buffer. No work is encoded into the command buffer at
-  ///             this time.
-  ///
-  /// @param[in]  command  The command
-  ///
-  /// @return     If the command was valid for subsequent commitment.
-  ///
-  bool AddCommand(ComputeCommand command);
+  virtual fml::Status Compute(const ISize& grid_size) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Encode the recorded commands to the underlying command buffer.
   ///
-  /// @param      transients_allocator  The transients allocator.
-  ///
   /// @return     If the commands were encoded to the underlying command
   ///             buffer.
   ///
-  bool EncodeCommands() const;
+  virtual bool EncodeCommands() const = 0;
 
  protected:
-  const std::weak_ptr<const Context> context_;
-  std::vector<ComputeCommand> commands_;
+  const std::shared_ptr<const Context> context_;
 
-  explicit ComputePass(std::weak_ptr<const Context> context);
+  explicit ComputePass(std::shared_ptr<const Context> context);
 
   virtual void OnSetLabel(const std::string& label) = 0;
 
-  virtual bool OnEncodeCommands(const Context& context,
-                                const ISize& grid_size,
-                                const ISize& thread_group_size) const = 0;
-
  private:
-  std::shared_ptr<HostBuffer> transients_buffer_;
-  ISize grid_size_ = ISize(32, 32);
-  ISize thread_group_size_ = ISize(32, 32);
-
   ComputePass(const ComputePass&) = delete;
 
   ComputePass& operator=(const ComputePass&) = delete;
