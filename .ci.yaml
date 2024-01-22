@@ -4283,19 +4283,8 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: route_test_ios
 
-  - name: Mac_x64_ios flavors_test_ios
+  - name: Mac_ios flavors_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flavors_test_ios
-
-  - name: Mac_arm64_ios flavors_test_ios
-    recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
