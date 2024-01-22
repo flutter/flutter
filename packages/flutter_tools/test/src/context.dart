@@ -148,11 +148,11 @@ void testUsingContext(
                   return await testMethod();
                 },
               );
-            // This catch rethrows, so doesn't need to catch only Exception.
-            } catch (error) { // ignore: avoid_catches_without_on_clauses
-              _printBufferedErrors(context);
-              rethrow;
             } finally {
+              // We do not need a catch { ... } block because the error zone
+              // will catch all errors and send them to the completer below.
+              //
+              // See https://github.com/flutter/flutter/pull/141821/files#r1462288131.
               if (!completer.isCompleted) {
                 completer.complete();
               }
