@@ -196,7 +196,8 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     }
   }
 
-  if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
+  auto depth = render_target_.GetDepthAttachment();
+  if (depth.has_value()) {
     depth_stencil_ref = vk::AttachmentReference{
         static_cast<uint32_t>(attachments.size()),
         vk::ImageLayout::eDepthStencilAttachmentOptimal};
@@ -213,8 +214,14 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
         vk::ImageLayout::eDepthStencilAttachmentOptimal};
     attachments.emplace_back(CreateAttachmentDescription(
         stencil.value(), &Attachment::texture, supports_framebuffer_fetch));
-    SetTextureLayout(stencil.value(), attachments.back(), command_buffer,
-                     &Attachment::texture);
+
+    // If the depth and stencil are stored in the same texture, then we've
+    // already inserted a memory barrier to transition this texture as part of
+    // the depth branch above.
+    if (depth.has_value() && depth->texture != stencil->texture) {
+      SetTextureLayout(stencil.value(), attachments.back(), command_buffer,
+                       &Attachment::texture);
+    }
   }
 
   vk::SubpassDescription subpass_desc;
