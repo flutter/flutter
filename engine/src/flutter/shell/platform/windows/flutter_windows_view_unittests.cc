@@ -845,7 +845,7 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
   std::thread([&resized_latch, &view]() {
     // Start the window resize. This sends the new window metrics
     // and then blocks until another thread completes the window resize.
-    view.OnWindowSizeChanged(500, 500);
+    EXPECT_TRUE(view.OnWindowSizeChanged(500, 500));
     resized_latch.Signal();
   }).detach();
 
@@ -853,7 +853,8 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
   metrics_sent_latch.Wait();
 
   // Complete the window resize by reporting a frame with the new window size.
-  view.OnFrameGenerated(500, 500);
+  ASSERT_TRUE(view.OnFrameGenerated(500, 500));
+  view.OnFramePresented();
   resized_latch.Wait();
 }
 
@@ -894,7 +895,7 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
   std::thread([&resized_latch, &view]() {
     // Start the window resize. This sends the new window metrics
     // and then blocks until another thread completes the window resize.
-    view.OnWindowSizeChanged(500, 500);
+    EXPECT_TRUE(view.OnWindowSizeChanged(500, 500));
     resized_latch.Signal();
   }).detach();
 
@@ -903,7 +904,49 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
 
   // Complete the window resize by reporting an empty frame.
   view.OnEmptyFrameGenerated();
+  view.OnFramePresented();
   resized_latch.Wait();
+}
+
+// A window resize can be interleaved between a frame generation and
+// presentation. This should not crash the app. Regression test for:
+// https://github.com/flutter/flutter/issues/141855
+TEST(FlutterWindowsViewTest, WindowResizeRace) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
+  std::unique_ptr<MockAngleSurfaceManager> surface_manager =
+      std::make_unique<MockAngleSurfaceManager>();
+
+  EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
+
+  FlutterWindowsView view(std::move(window_binding_handler),
+                          std::move(windows_proc_table));
+  modifier.SetSurfaceManager(std::move(surface_manager));
+  view.SetEngine(engine.get());
+
+  // Begin a frame.
+  ASSERT_TRUE(view.OnFrameGenerated(100, 100));
+
+  // Inject a window resize between the frame generation and
+  // frame presentation. The new size invalidates the current frame.
+  fml::AutoResetWaitableEvent resized_latch;
+  std::thread([&resized_latch, &view]() {
+    // The resize is never completed. The view times out and returns false.
+    EXPECT_FALSE(view.OnWindowSizeChanged(500, 500));
+    resized_latch.Signal();
+  }).detach();
+
+  // Wait until the platform thread has started the window resize.
+  resized_latch.Wait();
+
+  // Complete the invalidated frame while a resize is pending. Although this
+  // might mean that we presented a frame with the wrong size, this should not
+  // crash the app.
+  view.OnFramePresented();
 }
 
 TEST(FlutterWindowsViewTest, WindowRepaintTests) {
