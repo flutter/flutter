@@ -367,7 +367,7 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
-  /// Indicates if the currenet command running has a terminal attached.
+  /// Indicates if the current command running has a terminal attached.
   bool get hasTerminal => globals.stdio.hasTerminal;
 
   /// Path to the Dart's package config file.
@@ -1139,16 +1139,6 @@ abstract class FlutterCommand extends Command<void> {
         help: 'Enable vulkan validation on the Impeller rendering backend if '
               'Vulkan is in use and the validation layers are available to the '
               'application.',
-    );
-  }
-
-  void addImpellerForceGLFlag({required bool verboseHelp}) {
-    argParser.addFlag('impeller-force-gl',
-        hide: !verboseHelp,
-        help: 'On platforms that support OpenGL Rendering using Impeller, force '
-              'rendering using OpenGL over other APIs. If Impeller is not '
-              'enabled or the platform does not support OpenGL ES, this flag '
-              'does nothing.',
     );
   }
 

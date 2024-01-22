@@ -33,7 +33,7 @@ const double _kFinalLabelScale = 0.75;
 // The default duration for hint fade in/out transitions.
 //
 // Animating hint is not mentioned in the Material specification.
-// The animation is kept for backard compatibility and a short duration
+// The animation is kept for backward compatibility and a short duration
 // is used to mitigate the UX impact.
 const Duration _kHintFadeTransitionDuration = Duration(milliseconds: 20);
 
@@ -2416,7 +2416,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
+      floatingLabelHeight = MediaQuery.textScalerOf(context).scale(4.0 + 0.75 * labelStyle.fontSize!);
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)

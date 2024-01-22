@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -52,7 +53,10 @@ void _tests() {
   // also update this code to reflect the new output.
   //
   // This test is flexible w.r.t. leading and trailing whitespace.
-  testWidgets('generates code', (WidgetTester tester) async {
+  testWidgets('generates code',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code = semantics
@@ -114,32 +118,37 @@ void _tests() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 7,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                              id: 5,
                               children: <TestSemantics>[
                                 TestSemantics(
-                                  id: 5,
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                  label: 'Plain text',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 6,
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                  flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
-                                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
-                                  label: '\u202aInteractive text\u202c',
-                                  value: 'test-value',
-                                  increasedValue: 'test-increasedValue',
-                                  decreasedValue: 'test-decreasedValue',
-                                  hint: 'test-hint',
-                                  textDirection: TextDirection.rtl,
+                                  id: 8,
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      id: 6,
+                                      tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                      label: 'Plain text',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                    TestSemantics(
+                                      id: 7,
+                                      tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                      flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
+                                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
+                                      label: '\u202aInteractive text\u202c',
+                                      value: 'test-value',
+                                      increasedValue: 'test-increasedValue',
+                                      decreasedValue: 'test-decreasedValue',
+                                      hint: 'test-hint',
+                                      textDirection: TextDirection.rtl,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
