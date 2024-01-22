@@ -114,24 +114,65 @@ class DependencyVersionChecker {
 
         // This approach is taken from AGP's own version checking plugin:
         // https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/agpVersionChecker.kt#58.
-        fun getAGPVersion(project : Project) : Version? {
-            var agpVersion : Version? = null
+        fun getAGPVersion(project: Project): Version? {
+            var agpVersion: Version? = null
             try {
-                agpVersion = Version.fromString(project.plugins.getPlugin("com.android.base")::class.java.classLoader.loadClass(com.android.Version::class.java.name).fields.find { it.name == "ANDROID_GRADLE_PLUGIN_VERSION" }!!.get(null) as String)
+                agpVersion = Version.fromString(
+                    project.plugins.getPlugin("com.android.base")::class.java.classLoader.loadClass(
+                        com.android.Version::class.java.name
+                    ).fields.find { it.name == "ANDROID_GRADLE_PLUGIN_VERSION" }!!
+                        .get(null) as String
+                )
             } catch (ignored: ClassNotFoundException) {
                 // Use deprecated Version class as it exists in older AGP (com.android.Version) does
                 // not exist in those versions.
-                agpVersion = Version.fromString(project.plugins.getPlugin("com.android.base")::class.java.classLoader.loadClass(com.android.builder.model.Version::class.java.name).fields.find { it.name == "ANDROID_GRADLE_PLUGIN_VERSION" }!!.get(null) as String)
+                agpVersion = Version.fromString(
+                    project.plugins.getPlugin("com.android.base")::class.java.classLoader.loadClass(
+                        com.android.builder.model.Version::class.java.name
+                    ).fields.find { it.name == "ANDROID_GRADLE_PLUGIN_VERSION" }!!
+                        .get(null) as String
+                )
             }
             return agpVersion
         }
 
         fun getKGPVersion(project : Project) : Version {
-            return Version.fromString(
-                project.getPlugins()
+            try {
+//                println(kotlinPlugin!!.javaClass.kotlin.members.first {it.name == "kotlinPluginVersion"}!!.call(kotlinPlugin))
+//                println(kotlinPlugin!!.javaClass.kotlin.members.first {it.name == "pluginVersion"}!!.call(kotlinPlugin))
+//                println(kotlinPlugin!!.javaClass.kotlin.members.first {it.name == "kotlinPluginVersion"}!!.call(kotlinPlugin))
+//                println("gray")
+//                project.plugins.withId("org.jetbrains.kotlin.android") {
+//                    println(.version)
+//                }
+                //println(project.plugins.getPlugin("org.jetbrains.kotlin.android")::class.java.classLoader.loadClass(KotlinAndroidPluginWrapper::class.java.name).fields.find {println(it.name) ; it.name == "pluginVersion"})
+                //println("gray + " + KotlinAndroidPluginWrapper::class.java.getFields().get(0))
+                //println(project.getPlugins()
+                //    .findPlugin(KotlinAndroidPluginWrapper::class.java)!!.pluginVersion)
+                //                kotlinPlugin!!::class.members.forEach {
+//                    try {
+//                        println(it.name)
+//                        println(it.call(kotlinPlugin))
+//                    } catch (ignored: Exception) {
+//
+//                    }
+//
+//                }
+
+                val kotlinPlugin = project.getPlugins()
                     .findPlugin(KotlinAndroidPluginWrapper::class.java)!!
-                    .pluginVersion
-            )
+                val versionfield = kotlinPlugin.javaClass.kotlin.members.first {it.name == "pluginVersion" || it.name == "kotlinPluginVersion"}
+                if (versionfield != null) {
+                    return Version.fromString(versionfield!!.call(kotlinPlugin) as String)
+                }
+                // Can't determine version.
+                return Version(0,0,0)
+
+            } catch (ignored : Exception) {
+                println(ignored)
+            }
+            return Version(0,0,0)
+
         }
 
         private fun getErrorMessage(dependencyName : String,
