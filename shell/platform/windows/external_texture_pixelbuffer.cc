@@ -9,7 +9,7 @@ namespace flutter {
 ExternalTexturePixelBuffer::ExternalTexturePixelBuffer(
     const FlutterDesktopPixelBufferTextureCallback texture_callback,
     void* user_data,
-    std::shared_ptr<GlProcTable> gl)
+    std::shared_ptr<egl::ProcTable> gl)
     : texture_callback_(texture_callback),
       user_data_(user_data),
       gl_(std::move(gl)) {}

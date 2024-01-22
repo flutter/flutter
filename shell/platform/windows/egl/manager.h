@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_ANGLE_SURFACE_MANAGER_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_ANGLE_SURFACE_MANAGER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_EGL_MANAGER_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_EGL_MANAGER_H_
 
 // OpenGL ES and EGL includes
 #include <EGL/egl.h>
@@ -19,17 +19,17 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/windows/window_binding_handler.h"
 
 namespace flutter {
+namespace egl {
 
 // A manager for initializing ANGLE correctly and using it to create and
 // destroy surfaces
-class AngleSurfaceManager {
+class Manager {
  public:
-  static std::unique_ptr<AngleSurfaceManager> Create(bool enable_impeller);
+  static std::unique_ptr<Manager> Create(bool enable_impeller);
 
-  virtual ~AngleSurfaceManager();
+  virtual ~Manager();
 
   // Whether the manager is currently valid.
   bool IsValid() const;
@@ -106,10 +106,10 @@ class AngleSurfaceManager {
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
-  explicit AngleSurfaceManager(bool enable_impeller);
+  explicit Manager(bool enable_impeller);
 
  private:
-  // Number of active instances of AngleSurfaceManager
+  // Number of active instances of Manager
   static int instance_count_;
 
   // Initialize the EGL display.
@@ -152,9 +152,10 @@ class AngleSurfaceManager {
   // The current D3D device.
   Microsoft::WRL::ComPtr<ID3D11Device> resolved_device_ = nullptr;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AngleSurfaceManager);
+  FML_DISALLOW_COPY_AND_ASSIGN(Manager);
 };
 
+}  // namespace egl
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_ANGLE_SURFACE_MANAGER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_EGL_MANAGER_H_

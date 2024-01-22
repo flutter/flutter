@@ -8,9 +8,10 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/windows/angle_surface_manager.h"
+#include "flutter/shell/platform/common/public/flutter_texture_registrar.h"
+#include "flutter/shell/platform/windows/egl/manager.h"
+#include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/external_texture.h"
-#include "flutter/shell/platform/windows/gl_proc_table.h"
 
 namespace flutter {
 
@@ -21,8 +22,8 @@ class ExternalTextureD3d : public ExternalTexture {
       FlutterDesktopGpuSurfaceType type,
       const FlutterDesktopGpuSurfaceTextureCallback texture_callback,
       void* user_data,
-      const AngleSurfaceManager* surface_manager,
-      std::shared_ptr<GlProcTable> gl);
+      const egl::Manager* egl_manager,
+      std::shared_ptr<egl::ProcTable> gl);
   virtual ~ExternalTextureD3d();
 
   // |ExternalTexture|
@@ -41,8 +42,8 @@ class ExternalTextureD3d : public ExternalTexture {
   FlutterDesktopGpuSurfaceType type_;
   const FlutterDesktopGpuSurfaceTextureCallback texture_callback_;
   void* const user_data_;
-  const AngleSurfaceManager* surface_manager_;
-  std::shared_ptr<GlProcTable> gl_;
+  const egl::Manager* egl_manager_;
+  std::shared_ptr<egl::ProcTable> gl_;
   GLuint gl_texture_ = 0;
   EGLSurface egl_surface_ = EGL_NO_SURFACE;
   void* last_surface_handle_ = nullptr;

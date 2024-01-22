@@ -215,11 +215,11 @@ HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
 }
 
 IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {
-  auto surface_manager = ViewFromHandle(view)->GetEngine()->surface_manager();
-  if (surface_manager) {
+  auto egl_manager = ViewFromHandle(view)->GetEngine()->egl_manager();
+  if (egl_manager) {
     Microsoft::WRL::ComPtr<ID3D11Device> d3d_device;
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgi_device;
-    if (surface_manager->GetDevice(d3d_device.GetAddressOf()) &&
+    if (egl_manager->GetDevice(d3d_device.GetAddressOf()) &&
         SUCCEEDED(d3d_device.As(&dxgi_device))) {
       IDXGIAdapter* adapter;
       if (SUCCEEDED(dxgi_device->GetAdapter(&adapter))) {
