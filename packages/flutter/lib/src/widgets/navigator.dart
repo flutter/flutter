@@ -5569,10 +5569,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                 includeSemantics: false,
                 child: UnmanagedRestorationScope(
                   bucket: bucket,
-                  child: Overlay(
-                    key: _overlayKey,
-                    clipBehavior: widget.clipBehavior,
-                    initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+                  // Generating a semantics node here fixes an issue where widgets rendered
+                  // before Navigator mistakenly get their semantics node dropped.
+                  // See: https://github.com/flutter/flutter/pull/138446
+                  child: Semantics(
+                    explicitChildNodes: true,
+                    container: true,
+                    child: Overlay(
+                      key: _overlayKey,
+                      clipBehavior: widget.clipBehavior,
+                      initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+                    ),
                   ),
                 ),
               ),
