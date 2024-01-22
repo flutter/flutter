@@ -1,9 +1,14 @@
-Signature: c8e6e60ea03a90e2da3deaa5621a09f2
+Signature: 906f615802fd9b6e1ad1fea2ee7f259a
 
 ====================================================================================================
 LIBRARY: etc1
 LIBRARY: vulkan
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_platform.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std_decode.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std_decode.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codecs_common.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_android.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_core.h
@@ -15,6 +20,11 @@ ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutte
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/skia/third_party/etc1/etc1.h
 TYPE: LicenseType.apache
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_platform.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std_decode.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std_decode.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codecs_common.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_android.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_core.h
