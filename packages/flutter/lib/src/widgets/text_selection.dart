@@ -2138,6 +2138,7 @@ class TextSelectionGestureDetectorBuilder {
           }
       }
     }
+    editableText.requestKeyboard();
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapCancel].
