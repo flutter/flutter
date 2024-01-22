@@ -37,8 +37,11 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     return {};
   }
 
-  CIImage* ciImage = [[CIImage alloc] initWithMTLTexture:metal_texture
-                                                 options:@{}];
+  CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
+  CIImage* ciImage = [[CIImage alloc]
+      initWithMTLTexture:metal_texture
+                 options:@{kCIImageColorSpace : (__bridge id)color_space}];
+  CGColorSpaceRelease(color_space);
   FML_CHECK(ciImage);
 
   std::shared_ptr<Context> context = playground_->GetContext();
