@@ -32,7 +32,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await bootstrapAndRunApp();
+  await bootstrapAndRunApp(withImplicitView: true);
   setUpRenderingForTests();
   runSemanticsTests();
 }

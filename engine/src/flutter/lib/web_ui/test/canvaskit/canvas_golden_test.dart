@@ -21,7 +21,7 @@ const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
   group('CkCanvas', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     setUp(() {
       renderer.fontCollection.debugResetFallbackFonts();

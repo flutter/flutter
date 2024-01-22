@@ -14,7 +14,7 @@ void main() {
 
 void testMain() {
   setUp(() async {
-    await bootstrapAndRunApp();
+    await bootstrapAndRunApp(withImplicitView: true);
   });
 
   test('collects frame timings', () async {

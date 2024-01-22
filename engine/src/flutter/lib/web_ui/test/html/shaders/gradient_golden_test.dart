@@ -26,7 +26,7 @@ Future<void> testMain() async {
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
   const Rect region = Rect.fromLTWH(0, 0, 500, 240);
 
-  setUpUnitTests();
+  setUpUnitTests(withImplicitView: true);
 
   test('Paints sweep gradient rectangles', () async {
     final RecordingCanvas canvas =

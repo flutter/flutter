@@ -18,7 +18,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpUnitTests(withImplicitView: true);
   group('loadFontFromList', () {
     const String testFontUrl = '/assets/fonts/ahem.ttf';
 

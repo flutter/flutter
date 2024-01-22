@@ -20,14 +20,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  // TODO(yjbanov): see https://github.com/flutter/flutter/issues/138906
-  //                This test tests multi-view mode only, but currently there's
-  //                no way to cleanly boot into pure multi-view mode. As a
-  //                workaroud we boot into a mode that includes the implicit
-  //                view, but we then remove the implicit view.
   await bootstrapAndRunApp();
-  final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView!;
-  EnginePlatformDispatcher.instance.viewManager.disposeAndUnregisterView(implicitView.viewId);
 
   test('Can create multiple views each with its own semantics tree', () async {
     EngineSemantics.instance.semanticsEnabled = true;

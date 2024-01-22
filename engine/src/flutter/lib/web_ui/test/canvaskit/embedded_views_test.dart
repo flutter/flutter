@@ -25,7 +25,7 @@ void main() {
 
 void testMain() {
   group('$HtmlViewEmbedder', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     setUp(() {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1);

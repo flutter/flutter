@@ -16,7 +16,7 @@ void main() {
 
 void testMain() {
   group('CanvasKit', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     late LayerScene scene;
 

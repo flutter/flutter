@@ -19,8 +19,9 @@ export '../common/rendering.dart' show renderScene;
 const MethodCodec codec = StandardMethodCodec();
 
 /// Common test setup for all CanvasKit unit-tests.
-void setUpCanvasKitTest() {
+void setUpCanvasKitTest({bool withImplicitView = false}) {
   setUpUnitTests(
+    withImplicitView: withImplicitView,
     emulateTesterEnvironment: false,
     setUpTestViewDimensions: false,
   );

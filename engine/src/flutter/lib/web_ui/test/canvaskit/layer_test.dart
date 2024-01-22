@@ -17,7 +17,7 @@ void main() {
 
 void testMain() {
   group('CanvasKit', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     // Regression test for https://github.com/flutter/flutter/issues/63715
     test('TransformLayer prerolls correctly', () async {

@@ -22,7 +22,7 @@ void main() {
 Future<void> testMain() async {
   const double baselineRatio = 1.1662499904632568;
 
-  setUpUnitTests();
+  setUpUnitTests(withImplicitView: true);
 
   late String fallback;
   setUp(() {

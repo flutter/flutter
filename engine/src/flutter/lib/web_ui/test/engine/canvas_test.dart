@@ -16,7 +16,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await bootstrapAndRunApp();
+  await bootstrapAndRunApp(withImplicitView: true);
 
   group('EngineCanvas', () {
     late MockEngineCanvas mockCanvas;

@@ -17,7 +17,7 @@ const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 /// Test that we can render even if `createImageBitmap` is not supported.
 void testMain() {
   group('CanvasKit', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
     setUp(() async {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
     });

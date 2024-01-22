@@ -112,6 +112,7 @@ ui.Image generateAtlas() {
 
 Future<void> testMain() async {
   setUpUnitTests(
+    withImplicitView: true,
     setUpTestViewDimensions: false,
   );
 

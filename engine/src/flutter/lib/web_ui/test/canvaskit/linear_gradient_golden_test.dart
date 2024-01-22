@@ -19,7 +19,7 @@ const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
   group('Linear', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     test('is correctly rendered', () async {
       final CkPictureRecorder recorder = CkPictureRecorder();

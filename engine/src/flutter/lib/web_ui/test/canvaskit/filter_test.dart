@@ -49,7 +49,7 @@ void testMain() {
     return filters;
   }
 
-  setUpCanvasKitTest();
+  setUpCanvasKitTest(withImplicitView: true);
 
   group('ImageFilters', () {
     test('can be constructed', () {

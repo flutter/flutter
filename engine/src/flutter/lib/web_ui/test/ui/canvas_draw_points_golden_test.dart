@@ -20,6 +20,7 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(
+    withImplicitView: true,
     setUpTestViewDimensions: false,
   );
 
