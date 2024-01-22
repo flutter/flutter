@@ -1930,6 +1930,11 @@ void main() {
             style: textStyle,
             cursorColor: cursorColor,
             selectionControls: materialTextSelectionControls,
+            contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
           ),
         ),
       );
