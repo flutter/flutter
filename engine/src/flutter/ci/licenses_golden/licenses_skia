@@ -1,4 +1,4 @@
-Signature: c2d4cbfbae2ec5b3efb6eed8d3b46040
+Signature: daf3423346e848f8c3f65179af3d5ba8
 
 ====================================================================================================
 LIBRARY: etc1
@@ -5149,6 +5149,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/vk/vulkanmemoryallocator/Vulka
 ORIGIN: ../../../flutter/third_party/skia/src/image/SkImage_Lazy.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkBitmapProcState_opts.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkOpts_hsw.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/opts/SkOpts_skx.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkRasterPipeline_opts.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsAsWinding.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTCurve.h + ../../../flutter/third_party/skia/LICENSE
@@ -5363,6 +5364,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/vk/vulkanmemoryallocator/VulkanM
 FILE: ../../../flutter/third_party/skia/src/image/SkImage_Lazy.h
 FILE: ../../../flutter/third_party/skia/src/opts/SkBitmapProcState_opts.h
 FILE: ../../../flutter/third_party/skia/src/opts/SkOpts_hsw.cpp
+FILE: ../../../flutter/third_party/skia/src/opts/SkOpts_skx.cpp
 FILE: ../../../flutter/third_party/skia/src/opts/SkRasterPipeline_opts.h
 FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsAsWinding.cpp
 FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTCurve.h
