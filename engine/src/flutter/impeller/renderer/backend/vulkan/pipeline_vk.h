@@ -14,6 +14,10 @@
 
 namespace impeller {
 
+// Limit on the total number of buffer and image bindings that allow the Vulkan
+// backend to avoid dynamic heap allocations.
+static constexpr size_t kMaxBindings = 32;
+
 class PipelineVK final
     : public Pipeline<PipelineDescriptor>,
       public BackendCast<PipelineVK, Pipeline<PipelineDescriptor>> {
