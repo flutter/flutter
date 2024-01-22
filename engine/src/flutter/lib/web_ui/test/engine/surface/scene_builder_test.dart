@@ -24,7 +24,7 @@ void main() {
 
 void testMain() {
   setUpAll(() async {
-    await bootstrapAndRunApp();
+    await bootstrapAndRunApp(withImplicitView: true);
     setUpRenderingForTests();
   });
 

@@ -22,7 +22,7 @@ void main() {
 // semantics.
 Future<void> testMain() async {
   group('CanvasKit semantics', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     runSemanticsTests();
   });

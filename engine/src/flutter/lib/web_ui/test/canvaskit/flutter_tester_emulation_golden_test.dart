@@ -20,7 +20,7 @@ void testMain() {
   ui_web.debugEmulateFlutterTesterEnvironment = true;
 
   group('flutter_tester emulation', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     test('defaults to FlutterTest font family',
         () async {

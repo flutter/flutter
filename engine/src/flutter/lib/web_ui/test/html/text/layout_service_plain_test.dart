@@ -19,7 +19,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpUnitTests(withImplicitView: true);
 
   test('no text', () {
     final CanvasParagraph paragraph = CanvasParagraphBuilder(ahemStyle).build();

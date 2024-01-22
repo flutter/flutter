@@ -33,7 +33,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpUnitTests(withImplicitView: true);
 
   test('empty paragraph', () {
     final CanvasParagraph paragraph1 = rich(

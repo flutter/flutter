@@ -43,6 +43,7 @@ const String kVoronoiShaderSksl = r'''
 
 Future<void> testMain() async {
   setUpUnitTests(
+    withImplicitView: true,
     setUpTestViewDimensions: false,
   );
 

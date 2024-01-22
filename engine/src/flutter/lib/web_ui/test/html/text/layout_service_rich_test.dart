@@ -17,7 +17,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpUnitTests(withImplicitView: true);
 
   test('does not crash on empty spans', () {
     final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {

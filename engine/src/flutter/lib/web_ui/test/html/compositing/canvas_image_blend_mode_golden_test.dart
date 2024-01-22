@@ -19,6 +19,7 @@ SurfacePaint makePaint() => Paint() as SurfacePaint;
 
 Future<void> testMain() async {
   setUpUnitTests(
+    withImplicitView: true,
     setUpTestViewDimensions: false,
   );
 
