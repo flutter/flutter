@@ -1211,10 +1211,6 @@ void main() {
     });
 
     group('Flutter version', () {
-      late _TestDeviceManager testDeviceManager;
-      late Logger logger;
-      late FileSystem fileSystem;
-
       const List<String> flutterVersionDartDefines = <String>[
         'FLUTTER_VERSION',
         'FLUTTER_CHANNEL',
@@ -1224,20 +1220,8 @@ void main() {
         'FLUTTER_DART_VERSION',
       ];
 
-      setUp(() {
-        logger = BufferLogger.test();
-        testDeviceManager = _TestDeviceManager(logger: logger);
-        fileSystem = MemoryFileSystem.test();
-      });
-
       for (final String dartDefine in flutterVersionDartDefines) {
         testUsingContext("tool exits when $dartDefine is already set in user's environment", () async {
-          fileSystem.file('lib/main.dart').createSync(recursive: true);
-          fileSystem.file('pubspec.yaml').createSync();
-          fileSystem.file('.packages').createSync();
-
-          final FakeDevice device = FakeDevice('name', 'id');
-          testDeviceManager.devices = <Device>[device];
           final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
           final CommandRunner<void> runner =  createTestCommandRunner(command);
 
@@ -1246,26 +1230,21 @@ void main() {
             'Use FlutterVersion to access it in Flutter code'));
 
         }, overrides: <Type, Generator>{
-          DeviceManager: () => testDeviceManager,
-          Platform: () => FakePlatform(
-            environment: <String, String>{
-              dartDefine: 'I was already set'
-            }
-          ),
+          DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
+            ..devices = <Device>[FakeDevice('name', 'id')],
+          Platform: () => FakePlatform(environment: <String, String>{dartDefine: 'I was already set'}),
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          FileSystem: () => fileSystem,
+          FileSystem: () {
+            return MemoryFileSystem.test()
+              ..file('lib/main.dart').createSync(recursive: true)
+              ..file('pubspec.yaml').createSync()
+              ..file('.packages').createSync();
+          },
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
         });
 
         testUsingContext('tool exits when $dartDefine is set in --dart-define or --dart-define-from-file', () async {
-          fileSystem.file('lib/main.dart').createSync(recursive: true);
-          fileSystem.file('pubspec.yaml').createSync();
-          fileSystem.file('.packages').createSync();
-          fileSystem.file('config.json')..createSync()..writeAsStringSync('{"$dartDefine": "AlreadySet"}');
-
-          final FakeDevice device = FakeDevice('name', 'id');
-          testDeviceManager.devices = <Device>[device];
           final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
           final CommandRunner<void> runner =  createTestCommandRunner(command);
 
@@ -1277,10 +1256,18 @@ void main() {
             throwsToolExit(message: '$dartDefine is used by the framework and cannot be set using --dart-define or --dart-define-from-file. '
             'Use FlutterVersion to access it in Flutter code'));
         }, overrides: <Type, Generator>{
-          DeviceManager: () => testDeviceManager,
+          DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
+            ..devices = <Device>[FakeDevice('name', 'id')],
           Platform: () => FakePlatform(),
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          FileSystem: () => fileSystem,
+          FileSystem: () {
+            final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            fileSystem.file('.packages').createSync();
+            fileSystem.file('config.json')..createSync()..writeAsStringSync('{"$dartDefine": "AlreadySet"}');
+            return fileSystem;
+          },
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
         });
@@ -1291,7 +1278,6 @@ void main() {
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
         expect(buildInfo.dartDefines, contains('FLUTTER_VERSION=0.0.0'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FlutterVersion: () => FakeFlutterVersion(),
       });
@@ -1302,7 +1288,6 @@ void main() {
 
         expect(buildInfo.dartDefines, contains('FLUTTER_CHANNEL=master'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FlutterVersion: () => FakeFlutterVersion(),
       });
@@ -1313,7 +1298,6 @@ void main() {
 
         expect(buildInfo.dartDefines, contains('FLUTTER_GIT_URL=https://github.com/flutter/flutter.git'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FlutterVersion: () => FakeFlutterVersion(),
       });
@@ -1324,7 +1308,6 @@ void main() {
 
         expect(buildInfo.dartDefines, contains('FLUTTER_FRAMEWORK_REVISION=11111'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FlutterVersion: () => FakeFlutterVersion(),
       });
@@ -1335,7 +1318,6 @@ void main() {
 
         expect(buildInfo.dartDefines, contains('FLUTTER_ENGINE_REVISION=abcde'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FlutterVersion: () => FakeFlutterVersion(),
       });
@@ -1346,7 +1328,6 @@ void main() {
 
         expect(buildInfo.dartDefines, contains('FLUTTER_DART_VERSION=12'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FlutterVersion: () => FakeFlutterVersion(),
       });
