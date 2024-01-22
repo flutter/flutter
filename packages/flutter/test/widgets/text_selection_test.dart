@@ -1277,32 +1277,33 @@ void main() {
       expect(find.byKey(spy.leftHandleKey), findsNothing);
       expect(find.byKey(spy.rightHandleKey), findsNothing);
 
+      final GlobalKey toolbarKey = GlobalKey();
       selectionOverlay.showToolbar(
         context: selectionOverlay.context,
-        contextMenuBuilder: (BuildContext context) => const Placeholder(),
+        contextMenuBuilder: (BuildContext context) => Placeholder(key: toolbarKey),
       );
       await tester.pump();
-      expect(find.byKey(spy.toolBarKey), findsOneWidget);
+      expect(find.byKey(toolbarKey), findsOneWidget);
 
       selectionOverlay.hideToolbar();
       await tester.pump();
-      expect(find.byKey(spy.toolBarKey), findsNothing);
+      expect(find.byKey(toolbarKey), findsNothing);
 
       selectionOverlay.showHandles();
       selectionOverlay.showToolbar(
         context: selectionOverlay.context,
-        contextMenuBuilder: (BuildContext context) => const Placeholder(),
+        contextMenuBuilder: (BuildContext context) => Placeholder(key: toolbarKey),
       );
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsOneWidget);
       expect(find.byKey(spy.rightHandleKey), findsOneWidget);
-      expect(find.byKey(spy.toolBarKey), findsOneWidget);
+      expect(find.byKey(toolbarKey), findsOneWidget);
 
       selectionOverlay.hide();
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsNothing);
       expect(find.byKey(spy.rightHandleKey), findsNothing);
-      expect(find.byKey(spy.toolBarKey), findsNothing);
+      expect(find.byKey(toolbarKey), findsNothing);
 
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
@@ -1964,7 +1965,6 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   UniqueKey leftHandleKey = UniqueKey();
   UniqueKey rightHandleKey = UniqueKey();
   UniqueKey collapsedHandleKey = UniqueKey();
-  UniqueKey toolBarKey = UniqueKey();
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
