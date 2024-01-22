@@ -14,6 +14,8 @@ impeller_component("metal") {
     "blit_pass_mtl.mm",
     "command_buffer_mtl.h",
     "command_buffer_mtl.mm",
+    "compute_pass_bindings_cache_mtl.h",
+    "compute_pass_bindings_cache_mtl.mm",
     "compute_pass_mtl.h",
     "compute_pass_mtl.mm",
     "compute_pipeline_mtl.h",

@@ -121,21 +121,17 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
         context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
     FML_DCHECK(compute_pipeline);
 
-    pass->SetGridSize(ISize(line_count, 1));
-    pass->SetThreadGroupSize(ISize(line_count, 1));
+    pass->SetPipeline(compute_pipeline);
+    pass->SetCommandLabel("Generate Polyline");
 
-    ComputeCommand cmd;
-    DEBUG_COMMAND_INFO(cmd, "Generate Polyline");
-    cmd.pipeline = compute_pipeline;
+    PS::BindConfig(*pass, host_buffer.EmplaceUniform(config));
+    PS::BindCubics(*pass, host_buffer.EmplaceStorageBuffer(cubics));
+    PS::BindQuads(*pass, host_buffer.EmplaceStorageBuffer(quads));
+    PS::BindLines(*pass, host_buffer.EmplaceStorageBuffer(lines));
+    PS::BindComponents(*pass, host_buffer.EmplaceStorageBuffer(components));
+    PS::BindPolyline(*pass, DeviceBuffer::AsBufferView(polyline_buffer));
 
-    PS::BindConfig(cmd, host_buffer.EmplaceUniform(config));
-    PS::BindCubics(cmd, host_buffer.EmplaceStorageBuffer(cubics));
-    PS::BindQuads(cmd, host_buffer.EmplaceStorageBuffer(quads));
-    PS::BindLines(cmd, host_buffer.EmplaceStorageBuffer(lines));
-    PS::BindComponents(cmd, host_buffer.EmplaceStorageBuffer(components));
-    PS::BindPolyline(cmd, DeviceBuffer::AsBufferView(polyline_buffer));
-
-    if (!pass->AddCommand(std::move(cmd))) {
+    if (!pass->Compute(ISize(line_count, 1)).ok()) {
       return Status::kCommandInvalid;
     }
   }
@@ -149,12 +145,8 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
         context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
     FML_DCHECK(compute_pipeline);
 
-    pass->SetGridSize(ISize(line_count, 1));
-    pass->SetThreadGroupSize(ISize(line_count, 1));
-
-    ComputeCommand cmd;
-    DEBUG_COMMAND_INFO(cmd, "Compute Stroke");
-    cmd.pipeline = compute_pipeline;
+    pass->SetPipeline(compute_pipeline);
+    pass->SetCommandLabel("Compute Stroke");
 
     SS::Config config{
         .width = stroke_width_,
@@ -162,13 +154,13 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
         .join = static_cast<uint32_t>(stroke_join_),
         .miter_limit = miter_limit_,
     };
-    SS::BindConfig(cmd, host_buffer.EmplaceUniform(config));
+    SS::BindConfig(*pass, host_buffer.EmplaceUniform(config));
 
-    SS::BindPolyline(cmd, DeviceBuffer::AsBufferView(polyline_buffer));
-    SS::BindVertexBufferCount(cmd, std::move(vertex_buffer_count));
-    SS::BindVertexBuffer(cmd, std::move(vertex_buffer));
+    SS::BindPolyline(*pass, DeviceBuffer::AsBufferView(polyline_buffer));
+    SS::BindVertexBufferCount(*pass, std::move(vertex_buffer_count));
+    SS::BindVertexBuffer(*pass, std::move(vertex_buffer));
 
-    if (!pass->AddCommand(std::move(cmd))) {
+    if (!pass->Compute(ISize(line_count, 1)).ok()) {
       return Status::kCommandInvalid;
     }
   }

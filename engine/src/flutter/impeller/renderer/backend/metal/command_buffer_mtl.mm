@@ -220,9 +220,13 @@ std::shared_ptr<ComputePass> CommandBufferMTL::OnCreateComputePass() {
   if (!buffer_) {
     return nullptr;
   }
+  auto context = context_.lock();
+  if (!context) {
+    return nullptr;
+  }
 
   auto pass =
-      std::shared_ptr<ComputePassMTL>(new ComputePassMTL(context_, buffer_));
+      std::shared_ptr<ComputePassMTL>(new ComputePassMTL(context, buffer_));
   if (!pass->IsValid()) {
     return nullptr;
   }

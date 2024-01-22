@@ -8,7 +8,9 @@
 #include <Metal/Metal.h>
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/metal/compute_pass_bindings_cache_mtl.h"
 #include "impeller/renderer/compute_pass.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
 
@@ -21,27 +23,48 @@ class ComputePassMTL final : public ComputePass {
   friend class CommandBufferMTL;
 
   id<MTLCommandBuffer> buffer_ = nil;
-  std::string label_;
+  id<MTLComputeCommandEncoder> encoder_ = nil;
+  ComputePassBindingsCacheMTL pass_bindings_cache_ =
+      ComputePassBindingsCacheMTL();
   bool is_valid_ = false;
+  bool has_label_ = false;
 
-  ComputePassMTL(std::weak_ptr<const Context> context,
+  ComputePassMTL(std::shared_ptr<const Context> context,
                  id<MTLCommandBuffer> buffer);
 
   // |ComputePass|
   bool IsValid() const override;
 
   // |ComputePass|
+  fml::Status Compute(const ISize& grid_size) override;
+
+  // |ComputePass|
+  void SetCommandLabel(std::string_view label) override;
+
+  // |ComputePass|
   void OnSetLabel(const std::string& label) override;
 
   // |ComputePass|
-  bool OnEncodeCommands(const Context& context,
-                        const ISize& grid_size,
-                        const ISize& thread_group_size) const override;
+  void SetPipeline(const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>&
+                       pipeline) override;
 
-  bool EncodeCommands(const std::shared_ptr<Allocator>& allocator,
-                      id<MTLComputeCommandEncoder> pass,
-                      const ISize& grid_size,
-                      const ISize& thread_group_size) const;
+  // |ComputePass|
+  bool BindResource(ShaderStage stage,
+                    DescriptorType type,
+                    const ShaderUniformSlot& slot,
+                    const ShaderMetadata& metadata,
+                    BufferView view) override;
+
+  // |ComputePass|
+  bool BindResource(ShaderStage stage,
+                    DescriptorType type,
+                    const SampledImageSlot& slot,
+                    const ShaderMetadata& metadata,
+                    std::shared_ptr<const Texture> texture,
+                    std::shared_ptr<const Sampler> sampler) override;
+
+  // |ComputePass|
+  bool EncodeCommands() const override;
 
   ComputePassMTL(const ComputePassMTL&) = delete;
 

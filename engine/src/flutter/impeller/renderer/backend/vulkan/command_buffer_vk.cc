@@ -100,8 +100,8 @@ std::shared_ptr<ComputePass> CommandBufferVK::OnCreateComputePass() {
     return nullptr;
   }
   auto pass =
-      std::shared_ptr<ComputePassVK>(new ComputePassVK(context,          //
-                                                       weak_from_this()  //
+      std::shared_ptr<ComputePassVK>(new ComputePassVK(context,            //
+                                                       shared_from_this()  //
                                                        ));
   if (!pass->IsValid()) {
     return nullptr;
