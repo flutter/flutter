@@ -816,7 +816,7 @@ class _ViewContentState extends State<_ViewContent> {
     );
 
     final List<Widget> defaultTrailing = <Widget>[
-      IconButton(
+      if (_controller.text.isNotEmpty) IconButton(
         icon: const Icon(Icons.close),
         onPressed: () {
           _controller.clear();

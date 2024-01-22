@@ -108,7 +108,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Map<AssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets);
-  await copyNativeAssetsMacOSHost(
+  await _copyNativeAssetsIOS(
     buildUri,
     fatAssetTargetLocations,
     codesignIdentity,
@@ -147,21 +147,25 @@ Target _getNativeTarget(DarwinArch darwinArch) {
 }
 
 Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
+  final Set<String> alreadyTakenNames = <String>{};
   final Map<AssetPath, List<Asset>> result = <AssetPath, List<Asset>>{};
   for (final Asset asset in nativeAssets) {
-    final AssetPath path = _targetLocationIOS(asset).path;
+    final AssetPath path = _targetLocationIOS(asset, alreadyTakenNames).path;
     result[path] ??= <Asset>[];
     result[path]!.add(asset);
   }
   return result;
 }
 
-Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) => <Asset, Asset>{
-  for (final Asset asset in nativeAssets)
-    asset: _targetLocationIOS(asset),
-};
+Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) {
+  final Set<String> alreadyTakenNames = <String>{};
+  return <Asset, Asset>{
+    for (final Asset asset in nativeAssets)
+      asset: _targetLocationIOS(asset, alreadyTakenNames),
+  };
+}
 
-Asset _targetLocationIOS(Asset asset) {
+Asset _targetLocationIOS(Asset asset, Set<String> alreadyTakenNames) {
   final AssetPath path = asset.path;
   switch (path) {
     case AssetSystemPath _:
@@ -170,7 +174,52 @@ Asset _targetLocationIOS(Asset asset) {
       return asset;
     case AssetAbsolutePath _:
       final String fileName = path.uri.pathSegments.last;
-      return asset.copyWith(path: AssetAbsolutePath(Uri(path: fileName)));
+      return asset.copyWith(
+        path: AssetAbsolutePath(frameworkUri(fileName, alreadyTakenNames)),
+      );
   }
-  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
+  throw Exception(
+      'Unsupported asset path type ${path.runtimeType} in asset $asset');
+}
+
+/// Copies native assets into a framework per dynamic library.
+///
+/// For `flutter run -release` a multi-architecture solution is needed. So,
+/// `lipo` is used to combine all target architectures into a single file.
+///
+/// The install name is set so that it matches what the place it will
+/// be bundled in the final app.
+///
+/// Code signing is also done here, so that it doesn't have to be done in
+/// in xcode_backend.dart.
+Future<void> _copyNativeAssetsIOS(
+  Uri buildUri,
+  Map<AssetPath, List<Asset>> assetTargetLocations,
+  String? codesignIdentity,
+  BuildMode buildMode,
+  FileSystem fileSystem,
+) async {
+  if (assetTargetLocations.isNotEmpty) {
+    globals.logger
+        .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
+    for (final MapEntry<AssetPath, List<Asset>> assetMapping
+        in assetTargetLocations.entries) {
+      final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
+      final List<Uri> sources = <Uri>[
+        for (final Asset source in assetMapping.value)
+          (source.path as AssetAbsolutePath).uri
+      ];
+      final Uri targetUri = buildUri.resolveUri(target);
+      final File dylibFile = fileSystem.file(targetUri);
+      final Directory frameworkDir = dylibFile.parent;
+      if (!await frameworkDir.exists()) {
+        await frameworkDir.create(recursive: true);
+      }
+      await lipoDylibs(dylibFile, sources);
+      await setInstallNameDylib(dylibFile);
+      await createInfoPlist(targetUri.pathSegments.last, frameworkDir);
+      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+    }
+    globals.logger.printTrace('Copying native assets done.');
+  }
 }
