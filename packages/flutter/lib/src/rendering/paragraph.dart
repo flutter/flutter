@@ -1642,12 +1642,16 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         if (existingSelectionStart != null) {
           // If the start edge exists and the end edge is being moved, then the
           // end edge is moved to encompass the entire word at the new position.
+          debugPrint('case 1 ${existingSelectionStart.offset}');
           if (position.offset < existingSelectionStart.offset) {
+            debugPrint('case 1.2');
             targetPosition = textBoundary.boundaryStart;
           } else {
+            debugPrint('case 1.3');
             targetPosition = textBoundary.boundaryEnd;
           }
         } else {
+          debugPrint('case 2');
           // Move the end edge to the closest text boundary.
           targetPosition = _closestTextBoundary(textBoundary, position);
         }
@@ -1669,6 +1673,79 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           _setSelectionPosition(isSelectionInverted ? localTextBoundary.boundaryStart : localTextBoundary.boundaryEnd, isEnd: false);
         }
       }
+    }
+    return targetPosition ?? position;
+  }
+
+  TextPosition _updateSelectionEndEdgeByTextBoundary2(
+    _TextBoundaryRecord? textBoundary,
+    _TextBoundaryAtPosition getTextBoundary,
+    TextPosition position,
+    TextPosition? existingSelectionStart,
+    TextPosition? existingSelectionEnd,
+  ) {
+    TextPosition? targetPosition;
+    if (textBoundary != null) {
+      assert(textBoundary.boundaryStart.offset >= range.start && textBoundary.boundaryEnd.offset <= range.end);
+      if (_selectableContainsOriginTextBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
+        final bool isSamePosition = position.offset == existingSelectionStart.offset;
+        final bool isSelectionInverted = existingSelectionStart.offset > existingSelectionEnd.offset;
+        final bool shouldSwapEdges = !isSamePosition && (isSelectionInverted != (position.offset < existingSelectionStart.offset));
+        if (shouldSwapEdges) {
+          if (position.offset < existingSelectionStart.offset) {
+            targetPosition = textBoundary.boundaryStart;
+          } else {
+            targetPosition = textBoundary.boundaryEnd;
+          }
+          // When the selection is inverted by the new position it is necessary to
+          // swap the end edge (moving edge) with the start edge (static edge) to
+          // maintain the origin text boundary within the selection.
+          final _TextBoundaryRecord localTextBoundary = getTextBoundary(existingSelectionStart);
+          assert(localTextBoundary.boundaryStart.offset >= range.start && localTextBoundary.boundaryEnd.offset <= range.end);
+          _setSelectionPosition(existingSelectionStart.offset == localTextBoundary.boundaryStart.offset ? localTextBoundary.boundaryEnd : localTextBoundary.boundaryStart, isEnd: false);
+        } else {
+          if (position.offset < existingSelectionStart.offset) {
+            targetPosition = textBoundary.boundaryStart;
+          } else if (position.offset > existingSelectionStart.offset) {
+            targetPosition = textBoundary.boundaryEnd;
+          } else {
+            // Keep the origin text boundary in bounds when position is at the static edge.
+            targetPosition = existingSelectionEnd;
+          }
+        }
+      } else {
+        if (existingSelectionStart != null) {
+          // If the start edge exists and the end edge is being moved, then the
+          // end edge is moved to encompass the entire word at the new position.
+          if (position.offset < existingSelectionStart.offset) {
+            targetPosition = textBoundary.boundaryStart;
+          } else {
+            targetPosition = textBoundary.boundaryEnd;
+          }
+        } else {
+          // Move the end edge to the closest text boundary.
+          targetPosition = _closestTextBoundary(textBoundary, position);
+        }
+      }
+    } else {
+    _TextBoundaryRecord localTextBoundary = getTextBoundary(position);
+    targetPosition = localTextBoundary.boundaryEnd;
+      // // The position is not contained within the current rect. The targetPosition
+      // // will either be at the end or beginning of the current rect. See [SelectionUtils.adjustDragOffset]
+      // // for a more in depth explanation on this adjustment.
+      // if (existingSelectionStart != null && existingSelectionEnd != null) {
+      //   // When the selection is inverted by the new position it is necessary to
+      //   // swap the end edge (moving edge) with the start edge (static edge) to
+      //   // maintain the origin text boundary within the selection.
+      //   final bool isSamePosition = position.offset == existingSelectionStart.offset;
+      //   final bool isSelectionInverted = existingSelectionStart.offset > existingSelectionEnd.offset;
+      //   final bool shouldSwapEdges = isSelectionInverted != (position.offset < existingSelectionStart.offset) || isSamePosition;
+      //   if (shouldSwapEdges) {
+      //     final _TextBoundaryRecord localTextBoundary = getTextBoundary(existingSelectionStart);
+      //     assert(localTextBoundary.boundaryStart.offset >= range.start && localTextBoundary.boundaryEnd.offset <= range.end);
+      //     _setSelectionPosition(isSelectionInverted ? localTextBoundary.boundaryStart : localTextBoundary.boundaryEnd, isEnd: false);
+      //   }
+      // }
     }
     return targetPosition ?? position;
   }
@@ -1747,37 +1824,34 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     );
 
     final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
+    debugPrint('local $localPosition adjusted $adjustedOffset textpos $position ${getTextBoundary(position)}');
     // Check if the original local position is within the rect, if it is not then
     // we do not need to look up the text boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
-    _TextBoundaryRecord? textBoundary = _rect.contains(localPosition) ? getTextBoundary(position) : null;
-    if (textBoundary != null
-        && (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset <= range.start
-        || textBoundary.boundaryStart.offset >= range.end && textBoundary.boundaryEnd.offset > range.end)) {
-      // When the position is located at a placeholder inside of the text, then we may compute
-      // a text boundary that does not belong to the current selectable fragment. In this case
-      // we should invalidate the text boundary so that it is not taken into account when
-      // computing the target position.
-      textBoundary = null;
-    }
-    final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
+    // _TextBoundaryRecord? textBoundary = _rect.contains(localPosition) ? getTextBoundary(position) : null;
+    // _TextBoundaryRecord textBoundary = getTextBoundary(position);
+    _TextBoundaryRecord? textBoundary = boundingBoxes.any((Rect rect) => rect.contains(localPosition)) ? getTextBoundary(position) : null;
+    final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByTextBoundary2(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
     debugPrint('lol');
     _setSelectionPosition(targetPosition, isEnd: isEnd);
-    if (targetPosition.offset == range.end) {
-      return SelectionResult.next;
-    }
+    if (textBoundary != null) {
+      if (targetPosition.offset == range.end) {
+        return SelectionResult.next;
+      }
 
-    if (targetPosition.offset == range.start) {
-      debugPrint('woah I dont like this prev $range ${targetPosition.offset} ${getTextBoundary(position)}');
-      return SelectionResult.previous;
+      if (targetPosition.offset == range.start) {
+        debugPrint('woah I dont like this prev $range ${targetPosition.offset} ${getTextBoundary(position)} $textBoundary end');
+        return SelectionResult.previous;
+      }
     }
     // TODO(chunhtai): The geometry information should not be used to determine
     // selection result. This is a workaround to RenderParagraph, where it does
     // not have a way to get accurate text length if its text is truncated due to
     // layout constraint.
-    debugPrint('$fullText hello world');
-    return _handleSelectMultiFragmentTextBoundary2(textBoundary!);
+    debugPrint('$fullText hello world $textBoundary');
+    // return _handleSelectMultiFragmentTextBoundary2(textBoundary!);
+    return _handleSelectMultiFragmentTextBoundary2(_getParagraphBoundaryAtPosition(position));
   }
 
   SelectionResult _handleSelectMultiFragmentTextBoundary2(_TextBoundaryRecord textBoundary) {
@@ -1800,6 +1874,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       }
       return SelectionResult.end;
     }
+    debugPrint('nooeee $textBoundary $range');
     // _textSelectionStart = textBoundary.boundaryStart;
     // _textSelectionEnd = textBoundary.boundaryEnd;
     return SelectionResult.end;
@@ -1945,8 +2020,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final Offset localPosition = paragraph.globalToLocal(globalPosition);
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
     final _TextBoundaryRecord paragraphBoundary = _getParagraphBoundaryAtPosition(position);
-    final SelectionResult result = _handleSelectMultiFragmentTextBoundary(paragraphBoundary);
-    return result;
+    return _handleSelectMultiFragmentTextBoundary(paragraphBoundary);
   }
 
   _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position) {
@@ -1955,8 +2029,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // the previous text boundary's location.
     int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == fullText.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
     int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? fullText.length;
-    // paragraphStart = paragraphStart < range.start ? range.start : paragraphStart;
-    // paragraphEnd = paragraphEnd > range.end ? range.end : paragraphEnd;
     final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
     assert(paragraphRange.isNormalized);
     return _adjustTextBoundaryAtPosition(paragraphRange, position);

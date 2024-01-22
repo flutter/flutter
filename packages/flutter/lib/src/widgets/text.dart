@@ -741,7 +741,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
   late List<_SelectableSlot> _slots;
 
-  bool isSlotsFilled() {
+  bool _isSlotsFilled() {
     if (_slots.isEmpty) {
       return false;
     }
@@ -852,7 +852,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
 
   @override
   void add(Selectable selectable) {
-    assert(!isSlotsFilled());
+    assert(!_isSlotsFilled());
     assert(!selectables.contains(selectable));
     _additions.add(selectable);
     _scheduleSelectableUpdate();
@@ -1745,17 +1745,18 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     final bool isCurrentEdgeWithinViewport = isEnd ? _selectionGeometry.endSelectionPoint != null : _selectionGeometry.startSelectionPoint != null;
     final bool isOppositeEdgeWithinViewport = isEnd ? _selectionGeometry.startSelectionPoint != null : _selectionGeometry.endSelectionPoint != null;
     int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
-      (true, true, true) => currentSelectionEndIndex,
-      (true, true, false) => currentSelectionEndIndex,
+      (true, true, true) => currentSelectionStartIndex,
+      (true, true, false) => 0,
       (true, false, true) => currentSelectionStartIndex,
       (true, false, false) => 0,
-      (false, true, true) => currentSelectionStartIndex,
-      (false, true, false) => currentSelectionStartIndex,
-      (false, false, true) => currentSelectionEndIndex,
+      (false, true, true) => currentSelectionEndIndex,
+      (false, true, false) => currentSelectionEndIndex,
+      (false, false, true) => 0,
       (false, false, false) => 0,
     };
     bool? forward;
     late SelectionResult currentSelectableResult;
+    bool foundStart = false;
     // This loop sends the selection event to one of the following to determine
     // the direction of the search.
     //  - currentSelectionEndIndex/currentSelectionStartIndex if the current edge
@@ -1770,20 +1771,47 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     // 1. the selectable returns end, pending, none.
     // 2. the selectable returns previous when looking forward.
     // 2. the selectable returns next when looking backward.
+    debugPrint('start at $newIndex');
     while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
+      debugPrint('adjustSelection newIndex ${selectables[newIndex]}');
+      // if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
+      //   if (foundStart) {
+      //     dispatchSelectionEventToChild(selectables[newIndex], SelectAllSelectionEvent());
+      //   }
+      //   newIndex += 1;
+      //   continue;
+      // }
+      if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex]) && foundStart) {
+        debugPrint('ummmm');
+        dispatchSelectionEventToChild(selectables[newIndex], SelectAllSelectionEvent());
+        newIndex += 1;
+        continue;
+      }
       currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
+      debugPrint('results $currentSelectableResult');
       switch (currentSelectableResult) {
         case SelectionResult.end:
         case SelectionResult.pending:
         case SelectionResult.none:
           finalResult = currentSelectableResult;
         case SelectionResult.next:
+          if (selectables[newIndex].boundingBoxes.isNotEmpty) {
+            for (final Rect rect in selectables[newIndex].boundingBoxes) {
+              final Rect globalRect = MatrixUtils.transformRect(selectables[newIndex].getTransformTo(null), rect);
+              if (globalRect.contains(event.globalPosition)) {
+                debugPrint('found');
+                foundStart = true;
+                break;
+              }
+            }
+          }
           if (forward == false) {
             newIndex += 1;
             finalResult = SelectionResult.end;
           } else if (newIndex == selectables.length - 1) {
             finalResult = currentSelectableResult;
           } else {
+            // debugPrint('$newIndex ${selectables[newIndex]}');
             forward = true;
             newIndex += 1;
           }
