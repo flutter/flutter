@@ -1724,8 +1724,9 @@ class EditableText extends StatefulWidget {
   /// removing the "Paste" button here will not affect a user's ability to
   /// perform a semantics paste action into the field with their accessibility
   /// software. To control which semantics actions are available on the field,
-  /// use [getSemanticsCanCut], [getSemanticsCanCopy], and
-  /// [getSemanticsCanPaste].
+  /// use [EditableText.getSemanticsCanCut],
+  /// [EditableText.getSemanticsCanCopy], and
+  /// [EditableText.getSemanticsCanPaste].
   ///
   /// See also:
   ///   * [AdaptiveTextSelectionToolbar], which builds the default text selection
