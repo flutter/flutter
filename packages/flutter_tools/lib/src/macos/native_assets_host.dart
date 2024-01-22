@@ -4,7 +4,8 @@
 
 // Shared logic between iOS and macOS implementations of native assets.
 
-import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    hide BuildMode;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
