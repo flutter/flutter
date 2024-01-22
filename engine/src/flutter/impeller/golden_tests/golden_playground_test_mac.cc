@@ -58,9 +58,6 @@ static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_CanRenderClippedRuntimeEffects_Vulkan",
     "impeller_Play_AiksTest_CaptureContext_Metal",
     "impeller_Play_AiksTest_CaptureContext_Vulkan",
-    // TODO(https://github.com/flutter/flutter/issues/141891): This tests
-    // crashes on vulkan and needs to be fixed.
-    "impeller_Play_AiksTest_DrawPaintTransformsBounds_Vulkan",
 };
 
 namespace {
