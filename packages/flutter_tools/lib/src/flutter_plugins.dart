@@ -1258,19 +1258,19 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   }
 
   bool hasPubspecError = false;
-  for (final String platform in platformKeys) {
+  for (final String platformKey in platformKeys) {
     for (final Plugin plugin in plugins) {
-      if (plugin.platforms[platform] == null &&
-          plugin.defaultPackagePlatforms[platform] == null) {
+      if (plugin.platforms[platformKey] == null &&
+          plugin.defaultPackagePlatforms[platformKey] == null) {
         // The plugin doesn't implement this platform.
         continue;
       }
       String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
         final String? defaultImplementation =
-            plugin.defaultPackagePlatforms[platform];
+            plugin.defaultPackagePlatforms[platformKey];
         final bool hasInlineDartImplementation =
-            plugin.pluginDartClassPlatforms[platform] != null;
+            plugin.pluginDartClassPlatforms[platformKey] != null;
         if (defaultImplementation == null && !hasInlineDartImplementation) {
           if (throwOnPluginPubspecError) {
             globals.printError(
@@ -1280,14 +1280,14 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
               'flutter:\n'
               '  plugin:\n'
               '    platforms:\n'
-              '      $platform:\n'
+              '      $platformKey:\n'
               '        $kDartPluginClass: <plugin-class>\n'
               '\n'
               'To set a default implementation, use:\n'
               'flutter:\n'
               '  plugin:\n'
               '    platforms:\n'
-              '      $platform:\n'
+              '      $platformKey:\n'
               '        $kDefaultPackage: <plugin-implementation>\n'
               '\n'
               'To implement an interface, use:\n'
@@ -1300,7 +1300,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           hasPubspecError = true;
           continue;
         }
-        final String defaultImplementationKey = getResolutionKey(platform: platform, packageName: plugin.name);
+        final String defaultImplementationKey = getResolutionKey(platform: platformKey, packageName: plugin.name);
         if (defaultImplementation != null) {
           defaultImplementations[defaultImplementationKey] = defaultImplementation;
           continue;
@@ -1314,7 +1314,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           // - the plugin requires at least Flutter 2.11 (when this opt-in logic
           //   was added), so that existing plugins continue to work.
           // See https://github.com/flutter/flutter/issues/87862 for details.
-          final bool isDesktop = platform == 'linux' || platform == 'macos' || platform == 'windows';
+          final bool isDesktop = platformKey == 'linux' || platformKey == 'macos' || platformKey == 'windows';
           final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
           final semver.Version? minFlutterVersion = flutterConstraint != null &&
             flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
@@ -1331,20 +1331,20 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         }
       }
       // If there's no Dart implementation, there's nothing to register.
-      if (plugin.pluginDartClassPlatforms[platform] == null ||
-          plugin.pluginDartClassPlatforms[platform] == 'none') {
+      if (plugin.pluginDartClassPlatforms[platformKey] == null ||
+          plugin.pluginDartClassPlatforms[platformKey] == 'none') {
         continue;
       }
 
       // If it hasn't been skipped, it's a candidate for auto-registration, so
       // add it as a possible resolution.
-      final String resolutionKey = getResolutionKey(platform: platform, packageName: implementsPackage);
+      final String resolutionKey = getResolutionKey(platform: platformKey, packageName: implementsPackage);
       if (!possibleResolutions.containsKey(resolutionKey)) {
         possibleResolutions[resolutionKey] = <PluginInterfaceResolution>[];
       }
       possibleResolutions[resolutionKey]!.add(PluginInterfaceResolution(
         plugin: plugin,
-        platform: platform,
+        platform: platformKey,
       ));
     }
   }
