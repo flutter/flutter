@@ -1824,7 +1824,7 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(4, SemanticsAction.decrease);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(5, SemanticsAction.decrease);
     await tester.pumpAndSettle();
 
     expect(date, DateTime(2018, 6, 7));

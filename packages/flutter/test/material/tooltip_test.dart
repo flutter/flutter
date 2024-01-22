@@ -2130,12 +2130,16 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      tooltip: 'Foo',
-                      label: 'Bar',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          tooltip: 'Foo',
+                          label: 'Bar',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -2171,11 +2175,15 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Bar',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'Bar',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),

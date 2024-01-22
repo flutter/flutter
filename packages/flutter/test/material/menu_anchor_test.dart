@@ -3355,41 +3355,47 @@ void main() {
                       TestSemantics(
                         id: 3,
                         rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isFocused,
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.hasExpandedState,
-                              SemanticsFlag.isExpanded,
-                            ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'ABC',
-                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                          ),
-                          TestSemantics(
-                            id: 6,
-                            rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
+                            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                             children: <TestSemantics>[
                               TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.isFocused,
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.hasExpandedState,
+                                  SemanticsFlag.isExpanded,
+                                ],
+                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                label: 'ABC',
+                                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                              ),
+                              TestSemantics(
                                 id: 7,
-                                rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
                                 children: <TestSemantics>[
                                   TestSemantics(
                                     id: 8,
-                                    label: 'Item 0',
                                     rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                    flags: <SemanticsFlag>[
-                                      SemanticsFlag.hasEnabledState,
-                                      SemanticsFlag.isEnabled,
-                                      SemanticsFlag.isFocusable,
+                                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 9,
+                                        label: 'Item 0',
+                                        rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                        flags: <SemanticsFlag>[
+                                          SemanticsFlag.hasEnabledState,
+                                          SemanticsFlag.isEnabled,
+                                          SemanticsFlag.isFocusable,
+                                        ],
+                                        actions: <SemanticsAction>[SemanticsAction.tap],
+                                      ),
                                     ],
-                                    actions: <SemanticsAction>[SemanticsAction.tap],
                                   ),
                                 ],
                               ),
@@ -3426,20 +3432,26 @@ void main() {
                       TestSemantics(
                         id: 3,
                         rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasExpandedState,
-                              SemanticsFlag.isFocused,
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
+                            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasExpandedState,
+                                  SemanticsFlag.isFocused,
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                ],
+                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                label: 'ABC',
+                                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                              ),
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'ABC',
-                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                           ),
                         ],
                       ),
