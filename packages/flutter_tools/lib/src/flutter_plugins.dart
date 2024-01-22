@@ -1249,8 +1249,8 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
   ];
-  final Map<String, List<PluginInterfaceResolution>> possibleResolutions
-      = <String, List<PluginInterfaceResolution>>{};
+  final Map<String, List<PluginInterfaceResolution>> possibleResolutions =
+      <String, List<PluginInterfaceResolution>>{};
   final Map<String, String> defaultImplementations = <String, String>{};
   // Generates a key for the maps above.
   String getResolutionKey({required String platform, required String packageName}) {
@@ -1258,8 +1258,8 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   }
 
   bool hasPubspecError = false;
-  for (final Plugin plugin in plugins) {
-    for (final String platform in platformKeys) {
+  for (final String platform in platformKeys) {
+    for (final Plugin plugin in plugins) {
       if (plugin.platforms[platform] == null &&
           plugin.defaultPackagePlatforms[platform] == null) {
         // The plugin doesn't implement this platform.
@@ -1267,9 +1267,10 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       }
       String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
-        final String? defaultImplementation = plugin.defaultPackagePlatforms[platform];
+        final String? defaultImplementation =
+            plugin.defaultPackagePlatforms[platform];
         final bool hasInlineDartImplementation =
-          plugin.pluginDartClassPlatforms[platform] != null;
+            plugin.pluginDartClassPlatforms[platform] != null;
         if (defaultImplementation == null && !hasInlineDartImplementation) {
           if (throwOnPluginPubspecError) {
             globals.printError(
@@ -1293,7 +1294,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
               'flutter:\n'
               '  plugin:\n'
               '    implements: <plugin-interface>'
-              '\n'
+              '\n',
             );
           }
           hasPubspecError = true;
