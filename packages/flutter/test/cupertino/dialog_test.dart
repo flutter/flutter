@@ -201,33 +201,37 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
-                          label: 'Alert',
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                           children: <TestSemantics>[
                             TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasImplicitScrolling,
-                              ],
-                              children: <TestSemantics>[
-                                TestSemantics(label: 'The Title'),
-                                TestSemantics(label: 'Content'),
-                              ],
-                            ),
-                            TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasImplicitScrolling,
-                              ],
+                              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+                              label: 'Alert',
                               children: <TestSemantics>[
                                 TestSemantics(
-                                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                                  label: 'Cancel',
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.hasImplicitScrolling,
+                                  ],
+                                  children: <TestSemantics>[
+                                    TestSemantics(label: 'The Title'),
+                                    TestSemantics(label: 'Content'),
+                                  ],
                                 ),
                                 TestSemantics(
-                                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                                  label: 'OK',
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.hasImplicitScrolling,
+                                  ],
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                                      label: 'Cancel',
+                                    ),
+                                    TestSemantics(
+                                      flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                                      label: 'OK',
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -302,8 +306,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoAlertDialog(
               title: const Text('The Title'),
               content: Text('Very long content ' * 20),
@@ -405,8 +410,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -461,14 +467,12 @@ void main() {
   });
 
   testWidgets('Title Section is empty, Button section is not empty.', (WidgetTester tester) async {
-    const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withNoTextScaling(
             child: CupertinoAlertDialog(
               actions: const <Widget>[
                 CupertinoDialogAction(
@@ -515,14 +519,12 @@ void main() {
   });
 
   testWidgets('Button section is empty, Title section is not empty.', (WidgetTester tester) async {
-    const double textScaleFactor = 1.0;
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withNoTextScaling(
             child: CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -715,8 +717,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoAlertDialog(
               title: const Text('The Title'),
               content: Text('The message\n' * 20),
@@ -1193,8 +1196,9 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         useMaterial3: false,
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: const RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: Text('Title'),
@@ -1224,8 +1228,9 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         useMaterial3: true,
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: const RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: Text('Title'),
@@ -1322,14 +1327,12 @@ void main() {
 
   testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
-    const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withNoTextScaling(
             child: CupertinoAlertDialog(
               title: const Text('Test Title'),
               content: const Text('Test Content'),
@@ -1507,8 +1510,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: const Text('Title'),

@@ -525,15 +525,20 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField,
-                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
-                        actions: <SemanticsAction>[SemanticsAction.tap,
-                          SemanticsAction.didGainAccessibilityFocus,],
-                        textDirection: TextDirection.ltr,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 5,
+                            flags: <SemanticsFlag>[SemanticsFlag.isTextField,
+                              SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
+                            actions: <SemanticsAction>[SemanticsAction.tap,
+                              SemanticsAction.didGainAccessibilityFocus,],
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -548,7 +553,7 @@ void main() {
     ));
 
     expect(focusNode.hasFocus, isFalse);
-    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    semanticsOwner.performAction(5, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
     semantics.dispose();
