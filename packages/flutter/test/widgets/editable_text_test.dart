@@ -16575,6 +16575,81 @@ void main() {
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     expect(state.renderEditable.cursorColor, cursorColor.withOpacity(opacity));
   });
+
+  group('selectAllEnabled', () {
+    Widget createEditableText({
+      String? text,
+      TextSelection? selection,
+    }) {
+      final TextEditingController controller = TextEditingController(text: text)
+        ..selection = selection ?? const TextSelection.collapsed(offset: -1);
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      return CupertinoApp(
+        home: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: const TextStyle(),
+          cursorColor: const Color.fromARGB(0, 0, 0, 0),
+          backgroundCursorColor: const Color.fromARGB(0, 0, 0, 0),
+        ),
+      );
+    }
+
+    testWidgets('should return false when there is no text', (WidgetTester tester) async {
+      await tester.pumpWidget(createEditableText());
+      final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+      expect(editableTextState.selectAllEnabled, isFalse);
+    });
+
+    testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
+      await tester.pumpWidget(createEditableText(
+        text: '123',
+      ));
+      final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+      expect(
+        editableTextState.selectAllEnabled,
+        switch (defaultTargetPlatform) {
+          TargetPlatform.macOS        => isFalse,
+          TargetPlatform.iOS
+            || TargetPlatform.android
+            || TargetPlatform.fuchsia
+            || TargetPlatform.linux
+            || TargetPlatform.windows => isTrue,
+        },
+      );
+    });
+
+    testWidgets('when there is text and partial uncollapsed selection', (WidgetTester tester) async {
+      await tester.pumpWidget(createEditableText(
+        text: '123',
+        selection: const TextSelection(baseOffset: 1, extentOffset: 2),
+      ));
+      final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+      expect(
+        editableTextState.selectAllEnabled,
+        switch (defaultTargetPlatform) {
+          TargetPlatform.macOS        => isFalse,
+          TargetPlatform.iOS          => isFalse,
+          TargetPlatform.android
+            || TargetPlatform.fuchsia
+            || TargetPlatform.linux
+            || TargetPlatform.windows => isTrue,
+        },
+      );
+    });
+
+    testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
+      await tester.pumpWidget(createEditableText(
+        text: '123',
+        selection: const TextSelection(baseOffset: 0, extentOffset: 3),
+      ));
+      final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+      expect(editableTextState.selectAllEnabled, isFalse);
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {
