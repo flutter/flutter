@@ -21,7 +21,7 @@ ContentContextOptions OptionsFromPass(const RenderPass& pass) {
   ContentContextOptions opts;
   opts.sample_count = pass.GetSampleCount();
   opts.color_attachment_pixel_format = pass.GetRenderTargetPixelFormat();
-  opts.has_stencil_attachment = pass.HasStencilAttachment();
+  opts.has_depth_stencil_attachments = pass.HasStencilAttachment();
   return opts;
 }
 

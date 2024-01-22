@@ -7,6 +7,7 @@
 #include <optional>
 #include <utility>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation.h"
@@ -17,13 +18,37 @@
 
 namespace impeller {
 
+static bool IsDepthStencilFormat(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kS8UInt:
+    case PixelFormat::kD24UnormS8Uint:
+    case PixelFormat::kD32FloatS8UInt:
+      return true;
+    case PixelFormat::kUnknown:
+    case PixelFormat::kA8UNormInt:
+    case PixelFormat::kR8UNormInt:
+    case PixelFormat::kR8G8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
+    case PixelFormat::kB8G8R8A8UNormInt:
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
+    case PixelFormat::kR32G32B32A32Float:
+    case PixelFormat::kR16G16B16A16Float:
+    case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kB10G10R10XRSRGB:
+    case PixelFormat::kB10G10R10A10XR:
+      return false;
+  }
+  FML_UNREACHABLE();
+}
+
 static TextureGLES::Type GetTextureTypeFromDescriptor(
     const TextureDescriptor& desc) {
   const auto usage = static_cast<TextureUsageMask>(desc.usage);
   const auto render_target =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
   const auto is_msaa = desc.sample_count == SampleCount::kCount4;
-  if (usage == render_target && desc.format == PixelFormat::kS8UInt) {
+  if (usage == render_target && IsDepthStencilFormat(desc.format)) {
     return is_msaa ? TextureGLES::Type::kRenderBufferMultisampled
                    : TextureGLES::Type::kRenderBuffer;
   }
@@ -457,19 +482,20 @@ TextureGLES::Type TextureGLES::GetType() const {
   return type_;
 }
 
-static GLenum ToAttachmentPoint(TextureGLES::AttachmentPoint point) {
+static GLenum ToAttachmentType(TextureGLES::AttachmentType point) {
   switch (point) {
-    case TextureGLES::AttachmentPoint::kColor0:
+    case TextureGLES::AttachmentType::kColor0:
       return GL_COLOR_ATTACHMENT0;
-    case TextureGLES::AttachmentPoint::kDepth:
+    case TextureGLES::AttachmentType::kDepth:
       return GL_DEPTH_ATTACHMENT;
-    case TextureGLES::AttachmentPoint::kStencil:
+    case TextureGLES::AttachmentType::kStencil:
       return GL_STENCIL_ATTACHMENT;
   }
 }
 
-bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
-                                             AttachmentPoint point) const {
+bool TextureGLES::SetAsFramebufferAttachment(
+    GLenum target,
+    AttachmentType attachment_type) const {
   if (!IsValid()) {
     return false;
   }
@@ -482,29 +508,30 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
 
   switch (type_) {
     case Type::kTexture:
-      gl.FramebufferTexture2D(target,                    // target
-                              ToAttachmentPoint(point),  // attachment
-                              GL_TEXTURE_2D,             // textarget
-                              handle.value(),            // texture
-                              0                          // level
+      gl.FramebufferTexture2D(target,                             // target
+                              ToAttachmentType(attachment_type),  // attachment
+                              GL_TEXTURE_2D,                      // textarget
+                              handle.value(),                     // texture
+                              0                                   // level
       );
       break;
     case Type::kTextureMultisampled:
       gl.FramebufferTexture2DMultisampleEXT(
-          target,                    // target
-          ToAttachmentPoint(point),  // attachment
-          GL_TEXTURE_2D,             // textarget
-          handle.value(),            // texture
-          0,                         // level
-          4                          // samples
+          target,                             // target
+          ToAttachmentType(attachment_type),  // attachment
+          GL_TEXTURE_2D,                      // textarget
+          handle.value(),                     // texture
+          0,                                  // level
+          4                                   // samples
       );
       break;
     case Type::kRenderBuffer:
     case Type::kRenderBufferMultisampled:
-      gl.FramebufferRenderbuffer(target,                    // target
-                                 ToAttachmentPoint(point),  // attachment
-                                 GL_RENDERBUFFER,  // render-buffer target
-                                 handle.value()    // render-buffer
+      gl.FramebufferRenderbuffer(
+          target,                             // target
+          ToAttachmentType(attachment_type),  // attachment
+          GL_RENDERBUFFER,                    // render-buffer target
+          handle.value()                      // render-buffer
       );
       break;
   }

@@ -107,13 +107,22 @@ struct PipelineBuilder {
       desc.SetColorAttachmentDescriptor(0u, color0);
     }
 
+    // Setup default depth buffer descriptions.
+    {
+      DepthAttachmentDescriptor depth0;
+      depth0.depth_compare = CompareFunction::kAlways;
+      desc.SetDepthStencilAttachmentDescriptor(depth0);
+      desc.SetDepthPixelFormat(
+          context.GetCapabilities()->GetDefaultDepthStencilFormat());
+    }
+
     // Setup default stencil buffer descriptions.
     {
       StencilAttachmentDescriptor stencil0;
       stencil0.stencil_compare = CompareFunction::kEqual;
       desc.SetStencilAttachmentDescriptors(stencil0);
       desc.SetStencilPixelFormat(
-          context.GetCapabilities()->GetDefaultStencilFormat());
+          context.GetCapabilities()->GetDefaultDepthStencilFormat());
     }
 
     return true;
