@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show ValueListenable, defaultTargetPlatform;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1234,7 +1234,6 @@ void main() {
         onEndHandleDragUpdate: onEndDragUpdate,
         onEndHandleDragEnd: onEndDragEnd,
         clipboardStatus: clipboardStatus,
-        selectionDelegate: FakeTextSelectionDelegate(),
         selectionControls: selectionControls,
         selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
@@ -1278,7 +1277,10 @@ void main() {
       expect(find.byKey(spy.leftHandleKey), findsNothing);
       expect(find.byKey(spy.rightHandleKey), findsNothing);
 
-      selectionOverlay.showToolbar();
+      selectionOverlay.showToolbar(
+        context: selectionOverlay.context,
+        contextMenuBuilder: (BuildContext context) => const Placeholder(),
+      );
       await tester.pump();
       expect(find.byKey(spy.toolBarKey), findsOneWidget);
 
@@ -1287,7 +1289,10 @@ void main() {
       expect(find.byKey(spy.toolBarKey), findsNothing);
 
       selectionOverlay.showHandles();
-      selectionOverlay.showToolbar();
+      selectionOverlay.showToolbar(
+        context: selectionOverlay.context,
+        contextMenuBuilder: (BuildContext context) => const Placeholder(),
+      );
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsOneWidget);
       expect(find.byKey(spy.rightHandleKey), findsOneWidget);
@@ -1971,20 +1976,6 @@ class TextSelectionControlsSpy extends TextSelectionControls {
       case TextSelectionHandleType.collapsed:
         return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: collapsedHandleKey));
     }
-  }
-
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    return Text('dummy', key: toolBarKey);
   }
 
   @override
