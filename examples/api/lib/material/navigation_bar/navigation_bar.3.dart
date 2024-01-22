@@ -59,9 +59,11 @@ class _CustomDestination extends StatelessWidget {
         children: [
           Icon(icon),
           FadeTransition(
-              opacity: info.selectedAnimation,
-              child: Text(
-                  'label ${info.index + 1}/${info.totalNumberOfDestinations}'))
+            opacity: info.selectedAnimation,
+            child: Text(
+               'label ${info.index + 1}/${info.totalNumberOfDestinations}',
+             ),
+           ),
         ],
       ),
     );
