@@ -18,7 +18,7 @@ void main() {
 
 void testMain() {
   group('Vertices', () {
-    setUpUnitTests(setUpTestViewDimensions: false);
+    setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
     test('can be constructed, drawn, and disposed of', () {
       final ui.Vertices vertices = _testVertices();

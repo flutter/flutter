@@ -31,9 +31,9 @@ bool get debugEmulateFlutterTesterEnvironment =>
 set debugEmulateFlutterTesterEnvironment(bool value) {
   _debugEmulateFlutterTesterEnvironment = value;
   if (_debugEmulateFlutterTesterEnvironment) {
-    ensureImplicitViewInitialized();
     const ui.Size logicalSize = ui.Size(800.0, 600.0);
-    window.debugPhysicalSizeOverride = logicalSize * window.devicePixelRatio;
+    final EngineFlutterWindow? implicitView = EnginePlatformDispatcher.instance.implicitView;
+    implicitView?.debugPhysicalSizeOverride = logicalSize * implicitView.devicePixelRatio;
   }
   debugDisableFontFallbacks = value;
 }

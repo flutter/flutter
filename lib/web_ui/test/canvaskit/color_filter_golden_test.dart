@@ -17,7 +17,7 @@ const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
   group('ColorFilter', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     test('ColorFilter.matrix applies a color filter', () async {
       final LayerSceneBuilder builder = LayerSceneBuilder();

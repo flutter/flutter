@@ -30,7 +30,7 @@ class DummyDisplayCanvas extends DisplayCanvas {
 
 void testMain() {
   group('$DisplayCanvasFactory', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     test('getCanvas', () {
       final DisplayCanvasFactory<DisplayCanvas> factory =

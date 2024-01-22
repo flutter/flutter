@@ -63,6 +63,7 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(
+    withImplicitView: true,
     emulateTesterEnvironment: false,
     setUpTestViewDimensions: false
   );

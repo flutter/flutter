@@ -20,7 +20,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await bootstrapAndRunApp();
+  await bootstrapAndRunApp(withImplicitView: true);
 
   late PersistedPlatformView view;
 

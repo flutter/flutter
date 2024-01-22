@@ -16,6 +16,7 @@ void main() {
 
 void testMain() {
   setUpUnitTests(
+    withImplicitView: true,
     setUpTestViewDimensions: false,
   );
 

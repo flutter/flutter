@@ -14,7 +14,7 @@ void main() {
 
 void testMain() {
   group('frame timings', () {
-    setUpCanvasKitTest();
+    setUpCanvasKitTest(withImplicitView: true);
 
     test('collects frame timings', () async {
       await runFrameTimingsTest();

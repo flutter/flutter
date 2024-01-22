@@ -12,6 +12,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart';
 
+import '../common/test_initialization.dart';
 import 'scene_builder_utils.dart';
 
 void main() {
@@ -43,8 +44,8 @@ void testMain() {
   late EngineSceneView sceneView;
   late StubPictureRenderer stubPictureRenderer;
 
-  setUpAll(() {
-    ensureImplicitViewInitialized();
+  setUpAll(() async {
+    await bootstrapAndRunApp(withImplicitView: true);
   });
 
   setUp(() {
