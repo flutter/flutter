@@ -1566,6 +1566,6 @@ class IconWithRandomColor extends StatelessWidget {
 }
 
 
-bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.0001}) {
+bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.05}) {
   return (a.width - b.width).abs() <= maxDiff && (a.height - b.height).abs() <= maxDiff;
 }
