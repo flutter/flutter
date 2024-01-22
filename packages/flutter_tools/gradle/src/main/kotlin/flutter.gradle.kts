@@ -137,42 +137,11 @@ class DependencyVersionChecker {
         }
 
         fun getKGPVersion(project : Project) : Version {
-            try {
-//                println(kotlinPlugin!!.javaClass.kotlin.members.first {it.name == "kotlinPluginVersion"}!!.call(kotlinPlugin))
-//                println(kotlinPlugin!!.javaClass.kotlin.members.first {it.name == "pluginVersion"}!!.call(kotlinPlugin))
-//                println(kotlinPlugin!!.javaClass.kotlin.members.first {it.name == "kotlinPluginVersion"}!!.call(kotlinPlugin))
-//                println("gray")
-//                project.plugins.withId("org.jetbrains.kotlin.android") {
-//                    println(.version)
-//                }
-                //println(project.plugins.getPlugin("org.jetbrains.kotlin.android")::class.java.classLoader.loadClass(KotlinAndroidPluginWrapper::class.java.name).fields.find {println(it.name) ; it.name == "pluginVersion"})
-                //println("gray + " + KotlinAndroidPluginWrapper::class.java.getFields().get(0))
-                //println(project.getPlugins()
-                //    .findPlugin(KotlinAndroidPluginWrapper::class.java)!!.pluginVersion)
-                //                kotlinPlugin!!::class.members.forEach {
-//                    try {
-//                        println(it.name)
-//                        println(it.call(kotlinPlugin))
-//                    } catch (ignored: Exception) {
-//
-//                    }
-//
-//                }
-
-                val kotlinPlugin = project.getPlugins()
-                    .findPlugin(KotlinAndroidPluginWrapper::class.java)!!
-                val versionfield = kotlinPlugin.javaClass.kotlin.members.first {it.name == "pluginVersion" || it.name == "kotlinPluginVersion"}
-                if (versionfield != null) {
-                    return Version.fromString(versionfield!!.call(kotlinPlugin) as String)
-                }
-                // Can't determine version.
-                return Version(0,0,0)
-
-            } catch (ignored : Exception) {
-                println(ignored)
-            }
-            return Version(0,0,0)
-
+            val kotlinPlugin = project.getPlugins()
+                .findPlugin(KotlinAndroidPluginWrapper::class.java)!!
+            val versionfield =
+                kotlinPlugin.javaClass.kotlin.members.first { it.name == "pluginVersion" || it.name == "kotlinPluginVersion" }
+            return Version.fromString(versionfield!!.call(kotlinPlugin) as String)
         }
 
         private fun getErrorMessage(dependencyName : String,

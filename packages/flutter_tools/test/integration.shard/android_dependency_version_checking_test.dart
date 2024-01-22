@@ -5,8 +5,6 @@
 import 'dart:io';
 
 import 'package:file/src/interface/file_system_entity.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart'
-    show getGradlewFileName;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -62,7 +60,7 @@ void main() {
   });
 
   testUsingContext(
-      'AGP version out of support band prints warning but still builds', () async {
+      'AGP version out of "warn" support band prints warning but still builds', () async {
     // Create a new flutter project.
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
@@ -104,15 +102,10 @@ void main() {
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your AGP version soon.'));
-    
-    print(result.stderr.toString());
-    print("hi gray");
-    print(result.stdout.toString());
-    //expect(stdout.toString().contains('Built build/app'), true);
   });
 
   testUsingContext(
-      'Gradle version out of support band prints warning but still builds', () async {
+      'Gradle version out of "warn" support band prints warning but still builds', () async {
     // Create a new flutter project.
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
@@ -154,14 +147,10 @@ void main() {
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Gradle version soon.'));
-
-    print(result.stderr.toString());
-    print("hi gray");
-    print(result.stdout.toString());
   });
 
   testUsingContext(
-      'Kotlin version out of support band prints warning but still builds', () async {
+      'Kotlin version out of "warn" support band prints warning but still builds', () async {
     // Create a new flutter project.
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
@@ -173,7 +162,7 @@ void main() {
     expect(result, const ProcessResultMatcher());
     const String gradleVersion = '7.5';
     const String agpVersion = '7.4.0';
-    const String kgpVersion = '1.3.10';
+    const String kgpVersion = '1.4.10';
 
     final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
 
@@ -203,12 +192,8 @@ void main() {
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Kotlin version soon.'));
-
-    print(result.stderr.toString());
-    print("hi gray");
-    print(result.stdout.toString());
   });
 
-  // TODO(gmackall): Add tests for build blocking when we enable the
-  // corresponding error versions.
+  // TODO(gmackall): Add tests for build blocking when the
+  // corresponding error versions are enabled.
 }
