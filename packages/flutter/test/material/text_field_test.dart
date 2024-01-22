@@ -742,17 +742,22 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.tap,
-                          SemanticsAction.didGainAccessibilityFocus,
-                          SemanticsAction.didLoseAccessibilityFocus,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 5,
+                            flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.tap,
+                              SemanticsAction.didGainAccessibilityFocus,
+                              SemanticsAction.didLoseAccessibilityFocus,
+                            ],
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -767,11 +772,11 @@ void main() {
     ));
 
     expect(focusNode.hasFocus, isFalse);
-    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    semanticsOwner.performAction(5, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
 
-    semanticsOwner.performAction(4, SemanticsAction.didLoseAccessibilityFocus);
+    semanticsOwner.performAction(5, SemanticsAction.didLoseAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isFalse);
     semantics.dispose();

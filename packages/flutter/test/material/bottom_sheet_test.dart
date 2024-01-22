@@ -839,27 +839,31 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Dialog',
-                  textDirection: TextDirection.ltr,
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.scopesRoute,
-                    SemanticsFlag.namesRoute,
-                  ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'BottomSheet',
+                      label: 'Dialog',
                       textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
+                      ],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'BottomSheet',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            TestSemantics(
-              children: <TestSemantics>[
                 TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-                  label: 'Scrim',
-                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                      label: 'Scrim',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1011,32 +1015,36 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Dialog',
-                  textDirection: TextDirection.ltr,
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.scopesRoute,
-                    SemanticsFlag.namesRoute,
-                  ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                      label: 'Dialog',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
+                      ],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: 'BottomSheet',
-                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'BottomSheet',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            TestSemantics(
-              children: <TestSemantics>[
                 TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-                  label: 'Scrim',
-                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                      label: 'Scrim',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1084,21 +1092,25 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Dialog',
-                  textDirection: TextDirection.ltr,
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.scopesRoute,
-                    SemanticsFlag.namesRoute,
-                  ],
                   children: <TestSemantics>[
                     TestSemantics(
+                      label: 'Dialog',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
+                      ],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
-                              label: 'BottomSheet',
-                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'BottomSheet',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -1106,14 +1118,14 @@ void main() {
                     ),
                   ],
                 ),
-              ],
-            ),
-            TestSemantics(
-              children: <TestSemantics>[
                 TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-                  label: 'Scrim',
-                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                      label: 'Scrim',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1155,34 +1167,38 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Dialog',
-                  textDirection: TextDirection.ltr,
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.scopesRoute,
-                    SemanticsFlag.namesRoute,
-                  ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'BottomSheet',
+                      label: 'Dialog',
                       textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
+                      ],
                       children: <TestSemantics>[
                         TestSemantics(
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                          label: 'Dismiss',
+                          label: 'BottomSheet',
                           textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'Dismiss',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            TestSemantics(
-              children: <TestSemantics>[
                 TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-                  label: 'Scrim',
-                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                      label: 'Scrim',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),

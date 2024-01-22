@@ -5484,7 +5484,6 @@ TestSemantics _expectedSemantics() {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
                     flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
