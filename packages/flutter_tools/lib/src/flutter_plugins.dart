@@ -1242,7 +1242,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   bool throwOnPluginPubspecError = true,
 }) {
-  final List<String> platforms = <String>[
+  final Iterable<String> platformKeys = <String>[
     AndroidPlugin.kConfigKey,
     IOSPlugin.kConfigKey,
     LinuxPlugin.kConfigKey,
@@ -1259,7 +1259,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 
   bool hasPubspecError = false;
   for (final Plugin plugin in plugins) {
-    for (final String platform in platforms) {
+    for (final String platform in platformKeys) {
       if (plugin.platforms[platform] == null &&
           plugin.defaultPackagePlatforms[platform] == null) {
         // The plugin doesn't implement this platform.
