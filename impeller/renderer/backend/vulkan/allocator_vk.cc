@@ -424,11 +424,6 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
   return std::make_shared<TextureVK>(context_, std::move(source));
 }
 
-void AllocatorVK::DidAcquireSurfaceFrame() {
-  frame_count_++;
-  raster_thread_id_ = std::this_thread::get_id();
-}
-
 // |Allocator|
 std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
     const DeviceBufferDescriptor& desc) {
@@ -449,8 +444,7 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
   allocation_info.preferredFlags = static_cast<VkMemoryPropertyFlags>(
       ToVKBufferMemoryPropertyFlags(desc.storage_mode));
   allocation_info.flags = ToVmaAllocationBufferCreateFlags(desc.storage_mode);
-  if (created_buffer_pool_ && desc.storage_mode == StorageMode::kHostVisible &&
-      raster_thread_id_ == std::this_thread::get_id()) {
+  if (created_buffer_pool_ && desc.storage_mode == StorageMode::kHostVisible) {
     allocation_info.pool = staging_buffer_pool_.get().pool;
   }
 
