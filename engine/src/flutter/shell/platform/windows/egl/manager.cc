@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/angle_surface_manager.h"
+#include "flutter/shell/platform/windows/egl/manager.h"
 
 #include <vector>
 
@@ -17,20 +17,20 @@ static void LogEglError(std::string message) {
 }
 
 namespace flutter {
+namespace egl {
 
-int AngleSurfaceManager::instance_count_ = 0;
+int Manager::instance_count_ = 0;
 
-std::unique_ptr<AngleSurfaceManager> AngleSurfaceManager::Create(
-    bool enable_impeller) {
-  std::unique_ptr<AngleSurfaceManager> manager;
-  manager.reset(new AngleSurfaceManager(enable_impeller));
+std::unique_ptr<Manager> Manager::Create(bool enable_impeller) {
+  std::unique_ptr<Manager> manager;
+  manager.reset(new Manager(enable_impeller));
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-AngleSurfaceManager::AngleSurfaceManager(bool enable_impeller) {
+Manager::Manager(bool enable_impeller) {
   ++instance_count_;
 
   if (!InitializeDisplay()) {
@@ -48,12 +48,12 @@ AngleSurfaceManager::AngleSurfaceManager(bool enable_impeller) {
   is_valid_ = true;
 }
 
-AngleSurfaceManager::~AngleSurfaceManager() {
+Manager::~Manager() {
   CleanUp();
   --instance_count_;
 }
 
-bool AngleSurfaceManager::InitializeDisplay() {
+bool Manager::InitializeDisplay() {
   // These are preferred display attributes and request ANGLE's D3D11
   // renderer. eglInitialize will only succeed with these attributes if the
   // hardware supports D3D11 Feature Level 10_0+.
@@ -147,7 +147,7 @@ bool AngleSurfaceManager::InitializeDisplay() {
   FML_UNREACHABLE();
 }
 
-bool AngleSurfaceManager::InitializeConfig(bool enable_impeller) {
+bool Manager::InitializeConfig(bool enable_impeller) {
   const EGLint config_attributes[] = {EGL_RED_SIZE,   8, EGL_GREEN_SIZE,   8,
                                       EGL_BLUE_SIZE,  8, EGL_ALPHA_SIZE,   8,
                                       EGL_DEPTH_SIZE, 8, EGL_STENCIL_SIZE, 8,
@@ -193,7 +193,7 @@ bool AngleSurfaceManager::InitializeConfig(bool enable_impeller) {
   return false;
 }
 
-bool AngleSurfaceManager::InitializeContexts() {
+bool Manager::InitializeContexts() {
   const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
   render_context_ =
@@ -213,7 +213,7 @@ bool AngleSurfaceManager::InitializeContexts() {
   return true;
 }
 
-bool AngleSurfaceManager::InitializeDevice() {
+bool Manager::InitializeDevice() {
   const auto query_display_attrib_EXT =
       reinterpret_cast<PFNEGLQUERYDISPLAYATTRIBEXTPROC>(
           ::eglGetProcAddress("eglQueryDisplayAttribEXT"));
@@ -244,7 +244,7 @@ bool AngleSurfaceManager::InitializeDevice() {
   return true;
 }
 
-void AngleSurfaceManager::CleanUp() {
+void Manager::CleanUp() {
   EGLBoolean result = EGL_FALSE;
 
   // Needs to be reset before destroying the EGLContext.
@@ -278,13 +278,11 @@ void AngleSurfaceManager::CleanUp() {
   }
 }
 
-bool AngleSurfaceManager::IsValid() const {
+bool Manager::IsValid() const {
   return is_valid_;
 }
 
-bool AngleSurfaceManager::CreateSurface(HWND hwnd,
-                                        EGLint width,
-                                        EGLint height) {
+bool Manager::CreateSurface(HWND hwnd, EGLint width, EGLint height) {
   if (!hwnd || !is_valid_) {
     return false;
   }
@@ -312,10 +310,10 @@ bool AngleSurfaceManager::CreateSurface(HWND hwnd,
   return true;
 }
 
-void AngleSurfaceManager::ResizeSurface(HWND hwnd,
-                                        EGLint width,
-                                        EGLint height,
-                                        bool vsync_enabled) {
+void Manager::ResizeSurface(HWND hwnd,
+                            EGLint width,
+                            EGLint height,
+                            bool vsync_enabled) {
   EGLint existing_width, existing_height;
   GetSurfaceDimensions(&existing_width, &existing_height);
   if (width != existing_width || height != existing_height) {
@@ -328,15 +326,14 @@ void AngleSurfaceManager::ResizeSurface(HWND hwnd,
     ClearContext();
     DestroySurface();
     if (!CreateSurface(hwnd, width, height)) {
-      FML_LOG(ERROR)
-          << "AngleSurfaceManager::ResizeSurface failed to create surface";
+      FML_LOG(ERROR) << "Manager::ResizeSurface failed to create surface";
     }
   }
 
   SetVSyncEnabled(vsync_enabled);
 }
 
-void AngleSurfaceManager::GetSurfaceDimensions(EGLint* width, EGLint* height) {
+void Manager::GetSurfaceDimensions(EGLint* width, EGLint* height) {
   if (surface_ == EGL_NO_SURFACE || !is_valid_) {
     *width = 0;
     *height = 0;
@@ -351,50 +348,49 @@ void AngleSurfaceManager::GetSurfaceDimensions(EGLint* width, EGLint* height) {
   *height = surface_height_;
 }
 
-void AngleSurfaceManager::DestroySurface() {
+void Manager::DestroySurface() {
   if (display_ != EGL_NO_DISPLAY && surface_ != EGL_NO_SURFACE) {
     ::eglDestroySurface(display_, surface_);
   }
   surface_ = EGL_NO_SURFACE;
 }
 
-bool AngleSurfaceManager::HasContextCurrent() {
+bool Manager::HasContextCurrent() {
   return ::eglGetCurrentContext() != EGL_NO_CONTEXT;
 }
 
-bool AngleSurfaceManager::MakeCurrent() {
+bool Manager::MakeCurrent() {
   return (::eglMakeCurrent(display_, surface_, surface_, render_context_) ==
           EGL_TRUE);
 }
 
-bool AngleSurfaceManager::ClearCurrent() {
+bool Manager::ClearCurrent() {
   return (::eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
                            EGL_NO_CONTEXT) == EGL_TRUE);
 }
 
-bool AngleSurfaceManager::ClearContext() {
+bool Manager::ClearContext() {
   return (::eglMakeCurrent(display_, nullptr, nullptr, render_context_) ==
           EGL_TRUE);
 }
 
-bool AngleSurfaceManager::MakeResourceCurrent() {
+bool Manager::MakeResourceCurrent() {
   return (::eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
                            resource_context_) == EGL_TRUE);
 }
 
-bool AngleSurfaceManager::SwapBuffers() {
+bool Manager::SwapBuffers() {
   return (::eglSwapBuffers(display_, surface_));
 }
 
-EGLSurface AngleSurfaceManager::CreateSurfaceFromHandle(
-    EGLenum handle_type,
-    EGLClientBuffer handle,
-    const EGLint* attributes) const {
+EGLSurface Manager::CreateSurfaceFromHandle(EGLenum handle_type,
+                                            EGLClientBuffer handle,
+                                            const EGLint* attributes) const {
   return ::eglCreatePbufferFromClientBuffer(display_, handle_type, handle,
                                             config_, attributes);
 }
 
-void AngleSurfaceManager::SetVSyncEnabled(bool enabled) {
+void Manager::SetVSyncEnabled(bool enabled) {
   if (!MakeCurrent()) {
     LogEglError("Unable to make surface current to update the swap interval");
     return;
@@ -411,7 +407,7 @@ void AngleSurfaceManager::SetVSyncEnabled(bool enabled) {
   }
 }
 
-bool AngleSurfaceManager::GetDevice(ID3D11Device** device) {
+bool Manager::GetDevice(ID3D11Device** device) {
   if (!resolved_device_) {
     if (!InitializeDevice()) {
       return false;
@@ -422,4 +418,5 @@ bool AngleSurfaceManager::GetDevice(ID3D11Device** device) {
   return (resolved_device_ != nullptr);
 }
 
+}  // namespace egl
 }  // namespace flutter

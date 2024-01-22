@@ -12,8 +12,8 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/public/flutter_texture_registrar.h"
+#include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/external_texture.h"
-#include "flutter/shell/platform/windows/gl_proc_table.h"
 
 namespace flutter {
 
@@ -24,7 +24,7 @@ class FlutterWindowsEngine;
 class FlutterWindowsTextureRegistrar {
  public:
   explicit FlutterWindowsTextureRegistrar(FlutterWindowsEngine* engine,
-                                          std::shared_ptr<GlProcTable> gl);
+                                          std::shared_ptr<egl::ProcTable> gl);
 
   // Registers a texture described by the given |texture_info| object.
   // Returns the non-zero, positive texture id or -1 on error.
@@ -47,7 +47,7 @@ class FlutterWindowsTextureRegistrar {
 
  private:
   FlutterWindowsEngine* engine_ = nullptr;
-  std::shared_ptr<GlProcTable> gl_;
+  std::shared_ptr<egl::ProcTable> gl_;
 
   // All registered textures, keyed by their IDs.
   std::unordered_map<int64_t, std::unique_ptr<flutter::ExternalTexture>>

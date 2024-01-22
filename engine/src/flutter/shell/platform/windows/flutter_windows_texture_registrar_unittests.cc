@@ -4,10 +4,11 @@
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_proc_table.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
-#include "flutter/shell/platform/windows/testing/mock_gl_proc_table.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -42,7 +43,7 @@ ComPtr<ID3D11Texture2D> CreateD3dTexture(FlutterWindowsEngine* engine,
                                          UINT height) {
   ComPtr<ID3D11Device> d3d_device;
   ComPtr<ID3D11Texture2D> d3d_texture;
-  if (engine->surface_manager()->GetDevice(d3d_device.GetAddressOf())) {
+  if (engine->egl_manager()->GetDevice(d3d_device.GetAddressOf())) {
     D3D11_TEXTURE2D_DESC texture_description = {};
     texture_description.MipLevels = 1;
     texture_description.SampleDesc.Count = 1;
@@ -65,7 +66,7 @@ ComPtr<ID3D11Texture2D> CreateD3dTexture(FlutterWindowsEngine* engine,
 
 TEST(FlutterWindowsTextureRegistrarTest, CreateDestroy) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  std::shared_ptr<MockGlProcTable> gl = std::make_shared<MockGlProcTable>();
+  auto gl = std::make_shared<egl::MockProcTable>();
   FlutterWindowsTextureRegistrar registrar(engine.get(), gl);
 
   EXPECT_TRUE(true);
@@ -74,7 +75,7 @@ TEST(FlutterWindowsTextureRegistrarTest, CreateDestroy) {
 TEST(FlutterWindowsTextureRegistrarTest, RegisterUnregisterTexture) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
-  std::shared_ptr<MockGlProcTable> gl = std::make_shared<MockGlProcTable>();
+  auto gl = std::make_shared<egl::MockProcTable>();
 
   FlutterWindowsTextureRegistrar registrar(engine.get(), gl);
 
@@ -138,7 +139,7 @@ TEST(FlutterWindowsTextureRegistrarTest, RegisterUnregisterTexture) {
 
 TEST(FlutterWindowsTextureRegistrarTest, RegisterUnknownTextureType) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  std::shared_ptr<MockGlProcTable> gl = std::make_shared<MockGlProcTable>();
+  auto gl = std::make_shared<egl::MockProcTable>();
 
   FlutterWindowsTextureRegistrar registrar(engine.get(), gl);
 
@@ -152,7 +153,7 @@ TEST(FlutterWindowsTextureRegistrarTest, RegisterUnknownTextureType) {
 
 TEST(FlutterWindowsTextureRegistrarTest, PopulatePixelBufferTexture) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  std::shared_ptr<MockGlProcTable> gl = std::make_shared<MockGlProcTable>();
+  auto gl = std::make_shared<egl::MockProcTable>();
 
   FlutterWindowsTextureRegistrar registrar(engine.get(), gl);
 
@@ -203,7 +204,7 @@ TEST(FlutterWindowsTextureRegistrarTest, PopulatePixelBufferTexture) {
 
 TEST(FlutterWindowsTextureRegistrarTest, PopulateD3dTextureWithHandle) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  std::shared_ptr<MockGlProcTable> gl = std::make_shared<MockGlProcTable>();
+  auto gl = std::make_shared<egl::MockProcTable>();
   FlutterWindowsTextureRegistrar registrar(engine.get(), gl);
 
   UINT width = 100;
@@ -265,7 +266,7 @@ TEST(FlutterWindowsTextureRegistrarTest, PopulateD3dTextureWithHandle) {
 
 TEST(FlutterWindowsTextureRegistrarTest, PopulateD3dTexture) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  std::shared_ptr<MockGlProcTable> gl = std::make_shared<MockGlProcTable>();
+  auto gl = std::make_shared<egl::MockProcTable>();
   FlutterWindowsTextureRegistrar registrar(engine.get(), gl);
 
   UINT width = 100;
@@ -321,7 +322,7 @@ TEST(FlutterWindowsTextureRegistrarTest, PopulateD3dTexture) {
 
 TEST(FlutterWindowsTextureRegistrarTest, PopulateInvalidTexture) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  std::shared_ptr<MockGlProcTable> gl = std::make_shared<MockGlProcTable>();
+  auto gl = std::make_shared<egl::MockProcTable>();
 
   FlutterWindowsTextureRegistrar registrar(engine.get(), gl);
 
@@ -332,7 +333,7 @@ TEST(FlutterWindowsTextureRegistrarTest, PopulateInvalidTexture) {
 TEST(FlutterWindowsTextureRegistrarTest,
      UnregisterTextureWithEngineDownInvokesCallback) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  std::shared_ptr<MockGlProcTable> gl = std::make_shared<MockGlProcTable>();
+  auto gl = std::make_shared<egl::MockProcTable>();
 
   FlutterWindowsTextureRegistrar registrar(engine.get(), gl);
 

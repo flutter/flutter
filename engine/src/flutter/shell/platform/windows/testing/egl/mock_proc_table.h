@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_GL_PROC_TABLE_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_GL_PROC_TABLE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_EGL_MOCK_PROC_TABLE_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_EGL_MOCK_PROC_TABLE_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/windows/gl_proc_table.h"
+#include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "gmock/gmock.h"
 
 namespace flutter {
 namespace testing {
+namespace egl {
 
-/// Mock for the |GlProcTable| base class.
-class MockGlProcTable : public GlProcTable {
+/// Mock for the |ProcTable| base class.
+class MockProcTable : public ::flutter::egl::ProcTable {
  public:
-  MockGlProcTable() = default;
-  virtual ~MockGlProcTable() = default;
+  MockProcTable() = default;
+  virtual ~MockProcTable() = default;
 
   MOCK_METHOD(void,
               GenTextures,
@@ -48,10 +49,11 @@ class MockGlProcTable : public GlProcTable {
               (const override));
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(MockGlProcTable);
+  FML_DISALLOW_COPY_AND_ASSIGN(MockProcTable);
 };
 
+}  // namespace egl
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_GL_PROC_TABLE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_EGL_MOCK_PROC_TABLE_H_

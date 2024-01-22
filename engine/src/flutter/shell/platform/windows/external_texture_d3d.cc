@@ -13,12 +13,12 @@ ExternalTextureD3d::ExternalTextureD3d(
     FlutterDesktopGpuSurfaceType type,
     const FlutterDesktopGpuSurfaceTextureCallback texture_callback,
     void* user_data,
-    const AngleSurfaceManager* surface_manager,
-    std::shared_ptr<GlProcTable> gl)
+    const egl::Manager* egl_manager,
+    std::shared_ptr<egl::ProcTable> gl)
     : type_(type),
       texture_callback_(texture_callback),
       user_data_(user_data),
-      surface_manager_(surface_manager),
+      egl_manager_(egl_manager),
       gl_(std::move(gl)) {}
 
 ExternalTextureD3d::~ExternalTextureD3d() {
@@ -53,9 +53,9 @@ bool ExternalTextureD3d::PopulateTexture(size_t width,
 
 void ExternalTextureD3d::ReleaseImage() {
   if (egl_surface_ != EGL_NO_SURFACE) {
-    eglReleaseTexImage(surface_manager_->egl_display(), egl_surface_,
+    eglReleaseTexImage(egl_manager_->egl_display(), egl_surface_,
                        EGL_BACK_BUFFER);
-    eglDestroySurface(surface_manager_->egl_display(), egl_surface_);
+    eglDestroySurface(egl_manager_->egl_display(), egl_surface_);
     egl_surface_ = EGL_NO_SURFACE;
   }
 }
@@ -95,14 +95,14 @@ bool ExternalTextureD3d::CreateOrUpdateTexture(
         EGL_TEXTURE_RGBA,  // always EGL_TEXTURE_RGBA
         EGL_NONE};
 
-    egl_surface_ = surface_manager_->CreateSurfaceFromHandle(
+    egl_surface_ = egl_manager_->CreateSurfaceFromHandle(
         (type_ == kFlutterDesktopGpuSurfaceTypeD3d11Texture2D)
             ? EGL_D3D_TEXTURE_ANGLE
             : EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE,
         handle, attributes);
 
     if (egl_surface_ == EGL_NO_SURFACE ||
-        eglBindTexImage(surface_manager_->egl_display(), egl_surface_,
+        eglBindTexImage(egl_manager_->egl_display(), egl_surface_,
                         EGL_BACK_BUFFER) == EGL_FALSE) {
       FML_LOG(ERROR) << "Binding D3D surface failed.";
     }

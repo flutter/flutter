@@ -17,7 +17,6 @@
 #include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
-#include "flutter/shell/platform/windows/angle_surface_manager.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"

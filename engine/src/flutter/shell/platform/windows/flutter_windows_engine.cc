@@ -55,17 +55,17 @@ FlutterRendererConfig GetOpenGLRendererConfig() {
   config.open_gl.struct_size = sizeof(config.open_gl);
   config.open_gl.make_current = [](void* user_data) -> bool {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
-    if (!host->surface_manager()) {
+    if (!host->egl_manager()) {
       return false;
     }
-    return host->surface_manager()->MakeCurrent();
+    return host->egl_manager()->MakeCurrent();
   };
   config.open_gl.clear_current = [](void* user_data) -> bool {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
-    if (!host->surface_manager()) {
+    if (!host->egl_manager()) {
       return false;
     }
-    return host->surface_manager()->ClearContext();
+    return host->egl_manager()->ClearContext();
   };
   config.open_gl.present = [](void* user_data) -> bool { FML_UNREACHABLE(); };
   config.open_gl.fbo_reset_after_present = true;
@@ -79,10 +79,10 @@ FlutterRendererConfig GetOpenGLRendererConfig() {
   };
   config.open_gl.make_resource_current = [](void* user_data) -> bool {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
-    if (!host->surface_manager()) {
+    if (!host->egl_manager()) {
       return false;
     }
-    return host->surface_manager()->MakeResourceCurrent();
+    return host->egl_manager()->MakeResourceCurrent();
   };
   config.open_gl.gl_external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
@@ -154,7 +154,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
     windows_proc_table_ = std::make_shared<WindowsProcTable>();
   }
 
-  gl_ = GlProcTable::Create();
+  gl_ = egl::ProcTable::Create();
 
   embedder_api_.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&embedder_api_);
@@ -200,7 +200,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   enable_impeller_ = std::find(switches.begin(), switches.end(),
                                "--enable-impeller=true") != switches.end();
 
-  surface_manager_ = AngleSurfaceManager::Create(enable_impeller_);
+  egl_manager_ = egl::Manager::Create(enable_impeller_);
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
@@ -380,7 +380,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
   args.custom_task_runners = &custom_task_runners;
 
-  if (surface_manager_) {
+  if (egl_manager_) {
     auto resolver = [](const char* name) -> void* {
       return reinterpret_cast<void*>(::eglGetProcAddress(name));
     };
@@ -423,22 +423,22 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
   // The platform thread creates OpenGL contexts. These
   // must be released to be used by the engine's threads.
-  FML_DCHECK(!surface_manager_ || !surface_manager_->HasContextCurrent());
+  FML_DCHECK(!egl_manager_ || !egl_manager_->HasContextCurrent());
 
   FlutterRendererConfig renderer_config;
 
   if (enable_impeller_) {
     // Impeller does not support a Software backend. Avoid falling back and
     // confusing the engine on which renderer is selected.
-    if (!surface_manager_) {
+    if (!egl_manager_) {
       FML_LOG(ERROR) << "Could not create surface manager. Impeller backend "
                         "does not support software rendering.";
       return false;
     }
     renderer_config = GetOpenGLRendererConfig();
   } else {
-    renderer_config = surface_manager_ ? GetOpenGLRendererConfig()
-                                       : GetSoftwareRendererConfig();
+    renderer_config =
+        egl_manager_ ? GetOpenGLRendererConfig() : GetSoftwareRendererConfig();
   }
 
   auto result = embedder_api_.Run(FLUTTER_ENGINE_VERSION, &renderer_config,

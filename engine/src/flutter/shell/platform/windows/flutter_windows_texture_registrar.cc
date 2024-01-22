@@ -20,7 +20,7 @@ namespace flutter {
 
 FlutterWindowsTextureRegistrar::FlutterWindowsTextureRegistrar(
     FlutterWindowsEngine* engine,
-    std::shared_ptr<GlProcTable> gl)
+    std::shared_ptr<egl::ProcTable> gl)
     : engine_(engine), gl_(std::move(gl)) {}
 
 int64_t FlutterWindowsTextureRegistrar::RegisterTexture(
@@ -53,7 +53,7 @@ int64_t FlutterWindowsTextureRegistrar::RegisterTexture(
 
       auto user_data = SAFE_ACCESS(gpu_surface_config, user_data, nullptr);
       return EmplaceTexture(std::make_unique<flutter::ExternalTextureD3d>(
-          surface_type, callback, user_data, engine_->surface_manager(), gl_));
+          surface_type, callback, user_data, engine_->egl_manager(), gl_));
     }
   }
 

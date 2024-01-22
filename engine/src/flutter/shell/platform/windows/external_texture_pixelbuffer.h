@@ -7,8 +7,8 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/public/flutter_texture_registrar.h"
+#include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/external_texture.h"
-#include "flutter/shell/platform/windows/gl_proc_table.h"
 
 namespace flutter {
 
@@ -18,7 +18,7 @@ class ExternalTexturePixelBuffer : public ExternalTexture {
   ExternalTexturePixelBuffer(
       const FlutterDesktopPixelBufferTextureCallback texture_callback,
       void* user_data,
-      std::shared_ptr<GlProcTable> gl);
+      std::shared_ptr<egl::ProcTable> gl);
 
   virtual ~ExternalTexturePixelBuffer();
 
@@ -38,7 +38,7 @@ class ExternalTexturePixelBuffer : public ExternalTexture {
 
   const FlutterDesktopPixelBufferTextureCallback texture_callback_ = nullptr;
   void* const user_data_ = nullptr;
-  std::shared_ptr<GlProcTable> gl_;
+  std::shared_ptr<egl::ProcTable> gl_;
   GLuint gl_texture_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalTexturePixelBuffer);

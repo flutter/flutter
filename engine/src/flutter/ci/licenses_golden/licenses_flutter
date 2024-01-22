@@ -7219,8 +7219,6 @@ ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h + .
 ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/angle_surface_manager.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/angle_surface_manager.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/flutter_engine.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/dart_project.h + ../../../flutter/LICENSE
@@ -7239,6 +7237,10 @@ ORIGIN: ../../../flutter/shell/platform/windows/direct_manipulation.cc + ../../.
 ORIGIN: ../../../flutter/shell/platform/windows/direct_manipulation.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/dpi_utils.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/dpi_utils.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/manager.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/manager.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/proc_table.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/proc_table.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/event_watcher.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/event_watcher.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/external_texture.h + ../../../flutter/LICENSE
@@ -7262,8 +7264,6 @@ ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_texture_registra
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_view.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_view.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_view_controller.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/gl_proc_table.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/gl_proc_table.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/keyboard_handler_base.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/keyboard_key_channel_handler.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/keyboard_key_channel_handler.h + ../../../flutter/LICENSE
@@ -10093,8 +10093,6 @@ FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.h
-FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.cc
-FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.h
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_engine.cc
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/dart_project.h
@@ -10113,6 +10111,10 @@ FILE: ../../../flutter/shell/platform/windows/direct_manipulation.cc
 FILE: ../../../flutter/shell/platform/windows/direct_manipulation.h
 FILE: ../../../flutter/shell/platform/windows/dpi_utils.cc
 FILE: ../../../flutter/shell/platform/windows/dpi_utils.h
+FILE: ../../../flutter/shell/platform/windows/egl/manager.cc
+FILE: ../../../flutter/shell/platform/windows/egl/manager.h
+FILE: ../../../flutter/shell/platform/windows/egl/proc_table.cc
+FILE: ../../../flutter/shell/platform/windows/egl/proc_table.h
 FILE: ../../../flutter/shell/platform/windows/event_watcher.cc
 FILE: ../../../flutter/shell/platform/windows/event_watcher.h
 FILE: ../../../flutter/shell/platform/windows/external_texture.h
@@ -10136,8 +10138,6 @@ FILE: ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar.
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_view.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_view.h
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_view_controller.h
-FILE: ../../../flutter/shell/platform/windows/gl_proc_table.cc
-FILE: ../../../flutter/shell/platform/windows/gl_proc_table.h
 FILE: ../../../flutter/shell/platform/windows/keyboard_handler_base.h
 FILE: ../../../flutter/shell/platform/windows/keyboard_key_channel_handler.cc
 FILE: ../../../flutter/shell/platform/windows/keyboard_key_channel_handler.h

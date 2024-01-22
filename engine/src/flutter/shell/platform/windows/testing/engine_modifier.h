@@ -29,12 +29,12 @@ class EngineModifier {
   // engine unless overwritten again.
   FlutterEngineProcTable& embedder_api() { return engine_->embedder_api_; }
 
-  // Override the surface manager used by the engine.
+  // Override the EGL manager used by the engine.
   //
   // Modifications are to the engine, and will last for the lifetime of the
   // engine unless overwritten again.
-  void SetSurfaceManager(std::unique_ptr<AngleSurfaceManager> surface_manager) {
-    engine_->surface_manager_ = std::move(surface_manager);
+  void SetEGLManager(std::unique_ptr<egl::Manager> egl_manager) {
+    engine_->egl_manager_ = std::move(egl_manager);
   }
 
   /// Reset the start_time field that is used to align vsync events.
@@ -51,14 +51,14 @@ class EngineModifier {
         std::optional<std::chrono::nanoseconds>(frame_interval_nanos);
   }
 
-  // Explicitly releases the SurfaceManager being used by the
-  // FlutterWindowsEngine instance. This should be used if SetSurfaceManager is
+  // Explicitly releases the egl::Manager being used by the
+  // FlutterWindowsEngine instance. This should be used if SetEGLManager is
   // used to explicitly set to a non-null value (but not a valid object) to test
   // a successful ANGLE initialization.
   //
   // Modifications are to the engine, and will last for the lifetime of the
   // engine unless overwritten again.
-  void ReleaseSurfaceManager() { engine_->surface_manager_.release(); }
+  void ReleaseEGLManager() { engine_->egl_manager_.release(); }
 
   // Run the FlutterWindowsEngine's handler that runs right before an engine
   // restart. This resets the keyboard's state if it exists.

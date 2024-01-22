@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_GL_PROC_TABLE_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_GL_PROC_TABLE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_EGL_PROC_TABLE_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_EGL_PROC_TABLE_H_
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -13,13 +13,14 @@
 #include "flutter/fml/macros.h"
 
 namespace flutter {
+namespace egl {
 
 // Lookup table for GLES functions.
-class GlProcTable {
+class ProcTable {
  public:
-  static std::shared_ptr<GlProcTable> Create();
+  static std::shared_ptr<ProcTable> Create();
 
-  virtual ~GlProcTable();
+  virtual ~ProcTable();
 
   virtual void GenTextures(GLsizei n, GLuint* textures) const;
   virtual void DeleteTextures(GLsizei n, const GLuint* textures) const;
@@ -36,7 +37,7 @@ class GlProcTable {
                           const void* data) const;
 
  protected:
-  GlProcTable();
+  ProcTable();
 
  private:
   using GenTexturesProc = void(__stdcall*)(GLsizei n, GLuint* textures);
@@ -62,9 +63,10 @@ class GlProcTable {
   TexParameteriProc tex_parameteri_;
   TexImage2DProc tex_image_2d_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(GlProcTable);
+  FML_DISALLOW_COPY_AND_ASSIGN(ProcTable);
 };
 
+}  // namespace egl
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_GL_PROC_TABLE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_EGL_PROC_TABLE_H_
