@@ -4,8 +4,10 @@
 
 import 'package:native_assets_builder/native_assets_builder.dart'
     show BuildResult, DryRunResult;
-import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
-import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    hide BuildMode;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    as native_assets_cli;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -78,7 +80,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   Uri? yamlParentDirectory,
   required FileSystem fileSystem,
   required int targetAndroidNdkApi,
-  bool isAndroidLibrary = false,
 }) async {
   const OS targetOS = OS.android;
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOS);
@@ -115,9 +116,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
-  if (isAndroidLibrary && nativeAssets.isNotEmpty) {
-    throwToolExit('Native assets are not yet supported in Android add2app.');
-  }
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
   await _copyNativeAssetsAndroid(buildUri_, assetTargetLocations, fileSystem);

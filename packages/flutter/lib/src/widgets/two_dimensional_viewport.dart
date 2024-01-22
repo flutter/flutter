@@ -793,7 +793,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   ///
   /// Returns null if there is no active child for the given [ChildVicinity].
   @protected
-  RenderBox? getChildFor(ChildVicinity vicinity) => _children[vicinity];
+  RenderBox? getChildFor(covariant ChildVicinity vicinity) => _children[vicinity];
 
   @override
   void attach(PipelineOwner owner) {

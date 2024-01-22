@@ -9,16 +9,15 @@ import 'package:flutter_test/flutter_test.dart';
 Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
+  TextScaler textScaler = TextScaler.noScaling,
   Brightness brightness = Brightness.light,
-  bool? useMaterial3,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    theme: ThemeData(brightness: brightness),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Material(child: child),
       ),
     ),
@@ -72,8 +71,65 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ActionChip defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+  testWidgets('Material2 - ActionChip defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+    const String label = 'action chip';
+
+    // Test enabled ActionChip defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: ActionChip(
+              onPressed: () {},
+              label: const Text(label),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test default chip size.
+    expect(tester.getSize(find.byType(ActionChip)), const Size(178.0, 48.0));
+    // Test default label style.
+    expect(
+      getLabelStyle(tester, label).style.color,
+      theme.textTheme.bodyLarge!.color!.withAlpha(0xde),
+    );
+
+    Material chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, Colors.black);
+    expect(chipMaterial.shape, const StadiumBorder());
+
+    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, Colors.black.withAlpha(0x1f));
+
+    // Test disabled ActionChip defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: ActionChip(
+            label: Text(label),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, Colors.black);
+    expect(chipMaterial.shape, const StadiumBorder());
+
+    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, Colors.black38);
+  });
+
+  testWidgets('Material3 - ActionChip defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     const String label = 'action chip';
 
     // Test enabled ActionChip defaults.
@@ -146,8 +202,8 @@ void main() {
     expect(decoration.color, null);
   });
 
-  testWidgets('ActionChip.elevated defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+  testWidgets('Material3 - ActionChip.elevated defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     const String label = 'action chip';
 
     // Test enabled ActionChip defaults.
@@ -231,7 +287,6 @@ void main() {
     });
     Widget buildApp({ required bool enabled, required bool selected }) {
       return wrapForChip(
-        useMaterial3: true,
         child: Column(
           children: <Widget>[
             ActionChip(
@@ -284,7 +339,6 @@ void main() {
     const Color backgroundColor = Color(0xff0000ff);
     Widget buildApp({ required bool enabled, required bool selected }) {
       return wrapForChip(
-        useMaterial3: true,
         child: Column(
           children: <Widget>[
             ActionChip(

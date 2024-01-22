@@ -525,15 +525,20 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField,
-                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
-                        actions: <SemanticsAction>[SemanticsAction.tap,
-                          SemanticsAction.didGainAccessibilityFocus,],
-                        textDirection: TextDirection.ltr,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 5,
+                            flags: <SemanticsFlag>[SemanticsFlag.isTextField,
+                              SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
+                            actions: <SemanticsAction>[SemanticsAction.tap,
+                              SemanticsAction.didGainAccessibilityFocus,],
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -548,7 +553,7 @@ void main() {
     ));
 
     expect(focusNode.hasFocus, isFalse);
-    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    semanticsOwner.performAction(5, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
     semantics.dispose();
@@ -4827,7 +4832,7 @@ void main() {
           TextSelection(baseOffset: 0, extentOffset: platformSelectsByLine ? 19 : 20),
         );
 
-        // Clicking again moves the caret to the tapped positio.
+        // Clicking again moves the caret to the tapped position.
         await gesture.down(textFieldStart + const Offset(200.0, 9.0));
         await tester.pump();
         await gesture.up();
@@ -9965,7 +9970,7 @@ void main() {
     expect(state.selectionOverlay!.handlesAreVisible, isTrue);
     expect(state.renderEditable.selectionColor, defaultSelectionColor);
 
-    // Single tapping a non-misspelled word shows a collpased cursor.
+    // Single tapping a non-misspelled word shows a collapsed cursor.
     await tester.tapAt(textOffsetToPosition(tester, 7));
     await tester.pumpAndSettle();
     expect(
@@ -10100,6 +10105,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'abcd',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
