@@ -3755,6 +3755,11 @@ void main() {
             onSelectionChanged: (SelectedContent? selectedContent) {},
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
+            contextMenuBuilder: (BuildContext context, SelectableRegionState selectableRegionState) {
+              return AdaptiveTextSelectionToolbar.selectableRegion(
+                selectableRegionState: selectableRegionState,
+              );
+            },
             child: const Center(
               child: Text('How are you'),
             ),
