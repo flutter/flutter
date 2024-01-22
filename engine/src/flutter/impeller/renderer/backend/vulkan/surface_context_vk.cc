@@ -81,9 +81,6 @@ std::unique_ptr<Surface> SurfaceContextVK::AcquireNextSurface() {
     impeller::PipelineLibraryVK::Cast(*pipeline_library)
         .DidAcquireSurfaceFrame();
   }
-  if (auto allocator = parent_->GetResourceAllocator()) {
-    allocator->DidAcquireSurfaceFrame();
-  }
   parent_->GetCommandPoolRecycler()->Dispose();
   return surface;
 }

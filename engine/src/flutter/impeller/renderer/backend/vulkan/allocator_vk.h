@@ -37,8 +37,6 @@ class AllocatorVK final : public Allocator {
   bool supports_framebuffer_fetch_ = false;
   // TODO(jonahwilliams): figure out why CI can't create these buffer pools.
   bool created_buffer_pool_ = true;
-  uint32_t frame_count_ = 0;
-  std::thread::id raster_thread_id_;
 
   AllocatorVK(std::weak_ptr<Context> context,
               uint32_t vulkan_api_version,
@@ -49,9 +47,6 @@ class AllocatorVK final : public Allocator {
 
   // |Allocator|
   bool IsValid() const;
-
-  // |Allocator|
-  void DidAcquireSurfaceFrame() override;
 
   // |Allocator|
   std::shared_ptr<DeviceBuffer> OnCreateBuffer(
