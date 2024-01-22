@@ -2365,7 +2365,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     // Snapshot the input before using `await`.
-    // See https://github.com/flutter/flutter/issues/11427
+    // TODO(ianh): https://github.com/flutter/flutter/issues/11427
     final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data == null) {
       return;
