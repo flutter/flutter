@@ -2619,9 +2619,9 @@ TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
       ContentContext(GetContext(), TypographerContextSkia::Make());
 
   auto default_color_burn = content_context.GetBlendColorBurnPipeline(
-      {.has_stencil_attachment = false});
+      {.has_depth_stencil_attachments = false});
   auto alt_color_burn = content_context.GetBlendColorBurnPipeline(
-      {.has_stencil_attachment = true});
+      {.has_depth_stencil_attachments = true});
 
   ASSERT_NE(default_color_burn, alt_color_burn);
   ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
@@ -2690,7 +2690,7 @@ TEST_P(EntityTest, ContentContextOptionsHasReasonableHashFunctions) {
   opts.blend_mode = BlendMode::kColorBurn;
   auto hash_b = ContentContextOptions::Hash{}(opts);
 
-  opts.has_stencil_attachment = false;
+  opts.has_depth_stencil_attachments = false;
   auto hash_c = ContentContextOptions::Hash{}(opts);
 
   opts.primitive_type = PrimitiveType::kPoint;

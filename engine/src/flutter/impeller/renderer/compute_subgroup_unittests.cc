@@ -140,7 +140,7 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
     options.sample_count = pass.GetRenderTarget().GetSampleCount();
     options.color_attachment_pixel_format =
         pass.GetRenderTarget().GetRenderTargetPixelFormat();
-    options.has_stencil_attachment =
+    options.has_depth_stencil_attachments =
         pass.GetRenderTarget().GetStencilAttachment().has_value();
     options.blend_mode = BlendMode::kSourceIn;
     options.primitive_type = PrimitiveType::kTriangleStrip;
@@ -337,7 +337,7 @@ TEST_P(ComputeSubgroupTest, LargePath) {
     options.sample_count = pass.GetRenderTarget().GetSampleCount();
     options.color_attachment_pixel_format =
         pass.GetRenderTarget().GetRenderTargetPixelFormat();
-    options.has_stencil_attachment =
+    options.has_depth_stencil_attachments =
         pass.GetRenderTarget().GetStencilAttachment().has_value();
     options.blend_mode = BlendMode::kSourceIn;
     options.primitive_type = PrimitiveType::kTriangleStrip;
@@ -415,7 +415,7 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
     options.sample_count = pass.GetRenderTarget().GetSampleCount();
     options.color_attachment_pixel_format =
         pass.GetRenderTarget().GetRenderTargetPixelFormat();
-    options.has_stencil_attachment =
+    options.has_depth_stencil_attachments =
         pass.GetRenderTarget().GetStencilAttachment().has_value();
     options.blend_mode = BlendMode::kSourceIn;
     options.primitive_type = PrimitiveType::kTriangleStrip;

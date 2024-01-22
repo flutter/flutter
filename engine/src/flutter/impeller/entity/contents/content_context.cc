@@ -136,7 +136,8 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
   desc.SetColorAttachmentDescriptor(0u, color0);
 
-  if (!has_stencil_attachment) {
+  if (!has_depth_stencil_attachments) {
+    desc.ClearDepthAttachment();
     desc.ClearStencilAttachments();
   }
 

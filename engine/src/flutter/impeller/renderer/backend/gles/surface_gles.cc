@@ -40,24 +40,34 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(
   color0.load_action = LoadAction::kClear;
   color0.store_action = StoreAction::kStore;
 
-  TextureDescriptor stencil0_tex;
-  stencil0_tex.type = TextureType::kTexture2D;
-  stencil0_tex.format = color_format;
-  stencil0_tex.size = fbo_size;
-  stencil0_tex.usage =
+  TextureDescriptor depth_stencil_texture_desc;
+  depth_stencil_texture_desc.type = TextureType::kTexture2D;
+  depth_stencil_texture_desc.format = color_format;
+  depth_stencil_texture_desc.size = fbo_size;
+  depth_stencil_texture_desc.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-  stencil0_tex.sample_count = SampleCount::kCount1;
+  depth_stencil_texture_desc.sample_count = SampleCount::kCount1;
+
+  auto depth_stencil_tex = std::make_shared<TextureGLES>(
+      gl_context.GetReactor(), depth_stencil_texture_desc,
+      TextureGLES::IsWrapped::kWrapped);
+
+  DepthAttachment depth0;
+  depth0.clear_depth = 0;
+  depth0.texture = depth_stencil_tex;
+  depth0.load_action = LoadAction::kClear;
+  depth0.store_action = StoreAction::kDontCare;
 
   StencilAttachment stencil0;
   stencil0.clear_stencil = 0;
-  stencil0.texture = std::make_shared<TextureGLES>(
-      gl_context.GetReactor(), stencil0_tex, TextureGLES::IsWrapped::kWrapped);
+  stencil0.texture = depth_stencil_tex;
   stencil0.load_action = LoadAction::kClear;
   stencil0.store_action = StoreAction::kDontCare;
 
   RenderTarget render_target_desc;
 
   render_target_desc.SetColorAttachment(color0, 0u);
+  render_target_desc.SetDepthAttachment(depth0);
   render_target_desc.SetStencilAttachment(stencil0);
 
 #ifdef IMPELLER_DEBUG
