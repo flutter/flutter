@@ -6,9 +6,7 @@ import 'package:flutter/animation.dart';
 
 // The easing curves of the Material Library
 
-// TODO(guidezpl): deprecate the three curves below once customers (packages/plugins) are migrated
-
-/// The standard easing curve in the Material specification.
+/// The standard easing curve in the Material 2 specification.
 ///
 /// Elements that begin and end at rest use standard easing.
 /// They speed up quickly and slow down gradually, in order
@@ -16,18 +14,28 @@ import 'package:flutter/animation.dart';
 ///
 /// See also:
 /// * <https://material.io/design/motion/speed.html#easing>
+@Deprecated(
+  'Use Easing.legacy (M2) or Easing.standard (M3) instead. '
+  'This curve is updated in M3. '
+  'This feature was deprecated after v3.18.0-0.1.pre.'
+)
 const Curve standardEasing = Curves.fastOutSlowIn;
 
-/// The accelerate easing curve in the Material specification.
+/// The accelerate easing curve in the Material 2 specification.
 ///
 /// Elements exiting a screen use acceleration easing,
 /// where they start at rest and end at peak velocity.
 ///
 /// See also:
 /// * <https://material.io/design/motion/speed.html#easing>
+@Deprecated(
+  'Use Easing.legacyAccelerate (M2) or Easing.standardAccelerate (M3) instead. '
+  'This curve is updated in M3. '
+  'This feature was deprecated after v3.18.0-0.1.pre.'
+)
 const Curve accelerateEasing = Cubic(0.4, 0.0, 1.0, 1.0);
 
-/// The decelerate easing curve in the Material specification.
+/// The decelerate easing curve in the Material 2 specification.
 ///
 /// Incoming elements are animated using deceleration easing,
 /// which starts a transition at peak velocity (the fastest
@@ -35,4 +43,9 @@ const Curve accelerateEasing = Cubic(0.4, 0.0, 1.0, 1.0);
 ///
 /// See also:
 /// * <https://material.io/design/motion/speed.html#easing>
+@Deprecated(
+  'Use Easing.legacyDecelerate (M2) or Easing.standardDecelerate (M3) instead. '
+  'This curve is updated in M3. '
+  'This feature was deprecated after v3.18.0-0.1.pre.'
+)
 const Curve decelerateEasing = Cubic(0.0, 0.0, 0.2, 1.0);
