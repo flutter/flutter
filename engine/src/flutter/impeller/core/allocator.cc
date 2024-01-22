@@ -58,8 +58,6 @@ std::shared_ptr<Texture> Allocator::CreateTexture(
   return OnCreateTexture(desc);
 }
 
-void Allocator::DidAcquireSurfaceFrame() {}
-
 uint16_t Allocator::MinimumBytesPerRow(PixelFormat format) const {
   return BytesPerPixelForPixelFormat(format);
 }
