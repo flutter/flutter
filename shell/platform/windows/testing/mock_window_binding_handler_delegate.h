@@ -16,7 +16,7 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
  public:
   MockWindowBindingHandlerDelegate() {}
 
-  MOCK_METHOD(void, OnWindowSizeChanged, (size_t, size_t), (override));
+  MOCK_METHOD(bool, OnWindowSizeChanged, (size_t, size_t), (override));
   MOCK_METHOD(void, OnWindowRepaint, (), (override));
   MOCK_METHOD(void,
               OnPointerMove,

@@ -20,9 +20,12 @@ class WindowBindingHandlerDelegate {
   using KeyEventCallback = std::function<void(bool)>;
 
   // Notifies delegate that backing window size has changed.
-  // Typically called by currently configured WindowBindingHandler, this is
-  // called on the platform thread.
-  virtual void OnWindowSizeChanged(size_t width, size_t height) = 0;
+  //
+  // Called by |FlutterWindow| on the platform thread.
+  //
+  // Returns true if the delegate completed the window resize synchronously.
+  // The return value is exposed for unit testing.
+  virtual bool OnWindowSizeChanged(size_t width, size_t height) = 0;
 
   // Notifies delegate that backing window needs to be repainted.
   // Typically called by currently configured WindowBindingHandler.

@@ -105,7 +105,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   void SetFlutterCursor(HCURSOR cursor);
 
   // |WindowBindingHandlerDelegate|
-  void OnWindowSizeChanged(size_t width, size_t height) override;
+  bool OnWindowSizeChanged(size_t width, size_t height) override;
 
   // |WindowBindingHandlerDelegate|
   void OnWindowRepaint() override;
