@@ -459,7 +459,7 @@ class _IndicatorPainter extends CustomPainter {
 
   final TabController controller;
   final Decoration indicator;
-  final TabBarIndicatorSize? indicatorSize;
+  final TabBarIndicatorSize indicatorSize;
   final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
   final List<EdgeInsetsGeometry> labelPaddings;
@@ -555,9 +555,11 @@ class _IndicatorPainter extends CustomPainter {
     final Rect toRect = indicatorRect(size, to);
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
 
-    if (indicatorSize == TabBarIndicatorSize.label) {
-      _currentRect = _applyStretchEffect(_currentRect!);
-    }
+    _currentRect = switch (indicatorSize) {
+      TabBarIndicatorSize.label => _applyStretchEffect(_currentRect!),
+      // Do nothing
+      TabBarIndicatorSize.tab => _currentRect,
+    };
 
     assert(_currentRect != null);
 
@@ -580,7 +582,7 @@ class _IndicatorPainter extends CustomPainter {
     final double value = controller.animation!.value;
 
     // The progress of the animation from 0 to 1
-    double tabChangeProgress;
+    late double tabChangeProgress;
 
     // If we are changing tabs via index, we want to map the progress between 0 and 1
     if (controller.indexIsChanging) {
@@ -1400,7 +1402,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
       indicator: _getIndicator(indicatorSize),
-      indicatorSize: widget.indicatorSize ?? tabBarTheme.indicatorSize ?? _defaults.indicatorSize!,
+      indicatorSize: indicatorSize,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
