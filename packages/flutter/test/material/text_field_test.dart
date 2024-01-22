@@ -7875,7 +7875,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('TextField semantics alway include label and not hint when input value is not empty', (WidgetTester tester) async {
+  testWidgets('TextField semantics always include label and not hint when input value is not empty', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController(text: 'value');
     final Key key = UniqueKey();
@@ -8854,7 +8854,7 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 4.0),
+            data: const MediaQueryData(textScaler: TextScaler.linear(4.0)),
             child: Center(
               child: TextField(
                 decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),
@@ -14964,6 +14964,31 @@ void main() {
     await tester.pumpAndSettle(); // label animation.
     // The label will always float above the content.
     expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/140607.
+  testWidgets('TextFields can inherit errorStyle color from InputDecorationTheme.', (WidgetTester tester) async {
+    Widget textFieldBuilder() {
+      return MaterialApp(
+        theme: ThemeData(
+          inputDecorationTheme: const InputDecorationTheme(
+            errorStyle: TextStyle(color: Colors.green),
+          ),
+        ),
+        home: const Scaffold(
+          body: TextField(
+            decoration: InputDecoration(
+              errorText: 'error',
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(textFieldBuilder());
+    await tester.pumpAndSettle();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.cursorColor, Colors.green);
   });
 
   group('MaxLengthEnforcement', () {

@@ -280,6 +280,8 @@ abstract interface class DeletableChipAttributes {
   ///
   /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
   /// used.
+  ///
+  /// If the chip is disabled, the delete button tooltip will not be shown.
   String? get deleteButtonTooltipMessage;
 }
 
@@ -1128,7 +1130,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       child: _wrapWithTooltip(
         tooltip: widget.deleteButtonTooltipMessage
           ?? MaterialLocalizations.of(context).deleteButtonTooltip,
-        enabled: widget.onDeleted != null,
+        enabled: widget.isEnabled && widget.onDeleted != null,
         child: InkWell(
           // Radius should be slightly less than the full size of the chip.
           radius: (_kChipHeight + (widget.padding?.vertical ?? 0.0)) * .45,
@@ -1155,16 +1157,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
-
-    /// The chip at text scale 1 starts with 8px on each side and as text scaling
-    /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
-    /// Once the widget has a text scaling of 2 or higher than the label padding
-    /// remains 4px.
-    final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
-      const EdgeInsets.symmetric(horizontal: 8.0),
-      const EdgeInsets.symmetric(horizontal: 4.0),
-      clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
-    )!;
 
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);
@@ -1210,10 +1202,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     // Widget's label style is merged with this below.
     final TextStyle labelStyle = chipTheme.labelStyle
       ?? chipDefaults.labelStyle!;
-    final EdgeInsetsGeometry labelPadding = widget.labelPadding
-      ?? chipTheme.labelPadding
-      ?? chipDefaults.labelPadding
-      ?? defaultLabelPadding;
     final IconThemeData? iconTheme = widget.iconTheme
       ?? chipTheme.iconTheme
       ?? chipDefaults.iconTheme;
@@ -1227,6 +1215,23 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           child: widget.avatar!,
         )
       : widget.avatar;
+
+    /// The chip at text scale 1 starts with 8px on each side and as text scaling
+    /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+    /// Once the widget has a text scaling of 2 or higher than the label padding
+    /// remains 4px.
+    final double defaultFontSize = effectiveLabelStyle.fontSize ?? 14.0;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+    final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(effectiveTextScale - 1.0, 0.0, 1.0),
+    )!;
+
+    final EdgeInsetsGeometry labelPadding = widget.labelPadding
+      ?? chipTheme.labelPadding
+      ?? chipDefaults.labelPadding
+      ?? defaultLabelPadding;
 
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
@@ -2317,16 +2322,24 @@ class _ChipDefaultsM3 extends ChipThemeData {
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
 
-  /// The chip at text scale 1 starts with 8px on each side and as text scaling
-  /// gets closer to 2, the label padding is linearly interpolated from 8px to 4px.
-  /// Once the widget has a text scaling of 2 or higher than the label padding
-  /// remains 4px.
+  /// The label padding of the chip scales with the font size specified in the
+  /// [labelStyle], and the system font size settings that scale font sizes
+  /// globally.
+  ///
+  /// The chip at effective font size 14.0 starts with 8px on each side and as
+  /// the font size scales up to closer to 28.0, the label padding is linearly
+  /// interpolated from 8px to 4px. Once the label has a font size of 2 or
+  /// higher, label padding remains 4px.
   @override
-  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
-  )!;
+  EdgeInsetsGeometry? get labelPadding {
+    final double fontSize = labelStyle?.fontSize ?? 14.0;
+    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
+    return EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(fontSizeRatio - 1.0, 0.0, 1.0),
+    )!;
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - Chip

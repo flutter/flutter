@@ -1063,19 +1063,19 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
     bool needsAssembleSemanticsNode = false;
-    bool needsChildConfigrationsDelegate = false;
+    bool needsChildConfigurationsDelegate = false;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.recognizer != null) {
         needsAssembleSemanticsNode = true;
         break;
       }
-      needsChildConfigrationsDelegate = needsChildConfigrationsDelegate || info.isPlaceholder;
+      needsChildConfigurationsDelegate = needsChildConfigurationsDelegate || info.isPlaceholder;
     }
 
     if (needsAssembleSemanticsNode) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
-    } else if (needsChildConfigrationsDelegate) {
+    } else if (needsChildConfigurationsDelegate) {
       config.childConfigurationsDelegate = _childSemanticsConfigurationsDelegate;
     } else {
       if (_cachedAttributedLabels == null) {
