@@ -142,6 +142,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (platform.isWindows)
         WindowsVersionValidator(
           operatingSystemUtils: globals.os,
+          processLister: ProcessLister(globals.processManager),
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
@@ -427,7 +428,7 @@ class Doctor {
             final DoctorValidator subValidator = validator.subValidators[i];
 
             // Ensure that all of the subvalidators in the group have
-            // a corresponding subresult incase a validator crashed
+            // a corresponding subresult in case a validator crashed
             final ValidationResult subResult;
             try {
               subResult = validator.subResults[i];

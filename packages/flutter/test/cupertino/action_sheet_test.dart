@@ -293,8 +293,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),
@@ -361,8 +362,9 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
           screenHeight = MediaQuery.sizeOf(context).height;
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: Text('Very long content' * 200),
@@ -958,62 +960,80 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
+                  id: 2,
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.scopesRoute,
-                        SemanticsFlag.namesRoute,
-                      ],
-                      label: 'Alert',
+                      id: 6,
                       children: <TestSemantics>[
                         TestSemantics(
+                          id: 7,
                           flags: <SemanticsFlag>[
-                            SemanticsFlag.hasImplicitScrolling,
+                            SemanticsFlag.scopesRoute,
+                            SemanticsFlag.namesRoute
                           ],
+                          label: 'Alert',
+                          textDirection: TextDirection.ltr,
                           children: <TestSemantics>[
                             TestSemantics(
-                              label: 'The title',
-                            ),
-                            TestSemantics(
-                              label: 'The message',
-                            ),
-                          ],
-                        ),
-                        TestSemantics(
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasImplicitScrolling,
-                          ],
-                          children: <TestSemantics>[
-                            TestSemantics(
+                              id: 8,
                               flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasImplicitScrolling
                               ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 9,
+                                  label: 'The title',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  id: 10,
+                                  label: 'The message',
+                                  textDirection: TextDirection.ltr,
+                                ),
                               ],
-                              label: 'One',
                             ),
                             TestSemantics(
+                              id: 11,
                               flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasImplicitScrolling
                               ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 12,
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isButton
+                                  ],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap
+                                  ],
+                                  label: 'One',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  id: 13,
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isButton
+                                  ],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap
+                                  ],
+                                  label: 'Two',
+                                  textDirection: TextDirection.ltr,
+                                ),
                               ],
-                              label: 'Two',
+                            ),
+                            TestSemantics(
+                              id: 14,
+                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'Cancel',
+                              textDirection: TextDirection.ltr,
                             ),
                           ],
-                        ),
-                        TestSemantics(
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isButton,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.tap,
-                          ],
-                          label: 'Cancel',
                         ),
                       ],
                     ),
@@ -1039,8 +1059,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),

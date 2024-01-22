@@ -97,8 +97,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -119,8 +118,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -139,8 +137,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -162,8 +159,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -179,8 +175,7 @@ void main() {
         image: imageProvider1,
         excludeFromSemantics: true,
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -199,8 +194,7 @@ void main() {
         image: imageProvider2,
         excludeFromSemantics: true,
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -217,8 +211,7 @@ void main() {
         image: imageProvider1,
         excludeFromSemantics: true,
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -238,8 +231,7 @@ void main() {
         excludeFromSemantics: true,
         image: imageProvider2,
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -927,8 +919,7 @@ void main() {
                 image: imageProvider1,
             ),
         ),
-        null,
-        EnginePhase.layout,
+        phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -951,8 +942,7 @@ void main() {
               image: imageProvider2,
             ),
         ),
-        null,
-        EnginePhase.layout,
+        phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -965,10 +955,10 @@ void main() {
     final Image image2 = Image(image: _TestImageProvider()..complete(image10x10.clone()), width: 20.0, excludeFromSemantics: true);
 
     final Column column = Column(children: <Widget>[image1, image2]);
-    await tester.pumpWidget(column, null, EnginePhase.layout);
+    await tester.pumpWidget(column, phase:EnginePhase.layout);
 
     final Column columnSwapped = Column(children: <Widget>[image2, image1]);
-    await tester.pumpWidget(columnSwapped, null, EnginePhase.layout);
+    await tester.pumpWidget(columnSwapped, phase: EnginePhase.layout);
 
     final List<RenderImage> renderObjects = tester.renderObjectList<RenderImage>(find.byType(Image)).toList();
     expect(renderObjects, hasLength(2));
@@ -1420,8 +1410,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     // only listener from resolveStreamForKey is left.
@@ -1454,8 +1443,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     // only listener from resolveStreamForKey is left.
@@ -1853,7 +1841,10 @@ void main() {
     skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
-  testWidgets('Reports image size when painted', (WidgetTester tester) async {
+  testWidgets('Reports image size when painted',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
