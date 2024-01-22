@@ -58,31 +58,8 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
   String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
 }
 
-/// An interface for building the selection UI, to be provided by the
+/// An interface for building the selection handles UI, to be provided by the
 /// implementer of the toolbar widget.
-///
-/// Parts of this class, including [buildToolbar], have been deprecated in favor
-/// of [EditableText.contextMenuBuilder], which is now the preferred way to
-/// customize the context menus.
-///
-/// ## Use with [EditableText.contextMenuBuilder]
-///
-/// For backwards compatibility during the deprecation period, when
-/// [EditableText.selectionControls] is set to an object that does not mix in
-/// [TextSelectionHandleControls], [EditableText.contextMenuBuilder] is ignored
-/// in favor of the deprecated [buildToolbar].
-///
-/// To migrate code from [buildToolbar] to the preferred
-/// [EditableText.contextMenuBuilder], while still using [buildHandle], mix in
-/// [TextSelectionHandleControls] into the [TextSelectionControls] subclass when
-/// moving any toolbar code to a callback passed to
-/// [EditableText.contextMenuBuilder].
-///
-/// In due course, [buildToolbar] will be removed, and the mixin will no longer
-/// be necessary as a way to flag to the framework that the code has been
-/// migrated and does not expect [buildToolbar] to be called.
-///
-/// For more information, see <https://docs.flutter.dev/release/breaking-changes/context-menus>.
 ///
 /// See also:
 ///
@@ -231,7 +208,8 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.selectionControls}
   final TextSelectionControls? selectionControls;
 
-  /// {@macro flutter.widgets.SelectionOverlay.selectionDelegate}
+  /// The delegate for manipulating the current selection in the owning text
+  /// field.
   final TextSelectionDelegate selectionDelegate;
 
   late final SelectionOverlay _selectionOverlay;
@@ -1386,8 +1364,6 @@ class SelectionOverlay {
 // should follow the correct fading behavior for the current platform, then be
 // made public and de-duplicated with widgets/selectable_region.dart.
 // https://github.com/flutter/flutter/issues/107732
-// Wrap the given child in the widgets common to both contextMenuBuilder and
-// TextSelectionControls.buildToolbar.
 class _SelectionToolbarWrapper extends StatefulWidget {
   const _SelectionToolbarWrapper({
     this.visibility,
