@@ -98,13 +98,7 @@ struct GoldenPlaygroundTest::GoldenPlaygroundTestImpl {
 
 GoldenPlaygroundTest::GoldenPlaygroundTest()
     : typographer_context_(TypographerContextSkia::Make()),
-      pimpl_(new GoldenPlaygroundTest::GoldenPlaygroundTestImpl()) {
-  if (GetParam() == PlaygroundBackend::kMetal) {
-    pimpl_->screenshotter = std::make_unique<testing::MetalScreenshotter>();
-  } else if (GetParam() == PlaygroundBackend::kVulkan) {
-    pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>();
-  }
-}
+      pimpl_(new GoldenPlaygroundTest::GoldenPlaygroundTestImpl()) {}
 
 GoldenPlaygroundTest::~GoldenPlaygroundTest() = default;
 
@@ -131,6 +125,12 @@ void GoldenPlaygroundTest::SetUp() {
       GetBackend() != PlaygroundBackend::kVulkan) {
     GTEST_SKIP_("GoldenPlaygroundTest doesn't support this backend type.");
     return;
+  }
+
+  if (GetParam() == PlaygroundBackend::kMetal) {
+    pimpl_->screenshotter = std::make_unique<testing::MetalScreenshotter>();
+  } else if (GetParam() == PlaygroundBackend::kVulkan) {
+    pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>();
   }
 
   std::string test_name = GetTestName();
