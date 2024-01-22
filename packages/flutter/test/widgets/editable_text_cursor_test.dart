@@ -83,6 +83,11 @@ void main() {
           style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           keyboardType: TextInputType.text,
           onChanged: (String value) {
             changedValue = value;
@@ -138,6 +143,11 @@ void main() {
           style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           keyboardType: TextInputType.text,
           onChanged: (String value) {
             changedValue = value;
@@ -1035,6 +1045,11 @@ void main() {
               style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return AdaptiveTextSelectionToolbar.editableText(
+                  editableTextState: editableTextState,
+                );
+              },
               keyboardType: TextInputType.text,
               onChanged: (String value) {
                 changedValue = value;
@@ -1096,6 +1111,11 @@ void main() {
               style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return AdaptiveTextSelectionToolbar.editableText(
+                  editableTextState: editableTextState,
+                );
+              },
               keyboardType: TextInputType.text,
               onChanged: (String value) {
                 changedValue = value;
