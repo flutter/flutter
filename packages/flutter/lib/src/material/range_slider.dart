@@ -1628,10 +1628,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   /// Describe the semantics of the start thumb.
-  SemanticsNode? _startSemanticsNode = SemanticsNode();
+  SemanticsNode? _startSemanticsNode;
 
   /// Describe the semantics of the end thumb.
-  SemanticsNode? _endSemanticsNode = SemanticsNode();
+  SemanticsNode? _endSemanticsNode;
 
   // Create the semantics configuration for a single value.
   SemanticsConfiguration _createSemanticsConfiguration(
@@ -1697,6 +1697,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       width: kMinInteractiveDimension,
       height: kMinInteractiveDimension,
     );
+
+    _startSemanticsNode ??= SemanticsNode();
+    _endSemanticsNode ??= SemanticsNode();
+
     switch (textDirection) {
       case TextDirection.ltr:
         _startSemanticsNode!.rect = leftRect;
