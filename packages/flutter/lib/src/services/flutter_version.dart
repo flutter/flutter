@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// [FlutterVersion] contains various meta information about with which 
+/// [FlutterVersion] contains various meta information about with which
 /// Flutter version this app was compiled.
 /// It tries to mimic the information that is seen when executing `flutter --version`.
 ///
