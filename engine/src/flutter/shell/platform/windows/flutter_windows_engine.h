@@ -22,9 +22,10 @@
 #include "flutter/shell/platform/common/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
-#include "flutter/shell/platform/windows/angle_surface_manager.h"
 #include "flutter/shell/platform/windows/compositor.h"
 #include "flutter/shell/platform/windows/cursor_handler.h"
+#include "flutter/shell/platform/windows/egl/manager.h"
+#include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
@@ -140,11 +141,9 @@ class FlutterWindowsEngine {
     return texture_registrar_.get();
   }
 
-  // The ANGLE surface manager object. If this is nullptr, then we are
+  // The EGL manager object. If this is nullptr, then we are
   // rendering using software instead of OpenGL.
-  AngleSurfaceManager* surface_manager() const {
-    return surface_manager_.get();
-  }
+  egl::Manager* egl_manager() const { return egl_manager_.get(); }
 
   WindowProcDelegateManager* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
@@ -363,10 +362,10 @@ class FlutterWindowsEngine {
   // The texture registrar.
   std::unique_ptr<FlutterWindowsTextureRegistrar> texture_registrar_;
 
-  // An object used for intializing Angle and creating / destroying render
-  // surfaces. Surface creation functionality requires a valid render_target.
-  // May be nullptr if ANGLE failed to initialize.
-  std::unique_ptr<AngleSurfaceManager> surface_manager_;
+  // An object used for intializing ANGLE and creating / destroying render
+  // surfaces. If nullptr, ANGLE failed to initialize and software rendering
+  // should be used instead.
+  std::unique_ptr<egl::Manager> egl_manager_;
 
   // The compositor that creates backing stores for the engine to render into
   // and then presents them onto views.
@@ -426,7 +425,7 @@ class FlutterWindowsEngine {
 
   std::shared_ptr<WindowsProcTable> windows_proc_table_;
 
-  std::shared_ptr<GlProcTable> gl_;
+  std::shared_ptr<egl::ProcTable> gl_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };

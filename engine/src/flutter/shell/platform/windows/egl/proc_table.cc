@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/gl_proc_table.h"
+#include "flutter/shell/platform/windows/egl/proc_table.h"
 
 #include <EGL/egl.h>
 
 namespace flutter {
+namespace egl {
 
-std::shared_ptr<GlProcTable> GlProcTable::Create() {
-  auto gl = std::shared_ptr<GlProcTable>(new GlProcTable());
+std::shared_ptr<ProcTable> ProcTable::Create() {
+  auto gl = std::shared_ptr<ProcTable>(new ProcTable());
 
   gl->gen_textures_ =
       reinterpret_cast<GenTexturesProc>(::eglGetProcAddress("glGenTextures"));
@@ -30,39 +31,38 @@ std::shared_ptr<GlProcTable> GlProcTable::Create() {
   return gl;
 }
 
-GlProcTable::GlProcTable() = default;
+ProcTable::ProcTable() = default;
 
-GlProcTable::~GlProcTable() = default;
+ProcTable::~ProcTable() = default;
 
-void GlProcTable::GenTextures(GLsizei n, GLuint* textures) const {
+void ProcTable::GenTextures(GLsizei n, GLuint* textures) const {
   gen_textures_(n, textures);
 }
 
-void GlProcTable::DeleteTextures(GLsizei n, const GLuint* textures) const {
+void ProcTable::DeleteTextures(GLsizei n, const GLuint* textures) const {
   delete_textures_(n, textures);
 }
 
-void GlProcTable::BindTexture(GLenum target, GLuint texture) const {
+void ProcTable::BindTexture(GLenum target, GLuint texture) const {
   bind_texture_(target, texture);
 }
 
-void GlProcTable::TexParameteri(GLenum target,
-                                GLenum pname,
-                                GLint param) const {
+void ProcTable::TexParameteri(GLenum target, GLenum pname, GLint param) const {
   tex_parameteri_(target, pname, param);
 }
 
-void GlProcTable::TexImage2D(GLenum target,
-                             GLint level,
-                             GLint internalformat,
-                             GLsizei width,
-                             GLsizei height,
-                             GLint border,
-                             GLenum format,
-                             GLenum type,
-                             const void* data) const {
+void ProcTable::TexImage2D(GLenum target,
+                           GLint level,
+                           GLint internalformat,
+                           GLsizei width,
+                           GLsizei height,
+                           GLint border,
+                           GLenum format,
+                           GLenum type,
+                           const void* data) const {
   tex_image_2d_(target, level, internalformat, width, height, border, format,
                 type, data);
 }
 
+}  // namespace egl
 }  // namespace flutter

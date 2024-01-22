@@ -9,9 +9,9 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
-#include "flutter/shell/platform/windows/testing/mock_angle_surface_manager.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/mock_windows_proc_table.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
@@ -51,7 +51,7 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
 
         EXPECT_EQ(version, FLUTTER_ENGINE_VERSION);
         EXPECT_NE(config, nullptr);
-        // We have an AngleSurfaceManager, so this should be using OpenGL.
+        // We have an EGL manager, so this should be using OpenGL.
         EXPECT_EQ(config->type, kOpenGL);
         EXPECT_EQ(user_data, engine_instance);
         // Spot-check arguments.
@@ -131,8 +131,8 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
         return kSuccess;
       }));
 
-  // Set the AngleSurfaceManager to !nullptr to test ANGLE rendering.
-  modifier.SetSurfaceManager(std::make_unique<MockAngleSurfaceManager>());
+  // Set the EGL manager to !nullptr to test ANGLE rendering.
+  modifier.SetEGLManager(std::make_unique<egl::MockManager>());
 
   engine->Run();
 
@@ -144,7 +144,7 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
   // Ensure that deallocation doesn't call the actual Shutdown with the bogus
   // engine pointer that the overridden Run returned.
   modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
-  modifier.ReleaseSurfaceManager();
+  modifier.ReleaseEGLManager();
 }
 
 TEST_F(FlutterWindowsEngineTest, ConfiguresFrameVsync) {
@@ -196,7 +196,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEUsesSoftware) {
                 FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
-        // We don't have an AngleSurfaceManager, so we should be using software.
+        // We don't have an EGL Manager, so we should be using software.
         EXPECT_EQ(config->type, kSoftware);
         return kSuccess;
       }));
@@ -215,8 +215,8 @@ TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEUsesSoftware) {
       MOCK_ENGINE_PROC(SendPlatformMessage,
                        ([](auto engine, auto message) { return kSuccess; }));
 
-  // Set the AngleSurfaceManager to nullptr to test software fallback path.
-  modifier.SetSurfaceManager(nullptr);
+  // Set the EGL manager to nullptr to test software fallback path.
+  modifier.SetEGLManager(nullptr);
 
   engine->Run();
 
@@ -256,8 +256,8 @@ TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEOnImpellerFailsToStart) {
       MOCK_ENGINE_PROC(SendPlatformMessage,
                        ([](auto engine, auto message) { return kSuccess; }));
 
-  // Set the AngleSurfaceManager to nullptr to test software fallback path.
-  modifier.SetSurfaceManager(nullptr);
+  // Set the EGL manager to nullptr to test software fallback path.
+  modifier.SetEGLManager(nullptr);
 
   EXPECT_FALSE(engine->Run());
 }
