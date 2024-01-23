@@ -60,6 +60,12 @@ static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_CaptureContext_Vulkan",
 };
 
+/// TODO(https://github.com/flutter/flutter/issues/142017): Turn on validation
+/// for all vulkan tests.
+static const std::vector<std::string> kVulkanValidationTests = {
+    "impeller_Play_AiksTest_CanRenderTextFrame_Vulkan",
+};
+
 namespace {
 std::string GetTestName() {
   std::string suite_name =
@@ -127,13 +133,20 @@ void GoldenPlaygroundTest::SetUp() {
     return;
   }
 
+  bool enable_vulkan_validations = false;
+  std::string test_name = GetTestName();
+  if (std::find(kVulkanValidationTests.begin(), kVulkanValidationTests.end(),
+                test_name) != kVulkanValidationTests.end()) {
+    enable_vulkan_validations = true;
+  }
+
   if (GetParam() == PlaygroundBackend::kMetal) {
     pimpl_->screenshotter = std::make_unique<testing::MetalScreenshotter>();
   } else if (GetParam() == PlaygroundBackend::kVulkan) {
-    pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>();
+    pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
+        enable_vulkan_validations);
   }
 
-  std::string test_name = GetTestName();
   if (std::find(kSkipTests.begin(), kSkipTests.end(), test_name) !=
       kSkipTests.end()) {
     GTEST_SKIP_(
