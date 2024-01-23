@@ -223,6 +223,7 @@ class BuildInfo {
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
 
   /// The module system DDC is targeting, or null if not using DDC.
+  // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
   DdcModuleFormat? get ddcModuleFormat => _ddcModuleFormatFromFrontEndArgs(extraFrontEndOptions);
 
   /// 'true' if this build uses the DDC module system.
@@ -1055,6 +1056,7 @@ enum DdcModuleFormat {
   ddc,
 }
 
+// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
 DdcModuleFormat? _ddcModuleFormatFromFrontEndArgs(List<String>? extraFrontEndArgs) {
   if (extraFrontEndArgs == null) {
     return null;
