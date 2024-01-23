@@ -268,7 +268,7 @@ void main() {
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.1)));
     await tester.pumpAndSettle();
     if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
-     expect( _sizeAlmostEqual(tester.getSize(find.text(label)),const Size(15.65, 22.0)), true);
+      expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(15.65, 22.0)), true);
     }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.5)));
