@@ -2171,7 +2171,8 @@ targets:
   - name: Linux_pixel_7pro external_ui_integration_test
     recipe: devicelab/devicelab_drone
     # This test used to be presubmit: false. It should block engine rolls.
-    runIf: bin/internal/engine.version
+    runIf:
+      - bin/internal/engine.version
     timeout: 60
     properties:
       tags: >
@@ -4269,7 +4270,8 @@ targets:
   - name: Mac_ios external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     # This test used to be presubmit: false. It should block engine rolls.
-    runIf: bin/internal/engine.version
+    runIf:
+      - bin/internal/engine.version
     timeout: 60
     properties:
       tags: >
