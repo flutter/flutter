@@ -144,5 +144,6 @@
   "menuDismissLabel": "Tutup menu",
   "lookUpButtonLabel": "Cari",
   "searchWebButtonLabel": "Telusuri di Web",
-  "shareButtonLabel": "Bagikan..."
+  "shareButtonLabel": "Bagikan...",
+  "clearButtonTooltip": "Clear text"
 }
