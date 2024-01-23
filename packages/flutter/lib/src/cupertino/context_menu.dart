@@ -1220,13 +1220,13 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 
   Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
-    return switch ((contextMenuLocation, orientation)) {
-      (_ContextMenuLocation.center, Orientation.portrait ) => Alignment.bottomCenter,
-      (_ContextMenuLocation.center, Orientation.landscape) => Alignment.topRight,
-      (_ContextMenuLocation.right,  Orientation.portrait ) => Alignment.bottomCenter,
-      (_ContextMenuLocation.right,  Orientation.landscape) => Alignment.topLeft,
-      (_ContextMenuLocation.left,   Orientation.portrait ) => Alignment.bottomCenter,
-      (_ContextMenuLocation.left,   Orientation.landscape) => Alignment.topRight,
+    if (orientation == Orientation.portrait) {
+      return Alignment.bottomCenter;
+    }
+    return switch (contextMenuLocation) {
+      _ContextMenuLocation.left   => Alignment.topRight,
+      _ContextMenuLocation.center => Alignment.topRight,
+      _ContextMenuLocation.right  => Alignment.topLeft,
     };
   }
 
