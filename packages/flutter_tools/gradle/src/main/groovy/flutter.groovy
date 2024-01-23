@@ -42,10 +42,10 @@ import org.gradle.internal.os.OperatingSystem
 class FlutterExtension {
 
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    public final int compileSdkVersion = 34
+    final int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    public final int minSdkVersion = 19
+    final int minSdkVersion = 19
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -53,14 +53,14 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    public final int targetSdkVersion = 33
+    final int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public final String ndkVersion = "23.1.7779620"
+    final String ndkVersion = "23.1.7779620"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -704,7 +704,7 @@ class FlutterPlugin implements Plugin<Project> {
         File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
         File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
         if (buildGradle.exists() && buildGradleKts.exists()) {
-            project.logger.error(
+            logger.error(
                 "Both build.gradle and build.gradle.kts exist, so " +
                 "build.gradle.kts is ignored. This is likely a mistake."
             )
@@ -722,7 +722,7 @@ class FlutterPlugin implements Plugin<Project> {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
-            project.logger.error(
+            logger.error(
                 "Both settings.gradle and settings.gradle.kts exist, so " +
                 "settings.gradle.kts is ignored. This is likely a mistake."
             )
