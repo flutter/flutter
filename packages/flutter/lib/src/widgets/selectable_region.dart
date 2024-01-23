@@ -271,7 +271,7 @@ class SelectableRegion extends StatefulWidget {
   }) {
     final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
-    final bool canShare = onShare != null && switch (defaultTargetPlatform) {
+    final bool platformCanShare = switch (defaultTargetPlatform) {
       TargetPlatform.android
         => selectionGeometry.status == SelectionStatus.uncollapsed,
       TargetPlatform.macOS
@@ -279,13 +279,14 @@ class SelectableRegion extends StatefulWidget {
       || TargetPlatform.linux
       || TargetPlatform.windows
         => false,
-      // TODO(bleroux): the share button should be proposed on iOS but the share
+      // TODO(bleroux): the share button should be shown on iOS but the share
       // functionality requires some changes on the engine side because, on iPad,
       // it needs an anchor for the popup.
       // See: https://github.com/flutter/flutter/issues/141775.
       TargetPlatform.iOS
         => false,
     };
+    final bool canShare = onShare != null && platformCanShare;
 
     // On Android, the share button is before the select all button.
     final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
