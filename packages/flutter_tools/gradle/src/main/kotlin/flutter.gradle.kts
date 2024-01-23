@@ -116,8 +116,7 @@ class DependencyVersionChecker {
                 kgpVersion = getKGPVersion(project)
             } catch (ignored : Exception){
                 project.logger.error("Warning: unable to detect project KGP version. Skipping " +
-                        "version checking.")
-                println(ignored)
+                        "version checking.")    
             }
             if (kgpVersion != null) checkKGPVersion(kgpVersion!!, project)
         }
