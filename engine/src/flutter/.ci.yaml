@@ -130,7 +130,8 @@ targets:
         ]
       ignore_cache_paths: >-
         [
-          "builder/src/flutter/prebuilts/SDKs"
+          "builder/src/flutter/prebuilts/SDKs",
+          "builder/src/flutter/prebuilts/Library"
         ]
       gclient_variables: >-
         {
