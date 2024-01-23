@@ -146,5 +146,6 @@
   "menuDismissLabel": "Dismiss menu",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "shareButtonLabel": "Share...",
+  "clearButtonTooltip": "Clear text"
 }

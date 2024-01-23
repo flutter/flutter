@@ -6570,8 +6570,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
             ),
           ),
         ),
-        null,
-        EnginePhase.layout,
+        phase: EnginePhase.layout,
       );
     } finally {
       FlutterError.onError = oldHandler;

@@ -886,6 +886,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Typically this would be set to [CupertinoColors.inactiveGray].
   ///
   /// If this is null, the background cursor is not painted.
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   Color? get backgroundCursorColor => _caretPainter.backgroundCursorColor;
   set backgroundCursorColor(Color? value) {
     _caretPainter.backgroundCursorColor = value;
@@ -1181,6 +1186,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// moving the floating cursor.
   ///
   /// Defaults to a padding with left, top and right set to 4, bottom to 5.
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   EdgeInsets floatingCursorAddedMargin;
 
   bool _floatingCursorOn = false;
@@ -2381,6 +2391,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// Returns the position within the text field closest to the raw cursor offset.
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset, {bool? shouldResetOrigin}) {
     Offset deltaPosition = Offset.zero;
     final double topBound = -floatingCursorAddedMargin.top;
@@ -2440,6 +2455,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// Sets the screen position of the floating cursor and the text position
   /// closest to the cursor.
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset, TextPosition lastTextPosition, { double? resetLerpValue }) {
     if (state == FloatingCursorDragState.End) {
       _relativeOrigin = Offset.zero;
