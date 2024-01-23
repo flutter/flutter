@@ -1427,8 +1427,8 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
           int startIndex = 0;
           if (lastNextIndex != null && selectionAtStartOfSelectable) {
             startIndex = lastNextIndex + 1;
-          } else if (lastNextIndex != null) {
-            startIndex = index;
+          } else {
+            startIndex = lastNextIndex == null ? 0 : index;
           }
           for (int i = startIndex; i < index; i += 1) {
             dispatchSelectionEventToChild(selectables[i], SelectAllSelectionEvent());
