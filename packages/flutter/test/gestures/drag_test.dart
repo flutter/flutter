@@ -2136,6 +2136,11 @@ void main() {
     expect(updatedScrollDelta, isNull);
     expect(didEndPan, isFalse);
 
+    tester.route(touchDown);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
     tester.route(touchPointer.move(const Offset(25.0, 25.0)));
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, const Offset(5.0, 5.0));

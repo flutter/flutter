@@ -129,7 +129,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [MultitouchDragStrategy], which defines two different drag strategies for
+  ///  * [MultitouchDragStrategy], which defines several different drag strategies for
   ///  multi-finger drag.
   MultitouchDragStrategy multitouchDragStrategy;
 
@@ -397,7 +397,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       case MultitouchDragStrategy.maxAllPointers:
         result = true;
       case MultitouchDragStrategy.latestPointer:
-        result = _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.last;
+        result = _activePointer == null || pointer == _activePointer;
     }
     return result;
   }
@@ -646,11 +646,18 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   final List<int> _acceptedActivePointers = <int>[];
+  // This value is used when the multitouch strategy is `latestPointer`,
+  // it keeps track of the last accepted pointer. If this active pointer
+  // leave up, it will be set to the first accepted pointer.
+  // Refer to the implementation of Android `RecyclerView`(line 3846):
+  // https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-master-dev/recyclerview/recyclerview/src/main/java/androidx/recyclerview/widget/RecyclerView.java
+  int? _activePointer;
 
   @override
   void acceptGesture(int pointer) {
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
+    _activePointer = pointer;
     if (!onlyAcceptDragOnThreshold || _hasDragThresholdBeenMet) {
       _checkDrag(pointer);
     }
@@ -687,6 +694,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     // interested in winning the gesture arena for it.
     if (!_acceptedActivePointers.remove(pointer)) {
       resolvePointer(pointer, GestureDisposition.rejected);
+    }
+
+    if (_activePointer == pointer) {
+      _activePointer =
+        _acceptedActivePointers.isNotEmpty ? _acceptedActivePointers.first : null;
     }
   }
 

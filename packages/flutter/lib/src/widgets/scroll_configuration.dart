@@ -112,8 +112,8 @@ class ScrollBehavior {
   /// By default, [MultitouchDragStrategy.latestPointer] is configured to
   /// create drag gestures for non-Apple platforms, and
   /// [MultitouchDragStrategy.maxAllPointers] for Apple platforms.
-  MultitouchDragStrategy get multitouchDragStrategy {
-    switch (defaultTargetPlatform) {
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) {
+    switch (getPlatform(context)) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
         return MultitouchDragStrategy.maxAllPointers;
@@ -265,12 +265,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.scrollbars = true,
     this.overscroll = true,
     Set<PointerDeviceKind>? dragDevices,
-    MultitouchDragStrategy? multitouchDragStrategy,
+    this.multitouchDragStrategy,
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
   }) : _dragDevices = dragDevices,
-        _multitouchDragStrategy = multitouchDragStrategy,
        _pointerAxisModifiers = pointerAxisModifiers;
 
   final ScrollBehavior delegate;
@@ -279,17 +278,19 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
-  final MultitouchDragStrategy? _multitouchDragStrategy;
+  final MultitouchDragStrategy? multitouchDragStrategy;
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
 
   @override
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
-  MultitouchDragStrategy get multitouchDragStrategy => _multitouchDragStrategy ?? delegate.multitouchDragStrategy;
+  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
 
   @override
-  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) {
+    return multitouchDragStrategy ?? delegate.getMultitouchDragStrategy(context);
+  }
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {

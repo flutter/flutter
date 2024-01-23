@@ -368,7 +368,7 @@ void main() {
 
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
     expect(scrollBehavior.runtimeType, CupertinoScrollBehavior);
-    expect(scrollBehavior.multitouchDragStrategy, MultitouchDragStrategy.maxAllPointers);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.maxAllPointers);
   });
 
   testWidgets('A ScrollBehavior can be set for CupertinoApp', (WidgetTester tester) async {

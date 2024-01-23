@@ -274,7 +274,7 @@ void main() {
     // The default multitouchDragStrategy is latestPointer.
     // Only the latest active pointer be tracked.
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
-    expect(scrollBehavior.multitouchDragStrategy, MultitouchDragStrategy.latestPointer);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.latestPointer);
     expect(controller.position.pixels, 40.0);
 
     // Change to maxAllPointers.
@@ -344,7 +344,7 @@ void main() {
 
     // The default multitouchDragStrategy is maxAllPointers.
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
-    expect(scrollBehavior.multitouchDragStrategy, MultitouchDragStrategy.maxAllPointers);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.maxAllPointers);
     expect(controller.position.pixels, 50.0);
 
     // Change to latestPointer.

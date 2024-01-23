@@ -57,7 +57,7 @@ enum DragStartBehavior {
 enum MultitouchDragStrategy {
   /// Only the latest active pointer is tracked by the recognizer.
   ///
-  /// If the tracked pointer is released, the latest of the remaining active
+  /// If the tracked pointer is released, the first accepted of the remaining active
   /// pointers will continue to be tracked.
   ///
   /// This is the behavior typically seen on Android.
