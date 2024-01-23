@@ -59,7 +59,7 @@ void UpdateVsync(const FlutterWindowsEngine& engine, bool needs_vsync) {
     egl_manager->SetVSyncEnabled(needs_vsync);
 
     // Release the EGL context so that the raster thread can use it.
-    if (!egl_manager->ClearCurrent()) {
+    if (!egl_manager->render_context()->ClearCurrent()) {
       FML_LOG(ERROR)
           << "Unable to clear current surface after updating the swap interval";
       return;
