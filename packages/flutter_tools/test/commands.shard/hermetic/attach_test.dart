@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
