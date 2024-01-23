@@ -56,6 +56,27 @@ String indexHtmlFlutterJsPromisesFull = _generateFlutterJsIndexHtml('''
     });
 ''');
 
+/// index_with_flutterjs.html
+String indexHtmlFlutterJsLoad = _generateFlutterJsIndexHtml('''
+    window.addEventListener('load', function(ev) {
+      _flutter.buildConfig = {
+        builds: [
+          {
+            "compileTarget": "dartdevc",
+            "renderer": "html",
+            "mainJsPath": "main.dart.js",
+          }
+        ]
+      };
+      // Download main.dart.js
+      _flutter.loader.load({
+        serviceWorkerSettings: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+      });
+    });
+''');
+
 /// index_without_flutterjs.html
 String indexHtmlNoFlutterJs = '''
 <!DOCTYPE HTML>
