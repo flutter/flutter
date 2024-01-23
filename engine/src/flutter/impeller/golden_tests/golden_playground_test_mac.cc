@@ -63,6 +63,7 @@ static const std::vector<std::string> kSkipTests = {
 /// TODO(https://github.com/flutter/flutter/issues/142017): Turn on validation
 /// for all vulkan tests.
 static const std::vector<std::string> kVulkanValidationTests = {
+    "impeller_Play_AiksTest_CanRenderImageRect_Vulkan",
     "impeller_Play_AiksTest_CanRenderTextFrame_Vulkan",
 };
 
