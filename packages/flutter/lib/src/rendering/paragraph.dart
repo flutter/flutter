@@ -1806,7 +1806,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // When the start/end edges are swapped, i.e. the start is after the end, and
     // the scrollable synthesizes an event for the opposite edge, this will potentially
     // move the opposite edge outside of the origin text boundary and we are unable to recover.
-    debugPrint('wowza $fullText');
+    debugPrint('_updateSelectionEdgeByTextBoundary2 for: ${range.textInside(fullText)} $range');
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
 
@@ -1831,25 +1831,37 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // not located inside its rect.
     // _TextBoundaryRecord? textBoundary = _rect.contains(localPosition) ? getTextBoundary(position) : null;
     // _TextBoundaryRecord textBoundary = getTextBoundary(position);
-    _TextBoundaryRecord? textBoundary = boundingBoxes.any((Rect rect) => rect.contains(localPosition)) ? getTextBoundary(position) : null;
-    final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByTextBoundary2(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
-    debugPrint('lol');
-    _setSelectionPosition(targetPosition, isEnd: isEnd);
-    if (textBoundary != null) {
-      if (targetPosition.offset == range.end) {
+    bool positionInSelectable = boundingBoxes.any((Rect rect) => rect.contains(localPosition));
+    _TextBoundaryRecord? textBoundary = positionInSelectable ? getTextBoundary(position) : null;
+    debugPrint('textBoundary $textBoundary');
+    if (textBoundary == null) {
+      debugPrint('me no likey');
+      _setSelectionPosition(position, isEnd: isEnd);
+      if (position.offset == range.end) {
         return SelectionResult.next;
       }
 
-      if (targetPosition.offset == range.start) {
-        debugPrint('woah I dont like this prev $range ${targetPosition.offset} ${getTextBoundary(position)} $textBoundary end');
+      if (position.offset == range.start) {
         return SelectionResult.previous;
       }
     }
+    final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByTextBoundary2(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
+    debugPrint('targetPosition $targetPosition');
+    _setSelectionPosition(targetPosition, isEnd: isEnd);
+    // if (textBoundary == null) {
+    //   if (targetPosition.offset == range.end) {
+    //     return SelectionResult.next;
+    //   }
+
+    //   if (targetPosition.offset == range.start) {
+    //     debugPrint('woah I dont like this prev $range ${targetPosition.offset} ${getTextBoundary(position)} $textBoundary end');
+    //     return SelectionResult.previous;
+    //   }
+    // }
     // TODO(chunhtai): The geometry information should not be used to determine
     // selection result. This is a workaround to RenderParagraph, where it does
     // not have a way to get accurate text length if its text is truncated due to
     // layout constraint.
-    debugPrint('$fullText hello world $textBoundary');
     // return _handleSelectMultiFragmentTextBoundary2(textBoundary!);
     return _handleSelectMultiFragmentTextBoundary2(_getParagraphBoundaryAtPosition(position));
   }
