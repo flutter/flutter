@@ -328,6 +328,12 @@ bool EntityPass::Render(ContentContext& renderer,
     VALIDATION_LOG << "The root RenderTarget must have a color attachment.";
     return false;
   }
+  if (root_render_target.GetDepthAttachment().has_value() !=
+      root_render_target.GetStencilAttachment().has_value()) {
+    VALIDATION_LOG << "The root RenderTarget should have a stencil attachment "
+                      "iff it has a depth attachment.";
+    return false;
+  }
 
   capture.AddRect("Coverage",
                   Rect::MakeSize(root_render_target.GetRenderTargetSize()),

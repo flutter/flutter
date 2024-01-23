@@ -142,11 +142,25 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
 
   auto maybe_stencil = desc.GetFrontStencilAttachmentDescriptor();
+  auto maybe_depth = desc.GetDepthStencilAttachmentDescriptor();
+  FML_DCHECK(has_depth_stencil_attachments == maybe_depth.has_value())
+      << "Depth attachment doesn't match expected pipeline state. "
+         "has_depth_stencil_attachments="
+      << has_depth_stencil_attachments;
+  FML_DCHECK(has_depth_stencil_attachments == maybe_stencil.has_value())
+      << "Stencil attachment doesn't match expected pipeline state. "
+         "has_depth_stencil_attachments="
+      << has_depth_stencil_attachments;
   if (maybe_stencil.has_value()) {
     StencilAttachmentDescriptor stencil = maybe_stencil.value();
     stencil.stencil_compare = stencil_compare;
     stencil.depth_stencil_pass = stencil_operation;
     desc.SetStencilAttachmentDescriptors(stencil);
+  }
+  if (maybe_depth.has_value()) {
+    DepthAttachmentDescriptor depth = maybe_depth.value();
+    depth.depth_compare = CompareFunction::kAlways;
+    depth.depth_write_enabled = false;
   }
 
   desc.SetPrimitiveType(primitive_type);
