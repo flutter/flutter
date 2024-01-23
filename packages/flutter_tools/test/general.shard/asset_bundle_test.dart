@@ -671,12 +671,9 @@ assets:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(packagesPath: '.packages');
 
-    final DevFSStringContent? assetManifest = bundle.entries['AssetManifest.json']
-      as DevFSStringContent?;
-    final DevFSStringContent? fontManifest = bundle.entries['FontManifest.json']
-      as DevFSStringContent?;
-    final DevFSStringContent? license = bundle.entries['NOTICES']
-      as DevFSStringContent?;
+    final assetManifest = bundle.entries['AssetManifest.json'];
+    final fontManifest = bundle.entries['FontManifest.json'];
+    final license = bundle.entries['NOTICES'];
 
     await bundle.build(packagesPath: '.packages');
 
@@ -1077,8 +1074,8 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
-    expect((bundle.entries['FontManifest.json']! as DevFSStringContent).string, '[]');
-    expect((bundle.entries['AssetManifest.json']! as DevFSStringContent).string, '{}');
+    expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
+    expect((bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string, '{}');
     expect(testLogger.errorText, contains(
       'package:foo has `uses-material-design: true` set'
     ));
@@ -1149,10 +1146,10 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
-    expect((bundle.entries['FontManifest.json']! as DevFSStringContent).string, '[]');
+    expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
     // The assets from deferred components and regular assets
     // are both included in alphabetical order
-    expect((bundle.entries['AssetManifest.json']! as DevFSStringContent).string, '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
+    expect((bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string, '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),

@@ -543,7 +543,7 @@ class ManifestAssetBundle implements AssetBundle {
     // the uncompressed strings to not incur decompression/decoding while making
     // the comparison.
     if (!entries.containsKey(_kNoticeZippedFile) ||
-        (entries[_kNoticeZippedFile] as DevFSStringCompressingBytesContent?)
+        (entries[_kNoticeZippedFile]?.content as DevFSStringCompressingBytesContent?)
             ?.equals(combinedLicenses) != true) {
       entries[_kNoticeZippedFile] = AssetBundleEntry(
         DevFSStringCompressingBytesContent(
