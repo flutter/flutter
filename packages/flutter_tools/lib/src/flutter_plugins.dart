@@ -1424,7 +1424,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   PackageConfig packageConfig,
   String currentMainUri,
   File mainFile, {
-  bool throwOnPluginPubspecError = false,
+  bool throwOnPluginPubspecError = true,
 }) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
