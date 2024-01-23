@@ -1242,7 +1242,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   bool throwOnPluginPubspecError = true,
 }) {
-  final Iterable<String> platformKeys = <String>[
+  const Iterable<String> platformKeys = <String>[
     AndroidPlugin.kConfigKey,
     IOSPlugin.kConfigKey,
     LinuxPlugin.kConfigKey,
@@ -1339,9 +1339,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       // If it hasn't been skipped, it's a candidate for auto-registration, so
       // add it as a possible resolution.
       final String resolutionKey = getResolutionKey(platform: platformKey, packageName: implementsPackage);
-      if (!possibleResolutions.containsKey(resolutionKey)) {
-        possibleResolutions[resolutionKey] = <PluginInterfaceResolution>[];
-      }
+      possibleResolutions.putIfAbsent(resolutionKey, () => <PluginInterfaceResolution>[]);
       possibleResolutions[resolutionKey]!.add(PluginInterfaceResolution(
         plugin: plugin,
         platform: platformKey,
