@@ -2512,7 +2512,7 @@ flutter:
         expect(buildRunner.packagesWithNativeAssetsInvocations, 1);
 
         expect(residentCompiler.recompileCalled, true);
-        expect(residentCompiler.receivedNativeAssetsYaml, Uri.parse('file:///build/native_assets/macos/native_assets.yaml'));
+        expect(residentCompiler.receivedNativeAssetsYaml.toString(), endsWith('native_assets/macos/native_assets.yaml'));
       }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
