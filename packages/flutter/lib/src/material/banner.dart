@@ -366,7 +366,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
                       padding: leadingPadding,
                       child: widget.leading,
                     ),
-                   MediaQuery.withClampedTextScaling(
+                  MediaQuery.withClampedTextScaling(
                     // Set maximum text scale factor to _kMaxContentTextScaleFactor for the
                     // content to keep the visual hierarchy the same even with larger font
                     // sizes.
@@ -378,20 +378,19 @@ class _MaterialBannerState extends State<MaterialBanner> {
                       ),
                     ),
                   ),
-                  if (isSingleRow) MediaQuery.withClampedTextScaling(
-                    // Set maximum text scale factor to _kMaxContentTextScaleFactor for the
-                    // actionsBar to keep the visual hierarchy the same even with larger font
-                    // sizes.
-                    maxScaleFactor: _kMaxContentTextScaleFactor,
-                    child: actionsBar,
-                  ),
+                  if (isSingleRow)
+                    MediaQuery.withClampedTextScaling(
+                      // Set maximum text scale factor to _kMaxContentTextScaleFactor for the
+                      // actionsBar to keep the visual hierarchy the same even with larger font
+                      // sizes.
+                      maxScaleFactor: _kMaxContentTextScaleFactor,
+                      child: actionsBar,
+                    ),
                 ],
               ),
             ),
-            if (!isSingleRow)
-              actionsBar,
-            if (elevation == 0)
-              Divider(height: 0, color: dividerColor),
+            if (!isSingleRow) actionsBar,
+            if (elevation == 0) Divider(height: 0, color: dividerColor),
           ],
         ),
       ),

@@ -242,9 +242,9 @@ void main() {
     const String label = 'A';
     Widget buildApp({ required TextScaler textScaler }) {
       return MaterialApp(
-          home: MediaQuery(
-            data: MediaQueryData(textScaler: textScaler),
-            child: MaterialBanner(
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: textScaler),
+          child: MaterialBanner(
             forceActionsBelow: true,
             content: const SizedBox(child:Center(child:Text(label))),
             actions: <Widget>[
