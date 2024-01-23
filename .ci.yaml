@@ -2168,14 +2168,14 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: embedded_android_views_integration_test
 
-  - name: Linux_pixel_7pro external_ui_integration_test
+  - name: Linux_pixel_7pro external_textures_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: external_ui_integration_test
+      task_name: external_textures_integration_test
 
   # linux motog4 benchmark
   - name: Linux_android fading_child_animation_perf__timeline_summary
@@ -4265,14 +4265,14 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: imagefiltered_transform_animation_perf_ios__timeline_summary
 
-  - name: Mac_ios external_ui_integration_test_ios
+  - name: Mac_ios external_textures_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: external_ui_integration_test_ios
+      task_name: external_textures_integration_test_ios
       ignore_flakiness: "true"
 
   - name: Mac_ios route_test_ios
