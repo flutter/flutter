@@ -3339,4 +3339,42 @@ enum LiveTextInputStatus {
   'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 mixin TextSelectionHandleControls on TextSelectionControls {
+  /// Builds the text selection toolbar.
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) =>
+      const SizedBox.shrink();
+
+  /// Returns true if the cut action is enabled on this toolbar.
+  bool canCut(TextSelectionDelegate delegate) => false;
+
+  /// Returns true if the copy action is enabled on this toolbar.
+  bool canCopy(TextSelectionDelegate delegate) => false;
+
+  /// Returns true if the paste action is enabled on this toolbar.
+  bool canPaste(TextSelectionDelegate delegate) => false;
+
+  /// Returns true if the select all action is enabled on this toolbar.
+  bool canSelectAll(TextSelectionDelegate delegate) => false;
+
+  /// Performs the cut action.
+  void handleCut(TextSelectionDelegate delegate,
+      [ClipboardStatusNotifier? clipboardStatus]) {}
+
+  /// Performs the copy action.
+  void handleCopy(TextSelectionDelegate delegate,
+      [ClipboardStatusNotifier? clipboardStatus]) {}
+
+  /// Performs the paste action.
+  Future<void> handlePaste(TextSelectionDelegate delegate) async {}
+
+  /// Performs the select all action.
+  void handleSelectAll(TextSelectionDelegate delegate) {}
 }
