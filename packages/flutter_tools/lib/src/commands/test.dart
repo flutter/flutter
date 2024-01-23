@@ -424,6 +424,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // Running with concurrency will result in deploying multiple test apps
       // on the connected device concurrently, which is not supported.
       jobs = 1;
+    } else if (experimentalFasterTesting) {
+      if (argResults!.wasParsed('concurrency')) {
+        globals.printStatus(
+          '-j/--concurrency was parsed but will be ignored. This option is not '
+          'compatible with --experimental-faster-testing.',
+        );
+      }
     }
 
     final int? shardIndex = int.tryParse(stringArg('shard-index') ?? '');
@@ -456,7 +463,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final bool ipv6 = boolArg('ipv6');
-    if (experimentalFasterTesting && enableVmService) {
+    if (experimentalFasterTesting && ipv6) {
       globals.printStatus(
         '--ipv6 was parsed but will be ignored. This option is not compatible '
         'with --experimental-faster-testing.',
@@ -537,7 +544,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         excludeTags: excludeTags,
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
-        concurrency: jobs,
         testAssetDirectory: testAssetDirectory,
         flutterProject: flutterProject,
         randomSeed: stringArg('test-randomize-ordering-seed'),
