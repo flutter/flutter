@@ -339,6 +339,19 @@ class FlutterPlugin implements Plugin<Project> {
                 implementation("androidx.multidex:multidex:2.0.1")
             }
             }
+
+        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
+        // supported range.
+        if (!project.hasProperty("skipDependencyChecks") || !project.getProperty("skipDependencyChecks")) {
+            try {
+                project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                        "gradle", "src", "main", "kotlin", "dependency_version_checker.gradle.kts")
+            } catch (Exception ignored) {
+                project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
+                        "AGP, and KGP versions. Skipping dependency version checking.")
+            }
+        }
+
         // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "kotlin", "flutter.gradle.kts")
 
