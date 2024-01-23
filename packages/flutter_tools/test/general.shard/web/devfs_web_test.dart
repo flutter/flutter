@@ -800,7 +800,7 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
-      webRenderer: WebRendererMode.canvaskit,
+      webRenderer: WebRendererMode.html,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
