@@ -648,7 +648,7 @@ flutter:
 
     await writeBundle(
       directory,
-      <String, AssetBundleEntry>{},
+      const <String, AssetBundleEntry>{},
       loggerOverride: testLogger,
       targetPlatform: TargetPlatform.android,
       impellerStatus: ImpellerStatus.disabled,
