@@ -752,9 +752,6 @@ void main() {
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
-    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
-    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
-
     // Generated entrypoint.
     expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
       contains('GENERATED'));
@@ -864,10 +861,6 @@ void main() {
 
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
-
-    // Toggle CanvasKit
-    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
-    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
 
     // Generated entrypoint.
     expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
