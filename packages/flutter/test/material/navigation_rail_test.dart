@@ -5479,47 +5479,60 @@ TestSemantics _expectedSemantics() {
   return TestSemantics.root(
     children: <TestSemantics>[
       TestSemantics(
+        id: 1,
         textDirection: TextDirection.ltr,
         children: <TestSemantics>[
           TestSemantics(
+            id: 2,
             children: <TestSemantics>[
               TestSemantics(
+                id: 3,
                 children: <TestSemantics>[
                   TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                    id: 4,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.isSelected,
-                          SemanticsFlag.isFocusable,
+                        id: 5,
+                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 6,
+                            flags: <SemanticsFlag>[SemanticsFlag.isSelected,
+                              SemanticsFlag.isFocusable],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'Abc\nTab 1 of 4',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            id: 7,
+                            flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'Def\nTab 2 of 4',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            id: 8,
+                            flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'Ghi\nTab 3 of 4',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            id: 9,
+                            flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'Jkl\nTab 4 of 4',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
-                        label: 'Abc\nTab 1 of 4',
-                        textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
-                        label: 'Def\nTab 2 of 4',
+                        id: 10,
+                        label: 'body',
                         textDirection: TextDirection.ltr,
                       ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
-                        label: 'Ghi\nTab 3 of 4',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
-                        label: 'Jkl\nTab 4 of 4',
-                        textDirection: TextDirection.ltr,
-                      ),
-                    ]
-                  ),
-                  TestSemantics(
-                    label: 'body',
-                    textDirection: TextDirection.ltr,
+                    ],
                   ),
                 ],
               ),
