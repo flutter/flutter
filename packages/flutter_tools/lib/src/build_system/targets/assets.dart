@@ -75,7 +75,7 @@ Future<Depfile> copyAssets(
 
   final IconTreeShaker iconTreeShaker = IconTreeShaker(
     environment,
-    assetBundle.entries[kFontManifestJson] as DevFSStringContent?,
+    assetBundle.entries[kFontManifestJson]?.content as DevFSStringContent?,
     processManager: environment.processManager,
     logger: environment.logger,
     fileSystem: environment.fileSystem,
