@@ -270,7 +270,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a2dfdefd9b1248689264bfe8b48e1c83b5e80039',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '5d969bd98e31ec90c23ccb982666ace80559f442',
 
   'src/flutter/third_party/rapidjson':
    Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
