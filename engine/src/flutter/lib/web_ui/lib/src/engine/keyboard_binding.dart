@@ -472,7 +472,7 @@ class KeyboardConverter {
             timeStamp: timeStamp,
             type: ui.KeyEventType.up,
             physical: physicalKey,
-            logical: logicalKey(),
+            logical: _pressingRecords[physicalKey]!,
             character: null,
             synthesized: true,
           ));
