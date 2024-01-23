@@ -144,5 +144,6 @@
   "menuDismissLabel": "Отхвърляне на менюто",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Търсене в мрежата",
-  "shareButtonLabel": "Споделяне..."
+  "shareButtonLabel": "Споделяне...",
+  "clearButtonTooltip": "Clear text"
 }

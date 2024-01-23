@@ -32,6 +32,9 @@ abstract class MaterialLocalizations {
   /// The [BackButton]'s tooltip.
   String get backButtonTooltip;
 
+  /// The tooltip for the clear button to clear text on [SearchAnchor]'s search view.
+  String get clearButtonTooltip;
+
   /// The [CloseButton]'s tooltip.
   String get closeButtonTooltip;
 
@@ -1052,6 +1055,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get backButtonTooltip => 'Back';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonTooltip => 'Close';

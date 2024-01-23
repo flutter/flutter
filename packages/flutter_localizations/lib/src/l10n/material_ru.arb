@@ -151,5 +151,6 @@
   "menuDismissLabel": "Закрыть меню",
   "lookUpButtonLabel": "Найти",
   "searchWebButtonLabel": "Искать в интернете",
-  "shareButtonLabel": "Поделиться"
+  "shareButtonLabel": "Поделиться",
+  "clearButtonTooltip": "Clear text"
 }
