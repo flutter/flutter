@@ -600,8 +600,6 @@ class TextField extends StatefulWidget {
   final bool? enabled;
 
   /// Determines whether this widget ignores pointer events.
-  ///
-  /// If false this widget responds to all pointer events.
   final bool? ignorePointers;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
