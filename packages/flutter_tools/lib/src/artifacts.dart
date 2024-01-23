@@ -97,6 +97,7 @@ enum HostArtifact {
   webPlatformDart2JSSoundKernelDill,
 
   /// The precompiled SDKs and sourcemaps for web debug builds with the AMD module system.
+  // TODO(markzipan): delete these when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
   webPrecompiledAmdSdk,
   webPrecompiledAmdSdkSourcemaps,
   webPrecompiledAmdCanvaskitSdk,

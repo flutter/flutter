@@ -6,7 +6,6 @@ import 'package:package_config/package_config.dart';
 
 const String _currentDirectoryScript = r"""
 var _currentDirectory = (function () {
-  var _url;
   var lines = new Error().stack.split('\n');
   function lookupUrl() {
     if (lines.length > 2) {
@@ -26,7 +25,7 @@ var _currentDirectory = (function () {
     // Safari.
     return lines[0].match(/[@](.+):\d+:\d+$/)[1];
   }
-  _url = lookupUrl();
+  var _url = lookupUrl();
   var lastSlash = _url.lastIndexOf('/');
   if (lastSlash == -1) return _url;
   var currentDirectory = _url.substring(0, lastSlash + 1);
@@ -119,12 +118,14 @@ function getTTScriptUrl(scriptName) {
   let appName = "$entrypoint";
 
   // A uuid that identifies a subapp.
+  // Stubbed out since subapps aren't supported in Flutter.
   let uuid = "00000000-0000-0000-0000-000000000000";
 
   window.postMessage(
       {type: "DDC_STATE_CHANGE", state: "initial_load", targetUuid: uuid}, "*");
 
-  // Load pre-requisite DDC scripts. We intentionally use invalid names to avoid namespace clashes.
+  // Load pre-requisite DDC scripts.
+  // We intentionally use invalid names to avoid namespace clashes.
   let prerequisiteScripts = [
     {
       "src": getTTScriptUrl("moduleLoader"),

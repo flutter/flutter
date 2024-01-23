@@ -1053,7 +1053,6 @@ enum NullSafetyMode {
 enum DdcModuleFormat {
   amd,
   ddc,
-  es6,
 }
 
 DdcModuleFormat? _ddcModuleFormatFromFrontEndArgs(List<String>? extraFrontEndArgs) {
