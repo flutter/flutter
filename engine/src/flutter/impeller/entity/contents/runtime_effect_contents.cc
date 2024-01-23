@@ -141,7 +141,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
   const std::shared_ptr<const Capabilities>& caps = context->GetCapabilities();
   const auto color_attachment_format = caps->GetDefaultColorFormat();
-  const auto stencil_attachment_format = caps->GetDefaultStencilFormat();
+  const auto stencil_attachment_format = caps->GetDefaultDepthStencilFormat();
 
   using VS = RuntimeEffectVertexShader;
 
@@ -303,10 +303,11 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     desc.SetColorAttachmentDescriptor(
         0u, {.format = color_attachment_format, .blending_enabled = true});
 
-    StencilAttachmentDescriptor stencil0;
-    stencil0.stencil_compare = CompareFunction::kEqual;
-    desc.SetStencilAttachmentDescriptors(stencil0);
+    desc.SetStencilAttachmentDescriptors(StencilAttachmentDescriptor{});
     desc.SetStencilPixelFormat(stencil_attachment_format);
+
+    desc.SetDepthStencilAttachmentDescriptor(DepthAttachmentDescriptor{});
+    desc.SetDepthPixelFormat(stencil_attachment_format);
 
     options.ApplyToPipelineDescriptor(desc);
     auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
