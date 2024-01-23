@@ -5,6 +5,25 @@
 import org.gradle.api.JavaVersion
 import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
+// This buildscript block supplies dependencies for this file's own import
+// declarations above. It exists solely for compatibility with projects that
+// have not migrated to declaratively apply the Flutter Gradle Plugin;
+// for those that have, FGP's `build.gradle.kts`  takes care of this.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // When bumping, also update:
+        //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/flutter.groovy
+        //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
+        //  * AGP version in dependencies block in packages/flutter_tools/gradle/build.gradle.kts
+        classpath("com.android.tools.build:gradle:7.3.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
+    }
+}
+
 apply<FlutterPluginKts>()
 
 class FlutterPluginKts : Plugin<Project> {
@@ -98,6 +117,7 @@ class DependencyVersionChecker {
             } catch (ignored : Exception){
                 project.logger.error("Warning: unable to detect project KGP version. Skipping " +
                         "version checking.")
+                println(ignored)
             }
             if (kgpVersion != null) checkKGPVersion(kgpVersion!!, project)
         }
@@ -137,6 +157,11 @@ class DependencyVersionChecker {
         }
 
         fun getKGPVersion(project : Project) : Version {
+            // This property corresponds to application of the Kotlin Gradle plugin in the
+            // top-level build.gradle file.
+            if (project.hasProperty("kotlin_version")) {
+                return Version.fromString(project.properties.get("kotlin_version") as String)
+            }
             val kotlinPlugin = project.getPlugins()
                 .findPlugin(KotlinAndroidPluginWrapper::class.java)!!
             val versionfield =
