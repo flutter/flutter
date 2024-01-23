@@ -2521,6 +2521,7 @@
 ../../../third_party/dart/sdk/lib/html/doc
 ../../../third_party/dart/sdk/lib/libraries.json
 ../../../third_party/dart/sdk/lib/libraries.yaml
+../../../third_party/dart/sdk/lib/svg/dart2js
 ../../../third_party/dart/sdk/lib/vmservice_libraries.json
 ../../../third_party/dart/sdk/lib/vmservice_libraries.yaml
 ../../../third_party/dart/sdk/version

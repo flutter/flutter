@@ -1,4 +1,4 @@
-Signature: 070d855e9daf0706a6209be7505b27e1
+Signature: bfe079de7a6c5c5c2ce1f7e9837a17ac
 
 ====================================================================================================
 LIBRARY: dart
@@ -857,7 +857,6 @@ ORIGIN: ../../../third_party/dart/sdk/lib/io/secure_server_socket.dart + ../../.
 ORIGIN: ../../../third_party/dart/sdk/lib/isolate/isolate.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/math/math.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/math/random.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart + ../../../third_party/dart/LICENSE
@@ -1225,7 +1224,6 @@ FILE: ../../../third_party/dart/sdk/lib/io/secure_server_socket.dart
 FILE: ../../../third_party/dart/sdk/lib/isolate/isolate.dart
 FILE: ../../../third_party/dart/sdk/lib/math/math.dart
 FILE: ../../../third_party/dart/sdk/lib/math/random.dart
-FILE: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
