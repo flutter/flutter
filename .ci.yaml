@@ -2168,7 +2168,7 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: embedded_android_views_integration_test
 
-  - name: Linux_pixel_7pro external_textures_integration_test
+  - name: Linux_pixel_7pro external_ui_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4265,7 +4265,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: imagefiltered_transform_animation_perf_ios__timeline_summary
 
-  - name: Mac_ios external_textures_integration_test_ios
+  - name: Mac_ios external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

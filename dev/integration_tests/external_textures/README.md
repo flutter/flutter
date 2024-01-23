@@ -37,6 +37,11 @@ flutter drive lib/frame_rate_main.dart --driver test_driver/frame_rate_test.dart
 >
 > See [`devicelab/lib/tasks/integration_tests.dart`](../../devicelab/lib/tasks/integration_tests.dart)
 > and search for `createExternalTexturesIntegrationTest`.
+>
+> The actual tests are run by task runners:
+>
+> - [Android](../../devicelab/bin/tasks/external_textures_integration_test.dart)
+> - [iOS](../../devicelab/bin/tasks/external_textures_integration_test_ios.dart)
 
 [^1]: Only iOS and Android.
 [^2]: Unfortunately documentation is quite limited. See [#142021](https://github.com/flutter/flutter/issues/142021).
