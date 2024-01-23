@@ -26,6 +26,7 @@ final int kPhysicalShiftRight = kWebToPhysicalKey['ShiftRight']!;
 final int kPhysicalMetaLeft = kWebToPhysicalKey['MetaLeft']!;
 final int kPhysicalCapsLock = kWebToPhysicalKey['CapsLock']!;
 final int kPhysicalScrollLock = kWebToPhysicalKey['ScrollLock']!;
+final int kPhysicalBracketLeft = kWebToPhysicalKey['BracketLeft']!;
 // A web-specific physical key when code is empty.
 const int kPhysicalEmptyCode = 0x1700000000;
 
@@ -41,6 +42,9 @@ final int kLogicalAltLeft = kWebLogicalLocationMap['Alt']![kLocationLeft]!;
 final int kLogicalMetaLeft = kWebLogicalLocationMap['Meta']![kLocationLeft]!;
 final int kLogicalCapsLock = kWebToLogicalKey['CapsLock']!;
 final int kLogicalScrollLock = kWebToLogicalKey['ScrollLock']!;
+final int kLogicalProcess = kWebToLogicalKey['Process']!;
+const int kWebKeyIdPlane = 0x1700000000;
+final int kLogicalBracketLeft = kPhysicalBracketLeft + kWebKeyIdPlane; // Dead key algorithm.
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -515,6 +519,49 @@ void testMain() {
       deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
+      character: null,
+    );
+    expect(MockKeyboardEvent.lastDefaultPrevented, isTrue);
+  });
+
+  test('Duplicate down is preceded with synthesized up using registered logical key', () {
+    // Regression test for https://github.com/flutter/flutter/issues/126247.
+    final List<ui.KeyData> keyDataList = <ui.KeyData>[];
+    final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
+      keyDataList.add(key);
+      return true;
+    }, OperatingSystem.linux);
+
+    // This test simulates the use of 'BracketLeft' on a french keyboard, see:
+    // https://github.com/flutter/flutter/issues/126247#issuecomment-1856112566.
+    converter.handleEvent(keyDownEvent('BracketLeft', 'Dead'));
+    expect(MockKeyboardEvent.lastDefaultPrevented, isTrue);
+    expectKeyData(keyDataList.first,
+      type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
+      physical: kPhysicalBracketLeft,
+      logical: kLogicalBracketLeft,
+      character: null,
+    );
+
+    // A KeyUp of BracketLeft is missed.
+    keyDataList.clear();
+
+    converter.handleEvent(keyDownEvent('BracketLeft', 'Process'));
+    expect(keyDataList, hasLength(2));
+    expectKeyData(keyDataList.first,
+      type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
+      physical: kPhysicalBracketLeft,
+      logical: kLogicalBracketLeft,
+      character: null,
+      synthesized: true,
+    );
+    expectKeyData(keyDataList.last,
+      type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
+      physical: kPhysicalBracketLeft,
+      logical: kLogicalProcess,
       character: null,
     );
     expect(MockKeyboardEvent.lastDefaultPrevented, isTrue);
