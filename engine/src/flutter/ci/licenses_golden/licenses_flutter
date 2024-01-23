@@ -7233,6 +7233,10 @@ ORIGIN: ../../../flutter/shell/platform/windows/direct_manipulation.cc + ../../.
 ORIGIN: ../../../flutter/shell/platform/windows/direct_manipulation.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/dpi_utils.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/dpi_utils.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/context.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/context.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/egl.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/egl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/egl/manager.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/egl/manager.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/egl/proc_table.cc + ../../../flutter/LICENSE
@@ -10103,6 +10107,10 @@ FILE: ../../../flutter/shell/platform/windows/direct_manipulation.cc
 FILE: ../../../flutter/shell/platform/windows/direct_manipulation.h
 FILE: ../../../flutter/shell/platform/windows/dpi_utils.cc
 FILE: ../../../flutter/shell/platform/windows/dpi_utils.h
+FILE: ../../../flutter/shell/platform/windows/egl/context.cc
+FILE: ../../../flutter/shell/platform/windows/egl/context.h
+FILE: ../../../flutter/shell/platform/windows/egl/egl.cc
+FILE: ../../../flutter/shell/platform/windows/egl/egl.h
 FILE: ../../../flutter/shell/platform/windows/egl/manager.cc
 FILE: ../../../flutter/shell/platform/windows/egl/manager.h
 FILE: ../../../flutter/shell/platform/windows/egl/proc_table.cc

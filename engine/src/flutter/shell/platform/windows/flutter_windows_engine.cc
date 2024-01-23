@@ -65,7 +65,7 @@ FlutterRendererConfig GetOpenGLRendererConfig() {
     if (!host->egl_manager()) {
       return false;
     }
-    return host->egl_manager()->ClearContext();
+    return host->egl_manager()->render_context()->ClearCurrent();
   };
   config.open_gl.present = [](void* user_data) -> bool { FML_UNREACHABLE(); };
   config.open_gl.fbo_reset_after_present = true;
@@ -82,7 +82,7 @@ FlutterRendererConfig GetOpenGLRendererConfig() {
     if (!host->egl_manager()) {
       return false;
     }
-    return host->egl_manager()->MakeResourceCurrent();
+    return host->egl_manager()->resource_context()->MakeCurrent();
   };
   config.open_gl.gl_external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,

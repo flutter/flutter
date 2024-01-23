@@ -23,10 +23,12 @@ class MockManager : public flutter::egl::Manager {
   MOCK_METHOD(void, DestroySurface, (), (override));
 
   MOCK_METHOD(bool, MakeCurrent, (), (override));
-  MOCK_METHOD(bool, ClearCurrent, (), (override));
   MOCK_METHOD(void, SetVSyncEnabled, (bool), (override));
 
   MOCK_METHOD(bool, SwapBuffers, (), (override));
+
+  MOCK_METHOD(flutter::egl::Context*, render_context, (), (const, override));
+  MOCK_METHOD(flutter::egl::Context*, resource_context, (), (const, override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockManager);

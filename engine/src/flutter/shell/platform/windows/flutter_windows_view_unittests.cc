@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_context.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
@@ -1305,6 +1306,7 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAtStartup) {
   auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
   std::unique_ptr<egl::MockManager> egl_manager =
       std::make_unique<egl::MockManager>();
+  egl::MockContext render_context;
 
   EXPECT_CALL(*engine.get(), running).WillRepeatedly(Return(false));
   EXPECT_CALL(*engine.get(), PostRasterThreadTask).Times(0);
@@ -1321,7 +1323,9 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAtStartup) {
       .Times(1)
       .WillOnce(Return(true));
   EXPECT_CALL(*egl_manager.get(), SetVSyncEnabled(false)).Times(1);
-  EXPECT_CALL(*egl_manager.get(), ClearCurrent).WillOnce(Return(true));
+  EXPECT_CALL(*egl_manager.get(), render_context)
+      .WillOnce(Return(&render_context));
+  EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
 
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*egl_manager.get(), DestroySurface).Times(1);
@@ -1342,6 +1346,7 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAtStartup) {
   auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
   std::unique_ptr<egl::MockManager> egl_manager =
       std::make_unique<egl::MockManager>();
+  egl::MockContext render_context;
 
   EXPECT_CALL(*engine.get(), running).WillRepeatedly(Return(false));
   EXPECT_CALL(*engine.get(), PostRasterThreadTask).Times(0);
@@ -1357,7 +1362,9 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAtStartup) {
       .Times(1)
       .WillOnce(Return(true));
   EXPECT_CALL(*egl_manager.get(), SetVSyncEnabled(true)).Times(1);
-  EXPECT_CALL(*egl_manager.get(), ClearCurrent).WillOnce(Return(true));
+  EXPECT_CALL(*egl_manager.get(), render_context)
+      .WillOnce(Return(&render_context));
+  EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
 
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*egl_manager.get(), DestroySurface).Times(1);
@@ -1397,7 +1404,7 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAfterStartup) {
         return true;
       });
   EXPECT_CALL(*egl_manager.get(), SetVSyncEnabled(false)).Times(1);
-  EXPECT_CALL(*egl_manager.get(), ClearCurrent).Times(0);
+  EXPECT_CALL(*egl_manager.get(), render_context).Times(0);
 
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*egl_manager.get(), DestroySurface).Times(1);
@@ -1438,7 +1445,7 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAfterStartup) {
         return true;
       });
   EXPECT_CALL(*egl_manager.get(), SetVSyncEnabled(true)).Times(1);
-  EXPECT_CALL(*egl_manager.get(), ClearCurrent).Times(0);
+  EXPECT_CALL(*egl_manager.get(), render_context).Times(0);
 
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*egl_manager.get(), DestroySurface).Times(1);
@@ -1473,7 +1480,7 @@ TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
       .WillOnce(Return(false))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(*egl_manager.get(), ClearCurrent).Times(0);
+  EXPECT_CALL(*egl_manager.get(), render_context).Times(0);
 
   EngineModifier modifier(engine.get());
   FlutterWindowsView view(std::move(window_binding_handler),
