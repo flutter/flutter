@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -47,6 +49,8 @@ void main() {
 
       final List<Device> devices = await discoverer.devices();
       expect(devices, isNotNull);
+      expect(devices.first.id, 'mac-designed-for-ipad');
+      expect(devices.first is MacOSDesignedForIPadDevice, true);
     });
 
     testWithoutContext('no device on x86', () async {

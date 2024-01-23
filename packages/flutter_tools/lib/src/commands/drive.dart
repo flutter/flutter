@@ -224,7 +224,7 @@ class DriveCommand extends RunCommandBase {
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
-      if (device is! MacOSDesignedForIPadDevice) {
+      if (device is MacOSDesignedForIPadDevice) {
         throwToolExit('Mac Designed for iPad is currently not supported for flutter drive.');
       }
     }
