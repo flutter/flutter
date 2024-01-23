@@ -18,7 +18,7 @@ namespace testing {
 /// playground backend.
 class VulkanScreenshotter : public Screenshotter {
  public:
-  VulkanScreenshotter();
+  explicit VulkanScreenshotter(bool enable_validations);
 
   std::unique_ptr<Screenshot> MakeScreenshot(
       AiksContext& aiks_context,
