@@ -671,9 +671,9 @@ assets:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(packagesPath: '.packages');
 
-    final assetManifest = bundle.entries['AssetManifest.json'];
-    final fontManifest = bundle.entries['FontManifest.json'];
-    final license = bundle.entries['NOTICES'];
+    final AssetBundleEntry? assetManifest = bundle.entries['AssetManifest.json'];
+    final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
+    final AssetBundleEntry? license = bundle.entries['NOTICES'];
 
     await bundle.build(packagesPath: '.packages');
 
