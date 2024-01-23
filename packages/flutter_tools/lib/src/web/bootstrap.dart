@@ -143,7 +143,7 @@ function getTTScriptUrl(scriptName) {
     prerequisiteLoads.push(forceLoadModule(prerequisiteScripts[i].src));
   }
   Promise.all(prerequisiteLoads).then((_) => afterPrerequisiteLogic());
- 
+
   // Save the current script so we can access it in a closure.
   var _currentScript = document.currentScript;
 
