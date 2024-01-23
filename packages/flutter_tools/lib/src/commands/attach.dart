@@ -90,6 +90,7 @@ class AttachCommand extends FlutterCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
+    usesNativeAssetsOption(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -536,6 +537,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           dillOutputPath: stringArg('output-dill'),
           ipv6: usesIpv6,
           flutterProject: flutterProject,
+          nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
           analytics: analytics,
         )
       : ColdRunner(
@@ -569,6 +571,7 @@ class HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
+    String? nativeAssetsYamlFile,
     required Analytics analytics,
   }) => HotRunner(
     devices,
@@ -581,6 +584,7 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
+    nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
   );
 }
