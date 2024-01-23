@@ -2173,6 +2173,7 @@ targets:
     # This test used to be presubmit: false. It should block engine rolls.
     runIf:
       - bin/internal/engine.version
+      - .ci.yaml
     timeout: 60
     properties:
       tags: >
@@ -4272,6 +4273,7 @@ targets:
     # This test used to be presubmit: false. It should block engine rolls.
     runIf:
       - bin/internal/engine.version
+      - .ci.yaml
     timeout: 60
     properties:
       tags: >
