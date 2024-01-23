@@ -243,26 +243,30 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            label: 'Line one',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Line two',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isButton,
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable
+                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                label: 'Line one',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                label: 'Line two',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.isButton,
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable
+                                ],
+                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                label: 'Button',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Button',
-                            textDirection: TextDirection.ltr,
                           ),
                         ],
                       ),
@@ -1421,7 +1425,7 @@ void main() {
     );
 
     testWidgets(
-      'right-click mouse shows the context menu at position on Android, Fucshia, and Windows',
+      'right-click mouse shows the context menu at position on Android, Fuchsia, and Windows',
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();

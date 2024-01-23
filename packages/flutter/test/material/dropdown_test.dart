@@ -1330,59 +1330,70 @@ void main() {
 
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        TestSemantics.rootChild(
-          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-          label: 'Dismiss',
-          textDirection: TextDirection.ltr,
+        TestSemantics(
           children: <TestSemantics>[
             TestSemantics(
-              flags: <SemanticsFlag>[
-                SemanticsFlag.scopesRoute,
-                SemanticsFlag.namesRoute,
-              ],
-              label: 'Popup menu',
               children: <TestSemantics>[
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
                       flags: <SemanticsFlag>[
-                        SemanticsFlag.hasImplicitScrolling,
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
                       ],
+                      label: 'Popup menu',
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: 'one',
-                          textDirection: TextDirection.ltr,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isFocused,
-                            SemanticsFlag.isFocusable,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasImplicitScrolling,
+                              ],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'one',
+                                  textDirection: TextDirection.ltr,
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isFocused,
+                                    SemanticsFlag.isFocusable,
+                                  ],
+                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                ),
+                                TestSemantics(
+                                  label: 'two',
+                                  textDirection: TextDirection.ltr,
+                                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                ),
+                                TestSemantics(
+                                  label: 'three',
+                                  textDirection: TextDirection.ltr,
+                                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                ),
+                                TestSemantics(
+                                  label: 'four',
+                                  textDirection: TextDirection.ltr,
+                                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                ),
+                              ],
+                            ),
                           ],
-                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                        ),
-                        TestSemantics(
-                          label: 'two',
-                          textDirection: TextDirection.ltr,
-                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                        ),
-                        TestSemantics(
-                          label: 'three',
-                          textDirection: TextDirection.ltr,
-                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                        ),
-                        TestSemantics(
-                          label: 'four',
-                          textDirection: TextDirection.ltr,
-                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
                         ),
                       ],
                     ),
                   ],
+                ),
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[]
                 ),
               ],
             ),
@@ -2269,16 +2280,16 @@ void main() {
       'three',
     ];
     String? item = items[0];
-    late MediaQueryData mediaQuery;
+    late double textScale;
 
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             builder: (BuildContext context, Widget? child) {
-              mediaQuery = MediaQuery.of(context);
+              textScale = MediaQuery.of(context).textScaler.scale(14) / 14;
               return MediaQuery(
-                data: mediaQuery,
+                data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
                 child: child!,
               );
             },
@@ -2292,9 +2303,7 @@ void main() {
                 onChanged: (String? newItem) {
                   setState(() {
                     item = newItem;
-                    mediaQuery = mediaQuery.copyWith(
-                      textScaleFactor: mediaQuery.textScaleFactor + 0.1,
-                    );
+                    textScale += 0.1;
                   });
                 },
               ),
