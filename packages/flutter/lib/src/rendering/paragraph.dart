@@ -364,7 +364,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return results;
   }
 
-
   // Should be null if selection is not enabled, i.e. _registrar = null. The
   // paragraph splits on [PlaceholderSpan.placeholderCodeUnit], and stores each
   // fragment in this list.

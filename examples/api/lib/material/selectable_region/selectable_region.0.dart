@@ -273,8 +273,6 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   @override
   int? get contentLength => 1;
 
-
-
   LayerLink? _startHandle;
   LayerLink? _endHandle;
 
