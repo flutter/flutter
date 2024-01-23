@@ -538,7 +538,7 @@ void main() {
 
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the resolution errors',
         ));
 
         expect(
@@ -627,7 +627,7 @@ void main() {
           ]);
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the resolution errors',
         ));
 
         expect(
@@ -684,7 +684,7 @@ void main() {
           ]);
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the resolution errors',
         ));
 
         expect(

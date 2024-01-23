@@ -1347,7 +1347,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     }
   }
   if (hasPubspecError && throwOnPluginPubspecError) {
-    throwToolExit('Please resolve the errors');
+    throwToolExit('Please resolve the pubspec errors');
   }
 
   // Now resolve all the possible resolutions to a single option for each
@@ -1400,7 +1400,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     }
   }
   if (hasResolutionError) {
-    throwToolExit('Please resolve the errors');
+    throwToolExit('Please resolve the resolution errors');
   }
   return finalResolution;
 }
