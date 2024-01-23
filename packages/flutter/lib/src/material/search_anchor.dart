@@ -20,6 +20,7 @@ import 'ink_well.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'material_state.dart';
 import 'search_bar_theme.dart';
 import 'search_view_theme.dart';
@@ -811,6 +812,7 @@ class _ViewContentState extends State<_ViewContent> {
   Widget build(BuildContext context) {
     final Widget defaultLeading = IconButton(
       icon: const Icon(Icons.arrow_back),
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () { Navigator.of(context).pop(); },
       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
     );
@@ -818,6 +820,7 @@ class _ViewContentState extends State<_ViewContent> {
     final List<Widget> defaultTrailing = <Widget>[
       if (_controller.text.isNotEmpty) IconButton(
         icon: const Icon(Icons.close),
+        tooltip: MaterialLocalizations.of(context).clearButtonTooltip,
         onPressed: () {
           _controller.clear();
         },
