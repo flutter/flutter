@@ -2233,7 +2233,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     );
   }
 
-
   // Clears the selection on all selectables not in the range of
   // currentSelectionStartIndex..currentSelectionEndIndex.
   //
