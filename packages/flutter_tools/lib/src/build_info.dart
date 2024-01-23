@@ -226,9 +226,6 @@ class BuildInfo {
   // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
   DdcModuleFormat? get ddcModuleFormat => _ddcModuleFormatFromFrontEndArgs(extraFrontEndOptions);
 
-  /// 'true' if this build uses the DDC module system.
-  bool get usesDdcModules => ddcModuleFormat == DdcModuleFormat.ddc;
-
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
   ///

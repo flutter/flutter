@@ -168,8 +168,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       : NullSafetyMode.unsound;
   }
 
-  bool get _usesDdcModules => buildInfo.usesDdcModules;
-
   final Configuration _config;
   final shelf.Server _server;
   Uri get url => _server.url;
@@ -211,12 +209,12 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk {
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap = _usesDdcModules ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
     return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[_rendererMode]![_nullSafetyMode]!));
   }
 
   File get _dartSdkSourcemaps {
-      final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>  dartSdkArtifactMap = _usesDdcModules ? kDdcDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+      final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>  dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
     return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[_rendererMode]![_nullSafetyMode]!));
   }
 
