@@ -747,9 +747,7 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
-    this.getSemanticsCanCopy = defaultGetSemanticsCanCopy,
-    this.getSemanticsCanCut = defaultGetSemanticsCanCut,
-    this.getSemanticsCanPaste = defaultGetSemanticsCanPaste,
+    this.semanticsActions = _defaultSemanticsActions,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -881,14 +879,13 @@ class EditableText extends StatefulWidget {
   /// If null, this widget will create its own [UndoHistoryController].
   final UndoHistoryController? undoController;
 
-  /// Determines whether or not copying through [Semantics] is possible.
-  final SemanticsEnabledCallback getSemanticsCanCopy;
-
-  /// Determines whether or not cutting through [Semantics] is possible.
-  final SemanticsEnabledCallback getSemanticsCanCut;
-
-  /// Determines whether or not pasting through [Semantics] is possible.
-  final SemanticsEnabledCallback getSemanticsCanPaste;
+  /// Which [EditableTextSemanticsActions] are enabled.
+  ///
+  /// These represent text editing actions as used through [Semantics], such as
+  /// by a user's accessibility software.
+  ///
+  /// Defaults to enabling all [EditableTextSemanticsActions].
+  final EditableTextSemanticsActions semanticsActions;
 
   /// {@template flutter.widgets.editableText.strutStyle}
   /// The strut style used for the vertical layout.
@@ -1724,9 +1721,7 @@ class EditableText extends StatefulWidget {
   /// removing the "Paste" button here will not affect a user's ability to
   /// perform a semantics paste action into the field with their accessibility
   /// software. To control which semantics actions are available on the field,
-  /// use [EditableText.getSemanticsCanCut],
-  /// [EditableText.getSemanticsCanCopy], and
-  /// [EditableText.getSemanticsCanPaste].
+  /// use [EditableText.semanticsActions].
   ///
   /// See also:
   ///   * [AdaptiveTextSelectionToolbar], which builds the default text selection
@@ -2001,38 +1996,11 @@ class EditableText extends StatefulWidget {
     return inferKeyboardType[effectiveHint] ?? TextInputType.text;
   }
 
-  /// The default way for [EditableText] to determine when a semantics copy is
-  /// possible.
-  ///
-  /// Used if [EditableText.getSemanticsCanCopy] is not passed.
-  static bool defaultGetSemanticsCanCopy(EditableTextState editableTextState) {
-    return editableTextState.widget.selectionEnabled
-        && editableTextState._hasFocus
-        && editableTextState.copyEnabled;
-  }
-
-
-  /// The default way for [EditableText] to determine when a semantics cut is
-  /// possible.
-  ///
-  /// Used if [EditableText.getSemanticsCanCut] is not passed.
-  static bool defaultGetSemanticsCanCut(EditableTextState editableTextState) {
-    return editableTextState.widget.selectionEnabled
-        && editableTextState._hasFocus
-        && editableTextState.cutEnabled;
-  }
-
-
-  /// The default way for [EditableText] to determine when a semantics paste is
-  /// possible.
-  ///
-  /// Used if [EditableText.getSemanticsCanPaste] is not passed.
-  static bool defaultGetSemanticsCanPaste(EditableTextState editableTextState) {
-    return editableTextState.widget.selectionEnabled
-        && editableTextState._hasFocus
-        && editableTextState.pasteEnabled
-        && (editableTextState.clipboardStatus.value == ClipboardStatus.pasteable);
-  }
+  static const EditableTextSemanticsActions _defaultSemanticsActions = (
+    cut: true,
+    copy: true,
+    paste: true,
+  );
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -4386,7 +4354,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback? _semanticsOnCopy() {
-    return widget.getSemanticsCanCopy(this)
+    return widget.semanticsActions.copy
+        && widget.selectionEnabled
+        && _hasFocus
+        && copyEnabled
       ? () {
         copySelection(SelectionChangedCause.toolbar);
       }
@@ -4394,7 +4365,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback? _semanticsOnCut() {
-    return widget.getSemanticsCanCut(this)
+    return widget.semanticsActions.cut
+        && widget.selectionEnabled
+        && _hasFocus
+        && cutEnabled
       ? () {
         cutSelection(SelectionChangedCause.toolbar);
       }
@@ -4402,7 +4376,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback? _semanticsOnPaste() {
-    return widget.getSemanticsCanPaste(this)
+    return widget.semanticsActions.paste
+        && widget.selectionEnabled
+        && _hasFocus
+        && pasteEnabled
+        && (clipboardStatus.value == ClipboardStatus.pasteable)
       ? () {
         pasteText(SelectionChangedCause.toolbar);
       }
@@ -5633,3 +5611,11 @@ class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
 /// Signature that returns a bool indicating whether the given
 /// [EditableTextState] should enable some operation.
 typedef SemanticsEnabledCallback = bool Function(EditableTextState editableTextState);
+
+/// The configurable actions that a user may invoke on [EditableText] through
+/// [Semantics], such as when using accessibility software.
+typedef EditableTextSemanticsActions = ({
+  bool cut,
+  bool copy,
+  bool paste,
+});

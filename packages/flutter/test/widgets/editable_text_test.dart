@@ -4566,15 +4566,11 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: controls,
-          getSemanticsCanCopy: testCanCopy
-              ? EditableText.defaultGetSemanticsCanCopy
-              : (EditableTextState editableTextState) => false,
-          getSemanticsCanCut: testCanCut
-              ? EditableText.defaultGetSemanticsCanCut
-              : (EditableTextState editableTextState) => false,
-          getSemanticsCanPaste: testCanPaste
-              ? EditableText.defaultGetSemanticsCanPaste
-              : (EditableTextState editableTextState) => false,
+          semanticsActions: (
+            cut: testCanCut,
+            copy: testCanCopy,
+            paste: testCanPaste,
+          ),
           contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
             return AdaptiveTextSelectionToolbar.editableText(
               editableTextState: editableTextState,
