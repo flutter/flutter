@@ -112,19 +112,37 @@ ComputeUVGeometryCPU(
 }
 
 GeometryResult ComputeUVGeometryForRect(Rect source_rect,
-                                        Rect texture_coverage,
+                                        Rect texture_bounds,
                                         Matrix effect_transform,
                                         const ContentContext& renderer,
                                         const Entity& entity,
                                         RenderPass& pass) {
   auto& host_buffer = renderer.GetTransientsBuffer();
 
-  auto uv_transform =
-      texture_coverage.GetNormalizingTransform() * effect_transform;
-  std::vector<Point> data(8);
+  // Calculate UV-specific transform based on texture coverage and effect.
+  // For example, if the texture is 100x100 and the effect transform is
+  // scaling by 0.2, texture_bounds.GetNormalizingTransform() will result in a
+  // Matrix that scales by 0.01, and then if the effect_transform is
+  // Matrix::MakeScale(Vector2{2, 2}), the resulting uv_transform will have x
+  // and y basis vectors with scale 0.02.
+  auto uv_transform = texture_bounds.GetNormalizingTransform() *  //
+                      effect_transform;
+
+  // Allocate space for vertex and UV data (4 vertices)
+  // 0: position
+  // 1: UV
+  // 2: position
+  // 3: UV
+  // etc.
+  Point data[8];
+
+  // Get the raw points from the rect and transform them into UV space.
   auto points = source_rect.GetPoints();
   for (auto i = 0u, j = 0u; i < 8; i += 2, j++) {
+    // Store original coordinates.
     data[i] = points[j];
+
+    // Store transformed UV coordinates.
     data[i + 1] = uv_transform * points[j];
   }
 
@@ -133,7 +151,9 @@ GeometryResult ComputeUVGeometryForRect(Rect source_rect,
       .vertex_buffer =
           {
               .vertex_buffer = host_buffer.Emplace(
-                  data.data(), 16 * sizeof(float), alignof(float)),
+                  /*buffer=*/data,
+                  /*length=*/16 * sizeof(float),
+                  /*align=*/alignof(float)),
               .vertex_count = 4,
               .index_type = IndexType::kNone,
           },
