@@ -621,8 +621,14 @@ void main() {
           return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
         };
       final FakeBundle bundle = FakeBundle()
-        ..entries['foo.frag'] = AssetBundleEntry(DevFSByteContent(<int>[1, 2, 3, 4]), kind: AssetKind.shader,)
-        ..entries['not.frag'] = AssetBundleEntry(DevFSByteContent(<int>[1, 2, 3, 4]));
+        ..entries['foo.frag'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.shader,
+        )
+        ..entries['not.frag'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),
@@ -672,7 +678,10 @@ void main() {
           return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
         };
       final FakeBundle bundle = FakeBundle()
-        ..entries['FontManifest.json'] = AssetBundleEntry(DevFSByteContent(<int>[1, 2, 3, 4]));
+        ..entries['FontManifest.json'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),

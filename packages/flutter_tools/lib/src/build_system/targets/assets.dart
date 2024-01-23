@@ -98,9 +98,16 @@ Future<Depfile> copyAssets(
   final Map<String, AssetBundleEntry> assetEntries = <String, AssetBundleEntry>{
     ...assetBundle.entries,
     ...additionalContent.map((String key, DevFSContent value) {
-      return MapEntry<String, AssetBundleEntry>(key, AssetBundleEntry(value));
+      return MapEntry<String, AssetBundleEntry>(
+        key,
+        AssetBundleEntry(value, kind: AssetKind.regular),
+      );
     }),
-    if (skslBundle != null) kSkSLShaderBundlePath: AssetBundleEntry(skslBundle),
+    if (skslBundle != null)
+      kSkSLShaderBundlePath: AssetBundleEntry(
+        skslBundle,
+        kind: AssetKind.regular,
+      ),
   };
 
   await Future.wait<void>(

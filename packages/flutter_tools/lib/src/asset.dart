@@ -82,7 +82,7 @@ enum AssetKind {
 @immutable
 final class AssetBundleEntry {
   const AssetBundleEntry(this.content, {
-    this.kind = AssetKind.regular,
+    required this.kind,
   });
 
   final DevFSContent content;
@@ -247,16 +247,24 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJsonFilename] = AssetBundleEntry(DevFSStringContent('{}'));
+      entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
+        DevFSStringContent('{}'),
+        kind: AssetKind.regular,
+      );
       final ByteData emptyAssetManifest =
         const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
       entries[_kAssetManifestBinFilename] = AssetBundleEntry(
-        DevFSByteContent(emptyAssetManifest.buffer
-            .asUint8List(0, emptyAssetManifest.lengthInBytes)),
+        DevFSByteContent(
+          emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes),
+        ),
+        kind: AssetKind.regular,
       );
       // Create .bin.json on web builds.
       if (targetPlatform == TargetPlatform.web_javascript) {
-        entries[_kAssetManifestBinJsonFilename] = AssetBundleEntry(DevFSStringContent('""'));
+        entries[_kAssetManifestBinJsonFilename] = AssetBundleEntry(
+          DevFSStringContent('""'),
+          kind: AssetKind.regular,
+        );
       }
       return 0;
     }
@@ -431,7 +439,10 @@ class ManifestAssetBundle implements AssetBundle {
         for (final _Asset variant in assetsMap[asset]!) {
           final File variantFile = variant.lookupAssetFile(_fileSystem);
           assert(variantFile.existsSync());
-          deferredComponentsEntries[componentName]![variant.entryUri.path] ??= AssetBundleEntry(DevFSFileContent(variantFile));
+          deferredComponentsEntries[componentName]![variant.entryUri.path] ??= AssetBundleEntry(
+            DevFSFileContent(variantFile),
+            kind: AssetKind.regular,
+          );
         }
       }
     }
@@ -547,12 +558,14 @@ class ManifestAssetBundle implements AssetBundle {
             ?.equals(combinedLicenses) != true) {
       entries[_kNoticeZippedFile] = AssetBundleEntry(
         DevFSStringCompressingBytesContent(
-        combinedLicenses,
-        // A zlib dictionary is a hinting string sequence with the most
-        // likely string occurrences at the end. This ends up just being
-        // common English words with domain specific words like copyright.
-        hintString: 'copyrightsoftwaretothisinandorofthe',
-      ));
+          combinedLicenses,
+          // A zlib dictionary is a hinting string sequence with the most
+          // likely string occurrences at the end. This ends up just being
+          // common English words with domain specific words like copyright.
+          hintString: 'copyrightsoftwaretothisinandorofthe',
+        ),
+        kind: AssetKind.regular,
+      );
     }
   }
 
