@@ -150,6 +150,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     super.key,
     required VoidCallback onCopy,
     required VoidCallback onSelectAll,
+    required VoidCallback? onShare,
     required SelectionGeometry selectionGeometry,
     required this.anchors,
   }) : children = null,
@@ -157,6 +158,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onSelectAll: onSelectAll,
+         onShare: onShare,
        );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
