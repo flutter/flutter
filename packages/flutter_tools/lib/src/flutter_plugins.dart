@@ -1272,7 +1272,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         final bool hasInlineDartImplementation =
             plugin.pluginDartClassPlatforms[platformKey] != null;
         if (defaultImplementation == null && !hasInlineDartImplementation) {
-          if (false) {
+          if (throwOnPluginPubspecError) {
             globals.printError(
               "Plugin `${plugin.name}` doesn't implement a plugin interface, nor does "
               'it specify an implementation in pubspec.yaml.\n\n'
@@ -1346,7 +1346,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       ));
     }
   }
-  if (hasPubspecError && false) {
+  if (hasPubspecError && throwOnPluginPubspecError) {
     throwToolExit('Please resolve the pubspec errors');
   }
 
