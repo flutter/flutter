@@ -92,10 +92,12 @@ final class AssetBundleEntry {
 }
 
 abstract class AssetBundle {
+  /// The files that were specified under the `assets` section in the pubspec,
+  /// indexed by asset key.
   Map<String, AssetBundleEntry> get entries;
 
   /// The files that were specified under the deferred components assets sections
-  /// in pubspec.
+  /// in a pubspec, indexed by component name and asset key.
   Map<String, Map<String, AssetBundleEntry>> get deferredComponentsEntries;
 
   /// Additional files that this bundle depends on that are not included in the
