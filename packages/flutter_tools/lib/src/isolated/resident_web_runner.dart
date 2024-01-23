@@ -291,21 +291,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
               ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
               : null;
 
-        bool usesDDCModuleSystem = false;
-        const String ddcModuleFormatString = '--dartdevc-module-format=';
-        for (final String flag
-            in debuggingOptions.buildInfo.extraFrontEndOptions) {
-          if (flag.startsWith(ddcModuleFormatString)) {
-            final List<String> flagValues = flag
-                .substring(ddcModuleFormatString.length, flag.length)
-                .split(',');
-            if (flagValues.contains('ddc') || flagValues.contains('legacy')) {
-              usesDDCModuleSystem = true;
-              break;
-            }
-          }
-        }
-
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: await getPort(),
@@ -326,7 +311,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-          ddcModuleSystem: usesDDCModuleSystem,
+          ddcModuleSystem: debuggingOptions.buildInfo.usesDdcModules,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
