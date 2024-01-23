@@ -77,14 +77,26 @@ enum AssetKind {
   model,
 }
 
-abstract class AssetBundle {
-  Map<String, DevFSContent> get entries;
+/// Contains all information about an asset needed by tool the to prepare and
+/// copy an asset file to the build output.
+@immutable
+final class AssetBundleEntry {
+  const AssetBundleEntry(this.content, {
+    this.kind = AssetKind.regular,
+  });
 
-  Map<String, AssetKind> get entryKinds;
+  final DevFSContent content;
+  final AssetKind kind;
+
+  Future<List<int>> contentsAsBytes() => content.contentsAsBytes();
+}
+
+abstract class AssetBundle {
+  Map<String, AssetBundleEntry> get entries;
 
   /// The files that were specified under the deferred components assets sections
   /// in pubspec.
-  Map<String, Map<String, DevFSContent>> get deferredComponentsEntries;
+  Map<String, Map<String, AssetBundleEntry>> get deferredComponentsEntries;
 
   /// Additional files that this bundle depends on that are not included in the
   /// output result.
@@ -149,13 +161,10 @@ class ManifestAssetBundle implements AssetBundle {
   final bool _splitDeferredAssets;
 
   @override
-  final Map<String, DevFSContent> entries = <String, DevFSContent>{};
+  final Map<String, AssetBundleEntry> entries = <String, AssetBundleEntry>{};
 
   @override
-  final Map<String, AssetKind> entryKinds = <String, AssetKind>{};
-
-  @override
-  final Map<String, Map<String, DevFSContent>> deferredComponentsEntries = <String, Map<String, DevFSContent>>{};
+  final Map<String, Map<String, AssetBundleEntry>> deferredComponentsEntries = <String, Map<String, AssetBundleEntry>>{};
 
   @override
   final List<File> inputFiles = <File>[];
@@ -236,17 +245,16 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJsonFilename] = DevFSStringContent('{}');
-      entryKinds[_kAssetManifestJsonFilename] = AssetKind.regular;
+      entries[_kAssetManifestJsonFilename] = AssetBundleEntry(DevFSStringContent('{}'));
       final ByteData emptyAssetManifest =
         const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
-      entries[_kAssetManifestBinFilename] =
-        DevFSByteContent(emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes));
-      entryKinds[_kAssetManifestBinFilename] = AssetKind.regular;
+      entries[_kAssetManifestBinFilename] = AssetBundleEntry(
+        DevFSByteContent(emptyAssetManifest.buffer
+            .asUint8List(0, emptyAssetManifest.lengthInBytes)),
+      );
       // Create .bin.json on web builds.
       if (targetPlatform == TargetPlatform.web_javascript) {
-        entries[_kAssetManifestBinJsonFilename] = DevFSStringContent('""');
-        entryKinds[_kAssetManifestBinJsonFilename] = AssetKind.regular;
+        entries[_kAssetManifestBinJsonFilename] = AssetBundleEntry(DevFSStringContent('""'));
       }
       return 0;
     }
@@ -388,14 +396,16 @@ class ManifestAssetBundle implements AssetBundle {
         final File variantFile = variant.lookupAssetFile(_fileSystem);
         inputFiles.add(variantFile);
         assert(variantFile.existsSync());
-        entries[variant.entryUri.path] ??= DevFSFileContent(variantFile);
-        entryKinds[variant.entryUri.path] ??= variant.assetKind;
+        entries[variant.entryUri.path] ??= AssetBundleEntry(
+          DevFSFileContent(variantFile),
+          kind: variant.kind,
+        );
       }
     }
     // Save the contents of each deferred component image, image variant, and font
     // asset in deferredComponentsEntries.
     for (final String componentName in deferredComponentsAssetVariants.keys) {
-      deferredComponentsEntries[componentName] = <String, DevFSContent>{};
+      deferredComponentsEntries[componentName] = <String, AssetBundleEntry>{};
       final Map<_Asset, List<_Asset>> assetsMap = deferredComponentsAssetVariants[componentName]!;
       for (final _Asset asset in assetsMap.keys) {
         final File assetFile = asset.lookupAssetFile(_fileSystem);
@@ -419,7 +429,7 @@ class ManifestAssetBundle implements AssetBundle {
         for (final _Asset variant in assetsMap[asset]!) {
           final File variantFile = variant.lookupAssetFile(_fileSystem);
           assert(variantFile.existsSync());
-          deferredComponentsEntries[componentName]![variant.entryUri.path] ??= DevFSFileContent(variantFile);
+          deferredComponentsEntries[componentName]![variant.entryUri.path] ??= AssetBundleEntry(DevFSFileContent(variantFile));
         }
       }
     }
@@ -434,8 +444,7 @@ class ManifestAssetBundle implements AssetBundle {
     for (final _Asset asset in materialAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
-      entries[asset.entryUri.path] ??= DevFSFileContent(assetFile);
-      entryKinds[asset.entryUri.path] ??= asset.assetKind;
+      entries[asset.entryUri.path] ??= AssetBundleEntry(DevFSFileContent(assetFile), kind: asset.kind);
     }
 
     // Update wildcard directories we can detect changes in them.
@@ -487,7 +496,7 @@ class ManifestAssetBundle implements AssetBundle {
   @override
   List<File> additionalDependencies = <File>[];
   void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
-    final DevFSContent? oldContent = entries[key];
+    final DevFSContent? oldContent = entries[key]?.content;
     // In the case that the content is unchanged, we want to avoid an overwrite
     // as the isModified property may be reset to true,
     if (oldContent is DevFSByteContent && content is DevFSByteContent &&
@@ -495,8 +504,10 @@ class ManifestAssetBundle implements AssetBundle {
       return;
     }
 
-    entries[key] = content;
-    entryKinds[key] = assetKind;
+    entries[key] = AssetBundleEntry(
+      content,
+      kind: assetKind,
+    );
   }
 
   static bool _compareIntLists(List<int> o1, List<int> o2) {
@@ -532,14 +543,14 @@ class ManifestAssetBundle implements AssetBundle {
     if (!entries.containsKey(_kNoticeZippedFile) ||
         (entries[_kNoticeZippedFile] as DevFSStringCompressingBytesContent?)
             ?.equals(combinedLicenses) != true) {
-      entries[_kNoticeZippedFile] = DevFSStringCompressingBytesContent(
+      entries[_kNoticeZippedFile] = AssetBundleEntry(
+        DevFSStringCompressingBytesContent(
         combinedLicenses,
         // A zlib dictionary is a hinting string sequence with the most
         // likely string occurrences at the end. This ends up just being
         // common English words with domain specific words like copyright.
         hintString: 'copyrightsoftwaretothisinandorofthe',
-      );
-      entryKinds[_kNoticeZippedFile] = AssetKind.regular;
+      ));
     }
   }
 
@@ -564,7 +575,7 @@ class ManifestAssetBundle implements AssetBundle {
           relativeUri: Uri(path: entryUri.pathSegments.last),
           entryUri: entryUri,
           package: null,
-          assetKind: AssetKind.font,
+          kind: AssetKind.font,
         ));
       }
     }
@@ -592,7 +603,7 @@ class ManifestAssetBundle implements AssetBundle {
         relativeUri: Uri(path: entryUri.pathSegments.last),
         entryUri: entryUri,
         package: null,
-        assetKind: AssetKind.shader,
+        kind: AssetKind.shader,
       ));
     }
 
@@ -992,7 +1003,7 @@ class ManifestAssetBundle implements AssetBundle {
             entryUri: entryUri,
             relativeUri: relativeUri,
             package: attributedPackage,
-            assetKind: assetKind,
+            kind: assetKind,
           ),
         );
       }
@@ -1105,7 +1116,7 @@ class ManifestAssetBundle implements AssetBundle {
       relativeUri: assetUri,
       package: attributedPackage,
       originUri: originUri,
-      assetKind: assetKind,
+      kind: assetKind,
       flavors: flavors,
     );
   }
@@ -1129,7 +1140,7 @@ class ManifestAssetBundle implements AssetBundle {
           entryUri: assetUri,
           relativeUri: Uri(pathSegments: assetUri.pathSegments.sublist(2)),
           package: attributedPackage,
-          assetKind: assetKind,
+          kind: assetKind,
           originUri: originUri,
           flavors: flavors,
         );
@@ -1152,7 +1163,7 @@ class _Asset {
     required this.relativeUri,
     required this.entryUri,
     required this.package,
-    this.assetKind = AssetKind.regular,
+    this.kind = AssetKind.regular,
     List<String>? flavors,
   }): originUri = originUri ?? entryUri, flavors = flavors ?? const <String>[];
 
@@ -1171,7 +1182,7 @@ class _Asset {
   /// A platform-independent URL representing the entry for the asset manifest.
   final Uri entryUri;
 
-  final AssetKind assetKind;
+  final AssetKind kind;
 
   final List<String> flavors;
 
@@ -1224,7 +1235,7 @@ class _Asset {
         && other.baseDir == baseDir
         && other.relativeUri == relativeUri
         && other.entryUri == entryUri
-        && other.assetKind == assetKind
+        && other.kind == kind
         && hasEquivalentFlavorsWith(other);
   }
 
@@ -1233,7 +1244,7 @@ class _Asset {
     baseDir,
     relativeUri,
     entryUri,
-    assetKind,
+    kind,
     ...flavors,
   ]);
 }

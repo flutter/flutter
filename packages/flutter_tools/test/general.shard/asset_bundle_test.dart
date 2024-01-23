@@ -648,8 +648,7 @@ flutter:
 
     await writeBundle(
       directory,
-      <String, DevFSContent>{},
-      <String, AssetKind>{},
+      <String, AssetBundleEntry>{},
       loggerOverride: testLogger,
       targetPlatform: TargetPlatform.android,
       impellerStatus: ImpellerStatus.disabled,
@@ -775,7 +774,6 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.android,
         impellerStatus: ImpellerStatus.disabled,
@@ -822,7 +820,6 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
@@ -906,7 +903,6 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
