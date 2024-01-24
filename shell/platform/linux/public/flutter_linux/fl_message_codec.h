@@ -63,7 +63,7 @@ struct _FlMessageCodecClass {
 
   /**
    * FlMessageCodec::encode_message:
-   * @codec: A #FlMessageCodec.
+   * @codec: an #FlMessageCodec.
    * @message: message to encode or %NULL to encode the null value.
    * @error: (allow-none): #GError location to store the error occurring, or
    * %NULL.

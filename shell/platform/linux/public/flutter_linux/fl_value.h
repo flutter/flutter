@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_PUBLIC_FLUTTER_LINUX_FL_VALUE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_PUBLIC_FLUTTER_LINUX_FL_VALUE_H_
 
+#include <glib-object.h>
 #include <glib.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -34,6 +35,7 @@ G_BEGIN_DECLS
  * - #FL_VALUE_TYPE_FLOAT_LIST: Float64List
  * - #FL_VALUE_TYPE_LIST: List<dynamic>
  * - #FL_VALUE_TYPE_MAP: Map<dynamic>
+ * - #FL_VALUE_TYPE_CUSTOM: (custom type)
  *
  * See #FlMessageCodec to encode and decode these values.
  */
@@ -53,6 +55,7 @@ typedef struct _FlValue FlValue;
  * @FL_VALUE_TYPE_LIST: An ordered list of #FlValue objects.
  * @FL_VALUE_TYPE_MAP: A map of #FlValue objects keyed by #FlValue object.
  * @FL_VALUE_TYPE_FLOAT32_LIST: An ordered list of 32bit floating point numbers.
+ * @FL_VALUE_TYPE_CUSTOM: A custom value.
  *
  * Types of #FlValue.
  */
@@ -71,6 +74,7 @@ typedef enum {
   FL_VALUE_TYPE_LIST,
   FL_VALUE_TYPE_MAP,
   FL_VALUE_TYPE_FLOAT32_LIST,
+  FL_VALUE_TYPE_CUSTOM,
   // NOLINTEND(readability-identifier-naming)
 } FlValueType;
 
@@ -286,6 +290,45 @@ FlValue* fl_value_new_list_from_strv(const gchar* const* value);
  * Returns: a new #FlValue.
  */
 FlValue* fl_value_new_map();
+
+/**
+ * fl_value_new_custom:
+ * @type: an ID for this type.
+ * @value: pointer to the custom value.
+ * @destroy_notify: function to call when @value is no longer required.
+ *
+ * Creates a new custom data type. The Dart side of the channel must have
+ * equivalent custom code to access this object.
+ *
+ * Returns: a new #FlValue.
+ */
+FlValue* fl_value_new_custom(int type,
+                             gconstpointer value,
+                             GDestroyNotify destroy_notify);
+
+/**
+ * fl_value_new_custom_object:
+ * @type: an ID for this type.
+ * @object: the custom object.
+ *
+ * Creates a new custom data type. The Dart side of the channel must have
+ * equivalent custom code to access this object.
+ *
+ * Returns: a new #FlValue.
+ */
+FlValue* fl_value_new_custom_object(int type, GObject* object);
+
+/**
+ * fl_value_new_custom_object_take:
+ * @type: an ID for this type.
+ * @object: (transfer full): the custom object.
+ *
+ * Creates a new custom data type. The Dart side of the channel must have
+ * equivalent custom code to access this object. Ownership of @object is taken.
+ *
+ * Returns: a new #FlValue.
+ */
+FlValue* fl_value_new_custom_object_take(int type, GObject* object);
 
 /**
  * fl_value_ref:
@@ -598,6 +641,36 @@ FlValue* fl_value_lookup(FlValue* value, FlValue* key);
  * Returns: (allow-none): the value with this key or %NULL if not one present.
  */
 FlValue* fl_value_lookup_string(FlValue* value, const gchar* key);
+
+/**
+ * fl_value_get_custom_type:
+ * @value: an #FlValue of type #FL_VALUE_TYPE_CUSTOM.
+ *
+ * Gets the type ID for this custom type.
+ *
+ * Returns: a type ID.
+ */
+int fl_value_get_custom_type(FlValue* value);
+
+/**
+ * fl_value_get_custom_value:
+ * @value: an #FlValue of type #FL_VALUE_TYPE_CUSTOM.
+ *
+ * Gets the address of the custom value.
+ *
+ * Returns: a pointer to the custom value.
+ */
+gconstpointer fl_value_get_custom_value(FlValue* value);
+
+/**
+ * fl_value_get_custom_value_object:
+ * @value: an #FlValue of type #FL_VALUE_TYPE_CUSTOM.
+ *
+ * Gets the custom value as an object.
+ *
+ * Returns: an object.
+ */
+GObject* fl_value_get_custom_value_object(FlValue* value);
 
 /**
  * fl_value_to_string:
