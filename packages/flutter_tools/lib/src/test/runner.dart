@@ -16,6 +16,7 @@ import '../web/chrome.dart';
 import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
+import 'font_config_manager.dart';
 import 'test_config.dart';
 import 'test_time_recorder.dart';
 import 'test_wrapper.dart';
@@ -399,6 +400,7 @@ void main([dynamic sendPort]) {
     buffer.writeln('''
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io' show exit, exitCode;
 import 'dart:isolate';
 import 'dart:ui';
 
@@ -418,7 +420,7 @@ late final List<String> packageTestArgs;
 late final List<String> testPaths;
 
 /// Runs on the main isolate.
-void registerPluginAndRun() {
+Future<void> registerPluginAndRun() {
   final SpawnPlugin platform = SpawnPlugin();
   registerPlatformPlugin(
     <Runtime>[Runtime.vm],
@@ -426,7 +428,7 @@ void registerPluginAndRun() {
       return platform;
     },
   );
-  test.main(<String>[...packageTestArgs, '--', ...testPaths]);
+  return test.main(<String>[...packageTestArgs, '--', ...testPaths]);
 }
 
 late final Isolate rootTestIsolate;
@@ -471,7 +473,10 @@ void main() async {
 
     await readyToRunSignal.future;
     port.close(); // Not expecting anything else.
-    registerPluginAndRun();
+    await registerPluginAndRun();
+    // The [test.main] call in [registerPluginAndRun] sets dart:io's [exitCode]
+    // global.
+    exit(exitCode);
   } else {
     (_lookupEntryPoint(
         'file://${childTestIsolateSpawnerSourceFile.absolute.uri.toFilePath()}'.toNativeUtf8(),
@@ -693,6 +698,7 @@ class SpawnPlugin extends PlatformPlugin {
         : 'true';
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
+      'FONTCONFIG_FILE': FontConfigManager().fontConfigFile.path,
       'APP_NAME': flutterProject.manifest.appName,
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory,

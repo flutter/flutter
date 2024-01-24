@@ -464,6 +464,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     final bool ipv6 = boolArg('ipv6');
     if (experimentalFasterTesting && ipv6) {
+      // [ipv6] is set when the user desires for the test harness server to use
+      // IPv6, but a test harness server will not be started at all when
+      // [experimentalFasterTesting] is set.
       globals.printStatus(
         '--ipv6 was parsed but will be ignored. This option is not compatible '
         'with --experimental-faster-testing.',

@@ -237,7 +237,7 @@ void main() {
       result,
       ProcessResultMatcher(
         exitCode: 1,
-        stdoutPattern: RegExp(r'\+\d+ -1: Some tests failed\.'),
+        stdoutPattern: RegExp(r'\+\d+ -\d+: Some tests failed\.'),
       ),
     );
   });
