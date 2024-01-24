@@ -1392,7 +1392,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     if (!useSyslogLogging) {
       return;
     }
-    _iMobileDevice.startLogger(_deviceId).then<void>((Process process) {
+    _iMobileDevice.startLogger(_deviceId, _isWirelesslyConnected).then<void>((Process process) {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
