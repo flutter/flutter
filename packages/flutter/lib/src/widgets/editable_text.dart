@@ -3778,13 +3778,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Rect renderEditableBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), renderEditable.paintBounds);
       final Rect viewportRect = _calculateViewportRect();
       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
-      final bool renderEditableInView = !renderEditableBounds.hasNaN && viewportRect.overlaps(renderEditableBounds);
+      final bool? renderEditableInViewport = _renderEditableInViewport(notification);
+      final bool renderEditableIsVisible = renderEditableInViewport == null ? true : renderEditableInViewport! && viewportRect.overlaps(renderEditableBounds);
 
-      if (selectionIsVisible && renderEditableInView) {
+      if (selectionIsVisible && renderEditableIsVisible) {
         showToolbar();
         _valueWhenToolbarShowScheduled = null;
       }
     }
+  }
+
+  bool? _renderEditableInViewport(ScrollNotification notification) {
+    RenderAbstractViewport? closestViewport = RenderAbstractViewport.maybeOf(renderEditable);
+    if (closestViewport == null) {
+      return null;
+    }
+    while (closestViewport != null) {
+      final RevealedOffset leadingEdgeOffset = closestViewport.getOffsetToReveal(renderEditable, 0.0);
+      final RevealedOffset trailingEdgeOffset = closestViewport.getOffsetToReveal(renderEditable, 1.0);
+      final double currentOffset = notification.metrics.pixels;
+      final RevealedOffset? targetOffset = RevealedOffset.clampOffset(
+        leadingEdgeOffset: leadingEdgeOffset,
+        trailingEdgeOffset: trailingEdgeOffset,
+        currentOffset: currentOffset,
+      );
+      if (targetOffset == null) {
+        // `renderEditable` is between leading and trailing edge and hence already
+        //  fully shown on screen.
+        return true;
+      }
+      closestViewport = RenderAbstractViewport.maybeOf(closestViewport.parent);
+    }
+    return false;
   }
 
   TextSelectionOverlay _createSelectionOverlay() {
