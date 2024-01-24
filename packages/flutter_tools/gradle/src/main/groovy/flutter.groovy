@@ -684,7 +684,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (pluginProject == null) {
                 // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
                 project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
-            } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
+            } else if (doesSupportAndroidPlatform(project, pluginProject.projectDir.parentFile.path as String)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
                 configurePluginProject(it)
@@ -700,11 +700,11 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns `true` if the given path contains an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean doesSupportAndroidPlatform(String path) {
+    private Boolean doesSupportAndroidPlatform(Project project, String path) {
         File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
         File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
         if (buildGradle.exists() && buildGradleKts.exists()) {
-            logger.error(
+            project.logger.error(
                 "Both build.gradle and build.gradle.kts exist, so " +
                 "build.gradle.kts is ignored. This is likely a mistake."
             )
@@ -722,7 +722,7 @@ class FlutterPlugin implements Plugin<Project> {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
-            logger.error(
+            project.logger.error(
                 "Both settings.gradle and settings.gradle.kts exist, so " +
                 "settings.gradle.kts is ignored. This is likely a mistake."
             )
