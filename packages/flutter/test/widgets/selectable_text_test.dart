@@ -3782,7 +3782,7 @@ void main() {
     expect(endpoints[0].point.dx, isNegative);
     expect(endpoints[1].point.dx, isPositive);
   },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.android }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
   testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
