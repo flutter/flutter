@@ -358,7 +358,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   Future<List<int>> screenshot() async {
     await Future<void>.delayed(const Duration(seconds: 2));
 
-    final vms.Response result = await _serviceClient.callMethod('_flutter.screenshot');
+    final vms.Response result = await _serviceClient.callMethod('_flutter.screenshotSkp');
     return base64.decode(result.json!['screenshot'] as String);
   }
 
