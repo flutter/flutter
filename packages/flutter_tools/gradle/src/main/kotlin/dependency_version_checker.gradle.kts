@@ -25,6 +25,7 @@ buildscript {
 }
 
 apply<FlutterDependencyCheckerPlugin>()
+
 class FlutterDependencyCheckerPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         DependencyVersionChecker.checkDependencyVersions(project)

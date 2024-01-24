@@ -101,7 +101,7 @@ void main() {
       '--debug',
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
-    expect(result.stderr, contains('Please upgrade your AGP version soon.'));
+    expect(result.stderr, contains('Please upgrade your AGP version'));
   });
 
   testUsingContext(
@@ -146,7 +146,7 @@ void main() {
       '--debug',
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
-    expect(result.stderr, contains('Please upgrade your Gradle version soon.'));
+    expect(result.stderr, contains('Please upgrade your Gradle version'));
   });
 
   testUsingContext(
@@ -191,7 +191,7 @@ void main() {
       '--debug',
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
-    expect(result.stderr, contains('Please upgrade your Kotlin version soon.'));
+    expect(result.stderr, contains('Please upgrade your Kotlin version'));
   });
 
   // TODO(gmackall): Add tests for build blocking when the
