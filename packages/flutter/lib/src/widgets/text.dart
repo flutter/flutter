@@ -1358,11 +1358,14 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     return result;
   }
 
+  ({int start, int end, SelectionEvent event})? originBoundary;
+
   /// Selects a paragraph in a selectable at the location
   /// [SelectParagraphSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = _handleSelectParagraph(event);
+    originBoundary = (start: currentSelectionStartIndex, end: currentSelectionEndIndex, event: event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
     }
@@ -1816,10 +1819,27 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
       }
     }
     if (isEnd) {
-      currentSelectionEndIndex = newIndex;
+      if (originBoundary != null && currentSelectionEndIndex != originBoundary!.end) {
+        debugPrint('originBoundary not null $originBoundary');
+        int? start = currentSelectionStartIndex < originBoundary!.start ? null : originBoundary!.start;
+        int? end = newIndex > originBoundary!.end ? null : originBoundary!.end;
+
+        for (int i = start ?? newIndex; i <= originBoundary!.end; i += 1) {
+          debugPrint('$i');
+          if (paragraph.selectables != null && paragraph.selectables!.contains(selectables[i])) {
+            debugPrint('root');
+            dispatchSelectionEventToChild(selectables[i], originBoundary!.event);
+          } else {
+            debugPrint('non root');
+            dispatchSelectionEventToChild(selectables[i], SelectAllSelectionEvent());
+          }
+        }
+      }
+      currentSelectionEndIndex = originBoundary != null && originBoundary!.end > newIndex ?  originBoundary!.end : newIndex;
     } else {
       currentSelectionStartIndex = newIndex;
     }
+    debugPrint('$currentSelectionEndIndex $newIndex');
     _flushInactiveSelections();
     return finalResult!;
   }
