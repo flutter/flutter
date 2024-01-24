@@ -12,7 +12,6 @@ vars = {
   'swiftshader_git': 'https://swiftshader.googlesource.com',
   'dart_git': 'https://dart.googlesource.com',
   'flutter_git': 'https://flutter.googlesource.com',
-  'fuchsia_git': 'https://fuchsia.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   # OCMock is for testing only so there is no google clone
@@ -321,10 +320,10 @@ deps = {
    Var('flutter_git') + "/third_party/perfetto" + '@' + Var('dart_perfetto_rev'),
 
   'src/third_party/protobuf':
-   Var('fuchsia_git') + '/third_party/protobuf' + '@' + Var('dart_libprotobuf_rev'),
+   Var('flutter_git') + '/third_party/protobuf' + '@' + Var('dart_libprotobuf_rev'),
 
   'src/flutter/build/secondary/third_party/protobuf':
-   Var('fuchsia_git') + '/protobuf-gn' + '@' + Var('dart_protobuf_gn_rev'),
+   Var('flutter_git') + '/third_party/protobuf-gn' + '@' + Var('dart_protobuf_gn_rev'),
 
   'src/third_party/dart':
    Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
@@ -627,7 +626,7 @@ deps = {
    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
   'src/flutter/third_party/ocmock':
-   Var('ocmock_git') + '@' +  Var('ocmock_rev'),
+   Var('flutter_git') + '/third_party/ocmock' + '@' +  Var('ocmock_rev'),
 
   'src/flutter/third_party/libjpeg-turbo/src':
    Var('flutter_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
