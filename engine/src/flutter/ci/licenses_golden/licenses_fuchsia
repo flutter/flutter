@@ -1,4 +1,4 @@
-Signature: beabdc5234d883f2c2bc8aba73d99f02
+Signature: 2ecf55b6b4738524d953420566fc02c1
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -10272,6 +10272,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config.fid
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config_connector.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/light.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/admin.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/power.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/hwinfo.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_pipe2.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/descriptor.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -10697,6 +10698,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config_connector.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/light.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/admin.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/power.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/hwinfo.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_pipe2.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/descriptor.fidl
@@ -12668,6 +12670,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/device_type.fidl 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/plug.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_format.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/config.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.trippoint/trippoint.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/inspect_sink.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -12759,6 +12762,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/device_type.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/plug.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.trippoint/trippoint.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/inspect_sink.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl
@@ -12857,8 +12861,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/introspector.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/introspector.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/overview.fidl
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 The Fuchsia Authors. All rights reserved.
 
