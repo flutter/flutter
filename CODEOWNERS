@@ -9,4 +9,3 @@
 /packages/flutter_tools/pubspec.yaml @christopherfujino
 /packages/flutter_tools/templates/module/ios/ @jmagman
 /packages/flutter_tools/templates/**/Podfile* @jmagman
-/dev/integration_tests/external_textures/** @matanlurey @johnmccutchan @jonahwilliams
