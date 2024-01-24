@@ -333,7 +333,10 @@ void main() {
     expect(find.text('California'), findsOneWidget);
   });
 
-  testWidgets('PageController page stability', (WidgetTester tester) async {
+  testWidgets('PageController page stability',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
