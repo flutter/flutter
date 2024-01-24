@@ -18,6 +18,7 @@ import 'tooltip.dart';
 
 const double _kIndicatorHeight = 32;
 const double _kIndicatorWidth = 64;
+const double _kMaxLabelTextScaleFactor = 1.3;
 
 // Examples can assume:
 // late BuildContext context;
@@ -422,9 +423,11 @@ class NavigationDestination extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(top: 4),
           child: MediaQuery.withClampedTextScaling(
-            // Don't scale labels of destinations, instead, tooltip text will
-            // upscale.
-            maxScaleFactor: 1.0,
+            // Set maximum text scale factor to _kMaxLabelTextScaleFactor for the
+            // label to keep the visual hierarchy the same even with larger font
+            // sizes. To opt out, wrap the [label] widget in a [MediaQuery] widget
+            // with a different `TextScaler`.
+            maxScaleFactor: _kMaxLabelTextScaleFactor,
             child: Text(label, style: textStyle),
           ),
         );
