@@ -63,20 +63,14 @@ void main() {
                 TestSemantics(
                   id: 3,
                   rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 4,
-                      rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 5,
-                          label: 'Hello!',
-                          textDirection: TextDirection.ltr,
-                          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-                          transform: Matrix4.translationValues(395.0, 295.0, 0.0),
-                        ),
-                      ],
+                      label: 'Hello!',
+                      textDirection: TextDirection.ltr,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+                      transform: Matrix4.translationValues(395.0, 295.0, 0.0),
                     ),
                   ],
                 ),

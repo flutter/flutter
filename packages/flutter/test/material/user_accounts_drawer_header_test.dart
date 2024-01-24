@@ -525,34 +525,30 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                          label: 'Signed in\nname\nemail',
+                          textDirection: TextDirection.ltr,
                           children: <TestSemantics>[
                             TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              label: 'Signed in\nname\nemail',
+                              label: r'B',
                               textDirection: TextDirection.ltr,
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  label: r'B',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  label: r'C',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  label: r'D',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                                  actions: <SemanticsAction>[SemanticsAction.tap],
-                                  label: r'Show accounts',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
+                            ),
+                            TestSemantics(
+                              label: r'C',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'D',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: r'Show accounts',
+                              textDirection: TextDirection.ltr,
                             ),
                           ],
                         ),
@@ -611,27 +607,23 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          label: 'Signed in',
+                          textDirection: TextDirection.ltr,
                           children: <TestSemantics>[
                             TestSemantics(
-                              label: 'Signed in',
+                              label: r'B',
                               textDirection: TextDirection.ltr,
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  label: r'B',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  label: r'C',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  label: r'D',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
+                            ),
+                            TestSemantics(
+                              label: r'C',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'D',
+                              textDirection: TextDirection.ltr,
                             ),
                           ],
                         ),
