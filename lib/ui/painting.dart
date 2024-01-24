@@ -4465,35 +4465,31 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     // the same encoding here so that users can load assets with the same
     // key they have written in the pubspec.
     final String encodedKey = Uri(path: Uri.encodeFull(assetKey)).path;
-    final FragmentProgram? program = _shaderRegistry[encodedKey]?.target;
+    final FragmentProgram? program = _shaderRegistry[encodedKey];
     if (program != null) {
       return Future<FragmentProgram>.value(program);
     }
     return Future<FragmentProgram>.microtask(() {
       final FragmentProgram program = FragmentProgram._fromAsset(encodedKey);
-      _shaderRegistry[encodedKey] = WeakReference<FragmentProgram>(program);
+      _shaderRegistry[encodedKey] = program;
       return program;
     });
   }
 
   // This is a cache of shaders that have been loaded by
-  // FragmentProgram.fromAsset. It holds weak references to the FragmentPrograms
-  // so that the case where an in-use program is requested again can be fast,
-  // but programs that are no longer referenced are not retained because of the
-  // cache.
-  static final Map<String, WeakReference<FragmentProgram>> _shaderRegistry =
-      <String, WeakReference<FragmentProgram>>{};
+  // FragmentProgram.fromAsset. It holds a strong reference to theFragmentPrograms
+  // The native engine will retain the resources associated with this shader
+  // program (PSO variants) until shutdown, so maintaining a strong reference
+  // here ensures we do not perform extra work if the dart object is continually
+  // re-initialized.
+  static final Map<String, FragmentProgram> _shaderRegistry =
+      <String, FragmentProgram>{};
 
   static void _reinitializeShader(String assetKey) {
     // If a shader for the asset isn't already registered, then there's no
     // need to reinitialize it. The new shader will be loaded and initialized
     // the next time the program access it.
-    final WeakReference<FragmentProgram>? programRef = _shaderRegistry[assetKey];
-    if (programRef == null) {
-      return;
-    }
-
-    final FragmentProgram? program = programRef.target;
+    final FragmentProgram? program = _shaderRegistry[assetKey];
     if (program == null) {
       return;
     }
