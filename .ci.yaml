@@ -2175,7 +2175,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: external_textures_integration_test
+      task_name: external_ui_integration_test
 
   # linux motog4 benchmark
   - name: Linux_android fading_child_animation_perf__timeline_summary
@@ -4281,7 +4281,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: external_textures_integration_test_ios
+      task_name: external_ui_integration_test_ios
       ignore_flakiness: "true"
 
   - name: Mac_ios route_test_ios
