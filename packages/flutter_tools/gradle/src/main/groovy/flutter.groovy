@@ -42,10 +42,10 @@ import org.gradle.internal.os.OperatingSystem
 class FlutterExtension {
 
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    final int compileSdkVersion = 34
+    public final int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    final int minSdkVersion = 19
+    public  final int minSdkVersion = 19
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -53,32 +53,32 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    final int targetSdkVersion = 33
+    public final int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    final String ndkVersion = "23.1.7779620"
+    public final String ndkVersion = "23.1.7779620"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
-    String source = "../.."
+    public String source = "../.."
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
-    String target
+    public String target
 
     /** The versionCode that was read from app's local.properties. */
-    String flutterVersionCode = null
+    public String flutterVersionCode = null
 
     /** The versionName that was read from app's local.properties. */
-    String flutterVersionName = null
+    public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    Integer versionCode() {
+    public Integer versionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -91,7 +91,7 @@ class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    String versionName() {
+    public String versionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
         }
