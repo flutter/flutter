@@ -44,6 +44,7 @@ platform_properties:
       os: Ubuntu
       cores: "8"
       device_type: none
+      kvm: "1"
   linux_build_test:
     properties:
       dependencies: >-
@@ -348,6 +349,7 @@ targets:
     properties:
       tags: >
         ["framework","hostonly","linux"]
+      task_name: android_views
     timeout: 60
 
   - name: Linux build_tests_1_3
