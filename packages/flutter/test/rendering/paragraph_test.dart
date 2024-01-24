@@ -441,6 +441,21 @@ void main() {
     expect(paragraph.debugNeedsPaint, isFalse);
   });
 
+  test('Changing textAlign property should trigger markNeedsLayout', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'Hello',
+        style: TextStyle(color: Color(0xFF000000)),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+    layout(paragraph, phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    paragraph.textAlign = TextAlign.right;
+    expect(paragraph.debugNeedsLayout, isTrue);
+  });
+
   test('nested TextSpans in paragraph handle linear textScaler correctly.', () {
     const TextSpan testSpan = TextSpan(
       text: 'a',

@@ -459,6 +459,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
     _textPainter.textAlign = value;
     markNeedsPaint();
+    markNeedsLayout();
   }
 
   /// The directionality of the text.
