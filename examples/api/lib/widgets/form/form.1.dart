@@ -65,7 +65,7 @@ class _SaveableFormState extends State<_SaveableForm> {
   /// Shows a dialog and resolves to true when the user has indicated that they
   /// want to pop.
   ///
-  /// A null should be interpreted as a desire not to pop.
+  /// A null indicates a desire not to pop.
   Future<bool?> _showDialog() {
     return showDialog<bool>(
       context: context,
@@ -114,8 +114,8 @@ class _SaveableFormState extends State<_SaveableForm> {
               if (didPop) {
                 return;
               }
-              final bool? shouldPop = await _showDialog();
-              if (shouldPop ?? false) {
+              final bool shouldPop = await _showDialog() ?? false;
+              if (shouldPop) {
                 // Since this is the root route, quit the app where possible by
                 // invoking the SystemNavigator. If this wasn't the root route,
                 // then Navigator.maybePop could be used instead.
@@ -152,8 +152,10 @@ class _SaveableFormState extends State<_SaveableForm> {
           ),
           TextButton(
             onPressed: () async {
-              final bool? shouldPop = _isDirty ? await _showDialog() : true;
-              if (shouldPop == null || shouldPop == false) {
+              final bool shouldPop = _isDirty
+                  ? await _showDialog() ?? false
+                  : true;
+              if (!shouldPop) {
                 return;
               }
               // Since this is the root route, quit the app where possible by
