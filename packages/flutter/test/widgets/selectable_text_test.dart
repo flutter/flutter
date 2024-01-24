@@ -3714,7 +3714,7 @@ void main() {
 
     final TestGesture gesture =
         await tester.startGesture(selectableTextStart + const Offset(200.0, 0.0));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kLongPressTimeout);
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
     final TextEditingController controller = editableTextWidget.controller;
@@ -3890,7 +3890,7 @@ void main() {
 
     final TestGesture gesture =
         await tester.startGesture(selectableTextStart + const Offset(300, 5));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kLongPressTimeout);
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
     final TextEditingController controller = editableTextWidget.controller;
