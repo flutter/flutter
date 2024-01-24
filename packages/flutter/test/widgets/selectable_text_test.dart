@@ -3787,7 +3787,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('Desktop long press drag can edge scroll when inside a scrollable', (WidgetTester tester) async {
+  testWidgets('Desktop mouse drag can edge scroll when inside a horizontal scrollable', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/129590.
     await tester.pumpWidget(
       MaterialApp(
@@ -3858,22 +3858,16 @@ void main() {
         extentOffset: 134,
       ),
     );
-    // // The toolbar shows up.
-    // if (defaultTargetPlatform == TargetPlatform.iOS) {
-    //   expectCupertinoSelectionToolbar();
-    // } else {
-    //   expectMaterialSelectionToolbar();
-    // }
 
-    // final RenderEditable renderEditable = findRenderEditable(tester);
-    // final List<TextSelectionPoint> endpoints = globalize(
-    //   renderEditable.getEndpointsForSelection(controller.selection),
-    //   renderEditable,
-    // );
-    // expect(endpoints.isNotEmpty, isTrue);
-    // expect(endpoints.length, 2);
-    // expect(endpoints[0].point.dx, isNegative);
-    // expect(endpoints[1].point.dx, isPositive);
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.isNotEmpty, isTrue);
+    expect(endpoints.length, 2);
+    expect(endpoints[0].point.dx, isNegative);
+    expect(endpoints[1].point.dx, isPositive);
   },
     variant: TargetPlatformVariant.desktop(),
   );
