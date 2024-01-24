@@ -254,7 +254,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         FML_DCHECK(sampler_index < texture_inputs_.size());
         auto& input = texture_inputs_[sampler_index];
 
-        auto sampler =
+        const std::unique_ptr<const Sampler>& sampler =
             context->GetSamplerLibrary()->GetSampler(input.sampler_descriptor);
 
         SampledImageSlot image_slot;

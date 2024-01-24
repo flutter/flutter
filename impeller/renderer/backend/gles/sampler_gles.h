@@ -28,9 +28,6 @@ class SamplerGLES final : public Sampler,
 
   explicit SamplerGLES(SamplerDescriptor desc);
 
-  // |Sampler|
-  bool IsValid() const override;
-
   SamplerGLES(const SamplerGLES&) = delete;
 
   SamplerGLES& operator=(const SamplerGLES&) = delete;

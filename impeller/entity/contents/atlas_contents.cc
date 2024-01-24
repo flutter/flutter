@@ -252,8 +252,9 @@ bool AtlasContents::Render(const ContentContext& renderer,
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-        dst_sampler_descriptor);
+    const std::unique_ptr<const Sampler>& dst_sampler =
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            dst_sampler_descriptor);
     FS::BindTextureSamplerDst(pass, texture_, dst_sampler);
     frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
 

@@ -32,9 +32,6 @@ class SamplerMTL final : public Sampler,
 
   SamplerMTL(SamplerDescriptor desc, id<MTLSamplerState> state);
 
-  // |Sampler|
-  bool IsValid() const override;
-
   SamplerMTL(const SamplerMTL&) = delete;
 
   SamplerMTL& operator=(const SamplerMTL&) = delete;
