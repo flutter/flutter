@@ -4,6 +4,8 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 
+#include <CoreFoundation/CoreFoundation.h>
+
 #include "gtest/gtest.h"
 
 FLUTTER_ASSERT_ARC
@@ -213,6 +215,19 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeStringWithNonAsciiCodePoint) {
 TEST(FlutterStandardCodec, CanEncodeAndDecodeStringWithNonBMPCodePoint) {
   uint8_t bytes[8] = {0x07, 0x06, 0x68, 0xf0, 0x9f, 0x98, 0x82, 0x77};
   CheckEncodeDecode(@"h\U0001F602w", [NSData dataWithBytes:bytes length:8]);
+}
+
+TEST(FlutterStandardCodec, CanEncodeAndDecodeIndirectString) {
+  // This test ensures that an indirect NSString, whose internal string buffer
+  // can't be simply returned by `CFStringGetCStringPtr`, can be encoded without
+  // violating the memory sanitizer. This test only works with `--asan` flag.
+  // See https://github.com/flutter/flutter/issues/142101
+  uint8_t bytes[7] = {0x07, 0x05, 0x68, 0xe2, 0x98, 0xba, 0x77};
+  NSString* target = @"h\u263Aw";
+  // Ensures that this is an indirect string so that this test makes sense.
+  ASSERT_TRUE(CFStringGetCStringPtr((__bridge CFStringRef)target, kCFStringEncodingUTF8) ==
+              nullptr);
+  CheckEncodeDecode(target, [NSData dataWithBytes:bytes length:7]);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeArray) {
