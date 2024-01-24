@@ -75,9 +75,6 @@ class _IOCallbackManager implements CallbackManager {
     _isSurfaceRendered = true;
 
     addTearDown(() async {
-      // removed assertion because it will fail if the method was manually invoked.
-      // (which will happen if people use integration tests for taking multiple screenshots)
-      //assert(_isSurfaceRendered, 'Surface is not an image');
       if (_isSurfaceRendered) {
         await integrationTestChannel.invokeMethod<void>(
           'revertFlutterImage',
