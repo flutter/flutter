@@ -1,6 +1,6 @@
-def flutterPluginVersion = 'managed'
+def flutterPluginVersion = "managed"
 
-apply plugin: 'com.android.application'
+apply plugin: "com.android.application"
 
 android {
     // Conditional for compatibility with AGP <4.2.
@@ -37,8 +37,8 @@ android {
 }
 buildDir = new File(rootProject.projectDir, "../build/host")
 dependencies {
-    implementation project(':flutter')
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation project(":flutter")
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "androidx.appcompat:appcompat:1.0.2"
+    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
 }
