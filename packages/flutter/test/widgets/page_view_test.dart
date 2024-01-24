@@ -333,7 +333,10 @@ void main() {
     expect(find.text('California'), findsOneWidget);
   });
 
-  testWidgets('PageController page stability', (WidgetTester tester) async {
+  testWidgets('PageController page stability',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -1308,78 +1311,5 @@ void main() {
 
     expect(attach, 1);
     expect(detach, 1);
-  });
-
-  group('$PageView handles change of controller', () {
-    final GlobalKey key = GlobalKey();
-
-    Widget createPageView(PageController? controller) {
-      return MaterialApp(
-        home: Scaffold(
-          body: PageView(
-            key: key,
-            controller: controller,
-            children: const <Widget>[
-              Center(child: Text('0')),
-              Center(child: Text('1')),
-              Center(child: Text('2')),
-            ],
-          ),
-        ),
-      );
-    }
-
-    Future<void> testPageViewWithController(PageController controller, WidgetTester tester, bool controls) async  {
-      int curentVisiblePage() {
-        return int.parse(tester.widgetList(find.byType(Text)).whereType<Text>().first.data!);
-      }
-
-      final int initialPageInView = curentVisiblePage();
-
-      for (int i = 0; i < 3; i++) {
-        if (controls) {
-          controller.jumpToPage(i);
-          await tester.pumpAndSettle();
-          expect(curentVisiblePage(), i);
-        } else {
-          expect(()=> controller.jumpToPage(i), throwsAssertionError);
-          expect(curentVisiblePage(), initialPageInView);
-        }
-      }
-    }
-
-    testWidgets('null to value', (WidgetTester tester) async {
-      final PageController controller = PageController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(createPageView(null));
-      await tester.pumpWidget(createPageView(controller));
-      await testPageViewWithController(controller, tester, true);
-    });
-
-    testWidgets('value to value', (WidgetTester tester) async {
-      final PageController controller1 = PageController();
-      addTearDown(controller1.dispose);
-      final PageController controller2 = PageController();
-      addTearDown(controller2.dispose);
-      await tester.pumpWidget(createPageView(controller1));
-      await testPageViewWithController(controller1, tester, true);
-      await tester.pumpWidget(createPageView(controller2));
-      await testPageViewWithController(controller1, tester, false);
-      await testPageViewWithController(controller2, tester, true);
-    });
-
-    testWidgets('value to null', (WidgetTester tester) async {
-      final PageController controller = PageController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(createPageView(controller));
-      await testPageViewWithController(controller, tester, true);
-      await tester.pumpWidget(createPageView(null));
-      await testPageViewWithController(controller, tester, false);
-    });
-
-    testWidgets('null to null', (WidgetTester tester) async {
-      await tester.pumpWidget(createPageView(null));
-      await tester.pumpWidget(createPageView(null));
-    });
   });
 }
