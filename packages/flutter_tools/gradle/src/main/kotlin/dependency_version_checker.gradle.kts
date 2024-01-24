@@ -62,6 +62,7 @@ class DependencyVersionChecker {
             var javaVersion : JavaVersion? = null
             var agpVersion : Version? = null
             var kgpVersion : Version? = null
+            Map map = new HashMap()
 
             try {
                 gradleVersion = getGradleVersion(project)
@@ -127,17 +128,22 @@ class DependencyVersionChecker {
             return agpVersion
         }
 
-        fun getKGPVersion(project : Project) : Version {
+        fun getKGPVersion(project : Project) : Version? {
             // This property corresponds to application of the Kotlin Gradle plugin in the
             // top-level build.gradle file.
             if (project.hasProperty("kotlin_version")) {
                 return Version.fromString(project.properties.get("kotlin_version") as String)
             }
             val kotlinPlugin = project.getPlugins()
-                .findPlugin(KotlinAndroidPluginWrapper::class.java)!!
+                .findPlugin(KotlinAndroidPluginWrapper::class.java)
             val versionfield =
-                kotlinPlugin.javaClass.kotlin.members.first { it.name == "pluginVersion" || it.name == "kotlinPluginVersion" }
-            return Version.fromString(versionfield!!.call(kotlinPlugin) as String)
+                kotlinPlugin?.javaClass.kotlin.members.first { it.name == "pluginVersion" || it.name == "kotlinPluginVersion" }
+            val versionString = versionfield?.call(kotlinPlugin)
+            if (versionString == null) {
+                return null
+            } else {
+                return Version.fromString(versionfield!!.call(kotlinPlugin) as String)
+            }
         }
 
         private fun getErrorMessage(dependencyName : String,
@@ -147,6 +153,16 @@ class DependencyVersionChecker {
                     "than Flutter's minimum supported version of $errorVersion. Please upgrade " +
                     "your $dependencyName version. \nAlternatively, use the flag " +
                     "\"--android-skip-build-dependency-validation\" to bypass this check."
+        }
+
+        private fun getWarnMessage(dependencyName : String,
+                                   versionString : String,
+                                   warnVersion : String) {
+            return "Warning: Flutter support for your project's $dependencyName version " +
+                    "($versionString) will soon be dropped. Please upgrade your $dependencyName " +
+                    "version to a version of at least $warnVersion soon." +
+                    "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
+                    " to bypass this check."
         }
 
         fun checkGradleVersion(version : Version, project : Project) {
@@ -160,10 +176,13 @@ class DependencyVersionChecker {
                 )
             }
             else if (version < warnGradleVersion) {
-                project.logger.error("Warning: Flutter support for your project's Gradle version " +
-                        "($version) will soon be dropped. Please upgrade your Gradle version soon. " +
-                        "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
-                        " to bypass this check.")
+                project.logger.error(
+                    getWarnMessage(
+                        "Gradle",
+                        version.toString(),
+                        warnGradleVersion.toString()
+                    )
+                )
             }
         }
 
@@ -178,10 +197,13 @@ class DependencyVersionChecker {
                 )
             }
             else if (version < warnJavaVersion) {
-                project.logger.error("Warning: Flutter support for your project's Java version " +
-                        "($version) will soon be dropped. Please upgrade your Java version soon. " +
-                        "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
-                        " to bypass this check.")
+                project.logger.error(
+                    getWarnMessage(
+                        "Java",
+                        version.toString(),
+                        warnJavaVersion.toString()
+                    )
+                )
             }
         }
 
@@ -196,10 +218,13 @@ class DependencyVersionChecker {
                 )
             }
             else if (version < warnAGPVersion) {
-                project.logger.error("Warning: Flutter support for your project's Android Gradle Plugin" +
-                        " version ($version) will soon be dropped. Please upgrade your AGP version soon. " +
-                        "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
-                        " to bypass this check.")
+                project.logger.error(
+                    getWarnMessage(
+                        "AGP",
+                        version.toString(),
+                        warnAGPVersion.toString()
+                    )
+                )
             }
         }
 
@@ -214,10 +239,13 @@ class DependencyVersionChecker {
                 )
             }
             else if (version < warnKGPVersion) {
-                project.logger.error("Warning: Flutter support for your project's Kotlin version " +
-                        "($version) will soon be dropped. Please upgrade your Kotlin version soon. " +
-                        "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
-                        " to bypass this check.")
+                project.logger.error(
+                    getWarnMessage(
+                        "Kotlin",
+                        version.toString(),
+                        warnKGPVersion.toString()
+                    )
+                )
             }
         }
     }
