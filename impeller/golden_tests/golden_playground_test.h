@@ -51,6 +51,8 @@ class GoldenPlaygroundTest
 
   std::shared_ptr<Context> GetContext() const;
 
+  std::shared_ptr<Context> MakeContext() const;
+
   Point GetContentScale() const;
 
   Scalar GetSecondsElapsed() const;
