@@ -21,7 +21,10 @@ impeller_component("golden_playground_test") {
 
   if (is_mac) {
     sources += [ "golden_playground_test_mac.cc" ]
-    deps += [ ":metal_screenshot" ]
+    deps += [
+      ":metal_screenshot",
+      "//third_party/abseil-cpp/absl/base:no_destructor",
+    ]
   } else {
     sources += [ "golden_playground_test_stub.cc" ]
   }

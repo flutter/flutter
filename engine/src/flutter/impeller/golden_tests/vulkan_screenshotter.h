@@ -18,7 +18,8 @@ namespace testing {
 /// playground backend.
 class VulkanScreenshotter : public Screenshotter {
  public:
-  explicit VulkanScreenshotter(bool enable_validations);
+  explicit VulkanScreenshotter(
+      const std::unique_ptr<PlaygroundImpl>& playground);
 
   std::unique_ptr<Screenshot> MakeScreenshot(
       AiksContext& aiks_context,
@@ -29,7 +30,7 @@ class VulkanScreenshotter : public Screenshotter {
   PlaygroundImpl& GetPlayground() override { return *playground_; }
 
  private:
-  std::unique_ptr<PlaygroundImpl> playground_;
+  const std::unique_ptr<PlaygroundImpl>& playground_;
 };
 
 }  // namespace testing
