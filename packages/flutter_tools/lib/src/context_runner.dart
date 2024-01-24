@@ -351,7 +351,6 @@ Future<T> runInContext<T>(
           platform: globals.platform,
           logger: globals.logger,
           processManager: globals.processManager,
-          osUtils: globals.os,
         )
       ),
       WebWorkflow: () => WebWorkflow(
