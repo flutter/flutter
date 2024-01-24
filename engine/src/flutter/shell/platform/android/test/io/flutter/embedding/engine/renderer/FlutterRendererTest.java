@@ -5,6 +5,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -598,5 +599,20 @@ public class FlutterRendererTest {
 
     // We will have no pending readers to close.
     assertEquals(0, texture.readersToCloseSize());
+  }
+
+  @Test
+  public void SurfaceTextureSurfaceProducerCreatesAConnectedTexture() {
+    // Force creating a SurfaceTextureSurfaceProducer regardless of Android API version.
+    FlutterRenderer.debugForceSurfaceProducerGlTextures = true;
+
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+
+    // Verify behavior under test.
+    assertEquals(producer.id(), 0);
+    verify(fakeFlutterJNI, times(1)).registerTexture(eq(producer.id()), any());
   }
 }

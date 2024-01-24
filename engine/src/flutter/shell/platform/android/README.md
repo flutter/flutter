@@ -23,6 +23,84 @@ See also:
 - [Testing Android Changes in the Devicelab on an Emulator](https://github.com/flutter/flutter/wiki/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator)
 - [Texture Layer Hybrid Composition](https://github.com/flutter/flutter/wiki/Texture-Layer-Hybrid-Composition)
 
+## Testing
+
+There are two classes of tests for the Android embedder: unit tests that tend
+to test _contracts_ within the embedder, and integration tests that test the
+engine and embedder together, typically coupled with a Flutter app (that's how
+our users interact with the engine and embedder).
+
+### Unit tests
+
+Unit tests for the Android embedder are located in:
+
+- [`test`](test): Java unit tests.
+- C++ files that end in `_unittests.cc` in [`shell/platform/android`](./).
+
+The easiest way (though not the quickest) is to use `run_tests.py`:
+
+```shell
+# Assuming you're at the root of the engine repo where `run_tests.py` is located.
+./testing/run_tests.py --type java
+
+# Confusingly, these are C++ tests for Android.
+./testing/run_tests.py --type android
+
+# If you're using android_debug_unopt_arm64 builds:
+./testing/run_tests.py --type android --android-variant android_debug_unopt_arm64
+./testing/run_tests.py --type java --android-variant android_debug_unopt_arm64
+```
+
+You may also be able to run the tests directly from Android Studio.
+
+### Integration tests
+
+Integration tests for the Android embedder mostly exist outside of the engine
+for dubious historical reasons.
+
+To run these tests, you'll need to have a Flutter checkout and a working Android
+emulator or device:
+
+```shell
+# Build an up-to-date Flutter engine for Android.
+cd $ENGINE/src
+
+# Or, use your favorite arguments and build variant.
+ninja -j1000 -C ../out/android_debug_unopt_arm64 android_jar
+
+# Run the tests. Here is *1* example:
+cd $FLUTTER/dev/integration_tests/external_textures
+flutter drive \
+  --local-engine-host=$ENGINE/out/host_debug_unopt_arm64 \
+  --local-engine=$ENGINE/out/android_debug_unopt_arm64
+```
+
+Another good source of (unfortunately, manual) testing is `flutter/packages`:
+
+```shell
+cd $PACKAGES/packages/video_player/video_player_android/example
+flutter run \
+  --local-engine-host=$ENGINE/out/host_debug_unopt_arm64 \
+  --local-engine=$ENGINE/out/android_debug_unopt_arm64
+```
+
+> ![NOTE]
+> External texture rendering on Android is based on the device API level. For
+> example to test the OpenGLES branch (which uses `SurfaceTexture`), you'll
+> typically need an older device or emulator with an API version 29 or lower.
+>
+> You can also (locally) "force" the engine to use `SurfaceTextures`:
+>
+> ```diff
+> // shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java
+> -  @VisibleForTesting static boolean debugForceSurfaceProducerGlTextures = false;
+> +  @VisibleForTesting static boolean debugForceSurfaceProducerGlTextures = true;
+> ```
+>
+> ... and rebuild the engine.
+
+See [our wiki](https://github.com/flutter/flutter/wiki/Testing-the-engine#java---android-embedding) also.
+
 ## Developing
 
 How to edit and contribute to the Android embedder.
