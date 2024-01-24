@@ -3787,6 +3787,97 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
+  testWidgets('Desktop long press drag can edge scroll when inside a scrollable', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/129590.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 300.0,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SelectableText(
+                  'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges ' * 2,
+                  maxLines: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+    final TestGesture gesture =
+        await tester.startGesture(selectableTextStart + const Offset(200.0, 0.0));
+    await tester.pump();
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+
+    await gesture.moveBy(const Offset(100, 0));
+    // To the edge of the screen basically.
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 14,
+        extentOffset: 21,
+      ),
+    );
+    // Keep moving out.
+    await gesture.moveBy(const Offset(100, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 14,
+        extentOffset: 28,
+      ),
+    );
+    await gesture.moveBy(const Offset(1600, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 14,
+        extentOffset: 134,
+      ),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The selection isn't affected by the gesture lift.
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 14,
+        extentOffset: 134,
+      ),
+    );
+    // // The toolbar shows up.
+    // if (defaultTargetPlatform == TargetPlatform.iOS) {
+    //   expectCupertinoSelectionToolbar();
+    // } else {
+    //   expectMaterialSelectionToolbar();
+    // }
+
+    // final RenderEditable renderEditable = findRenderEditable(tester);
+    // final List<TextSelectionPoint> endpoints = globalize(
+    //   renderEditable.getEndpointsForSelection(controller.selection),
+    //   renderEditable,
+    // );
+    // expect(endpoints.isNotEmpty, isTrue);
+    // expect(endpoints.length, 2);
+    // expect(endpoints[0].point.dx, isNegative);
+    // expect(endpoints[1].point.dx, isPositive);
+  },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
   testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
