@@ -92,7 +92,7 @@ class DependencyVersionChecker {
         }
 
         // This approach is taken from AGP's own version checking plugin:
-        // https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/agpVersionChecker.kt#58.
+        // https://android.googlesource.com/platform/tools/base/+/1839aa23b8dc562005e2f0f0cc8e8b4c5caa37d0/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/agpVersionChecker.kt#58.
         fun getAGPVersion(project: Project): Version? {
             var agpVersion: Version? = null
             try {
