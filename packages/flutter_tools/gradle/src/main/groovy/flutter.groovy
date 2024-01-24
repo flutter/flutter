@@ -66,10 +66,10 @@ class FlutterExtension {
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
-    public String source = "../.."
+    String source = "../.."
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
-    public String target
+    String target
 
     /** The versionCode that was read from app's local.properties. */
     public String flutterVersionCode = null
@@ -684,7 +684,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (pluginProject == null) {
                 // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
                 project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
-            } else if (doesSupportAndroidPlatform(project, pluginProject.projectDir.parentFile.path as String)) {
+            } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
                 configurePluginProject(it)
@@ -700,7 +700,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns `true` if the given path contains an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean doesSupportAndroidPlatform(Project project, String path) {
+    private Boolean doesSupportAndroidPlatform(String path) {
         File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
         File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
         if (buildGradle.exists() && buildGradleKts.exists()) {
