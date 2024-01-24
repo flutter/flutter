@@ -3779,7 +3779,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Rect viewportRect = _calculateViewportRect();
       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
       final bool? renderEditableInViewport = _renderEditableInViewport(notification);
-      final bool renderEditableIsVisible = renderEditableInViewport == null ? true : renderEditableInViewport! && viewportRect.overlaps(renderEditableBounds);
+      final bool renderEditableIsVisible = renderEditableInViewport == null || (renderEditableInViewport && viewportRect.overlaps(renderEditableBounds));
 
       if (selectionIsVisible && renderEditableIsVisible) {
         showToolbar();
