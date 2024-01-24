@@ -5487,64 +5487,34 @@ TestSemantics _expectedSemantics() {
                 flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isSelected,
-                              SemanticsFlag.isFocusable],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Abc\nTab 1 of 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Def\nTab 2 of 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Ghi\nTab 3 of 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Jkl\nTab 4 of 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        flags: <SemanticsFlag>[SemanticsFlag.isSelected,
+                          SemanticsFlag.isFocusable],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: 'Abc\nTab 1 of 4',
+                        textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        label: 'body',
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: 'Def\nTab 2 of 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: 'Ghi\nTab 3 of 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: 'Jkl\nTab 4 of 4',
                         textDirection: TextDirection.ltr,
                       ),
                     ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Abc\nTab 1 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Def\nTab 2 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Ghi\nTab 3 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Jkl\nTab 4 of 4',
-                    textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     label: 'body',
