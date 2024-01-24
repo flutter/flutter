@@ -105,7 +105,7 @@ void main() {
       .toList();
 
     expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
-    expect(description[1], "dataRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
+    expect(description[1], "dataRowColor: Instance of '_WidgetStatePropertyWith<Color>'");
     expect(description[2], 'dataRowMinHeight: 41.0');
     expect(description[3], 'dataRowMaxHeight: 42.0');
     expect(description[4], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
