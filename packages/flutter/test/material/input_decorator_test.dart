@@ -6570,8 +6570,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
             ),
           ),
         ),
-        null,
-        EnginePhase.layout,
+        phase: EnginePhase.layout,
       );
     } finally {
       FlutterError.onError = oldHandler;
@@ -7022,5 +7021,30 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
         ),
       reason: 'clamp is expected',
     );
+  });
+
+  testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              labelText: 'label',
+            ),
+          ),
+        ),
+      ),
+    );
+    final TextStyle beforeStyle = getLabelStyle(tester);
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getLabelStyle(tester).height, beforeStyle.height);
   });
 }
