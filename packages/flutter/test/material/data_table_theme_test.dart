@@ -109,7 +109,7 @@ void main() {
     expect(description[2], 'dataRowMinHeight: 41.0');
     expect(description[3], 'dataRowMaxHeight: 42.0');
     expect(description[4], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
-    expect(description[5], "headingRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
+    expect(description[5], "headingRowColor: Instance of '_WidgetStatePropertyWith<Color>'");
     expect(description[6], 'headingRowHeight: 52.0');
     expect(description[7], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
     expect(description[8], 'horizontalMargin: 3.0');
