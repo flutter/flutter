@@ -16752,7 +16752,7 @@ void main() {
           ),
         ),
       ),
-    ),);
+    ));
 
     await tester.enterText(find.byType(EditableText), '\n');
     await tester.pumpAndSettle();
