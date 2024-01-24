@@ -50,6 +50,17 @@ void main() async {
     return;
   }
 
+  test('FragmentProgram objects are cached.', () async {
+    final FragmentProgram programA = await FragmentProgram.fromAsset(
+      'blue_green_sampler.frag.iplr',
+    );
+    final FragmentProgram programB = await FragmentProgram.fromAsset(
+      'blue_green_sampler.frag.iplr',
+    );
+
+    expect(identical(programA, programB), true);
+  });
+
   test('FragmentShader setSampler throws with out-of-bounds index', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'blue_green_sampler.frag.iplr',
