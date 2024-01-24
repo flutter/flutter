@@ -152,9 +152,7 @@ class _SaveableFormState extends State<_SaveableForm> {
           ),
           TextButton(
             onPressed: () async {
-              final bool shouldPop = _isDirty
-                  ? await _showDialog() ?? false
-                  : true;
+              final bool shouldPop = !_isDirty || (await _showDialog() ?? false);
               if (!shouldPop) {
                 return;
               }
