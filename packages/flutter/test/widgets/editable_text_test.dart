@@ -16754,9 +16754,9 @@ void main() {
       ),
     ));
 
+    expect(notifyCount, equals(0));
     await tester.enterText(find.byType(EditableText), '\n');
     await tester.pumpAndSettle();
-
     expect(notifyCount, equals(1));
   });
 }
