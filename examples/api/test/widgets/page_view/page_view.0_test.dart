@@ -49,7 +49,7 @@ void main() {
 
     // Verify that page view index is also updated with same index to page indicator.
     final PageView pageView = tester.widget<PageView>(find.byType(PageView));
-    expect(pageView.controller.page, 1);
+    expect(pageView.controller!.page, 1);
 
     // Tap backward button on page indicator area.
     await tester.tap(find.byIcon(Icons.arrow_left_rounded));
