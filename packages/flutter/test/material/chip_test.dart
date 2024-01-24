@@ -2896,18 +2896,14 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'test',
-                                textDirection: TextDirection.ltr,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isButton,
-                                ],
-                              ),
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
                             ],
                           ),
                         ],
@@ -2949,27 +2945,23 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
+                            ],
                             children: <TestSemantics>[
                               TestSemantics(
-                                label: 'test',
+                                tooltip: 'Delete',
+                                actions: <SemanticsAction>[SemanticsAction.tap],
                                 textDirection: TextDirection.ltr,
                                 flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
                                   SemanticsFlag.isButton,
-                                ],
-                                children: <TestSemantics>[
-                                  TestSemantics(
-                                    tooltip: 'Delete',
-                                    actions: <SemanticsAction>[SemanticsAction.tap],
-                                    textDirection: TextDirection.ltr,
-                                    flags: <SemanticsFlag>[
-                                      SemanticsFlag.isButton,
-                                      SemanticsFlag.isFocusable,
-                                    ],
-                                  ),
+                                  SemanticsFlag.isFocusable,
                                 ],
                               ),
                             ],
@@ -3013,22 +3005,18 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics> [
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'test',
-                                textDirection: TextDirection.ltr,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isButton,
-                                  SemanticsFlag.isEnabled,
-                                  SemanticsFlag.isFocusable,
-                                ],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
-                              ),
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
                             ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
                           ),
                         ],
                       ),
@@ -3075,22 +3063,18 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'test',
-                                textDirection: TextDirection.ltr,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isButton,
-                                  SemanticsFlag.isEnabled,
-                                  SemanticsFlag.isFocusable,
-                                ],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
-                              ),
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
                             ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
                           ),
                         ],
                       ),
@@ -3131,23 +3115,19 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'test',
-                                textDirection: TextDirection.ltr,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isButton,
-                                  SemanticsFlag.isEnabled,
-                                  SemanticsFlag.isFocusable,
-                                  SemanticsFlag.isSelected,
-                                ],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
-                              ),
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.isSelected,
                             ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
                           ),
                         ],
                       ),
@@ -3190,20 +3170,16 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'test',
-                                textDirection: TextDirection.ltr,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isButton,
-                                ],
-                                actions: <SemanticsAction>[],
-                              ),
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
                             ],
+                            actions: <SemanticsAction>[],
                           ),
                         ],
                       ),
@@ -3245,17 +3221,13 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'test',
-                                textDirection: TextDirection.ltr,
-                                flags: <SemanticsFlag>[], // Must not be a button when tapping is disabled.
-                                actions: <SemanticsAction>[],
-                              ),
-                            ],
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[], // Must not be a button when tapping is disabled.
+                            actions: <SemanticsAction>[],
                           ),
                         ],
                       ),
@@ -3298,22 +3270,18 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'test',
-                                textDirection: TextDirection.ltr,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isButton,
-                                  SemanticsFlag.isEnabled,
-                                  SemanticsFlag.isFocusable,
-                                ],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
-                              ),
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
                             ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
                           ),
                         ],
                       ),
@@ -3354,18 +3322,14 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'test',
-                                textDirection: TextDirection.ltr,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isButton,
-                                ],
-                              ),
+                            label: 'test',
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
                             ],
                           ),
                         ],

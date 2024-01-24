@@ -151,6 +151,7 @@ abstract final class FlutterOptions {
   static const String kAndroidSkipBuildDependencyValidation = 'android-skip-build-dependency-validation';
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
+  static const String kNativeAssetsYamlFile = 'native-assets-yaml-file';
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
@@ -1009,6 +1010,14 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kAssumeInitializeFromDillUpToDate,
       help: 'If set, assumes that the file passed in initialize-from-dill is up '
         'to date and skip the check and potential invalidation of files.',
+      hide: hide,
+    );
+  }
+
+  void usesNativeAssetsOption({ required bool hide }) {
+    argParser.addOption(FlutterOptions.kNativeAssetsYamlFile,
+      help: 'Initializes the resident compiler with a custom native assets '
+      'yaml file instead of the default cached location.',
       hide: hide,
     );
   }
