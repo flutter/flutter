@@ -97,8 +97,10 @@ class _SaveableFormState extends State<_SaveableForm> {
   }
 
   void _save(String? value) {
+    final String nextSavedValue = value ?? '';
     setState(() {
-      _savedValue = value ?? '';
+      _savedValue = nextSavedValue;
+      _isDirty = nextSavedValue != _controller.text;
     });
   }
 
