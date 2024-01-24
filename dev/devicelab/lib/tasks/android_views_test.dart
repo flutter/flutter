@@ -13,7 +13,6 @@ TaskFunction androidViewsTest({
   Map<String, String>? environment,
 }){
     return () async {
-        //return TaskResult.failure('aaa');
         section('Build APK');
         await flutter(
           'build',
@@ -25,14 +24,12 @@ TaskFunction androidViewsTest({
           workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views'
         );
 
-        // Any gradle command downloads gradle if not already present in the cache.
-        // ./gradlew dependencies downloads any gradle defined dependencies to the cache.
-        // https://docs.gradle.org/current/userguide/viewing_debugging_dependencies.html
-        // Downloading gradle and downloading dependencies are a common source of flakes
-        // and moving those to an infra step that can be retried shifts the blame
-        // individual tests to the infra itself.
-        /////// android_path = views_test_dir.join('android')
-        /////// with api.context(env=env, env_prefixes=env_prefixes, cwd=android_path):
+        /// Any gradle command downloads gradle if not already present in the cache.
+        /// ./gradlew dependencies downloads any gradle defined dependencies to the cache.
+        /// https://docs.gradle.org/current/userguide/viewing_debugging_dependencies.html
+        /// Downloading gradle and downloading dependencies are a common source of flakes
+        /// and moving those to an infra step that can be retried shifts the blame
+        /// individual tests to the infra itself.
         section('Download android dependencies');
         final int exitCode = await exec(
           './gradlew',
