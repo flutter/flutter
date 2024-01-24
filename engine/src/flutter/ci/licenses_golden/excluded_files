@@ -2545,6 +2545,7 @@
 ../../../third_party/dart/third_party/fallback_root_certificates/certdata.pem
 ../../../third_party/dart/third_party/fallback_root_certificates/certdata.txt
 ../../../third_party/dart/third_party/firefox_jsshell
+../../../third_party/dart/third_party/jsc/README.google
 ../../../third_party/dart/third_party/mdn/browser-compat-data/README.google
 ../../../third_party/dart/third_party/pkg
 ../../../third_party/dart/third_party/requirejs
