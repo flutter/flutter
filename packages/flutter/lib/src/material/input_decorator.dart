@@ -2123,9 +2123,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
-      .copyWith(height: 1)
       .merge(defaultTextStyle)
-      .merge(style);
+      .merge(style)
+      .copyWith(height: 1);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData, InputDecorationTheme defaults) {
