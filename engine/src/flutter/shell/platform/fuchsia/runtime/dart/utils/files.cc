@@ -5,18 +5,18 @@
 #include "files.h"
 
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <cstdint>
 
-#include "inlines.h"
-#include "logging.h"
+#include "flutter/fml/logging.h"
 
 namespace dart_utils {
 
 namespace {
 
 bool ReadFileDescriptor(int fd, std::string* result) {
-  DEBUG_CHECK(result, LOG_TAG, "");
+  FML_DCHECK(result);
   result->clear();
 
   if (fd < 0) {

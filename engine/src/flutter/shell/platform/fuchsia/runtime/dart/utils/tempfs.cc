@@ -6,12 +6,11 @@
 
 #include <string_view>
 
-#include <lib/syslog/global.h>
 #include <zircon/errors.h>
 #include <zircon/status.h>
 #include <zircon/syscalls.h>
 
-#include "logging.h"
+#include "flutter/fml/logging.h"
 
 namespace {
 
@@ -28,8 +27,8 @@ void BindTemp(fdio_ns_t* ns) {
   // devfs requires sharing between the service isolate and the app isolates.
   fdio_flat_namespace_t* rootns;
   if (zx_status_t status = fdio_ns_export_root(&rootns); status != ZX_OK) {
-    FX_LOGF(ERROR, LOG_TAG, "Failed to export root ns: %s",
-            zx_status_get_string(status));
+    FML_LOG(ERROR) << "Failed to export root ns: "
+                   << zx_status_get_string(status);
     return;
   }
 
@@ -44,9 +43,8 @@ void BindTemp(fdio_ns_t* ns) {
   if (zx_status_t status = fdio_ns_bind(ns, kTmpPath, tmp_dir_handle);
       status != ZX_OK) {
     zx_handle_close(tmp_dir_handle);
-    FX_LOGF(ERROR, LOG_TAG,
-            "Failed to bind /tmp directory into isolate namespace: %s",
-            zx_status_get_string(status));
+    FML_LOG(ERROR) << "Failed to bind /tmp directory into isolate namespace: "
+                   << zx_status_get_string(status);
   }
 }
 

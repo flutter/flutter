@@ -331,10 +331,10 @@ void SoftwareSurface::SignalWritesFinished(
     return;
   }
 
-  dart_utils::Check(surface_read_finished_callback_ == nullptr,
-                    "Attempted to signal a write on the surface when the "
-                    "previous write has not yet been acknowledged by the "
-                    "compositor.");
+  FML_CHECK(surface_read_finished_callback_ == nullptr)
+      << "Attempted to signal a write on the surface when the "
+         "previous write has not yet been acknowledged by the "
+         "compositor.";
   surface_read_finished_callback_ = on_surface_read_finished;
 
   // Sysmem *may* require the cache to be cleared after writes to the surface

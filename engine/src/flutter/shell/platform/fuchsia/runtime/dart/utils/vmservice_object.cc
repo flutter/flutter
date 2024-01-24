@@ -6,13 +6,12 @@
 
 #include <dirent.h>
 #include <fuchsia/io/cpp/fidl.h>
-#include <lib/syslog/global.h>
 #include <zircon/status.h>
 
 #include <cerrno>
 #include <string>
 
-#include "logging.h"
+#include "flutter/fml/logging.h"
 
 namespace {
 
@@ -40,9 +39,8 @@ void VMServiceObject::GetContents(LazyEntryVector* out_vector) const {
   // the contents of this directory.
   std::vector<std::string> files;
   if (!ReadDirContents(kPortDir, &files)) {
-    FX_LOGF(ERROR, LOG_TAG,
-            "Failed to read Dart VM service port directory '%s': %s", kPortDir,
-            strerror(errno));
+    FML_LOG(ERROR) << "Failed to read Dart VM service port directory '"
+                   << kPortDir << "': " << strerror(errno);
     return;
   }
   for (const auto& file : files) {

@@ -45,10 +45,10 @@ template("make_utils") {
              "$fuchsia_sdk_root/pkg:fdio",
              "$fuchsia_sdk_root/pkg:sys_cpp",
              "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
-             "$fuchsia_sdk_root/pkg:syslog",
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:vfs_cpp",
              "$fuchsia_sdk_root/pkg:zx",
+             "//flutter/fml",
              "//flutter/third_party/tonic",
            ]
 

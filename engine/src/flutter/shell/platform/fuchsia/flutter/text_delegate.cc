@@ -141,7 +141,7 @@ void TextDelegate::ActivateIme() {
 }
 
 void TextDelegate::ActivateIme(fuchsia::ui::input::InputMethodAction action) {
-  DEBUG_CHECK(last_text_state_.has_value(), LOG_TAG, "");
+  FML_DCHECK(last_text_state_.has_value());
 
   requested_text_action_ = action;
   text_sync_service_->GetInputMethodEditor(

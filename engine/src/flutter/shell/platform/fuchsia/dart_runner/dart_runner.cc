@@ -6,7 +6,6 @@
 
 #include <lib/async-loop/loop.h>
 #include <lib/async/default.h>
-#include <lib/syslog/global.h>
 #include <lib/vfs/cpp/pseudo_dir.h>
 #include <sys/stat.h>
 #include <zircon/status.h>
@@ -21,7 +20,6 @@
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "logging.h"
 #include "runtime/dart/utils/inlines.h"
 #include "runtime/dart/utils/vmservice_object.h"
 #include "service_isolate.h"
@@ -209,7 +207,7 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
   char* error =
       Dart_SetVMFlags(dart_utils::ArraySize(kDartVMArgs), kDartVMArgs);
   if (error) {
-    FX_LOGF(FATAL, LOG_TAG, "Dart_SetVMFlags failed: %s", error);
+    FML_LOG(FATAL) << "Dart_SetVMFlags failed: " << error;
   }
 
   Dart_InitializeParams params = {};
@@ -220,7 +218,7 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
 #else
   if (!dart_utils::MappedResource::LoadFromNamespace(
           nullptr, "/pkg/data/vm_snapshot_data.bin", vm_snapshot_data_)) {
-    FX_LOG(FATAL, LOG_TAG, "Failed to load vm snapshot data");
+    FML_LOG(FATAL) << "Failed to load vm snapshot data";
   }
   params.vm_snapshot_data = vm_snapshot_data_.address();
 #endif
@@ -233,13 +231,13 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
 #endif
   error = Dart_Initialize(&params);
   if (error)
-    FX_LOGF(FATAL, LOG_TAG, "Dart_Initialize failed: %s", error);
+    FML_LOG(FATAL) << "Dart_Initialize failed: " << error;
 }
 
 DartRunner::~DartRunner() {
   char* error = Dart_Cleanup();
   if (error)
-    FX_LOGF(FATAL, LOG_TAG, "Dart_Cleanup failed: %s", error);
+    FML_LOG(FATAL) << "Dart_Cleanup failed: " << error;
 }
 
 void DartRunner::Start(
