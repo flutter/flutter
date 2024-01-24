@@ -1446,7 +1446,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           case TextGranularity.word:
             result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getWordBoundaryAtPosition);
           case TextGranularity.paragraph:
-            result = _updateSelectionEdgeByTextBoundary2(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getClampedParagraphBoundaryAtPosition);
+            result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getClampedParagraphBoundaryAtPosition);
           case TextGranularity.document:
           case TextGranularity.line:
             assert(false, 'Moving the selection edge by line or document is not supported.');
@@ -1969,17 +1969,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   }
 
   TextRange? _intersect(TextRange a, TextRange b) {
-    if (a.start == b.start && a.end == b.end) {
-      return null;
-    }
-    int startMax = math.max(a.start, b.start);
-    int endMin = math.min(a.end, b.end);
-
+    final int startMax = math.max(a.start, b.start);
+    final int endMin = math.min(a.end, b.end);
     if (startMax <= endMin) {
-      // This means there is an intersection
+      // Intersection.
       return TextRange(start: startMax, end: endMin);
     }
-    // If no intersection, return null or handle accordingly
     return null;
   }
 
@@ -1993,21 +1988,18 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     } else if (textBoundary.boundaryStart.offset >= range.end && textBoundary.boundaryEnd.offset > range.end) {
       return SelectionResult.next;
     }
-    late final TextRange? intersectRange;
-    if ((intersectRange = _intersect(range, TextRange(start: textBoundary.boundaryStart.offset, end: textBoundary.boundaryEnd.offset))) != null) {
+    final TextRange? intersectRange;
+    final TextRange boundaryAsRange = TextRange(start: textBoundary.boundaryStart.offset, end: textBoundary.boundaryEnd.offset);
+    if ((intersectRange = _intersect(range, boundaryAsRange)) != null) {
       _textSelectionStart = TextPosition(offset: intersectRange!.start);
       _textSelectionEnd = TextPosition(offset: intersectRange!.end);
-      // _selectableContainsOriginTextBoundary = true;
+      _selectableContainsOriginTextBoundary = true;
       if (range.end < textBoundary.boundaryEnd.offset) {
-        debugPrint('the end $range $fullText ${fullText.length} $textBoundary');
         return SelectionResult.next;
       }
       return SelectionResult.end;
     }
-    _textSelectionStart = textBoundary.boundaryStart;
-    _textSelectionEnd = textBoundary.boundaryEnd;
-    _selectableContainsOriginTextBoundary = true;
-    return SelectionResult.end;
+    return SelectionResult.none;
   }
 
   _TextBoundaryRecord _adjustTextBoundaryAtPosition(TextRange textBoundary, TextPosition position) {
