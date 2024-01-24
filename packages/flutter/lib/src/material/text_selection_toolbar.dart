@@ -405,8 +405,14 @@ class _TextSelectionToolbarItemsLayoutElement extends MultiChildRenderObjectElem
   }
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    children.where(_shouldPaint).forEach(visitor);
+  void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
+    for (final Element child in children) {
+      if (_shouldPaint(child) && offstageAncestor == null) {
+        visitor(child);
+      } else {
+        child.debugVisitOnstageChildren(visitor, offstageAncestor : offstageAncestor ?? child);
+      }
+    }
   }
 }
 

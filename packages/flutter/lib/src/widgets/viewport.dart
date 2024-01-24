@@ -286,11 +286,15 @@ class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElem
   }
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    children.where((Element e) {
-      final RenderSliver renderSliver = e.renderObject! as RenderSliver;
-      return renderSliver.geometry!.visible;
-    }).forEach(visitor);
+  void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
+    for (final Element element in children) {
+      final RenderSliver renderSliver = element.renderObject! as RenderSliver;
+      if (renderSliver.geometry!.visible && offstageAncestor == null) {
+        visitor(element);
+      } else {
+        element.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor ?? element);
+      }
+    }
   }
 }
 

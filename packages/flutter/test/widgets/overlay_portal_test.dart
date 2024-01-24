@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -2246,6 +2245,34 @@ void main() {
       expect(overlayRenderObject, paints..paragraph());
       expect(overlayRenderObject, isNot(paints..paragraph()..paragraph()));
     });
+  });
+
+  testWidgets('Using OverlayPortal with no child in ListView', (WidgetTester tester) async {
+    final bool debugVisitOffstageChildren = Element.debugVisitOffstageChildren;
+    Element.debugVisitOffstageChildren = true;
+    addTearDown(() {
+      Element.debugVisitOffstageChildren = debugVisitOffstageChildren;
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView.builder(
+            itemBuilder: (BuildContext context,int index) {
+              return OverlayPortal(
+                controller: controller1,
+                overlayChildBuilder: (BuildContext context) {
+                  return const Center(
+                    child: Text('A'),
+                  );
+                },
+              );
+            },
+            itemCount: 1,
+          ),
+        ),
+      ),
+    );
+    expect(find.text('A'), findsOneWidget);
   });
 }
 

@@ -939,10 +939,16 @@ class _TheaterElement extends MultiChildRenderObjectElement {
   }
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
+  void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
     final _Theater theater = widget as _Theater;
     assert(children.length >= theater.skipCount);
-    children.skip(theater.skipCount).forEach(visitor);
+    for (final (int index, Element element) in children.indexed) {
+      if (index >= theater.skipCount && offstageAncestor == null) {
+        visitor(element);
+      } else {
+        element.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor ?? element);
+      }
+    }
   }
 }
 
@@ -2082,6 +2088,29 @@ class _OverlayPortalElement extends RenderObjectElement {
     }
     if (overlayChild != null) {
       visitor(overlayChild);
+    }
+  }
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
+    final Element? child = _child;
+    final Element? overlayChild = _overlayChild;
+    if (child != null) {
+      offstageAncestor == null ? visitor(child) : child.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor);
+    }
+    if (overlayChild != null) {
+      final _OverlayEntryLocation location = overlayChild.slot! as _OverlayEntryLocation;
+      final _Theater? theater = location._childModel.context.findAncestorWidgetOfExactType<_Theater>();
+      // Whether the overlayChild is onstage depends on whether location._childModel.context is onstage.
+      if (
+        theater != null &&
+        theater.children.indexOf(location._childModel.widget) >= theater.skipCount &&
+        (offstageAncestor == null || offstageAncestor.depth > (location._childModel.context as Element).depth)
+      ) {
+        visitor(overlayChild);
+      } else {
+        overlayChild.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor ?? overlayChild);
+      }
     }
   }
 

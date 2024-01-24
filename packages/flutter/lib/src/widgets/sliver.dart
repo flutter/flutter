@@ -1058,21 +1058,30 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    _childElements.values.cast<Element>().where((Element child) {
-      final SliverMultiBoxAdaptorParentData parentData = child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
-      final double itemExtent;
-      switch (renderObject.constraints.axis) {
-        case Axis.horizontal:
-          itemExtent = child.renderObject!.paintBounds.width;
-        case Axis.vertical:
-          itemExtent = child.renderObject!.paintBounds.height;
-      }
+  void debugVisitOnstageChildren(ElementVisitor visitor, {Element? offstageAncestor}) {
+    for (final Element child in _childElements.values.cast<Element>()) {
+      if (offstageAncestor == null) {
+        final SliverMultiBoxAdaptorParentData parentData = child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
+        final double itemExtent;
+        switch (renderObject.constraints.axis) {
+          case Axis.horizontal:
+            itemExtent = child.renderObject!.paintBounds.width;
+          case Axis.vertical:
+            itemExtent = child.renderObject!.paintBounds.height;
+        }
 
-      return parentData.layoutOffset != null &&
-          parentData.layoutOffset! < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
-          parentData.layoutOffset! + itemExtent > renderObject.constraints.scrollOffset;
-    }).forEach(visitor);
+        final bool isOnstage = parentData.layoutOffset != null &&
+            parentData.layoutOffset! < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
+            parentData.layoutOffset! + itemExtent > renderObject.constraints.scrollOffset;
+        if (isOnstage) {
+          visitor(child);
+        } else {
+          child.debugVisitOnstageChildren(visitor, offstageAncestor: child);
+        }
+      } else {
+        child.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor);
+      }
+    }
   }
 }
 
@@ -1296,10 +1305,11 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
   _SliverOffstageElement(SliverOffstage super.widget);
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!(widget as SliverOffstage).offstage) {
-      super.debugVisitOnstageChildren(visitor);
-    }
+  void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
+    super.debugVisitOnstageChildren(
+      visitor,
+      offstageAncestor: offstageAncestor ?? ((widget as SliverOffstage).offstage ? this : null),
+    );
   }
 }
 

@@ -3471,6 +3471,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
            0;
   }
 
+  /// Setting this property, the [debugVisitOnstageChildren] method will continue to
+  /// visit potentially onstage children for elements that are offstage, which may
+  /// introduce some additional overhead.
+  ///
+  /// By default, this property is set to false.
+  static bool debugVisitOffstageChildren = false;
+
   /// The configuration for this element.
   ///
   /// Avoid overriding this field on [Element] subtypes to provide a more
@@ -3683,22 +3690,39 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Classes like [Offstage] and [Overlay] override this method to hide their
   /// children.
   ///
+  /// [OverlayPortal] also overrides this method to visit its onstage
+  /// children when it itself is offstage. Specifically, when [offstageAncestor] is specified,
+  /// it means that the current element is also offstage because the ancestor [offstageAncestor]
+  /// is offstage (where [offstageAncestor] is the first ancestor to transition from onstage to offstage).
+  /// This method gives the children a chance to be back onstage.
+  ///
   /// Being onstage affects the element's discoverability during testing when
   /// you use Flutter's [Finder] objects. For example, when you instruct the
   /// test framework to tap on a widget, by default the finder will look for
   /// onstage elements and ignore the offstage ones.
   ///
-  /// The default implementation defers to [visitChildren] and therefore treats
-  /// the element as onstage.
+  /// The default implementation defers to [visitChildren] when [offstageAncestor] is not specified,
+  /// treating the element as an onstage element. If [offstageAncestor] is specified, the method
+  /// continues to be invoked for the children.
   ///
   /// See also:
   ///
   ///  * [Offstage] widget that hides its children.
+  ///  * [OverlayPortal] may contain onstage elements that exist outside of the widget itself.
+  ///    These elements are also traversed by this method.
   ///  * [Finder] that skips offstage widgets by default.
   ///  * [RenderObject.visitChildrenForSemantics], in contrast to this method,
   ///    designed specifically for excluding parts of the UI from the semantics
   ///    tree.
-  void debugVisitOnstageChildren(ElementVisitor visitor) => visitChildren(visitor);
+  void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
+    if (offstageAncestor == null) {
+      visitChildren(visitor);
+    } else if (debugVisitOffstageChildren) {
+      visitChildren((Element element) {
+        element.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor);
+      });
+    }
+  }
 
   /// Wrapper around [visitChildren] for [BuildContext].
   @override

@@ -3280,10 +3280,11 @@ class _OffstageElement extends SingleChildRenderObjectElement {
   _OffstageElement(Offstage super.widget);
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!(widget as Offstage).offstage) {
-      super.debugVisitOnstageChildren(visitor);
-    }
+  void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
+    super.debugVisitOnstageChildren(
+      visitor,
+      offstageAncestor: offstageAncestor ?? ((widget as Offstage).offstage ? this : null)
+    );
   }
 }
 
@@ -4123,12 +4124,13 @@ class _IndexedStackElement extends MultiChildRenderObjectElement {
   _RawIndexedStack get widget => super.widget as _RawIndexedStack;
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    final int? index = widget.index;
-    // If the index is null, no child is onstage. Otherwise, only the child at
-    // the selected index is.
-    if (index != null && children.isNotEmpty) {
-      visitor(children.elementAt(index));
+  void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
+    for (final (int index, Element element) in children.indexed) {
+      if (index == widget.index && offstageAncestor == null) {
+        visitor(element);
+      } else {
+        element.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor ?? element);
+      }
     }
   }
 }
