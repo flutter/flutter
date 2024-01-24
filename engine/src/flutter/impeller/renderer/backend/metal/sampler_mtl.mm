@@ -7,13 +7,11 @@
 namespace impeller {
 
 SamplerMTL::SamplerMTL(SamplerDescriptor desc, id<MTLSamplerState> state)
-    : Sampler(std::move(desc)), state_(state) {}
+    : Sampler(std::move(desc)), state_(state) {
+  FML_DCHECK(state_);
+}
 
 SamplerMTL::~SamplerMTL() = default;
-
-bool SamplerMTL::IsValid() const {
-  return state_;
-}
 
 id<MTLSamplerState> SamplerMTL::GetMTLSamplerState() const {
   return state_;

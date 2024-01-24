@@ -179,8 +179,9 @@ static std::optional<Entity> AdvancedBlend(
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-        dst_sampler_descriptor);
+    const std::unique_ptr<const Sampler>& dst_sampler =
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            dst_sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
@@ -201,8 +202,9 @@ static std::optional<Entity> AdvancedBlend(
         src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
         src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
       }
-      auto src_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-          src_sampler_descriptor);
+      const std::unique_ptr<const Sampler>& src_sampler =
+          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+              src_sampler_descriptor);
       blend_info.color_factor = 0;
       blend_info.src_input_alpha = src_snapshot->opacity;
       FS::BindTextureSamplerSrc(pass, src_snapshot->texture, src_sampler);
@@ -351,8 +353,9 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-        dst_sampler_descriptor);
+    const std::unique_ptr<const Sampler>& dst_sampler =
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            dst_sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
@@ -473,8 +476,9 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-        dst_sampler_descriptor);
+    const std::unique_ptr<const Sampler>& dst_sampler =
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            dst_sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.texture_sampler_y_coord_scale =
         dst_snapshot->texture->GetYCoordScale();
@@ -570,8 +574,9 @@ static std::optional<Entity> PipelineBlend(
         return false;
       }
 
-      auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-          input->sampler_descriptor);
+      const std::unique_ptr<const Sampler>& sampler =
+          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+              input->sampler_descriptor);
       FS::BindTextureSamplerSrc(pass, input->texture, sampler);
 
       auto size = input->texture->GetSize();

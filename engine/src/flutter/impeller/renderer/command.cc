@@ -72,8 +72,8 @@ bool Command::BindResource(ShaderStage stage,
                            const SampledImageSlot& slot,
                            const ShaderMetadata& metadata,
                            std::shared_ptr<const Texture> texture,
-                           std::shared_ptr<const Sampler> sampler) {
-  if (!sampler || !sampler->IsValid()) {
+                           const std::unique_ptr<const Sampler>& sampler) {
+  if (!sampler) {
     return false;
   }
   if (!texture || !texture->IsValid()) {
@@ -85,14 +85,14 @@ bool Command::BindResource(ShaderStage stage,
       vertex_bindings.sampled_images.emplace_back(TextureAndSampler{
           .slot = slot,
           .texture = {&metadata, std::move(texture)},
-          .sampler = std::move(sampler),
+          .sampler = sampler,
       });
       return true;
     case ShaderStage::kFragment:
       fragment_bindings.sampled_images.emplace_back(TextureAndSampler{
           .slot = slot,
           .texture = {&metadata, std::move(texture)},
-          .sampler = std::move(sampler),
+          .sampler = sampler,
       });
       return true;
     case ShaderStage::kCompute:

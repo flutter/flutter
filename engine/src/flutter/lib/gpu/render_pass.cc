@@ -448,7 +448,7 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
       flutter::gpu::ToImpellerSamplerAddressMode(width_address_mode);
   sampler_desc.height_address_mode =
       flutter::gpu::ToImpellerSamplerAddressMode(height_address_mode);
-  auto sampler =
+  const std::unique_ptr<const impeller::Sampler>& sampler =
       wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
   return command.BindResource(

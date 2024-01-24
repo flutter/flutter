@@ -69,7 +69,8 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(bridge && boston);
-  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  const std::unique_ptr<const Sampler>& sampler =
+      context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
@@ -164,7 +165,8 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
     vertex_buffer.index_type = IndexType::k16bit;
   }
 
-  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  const std::unique_ptr<const Sampler>& sampler =
+      context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
   Vector3 euler_angles;
@@ -232,7 +234,8 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(bridge && boston);
-  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  const std::unique_ptr<const Sampler>& sampler =
+      context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
@@ -305,8 +308,10 @@ TEST_P(RendererTest, CanRenderToTexture) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(bridge && boston);
-  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  const std::unique_ptr<const Sampler>& sampler =
+      context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
+
   std::shared_ptr<RenderPass> r2t_pass;
   auto cmd_buffer = context->CreateCommandBuffer();
   ASSERT_TRUE(cmd_buffer);
@@ -472,7 +477,8 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(bridge && boston);
-  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  const std::unique_ptr<const Sampler>& sampler =
+      context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
   // Vertex buffer.
@@ -540,7 +546,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
         frag_info.lod = 0;
         FS::BindFragInfo(*pass, host_buffer->EmplaceUniform(frag_info));
 
-        auto sampler = context->GetSamplerLibrary()->GetSampler({});
+        auto& sampler = context->GetSamplerLibrary()->GetSampler({});
         FS::BindTex(*pass, texture, sampler);
 
         pass->Draw();
@@ -577,7 +583,8 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(bridge && boston);
-  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  const std::unique_ptr<const Sampler>& sampler =
+      context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
   TextureDescriptor texture_desc;
@@ -668,7 +675,8 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
         frag_info.lod = 0;
         FS::BindFragInfo(*pass, host_buffer->EmplaceUniform(frag_info));
 
-        auto sampler = context->GetSamplerLibrary()->GetSampler({});
+        const std::unique_ptr<const Sampler>& sampler =
+            context->GetSamplerLibrary()->GetSampler({});
         auto buffer_view = DeviceBuffer::AsBufferView(device_buffer);
         auto texture =
             context->GetResourceAllocator()->CreateTexture(texture_desc);
@@ -795,7 +803,8 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
         SamplerDescriptor sampler_desc;
         sampler_desc.mip_filter = mip_filters[selected_mip_filter];
         sampler_desc.min_filter = min_filters[selected_min_filter];
-        auto sampler = context->GetSamplerLibrary()->GetSampler(sampler_desc);
+        const std::unique_ptr<const Sampler>& sampler =
+            context->GetSamplerLibrary()->GetSampler(sampler_desc);
         FS::BindTex(*pass, boston, sampler);
 
         pass->Draw();
@@ -830,14 +839,15 @@ TEST_P(RendererTest, TheImpeller) {
   SamplerDescriptor noise_sampler_desc;
   noise_sampler_desc.width_address_mode = SamplerAddressMode::kRepeat;
   noise_sampler_desc.height_address_mode = SamplerAddressMode::kRepeat;
-  auto noise_sampler =
+  const std::unique_ptr<const Sampler>& noise_sampler =
       context->GetSamplerLibrary()->GetSampler(noise_sampler_desc);
 
   auto cube_map = CreateTextureCubeForFixture(
       {"table_mountain_px.png", "table_mountain_nx.png",
        "table_mountain_py.png", "table_mountain_ny.png",
        "table_mountain_pz.png", "table_mountain_nz.png"});
-  auto cube_map_sampler = context->GetSamplerLibrary()->GetSampler({});
+  const std::unique_ptr<const Sampler>& cube_map_sampler =
+      context->GetSamplerLibrary()->GetSampler({});
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
 
   SinglePassCallback callback = [&](RenderPass& pass) {
@@ -1132,7 +1142,8 @@ TEST_P(RendererTest, StencilMask) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(bridge && boston);
-  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  const std::unique_ptr<const Sampler>& sampler =
+      context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
   static bool mirror = false;

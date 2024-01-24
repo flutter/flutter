@@ -211,9 +211,9 @@ static bool Bind(PassBindingsCacheMTL& pass,
 static bool Bind(PassBindingsCacheMTL& pass,
                  ShaderStage stage,
                  size_t bind_index,
-                 const Sampler& sampler,
+                 const std::unique_ptr<const Sampler>& sampler,
                  const Texture& texture) {
-  if (!sampler.IsValid() || !texture.IsValid()) {
+  if (!sampler || !texture.IsValid()) {
     return false;
   }
 
@@ -230,7 +230,7 @@ static bool Bind(PassBindingsCacheMTL& pass,
   return pass.SetTexture(stage, bind_index,
                          TextureMTL::Cast(texture).GetMTLTexture()) &&
          pass.SetSampler(stage, bind_index,
-                         SamplerMTL::Cast(sampler).GetMTLSamplerState());
+                         SamplerMTL::Cast(*sampler).GetMTLSamplerState());
 }
 
 // |RenderPass|
@@ -384,13 +384,14 @@ bool RenderPassMTL::BindResource(
 }
 
 // |RenderPass|
-bool RenderPassMTL::BindResource(ShaderStage stage,
-                                 DescriptorType type,
-                                 const SampledImageSlot& slot,
-                                 const ShaderMetadata& metadata,
-                                 std::shared_ptr<const Texture> texture,
-                                 std::shared_ptr<const Sampler> sampler) {
-  return Bind(pass_bindings_, stage, slot.texture_index, *sampler, *texture);
+bool RenderPassMTL::BindResource(
+    ShaderStage stage,
+    DescriptorType type,
+    const SampledImageSlot& slot,
+    const ShaderMetadata& metadata,
+    std::shared_ptr<const Texture> texture,
+    const std::unique_ptr<const Sampler>& sampler) {
+  return Bind(pass_bindings_, stage, slot.texture_index, sampler, *texture);
 }
 
 }  // namespace impeller

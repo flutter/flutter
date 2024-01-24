@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SAMPLER_LIBRARY_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SAMPLER_LIBRARY_GLES_H_
 
+#include "impeller/core/sampler.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 
@@ -24,7 +25,7 @@ class SamplerLibraryGLES final : public SamplerLibrary {
   SamplerLibraryGLES();
 
   // |SamplerLibrary|
-  std::shared_ptr<const Sampler> GetSampler(
+  const std::unique_ptr<const Sampler>& GetSampler(
       SamplerDescriptor descriptor) override;
 
   bool supports_decal_sampler_address_mode_ = false;

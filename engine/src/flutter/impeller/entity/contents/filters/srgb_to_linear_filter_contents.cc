@@ -77,7 +77,8 @@ std::optional<Entity> SrgbToLinearFilterContents::RenderFilter(
             ? input_snapshot->opacity
             : 1.0f;
 
-    auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
+    const std::unique_ptr<const Sampler>& sampler =
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
     FS::BindInputTexture(pass, input_snapshot->texture, sampler);
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));

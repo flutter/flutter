@@ -33,7 +33,7 @@ class SamplerLibraryMTL final
   explicit SamplerLibraryMTL(id<MTLDevice> device);
 
   // |SamplerLibrary|
-  std::shared_ptr<const Sampler> GetSampler(
+  const std::unique_ptr<const Sampler>& GetSampler(
       SamplerDescriptor descriptor) override;
 
   SamplerLibraryMTL(const SamplerLibraryMTL&) = delete;

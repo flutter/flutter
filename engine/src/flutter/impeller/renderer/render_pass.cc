@@ -153,9 +153,9 @@ bool RenderPass::BindResource(ShaderStage stage,
                               const SampledImageSlot& slot,
                               const ShaderMetadata& metadata,
                               std::shared_ptr<const Texture> texture,
-                              std::shared_ptr<const Sampler> sampler) {
+                              const std::unique_ptr<const Sampler>& sampler) {
   return pending_.BindResource(stage, type, slot, metadata, std::move(texture),
-                               std::move(sampler));
+                               sampler);
 }
 
 }  // namespace impeller

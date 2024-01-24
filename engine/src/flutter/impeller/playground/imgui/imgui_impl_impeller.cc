@@ -36,10 +36,14 @@
 #include "impeller/renderer/render_pass.h"
 
 struct ImGui_ImplImpeller_Data {
+  explicit ImGui_ImplImpeller_Data(
+      const std::unique_ptr<const impeller::Sampler>& p_sampler)
+      : sampler(p_sampler) {}
+
   std::shared_ptr<impeller::Context> context;
   std::shared_ptr<impeller::Texture> font_texture;
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline;
-  std::shared_ptr<const impeller::Sampler> sampler;
+  const std::unique_ptr<const impeller::Sampler>& sampler;
 };
 
 static ImGui_ImplImpeller_Data* ImGui_ImplImpeller_GetBackendData() {
@@ -56,7 +60,8 @@ bool ImGui_ImplImpeller_Init(
             "Already initialized a renderer backend!");
 
   // Setup backend capabilities flags
-  auto* bd = new ImGui_ImplImpeller_Data();
+  auto* bd =
+      new ImGui_ImplImpeller_Data(context->GetSamplerLibrary()->GetSampler({}));
   io.BackendRendererUserData = reinterpret_cast<void*>(bd);
   io.BackendRendererName = "imgui_impl_impeller";
   io.BackendFlags |=
@@ -105,8 +110,6 @@ bool ImGui_ImplImpeller_Init(
     bd->pipeline =
         context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
     IM_ASSERT(bd->pipeline != nullptr && "Could not create ImGui pipeline.");
-
-    bd->sampler = context->GetSamplerLibrary()->GetSampler({});
     IM_ASSERT(bd->pipeline != nullptr && "Could not create ImGui sampler.");
   }
 

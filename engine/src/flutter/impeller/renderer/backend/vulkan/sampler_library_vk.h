@@ -28,7 +28,7 @@ class SamplerLibraryVK final
   explicit SamplerLibraryVK(const std::weak_ptr<DeviceHolder>& device_holder);
 
   // |SamplerLibrary|
-  std::shared_ptr<const Sampler> GetSampler(
+  const std::unique_ptr<const Sampler>& GetSampler(
       SamplerDescriptor descriptor) override;
 
   SamplerLibraryVK(const SamplerLibraryVK&) = delete;
