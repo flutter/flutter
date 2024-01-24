@@ -16,13 +16,13 @@ TaskFunction androidViewsTest({
         //return TaskResult.failure('aaa');
         section('Build APK');
         await flutter(
-          'configure android project',
+          'build',
           options: <String>[
-            'build',
             'apk',
             '--config-only',
           ],
           environment: environment,
+          workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views'
         );
 
         // Any gradle command downloads gradle if not already present in the cache.
@@ -35,20 +35,24 @@ TaskFunction androidViewsTest({
         /////// with api.context(env=env, env_prefixes=env_prefixes, cwd=android_path):
         section('Download android dependencies');
         final int exitCode = await exec(
-          'gradlew',
+          './gradlew',
            <String>['-q', 'dependencies'],
+          workingDirectory:
+          '${flutterDirectory.path}/dev/integration_tests/android_views/android'
         );
         if (exitCode != 0) {
-          return TaskResult.failure('Failed to download dependencies');
+          return TaskResult.failure('Failed to download gradle dependencies');
         }
+        section('Run flutter drive on android views');
         await flutter(
-          'Android Views Integration Tests',
+          'drive',
           options: <String>[
-              'drive', '--browser-name=android-chrome',
+              '--browser-name=android-chrome',
               '--android-emulator', '--no-start-paused',
               '--purge-persistent-cache', '--device-timeout=30',
           ],
           environment: environment,
+          workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views'
         );
         return TaskResult.success(null);
       };
