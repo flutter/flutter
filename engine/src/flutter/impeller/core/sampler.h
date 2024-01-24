@@ -16,8 +16,6 @@ class Sampler {
  public:
   virtual ~Sampler();
 
-  virtual bool IsValid() const = 0;
-
   const SamplerDescriptor& GetDescriptor() const;
 
  protected:
@@ -32,7 +30,7 @@ class Sampler {
 };
 
 using SamplerMap = std::unordered_map<SamplerDescriptor,
-                                      std::shared_ptr<const Sampler>,
+                                      std::unique_ptr<const Sampler>,
                                       ComparableHash<SamplerDescriptor>,
                                       ComparableEqual<SamplerDescriptor>>;
 

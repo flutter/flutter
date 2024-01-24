@@ -4,8 +4,6 @@
 
 #include "impeller/renderer/backend/gles/sampler_gles.h"
 
-#include <iostream>
-
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
@@ -17,10 +15,6 @@ namespace impeller {
 SamplerGLES::SamplerGLES(SamplerDescriptor desc) : Sampler(std::move(desc)) {}
 
 SamplerGLES::~SamplerGLES() = default;
-
-bool SamplerGLES::IsValid() const {
-  return true;
-}
 
 static GLint ToParam(MinMagFilter minmag_filter,
                      std::optional<MipFilter> mip_filter = std::nullopt) {
@@ -74,10 +68,6 @@ static GLint ToAddressMode(SamplerAddressMode mode,
 
 bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
                                         const ProcTableGLES& gl) const {
-  if (!IsValid()) {
-    return false;
-  }
-
   if (texture.NeedsMipmapGeneration()) {
     VALIDATION_LOG
         << "Texture mip count is > 1, but the mipmap has not been generated. "

@@ -73,7 +73,7 @@ class ComputePassVK final : public ComputePass {
                     const SampledImageSlot& slot,
                     const ShaderMetadata& metadata,
                     std::shared_ptr<const Texture> texture,
-                    std::shared_ptr<const Sampler> sampler) override;
+                    const std::unique_ptr<const Sampler>& sampler) override;
 
   bool BindResource(size_t binding,
                     DescriptorType type,
