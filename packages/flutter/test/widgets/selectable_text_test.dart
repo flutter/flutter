@@ -3782,6 +3782,8 @@ void main() {
     expect(endpoints[0].point.dx, isNegative);
     expect(endpoints[1].point.dx, isPositive);
   },
+    // TODO(Renzo-Olivares): Add in TargetPlatform.android in the line below when
+    // we fix edge scrolling in a Scrollable https://github.com/flutter/flutter/issues/64059.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
