@@ -64,12 +64,10 @@ std::unique_ptr<Screenshot> ReadTexture(
 }
 }  // namespace
 
-VulkanScreenshotter::VulkanScreenshotter(bool enable_validations) {
-  FML_CHECK(::glfwInit() == GLFW_TRUE);
-  PlaygroundSwitches playground_switches;
-  playground_switches.enable_vulkan_validation = enable_validations;
-  playground_ =
-      PlaygroundImpl::Create(PlaygroundBackend::kVulkan, playground_switches);
+VulkanScreenshotter::VulkanScreenshotter(
+    const std::unique_ptr<PlaygroundImpl>& playground)
+    : playground_(playground) {
+  FML_CHECK(playground_);
 }
 
 std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(

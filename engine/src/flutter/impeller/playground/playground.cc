@@ -87,6 +87,12 @@ std::shared_ptr<Context> Playground::GetContext() const {
   return context_;
 }
 
+std::shared_ptr<Context> Playground::MakeContext() const {
+  // Playgrounds are already making a context for each test, so we can just
+  // return the `context_`.
+  return context_;
+}
+
 bool Playground::SupportsBackend(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
