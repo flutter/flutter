@@ -9,30 +9,43 @@
 // NOTE(robert-ancell) These test cases assumes a little-endian architecture.
 // These tests will need to be updated if tested on a big endian architecture.
 
-// Encodes a message using a FlStandardMessageCodec. Return a hex string with
+// Encodes a message using the supplied codec. Return a hex string with
 // the encoded binary output.
-static gchar* encode_message(FlValue* value) {
-  g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
+static gchar* encode_message_with_codec(FlValue* value, FlMessageCodec* codec) {
   g_autoptr(GError) error = nullptr;
   g_autoptr(GBytes) message =
-      fl_message_codec_encode_message(FL_MESSAGE_CODEC(codec), value, &error);
+      fl_message_codec_encode_message(codec, value, &error);
   EXPECT_NE(message, nullptr);
   EXPECT_EQ(error, nullptr);
 
   return bytes_to_hex_string(message);
 }
 
+// Encodes a message using a FlStandardMessageCodec. Return a hex string with
+// the encoded binary output.
+static gchar* encode_message(FlValue* value) {
+  g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
+  return encode_message_with_codec(value, FL_MESSAGE_CODEC(codec));
+}
+
+// Decodes a message using the supplied codec. The binary data is given in
+// the form of a hex string.
+static FlValue* decode_message_with_codec(const char* hex_string,
+                                          FlMessageCodec* codec) {
+  g_autoptr(GBytes) data = hex_string_to_bytes(hex_string);
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(FlValue) value =
+      fl_message_codec_decode_message(codec, data, &error);
+  EXPECT_EQ(error, nullptr);
+  EXPECT_NE(value, nullptr);
+  return fl_value_ref(value);
+}
+
 // Decodes a message using a FlStandardMessageCodec. The binary data is given in
 // the form of a hex string.
 static FlValue* decode_message(const char* hex_string) {
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
-  g_autoptr(GBytes) data = hex_string_to_bytes(hex_string);
-  g_autoptr(GError) error = nullptr;
-  g_autoptr(FlValue) value =
-      fl_message_codec_decode_message(FL_MESSAGE_CODEC(codec), data, &error);
-  EXPECT_EQ(error, nullptr);
-  EXPECT_NE(value, nullptr);
-  return fl_value_ref(value);
+  return decode_message_with_codec(hex_string, FL_MESSAGE_CODEC(codec));
 }
 
 // Decodes a message using a FlStandardMessageCodec. The binary data is given in
@@ -1075,6 +1088,178 @@ TEST(FlStandardMessageCodecTest, EncodeDecodeLargeMap) {
 TEST(FlStandardMessageCodecTest, DecodeUnknownType) {
   decode_error_value("0f", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_UNSUPPORTED_TYPE);
+}
+
+G_DECLARE_FINAL_TYPE(FlTestStandardMessageCodec,
+                     fl_test_standard_message_codec,
+                     FL,
+                     TEST_STANDARD_MESSAGE_CODEC,
+                     FlStandardMessageCodec)
+
+struct _FlTestStandardMessageCodec {
+  FlStandardMessageCodec parent_instance;
+};
+
+G_DEFINE_TYPE(FlTestStandardMessageCodec,
+              fl_test_standard_message_codec,
+              fl_standard_message_codec_get_type())
+
+static gboolean write_custom_value1(FlStandardMessageCodec* codec,
+                                    GByteArray* buffer,
+                                    FlValue* value,
+                                    GError** error) {
+  const gchar* text =
+      static_cast<const gchar*>(fl_value_get_custom_value(value));
+  size_t length = strlen(text);
+
+  uint8_t type = 128;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  fl_standard_message_codec_write_size(codec, buffer, length);
+  g_byte_array_append(buffer, reinterpret_cast<const uint8_t*>(text), length);
+  return TRUE;
+}
+
+static gboolean write_custom_value2(FlStandardMessageCodec* codec,
+                                    GByteArray* buffer,
+                                    FlValue* value,
+                                    GError** error) {
+  uint8_t type = 129;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  return TRUE;
+}
+
+static gboolean fl_test_standard_message_codec_write_value(
+    FlStandardMessageCodec* codec,
+    GByteArray* buffer,
+    FlValue* value,
+    GError** error) {
+  if (fl_value_get_type(value) == FL_VALUE_TYPE_CUSTOM &&
+      fl_value_get_custom_type(value) == 128) {
+    return write_custom_value1(codec, buffer, value, error);
+  } else if (fl_value_get_type(value) == FL_VALUE_TYPE_CUSTOM &&
+             fl_value_get_custom_type(value) == 129) {
+    return write_custom_value2(codec, buffer, value, error);
+  } else {
+    return FL_STANDARD_MESSAGE_CODEC_CLASS(
+               fl_test_standard_message_codec_parent_class)
+        ->write_value(codec, buffer, value, error);
+  }
+}
+
+static FlValue* read_custom_value1(FlStandardMessageCodec* codec,
+                                   GBytes* buffer,
+                                   size_t* offset,
+                                   GError** error) {
+  uint32_t length;
+  if (!fl_standard_message_codec_read_size(codec, buffer, offset, &length,
+                                           error)) {
+    return nullptr;
+  }
+  if (*offset + length > g_bytes_get_size(buffer)) {
+    g_set_error(error, FL_MESSAGE_CODEC_ERROR,
+                FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA, "Unexpected end of data");
+    return nullptr;
+  }
+  FlValue* value = fl_value_new_custom(
+      128,
+      g_strndup(static_cast<const gchar*>(g_bytes_get_data(buffer, nullptr)) +
+                    *offset,
+                length),
+      g_free);
+  *offset += length;
+
+  return value;
+}
+
+static FlValue* read_custom_value2(FlStandardMessageCodec* codec,
+                                   GBytes* buffer,
+                                   size_t* offset,
+                                   GError** error) {
+  return fl_value_new_custom(129, nullptr, nullptr);
+}
+
+static FlValue* fl_test_standard_message_codec_read_value_of_type(
+    FlStandardMessageCodec* codec,
+    GBytes* buffer,
+    size_t* offset,
+    int type,
+    GError** error) {
+  if (type == 128) {
+    return read_custom_value1(codec, buffer, offset, error);
+  } else if (type == 129) {
+    return read_custom_value2(codec, buffer, offset, error);
+  } else {
+    return FL_STANDARD_MESSAGE_CODEC_CLASS(
+               fl_test_standard_message_codec_parent_class)
+        ->read_value_of_type(codec, buffer, offset, type, error);
+  }
+}
+
+static void fl_test_standard_message_codec_class_init(
+    FlTestStandardMessageCodecClass* klass) {
+  FL_STANDARD_MESSAGE_CODEC_CLASS(klass)->write_value =
+      fl_test_standard_message_codec_write_value;
+  FL_STANDARD_MESSAGE_CODEC_CLASS(klass)->read_value_of_type =
+      fl_test_standard_message_codec_read_value_of_type;
+}
+
+static void fl_test_standard_message_codec_init(
+    FlTestStandardMessageCodec* self) {
+  // The following line suppresses a warning for unused function
+  FL_IS_TEST_STANDARD_MESSAGE_CODEC(self);
+}
+
+static FlTestStandardMessageCodec* fl_test_standard_message_codec_new() {
+  return FL_TEST_STANDARD_MESSAGE_CODEC(
+      g_object_new(fl_test_standard_message_codec_get_type(), nullptr));
+}
+
+TEST(FlStandardMessageCodecTest, DecodeCustomType) {
+  g_autoptr(FlTestStandardMessageCodec) codec =
+      fl_test_standard_message_codec_new();
+  g_autoptr(FlValue) value =
+      decode_message_with_codec("800568656c6c6f", FL_MESSAGE_CODEC(codec));
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);
+  ASSERT_EQ(fl_value_get_custom_type(value), 128);
+  EXPECT_STREQ(static_cast<const gchar*>(fl_value_get_custom_value(value)),
+               "hello");
+}
+
+TEST(FlStandardMessageCodecTest, DecodeCustomTypes) {
+  g_autoptr(FlTestStandardMessageCodec) codec =
+      fl_test_standard_message_codec_new();
+  g_autoptr(FlValue) value = decode_message_with_codec("0c02800568656c6c6f81",
+                                                       FL_MESSAGE_CODEC(codec));
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_LIST);
+  EXPECT_EQ(fl_value_get_length(value), static_cast<size_t>(2));
+  FlValue* value1 = fl_value_get_list_value(value, 0);
+  ASSERT_EQ(fl_value_get_type(value1), FL_VALUE_TYPE_CUSTOM);
+  ASSERT_EQ(fl_value_get_custom_type(value1), 128);
+  EXPECT_STREQ(static_cast<const gchar*>(fl_value_get_custom_value(value1)),
+               "hello");
+  FlValue* value2 = fl_value_get_list_value(value, 1);
+  ASSERT_EQ(fl_value_get_type(value2), FL_VALUE_TYPE_CUSTOM);
+  ASSERT_EQ(fl_value_get_custom_type(value2), 129);
+}
+
+TEST(FlStandardMessageCodecTest, EncodeCustomType) {
+  g_autoptr(FlValue) value = fl_value_new_custom(128, "hello", nullptr);
+  g_autoptr(FlTestStandardMessageCodec) codec =
+      fl_test_standard_message_codec_new();
+  g_autofree gchar* hex_string =
+      encode_message_with_codec(value, FL_MESSAGE_CODEC(codec));
+  EXPECT_STREQ(hex_string, "800568656c6c6f");
+}
+
+TEST(FlStandardMessageCodecTest, EncodeCustomTypes) {
+  g_autoptr(FlValue) value = fl_value_new_list();
+  fl_value_append_take(value, fl_value_new_custom(128, "hello", nullptr));
+  fl_value_append_take(value, fl_value_new_custom(129, nullptr, nullptr));
+  g_autoptr(FlTestStandardMessageCodec) codec =
+      fl_test_standard_message_codec_new();
+  g_autofree gchar* hex_string =
+      encode_message_with_codec(value, FL_MESSAGE_CODEC(codec));
+  EXPECT_STREQ(hex_string, "0c02800568656c6c6f81");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeDecode) {

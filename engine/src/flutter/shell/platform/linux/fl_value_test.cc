@@ -885,6 +885,51 @@ TEST(FlValueTest, MapToString) {
                "int64_list, []: float_list, []: list, {}: map}");
 }
 
+TEST(FlDartProjectTest, Custom) {
+  g_autoptr(FlValue) value =
+      fl_value_new_custom(128, g_strdup("Hello World"), g_free);
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);
+  ASSERT_EQ(fl_value_get_custom_type(value), 128);
+  ASSERT_STREQ(reinterpret_cast<const gchar*>(fl_value_get_custom_value(value)),
+               "Hello World");
+}
+
+TEST(FlDartProjectTest, CustomNoDestroyNotify) {
+  g_autoptr(FlValue) value = fl_value_new_custom(128, "Hello World", nullptr);
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);
+  ASSERT_EQ(fl_value_get_custom_type(value), 128);
+  ASSERT_STREQ(reinterpret_cast<const gchar*>(fl_value_get_custom_value(value)),
+               "Hello World");
+}
+
+TEST(FlDartProjectTest, CustomObject) {
+  g_autoptr(GObject) v = G_OBJECT(g_object_new(G_TYPE_OBJECT, nullptr));
+  g_autoptr(FlValue) value = fl_value_new_custom_object(128, v);
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);
+  ASSERT_EQ(fl_value_get_custom_type(value), 128);
+  ASSERT_TRUE(G_IS_OBJECT(fl_value_get_custom_value_object(value)));
+}
+
+TEST(FlDartProjectTest, CustomObjectTake) {
+  g_autoptr(FlValue) value = fl_value_new_custom_object_take(
+      128, G_OBJECT(g_object_new(G_TYPE_OBJECT, nullptr)));
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);
+  ASSERT_EQ(fl_value_get_custom_type(value), 128);
+  ASSERT_TRUE(G_IS_OBJECT(fl_value_get_custom_value_object(value)));
+}
+
+TEST(FlValueTest, CustomEqual) {
+  g_autoptr(FlValue) value1 = fl_value_new_custom(128, "Hello World", nullptr);
+  g_autoptr(FlValue) value2 = fl_value_new_custom(128, "Hello World", nullptr);
+  EXPECT_FALSE(fl_value_equal(value1, value2));
+}
+
+TEST(FlValueTest, CustomToString) {
+  g_autoptr(FlValue) value = fl_value_new_custom(128, nullptr, nullptr);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "(custom 128)");
+}
+
 TEST(FlValueTest, EqualSameObject) {
   g_autoptr(FlValue) value = fl_value_new_null();
   EXPECT_TRUE(fl_value_equal(value, value));

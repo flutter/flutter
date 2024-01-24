@@ -90,7 +90,6 @@ source_set("flutter_linux_sources") {
              "fl_method_channel_private.h",
              "fl_method_codec_private.h",
              "fl_plugin_registrar_private.h",
-             "fl_standard_message_codec_private.h",
              "key_mapping.h",
            ]
 

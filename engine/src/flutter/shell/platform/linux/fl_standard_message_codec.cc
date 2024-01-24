@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
-#include "flutter/shell/platform/linux/fl_standard_message_codec_private.h"
 
 #include <gmodule.h>
 
@@ -27,10 +26,6 @@ static constexpr int kValueFloat64List = 11;
 static constexpr int kValueList = 12;
 static constexpr int kValueMap = 13;
 static constexpr int kValueFloat32List = 14;
-
-struct _FlStandardMessageCodec {
-  FlMessageCodec parent_instance;
-};
 
 G_DEFINE_TYPE(FlStandardMessageCodec,
               fl_standard_message_codec,
@@ -445,66 +440,12 @@ static FlValue* fl_standard_message_codec_decode_message(FlMessageCodec* codec,
   return fl_value_ref(value);
 }
 
-static void fl_standard_message_codec_class_init(
-    FlStandardMessageCodecClass* klass) {
-  FL_MESSAGE_CODEC_CLASS(klass)->encode_message =
-      fl_standard_message_codec_encode_message;
-  FL_MESSAGE_CODEC_CLASS(klass)->decode_message =
-      fl_standard_message_codec_decode_message;
-}
-
-static void fl_standard_message_codec_init(FlStandardMessageCodec* self) {}
-
-G_MODULE_EXPORT FlStandardMessageCodec* fl_standard_message_codec_new() {
-  return static_cast<FlStandardMessageCodec*>(
-      g_object_new(fl_standard_message_codec_get_type(), nullptr));
-}
-
-void fl_standard_message_codec_write_size(FlStandardMessageCodec* codec,
-                                          GByteArray* buffer,
-                                          uint32_t size) {
-  if (size < 254) {
-    write_uint8(buffer, size);
-  } else if (size <= 0xffff) {
-    write_uint8(buffer, 254);
-    write_uint16(buffer, size);
-  } else {
-    write_uint8(buffer, 255);
-    write_uint32(buffer, size);
-  }
-}
-
-gboolean fl_standard_message_codec_read_size(FlStandardMessageCodec* codec,
-                                             GBytes* buffer,
-                                             size_t* offset,
-                                             uint32_t* value,
-                                             GError** error) {
-  uint8_t value8;
-  if (!read_uint8(buffer, offset, &value8, error)) {
-    return FALSE;
-  }
-
-  if (value8 == 255) {
-    if (!read_uint32(buffer, offset, value, error)) {
-      return FALSE;
-    }
-  } else if (value8 == 254) {
-    uint16_t value16;
-    if (!read_uint16(buffer, offset, &value16, error)) {
-      return FALSE;
-    }
-    *value = value16;
-  } else {
-    *value = value8;
-  }
-
-  return TRUE;
-}
-
-gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
-                                               GByteArray* buffer,
-                                               FlValue* value,
-                                               GError** error) {
+// Implements FlStandardMessageCodec::write_value.
+static gboolean fl_standard_message_codec_real_write_value(
+    FlStandardMessageCodec* self,
+    GByteArray* buffer,
+    FlValue* value,
+    GError** error) {
   if (value == nullptr) {
     write_uint8(buffer, kValueNull);
     return TRUE;
@@ -622,6 +563,11 @@ gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
         }
       }
       return TRUE;
+    case FL_VALUE_TYPE_CUSTOM:
+      g_set_error(error, FL_MESSAGE_CODEC_ERROR,
+                  FL_MESSAGE_CODEC_ERROR_UNSUPPORTED_TYPE,
+                  "Custom value not implemented");
+      return FALSE;
   }
 
   g_set_error(error, FL_MESSAGE_CODEC_ERROR,
@@ -630,15 +576,13 @@ gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
   return FALSE;
 }
 
-FlValue* fl_standard_message_codec_read_value(FlStandardMessageCodec* self,
-                                              GBytes* buffer,
-                                              size_t* offset,
-                                              GError** error) {
-  uint8_t type;
-  if (!read_uint8(buffer, offset, &type, error)) {
-    return nullptr;
-  }
-
+// Implements FlStandardMessageCodec::read_value_of_type.
+static FlValue* fl_standard_message_codec_read_value_of_type(
+    FlStandardMessageCodec* self,
+    GBytes* buffer,
+    size_t* offset,
+    int type,
+    GError** error) {
   g_autoptr(FlValue) value = nullptr;
   if (type == kValueNull) {
     return fl_value_new_null();
@@ -676,4 +620,83 @@ FlValue* fl_standard_message_codec_read_value(FlStandardMessageCodec* self,
   }
 
   return value == nullptr ? nullptr : fl_value_ref(value);
+}
+
+static void fl_standard_message_codec_class_init(
+    FlStandardMessageCodecClass* klass) {
+  FL_MESSAGE_CODEC_CLASS(klass)->encode_message =
+      fl_standard_message_codec_encode_message;
+  FL_MESSAGE_CODEC_CLASS(klass)->decode_message =
+      fl_standard_message_codec_decode_message;
+  klass->write_value = fl_standard_message_codec_real_write_value;
+  klass->read_value_of_type = fl_standard_message_codec_read_value_of_type;
+}
+
+static void fl_standard_message_codec_init(FlStandardMessageCodec* self) {}
+
+G_MODULE_EXPORT FlStandardMessageCodec* fl_standard_message_codec_new() {
+  return static_cast<FlStandardMessageCodec*>(
+      g_object_new(fl_standard_message_codec_get_type(), nullptr));
+}
+
+void fl_standard_message_codec_write_size(FlStandardMessageCodec* codec,
+                                          GByteArray* buffer,
+                                          uint32_t size) {
+  if (size < 254) {
+    write_uint8(buffer, size);
+  } else if (size <= 0xffff) {
+    write_uint8(buffer, 254);
+    write_uint16(buffer, size);
+  } else {
+    write_uint8(buffer, 255);
+    write_uint32(buffer, size);
+  }
+}
+
+gboolean fl_standard_message_codec_read_size(FlStandardMessageCodec* codec,
+                                             GBytes* buffer,
+                                             size_t* offset,
+                                             uint32_t* value,
+                                             GError** error) {
+  uint8_t value8;
+  if (!read_uint8(buffer, offset, &value8, error)) {
+    return FALSE;
+  }
+
+  if (value8 == 255) {
+    if (!read_uint32(buffer, offset, value, error)) {
+      return FALSE;
+    }
+  } else if (value8 == 254) {
+    uint16_t value16;
+    if (!read_uint16(buffer, offset, &value16, error)) {
+      return FALSE;
+    }
+    *value = value16;
+  } else {
+    *value = value8;
+  }
+
+  return TRUE;
+}
+
+gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
+                                               GByteArray* buffer,
+                                               FlValue* value,
+                                               GError** error) {
+  return FL_STANDARD_MESSAGE_CODEC_GET_CLASS(self)->write_value(self, buffer,
+                                                                value, error);
+}
+
+FlValue* fl_standard_message_codec_read_value(FlStandardMessageCodec* self,
+                                              GBytes* buffer,
+                                              size_t* offset,
+                                              GError** error) {
+  uint8_t type;
+  if (!read_uint8(buffer, offset, &type, error)) {
+    return nullptr;
+  }
+
+  return FL_STANDARD_MESSAGE_CODEC_GET_CLASS(self)->read_value_of_type(
+      self, buffer, offset, type, error);
 }

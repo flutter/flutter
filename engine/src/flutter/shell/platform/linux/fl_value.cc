@@ -74,6 +74,13 @@ typedef struct {
   GPtrArray* values;
 } FlValueMap;
 
+typedef struct {
+  FlValue parent;
+  int type;
+  gconstpointer value;
+  GDestroyNotify destroy_notify;
+} FlValueCustom;
+
 static FlValue* fl_value_new(FlValueType type, size_t size) {
   FlValue* self = static_cast<FlValue*>(g_malloc0(size));
   self->type = type;
@@ -232,6 +239,10 @@ static void value_to_string(FlValue* value, GString* buffer) {
       g_string_append(buffer, "}");
       return;
     }
+    case FL_VALUE_TYPE_CUSTOM:
+      g_string_append_printf(buffer, "(custom %d)",
+                             fl_value_get_custom_type(value));
+      return;
     default:
       g_string_append_printf(buffer, "<unknown type %d>", value->type);
   }
@@ -360,6 +371,25 @@ G_MODULE_EXPORT FlValue* fl_value_new_map() {
   return reinterpret_cast<FlValue*>(self);
 }
 
+FlValue* fl_value_new_custom(int type,
+                             gconstpointer value,
+                             GDestroyNotify destroy_notify) {
+  FlValueCustom* self = reinterpret_cast<FlValueCustom*>(
+      fl_value_new(FL_VALUE_TYPE_CUSTOM, sizeof(FlValueCustom)));
+  self->type = type;
+  self->value = value;
+  self->destroy_notify = destroy_notify;
+  return reinterpret_cast<FlValue*>(self);
+}
+
+FlValue* fl_value_new_custom_object(int type, GObject* object) {
+  return fl_value_new_custom(type, g_object_ref(object), g_object_unref);
+}
+
+FlValue* fl_value_new_custom_object_take(int type, GObject* object) {
+  return fl_value_new_custom(type, object, g_object_unref);
+}
+
 G_MODULE_EXPORT FlValue* fl_value_ref(FlValue* self) {
   g_return_val_if_fail(self != nullptr, nullptr);
   self->ref_count++;
@@ -414,6 +444,13 @@ G_MODULE_EXPORT void fl_value_unref(FlValue* self) {
       FlValueMap* v = reinterpret_cast<FlValueMap*>(self);
       g_ptr_array_unref(v->keys);
       g_ptr_array_unref(v->values);
+      break;
+    }
+    case FL_VALUE_TYPE_CUSTOM: {
+      FlValueCustom* v = reinterpret_cast<FlValueCustom*>(self);
+      if (v->destroy_notify != nullptr) {
+        v->destroy_notify((gpointer)v->value);
+      }
       break;
     }
     case FL_VALUE_TYPE_NULL:
@@ -546,6 +583,8 @@ G_MODULE_EXPORT bool fl_value_equal(FlValue* a, FlValue* b) {
       }
       return true;
     }
+    case FL_VALUE_TYPE_CUSTOM:
+      return false;
   }
 }
 
@@ -726,6 +765,7 @@ G_MODULE_EXPORT size_t fl_value_get_length(FlValue* self) {
     case FL_VALUE_TYPE_INT:
     case FL_VALUE_TYPE_FLOAT:
     case FL_VALUE_TYPE_STRING:
+    case FL_VALUE_TYPE_CUSTOM:
       return 0;
   }
 
@@ -776,6 +816,30 @@ G_MODULE_EXPORT FlValue* fl_value_lookup_string(FlValue* self,
   // with clang-tidy.
   fl_value_unref(string_key);
   return value;
+}
+
+G_MODULE_EXPORT int fl_value_get_custom_type(FlValue* self) {
+  g_return_val_if_fail(self != nullptr, -1);
+  g_return_val_if_fail(self->type == FL_VALUE_TYPE_CUSTOM, -1);
+
+  FlValueCustom* v = reinterpret_cast<FlValueCustom*>(self);
+  return v->type;
+}
+
+G_MODULE_EXPORT gconstpointer fl_value_get_custom_value(FlValue* self) {
+  g_return_val_if_fail(self != nullptr, nullptr);
+  g_return_val_if_fail(self->type == FL_VALUE_TYPE_CUSTOM, nullptr);
+
+  FlValueCustom* v = reinterpret_cast<FlValueCustom*>(self);
+  return v->value;
+}
+
+G_MODULE_EXPORT GObject* fl_value_get_custom_value_object(FlValue* self) {
+  g_return_val_if_fail(self != nullptr, nullptr);
+  g_return_val_if_fail(self->type == FL_VALUE_TYPE_CUSTOM, nullptr);
+
+  FlValueCustom* v = reinterpret_cast<FlValueCustom*>(self);
+  return G_OBJECT(v->value);
 }
 
 G_MODULE_EXPORT gchar* fl_value_to_string(FlValue* value) {
