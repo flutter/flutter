@@ -221,7 +221,7 @@ void FlutterStandardCodecHelperWriteUTF8(CFMutableDataRef data,
     // UTF16 length times 3 will fit all UTF8.
     CFIndex buffer_length = length * 3;
     std::vector<UInt8> buffer;
-    buffer.reserve(buffer_length);
+    buffer.resize(buffer_length);
     CFStringGetBytes(value, CFRangeMake(0, length), kCFStringEncodingUTF8, 0,
                      false, buffer.data(), buffer_length, &used_length);
     FlutterStandardCodecHelperWriteSize(data, used_length);
