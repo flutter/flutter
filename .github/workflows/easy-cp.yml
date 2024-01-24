@@ -5,7 +5,7 @@
 name: Cherry-pick Labeled PR to Release Branch
 
 on:
-  pull_request:
+  pull_request_target:
     branches: master
     types: [labeled]
 
