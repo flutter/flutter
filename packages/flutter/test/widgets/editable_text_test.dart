@@ -4577,19 +4577,15 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isTextField,
-                                SemanticsFlag.isObscured,
-                              ],
-                              value: expectedValue,
-                              textDirection: TextDirection.ltr,
-                            ),
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isObscured,
                           ],
+                          value: expectedValue,
+                          textDirection: TextDirection.ltr,
                         ),
                       ],
                     ),
@@ -4636,18 +4632,14 @@ void main() {
                 TestSemantics(
                   children:<TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isTextField,
-                              ],
-                              value: originalText,
-                              textDirection: TextDirection.ltr,
-                            ),
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
                           ],
+                          value: originalText,
+                          textDirection: TextDirection.ltr,
                         ),
                       ],
                     ),
@@ -4689,30 +4681,26 @@ void main() {
                 TestSemantics(
                   children:<TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isTextField,
-                                SemanticsFlag.isObscured,
-                                SemanticsFlag.isFocused,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.moveCursorBackwardByCharacter,
-                                SemanticsAction.setSelection,
-                                SemanticsAction.setText,
-                                SemanticsAction.moveCursorBackwardByWord,
-                              ],
-                              value: expectedValue,
-                              textDirection: TextDirection.ltr,
-                              // Focusing a single-line field on web selects it.
-                              textSelection: kIsWeb
-                                  ? const TextSelection(baseOffset: 0, extentOffset: 24)
-                                  : const TextSelection.collapsed(offset: 24),
-                            ),
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isObscured,
+                            SemanticsFlag.isFocused,
                           ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.moveCursorBackwardByCharacter,
+                            SemanticsAction.setSelection,
+                            SemanticsAction.setText,
+                            SemanticsAction.moveCursorBackwardByWord,
+                          ],
+                          value: expectedValue,
+                          textDirection: TextDirection.ltr,
+                          // Focusing a single-line field on web selects it.
+                          textSelection: kIsWeb
+                              ? const TextSelection(baseOffset: 0, extentOffset: 24)
+                              : const TextSelection.collapsed(offset: 24),
                         ),
                       ],
                     ),
@@ -4914,7 +4902,7 @@ void main() {
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-      const int expectedNodeId = 6;
+      const int expectedNodeId = 5;
 
       expect(
         semantics,
@@ -4929,31 +4917,26 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
-                          TestSemantics(
-                            id: 4,
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics.rootChild(
-                                id: expectedNodeId,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.isTextField,
-                                  SemanticsFlag.isFocused,
-                                ],
-                                actions: <SemanticsAction>[
-                                  SemanticsAction.moveCursorBackwardByCharacter,
-                                  SemanticsAction.moveCursorBackwardByWord,
-                                  SemanticsAction.setSelection,
-                                  SemanticsAction.setText,
-                                  SemanticsAction.copy,
-                                  SemanticsAction.cut,
-                                  SemanticsAction.paste,
-                                ],
-                                value: 'test',
-                                textSelection: TextSelection.collapsed(offset: controller.text.length),
-                                textDirection: TextDirection.ltr,
-                              ),
+                          TestSemantics.rootChild(
+                            id: expectedNodeId,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocused,
                             ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.moveCursorBackwardByCharacter,
+                              SemanticsAction.moveCursorBackwardByWord,
+                              SemanticsAction.setSelection,
+                              SemanticsAction.setText,
+                              SemanticsAction.copy,
+                              SemanticsAction.cut,
+                              SemanticsAction.paste,
+                            ],
+                            value: 'test',
+                            textSelection: TextSelection.collapsed(offset: controller.text.length),
+                            textDirection: TextDirection.ltr,
                           ),
                         ],
                       ),
@@ -5001,7 +4984,7 @@ void main() {
         await tester.pump();
 
         final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-        const int expectedNodeId = 6;
+        const int expectedNodeId = 5;
 
         expect(controller.value.selection.isCollapsed, isTrue);
 
@@ -5042,7 +5025,7 @@ void main() {
     await tester.pump();
 
     final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-    const int expectedNodeId = 5;
+    const int expectedNodeId = 4;
 
     expect(
       semantics,
@@ -5057,25 +5040,20 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                          children: <TestSemantics>[
-                            TestSemantics.rootChild(
-                              id: expectedNodeId,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isTextField,
-                                SemanticsFlag.isFocused,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.setSelection,
-                                SemanticsAction.setText,
-                              ],
-                              textSelection: TextSelection.collapsed(offset: controller.text.length),
-                              textDirection: TextDirection.ltr,
-                            ),
+                        TestSemantics.rootChild(
+                          id: expectedNodeId,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocused,
                           ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.setSelection,
+                            SemanticsAction.setText,
+                          ],
+                          textSelection: TextSelection.collapsed(offset: controller.text.length),
+                          textDirection: TextDirection.ltr,
                         ),
                       ],
                     ),

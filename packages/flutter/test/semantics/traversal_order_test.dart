@@ -39,66 +39,63 @@ void main() {
             TestSemantics(
               id: 2,
               children: <TestSemantics>[
-                TestSemantics(id: 3, children: <TestSemantics>[
-                  TestSemantics(
-                    id: 4,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 5,
-                        label: '0 - 0',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        id: 6,
-                        label: '0 - 1',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        id: 7,
-                        label: '0 - 2',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        id: 8,
-                        label: '1 - 0',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        id: 9,
-                        label: '1 - 1',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        id: 10,
-                        label: '1 - 2',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        id: 11,
-                        label: '2 - 0',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        id: 12,
-                        label: '2 - 1',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        id: 13,
-                        label: '2 - 2',
-                        textDirection: TextDirection.ltr,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    ],
-  );
+                TestSemantics(
+                  id: 3,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      label: '0 - 0',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 5,
+                      label: '0 - 1',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 6,
+                      label: '0 - 2',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 7,
+                      label: '1 - 0',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 8,
+                      label: '1 - 1',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 9,
+                      label: '1 - 2',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 10,
+                      label: '2 - 0',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 11,
+                      label: '2 - 1',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 12,
+                      label: '2 - 2',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
     expect(semantics, hasSemantics(expected, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });

@@ -2544,33 +2544,29 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                      actions: <SemanticsAction>[SemanticsAction.scrollUp],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                          actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                          actions: <SemanticsAction>[SemanticsAction.longPress],
                           children: <TestSemantics>[
                             TestSemantics(
-                              actions: <SemanticsAction>[SemanticsAction.longPress],
                               children: <TestSemantics>[
                                 TestSemantics(
-                                  children: <TestSemantics>[
-                                    TestSemantics(
-                                      label: 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                    TestSemantics(
-                                      flags: <SemanticsFlag>[
-                                        SemanticsFlag.isHidden,
-                                        SemanticsFlag.isLink,
-                                      ],
-                                      actions: <SemanticsAction>[SemanticsAction.tap],
-                                      label: 'off screen',
-                                      textDirection: TextDirection.ltr,
-                                    ),
+                                  label: 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isHidden,
+                                    SemanticsFlag.isLink,
                                   ],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                  label: 'off screen',
+                                  textDirection: TextDirection.ltr,
                                 ),
                               ],
                             ),
@@ -2598,7 +2594,7 @@ void main() {
 
     // Test shows on screen.
     expect(controller.offset, 0.0);
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(9, SemanticsAction.showOnScreen);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(8, SemanticsAction.showOnScreen);
     await tester.pumpAndSettle();
     expect(controller.offset != 0.0, isTrue);
 

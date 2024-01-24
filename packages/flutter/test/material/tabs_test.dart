@@ -5693,7 +5693,7 @@ void main() {
                       rect: TestSemantics.fullScreen,
                       label: 'PAGE1'
                     ),
-                  ],
+                  ]
                 ),
               ],
             ),
