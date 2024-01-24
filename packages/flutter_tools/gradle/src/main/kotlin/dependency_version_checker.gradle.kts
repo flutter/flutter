@@ -58,40 +58,27 @@ class DependencyVersionChecker {
          * we treat it as within the range for the purpose of this check.
          */
         fun checkDependencyVersions(project : Project) {
-            var gradleVersion : Version? = null
-            var javaVersion : JavaVersion? = null
             var agpVersion : Version? = null
             var kgpVersion : Version? = null
             Map map = new HashMap()
 
-            try {
-                gradleVersion = getGradleVersion(project)
-            } catch (ignored : Exception){
-                project.logger.error("Warning: unable to detect project Gradle version. Skipping " +
-                        "version checking.")
-            }
-            if (gradleVersion != null) checkGradleVersion(gradleVersion!!, project)
-            try {
-                javaVersion = getJavaVersion(project)
-            } catch (ignored : Exception){
-                project.logger.error("Warning: unable to detect project Java version. Skipping " +
-                        "version checking.")
-            }
-            if (javaVersion != null) checkJavaVersion(javaVersion!!, project)
-            try {
-                agpVersion = getAGPVersion(project)
-            } catch (ignored : Exception){
+            checkGradleVersion(getGradleVersion(project), project)
+            checkJavaVersion(getJavaVersion(project), project)
+            agpVersion = getAGPVersion(project)
+            if (agpVersion != null) {
+                checkAGPVersion(agpVersion, project)
+            } else {
                 project.logger.error("Warning: unable to detect project AGP version. Skipping " +
                         "version checking. " + ignored)
             }
-            if (agpVersion != null) checkAGPVersion(agpVersion!!, project)
-            try {
-                kgpVersion = getKGPVersion(project)
-            } catch (ignored : Exception){
+
+            kgpVersion = getKGPVersion(project)
+            if (kgpVersion != null) {
+                checkKGPVersion(kgpVersion, project)
+            } else {
                 project.logger.error("Warning: unable to detect project KGP version. Skipping " +
                         "version checking.")
             }
-            if (kgpVersion != null) checkKGPVersion(kgpVersion!!, project)
         }
 
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.invocation/-gradle/index.html#-837060600%2FFunctions%2F-1793262594
