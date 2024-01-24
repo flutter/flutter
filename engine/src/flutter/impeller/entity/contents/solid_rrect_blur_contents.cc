@@ -27,9 +27,9 @@ SolidRRectBlurContents::SolidRRectBlurContents() = default;
 SolidRRectBlurContents::~SolidRRectBlurContents() = default;
 
 void SolidRRectBlurContents::SetRRect(std::optional<Rect> rect,
-                                      Scalar corner_radius) {
+                                      Size corner_radii) {
   rect_ = rect;
-  corner_radius_ = corner_radius;
+  corner_radii_ = corner_radii;
 }
 
 void SolidRRectBlurContents::SetSigma(Sigma sigma) {
@@ -52,17 +52,13 @@ std::optional<Rect> SolidRRectBlurContents::GetCoverage(
 
   Scalar radius = PadForSigma(sigma_.sigma);
 
-  auto ltrb = rect_->GetLTRB();
-  Rect bounds = Rect::MakeLTRB(ltrb[0] - radius, ltrb[1] - radius,
-                               ltrb[2] + radius, ltrb[3] + radius);
-  return bounds.TransformBounds(entity.GetTransform());
-};
+  return rect_->Expand(radius).TransformBounds(entity.GetTransform());
+}
 
 bool SolidRRectBlurContents::Render(const ContentContext& renderer,
                                     const Entity& entity,
                                     RenderPass& pass) const {
-  // Early return if sigma is close to zero to avoid rendering NaNs.
-  if (!rect_.has_value() || std::fabs(sigma_.sigma) <= kEhCloseEnough) {
+  if (!rect_.has_value()) {
     return true;
   }
 
@@ -71,8 +67,10 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
 
-  // Clamp the max kernel width/height to 1000.
-  auto blur_sigma = std::min(sigma_.sigma, 250.0f);
+  // Clamp the max kernel width/height to 1000 to limit the extent
+  // of the blur and to kEhCloseEnough to prevent NaN calculations
+  // trying to evaluate a Guassian distribution with a sigma of 0.
+  auto blur_sigma = std::clamp(sigma_.sigma, kEhCloseEnough, 250.0f);
   // Increase quality by making the radius a bit bigger than the typical
   // sigma->radius conversion we use for slower blurs.
   auto blur_radius = PadForSigma(blur_sigma);
@@ -107,9 +105,10 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   frag_info.color = color;
   frag_info.blur_sigma = blur_sigma;
   frag_info.rect_size = Point(positive_rect.GetSize());
-  frag_info.corner_radius =
-      std::min(corner_radius_, std::min(positive_rect.GetWidth() / 2.0f,
-                                        positive_rect.GetHeight() / 2.0f));
+  frag_info.corner_radii = {std::clamp(corner_radii_.width, kEhCloseEnough,
+                                       positive_rect.GetWidth() * 0.5f),
+                            std::clamp(corner_radii_.width, kEhCloseEnough,
+                                       positive_rect.GetHeight() * 0.5f)};
 
   pass.SetCommandLabel("RRect Shadow");
   pass.SetPipeline(renderer.GetRRectBlurPipeline(opts));
