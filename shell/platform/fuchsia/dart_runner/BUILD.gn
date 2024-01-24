@@ -61,7 +61,6 @@ template("runner_sources") {
       "$fuchsia_sdk_root/pkg:sys_cpp",
       "$fuchsia_sdk_root/pkg:sys_cpp_testing",
       "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
-      "$fuchsia_sdk_root/pkg:syslog",
       "$fuchsia_sdk_root/pkg:trace",
       "$fuchsia_sdk_root/pkg:vfs_cpp",
       "$fuchsia_sdk_root/pkg:zx",

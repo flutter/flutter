@@ -4,7 +4,7 @@
 
 #include "service_isolate.h"
 
-#include "runtime/dart/utils/inlines.h"
+#include "flutter/fml/logging.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_library_natives.h"
@@ -14,7 +14,6 @@
 
 #include "builtin_libraries.h"
 #include "dart_component_controller.h"
-#include "logging.h"
 
 namespace dart_runner {
 namespace {
@@ -28,20 +27,20 @@ tonic::DartLibraryNatives* service_natives = nullptr;
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
                                       bool* auto_setup_scope) {
-  dart_utils::Check(service_natives, LOG_TAG);
+  FML_CHECK(service_natives);
   return service_natives->GetNativeFunction(name, argument_count,
                                             auto_setup_scope);
 }
 
 const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
-  dart_utils::Check(service_natives, LOG_TAG);
+  FML_CHECK(service_natives);
   return service_natives->GetSymbol(native_function);
 }
 
 #define SHUTDOWN_ON_ERROR(handle)           \
   if (Dart_IsError(handle)) {               \
     *error = strdup(Dart_GetError(handle)); \
-    FX_LOG(ERROR, LOG_TAG, *error);         \
+    FML_LOG(ERROR) << error;                \
     Dart_ExitScope();                       \
     Dart_ShutdownIsolate();                 \
     return nullptr;                         \
@@ -106,14 +105,14 @@ Dart_Isolate CreateServiceIsolate(
     if (!dart_utils::MappedResource::LoadFromNamespace(
             nullptr, snapshot_data_path, mapped_isolate_snapshot_data)) {
       *error = strdup("Failed to load snapshot for service isolate");
-      FX_LOG(ERROR, LOG_TAG, *error);
+      FML_LOG(ERROR) << *error;
       return nullptr;
     }
     if (!dart_utils::MappedResource::LoadFromNamespace(
             nullptr, snapshot_instructions_path,
             mapped_isolate_snapshot_instructions, true /* executable */)) {
       *error = strdup("Failed to load snapshot for service isolate");
-      FX_LOG(ERROR, LOG_TAG, *error);
+      FML_LOG(ERROR) << *error;
       return nullptr;
     }
 
@@ -142,7 +141,7 @@ Dart_Isolate CreateServiceIsolate(
       uri, DART_VM_SERVICE_ISOLATE_NAME, vmservice_data, vmservice_instructions,
       &flags, state, state, error);
   if (!isolate) {
-    FX_LOGF(ERROR, LOG_TAG, "Dart_CreateIsolateGroup failed: %s", *error);
+    FML_LOG(ERROR) << "Dart_CreateIsolateGroup failed: " << *error;
     return nullptr;
   }
 
@@ -200,7 +199,7 @@ Dart_Isolate CreateServiceIsolate(
   Dart_ExitIsolate();
   *error = Dart_IsolateMakeRunnable(isolate);
   if (*error != nullptr) {
-    FX_LOG(ERROR, LOG_TAG, *error);
+    FML_LOG(ERROR) << *error;
     Dart_EnterIsolate(isolate);
     Dart_ShutdownIsolate();
     return nullptr;
@@ -212,7 +211,7 @@ Dart_Handle GetVMServiceAssetsArchiveCallback() {
   dart_utils::MappedResource vm_service_tar;
   if (!dart_utils::MappedResource::LoadFromNamespace(
           nullptr, "/pkg/data/observatory.tar", vm_service_tar)) {
-    FX_LOG(ERROR, LOG_TAG, "Failed to load Observatory assets");
+    FML_LOG(ERROR) << "Failed to load Observatory assets";
     return nullptr;
   }
   // TODO(rmacnak): Should we avoid copying the tar? Or does the service
