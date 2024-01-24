@@ -40,9 +40,9 @@ TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}
   ).call;
 }
 
-TaskFunction createExternalUiIntegrationTest() {
+TaskFunction createExternalTexturesIntegrationTest() {
   return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/external_ui',
+    '${flutterDirectory.path}/dev/integration_tests/external_textures',
     'lib/main.dart',
   ).call;
 }

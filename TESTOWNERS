@@ -129,7 +129,7 @@
 /dev/devicelab/bin/tasks/cull_opacity_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/drive_perf_debug_warning.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/embedded_android_views_integration_test.dart @stuartmorgan @flutter/plugin
-/dev/devicelab/bin/tasks/external_ui_integration_test.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/external_textures_integration_test.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fading_child_animation_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_large_images__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test.dart @zanderso @flutter/tool
@@ -174,7 +174,7 @@
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_bad_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @vashworth @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf_ios_sksl_warmup__timeline_summary.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/external_ui_integration_test_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/external_textures_integration_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test_ios.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/flavors_test_ios_xcode_debug.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios.dart @zanderso @flutter/engine

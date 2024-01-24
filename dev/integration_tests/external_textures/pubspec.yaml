@@ -1,4 +1,4 @@
-name: external_ui
+name: external_textures
 description: A test of Flutter integrating external UIs.
 
 environment:
