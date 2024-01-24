@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'widget_state.dart';
 
 /// Mixin for [State] classes that require knowledge of changing [WidgetState]
 /// values for their child widgets.
