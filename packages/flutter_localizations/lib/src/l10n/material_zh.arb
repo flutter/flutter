@@ -144,5 +144,6 @@
   "menuDismissLabel": "关闭菜单",
   "lookUpButtonLabel": "向上看",
   "searchWebButtonLabel": "在网络上搜索",
-  "shareButtonLabel": "分享…"
+  "shareButtonLabel": "分享…",
+  "clearButtonTooltip": "Clear text"
 }
