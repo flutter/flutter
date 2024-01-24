@@ -24,7 +24,7 @@ import 'input_border.dart';
 ///    except [WidgetState] can be used outside of Material.
 ///  * [MaterialStateProperty], an interface for objects that "resolve" to
 ///    different values depending on a widget's material state.
-///  * [MaterialState.seleted], testing for build
+///  * [MaterialState.seleted], testing for build.
 /// {@template flutter.material.MaterialStateProperty.implementations}
 ///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [Color] or a
