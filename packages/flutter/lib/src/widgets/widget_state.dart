@@ -6,44 +6,38 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'input_border.dart';
-
 // Examples can assume:
 // late BuildContext context;
 
-/// Interactive states that some of the Material widgets can take on when
-/// receiving input from the user.
+/// Interactive states that some of the widgets can take on when receiving input
+/// from the user.
 ///
-/// States are defined by https://material.io/design/interaction/states.html#usage.
+/// States are defined by https://material.io/design/interaction/states.html#usage,
+/// but are not limited to the Material design system or library.
 ///
-/// Some Material widgets track their current state in a `Set<MaterialState>`.
+/// Some widgets track their current state in a `Set<WidgetState>`.
 ///
 /// See also:
 ///
-///  * [MaterialStateProperty], an interface for objects that "resolve" to
-///    different values depending on a widget's material state.
-/// {@template flutter.material.MaterialStateProperty.implementations}
-///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
+///  * [MaterialState], the Material specific version of `WidgetState`.
+///  * [WidgetStateProperty], an interface for objects that "resolve" to
+///    different values depending on a widget's state.
+/// {@template flutter.widgets.WidgetStateProperty.implementations}
+///  * [WidgetStateColor], a [Color] that implements `WidgetStateProperty`
 ///    which is used in APIs that need to accept either a [Color] or a
-///    `MaterialStateProperty<Color>`.
-///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
-///    `MaterialStateProperty` which is used in APIs that need to accept either
-///    a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
-///  * [MaterialStateOutlinedBorder], an [OutlinedBorder] that implements
-///    `MaterialStateProperty` which is used in APIs that need to accept either
-///    an [OutlinedBorder] or a [MaterialStateProperty<OutlinedBorder>].
-///  * [MaterialStateOutlineInputBorder], an [OutlineInputBorder] that implements
-///    `MaterialStateProperty` which is used in APIs that need to accept either
-///    an [OutlineInputBorder] or a [MaterialStateProperty<OutlineInputBorder>].
-///  * [MaterialStateUnderlineInputBorder], an [UnderlineInputBorder] that implements
-///    `MaterialStateProperty` which is used in APIs that need to accept either
-///    an [UnderlineInputBorder] or a [MaterialStateProperty<UnderlineInputBorder>].
-///  * [MaterialStateBorderSide], a [BorderSide] that implements
-///    `MaterialStateProperty` which is used in APIs that need to accept either
-///    a [BorderSide] or a [MaterialStateProperty<BorderSide>].
-///  * [MaterialStateTextStyle], a [TextStyle] that implements
-///    `MaterialStateProperty` which is used in APIs that need to accept either
-///    a [TextStyle] or a [MaterialStateProperty<TextStyle>].
+///    `WidgetStateProperty<Color>`.
+///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+///    `WidgetStateProperty` which is used in APIs that need to accept either
+///    a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+///  * [WidgetStateOutlinedBorder], an [OutlinedBorder] that implements
+///    `WidgetStateProperty` which is used in APIs that need to accept either
+///    an [OutlinedBorder] or a [WidgetStateProperty<OutlinedBorder>].
+///  * [WidgetStateBorderSide], a [BorderSide] that implements
+///    `WidgetStateProperty` which is used in APIs that need to accept either
+///    a [BorderSide] or a [WidgetStateProperty<BorderSide>].
+///  * [WidgetStateTextStyle], a [TextStyle] that implements
+///    `WidgetStateProperty` which is used in APIs that need to accept either
+///    a [TextStyle] or a [WidgetStateProperty<TextStyle>].
 /// {@endtemplate}
 enum WidgetState {
   /// The state when the user drags their mouse cursor over the given widget.
@@ -102,46 +96,46 @@ enum WidgetState {
 /// set of states.
 typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 
-/// Defines a [Color] that is also a [MaterialStateProperty].
+/// Defines a [Color] that is also a [WidgetStateProperty].
 ///
 /// This class exists to enable widgets with [Color] valued properties
-/// to also accept [MaterialStateProperty<Color>] values. A material
+/// to also accept [WidgetStateProperty<Color>] values. A widget
 /// state color property represents a color which depends on
 /// a widget's "interactive state". This state is represented as a
-/// [Set] of [MaterialState]s, like [MaterialState.pressed],
-/// [MaterialState.focused] and [MaterialState.hovered].
+/// [Set] of [WidgetState]s, like [WidgetState.pressed],
+/// [WidgetState.focused] and [WidgetState.hovered].
 ///
-/// [MaterialStateColor] should only be used with widgets that document
+/// [WidgetStateColor] should only be used with widgets that document
 /// their support, like [TimePickerThemeData.dayPeriodColor].
 ///
-/// To use a [MaterialStateColor], you can either:
-///   1. Create a subclass of [MaterialStateColor] and implement the abstract `resolve` method.
-///   2. Use [MaterialStateColor.resolveWith] and pass in a callback that
+/// To use a [WidgetStateColor], you can either:
+///   1. Create a subclass of [WidgetStateColor] and implement the abstract `resolve` method.
+///   2. Use [WidgetStateColor.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
 ///
-/// If a [MaterialStateColor] is used for a property or a parameter that doesn't
-/// support resolving [MaterialStateProperty<Color>]s, then its default color
+/// If a [WidgetStateColor] is used for a property or a parameter that doesn't
+/// support resolving [WidgetStateProperty<Color>]s, then its default color
 /// value will be used for all states.
 ///
-/// To define a `const` [MaterialStateColor], you'll need to extend
-/// [MaterialStateColor] and override its [resolve] method. You'll also need
+/// To define a `const` [WidgetStateColor], you'll need to extend
+/// [WidgetStateColor] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
 ///
 /// {@tool snippet}
 ///
-/// This example defines a [MaterialStateColor] with a const constructor.
+/// This example defines a [WidgetStateColor] with a const constructor.
 ///
 /// ```dart
-/// class MyColor extends MaterialStateColor {
+/// class MyColor extends WidgetStateColor {
 ///   const MyColor() : super(_defaultColor);
 ///
 ///   static const int _defaultColor = 0xcafefeed;
 ///   static const int _pressedColor = 0xdeadbeef;
 ///
 ///   @override
-///   Color resolve(Set<MaterialState> states) {
-///     if (states.contains(MaterialState.pressed)) {
+///   Color resolve(Set<WidgetState> states) {
+///     if (states.contains(WidgetState.pressed)) {
 ///       return const Color(_pressedColor);
 ///     }
 ///     return const Color(_defaultColor);
@@ -149,12 +143,16 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 /// }
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [MaterialStateColor], the Material specific version of `WidgetStateColor`.
 abstract class WidgetStateColor extends Color implements WidgetStateProperty<Color> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const WidgetStateColor(super.defaultValue);
 
-  /// Creates a [MaterialStateColor] from a [MaterialPropertyResolver<Color>]
+  /// Creates a [WidgetStateColor] from a [WidgetPropertyResolver<Color>]
   /// callback function.
   ///
   /// If used as a regular color, the color resolved in the default state (the
@@ -162,12 +160,12 @@ abstract class WidgetStateColor extends Color implements WidgetStateProperty<Col
   ///
   /// The given callback parameter must return a non-null color in the default
   /// state.
-  static WidgetStateColor resolveWith(MaterialPropertyResolver<Color> callback) => _MaterialStateColor(callback);
+  static WidgetStateColor resolveWith(WidgetPropertyResolver<Color> callback) => _WidgetStateColor(callback);
 
-  /// Returns a [Color] that's to be used when a Material component is in the
-  /// specified state.
+  /// Returns a [Color] that's to be used when a component is in the specified
+  /// state.
   @override
-  Color resolve(Set<MaterialState> states);
+  Color resolve(Set<WidgetState> states);
 }
 
 /// A [WidgetStateColor] created from a [WidgetPropertyResolver<Color>]
@@ -182,14 +180,14 @@ class _WidgetStateColor extends WidgetStateColor {
 
   final WidgetPropertyResolver<Color> _resolve;
 
-  /// The default state for a Material component, the empty set of interaction states.
+  /// The default state for a component, the empty set of interaction states.
   static const Set<WidgetState> _defaultStates = <WidgetState>{};
 
   @override
   Color resolve(Set<WidgetState> states) => _resolve(states);
 }
 
-/// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
+/// Defines a [MouseCursor] whose value depends on a set of [WidgetState]s which
 /// represent the interactive state of a component.
 ///
 /// This kind of [MouseCursor] is useful when the set of interactive
@@ -197,11 +195,11 @@ class _WidgetStateColor extends WidgetStateColor {
 /// mouse pointer hovering over a disabled [ListTile] should not
 /// display [SystemMouseCursors.click], since a disabled list tile
 /// doesn't respond to mouse clicks. [ListTile]'s default mouse cursor
-/// is a [MaterialStateMouseCursor.clickable], which resolves to
+/// is a [WidgetStateMouseCursor.clickable], which resolves to
 /// [SystemMouseCursors.basic] when the button is disabled.
 ///
-/// To use a [MaterialStateMouseCursor], you should create a subclass of
-/// [MaterialStateMouseCursor] and implement the abstract `resolve` method.
+/// To use a [WidgetStateMouseCursor], you should create a subclass of
+/// [WidgetStateMouseCursor] and implement the abstract `resolve` method.
 ///
 /// {@tool dartpad}
 /// This example defines a mouse cursor that resolves to
@@ -211,14 +209,16 @@ class _WidgetStateColor extends WidgetStateColor {
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
-/// [MaterialStateMouseCursor], otherwise only the default state will be used.
+/// [WidgetStateMouseCursor], otherwise only the default state will be used.
 ///
 /// See also:
 ///
+///  * [MaterialStateMouseCursor], the Material specific version of
+///    `WidgetStateMouseCursor`.
 ///  * [MouseCursor] for introduction on the mouse cursor system.
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
-abstract class WidgetStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
+abstract class WidgetStateMouseCursor extends MouseCursor implements WidgetStateProperty<MouseCursor> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const WidgetStateMouseCursor();
@@ -226,36 +226,36 @@ abstract class WidgetStateMouseCursor extends MouseCursor implements MaterialSta
   @protected
   @override
   MouseCursorSession createSession(int device) {
-    return resolve(<MaterialState>{}).createSession(device);
+    return resolve(<WidgetState>{}).createSession(device);
   }
 
-  /// Returns a [MouseCursor] that's to be used when a Material component is in
-  /// the specified state.
+  /// Returns a [MouseCursor] that's to be used when a component is in the
+  /// specified state.
   ///
   /// This method should never return null.
   @override
-  MouseCursor resolve(Set<MaterialState> states);
+  MouseCursor resolve(Set<WidgetState> states);
 
-  /// A mouse cursor for clickable material widgets, which resolves differently
-  /// when the widget is disabled.
+  /// A mouse cursor for clickable widgets, which resolves differently when the
+  /// widget is disabled.
   ///
   /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
-  /// This cursor is the default for many Material widgets.
+  /// This cursor is the default for many widgets.
   static const WidgetStateMouseCursor clickable = _EnabledAndDisabledMouseCursor(
     enabledCursor: SystemMouseCursors.click,
     disabledCursor: SystemMouseCursors.basic,
     name: 'clickable',
   );
 
-  /// A mouse cursor for material widgets related to text, which resolves differently
+  /// A mouse cursor for widgets related to text, which resolves differently
   /// when the widget is disabled.
   ///
   /// By default this cursor resolves to [SystemMouseCursors.text]. If the widget is
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
-  /// This cursor is the default for many Material widgets.
+  /// This cursor is the default for many widgets.
   static const WidgetStateMouseCursor textable = _EnabledAndDisabledMouseCursor(
     enabledCursor: SystemMouseCursors.text,
     disabledCursor: SystemMouseCursors.basic,
@@ -286,39 +286,37 @@ class _EnabledAndDisabledMouseCursor extends WidgetStateMouseCursor {
   String get debugDescription => 'WidgetStateMouseCursor($name)';
 }
 
-/// Defines a [BorderSide] whose value depends on a set of [MaterialState]s
+/// Defines a [BorderSide] whose value depends on a set of [WidgetState]s
 /// which represent the interactive state of a component.
 ///
-/// To use a [MaterialStateBorderSide], you should create a subclass of a
-/// [MaterialStateBorderSide] and override the abstract `resolve` method.
+/// To use a [WidgetStateBorderSide], you should create a subclass of a
+/// [WidgetStateBorderSide] and override the abstract `resolve` method.
 ///
 /// This class enables existing widget implementations with [BorderSide]
-/// properties to be extended to also effectively support `MaterialStateProperty<BorderSide>`
-/// property values. [MaterialStateBorderSide] should only be used with widgets that document
+/// properties to be extended to also effectively support `WidgetStateProperty<BorderSide>`
+/// property values. [WidgetStateBorderSide] should only be used with widgets that document
 /// their support, like [ActionChip.side].
 ///
-/// {@tool dartpad}
-/// This example defines a subclass of [MaterialStateBorderSide], that resolves
-/// to a red border side when its widget is selected.
-///
-/// ** See code in examples/api/lib/material/material_state/material_state_border_side.0.dart **
-/// {@end-tool}
-///
 /// This class should only be used for parameters which are documented to take
-/// [MaterialStateBorderSide], otherwise only the default state will be used.
-abstract class MaterialStateBorderSide extends BorderSide implements MaterialStateProperty<BorderSide?> {
+/// [WidgetStateBorderSide], otherwise only the default state will be used.
+///
+/// See also:
+///
+///  * [MaterialStateBorderSide], the Material specific version of
+///    `WidgetStateBorderSide`.
+abstract class WidgetStateBorderSide extends BorderSide implements WidgetStateProperty<BorderSide?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const MaterialStateBorderSide();
+  const WidgetStateBorderSide();
 
-  /// Returns a [BorderSide] that's to be used when a Material component is
-  /// in the specified state. Return null to defer to the default value of the
-  /// widget or theme.
+  /// Returns a [BorderSide] that's to be used when a component is in the
+  /// specified state. Return null to defer to the default value of the widget
+  /// or theme.
   @override
-  BorderSide? resolve(Set<MaterialState> states);
+  BorderSide? resolve(Set<WidgetState> states);
 
-  /// Creates a [MaterialStateBorderSide] from a
-  /// [MaterialPropertyResolver<BorderSide?>] callback function.
+  /// Creates a [WidgetStateBorderSide] from a
+  /// [WidgetPropertyResolver<BorderSide?>] callback function.
   ///
   /// If used as a regular [BorderSide], the border resolved in the default state
   /// (the empty set of states) will be used.
@@ -328,8 +326,8 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// ```dart
   /// ChipTheme(
   ///   data: Theme.of(context).chipTheme.copyWith(
-  ///     side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-  ///       if (states.contains(MaterialState.selected)) {
+  ///     side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+  ///       if (states.contains(WidgetState.selected)) {
   ///         return const BorderSide(color: Colors.red);
   ///       }
   ///       return null;  // Defer to default value on the theme or widget.
@@ -346,100 +344,106 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// ```dart
   /// Chip(
   ///   label: const Text('Transceiver'),
-  ///   side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected)) {
+  ///   side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.selected)) {
   ///       return const BorderSide(color: Colors.red);
   ///     }
   ///     return null;  // Defer to default value on the theme or widget.
   ///   }),
   /// ),
   /// ```
-  static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide?> callback) =>
-      _MaterialStateBorderSide(callback);
+  static WidgetStateBorderSide resolveWith(WidgetPropertyResolver<BorderSide?> callback) =>
+      _WidgetStateBorderSide(callback);
 }
 
-/// A [MaterialStateBorderSide] created from a
-/// [MaterialPropertyResolver<BorderSide>] callback alone.
+/// A [WidgetStateBorderSide] created from a
+/// [WidgetPropertyResolver<BorderSide>] callback alone.
 ///
 /// If used as a regular side, the side resolved in the default state will
 /// be used.
 ///
-/// Used by [MaterialStateBorderSide.resolveWith].
-class _MaterialStateBorderSide extends MaterialStateBorderSide {
-  const _MaterialStateBorderSide(this._resolve);
+/// Used by [WidgetStateBorderSide.resolveWith].
+class _WidgetStateBorderSide extends WidgetStateBorderSide {
+  const _WidgetStateBorderSide(this._resolve);
 
-  final MaterialPropertyResolver<BorderSide?> _resolve;
+  final WidgetPropertyResolver<BorderSide?> _resolve;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
+  BorderSide? resolve(Set<WidgetState> states) {
     return _resolve(states);
   }
 }
 
-/// Defines an [OutlinedBorder] whose value depends on a set of [MaterialState]s
+/// Defines an [OutlinedBorder] whose value depends on a set of [WidgetState]s
 /// which represent the interactive state of a component.
 ///
-/// To use a [MaterialStateOutlinedBorder], you should create a subclass of an
-/// [OutlinedBorder] and implement [MaterialStateOutlinedBorder]'s abstract
+/// To use a [WidgetStateOutlinedBorder], you should create a subclass of an
+/// [OutlinedBorder] and implement [WidgetStateOutlinedBorder]'s abstract
 /// `resolve` method.
 ///
 /// {@tool dartpad}
 /// This example defines a subclass of [RoundedRectangleBorder] and an
-/// implementation of [MaterialStateOutlinedBorder], that resolves to
+/// implementation of [WidgetStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
 ///
 /// ** See code in examples/api/lib/material/material_state/material_state_outlined_border.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
-/// [MaterialStateOutlinedBorder], otherwise only the default state will be used.
+/// [WidgetStateOutlinedBorder], otherwise only the default state will be used.
 ///
 /// See also:
 ///
 ///  * [ShapeBorder] the base class for shape outlines.
-abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements MaterialStateProperty<OutlinedBorder?> {
+///  * [MaterialStateOutlinedBorder], the Material specific version of
+///    `WidgetStateOutlinedBorder`.
+abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements WidgetStateProperty<OutlinedBorder?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const MaterialStateOutlinedBorder();
+  const WidgetStateOutlinedBorder();
 
-  /// Returns an [OutlinedBorder] that's to be used when a Material component is
-  /// in the specified state. Return null to defer to the default value of the
-  /// widget or theme.
+  /// Returns an [OutlinedBorder] that's to be used when a component is in the
+  /// specified state. Return null to defer to the default value of the widget
+  /// or theme.
   @override
-  OutlinedBorder? resolve(Set<MaterialState> states);
+  OutlinedBorder? resolve(Set<WidgetState> states);
 }
 
-/// Defines a [TextStyle] that is also a [MaterialStateProperty].
+/// Defines a [TextStyle] that is also a [WidgetStateProperty].
 ///
 /// This class exists to enable widgets with [TextStyle] valued properties
-/// to also accept [MaterialStateProperty<TextStyle>] values. A material
+/// to also accept [WidgetStateProperty<TextStyle>] values. A widget
 /// state text style property represents a text style which depends on
 /// a widget's "interactive state". This state is represented as a
-/// [Set] of [MaterialState]s, like [MaterialState.pressed],
-/// [MaterialState.focused] and [MaterialState.hovered].
+/// [Set] of [WidgetState]s, like [WidgetState.pressed],
+/// [WidgetState.focused] and [WidgetState.hovered].
 ///
-/// [MaterialStateTextStyle] should only be used with widgets that document
+/// [WidgetStateTextStyle] should only be used with widgets that document
 /// their support, like [InputDecoration.labelStyle].
 ///
-/// To use a [MaterialStateTextStyle], you can either:
-///   1. Create a subclass of [MaterialStateTextStyle] and implement the abstract `resolve` method.
-///   2. Use [MaterialStateTextStyle.resolveWith] and pass in a callback that
+/// To use a [WidgetStateTextStyle], you can either:
+///   1. Create a subclass of [WidgetStateTextStyle] and implement the abstract `resolve` method.
+///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
 ///
-/// If a [MaterialStateTextStyle] is used for a property or a parameter that doesn't
-/// support resolving [MaterialStateProperty<TextStyle>]s, then its default color
+/// If a [WidgetStateTextStyle] is used for a property or a parameter that doesn't
+/// support resolving [WidgetStateProperty<TextStyle>]s, then its default color
 /// value will be used for all states.
 ///
-/// To define a `const` [MaterialStateTextStyle], you'll need to extend
-/// [MaterialStateTextStyle] and override its [resolve] method. You'll also need
+/// To define a `const` [WidgetStateTextStyle], you'll need to extend
+/// [WidgetStateTextStyle] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateTextStyle extends TextStyle implements MaterialStateProperty<TextStyle> {
+/// See also:
+///
+///  * [MaterialStateTextStyle], the Material specific version of
+///    `WidgetStateTextStyle`.
+abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProperty<TextStyle> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const MaterialStateTextStyle();
+  const WidgetStateTextStyle();
 
-  /// Creates a [MaterialStateTextStyle] from a [MaterialPropertyResolver<TextStyle>]
+  /// Creates a [WidgetStateTextStyle] from a [WidgetPropertyResolver<TextStyle>]
   /// callback function.
   ///
   /// If used as a regular text style, the style resolved in the default state (the
@@ -447,166 +451,38 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle> callback) =>
-      _MaterialStateTextStyle(callback);
+  static WidgetStateTextStyle resolveWith(WidgetPropertyResolver<TextStyle> callback) =>
+      _WidgetStateTextStyle(callback);
 
-  /// Returns a [TextStyle] that's to be used when a Material component is in the
+  /// Returns a [TextStyle] that's to be used when a component is in the
   /// specified state.
   @override
-  TextStyle resolve(Set<MaterialState> states);
+  TextStyle resolve(Set<WidgetState> states);
 }
 
-/// A [MaterialStateTextStyle] created from a [MaterialPropertyResolver<TextStyle>]
+/// A [WidgetStateTextStyle] created from a [WidgetPropertyResolver<TextStyle>]
 /// callback alone.
 ///
 /// If used as a regular text style, the style resolved in the default state will
 /// be used.
 ///
-/// Used by [MaterialStateTextStyle.resolveWith].
-class _MaterialStateTextStyle extends MaterialStateTextStyle {
-  const _MaterialStateTextStyle(this._resolve);
+/// Used by [WidgetStateTextStyle.resolveWith].
+class _WidgetStateTextStyle extends WidgetStateTextStyle {
+  const _WidgetStateTextStyle(this._resolve);
 
-  final MaterialPropertyResolver<TextStyle> _resolve;
-
-  @override
-  TextStyle resolve(Set<MaterialState> states) => _resolve(states);
-}
-
-/// Defines a [OutlineInputBorder] that is also a [MaterialStateProperty].
-///
-/// This class exists to enable widgets with [OutlineInputBorder] valued properties
-/// to also accept [MaterialStateProperty<OutlineInputBorder>] values. A material
-/// state input border property represents a text style which depends on
-/// a widget's "interactive state". This state is represented as a
-/// [Set] of [MaterialState]s, like [MaterialState.pressed],
-/// [MaterialState.focused] and [MaterialState.hovered].
-///
-/// [MaterialStateOutlineInputBorder] should only be used with widgets that document
-/// their support, like [InputDecoration.border].
-///
-/// To use a [MaterialStateOutlineInputBorder], you can either:
-///   1. Create a subclass of [MaterialStateOutlineInputBorder] and implement the abstract `resolve` method.
-///   2. Use [MaterialStateOutlineInputBorder.resolveWith] and pass in a callback that
-///      will be used to resolve the color in the given states.
-///
-/// If a [MaterialStateOutlineInputBorder] is used for a property or a parameter that doesn't
-/// support resolving [MaterialStateProperty<OutlineInputBorder>]s, then its default color
-/// value will be used for all states.
-///
-/// To define a `const` [MaterialStateOutlineInputBorder], you'll need to extend
-/// [MaterialStateOutlineInputBorder] and override its [resolve] method. You'll also need
-/// to provide a `defaultValue` to the super constructor, so that we can know
-/// at compile-time what its default color is.
-abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implements MaterialStateProperty<InputBorder> {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const MaterialStateOutlineInputBorder();
-
-  /// Creates a [MaterialStateOutlineInputBorder] from a [MaterialPropertyResolver<InputBorder>]
-  /// callback function.
-  ///
-  /// If used as a regular input border, the border resolved in the default state (the
-  /// empty set of states) will be used.
-  ///
-  /// The given callback parameter must return a non-null text style in the default
-  /// state.
-  static MaterialStateOutlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
-      _MaterialStateOutlineInputBorder(callback);
-
-  /// Returns a [InputBorder] that's to be used when a Material component is in the
-  /// specified state.
-  @override
-  InputBorder resolve(Set<MaterialState> states);
-}
-
-/// A [MaterialStateOutlineInputBorder] created from a [MaterialPropertyResolver<OutlineInputBorder>]
-/// callback alone.
-///
-/// If used as a regular input border, the border resolved in the default state will
-/// be used.
-///
-/// Used by [MaterialStateTextStyle.resolveWith].
-class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
-  const _MaterialStateOutlineInputBorder(this._resolve);
-
-  final MaterialPropertyResolver<InputBorder> _resolve;
+  final WidgetPropertyResolver<TextStyle> _resolve;
 
   @override
-  InputBorder resolve(Set<MaterialState> states) => _resolve(states);
-}
-
-/// Defines a [UnderlineInputBorder] that is also a [MaterialStateProperty].
-///
-/// This class exists to enable widgets with [UnderlineInputBorder] valued properties
-/// to also accept [MaterialStateProperty<UnderlineInputBorder>] values. A material
-/// state input border property represents a text style which depends on
-/// a widget's "interactive state". This state is represented as a
-/// [Set] of [MaterialState]s, like [MaterialState.pressed],
-/// [MaterialState.focused] and [MaterialState.hovered].
-///
-/// [MaterialStateUnderlineInputBorder] should only be used with widgets that document
-/// their support, like [InputDecoration.border].
-///
-/// To use a [MaterialStateUnderlineInputBorder], you can either:
-///   1. Create a subclass of [MaterialStateUnderlineInputBorder] and implement the abstract `resolve` method.
-///   2. Use [MaterialStateUnderlineInputBorder.resolveWith] and pass in a callback that
-///      will be used to resolve the color in the given states.
-///
-/// If a [MaterialStateUnderlineInputBorder] is used for a property or a parameter that doesn't
-/// support resolving [MaterialStateProperty<UnderlineInputBorder>]s, then its default color
-/// value will be used for all states.
-///
-/// To define a `const` [MaterialStateUnderlineInputBorder], you'll need to extend
-/// [MaterialStateUnderlineInputBorder] and override its [resolve] method. You'll also need
-/// to provide a `defaultValue` to the super constructor, so that we can know
-/// at compile-time what its default color is.
-abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder implements MaterialStateProperty<InputBorder> {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const MaterialStateUnderlineInputBorder();
-
-  /// Creates a [MaterialStateUnderlineInputBorder] from a [MaterialPropertyResolver<InputBorder>]
-  /// callback function.
-  ///
-  /// If used as a regular input border, the border resolved in the default state (the
-  /// empty set of states) will be used.
-  ///
-  /// The given callback parameter must return a non-null text style in the default
-  /// state.
-  static MaterialStateUnderlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
-      _MaterialStateUnderlineInputBorder(callback);
-
-  /// Returns a [InputBorder] that's to be used when a Material component is in the
-  /// specified state.
-  @override
-  InputBorder resolve(Set<MaterialState> states);
-}
-
-/// A [MaterialStateUnderlineInputBorder] created from a [MaterialPropertyResolver<UnderlineInputBorder>]
-/// callback alone.
-///
-/// If used as a regular input border, the border resolved in the default state will
-/// be used.
-///
-/// Used by [MaterialStateTextStyle.resolveWith].
-class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBorder {
-  const _MaterialStateUnderlineInputBorder(this._resolve);
-
-  final MaterialPropertyResolver<InputBorder> _resolve;
-
-  @override
-  InputBorder resolve(Set<MaterialState> states) => _resolve(states);
+  TextStyle resolve(Set<WidgetState> states) => _resolve(states);
 }
 
 /// Interface for classes that [resolve] to a value of type `T` based
 /// on a widget's interactive "state", which is defined as a set
-/// of [MaterialState]s.
+/// of [WidgetState]s.
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=CylXr3AF3uU}
-///
-/// Material state properties represent values that depend on a widget's material
-/// "state". The state is encoded as a set of [MaterialState] values, like
-/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed]. For
+/// Widget state properties represent values that depend on a widget's "state".
+/// The state is encoded as a set of [WidgetState] values, like
+/// [WidgetState.focused], [WidgetState.hovered], [WidgetState.pressed]. For
 /// example the [InkWell.overlayColor] defines the color that fills the ink well
 /// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
 /// uses the overlay color's [resolve] method to compute the color for the
@@ -618,59 +494,51 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
 ///
-/// {@tool dartpad}
-/// This example shows how you can override the default text and icon
-/// color (the "foreground color") of a [TextButton] with a
-/// [MaterialStateProperty]. In this example, the button's text color
-/// will be `Colors.blue` when the button is being pressed, hovered,
-/// or focused. Otherwise, the text color will be `Colors.red`.
-///
-/// ** See code in examples/api/lib/material/material_state/material_state_property.0.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
-/// {@macro flutter.material.MaterialStateProperty.implementations}
-abstract class MaterialStateProperty<T> {
+///  * [MaterialStateProperty], the Material specific version of
+///    `WidgetStateProperty`.
+/// {@macro flutter.widgets.WidgetStateProperty.implementations}
+abstract class WidgetStateProperty<T> {
   /// Returns a value of type `T` that depends on [states].
   ///
   /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
-  /// current [MaterialState]s to compute colors and other visual parameters
+  /// current [WidgetState]s to compute colors and other visual parameters
   /// at build time.
-  T resolve(Set<MaterialState> states);
+  T resolve(Set<WidgetState> states);
 
   /// Resolves the value for the given set of states if `value` is a
-  /// [MaterialStateProperty], otherwise returns the value itself.
+  /// [WidgetStateProperty], otherwise returns the value itself.
   ///
   /// This is useful for widgets that have parameters which can optionally be a
-  /// [MaterialStateProperty]. For example, [InkWell.mouseCursor] can be a
-  /// [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
-  static T resolveAs<T>(T value, Set<MaterialState> states) {
-    if (value is MaterialStateProperty<T>) {
-      final MaterialStateProperty<T> property = value;
+  /// [WidgetStateProperty]. For example, [InkWell.mouseCursor] can be a
+  /// [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+  static T resolveAs<T>(T value, Set<WidgetState> states) {
+    if (value is WidgetStateProperty<T>) {
+      final WidgetStateProperty<T> property = value;
       return property.resolve(states);
     }
     return value;
   }
 
-  /// Convenience method for creating a [MaterialStateProperty] from a
-  /// [MaterialPropertyResolver] function alone.
-  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStatePropertyWith<T>(callback);
+  /// Convenience method for creating a [WidgetStateProperty] from a
+  /// [WidgetPropertyResolver] function alone.
+  static WidgetStateProperty<T> resolveWith<T>(WidgetPropertyResolver<T> callback) => _WidgetStatePropertyWith<T>(callback);
 
-  /// Convenience method for creating a [MaterialStateProperty] that resolves
+  /// Convenience method for creating a [WidgetStateProperty] that resolves
   /// to a single value for all states.
   ///
-  /// If you need a const value, use [MaterialStatePropertyAll] directly.
+  /// If you need a const value, use [WidgetStatePropertyAll] directly.
   ///
   // TODO(darrenaustin): Deprecate this when we have the ability to create
-  // a dart fix that will replace this with MaterialStatePropertyAll:
+  // a dart fix that will replace this with WidgetStatePropertyAll:
   // https://github.com/dart-lang/sdk/issues/49056.
-  static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
+  static WidgetStateProperty<T> all<T>(T value) => WidgetStatePropertyAll<T>(value);
 
-  /// Linearly interpolate between two [MaterialStateProperty]s.
-  static MaterialStateProperty<T?>? lerp<T>(
-    MaterialStateProperty<T>? a,
-    MaterialStateProperty<T>? b,
+  /// Linearly interpolate between two [WidgetStateProperty]s.
+  static WidgetStateProperty<T?>? lerp<T>(
+    WidgetStateProperty<T>? a,
+    WidgetStateProperty<T>? b,
     double t,
     T? Function(T?, T?, double) lerpFunction,
   ) {
@@ -682,56 +550,61 @@ abstract class MaterialStateProperty<T> {
   }
 }
 
-class _LerpProperties<T> implements MaterialStateProperty<T?> {
+class _LerpProperties<T> implements WidgetStateProperty<T?> {
   const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
 
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
+  final WidgetStateProperty<T>? a;
+  final WidgetStateProperty<T>? b;
   final double t;
   final T? Function(T?, T?, double) lerpFunction;
 
   @override
-  T? resolve(Set<MaterialState> states) {
+  T? resolve(Set<WidgetState> states) {
     final T? resolvedA = a?.resolve(states);
     final T? resolvedB = b?.resolve(states);
     return lerpFunction(resolvedA, resolvedB, t);
   }
 }
 
-class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
-  _MaterialStatePropertyWith(this._resolve);
+class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
+  _WidgetStatePropertyWith(this._resolve);
 
-  final MaterialPropertyResolver<T> _resolve;
+  final WidgetPropertyResolver<T> _resolve;
 
   @override
-  T resolve(Set<MaterialState> states) => _resolve(states);
+  T resolve(Set<WidgetState> states) => _resolve(states);
 }
 
-/// Convenience class for creating a [MaterialStateProperty] that
+/// Convenience class for creating a [WidgetStateProperty] that
 /// resolves to the given value for all states.
-class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
+///
+/// See also:
+///
+///  * [MaterialStatePropertyAll], the Material specific version of
+///    `WidgetStatePropertyAll`.
+class WidgetStatePropertyAll<T> implements WidgetStateProperty<T> {
 
-  /// Constructs a [MaterialStateProperty] that always resolves to the given
+  /// Constructs a [WidgetStateProperty] that always resolves to the given
   /// value.
-  const MaterialStatePropertyAll(this.value);
+  const WidgetStatePropertyAll(this.value);
 
   /// The value of the property that will be used for all states.
   final T value;
 
   @override
-  T resolve(Set<MaterialState> states) => value;
+  T resolve(Set<WidgetState> states) => value;
 
   @override
   String toString() {
     if (value is double) {
-      return 'MaterialStatePropertyAll(${debugFormatDouble(value as double)})';
+      return 'WidgetStatePropertyAll(${debugFormatDouble(value as double)})';
     } else {
-      return 'MaterialStatePropertyAll($value)';
+      return 'WidgetStatePropertyAll($value)';
     }
   }
 }
 
-/// Manages a set of [MaterialState]s and notifies listeners of changes.
+/// Manages a set of [WidgetState]s and notifies listeners of changes.
 ///
 /// Used by widgets that expose their internal state for the sake of
 /// extensions that add support for additional states. See
@@ -742,21 +615,26 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// changed with [update]; it should not be modified directly.
 ///
 /// The controller's [value] represents the set of states that a
-/// widget's visual properties, typically [MaterialStateProperty]
+/// widget's visual properties, typically [WidgetStateProperty]
 /// values, are resolved against. It is _not_ the intrinsic state of
 /// the widget. The widget is responsible for ensuring that the
 /// controller's [value] tracks its intrinsic state. For example one
 /// cannot request the keyboard focus for a widget by adding
-/// [MaterialState.focused] to its controller. When the widget gains the
+/// [WidgetState.focused] to its controller. When the widget gains the
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
-class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
-  /// Creates a MaterialStatesController.
-  MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
+///
+/// See also:
+///
+///  * [MaterialStatesController], the Material specific version of
+///    `WidgetStatesController`.
+class WidgetStatesController extends ValueNotifier<Set<WidgetState>> {
+  /// Creates a WidgetStatesController.
+  WidgetStatesController([Set<WidgetState>? value]) : super(<WidgetState>{...?value});
 
   /// Adds [state] to [value] if [add] is true, and removes it otherwise,
   /// and notifies listeners if [value] has changed.
-  void update(MaterialState state, bool add) {
+  void update(WidgetState state, bool add) {
     final bool valueChanged = add ? value.add(state) : value.remove(state);
     if (valueChanged) {
       notifyListeners();
