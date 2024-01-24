@@ -28,7 +28,7 @@ class SolidRRectBlurContents final : public Contents {
 
   ~SolidRRectBlurContents() override;
 
-  void SetRRect(std::optional<Rect> rect, Scalar corner_radius = 0);
+  void SetRRect(std::optional<Rect> rect, Size corner_radii = {});
 
   void SetSigma(Sigma sigma);
 
@@ -50,7 +50,7 @@ class SolidRRectBlurContents final : public Contents {
 
  private:
   std::optional<Rect> rect_;
-  Scalar corner_radius_;
+  Size corner_radii_;
   Sigma sigma_;
 
   Color color_;
