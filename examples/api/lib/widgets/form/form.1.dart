@@ -65,7 +65,8 @@ class _SaveableFormState extends State<_SaveableForm> {
   /// Shows a dialog and resolves to true when the user has indicated that they
   /// want to pop.
   ///
-  /// A null indicates a desire not to pop.
+  /// A return value of null indicates a desire not to pop, such as when the
+  /// user has dismissed the modal without tapping a button.
   Future<bool?> _showDialog() {
     return showDialog<bool>(
       context: context,
