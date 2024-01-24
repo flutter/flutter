@@ -60,7 +60,6 @@ class DependencyVersionChecker {
         fun checkDependencyVersions(project : Project) {
             var agpVersion : Version? = null
             var kgpVersion : Version? = null
-            Map map = new HashMap()
 
             checkGradleVersion(getGradleVersion(project), project)
             checkJavaVersion(getJavaVersion(project), project)
@@ -69,7 +68,7 @@ class DependencyVersionChecker {
                 checkAGPVersion(agpVersion, project)
             } else {
                 project.logger.error("Warning: unable to detect project AGP version. Skipping " +
-                        "version checking. " + ignored)
+                        "version checking. ")
             }
 
             kgpVersion = getKGPVersion(project)
@@ -124,7 +123,7 @@ class DependencyVersionChecker {
             val kotlinPlugin = project.getPlugins()
                 .findPlugin(KotlinAndroidPluginWrapper::class.java)
             val versionfield =
-                kotlinPlugin?.javaClass.kotlin.members.first { it.name == "pluginVersion" || it.name == "kotlinPluginVersion" }
+                kotlinPlugin?.javaClass?.kotlin?.members?.first { it.name == "pluginVersion" || it.name == "kotlinPluginVersion" }
             val versionString = versionfield?.call(kotlinPlugin)
             if (versionString == null) {
                 return null
@@ -144,7 +143,7 @@ class DependencyVersionChecker {
 
         private fun getWarnMessage(dependencyName : String,
                                    versionString : String,
-                                   warnVersion : String) {
+                                   warnVersion : String) : String {
             return "Warning: Flutter support for your project's $dependencyName version " +
                     "($versionString) will soon be dropped. Please upgrade your $dependencyName " +
                     "version to a version of at least $warnVersion soon." +
