@@ -10,7 +10,6 @@
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/fdio/directory.h>
 #include <lib/fdio/io.h>
-#include <lib/syslog/global.h>
 #include <lib/trace/event.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -18,10 +17,10 @@
 #include <zircon/dlfcn.h>
 #include <zircon/status.h>
 
+#include "flutter/fml/logging.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 #include "inlines.h"
-#include "logging.h"
 #include "vmo.h"
 
 namespace dart_utils {
@@ -34,18 +33,18 @@ static bool OpenVmo(fuchsia::mem::Buffer* resource_vmo,
 
   if (namespc == nullptr) {
     // Opening a file in the root namespace expects an absolute path.
-    dart_utils::Check(path[0] == '/', LOG_TAG);
+    FML_CHECK(path[0] == '/');
     if (!VmoFromFilename(path, executable, resource_vmo)) {
       return false;
     }
   } else {
     // openat of a path with a leading '/' ignores the namespace fd.
     // require a relative path.
-    dart_utils::Check(path[0] != '/', LOG_TAG);
+    FML_CHECK(path[0] != '/');
 
     auto root_dir = fdio_ns_opendir(namespc);
     if (root_dir < 0) {
-      FX_LOG(ERROR, LOG_TAG, "Failed to open namespace directory");
+      FML_LOG(ERROR) << "Failed to open namespace directory";
       return false;
     }
 
@@ -85,7 +84,7 @@ bool MappedResource::LoadFromVmo(const std::string& path,
   zx_status_t status = zx::vmar::root_self()->map(flags, 0, resource_vmo.vmo, 0,
                                                   resource_vmo.size, &addr);
   if (status != ZX_OK) {
-    FX_LOGF(ERROR, LOG_TAG, "Failed to map: %s", zx_status_get_string(status));
+    FML_LOG(ERROR) << "Failed to map: " << zx_status_get_string(status);
     return false;
   }
 
@@ -108,14 +107,14 @@ static int OpenFdExec(const std::string& path, int dirfd) {
   if (dirfd == AT_FDCWD) {
     // fdio_open_fd_at does not support AT_FDCWD, by design.  Use fdio_open_fd
     // and expect an absolute path for that usage pattern.
-    dart_utils::Check(path[0] == '/', LOG_TAG);
+    FML_CHECK(path[0] == '/');
     result = fdio_open_fd(
         path.c_str(),
         static_cast<uint32_t>(fuchsia::io::OpenFlags::RIGHT_READABLE |
                               fuchsia::io::OpenFlags::RIGHT_EXECUTABLE),
         &fd);
   } else {
-    dart_utils::Check(path[0] != '/', LOG_TAG);
+    FML_CHECK(path[0] != '/');
     result = fdio_open_fd_at(
         dirfd, path.c_str(),
         static_cast<uint32_t>(fuchsia::io::OpenFlags::RIGHT_READABLE |
@@ -123,8 +122,8 @@ static int OpenFdExec(const std::string& path, int dirfd) {
         &fd);
   }
   if (result != ZX_OK) {
-    FX_LOGF(ERROR, LOG_TAG, "fdio_open_fd_at(%s) failed: %s", path.c_str(),
-            zx_status_get_string(result));
+    FML_LOG(ERROR) << "fdio_open_fd_at(" << path << ") "
+                   << "failed: " << zx_status_get_string(result);
     return -1;
   }
   return fd;
@@ -137,7 +136,7 @@ bool ElfSnapshot::Load(fdio_ns_t* namespc, const std::string& path) {
   } else {
     root_dir = fdio_ns_opendir(namespc);
     if (root_dir < 0) {
-      FX_LOG(ERROR, LOG_TAG, "Failed to open namespace directory");
+      FML_LOG(ERROR) << "Failed to open namespace directory";
       return false;
     }
   }
@@ -147,8 +146,7 @@ bool ElfSnapshot::Load(fdio_ns_t* namespc, const std::string& path) {
 bool ElfSnapshot::Load(int dirfd, const std::string& path) {
   const int fd = OpenFdExec(path, dirfd);
   if (fd < 0) {
-    FX_LOGF(ERROR, LOG_TAG, "Failed to open VMO for %s from dir.",
-            path.c_str());
+    FML_LOG(ERROR) << "Failed to open VMO for " << path << " from dir.";
     return false;
   }
   return Load(fd);
@@ -159,7 +157,7 @@ bool ElfSnapshot::Load(int fd) {
   handle_ = Dart_LoadELF_Fd(fd, 0, &error, &vm_data_, &vm_instrs_,
                             &isolate_data_, &isolate_instrs_);
   if (handle_ == nullptr) {
-    FX_LOGF(ERROR, LOG_TAG, "Failed load ELF: %s", error);
+    FML_LOG(ERROR) << "Failed load ELF: " << error;
     return false;
   }
   return true;

@@ -6,16 +6,14 @@
 
 #include <fuchsia/feedback/cpp/fidl.h>
 #include <fuchsia/mem/cpp/fidl.h>
-#include <lib/syslog/global.h>
 #include <lib/zx/vmo.h>
 #include <sys/types.h>
 #include <zircon/status.h>
 
 #include <string>
 
+#include "flutter/fml/logging.h"
 #include "third_party/tonic/converter/dart_converter.h"
-
-#include "logging.h"
 
 namespace {
 static bool SetStackTrace(const std::string& data,
@@ -51,10 +49,9 @@ fuchsia::feedback::CrashReport BuildCrashReport(
   std::string error_message;
   const size_t delimiter_pos = error.find_first_of(':');
   if (delimiter_pos == std::string::npos) {
-    FX_LOGF(ERROR, LOG_TAG,
-            "error parsing Dart exception: expected format '$RuntimeType: "
-            "$Message', got '%s'",
-            error.c_str());
+    FML_LOG(ERROR) << "error parsing Dart exception: expected format "
+                      "'$RuntimeType: $Message', got '"
+                   << error << "'";
     // We still need to specify a type, otherwise the stack trace does not
     // show up in the crash server UI.
     error_type = "UnknownError";
@@ -74,7 +71,7 @@ fuchsia::feedback::CrashReport BuildCrashReport(
   dart_report.set_exception_type(error_type);
   dart_report.set_exception_message(error_message);
   if (!SetStackTrace(stack_trace, &dart_report)) {
-    FX_LOG(ERROR, LOG_TAG, "Failed to convert Dart stack trace to VMO");
+    FML_LOG(ERROR) << "Failed to convert Dart stack trace to VMO";
   }
 
   fuchsia::feedback::SpecificCrashReport specific_report;
@@ -118,8 +115,8 @@ void HandleException(std::shared_ptr<::sys::ServiceDirectory> services,
       std::move(crash_report),
       [](fuchsia::feedback::CrashReporter_FileReport_Result result) {
         if (result.is_err()) {
-          FX_LOGF(ERROR, LOG_TAG, "Failed to report Dart exception: %u",
-                  static_cast<uint32_t>(result.err()));
+          FML_LOG(ERROR) << "Failed to report Dart exception: "
+                         << static_cast<uint32_t>(result.err());
         }
       });
 }

@@ -11,21 +11,22 @@
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/fdio/directory.h>
 #include <lib/fdio/io.h>
-#include <lib/syslog/global.h>
 #include <zircon/status.h>
 
-#include "logging.h"
+#include <ios>
+
+#include "flutter/fml/logging.h"
 
 namespace {
 
 bool VmoFromFd(int fd, bool executable, fuchsia::mem::Buffer* buffer) {
   if (!buffer) {
-    FX_LOG(FATAL, LOG_TAG, "Invalid buffer pointer");
+    FML_LOG(FATAL) << "Invalid buffer pointer";
   }
 
   struct stat stat_struct;
   if (fstat(fd, &stat_struct) == -1) {
-    FX_LOGF(ERROR, LOG_TAG, "fstat failed: %s", strerror(errno));
+    FML_LOG(ERROR) << "fstat failed: " << strerror(errno);
     return false;
   }
 
@@ -38,8 +39,8 @@ bool VmoFromFd(int fd, bool executable, fuchsia::mem::Buffer* buffer) {
   }
 
   if (status != ZX_OK) {
-    FX_LOGF(ERROR, LOG_TAG, "fdio_get_vmo_%s failed: %s",
-            executable ? "exec" : "copy", zx_status_get_string(status));
+    FML_LOG(ERROR) << (executable ? "fdio_get_vmo_exec" : "fdio_get_vmo_copy")
+                   << " failed: " << zx_status_get_string(status);
     return false;
   }
 
@@ -68,9 +69,9 @@ bool VmoFromFilename(const std::string& filename,
   const zx_status_t status =
       fdio_open_fd(filename.c_str(), static_cast<uint32_t>(flags), &fd);
   if (status != ZX_OK) {
-    FX_LOGF(ERROR, LOG_TAG, "fdio_open_fd(\"%s\", %08x) failed: %s",
-            filename.c_str(), static_cast<uint32_t>(flags),
-            zx_status_get_string(status));
+    FML_LOG(ERROR) << "fdio_open_fd(\"" << filename << "\", " << std::hex
+                   << static_cast<uint32_t>(flags)
+                   << ") failed: " << zx_status_get_string(status);
     return false;
   }
   bool result = VmoFromFd(fd, executable, buffer);
@@ -91,9 +92,9 @@ bool VmoFromFilenameAt(int dirfd,
   const zx_status_t status = fdio_open_fd_at(dirfd, filename.c_str(),
                                              static_cast<uint32_t>(flags), &fd);
   if (status != ZX_OK) {
-    FX_LOGF(ERROR, LOG_TAG, "fdio_open_fd_at(%d, \"%s\", %08x) failed: %s",
-            dirfd, filename.c_str(), static_cast<uint32_t>(flags),
-            zx_status_get_string(status));
+    FML_LOG(ERROR) << "fdio_open_fd_at(" << dirfd << ", \"" << filename
+                   << "\", " << std::hex << static_cast<uint32_t>(flags)
+                   << ") failed: " << zx_status_get_string(status);
     return false;
   }
   bool result = VmoFromFd(fd, executable, buffer);

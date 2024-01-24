@@ -168,7 +168,6 @@ template("runner_sources") {
              "$fuchsia_sdk_root/pkg:async-loop-cpp",
              "$fuchsia_sdk_root/pkg:fdio",
              "$fuchsia_sdk_root/pkg:fidl_cpp",
-             "$fuchsia_sdk_root/pkg:syslog",
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:trace-engine",
              "$fuchsia_sdk_root/pkg:trace-provider-so",

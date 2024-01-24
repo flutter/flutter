@@ -7,7 +7,6 @@
 
 #include <lib/async/cpp/time.h>
 #include <lib/async/default.h>
-#include <lib/syslog/global.h>
 
 #include "flutter/flutter_vma/flutter_skia_vma.h"
 #include "flutter/fml/macros.h"
