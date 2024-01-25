@@ -1006,7 +1006,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$State',
         object: this,
@@ -1303,13 +1303,18 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Implementations of this method should end with a call to the inherited
   /// method, as in `super.dispose()`.
   ///
-  /// ## Application shutdown
+  /// ## Caveats
   ///
-  /// This method is _not_ invoked when the application shuts down, because
-  /// there is no way to predict when that will happen. For example, a user's
-  /// battery could catch fire, or the user could drop the device into a
-  /// swimming pool, or the operating system could unilaterally terminate the
-  /// application process due to memory pressure.
+  /// This method is _not_ invoked at times where a developer might otherwise
+  /// expect it, such as application shutdown or dismissal via platform
+  /// native methods.
+  ///
+  /// ### Application shutdown
+  ///
+  /// There is no way to predict when application shutdown will happen. For
+  /// example, a user's battery could catch fire, or the user could drop the
+  /// device into a swimming pool, or the operating system could unilaterally
+  /// terminate the application process due to memory pressure.
   ///
   /// Applications are responsible for ensuring that they are well-behaved
   /// even in the face of a rapid unscheduled termination.
@@ -1319,6 +1324,10 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// To listen for platform shutdown messages (and other lifecycle changes),
   /// consider the [AppLifecycleListener] API.
+  ///
+  /// ### Dismissing Flutter UI via platform native methods
+  ///
+  /// {@macro flutter.widgets.runApp.dismissal}
   ///
   /// See also:
   ///
@@ -1332,7 +1341,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
   }
 
@@ -3378,7 +3387,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element(Widget widget)
     : _widget = widget {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$Element',
         object: this,
@@ -4533,7 +4542,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(owner != null);
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget?.key;

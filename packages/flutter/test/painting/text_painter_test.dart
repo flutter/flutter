@@ -1193,9 +1193,9 @@ void main() {
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87543
 
   test('TextPainter handles invalid UTF-16', () {
-    Object? exception;
+    FlutterErrorDetails? error;
     FlutterError.onError = (FlutterErrorDetails details) {
-      exception = details.exception;
+      error = details;
     };
 
     final TextPainter painter = TextPainter()
@@ -1207,7 +1207,8 @@ void main() {
     painter.layout();
     // The layout should include one replacement character.
     expect(painter.width, equals(fontSize));
-    expect(exception, isNotNull);
+    expect(error!.exception, isNotNull);
+    expect(error!.silent, isTrue);
     painter.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87544
 

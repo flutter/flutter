@@ -4,10 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Animates forward when built', (WidgetTester tester) async {
+  testWidgets('Animates forward when built', (WidgetTester tester) async {
     final List<int> values = <int>[];
     int endCount = 0;
     await tester.pumpWidget(
@@ -38,7 +37,7 @@ void main() {
     expect(values, <int>[10, 60, 110]);
   });
 
-  testWidgetsWithLeakTracking('No initial animation when begin=null', (WidgetTester tester) async {
+  testWidgets('No initial animation when begin=null', (WidgetTester tester) async {
     final List<int> values = <int>[];
     int endCount = 0;
     await tester.pumpWidget(
@@ -62,7 +61,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('No initial animation when begin=end', (WidgetTester tester) async {
+  testWidgets('No initial animation when begin=end', (WidgetTester tester) async {
     final List<int> values = <int>[];
     int endCount = 0;
     await tester.pumpWidget(
@@ -85,7 +84,7 @@ void main() {
     expect(values, <int>[100]);
   });
 
-  testWidgetsWithLeakTracking('Replace tween animates new tween', (WidgetTester tester) async {
+  testWidgets('Replace tween animates new tween', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
@@ -113,7 +112,7 @@ void main() {
     expect(values, <int>[0, 100, 100, 150, 200]);
   });
 
-  testWidgetsWithLeakTracking('Curve is respected', (WidgetTester tester) async {
+  testWidgets('Curve is respected', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween, required Curve curve}) {
       return TweenAnimationBuilder<int>(
@@ -143,7 +142,7 @@ void main() {
     expect(values, <int>[100, 150]);
   });
 
-  testWidgetsWithLeakTracking('Duration is respected', (WidgetTester tester) async {
+  testWidgets('Duration is respected', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween, required Duration duration}) {
       return TweenAnimationBuilder<int>(
@@ -171,7 +170,7 @@ void main() {
     expect(values, <int>[100, 125]);
   });
 
-  testWidgetsWithLeakTracking('Child is integrated into tree', (WidgetTester tester) async {
+  testWidgets('Child is integrated into tree', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -190,7 +189,7 @@ void main() {
   });
 
   group('Change tween gapless while', () {
-    testWidgetsWithLeakTracking('running forward', (WidgetTester tester) async {
+    testWidgets('running forward', (WidgetTester tester) async {
       final List<int> values = <int>[];
       Widget buildWidget({required IntTween tween}) {
         return TweenAnimationBuilder<int>(
@@ -225,7 +224,7 @@ void main() {
       values.clear();
     });
 
-    testWidgetsWithLeakTracking('running forward and then reverse with same tween instance', (WidgetTester tester) async {
+    testWidgets('running forward and then reverse with same tween instance', (WidgetTester tester) async {
       final List<int> values = <int>[];
       Widget buildWidget({required IntTween tween}) {
         return TweenAnimationBuilder<int>(
@@ -255,7 +254,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Changing tween while gapless tween change is in progress', (WidgetTester tester) async {
+  testWidgets('Changing tween while gapless tween change is in progress', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
@@ -295,7 +294,7 @@ void main() {
     expect(values, <int>[175, 338, 501]);
   });
 
-  testWidgetsWithLeakTracking('Changing curve while no animation is running does not trigger animation', (WidgetTester tester) async {
+  testWidgets('Changing curve while no animation is running does not trigger animation', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required Curve curve}) {
       return TweenAnimationBuilder<int>(
@@ -324,7 +323,7 @@ void main() {
     expect(values, <int>[100]);
   });
 
-  testWidgetsWithLeakTracking('Setting same tween and direction does not trigger animation', (WidgetTester tester) async {
+  testWidgets('Setting same tween and direction does not trigger animation', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
@@ -353,7 +352,7 @@ void main() {
     expect(values, everyElement(100));
   });
 
-  testWidgetsWithLeakTracking('Setting same tween and direction while gapless animation is in progress works', (WidgetTester tester) async {
+  testWidgets('Setting same tween and direction while gapless animation is in progress works', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
@@ -389,7 +388,7 @@ void main() {
     expect(values, everyElement(300));
   });
 
-  testWidgetsWithLeakTracking('Works with nullable tweens', (WidgetTester tester) async {
+  testWidgets('Works with nullable tweens', (WidgetTester tester) async {
     final List<Size?> values = <Size?>[];
     await tester.pumpWidget(
       TweenAnimationBuilder<Size?>(

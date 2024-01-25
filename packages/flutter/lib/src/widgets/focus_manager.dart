@@ -103,10 +103,17 @@ KeyEventResult combineKeyEventResults(Iterable<KeyEventResult> results) {
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
 /// to receive key events.
 ///
+/// This kind of callback is deprecated and will be removed at a future date.
+/// Use [FocusOnKeyEventCallback] and associated APIs instead.
+///
 /// The [node] is the node that received the event.
 ///
 /// Returns a [KeyEventResult] that describes how, and whether, the key event
 /// was handled.
+@Deprecated(
+  'Use FocusOnKeyEventCallback instead. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent event);
 
 /// Signature of a callback used by [Focus.onKeyEvent] and [FocusScope.onKeyEvent]
@@ -369,14 +376,13 @@ enum UnfocusDisposition {
 /// {@template flutter.widgets.FocusNode.keyEvents}
 /// ## Key Event Propagation
 ///
-/// The [FocusManager] receives key events from [RawKeyboard] and
-/// [HardwareKeyboard] and will pass them to the focused nodes. It starts with
-/// the node with the primary focus, and will call the [onKey] or [onKeyEvent]
-/// callback for that node. If the callback returns [KeyEventResult.ignored],
-/// indicating that it did not handle the event, the [FocusManager] will move
-/// to the parent of that node and call its [onKey] or [onKeyEvent]. If that
-/// [onKey] or [onKeyEvent] returns [KeyEventResult.handled], then it will stop
-/// propagating the event. If it reaches the root [FocusScopeNode],
+/// The [FocusManager] receives key events from [HardwareKeyboard] and will pass
+/// them to the focused nodes. It starts with the node with the primary focus,
+/// and will call the [onKeyEvent] callback for that node. If the callback
+/// returns [KeyEventResult.ignored], indicating that it did not handle the
+/// event, the [FocusManager] will move to the parent of that node and call its
+/// [onKeyEvent]. If that [onKeyEvent] returns [KeyEventResult.handled], then it
+/// will stop propagating the event. If it reaches the root [FocusScopeNode],
 /// [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
 ///
@@ -429,11 +435,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [debugLabel] is ignored on release builds.
   ///
-  /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
-  /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
-  /// in the future.
+  /// To receive key events that focuses on this node, pass a listener to
+  /// `onKeyEvent`.
   FocusNode({
     String? debugLabel,
+    @Deprecated(
+      'Use onKeyEvent instead. '
+      'This feature was deprecated after v3.18.0-2.0.pre.',
+    )
     this.onKey,
     this.onKeyEvent,
     bool skipTraversal = false,
@@ -621,10 +630,17 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
   ///
+  /// This property is deprecated and will be removed at a future date. Use
+  /// [onKeyEvent] instead.
+  ///
   /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
   /// future. Prefer [onKeyEvent] instead.
   ///
   /// {@macro flutter.widgets.FocusNode.keyEvents}
+  @Deprecated(
+    'Use onKeyEvent instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   FocusOnKeyCallback? onKey;
 
   /// Called if this focus node receives a key event while focused (i.e. when
@@ -1035,13 +1051,16 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// node, and then [attach] called on the new node. This typically happens in
   /// the [State.didUpdateWidget] method.
   ///
-  /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
-  /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
-  /// in the future.
+  /// To receive key events that focuses on this node, pass a listener to
+  /// `onKeyEvent`.
   @mustCallSuper
   FocusAttachment attach(
     BuildContext? context, {
     FocusOnKeyEventCallback? onKeyEvent,
+    @Deprecated(
+      'Use onKeyEvent instead. '
+      'This feature was deprecated after v3.18.0-2.0.pre.',
+    )
     FocusOnKeyCallback? onKey,
   }) {
     _context = context;
@@ -1241,6 +1260,10 @@ class FocusScopeNode extends FocusNode {
   FocusScopeNode({
     super.debugLabel,
     super.onKeyEvent,
+    @Deprecated(
+      'Use onKeyEvent instead. '
+      'This feature was deprecated after v3.18.0-2.0.pre.',
+    )
     super.onKey,
     super.skipTraversal,
     super.canRequestFocus,
@@ -1432,8 +1455,8 @@ enum FocusHighlightStrategy {
 /// The focus manager is responsible for tracking which [FocusNode] has the
 /// primary input focus (the [primaryFocus]), holding the [FocusScopeNode] that
 /// is the root of the focus tree (the [rootScope]), and what the current
-/// [highlightMode] is. It also distributes key events from [KeyEventManager]
-/// to the nodes in the focus tree.
+/// [highlightMode] is. It also distributes [KeyEvent]s to the nodes in the
+/// focus tree.
 ///
 /// The singleton [FocusManager] instance is held by the [WidgetsBinding] as
 /// [WidgetsBinding.focusManager], and can be conveniently accessed using the
@@ -1490,10 +1513,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Registers global input event handlers that are needed to manage focus.
   ///
-  /// This sets the [RawKeyboard.keyEventHandler] for the shared instance of
-  /// [RawKeyboard] and adds a route to the global entry in the gesture routing
-  /// table. As such, only one [FocusManager] instance should register its
-  /// global handlers.
+  /// This calls the [HardwareKeyboard.addHandler] on the shared instance of
+  /// [HardwareKeyboard] and adds a route to the global entry in the gesture
+  /// routing table. As such, only one [FocusManager] instance should register
+  /// its global handlers.
   ///
   /// When this focus manager is no longer needed, calling [dispose] on it will
   /// unregister these handlers.
@@ -1808,6 +1831,18 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 // This doesn't extend ChangeNotifier because the callback passes the updated
 // value, and ChangeNotifier requires using VoidCallback.
 class _HighlightModeManager {
+  _HighlightModeManager() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_HighlightModeManager',
+        object: this,
+      );
+    }
+  }
+
   // If set, indicates if the last interaction detected was touch or not. If
   // null, no interactions have occurred yet.
   bool? _lastInteractionWasTouch;
@@ -1856,12 +1891,18 @@ class _HighlightModeManager {
 
   void registerGlobalHandlers() {
     assert(ServicesBinding.instance.keyEventManager.keyMessageHandler == null);
+    // TODO(gspencergoog): Remove this when the RawKeyEvent system is
+    // deprecated, and replace it with registering a handler on the
+    // HardwareKeyboard.
     ServicesBinding.instance.keyEventManager.keyMessageHandler = handleKeyMessage;
     GestureBinding.instance.pointerRouter.addGlobalRoute(handlePointerEvent);
   }
 
   @mustCallSuper
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler == handleKeyMessage) {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(handlePointerEvent);
       ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
@@ -1964,8 +2005,8 @@ class _HighlightModeManager {
     }
 
     // Walk the current focus from the leaf to the root, calling each node's
-    // onKey on the way up, and if one responds that they handled it or want to
-    // stop propagation, stop.
+    // onKeyEvent on the way up, and if one responds that they handled it or
+    // want to stop propagation, stop.
     for (final FocusNode node in <FocusNode>[
       FocusManager.instance.primaryFocus!,
       ...FocusManager.instance.primaryFocus!.ancestors,

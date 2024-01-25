@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../rendering/rendering_tester.dart';
@@ -270,7 +271,7 @@ void main() {
           'SemanticsNode#0(dirty, merge boundary ⛔️, Rect.fromLTRB(0.0, 0.0, 0.0, 10.0), invisible)\n'
           'which was added as the root SemanticsNode\n'
           'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.\n'
-          'An invisible SemantiscNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
+          'An invisible SemanticsNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
           'Consider removing the above invisible SemanticsNodes if they were added by your RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
           '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml'
         ),
@@ -293,7 +294,7 @@ void main() {
           'which was added as a child of:\n'
           '  SemanticsNode#0(dirty, Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))\n'
           'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.\n'
-          'An invisible SemantiscNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
+          'An invisible SemanticsNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
           'Consider removing the above invisible SemanticsNodes if they were added by your RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
           '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml'
         ),
@@ -681,6 +682,7 @@ void main() {
       '   flags: []\n'
       '   invisible\n'
       '   isHidden: false\n'
+      '   identifier: ""\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'
@@ -804,6 +806,7 @@ void main() {
       '   flags: []\n'
       '   invisible\n'
       '   isHidden: false\n'
+      '   identifier: ""\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'
@@ -965,6 +968,16 @@ void main() {
     expect(config.onTap, same(onTap));
     expect(config.customSemanticsActions[customAction], same(onCustomAction));
   });
+
+  test('SemanticsOwner dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() =>  SemanticsOwner(
+        onSemanticsUpdate: (SemanticsUpdate update) {},
+      ).dispose(), SemanticsOwner),
+      areCreateAndDispose,
+    );
+  });
+
 }
 
 class TestRender extends RenderProxyBox {

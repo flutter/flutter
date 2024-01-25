@@ -490,7 +490,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
       status.stop();
     }
 
-    _usage.sendTiming('build', 'gradle', sw.elapsed);
+    final Duration elapsedDuration = sw.elapsed;
+    _usage.sendTiming('build', 'gradle', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'build',
+      variableName: 'gradle',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (exitCode != 0) {
       if (detectedGradleError == null) {
@@ -608,6 +614,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       fileSystem: _fileSystem,
       logger: _logger,
       flutterUsage: _usage,
+      analytics: _analytics,
     );
     final String archName = androidBuildInfo.targetArchs.single.archName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
@@ -656,10 +663,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Directory outputDirectory,
     required String buildNumber,
   }) async {
-
     final FlutterManifest manifest = project.manifest;
-    if (!manifest.isModule && !manifest.isPlugin) {
-      throwToolExit('AARs can only be built for plugin or module projects.');
+    if (!manifest.isModule) {
+      throwToolExit('AARs can only be built for module projects.');
     }
 
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
@@ -757,7 +763,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } finally {
       status.stop();
     }
-    _usage.sendTiming('build', 'gradle-aar', sw.elapsed);
+    final Duration elapsedDuration = sw.elapsed;
+    _usage.sendTiming('build', 'gradle-aar', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'build',
+      variableName: 'gradle-aar',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
@@ -792,7 +804,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
       project: project,
     );
 
-    _usage.sendTiming('print', 'android build variants', sw.elapsed);
+    final Duration elapsedDuration = sw.elapsed;
+    _usage.sendTiming('print', 'android build variants', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'print',
+      variableName: 'android build variants',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
@@ -810,24 +828,38 @@ class AndroidGradleBuilder implements AndroidBuilder {
   }
 
   @override
-  Future<void> outputsAppLinkSettings(
+  Future<String> outputsAppLinkSettings(
     String buildVariant, {
     required FlutterProject project,
   }) async {
     final String taskName = _getOutputAppLinkSettingsTaskFor(buildVariant);
+    final Directory directory = await project.buildDirectory
+        .childDirectory('deeplink_data').create(recursive: true);
+    final String outputPath = globals.fs.path.join(
+      directory.absolute.path,
+      'app-link-settings-$buildVariant.json',
+    );
     final Stopwatch sw = Stopwatch()
       ..start();
     final RunResult result = await _runGradleTask(
       taskName,
-      options: const <String>['-q'],
+      options: <String>['-q', '-PoutputPath=$outputPath'],
       project: project,
     );
-    _usage.sendTiming('outputs', 'app link settings', sw.elapsed);
+    final Duration elapsedDuration = sw.elapsed;
+    _usage.sendTiming('outputs', 'app link settings', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'outputs',
+      variableName: 'app link settings',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
       _logger.printError(result.stderr, wrap: false);
+      throwToolExit(result.stderr);
     }
+    return outputPath;
   }
 }
 

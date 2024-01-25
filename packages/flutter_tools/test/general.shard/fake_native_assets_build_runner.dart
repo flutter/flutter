@@ -5,7 +5,7 @@
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:native_assets_builder/native_assets_builder.dart'
     as native_assets_builder;
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 import 'package:package_config/package_config_types.dart';
 
 /// Mocks all logic instead of using `package:native_assets_builder`, which
@@ -17,13 +17,16 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     this.dryRunResult = const FakeNativeAssetsBuilderResult(),
     this.buildResult = const FakeNativeAssetsBuilderResult(),
     CCompilerConfig? cCompilerConfigResult,
-  }) : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfig();
+    CCompilerConfig? ndkCCompilerConfigResult,
+  })  : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfig(),
+        ndkCCompilerConfigResult = ndkCCompilerConfigResult ?? CCompilerConfig();
 
   final native_assets_builder.BuildResult buildResult;
   final native_assets_builder.DryRunResult dryRunResult;
   final bool hasPackageConfigResult;
   final List<Package> packagesWithNativeAssetsResult;
   final CCompilerConfig cCompilerConfigResult;
+  final CCompilerConfig ndkCCompilerConfigResult;
 
   int buildInvocations = 0;
   int dryRunInvocations = 0;
@@ -70,6 +73,9 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
 
   @override
   Future<CCompilerConfig> get cCompilerConfig async => cCompilerConfigResult;
+
+  @override
+  Future<CCompilerConfig> get ndkCCompilerConfig async => cCompilerConfigResult;
 }
 
 final class FakeNativeAssetsBuilderResult

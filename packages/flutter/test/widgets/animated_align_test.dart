@@ -4,10 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('AnimatedAlign.debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign.debugFillProperties', (WidgetTester tester) async {
     const AnimatedAlign box = AnimatedAlign(
       alignment: Alignment.topCenter,
       curve: Curves.ease,
@@ -16,7 +15,7 @@ void main() {
     expect(box, hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('AnimatedAlign alignment visual-to-directional animation', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign alignment visual-to-directional animation', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -58,7 +57,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 400.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedAlign widthFactor', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign widthFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -83,7 +82,7 @@ void main() {
     expect(box.size.width, equals(50.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedAlign heightFactor', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign heightFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -107,7 +106,7 @@ void main() {
     expect(box.size.height, equals( 50.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedAlign null height factor', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign null height factor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -131,7 +130,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 100)));
   });
 
-  testWidgetsWithLeakTracking('AnimatedAlign null widthFactor', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign null widthFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

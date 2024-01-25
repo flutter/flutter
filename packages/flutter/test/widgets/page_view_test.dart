@@ -15,7 +15,10 @@ import 'states.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgetsWithLeakTracking('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgets('PageView.builder respects findChildIndexCallback',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
@@ -50,7 +53,7 @@ void main() {
     expect(finderCalled, true);
   });
 
-  testWidgetsWithLeakTracking('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
+  testWidgets('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
     final PageController controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
@@ -94,7 +97,7 @@ void main() {
     expect(find.text('Iowa'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Change the page through the controller when zero-size viewport', (WidgetTester tester) async {
+  testWidgets('Change the page through the controller when zero-size viewport', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
     final PageController controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
@@ -133,7 +136,7 @@ void main() {
     expect(find.text('Illinois'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('_PagePosition.applyViewportDimension should not throw', (WidgetTester tester) async {
+  testWidgets('_PagePosition.applyViewportDimension should not throw', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/101007
     final PageController controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
@@ -171,14 +174,14 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgetsWithLeakTracking('PageController cannot return page while unattached',
+  testWidgets('PageController cannot return page while unattached',
       (WidgetTester tester) async {
     final PageController controller = PageController();
     addTearDown(controller.dispose);
     expect(() => controller.page, throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('PageView control test', (WidgetTester tester) async {
+  testWidgets('PageView control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(Directionality(
@@ -245,7 +248,7 @@ void main() {
     expect(find.text('Arizona'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('PageView does not squish when overscrolled', (WidgetTester tester) async {
+  testWidgets('PageView does not squish when overscrolled', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: PageView(
         children: List<Widget>.generate(10, (int i) {
@@ -283,7 +286,7 @@ void main() {
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('PageController control test', (WidgetTester tester) async {
+  testWidgets('PageController control test', (WidgetTester tester) async {
     final PageController controller = PageController(initialPage: 4);
     addTearDown(controller.dispose);
 
@@ -330,7 +333,10 @@ void main() {
     expect(find.text('California'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('PageController page stability', (WidgetTester tester) async {
+  testWidgets('PageController page stability',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -382,7 +388,7 @@ void main() {
     expect(find.text('Arizona'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('PageController nextPage and previousPage return Futures that resolve', (WidgetTester tester) async {
+  testWidgets('PageController nextPage and previousPage return Futures that resolve', (WidgetTester tester) async {
     final PageController controller = PageController();
     addTearDown(controller.dispose);
 
@@ -416,7 +422,10 @@ void main() {
     expect(previousPageCompleted, true);
   });
 
-  testWidgetsWithLeakTracking('PageView in zero-size container', (WidgetTester tester) async {
+  testWidgets('PageView in zero-size container',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -446,7 +455,7 @@ void main() {
     expect(find.text('Alabama'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Page changes at halfway point', (WidgetTester tester) async {
+  testWidgets('Page changes at halfway point', (WidgetTester tester) async {
     final List<int> log = <int>[];
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -496,7 +505,7 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
+  testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
     addTearDown(controller.dispose);
@@ -551,7 +560,7 @@ void main() {
     expect(find.text('Arizona'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('PageView viewportFraction', (WidgetTester tester) async {
+  testWidgets('PageView viewportFraction', (WidgetTester tester) async {
     PageController controller = PageController(viewportFraction: 7/8);
     addTearDown(controller.dispose);
 
@@ -596,7 +605,10 @@ void main() {
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(790.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking('Page snapping disable and reenable', (WidgetTester tester) async {
+  testWidgets('Page snapping disable and reenable',
+  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     Widget build({ required bool pageSnapping }) {
@@ -659,7 +671,7 @@ void main() {
     expect(find.text('Arkansas'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('PageView small viewportFraction', (WidgetTester tester) async {
+  testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
     final PageController controller = PageController(viewportFraction: 1/8);
     addTearDown(controller.dispose);
 
@@ -704,7 +716,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Iowa')), const Offset(750.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking('PageView large viewportFraction', (WidgetTester tester) async {
+  testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
     final PageController controller = PageController(viewportFraction: 5/4);
     addTearDown(controller.dispose);
 
@@ -738,7 +750,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Updating PageView large viewportFraction',
     (WidgetTester tester) async {
       Widget build(PageController controller) {
@@ -777,7 +789,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'PageView large viewportFraction can scroll to the last page and snap',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/45096.
@@ -815,7 +827,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'All visible pages are able to receive touch events',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/23873.
@@ -864,7 +876,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('the current item remains centered on constraint change', (WidgetTester tester) async {
+  testWidgets('the current item remains centered on constraint change', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/50505.
     final PageController controller = PageController(
       initialPage: kStates.length - 1,
@@ -907,7 +919,7 @@ void main() {
     verifyCentered();
   });
 
-  testWidgetsWithLeakTracking('PageView does not report page changed on overscroll', (WidgetTester tester) async {
+  testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
     final PageController controller = PageController(
       initialPage: kStates.length - 1,
     );
@@ -934,7 +946,7 @@ void main() {
     expect(changeIndex, 0);
   });
 
-  testWidgetsWithLeakTracking('PageView can restore page', (WidgetTester tester) async {
+  testWidgets('PageView can restore page', (WidgetTester tester) async {
     final PageController controller = PageController();
     addTearDown(controller.dispose);
     expect(
@@ -1016,7 +1028,7 @@ void main() {
     expect(controller2.page, 0);
   });
 
-  testWidgetsWithLeakTracking('PageView exposes semantics of children', (WidgetTester tester) async {
+  testWidgets('PageView exposes semantics of children', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final PageController controller = PageController();
@@ -1056,7 +1068,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('PageMetrics', (WidgetTester tester) async {
+  testWidgets('PageMetrics', (WidgetTester tester) async {
     final PageMetrics page = PageMetrics(
       minScrollExtent: 100.0,
       maxScrollExtent: 200.0,
@@ -1073,7 +1085,7 @@ void main() {
     expect(page2.page, 4.0);
   });
 
-  testWidgetsWithLeakTracking('Page controller can handle rounding issue', (WidgetTester tester) async {
+  testWidgets('Page controller can handle rounding issue', (WidgetTester tester) async {
     final PageController pageController = PageController();
     addTearDown(pageController.dispose);
 
@@ -1094,7 +1106,7 @@ void main() {
     expect(pageController.page, 1);
   });
 
-  testWidgetsWithLeakTracking('PageView can participate in a11y scrolling', (WidgetTester tester) async {
+  testWidgets('PageView can participate in a11y scrolling', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final PageController controller = PageController();
@@ -1173,7 +1185,7 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgetsWithLeakTracking('PageView.padEnds tests', (WidgetTester tester) async {
+  testWidgets('PageView.padEnds tests', (WidgetTester tester) async {
     Finder viewportFinder() => find.byType(SliverFillViewport, skipOffstage: false);
 
     // PageView() defaults to true.
@@ -1195,7 +1207,7 @@ void main() {
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
   });
 
-  testWidgetsWithLeakTracking('PageView - precision error inside RenderSliverFixedExtentBoxAdaptor', (WidgetTester tester) async {
+  testWidgets('PageView - precision error inside RenderSliverFixedExtentBoxAdaptor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/95101
     final PageController controller = PageController(initialPage: 152);
     addTearDown(controller.dispose);
@@ -1223,7 +1235,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('PageView content should not be stretched on precision error', (WidgetTester tester) async {
+  testWidgets('PageView content should not be stretched on precision error', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/126561.
     final PageController controller = PageController();
     addTearDown(controller.dispose);
@@ -1266,7 +1278,7 @@ void main() {
     expect(transform.transform.storage.first, 1.0);
   });
 
-  testWidgetsWithLeakTracking('PageController onAttach, onDetach', (WidgetTester tester) async {
+  testWidgets('PageController onAttach, onDetach', (WidgetTester tester) async {
     int attach = 0;
     int detach = 0;
     final PageController controller = PageController(
@@ -1299,5 +1311,78 @@ void main() {
 
     expect(attach, 1);
     expect(detach, 1);
+  });
+
+  group('$PageView handles change of controller', () {
+    final GlobalKey key = GlobalKey();
+
+    Widget createPageView(PageController? controller) {
+      return MaterialApp(
+        home: Scaffold(
+          body: PageView(
+            key: key,
+            controller: controller,
+            children: const <Widget>[
+              Center(child: Text('0')),
+              Center(child: Text('1')),
+              Center(child: Text('2')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Future<void> testPageViewWithController(PageController controller, WidgetTester tester, bool controls) async  {
+      int curentVisiblePage() {
+        return int.parse(tester.widgetList(find.byType(Text)).whereType<Text>().first.data!);
+      }
+
+      final int initialPageInView = curentVisiblePage();
+
+      for (int i = 0; i < 3; i++) {
+        if (controls) {
+          controller.jumpToPage(i);
+          await tester.pumpAndSettle();
+          expect(curentVisiblePage(), i);
+        } else {
+          expect(()=> controller.jumpToPage(i), throwsAssertionError);
+          expect(curentVisiblePage(), initialPageInView);
+        }
+      }
+    }
+
+    testWidgets('null to value', (WidgetTester tester) async {
+      final PageController controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(createPageView(null));
+      await tester.pumpWidget(createPageView(controller));
+      await testPageViewWithController(controller, tester, true);
+    });
+
+    testWidgets('value to value', (WidgetTester tester) async {
+      final PageController controller1 = PageController();
+      addTearDown(controller1.dispose);
+      final PageController controller2 = PageController();
+      addTearDown(controller2.dispose);
+      await tester.pumpWidget(createPageView(controller1));
+      await testPageViewWithController(controller1, tester, true);
+      await tester.pumpWidget(createPageView(controller2));
+      await testPageViewWithController(controller1, tester, false);
+      await testPageViewWithController(controller2, tester, true);
+    });
+
+    testWidgets('value to null', (WidgetTester tester) async {
+      final PageController controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(createPageView(controller));
+      await testPageViewWithController(controller, tester, true);
+      await tester.pumpWidget(createPageView(null));
+      await testPageViewWithController(controller, tester, false);
+    });
+
+    testWidgets('null to null', (WidgetTester tester) async {
+      await tester.pumpWidget(createPageView(null));
+      await tester.pumpWidget(createPageView(null));
+    });
   });
 }

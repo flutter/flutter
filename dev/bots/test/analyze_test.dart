@@ -7,6 +7,9 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../analyze.dart';
+import '../custom_rules/analyze.dart';
+import '../custom_rules/no_double_clamp.dart';
+import '../custom_rules/no_stop_watches.dart';
 import '../utils.dart';
 import 'common.dart';
 
@@ -66,7 +69,7 @@ void main() {
       })
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '║ See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
@@ -85,7 +88,7 @@ void main() {
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .toList();
     expect(result.length, 4 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
-    expect(result[0], '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════');
+    expect(result[0], '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════');
     expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
     expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter');
     expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
@@ -97,7 +100,7 @@ void main() {
     final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'
       .replaceAll('/', Platform.isWindows ? r'\' : '/');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '║ The following file does not have the right license header for dart files:\n'
       '║   $file\n'
       '║ The expected license header is:\n'
@@ -118,7 +121,7 @@ void main() {
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
@@ -136,7 +139,7 @@ void main() {
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
@@ -149,7 +152,7 @@ void main() {
     ), shouldHaveErrors: !Platform.isWindows);
     if (!Platform.isWindows) {
       expect(result,
-        '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
         '║ test/analyze-test-input/root/packages/foo/serviceaccount.enc:0: file is not valid UTF-8\n'
         '║ All files in this repository must be UTF-8. In particular, images and other binaries\n'
         '║ must not be checked into this repository. This is because we are very sensitive to the\n'
@@ -207,5 +210,61 @@ void main() {
     expect(result, isNot(contains(':19')));
     expect(result, contains(':20'));
     expect(result, contains(':21'));
+  });
+
+  test('analyze.dart - clampDouble', () async {
+    final String result = await capture(() => analyzeWithRules(
+      testRootPath,
+      <AnalyzeRule>[noDoubleClamp],
+      includePaths: <String>['packages/flutter/lib'],
+    ), shouldHaveErrors: true);
+    final String lines = <String>[
+        '║ packages/flutter/lib/bar.dart:37: input.clamp(0.0, 2)',
+        '║ packages/flutter/lib/bar.dart:38: input.toDouble().clamp(0, 2)',
+        '║ packages/flutter/lib/bar.dart:42: nullableInt?.clamp(0, 2.0)',
+        '║ packages/flutter/lib/bar.dart:43: nullableDouble?.clamp(0, 2)',
+        '║ packages/flutter/lib/bar.dart:48: nullableInt?.clamp',
+        '║ packages/flutter/lib/bar.dart:50: nullableDouble?.clamp',
+      ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '║ \n'
+      '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
+  test('analyze.dart - stopwatch', () async {
+    final String result = await capture(() => analyzeWithRules(
+      testRootPath,
+      <AnalyzeRule>[noStopwatches],
+      includePaths: <String>['packages/flutter/lib'],
+    ), shouldHaveErrors: true);
+    final String lines = <String>[
+      '║ packages/flutter/lib/stopwatch.dart:18: Stopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:19: Stopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:24: StopwatchAtHome()',
+      '║ packages/flutter/lib/stopwatch.dart:27: StopwatchAtHome.new',
+      '║ packages/flutter/lib/stopwatch.dart:30: StopwatchAtHome.create',
+      '║ packages/flutter/lib/stopwatch.dart:36: externallib.MyStopwatch.create()',
+      '║ packages/flutter/lib/stopwatch.dart:40: externallib.MyStopwatch.new',
+      '║ packages/flutter/lib/stopwatch.dart:45: externallib.stopwatch',
+      '║ packages/flutter/lib/stopwatch.dart:46: externallib.createMyStopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:47: externallib.createStopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:48: externallib.createMyStopwatch'
+    ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '║ \n'
+      '║ Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.\n'
+      '║ A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
   });
 }

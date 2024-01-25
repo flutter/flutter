@@ -214,6 +214,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     'java.io.FileNotFoundException: https://downloads.gradle.org',
     'java.io.IOException: Unable to tunnel through proxy',
+    'java.io.IOException: Server returned HTTP response code: 502',
     'java.lang.RuntimeException: Timeout of',
     'java.util.zip.ZipException: error in opening zip file',
     'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
@@ -613,10 +614,10 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
         .childDirectory('app')
         .childFile('build.gradle');
     globals.printBox(
-      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdkVersion.\n'
-      'Fix this issue by bumping the compileSdkVersion in ${gradleFile.path}:\n'
+      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
+      'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
       'android {\n'
-      '  compileSdkVersion ${minCompileSdkVersionMatch?.group(1)}\n'
+      '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
       '}',
       title: _boxTitle,
     );

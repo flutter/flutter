@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
@@ -62,13 +61,13 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('should return false when there is no text', (WidgetTester tester) async {
+    testWidgets('should return false when there is no text', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(key: key));
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
-    testWidgetsWithLeakTracking('should return true when there is text and collapsed selection', (WidgetTester tester) async {
+    testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -77,7 +76,7 @@ void main() {
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgetsWithLeakTracking('should return true when there is text and partial uncollapsed selection', (WidgetTester tester) async {
+    testWidgets('should return true when there is text and partial uncollapsed selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -87,7 +86,7 @@ void main() {
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgetsWithLeakTracking('should return false when there is text and full selection', (WidgetTester tester) async {
+    testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -99,7 +98,7 @@ void main() {
   });
 
   group('Text selection menu overflow (Android)', () {
-    testWidgetsWithLeakTracking('All menu items show when they fit.', (WidgetTester tester) async {
+    testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
@@ -162,7 +161,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgetsWithLeakTracking("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
+    testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
@@ -237,7 +236,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgetsWithLeakTracking('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
+    testWidgets('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
       // Set the screen size so narrow that only Cut and Copy can fit.
       tester.view.physicalSize = const Size(800, 800);
       addTearDown(tester.view.reset);
@@ -303,7 +302,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgetsWithLeakTracking('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
+    testWidgets('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
@@ -378,7 +377,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgetsWithLeakTracking('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
+    testWidgets('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
@@ -407,8 +406,9 @@ void main() {
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(IconButton), findsNothing); // 'More' button.
 
       // Tap to place the cursor and tap again to show the menu without a
       // selection.
@@ -426,6 +426,7 @@ void main() {
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
 
@@ -436,8 +437,9 @@ void main() {
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget); // 'More' button.
       final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
 
       // Tap to clear the selection.
@@ -447,37 +449,39 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(IconButton), findsNothing); // 'More' button.
 
       // Long press to show the menu.
       await tester.longPressAt(textOffsetToPosition(tester, 1));
       await tester.pumpAndSettle();
 
-      // The last button is missing, and a more button is shown.
+      // The last buttons (share and select all) are missing, and a more button is shown.
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget); // 'More' button.
 
-      // Tapping the button shows the overflow menu.
+      // Tapping the more button shows the overflow menu.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
+      expect(find.text('Share'), findsOneWidget);
       expect(find.text('Select all'), findsOneWidget);
-      expect(find.byType(IconButton), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget); // Back button.
 
-      // Tapping Select all changes the menu items so that there is no longer
-      // any overflow.
+      // Tapping 'Select all' closes the overflow menu.
       await tester.tap(find.text('Select all'));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget); // 'More' button.
       final Offset newCutOffset = tester.getTopLeft(find.text('Cut'));
       expect(newCutOffset, equals(cutOffset));
     },
@@ -487,7 +491,7 @@ void main() {
   });
 
   group('menu position', () {
-    testWidgetsWithLeakTracking('When renders below a block of text, menu appears below bottom endpoint', (WidgetTester tester) async {
+    testWidgets('When renders below a block of text, menu appears below bottom endpoint', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
       addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
@@ -560,7 +564,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
         final TextEditingController controller =
@@ -639,7 +643,7 @@ void main() {
   });
 
   group('material handles', () {
-    testWidgetsWithLeakTracking('draws transparent handle correctly', (WidgetTester tester) async {
+    testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
       await tester.pumpWidget(RepaintBoundary(
         child: Theme(
           data: ThemeData(
@@ -673,7 +677,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('works with 3 positional parameters', (WidgetTester tester) async {
+    testWidgets('works with 3 positional parameters', (WidgetTester tester) async {
       await tester.pumpWidget(Theme(
         data: ThemeData(
           textSelectionTheme: const TextSelectionThemeData(
@@ -706,7 +710,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );

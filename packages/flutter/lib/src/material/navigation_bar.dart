@@ -18,6 +18,7 @@ import 'tooltip.dart';
 
 const double _kIndicatorHeight = 32;
 const double _kIndicatorWidth = 64;
+const double _kMaxLabelTextScaleFactor = 1.3;
 
 // Examples can assume:
 // late BuildContext context;
@@ -104,6 +105,7 @@ class NavigationBar extends StatelessWidget {
     this.indicatorShape,
     this.height,
     this.labelBehavior,
+    this.overlayColor,
   }) :  assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length);
 
@@ -207,6 +209,10 @@ class NavigationBar extends StatelessWidget {
   /// [NavigationDestinationLabelBehavior.alwaysShow].
   final NavigationDestinationLabelBehavior? labelBehavior;
 
+  /// The highlight color that's typically used to indicate that
+  /// the [NavigationDestination] is focused, hovered, or pressed.
+  final MaterialStateProperty<Color?>? overlayColor;
+
   VoidCallback _handleTap(int index) {
     return onDestinationSelected != null
       ? () => onDestinationSelected!(index)
@@ -249,6 +255,7 @@ class NavigationBar extends StatelessWidget {
                         labelBehavior: effectiveLabelBehavior,
                         indicatorColor: indicatorColor,
                         indicatorShape: indicatorShape,
+                        overlayColor: overlayColor,
                         onTap: _handleTap(i),
                         child: destinations[i],
                       );
@@ -416,9 +423,11 @@ class NavigationDestination extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(top: 4),
           child: MediaQuery.withClampedTextScaling(
-            // Don't scale labels of destinations, instead, tooltip text will
-            // upscale.
-            maxScaleFactor: 1.0,
+            // Set maximum text scale factor to _kMaxLabelTextScaleFactor for the
+            // label to keep the visual hierarchy the same even with larger font
+            // sizes. To opt out, wrap the [label] widget in a [MediaQuery] widget
+            // with a different `TextScaler`.
+            maxScaleFactor: _kMaxLabelTextScaleFactor,
             child: Text(label, style: textStyle),
           ),
         );
@@ -509,7 +518,8 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
         child: _IndicatorInkWell(
           iconKey: iconKey,
           labelBehavior: info.labelBehavior,
-          customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
+          customBorder: info.indicatorShape ?? navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
+          overlayColor: info.overlayColor ?? navigationBarTheme.overlayColor,
           onTap: widget.enabled ? info.onTap : null,
           child: Row(
             children: <Widget>[
@@ -532,6 +542,7 @@ class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
     required this.iconKey,
     required this.labelBehavior,
+    super.overlayColor,
     super.customBorder,
     super.onTap,
     super.child,
@@ -569,6 +580,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
     required this.labelBehavior,
     required this.indicatorColor,
     required this.indicatorShape,
+    required this.overlayColor,
     required this.onTap,
     required super.child,
   });
@@ -634,6 +646,12 @@ class _NavigationDestinationInfo extends InheritedWidget {
   ///
   /// This is used by destinations to override the indicator shape.
   final ShapeBorder? indicatorShape;
+
+  /// The highlight color that's typically used to indicate that
+  /// the [NavigationDestination] is focused, hovered, or pressed.
+  ///
+  /// This is used by destinations to override the overlay color.
+  final MaterialStateProperty<Color?>? overlayColor;
 
   /// The callback that should be called when this destination is tapped.
   ///

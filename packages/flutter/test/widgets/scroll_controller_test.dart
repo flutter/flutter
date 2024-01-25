@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'states.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('ScrollController control test', (WidgetTester tester) async {
+  testWidgets('ScrollController control test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -134,7 +134,7 @@ void main() {
     expect(realOffset(), equals(controller2.offset));
   });
 
-  testWidgetsWithLeakTracking('ScrollController control test', (WidgetTester tester) async {
+  testWidgets('ScrollController control test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController(
       initialScrollOffset: 209.0,
     );
@@ -180,7 +180,7 @@ void main() {
     expect(realOffset(), equals(controller.offset));
   });
 
-  testWidgetsWithLeakTracking('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
+  testWidgets('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -199,17 +199,17 @@ void main() {
     await tester.pump(); // Start the animation.
 
     // We will now change the tree on the same frame as the animation ends.
-    await tester.pumpWidget(Container(), const Duration(seconds: 2));
+    await tester.pumpWidget(Container(), duration: const Duration(seconds: 2));
   });
 
-  testWidgetsWithLeakTracking('Read operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
+  testWidgets('Read operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     expect(() => controller.offset, throwsAssertionError);
     expect(() => controller.position, throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Read operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
+  testWidgets('Read operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -245,14 +245,14 @@ void main() {
     expect(() => controller.position, throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Write operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
+  testWidgets('Write operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
     expect(() => controller.jumpTo(1.0), throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
+  testWidgets('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -289,7 +289,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Scroll controllers notify when the position changes', (WidgetTester tester) async {
+  testWidgets('Scroll controllers notify when the position changes', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
 
     final List<double> log = <double>[];
@@ -323,7 +323,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('keepScrollOffset', (WidgetTester tester) async {
+  testWidgets('keepScrollOffset', (WidgetTester tester) async {
     final PageStorageBucket bucket = PageStorageBucket();
 
     Widget buildFrame(ScrollController controller) {
@@ -379,7 +379,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('isScrollingNotifier works with pointer scroll', (WidgetTester tester) async {
+  testWidgets('isScrollingNotifier works with pointer scroll', (WidgetTester tester) async {
     Widget buildFrame(ScrollController controller) {
       return Directionality(
         textDirection: TextDirection.ltr,

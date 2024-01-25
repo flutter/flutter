@@ -244,9 +244,22 @@ class UnderlineInputBorder extends InputBorder {
     TextDirection? textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
-      canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
+      // This prevents the border from leaking the color due to anti-aliasing rounding errors.
+      final BorderRadius updatedBorderRadius = BorderRadius.only(
+        bottomLeft: borderRadius.bottomLeft.clamp(maximum: Radius.circular(rect.height / 2)),
+        bottomRight: borderRadius.bottomRight.clamp(maximum: Radius.circular(rect.height / 2)),
+      );
+
+      // We set the strokeAlign to center, so the behavior is consistent with
+      // drawLine and with the historical behavior of this border.
+      BoxBorder.paintNonUniformBorder(canvas, rect,
+          textDirection: textDirection,
+          borderRadius: updatedBorderRadius,
+          bottom: borderSide.copyWith(strokeAlign: BorderSide.strokeAlignCenter),
+          color: borderSide.color);
+    } else {
+      canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
     }
-    canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
   }
 
   @override

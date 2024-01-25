@@ -123,7 +123,9 @@ abstract interface class ChipAttributes {
   /// Otherwise, [StadiumBorder] is used.
   ///
   /// This shape is combined with [side] to create a shape decorated with an
-  /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
+  /// outline. If [side] is not null or side of [shape] is [BorderSide.none],
+  /// side of [shape] is ignored. To omit the outline entirely,
+  /// pass [BorderSide.none] to [side].
   ///
   /// If it is a [MaterialStateOutlinedBorder], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
@@ -278,6 +280,8 @@ abstract interface class DeletableChipAttributes {
   ///
   /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
   /// used.
+  ///
+  /// If the chip is disabled, the delete button tooltip will not be shown.
   String? get deleteButtonTooltipMessage;
 }
 
@@ -1126,7 +1130,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       child: _wrapWithTooltip(
         tooltip: widget.deleteButtonTooltipMessage
           ?? MaterialLocalizations.of(context).deleteButtonTooltip,
-        enabled: widget.onDeleted != null,
+        enabled: widget.isEnabled && widget.onDeleted != null,
         child: InkWell(
           // Radius should be slightly less than the full size of the chip.
           radius: (_kChipHeight + (widget.padding?.vertical ?? 0.0)) * .45,
@@ -1153,16 +1157,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
-
-    /// The chip at text scale 1 starts with 8px on each side and as text scaling
-    /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
-    /// Once the widget has a text scaling of 2 or higher than the label padding
-    /// remains 4px.
-    final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
-      const EdgeInsets.symmetric(horizontal: 8.0),
-      const EdgeInsets.symmetric(horizontal: 4.0),
-      clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
-    )!;
 
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);
@@ -1208,10 +1202,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     // Widget's label style is merged with this below.
     final TextStyle labelStyle = chipTheme.labelStyle
       ?? chipDefaults.labelStyle!;
-    final EdgeInsetsGeometry labelPadding = widget.labelPadding
-      ?? chipTheme.labelPadding
-      ?? chipDefaults.labelPadding
-      ?? defaultLabelPadding;
     final IconThemeData? iconTheme = widget.iconTheme
       ?? chipTheme.iconTheme
       ?? chipDefaults.iconTheme;
@@ -1225,6 +1215,23 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           child: widget.avatar!,
         )
       : widget.avatar;
+
+    /// The chip at text scale 1 starts with 8px on each side and as text scaling
+    /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+    /// Once the widget has a text scaling of 2 or higher than the label padding
+    /// remains 4px.
+    final double defaultFontSize = effectiveLabelStyle.fontSize ?? 14.0;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+    final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(effectiveTextScale - 1.0, 0.0, 1.0),
+    )!;
+
+    final EdgeInsetsGeometry labelPadding = widget.labelPadding
+      ?? chipTheme.labelPadding
+      ?? chipDefaults.labelPadding
+      ?? defaultLabelPadding;
 
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
@@ -1554,12 +1561,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     required this.enableAnimation,
     this.avatarBorder,
   }) : _theme = theme,
-       _textDirection = textDirection {
-    checkmarkAnimation.addListener(markNeedsPaint);
-    avatarDrawerAnimation.addListener(markNeedsLayout);
-    deleteDrawerAnimation.addListener(markNeedsLayout);
-    enableAnimation.addListener(markNeedsPaint);
-  }
+       _textDirection = textDirection;
 
   bool? value;
   bool? isEnabled;
@@ -2069,26 +2071,39 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
-  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
+  final LayerHandle<OpacityLayer> _labelOpacityLayerHandler = LayerHandle<OpacityLayer>();
+  final LayerHandle<OpacityLayer> _deleteIconOpacityLayerHandler = LayerHandle<OpacityLayer>();
 
-  void _paintChild(PaintingContext context, Offset offset, RenderBox? child, bool? isEnabled) {
+  void _paintChild(PaintingContext context, Offset offset, RenderBox? child, {required bool isDeleteIcon}) {
     if (child == null) {
-      _childOpacityLayerHandler.layer = null;
+      _labelOpacityLayerHandler.layer = null;
+      _deleteIconOpacityLayerHandler.layer = null;
       return;
     }
     final int disabledColorAlpha = _disabledColor.alpha;
     if (!enableAnimation.isCompleted) {
       if (needsCompositing) {
-        _childOpacityLayerHandler.layer = context.pushOpacity(
+        _labelOpacityLayerHandler.layer = context.pushOpacity(
           offset,
           disabledColorAlpha,
           (PaintingContext context, Offset offset) {
             context.paintChild(child, _boxParentData(child).offset + offset);
           },
-          oldLayer: _childOpacityLayerHandler.layer,
+          oldLayer: _labelOpacityLayerHandler.layer,
         );
+        if (isDeleteIcon) {
+          _deleteIconOpacityLayerHandler.layer = context.pushOpacity(
+            offset,
+            disabledColorAlpha,
+            (PaintingContext context, Offset offset) {
+              context.paintChild(child, _boxParentData(child).offset + offset);
+            },
+            oldLayer: _deleteIconOpacityLayerHandler.layer,
+          );
+        }
       } else {
-        _childOpacityLayerHandler.layer = null;
+        _labelOpacityLayerHandler.layer = null;
+        _deleteIconOpacityLayerHandler.layer = null;
         final Rect childRect = _boxRect(child).shift(offset);
         context.canvas.saveLayer(childRect.inflate(20.0), Paint()..color = _disabledColor);
         context.paintChild(child, _boxParentData(child).offset + offset);
@@ -2100,8 +2115,27 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    checkmarkAnimation.addListener(markNeedsPaint);
+    avatarDrawerAnimation.addListener(markNeedsLayout);
+    deleteDrawerAnimation.addListener(markNeedsLayout);
+    enableAnimation.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    checkmarkAnimation.removeListener(markNeedsPaint);
+    avatarDrawerAnimation.removeListener(markNeedsLayout);
+    deleteDrawerAnimation.removeListener(markNeedsLayout);
+    enableAnimation.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
+  @override
   void dispose() {
-    _childOpacityLayerHandler.layer = null;
+    _labelOpacityLayerHandler.layer = null;
+    _deleteIconOpacityLayerHandler.layer = null;
     _avatarOpacityLayerHandler.layer = null;
     super.dispose();
   }
@@ -2110,9 +2144,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   void paint(PaintingContext context, Offset offset) {
     _paintAvatar(context, offset);
     if (deleteIconShowing) {
-      _paintChild(context, offset, deleteIcon, isEnabled);
+      _paintChild(context, offset, deleteIcon, isDeleteIcon: true);
     }
-    _paintChild(context, offset, label, isEnabled);
+    _paintChild(context, offset, label, isDeleteIcon: false);
   }
 
   // Set this to true to have outlines of the tap targets drawn over
@@ -2288,16 +2322,24 @@ class _ChipDefaultsM3 extends ChipThemeData {
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
 
-  /// The chip at text scale 1 starts with 8px on each side and as text scaling
-  /// gets closer to 2, the label padding is linearly interpolated from 8px to 4px.
-  /// Once the widget has a text scaling of 2 or higher than the label padding
-  /// remains 4px.
+  /// The label padding of the chip scales with the font size specified in the
+  /// [labelStyle], and the system font size settings that scale font sizes
+  /// globally.
+  ///
+  /// The chip at effective font size 14.0 starts with 8px on each side and as
+  /// the font size scales up to closer to 28.0, the label padding is linearly
+  /// interpolated from 8px to 4px. Once the label has a font size of 2 or
+  /// higher, label padding remains 4px.
   @override
-  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
-  )!;
+  EdgeInsetsGeometry? get labelPadding {
+    final double fontSize = labelStyle?.fontSize ?? 14.0;
+    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
+    return EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(fontSizeRatio - 1.0, 0.0, 1.0),
+    )!;
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - Chip

@@ -95,7 +95,8 @@ void foundError(List<String> messages) {
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
   final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
-  print('$red╔═╡${bold}ERROR$reset$red╞═${"═" * (width - 9)}');
+  final String title = 'ERROR #${_errorMessages.length + 1}';
+  print('$red╔═╡$bold$title$reset$red╞═${"═" * (width - 4 - title.length)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
     print('$red║$reset $message');
   }
@@ -108,9 +109,7 @@ void foundError(List<String> messages) {
   _pendingLogs.clear();
   _errorMessages.add(messages);
   _hasError = true;
-  if (onError != null) {
-    onError!();
-  }
+  onError?.call();
 }
 
 @visibleForTesting
@@ -147,6 +146,7 @@ Never reportErrorsAndExit(String message) {
     }
   }
   print(redLine);
+  print('You may find the errors by searching for "╡ERROR #" in the logs.');
   system.exit(1);
 }
 

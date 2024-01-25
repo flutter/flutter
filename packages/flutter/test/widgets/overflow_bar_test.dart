@@ -4,21 +4,19 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('OverflowBar documented defaults', (WidgetTester tester) async {
+  testWidgets('OverflowBar documented defaults', (WidgetTester tester) async {
     const OverflowBar bar = OverflowBar();
     expect(bar.spacing, 0);
     expect(bar.alignment, null);
     expect(bar.overflowSpacing, 0);
     expect(bar.overflowDirection, VerticalDirection.down);
     expect(bar.textDirection, null);
-    expect(bar.clipBehavior, Clip.none);
     expect(bar.children, const <Widget>[]);
   });
 
-  testWidgetsWithLeakTracking('Empty OverflowBar', (WidgetTester tester) async {
+  testWidgets('Empty OverflowBar', (WidgetTester tester) async {
     const Size size = Size(16, 24);
 
     await tester.pumpWidget(
@@ -47,7 +45,7 @@ void main() {
     expect(tester.getSize(find.byType(OverflowBar)), Size.zero);
   });
 
-  testWidgetsWithLeakTracking('OverflowBar horizontal layout', (WidgetTester tester) async {
+  testWidgets('OverflowBar horizontal layout', (WidgetTester tester) async {
     final Key child1Key = UniqueKey();
     final Key child2Key = UniqueKey();
     final Key child3Key = UniqueKey();
@@ -94,7 +92,7 @@ void main() {
     expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(10.0 + 96 + 10.0, 8, 10.0 + 10.0 + 144, 56));
   });
 
-  testWidgetsWithLeakTracking('OverflowBar vertical layout', (WidgetTester tester) async {
+  testWidgets('OverflowBar vertical layout', (WidgetTester tester) async {
     final Key child1Key = UniqueKey();
     final Key child2Key = UniqueKey();
     final Key child3Key = UniqueKey();
@@ -175,7 +173,7 @@ void main() {
     expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0/2.0 - 32/2, 112, 100.0/2.0 + 32/2, 144));
   });
 
-  testWidgetsWithLeakTracking('OverflowBar intrinsic width', (WidgetTester tester) async {
+  testWidgets('OverflowBar intrinsic width', (WidgetTester tester) async {
     Widget buildFrame({ required double width }) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -206,7 +204,7 @@ void main() {
     expect(tester.getSize(find.byType(OverflowBar)).width, 150);
   });
 
-  testWidgetsWithLeakTracking('OverflowBar intrinsic height', (WidgetTester tester) async {
+  testWidgets('OverflowBar intrinsic height', (WidgetTester tester) async {
     Widget buildFrame({ required double maxWidth }) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -238,7 +236,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('OverflowBar is wider that its intrinsic width', (WidgetTester tester) async {
+  testWidgets('OverflowBar is wider that its intrinsic width', (WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -274,7 +272,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(key2)).dx, 600);
   });
 
-  testWidgetsWithLeakTracking('OverflowBar with alignment should match Row with mainAxisAlignment', (WidgetTester tester) async {
+  testWidgets('OverflowBar with alignment should match Row with mainAxisAlignment', (WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
