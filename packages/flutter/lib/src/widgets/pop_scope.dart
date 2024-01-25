@@ -10,6 +10,12 @@ import 'routes.dart';
 
 /// Manages system back gestures.
 ///
+/// A system back gesture is a swipe inward from near the edge of the screen on
+/// Android. It is recognized by Android before being passed to Flutter. iOS has
+/// a similar gesture, but it is recognized in Flutter by
+/// [CupertinoRouteTransitionMixin], not by iOS, and is therefore not a system
+/// back gesture.
+///
 /// The [canPop] parameter can be used to disable system back gestures. Defaults
 /// to true, meaning that back gestures happen as usual.
 ///
