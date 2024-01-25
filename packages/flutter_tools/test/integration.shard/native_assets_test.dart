@@ -19,7 +19,7 @@ import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart' show ProcessResultMatcher, fileSystem, platform;
@@ -230,7 +230,7 @@ void main() {
         // Overrides the build to output static libraries.
         final String buildDotDartContentsNew = buildDotDartContents.replaceFirst(
           'final buildConfig = await BuildConfig.fromArgs(args);',
-          r'''
+          '''
   final buildConfig = await BuildConfig.fromArgs([
     '-D${LinkModePreference.configKey}=${LinkModePreference.static}',
     ...args,
