@@ -8,7 +8,7 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
+const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
@@ -36,7 +36,15 @@ class ImageInfo {
   /// The [debugLabel] may be used to identify the source of this image.
   ///
   /// See details for disposing contract in the class description.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
+  ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
+        className: '$ImageInfo',
+        object: this,
+      );
+    }
+  }
 
   /// Creates an [ImageInfo] with a cloned [image].
   ///
@@ -132,6 +140,9 @@ class ImageInfo {
   /// and no clones of it or the image it contains can be made.
   void dispose() {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     image.dispose();
   }
 
@@ -450,7 +461,7 @@ class ImageStreamCompleterHandle {
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
+        library: _flutterPaintingLibrary,
         className: '$ImageStreamCompleterHandle',
         object: this,
       );
