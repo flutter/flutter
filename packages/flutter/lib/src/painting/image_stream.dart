@@ -8,56 +8,44 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
+const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
 ///
-/// The receiver of an [ImageInfo] object must call [dispose].
+/// The disposing contract for [ImageInfo] (as well as for [ui.Image])
+/// is different from traditional one, where
+/// an object should dispose a member if the object created the member:
+///
+/// * [ImageInfo] disposes [image], even if it is received as a constructor argument.
+/// * [ImageInfo] is expected to be disposed not by the object, that created it,
+/// but by the object that owns reference to it.
+/// * It is expected that only one object owns reference to [ImageInfo] object.
+///
+/// Safety tips:
+///
+///  * To share the [ImageInfo] or [ui.Image] between objects, use the [clone] method,
+/// which will not clone the entire underlying image, but only reference to it and information about it.
+///  * After passing a [ui.Image] or [ImageInfo] reference to another object, release the reference.
 @immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
-  /// The created [ImageInfo] will dispose the [image] when [dispose] is called.
-  /// If the [image] needs to be shared with other clients, pass `image.clone()`
-  /// The cloning will not increase memory footprint, because it clones
-  /// just handler to the image.
-  ///
-  /// After passing [image] to the constructor,
-  /// remove any references to it so that the image can be garbage collected,
-  /// after ImageInfo disposal.
-  ///
   /// The [debugLabel] may be used to identify the source of this image.
   ///
-  /// See also:
-  ///
-  ///  * [Image.clone], which describes how and why to clone images.
-  ImageInfo({
-    required this.image,
-    this.scale = 1.0,
-    this.debugLabel,
-  })
-  {
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterPaintingLibrary,
-        className: '$ImageInfo',
-        object: this,
-      );
-    }
-  }
+  /// See details for disposing contract in the class description.
+  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
 
   /// Creates an [ImageInfo] with a cloned [image].
-  ///
-  /// Cloning of the image will not increase memory foot print, because it clones
-  /// just handler to the image.
   ///
   /// This method must be used in cases where a client holding an [ImageInfo]
   /// needs to share the image info object with another client and will still
   /// need to access the underlying image data at some later point, e.g. to
   /// share it again with another client.
+  ///
+  /// See details for disposing contract in the class description.
   ///
   /// See also:
   ///
@@ -142,13 +130,9 @@ class ImageInfo {
   ///
   /// Once this method has been called, the object should not be used anymore,
   /// and no clones of it or the image it contains can be made.
-  @mustCallSuper
   void dispose() {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
     image.dispose();
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
   }
 
   @override
@@ -466,7 +450,7 @@ class ImageStreamCompleterHandle {
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterPaintingLibrary,
+        library: _flutterWidgetsLibrary,
         className: '$ImageStreamCompleterHandle',
         object: this,
       );
