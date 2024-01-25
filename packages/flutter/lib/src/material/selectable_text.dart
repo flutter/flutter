@@ -59,6 +59,31 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 
   final _SelectableTextState _state;
 
+  /// The viewport offset pixels of any [Scrollable] containing the
+  /// [RenderEditable] at the last drag start.
+  double _dragStartScrollOffset = 0.0;
+
+  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
+  double _dragStartViewportOffset = 0.0;
+
+  double get _scrollPosition {
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
+    return scrollableState == null
+        ? 0.0
+        : scrollableState.position.pixels;
+  }
+
+  AxisDirection? get _scrollDirection {
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
+    return scrollableState?.axisDirection;
+  }
+
   @override
   void onForcePressStart(ForcePressDetails details) {
     super.onForcePressStart(details);
@@ -73,14 +98,36 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   }
 
   @override
-  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (delegate.selectionEnabled) {
-      renderEditable.selectWordsInRange(
-        from: details.globalPosition - details.offsetFromOrigin,
-        to: details.globalPosition,
-        cause: SelectionChangedCause.longPress,
-      );
+  void onSingleLongTapStart(LongPressStartDetails details) {
+    if (!delegate.selectionEnabled) {
+      return;
     }
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    Feedback.forLongPress(_state.context);
+    _dragStartViewportOffset = renderEditable.offset.pixels;
+    _dragStartScrollOffset = _scrollPosition;
+  }
+
+  @override
+  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
+    if (!delegate.selectionEnabled) {
+      return;
+    }
+    // Adjust the drag start offset for possible viewport offset changes.
+    final Offset editableOffset = renderEditable.maxLines == 1
+        ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
+        : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+    final double effectiveScrollPosition = _scrollPosition - _dragStartScrollOffset;
+    final bool scrollingOnVerticalAxis = _scrollDirection == AxisDirection.up || _scrollDirection == AxisDirection.down;
+    final Offset scrollableOffset = Offset(
+      !scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
+      scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
+    );
+    renderEditable.selectWordsInRange(
+      from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
+      to: details.globalPosition,
+      cause: SelectionChangedCause.longPress,
+    );
   }
 
   @override
@@ -99,14 +146,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
       }
     }
     _state.widget.onTap?.call();
-  }
-
-  @override
-  void onSingleLongTapStart(LongPressStartDetails details) {
-    if (delegate.selectionEnabled) {
-      renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-      Feedback.forLongPress(_state.context);
-    }
   }
 }
 

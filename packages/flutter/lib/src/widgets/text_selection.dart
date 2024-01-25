@@ -2131,6 +2131,14 @@ class TextSelectionGestureDetectorBuilder {
         : scrollableState.position.pixels;
   }
 
+  AxisDirection? get _scrollDirection {
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
+    return scrollableState?.axisDirection;
+  }
+
   // For a shift + tap + drag gesture, the TextSelection at the point of the
   // tap. Mac uses this value to reset to the original selection when an
   // inversion of the base and offset happens.
@@ -2498,9 +2506,11 @@ class TextSelectionGestureDetectorBuilder {
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+      final double effectiveScrollPosition = _scrollPosition - _dragStartScrollOffset;
+      final bool scrollingOnVerticalAxis = _scrollDirection == AxisDirection.up || _scrollDirection == AxisDirection.down;
       final Offset scrollableOffset = Offset(
-        0.0,
-        _scrollPosition - _dragStartScrollOffset,
+        !scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
+        scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
       );
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -2839,9 +2849,11 @@ class TextSelectionGestureDetectorBuilder {
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+      final double effectiveScrollPosition = _scrollPosition - _dragStartScrollOffset;
+      final bool scrollingOnVerticalAxis = _scrollDirection == AxisDirection.up || _scrollDirection == AxisDirection.down;
       final Offset scrollableOffset = Offset(
-        0.0,
-        _scrollPosition - _dragStartScrollOffset,
+        !scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
+        scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
       );
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 
