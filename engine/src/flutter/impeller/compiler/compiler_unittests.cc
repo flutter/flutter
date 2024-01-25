@@ -142,6 +142,14 @@ TEST_P(CompilerTest, SkSLTextureLookUpOrderOfOperations) {
                      "flutter_FragCoord.xy));") != -1);
 }
 
+TEST_P(CompilerTest, CanCompileStructs) {
+  if (GetParam() != TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Only supported on SkSL";
+  }
+  ASSERT_TRUE(CanCompileAndReflect("struct_internal.frag",
+                                   SourceType::kFragmentShader));
+}
+
 #define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)               \
   INSTANTIATE_TEST_SUITE_P(                                                \
       suite_name, CompilerTest,                                            \
