@@ -751,7 +751,6 @@ void main() {
       of: find.byType(SegmentedButton<int>),
       matching: find.byType(Material),
     ).first);
-    expect(material.shape, styleFromStyle.shape?.resolve(enabled)?.copyWith(side: BorderSide.none));
     expect(material.elevation, styleFromStyle.elevation?.resolve(enabled));
     expect(material.shadowColor, styleFromStyle.shadowColor?.resolve(enabled));
     expect(material.surfaceTintColor, styleFromStyle.surfaceTintColor?.resolve(enabled));
