@@ -87,7 +87,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      // TODO(fujino): make this FakeProcessManager.empty()
+      // TODO(fujino): re-use fakeProcessManager
       xcode = Xcode.test(processManager: FakeProcessManager.any());
       deviceControl = IOSCoreDeviceControl(
         logger: logger,
@@ -1380,7 +1380,7 @@ invalid JSON
           },
         ));
 
-        expect(
+        await expectLater(
           () => deviceControl.getCoreDevices(),
           throwsA(
             isA<StateError>().having(
@@ -1388,6 +1388,13 @@ invalid JSON
               'message',
               contains('Expected the file ${tempFile.path} to exist but it did not'),
             ),
+          ),
+        );
+        expect(
+          logger.traceText,
+          contains('After running the command xcrun devicectl list devices '
+            '--timeout 5 --json-output ${tempFile.path} the file\n'
+            '${tempFile.path} was expected to exist, but it did not',
           ),
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
