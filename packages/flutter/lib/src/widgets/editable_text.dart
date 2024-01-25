@@ -3796,20 +3796,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     while (closestViewport != null) {
       final RevealedOffset leadingEdgeOffset = closestViewport.getOffsetToReveal(renderEditable, 0.0);
       final RevealedOffset trailingEdgeOffset = closestViewport.getOffsetToReveal(renderEditable, 1.0);
-      final double currentOffset = notification.metrics.pixels;
+      final double currentOffset = closestViewport.getOffset().pixels;
       final RevealedOffset? targetOffset = RevealedOffset.clampOffset(
         leadingEdgeOffset: leadingEdgeOffset,
         trailingEdgeOffset: trailingEdgeOffset,
         currentOffset: currentOffset,
       );
-      if (targetOffset == null) {
-        // `renderEditable` is between leading and trailing edge and hence already
-        //  fully shown on screen.
-        return true;
+      if (targetOffset != null) {
+        return false;
       }
       closestViewport = RenderAbstractViewport.maybeOf(closestViewport.parent);
     }
-    return false;
+    return true;
   }
 
   TextSelectionOverlay _createSelectionOverlay() {

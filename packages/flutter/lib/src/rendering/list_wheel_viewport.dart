@@ -1175,4 +1175,11 @@ class RenderListWheelViewport
       curve: curve,
     );
   }
+
+  @override
+  ViewportOffset getOffset({
+    Axis? axis,
+  }) {
+    return offset;
+  }
 }
