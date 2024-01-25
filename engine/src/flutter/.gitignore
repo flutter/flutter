@@ -136,3 +136,6 @@ app.*.symbols
 
 # RBE support configurations and scripts vended from CIPD
 /build/rbe
+
+# The test-scripts from Chromium and managed by DEPS and gclient.
+/tools/fuchsia/test_scripts
