@@ -69,6 +69,8 @@ class FakeCommand {
 
   /// A callback that is run after [duration] expires but before the [exitCode]
   /// (and output) are passed back.
+  ///
+  /// The callback will be provided the full [command] that matched this instance.
   final void Function(List<String> command)? onRun;
 
   /// The process' exit code.
