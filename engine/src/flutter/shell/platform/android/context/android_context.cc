@@ -13,6 +13,9 @@ AndroidContext::~AndroidContext() {
   if (main_context_) {
     main_context_->releaseResourcesAndAbandonContext();
   }
+  if (impeller_context_) {
+    impeller_context_->Shutdown();
+  }
 };
 
 AndroidRenderingAPI AndroidContext::RenderingApi() const {
