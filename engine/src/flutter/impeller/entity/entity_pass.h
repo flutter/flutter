@@ -157,6 +157,9 @@ class EntityPass {
     required_mip_count_ = mip_count;
   }
 
+  /// @brief Return the local bounds transformed intro screen coordinate space.
+  std::optional<Rect> GetTransformedBoundsLimit() const;
+
   //----------------------------------------------------------------------------
   /// @brief  Computes the coverage of a given subpass. This is used to
   ///         determine the texture size of a given subpass before it's rendered
