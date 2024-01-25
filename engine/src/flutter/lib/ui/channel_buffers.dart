@@ -273,7 +273,7 @@ class _Channel {
 /// size a plugin can send a message using the control channel,
 /// as described below.
 ///
-/// Size 0 is appropriate for channels where channels sent before
+/// Size 0 is appropriate for channels where messages sent before
 /// the engine and framework are ready should be ignored. For
 /// example, a plugin that notifies the framework any time a
 /// radiation sensor detects an ionization event might set its size
