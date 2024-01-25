@@ -150,5 +150,6 @@
   "menuDismissLabel": "Atsisakyti meniu",
   "lookUpButtonLabel": "Ieškoti",
   "searchWebButtonLabel": "Ieškoti žiniatinklyje",
-  "shareButtonLabel": "Bendrinti..."
+  "shareButtonLabel": "Bendrinti...",
+  "clearButtonTooltip": "Clear text"
 }

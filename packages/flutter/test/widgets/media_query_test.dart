@@ -164,7 +164,7 @@ void main() {
 
   testWidgets('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
-      textScaleFactor: 1234,
+      textScaler: TextScaler.linear(1234),
       platformBrightness: Brightness.dark,
       accessibleNavigation: true,
       invertColors: true,
@@ -231,7 +231,7 @@ void main() {
 
   testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
-      textScaleFactor: 1234,
+      textScaler: TextScaler.linear(1234),
       platformBrightness: Brightness.dark,
       accessibleNavigation: true,
       invertColors: true,

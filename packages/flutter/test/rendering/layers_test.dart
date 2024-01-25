@@ -372,13 +372,10 @@ void main() {
     final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
     final List<String> info = getDebugInfo(layer);
 
-    // TODO(yjbanov): remove kIsWeb when https://github.com/flutter/engine/pull/49786 rolls in
-    if (!kIsWeb) {
-      expect(
-        info,
-        contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'),
-      );
-    }
+    expect(
+      info,
+      contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'),
+    );
     expect(info, contains('blendMode: clear'));
   });
 

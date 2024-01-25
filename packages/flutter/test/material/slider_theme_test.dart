@@ -908,13 +908,13 @@ void main() {
         showValueIndicator: ShowValueIndicator.always,
         valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
       );
-      Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
+      Widget buildApp(String value, { double sliderValue = 0.5, TextScaler textScaler = TextScaler.noScaling }) {
         return MaterialApp(
           theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData(textScaleFactor: textScale),
+              data: MediaQueryData(textScaler: textScaler),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -1025,7 +1025,7 @@ void main() {
       await gesture.up();
 
       // Test that the neck stretches when the text scale gets smaller.
-      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 0.5));
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScaler: const TextScaler.linear(0.5)));
       center = tester.getCenter(find.byType(Slider));
       gesture = await tester.startGesture(center);
       // Wait for value indicator animation to finish.
@@ -1051,7 +1051,7 @@ void main() {
       await gesture.up();
 
       // Test that the neck shrinks when the text scale gets larger.
-      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 2.5));
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScaler: const TextScaler.linear(2.5)));
       center = tester.getCenter(find.byType(Slider));
       gesture = await tester.startGesture(center);
       // Wait for value indicator animation to finish.
@@ -1092,13 +1092,13 @@ void main() {
         showValueIndicator: ShowValueIndicator.always,
         valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
       );
-      Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
+      Widget buildApp(String value, { double sliderValue = 0.5, TextScaler textScaler = TextScaler.noScaling }) {
         return MaterialApp(
           theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData(textScaleFactor: textScale),
+              data: MediaQueryData(textScaler: textScaler),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -1209,7 +1209,7 @@ void main() {
       await gesture.up();
 
       // Test that the neck stretches when the text scale gets smaller.
-      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 0.5));
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScaler: const TextScaler.linear(0.5)));
       center = tester.getCenter(find.byType(Slider));
       gesture = await tester.startGesture(center);
       // Wait for value indicator animation to finish.
@@ -1235,7 +1235,7 @@ void main() {
       await gesture.up();
 
       // Test that the neck shrinks when the text scale gets larger.
-      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 2.5));
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScaler: const TextScaler.linear(2.5)));
       center = tester.getCenter(find.byType(Slider));
       gesture = await tester.startGesture(center);
       // Wait for value indicator animation to finish.
@@ -2040,13 +2040,13 @@ void main() {
         useMaterial3: true,
         platform: TargetPlatform.android,
       );
-      Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
+      Widget buildApp(String value, { double sliderValue = 0.5, TextScaler textScaler = TextScaler.noScaling }) {
         return MaterialApp(
           theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData(textScaleFactor: textScale),
+              data: MediaQueryData(textScaler: textScaler),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -2596,13 +2596,13 @@ void main() {
           useMaterial3: false,
           platform: TargetPlatform.android,
         );
-        Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
+        Widget buildApp(String value, { double sliderValue = 0.5, TextScaler textScaler = TextScaler.noScaling }) {
           return MaterialApp(
             theme: theme,
             home: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: MediaQueryData(textScaleFactor: textScale),
+                data: MediaQueryData(textScaler: textScaler),
                 child: Material(
                   child: Row(
                     children: <Widget>[

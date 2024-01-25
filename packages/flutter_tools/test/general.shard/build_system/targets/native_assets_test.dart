@@ -136,7 +136,7 @@ void main() {
             linkMode: native_assets_cli.LinkMode.dynamic,
             target: native_assets_cli.Target.iOSArm64,
             path: native_assets_cli.AssetAbsolutePath(
-              Uri.file('libfoo.dylib'),
+              Uri.file('foo.framework/foo'),
             ),
           )
         ], dependencies: <Uri>[
@@ -166,7 +166,7 @@ void main() {
         nativeAssetsYaml.readAsStringSync(),
         stringContainsInOrder(<String>[
           'package:foo/foo.dart',
-          'libfoo.dylib',
+          'foo.framework',
         ]),
       );
     },
