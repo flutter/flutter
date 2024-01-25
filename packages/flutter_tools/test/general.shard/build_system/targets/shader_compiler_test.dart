@@ -54,7 +54,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
           fileSystem.file(outputSpirvPath).createSync(recursive: true);
         },
@@ -94,7 +94,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
         },
       ),
@@ -133,7 +133,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
         },
       ),
@@ -171,7 +171,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
           fileSystem.file(outputSpirvPath).createSync(recursive: true);
         },
@@ -253,7 +253,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
             ..createSync()
@@ -301,7 +301,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
             ..createSync()
@@ -349,7 +349,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
             ..createSync()
@@ -398,7 +398,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
             ..createSync()
