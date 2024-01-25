@@ -38,10 +38,18 @@ const std::unique_ptr<PlaygroundImpl>& GetSharedVulkanPlayground(
     static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
         vulkan_validation_playground(
             MakeVulkanPlayground(/*enable_validations=*/true));
+    // TODO(https://github.com/flutter/flutter/issues/142237): This can be
+    // removed when the thread local storage is removed.
+    static fml::ScopedCleanupClosure context_cleanup(
+        [&] { (*vulkan_validation_playground)->GetContext()->Shutdown(); });
     return *vulkan_validation_playground;
   } else {
     static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
         vulkan_playground(MakeVulkanPlayground(/*enable_validations=*/false));
+    // TODO(https://github.com/flutter/flutter/issues/142237): This can be
+    // removed when the thread local storage is removed.
+    static fml::ScopedCleanupClosure context_cleanup(
+        [&] { (*vulkan_playground)->GetContext()->Shutdown(); });
     return *vulkan_playground;
   }
 }
@@ -90,11 +98,9 @@ static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_CaptureContext_Vulkan",
 };
 
-/// TODO(https://github.com/flutter/flutter/issues/142017): Turn on validation
-/// for all vulkan tests.
-static const std::vector<std::string> kVulkanValidationTests = {
-    "impeller_Play_AiksTest_CanRenderImageRect_Vulkan",
-    "impeller_Play_AiksTest_CanRenderTextFrame_Vulkan",
+static const std::vector<std::string> kVulkanDenyValidationTests = {
+    // TODO(https://github.com/flutter/flutter/issues/142080): remove this.
+    "impeller_Play_AiksTest_EmptySaveLayerRendersWithClear_Vulkan",
 };
 
 namespace {
@@ -129,8 +135,9 @@ bool SaveScreenshot(std::unique_ptr<testing::Screenshot> screenshot) {
 
 bool ShouldTestHaveVulkanValidations() {
   std::string test_name = GetTestName();
-  return std::find(kVulkanValidationTests.begin(), kVulkanValidationTests.end(),
-                   test_name) != kVulkanValidationTests.end();
+  return std::find(kVulkanDenyValidationTests.begin(),
+                   kVulkanDenyValidationTests.end(),
+                   test_name) == kVulkanDenyValidationTests.end();
 }
 }  // namespace
 
