@@ -613,6 +613,8 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
 
   late HorizontalDragGestureRecognizer _recognizer;
 
+  int? _trackedPointer;
+
   @override
   void initState() {
     super.initState();
@@ -669,7 +671,12 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   void _handlePointerDown(PointerDownEvent event) {
     if (widget.enabledCallback()) {
       _recognizer.addPointer(event);
+      _trackedPointer = event.pointer;
     }
+  }
+
+  void _handlePointerUp(PointerUpEvent event) {
+    _trackedPointer = null;
   }
 
   double _convertToLogical(double value) {
@@ -690,21 +697,30 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
                            MediaQuery.paddingOf(context).left :
                            MediaQuery.paddingOf(context).right;
     dragAreaWidth = max(dragAreaWidth, _kBackGestureWidth);
-    return Stack(
-      fit: StackFit.passthrough,
-      children: <Widget>[
-        widget.child,
-        PositionedDirectional(
-          start: 0.0,
-          width: dragAreaWidth,
-          top: 0.0,
-          bottom: 0.0,
-          child: Listener(
-            onPointerDown: _handlePointerDown,
-            behavior: HitTestBehavior.translucent,
+    return PopScope(
+      onPopInvoked: (bool didPop) {
+        if (!didPop || _trackedPointer == null) {
+          return;
+        }
+        _recognizer.rejectGesture(_trackedPointer!);
+      },
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: <Widget>[
+          widget.child,
+          PositionedDirectional(
+            start: 0.0,
+            width: dragAreaWidth,
+            top: 0.0,
+            bottom: 0.0,
+            child: Listener(
+              onPointerDown: _handlePointerDown,
+              onPointerUp: _handlePointerUp,
+              behavior: HitTestBehavior.translucent,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
