@@ -258,6 +258,18 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     std::set<spirv_cross::ID> known_structs;
     ir_->for_each_typed_id<spirv_cross::SPIRType>(
         [&](uint32_t, const spirv_cross::SPIRType& type) {
+          if (type.basetype != spirv_cross::SPIRType::BaseType::Struct) {
+            return;
+          }
+          // Skip structs that do not have layout offset decorations.
+          // These structs are used internally within the shader and are not
+          // part of the shader's interface.
+          for (size_t i = 0; i < type.member_types.size(); i++) {
+            if (!compiler_->has_member_decoration(type.self, i,
+                                                  spv::DecorationOffset)) {
+              return;
+            }
+          }
           if (known_structs.find(type.self) != known_structs.end()) {
             // Iterating over types this way leads to duplicates which may cause
             // duplicate struct definitions.
