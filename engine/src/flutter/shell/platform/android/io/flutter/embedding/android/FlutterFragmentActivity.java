@@ -572,8 +572,7 @@ public class FlutterFragmentActivity extends FragmentActivity
               + shouldAttachEngineToActivity());
 
       if (getCachedEngineGroupId() != null) {
-        return flutterFragment
-            .withNewEngineInGroup(getCachedEngineGroupId())
+        return FlutterFragment.withNewEngineInGroup(getCachedEngineGroupId())
             .dartEntrypoint(getDartEntrypointFunctionName())
             .initialRoute(getInitialRoute())
             .handleDeeplinking(shouldHandleDeeplinking())
