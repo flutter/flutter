@@ -78,8 +78,16 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      final RunResult result = await _processUtils.run(command, throwOnError: true);
 
+      if (!output.existsSync()) {
+        _logger.printTrace('After running the command ${command.join(' ')} the file');
+        _logger.printTrace('${output.path} was expected to exist, but it did not.');
+        _logger.printTrace('The process exited with code ${result.exitCode} and');
+        _logger.printTrace('Stdout:\n\n${result.stdout.trim()}\n');
+        _logger.printTrace('Stderr:\n\n${result.stderr.trim()}');
+        throw StateError('Expected the file ${output.path} to exist but it did not (see https://github.com/flutter/flutter/issues/141892)');
+      }
       final String stringOutput = output.readAsStringSync();
       _logger.printTrace(stringOutput);
 

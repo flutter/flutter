@@ -72,9 +72,18 @@ void main() {
     final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
     late int pid;
+    final List<String> command = <String>[
+      'run',
+      '-dflutter-tester',
+      '--report-ready',
+      '--pid-file',
+      pidFile,
+      '--no-devtools',
+      testScript,
+    ];
     try {
       final ProcessTestResult result = await runFlutter(
-        <String>['run', '-dflutter-tester', '--report-ready', '--pid-file', pidFile, '--no-devtools', testScript],
+        command,
         testDirectory,
         <Transition>[
           Multiple(<Pattern>['Flutter run key commands.', 'called paint'], handler: (String line) {
@@ -108,16 +117,22 @@ void main() {
         'called main',
         'called paint',
       ]);
-      expect(result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
-        // logs start after we receive the response to sending SIGUSR1
-        'Performing hot reload...'.padRight(progressMessageWidth),
-        startsWith('Reloaded 0 libraries in '),
-        'Performing hot restart...'.padRight(progressMessageWidth),
-        startsWith('Restarted application in '),
-        '', // this newline is the one for after we hit "q"
-        'Application finished.',
-        'ready',
-      ]);
+      expect(
+        result.stdout.where((String line) => !line.startsWith('called ')),
+        <Object>[
+          // logs start after we receive the response to sending SIGUSR1
+          'Performing hot reload...'.padRight(progressMessageWidth),
+          startsWith('Reloaded 0 libraries in '),
+          'Performing hot restart...'.padRight(progressMessageWidth),
+          startsWith('Restarted application in '),
+          '', // this newline is the one for after we hit "q"
+          'Application finished.',
+          'ready',
+        ],
+        reason: 'stdout from command ${command.join(' ')} was unexpected, '
+          'full Stdout:\n\n${result.stdout.join('\n')}\n\n'
+          'Stderr:\n\n${result.stderr.join('\n')}',
+      );
       expect(result.exitCode, 0);
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
