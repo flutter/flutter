@@ -322,12 +322,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         ..curve = Curves.linear
         ..reverseCurve = Curves.linear;
       final double delta = details.primaryDelta! / _kTrackInnerLength;
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          _positionController.value -= delta;
-        case TextDirection.ltr:
-          _positionController.value += delta;
-      }
+      _positionController.value += switch (Directionality.of(context)) {
+        TextDirection.rtl => -delta,
+        TextDirection.ltr =>  delta,
+      };
     }
   }
 
@@ -674,13 +672,10 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final double currentValue = _state.position.value;
     final double currentReactionValue = _state._reaction.value;
 
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - currentValue;
-      case TextDirection.ltr:
-        visualPosition = currentValue;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - currentValue,
+      TextDirection.ltr => currentValue,
+    };
 
     final Paint paint = Paint()
       ..color = Color.lerp(trackColor, activeColor, currentValue)!;
