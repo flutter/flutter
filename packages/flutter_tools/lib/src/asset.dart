@@ -11,7 +11,6 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/deferred_component.dart';
-import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
