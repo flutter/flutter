@@ -38,7 +38,12 @@ class AndroidHardwareBufferTextureSourceVK final : public TextureSourceVK {
   // |TextureSourceVK|
   vk::ImageView GetImageView() const override;
 
+  // |TextureSourceVK|
+  vk::ImageView GetRenderTargetView() const override;
+
   bool IsValid() const;
+
+  bool IsSwapchainImage() const override { return false; }
 
  private:
   const vk::Device& device_;

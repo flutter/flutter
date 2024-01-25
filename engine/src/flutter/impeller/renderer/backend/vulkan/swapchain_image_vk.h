@@ -38,7 +38,11 @@ class SwapchainImageVK final : public TextureSourceVK {
   // |TextureSourceVK|
   vk::ImageView GetImageView() const override;
 
+  vk::ImageView GetRenderTargetView() const override;
+
   void SetMSAATexture(std::shared_ptr<Texture> msaa_tex);
+
+  bool IsSwapchainImage() const override { return true; }
 
  private:
   vk::Image image_ = VK_NULL_HANDLE;

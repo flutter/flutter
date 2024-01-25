@@ -8,11 +8,11 @@
 
 namespace impeller {
 
-fml::Status AddMipmapGeneration(const std::shared_ptr<Context>& context,
-                                const std::shared_ptr<Texture>& texture) {
-  std::shared_ptr<CommandBuffer> mip_cmd_buffer =
-      context->CreateCommandBuffer();
-  std::shared_ptr<BlitPass> blit_pass = mip_cmd_buffer->CreateBlitPass();
+fml::Status AddMipmapGeneration(
+    const std::shared_ptr<CommandBuffer>& command_buffer,
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  std::shared_ptr<BlitPass> blit_pass = command_buffer->CreateBlitPass();
   bool success = blit_pass->GenerateMipmap(texture);
   if (!success) {
     return fml::Status(fml::StatusCode::kUnknown, "");
@@ -21,11 +21,7 @@ fml::Status AddMipmapGeneration(const std::shared_ptr<Context>& context,
   if (!success) {
     return fml::Status(fml::StatusCode::kUnknown, "");
   }
-  success = mip_cmd_buffer->SubmitCommands(/*callback=*/nullptr);
-  if (!success) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
-  }
-  return {};
+  return fml::Status();
 }
 
 }  // namespace impeller

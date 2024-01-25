@@ -65,4 +65,9 @@ vk::ImageView SwapchainImageVK::GetImageView() const {
   return image_view_.get();
 }
 
+// |TextureSourceVK|
+vk::ImageView SwapchainImageVK::GetRenderTargetView() const {
+  return image_view_.get();
+}
+
 }  // namespace impeller
