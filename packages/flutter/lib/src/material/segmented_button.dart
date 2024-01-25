@@ -515,15 +515,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final OutlinedBorder disabledBorder = resolvedDisabledBorder.copyWith(side: disabledSide);
 
     final List<Widget> buttons = widget.segments.map(buttonFor).toList();
-    //
-    // final MaterialTapTargetSize effectiveTTS = segmentStyle.tapTargetSize ?? segmentThemeStyle.tapTargetSize ?? MaterialTapTargetSize.shrinkWrap;
-    // final double HeightDelta;
-    // switch (effectiveTTS) {
-    //   case MaterialTapTargetSize.padded:
-    //     // mini
-    //   case MaterialTapTargetSize.shrinkWrap:
-    //
-    // }
+
     return Material(
       type: MaterialType.transparency,
       shape: enabledBorder.copyWith(side: BorderSide.none),
