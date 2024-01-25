@@ -90,12 +90,17 @@ class IMobileDevice {
   late final bool isInstalled = _processManager.canRun(_idevicescreenshotPath);
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger(String deviceID) {
+  Future<Process> startLogger(
+    String deviceID,
+    bool isWirelesslyConnected,
+  ) {
     return _processUtils.start(
       <String>[
         _idevicesyslogPath,
         '-u',
         deviceID,
+        if (isWirelesslyConnected)
+          '--network',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[_dyLdLibEntry]
