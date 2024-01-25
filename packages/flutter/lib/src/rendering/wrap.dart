@@ -586,8 +586,7 @@ class RenderWrap extends RenderBox
       switch (fit) {
         case WrapFit.runTight:
         case WrapFit.runLoose:
-          final double childIntrinsicMainAxisExtent = getChildMinIntrinsicMainAxisExtent(child, double.infinity);
-          if (runMainAxisExtent != 0 && runMainAxisExtent + childIntrinsicMainAxisExtent + spacing <= mainAxisLimit) {
+          if (runMainAxisExtent != 0 && runMainAxisExtent + getChildMinIntrinsicMainAxisExtent(child, double.infinity) + spacing <= mainAxisLimit) {
             switch (fit) {
               case WrapFit.runTight:
                 childSize = layoutChild(child, childConstraintsFittingTightInRun(mainAxisLimit - runMainAxisExtent - spacing));
@@ -716,8 +715,7 @@ class RenderWrap extends RenderBox
       switch (fit) {
         case WrapFit.runTight:
         case WrapFit.runLoose:
-          final double childIntrinsicMainAxisExtent = getChildMinIntrinsicMainAxisExtent(child, double.infinity);
-          if (runMainAxisExtent != 0 && runMainAxisExtent + childIntrinsicMainAxisExtent + spacing <= mainAxisLimit) {
+          if (runMainAxisExtent != 0 && runMainAxisExtent + getChildMinIntrinsicMainAxisExtent(child, double.infinity) + spacing <= mainAxisLimit) {
             switch (fit) {
               case WrapFit.runTight:
                 child.layout(childConstraintsFittingTightInRun(mainAxisLimit - runMainAxisExtent - spacing), parentUsesSize: true);
