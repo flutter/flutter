@@ -13,7 +13,6 @@ class TestImageInfo extends ImageInfo {
     required super.image,
     super.scale,
     super.debugLabel,
-    super.shouldDisposeImage,
   });
 
   final int value;

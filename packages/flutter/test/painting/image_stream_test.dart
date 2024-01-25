@@ -909,7 +909,7 @@ void main() {
     testWidgets('ImageInfo does not dispatch memory events when shouldDisposeImage is false', (WidgetTester tester) async {
       final List<ObjectEvent> events = await memoryEvents(
         () async {
-          final ImageInfo info = ImageInfo(image: image20x10, shouldDisposeImage: false);
+          final ImageInfo info = ImageInfo(image: image20x10);
           info.dispose();
         },
         ImageInfo,
