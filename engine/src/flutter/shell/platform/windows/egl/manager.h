@@ -20,6 +20,8 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/egl/context.h"
+#include "flutter/shell/platform/windows/egl/surface.h"
+#include "flutter/shell/platform/windows/egl/window_surface.h"
 
 namespace flutter {
 namespace egl {
@@ -42,36 +44,18 @@ class Manager {
   //
   // After the surface is created, |SetVSyncEnabled| should be called on a
   // thread that can bind the |render_context_|.
-  virtual bool CreateSurface(HWND hwnd, EGLint width, EGLint height);
+  virtual bool CreateWindowSurface(HWND hwnd, size_t width, size_t height);
 
   // Resizes backing surface from current size to newly requested size
   // based on width and height for the specific case when width and height do
-  // not match current surface dimensions. Target represents the visual entity
-  // to bind to.
+  // not match current surface dimensions. HWND is the window backing the
+  // surface.
   //
   // This binds |render_context_| to the current thread.
-  virtual void ResizeSurface(HWND hwnd,
-                             EGLint width,
-                             EGLint height,
-                             bool enable_vsync);
-
-  // queries EGL for the dimensions of surface in physical
-  // pixels returning width and height as out params.
-  void GetSurfaceDimensions(EGLint* width, EGLint* height);
-
-  // Releases the pass-in EGLSurface wrapping and backing resources if not null.
-  virtual void DestroySurface();
+  virtual void ResizeWindowSurface(HWND hwnd, size_t width, size_t height);
 
   // Check if the current thread has a context bound.
   bool HasContextCurrent();
-
-  // Binds |render_context_| to the current rendering thread and to the draw and
-  // read surfaces returning a boolean result reflecting success.
-  virtual bool MakeCurrent();
-
-  // Swaps the front and back buffers of the DX11 swapchain backing surface if
-  // not null.
-  virtual bool SwapBuffers();
 
   // Creates a |EGLSurface| from the provided handle.
   EGLSurface CreateSurfaceFromHandle(EGLenum handle_type,
@@ -81,16 +65,6 @@ class Manager {
   // Gets the |EGLDisplay|.
   EGLDisplay egl_display() const { return display_; };
 
-  // If enabled, makes the current surface's buffer swaps block until the
-  // v-blank.
-  //
-  // If disabled, allows one thread to swap multiple buffers per v-blank
-  // but can result in screen tearing if the system compositor is disabled.
-  //
-  // This binds |render_context_| to the current thread and makes the render
-  // surface current.
-  virtual void SetVSyncEnabled(bool enabled);
-
   // Gets the |ID3D11Device| chosen by ANGLE.
   bool GetDevice(ID3D11Device** device);
 
@@ -99,6 +73,9 @@ class Manager {
 
   // Get the EGL context used for async texture uploads.
   virtual Context* resource_context() const;
+
+  // Get the EGL surface that backs the Flutter view.
+  virtual WindowSurface* surface() const;
 
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
@@ -138,12 +115,8 @@ class Manager {
   // The EGL context used for async texture uploads.
   std::unique_ptr<Context> resource_context_;
 
-  // Current render_surface that engine will draw into.
-  EGLSurface surface_ = EGL_NO_SURFACE;
-
-  // Requested dimensions for current surface
-  EGLint surface_width_ = 0;
-  EGLint surface_height_ = 0;
+  // Th EGL surface used to render into the Flutter view.
+  std::unique_ptr<WindowSurface> surface_;
 
   // The current D3D device.
   Microsoft::WRL::ComPtr<ID3D11Device> resolved_device_ = nullptr;

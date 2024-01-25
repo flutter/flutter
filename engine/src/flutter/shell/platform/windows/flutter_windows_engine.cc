@@ -58,7 +58,7 @@ FlutterRendererConfig GetOpenGLRendererConfig() {
     if (!host->egl_manager()) {
       return false;
     }
-    return host->egl_manager()->MakeCurrent();
+    return host->egl_manager()->render_context()->MakeCurrent();
   };
   config.open_gl.clear_current = [](void* user_data) -> bool {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
