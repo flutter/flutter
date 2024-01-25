@@ -14,7 +14,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  # OCMock is for testing only so there is no google clone
+  # OCMock is for testing only
   'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
   'skia_revision': 'cc5124317c18a7dab373780108d6d27a86039056',
 
@@ -270,7 +270,6 @@ allowed_hosts = [
   'chromium.googlesource.com',
   'dart.googlesource.com',
   'flutter.googlesource.com',
-  'fuchsia.googlesource.com',
   'llvm.googlesource.com',
   'skia.googlesource.com',
   'swiftshader.googlesource.com',
