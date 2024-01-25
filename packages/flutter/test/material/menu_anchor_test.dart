@@ -2615,7 +2615,7 @@ void main() {
                   MenuItemButton(
                     focusNode: buttonFocusNode,
                     closeOnActivate: false,
-                    child: Text("Set focus to null"),
+                    child: const Text('Set focus to null'),
                     onPressed: () {
                       setState((){
                         buttonFocusNode = null;

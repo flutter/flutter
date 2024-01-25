@@ -1864,7 +1864,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         oldWidget.focusNode!.removeListener(_handleFocusChange);
       }
       if (widget.focusNode == null) {
-        print('Internal focus node is about to be updated....');
         _internalFocusNode ??= FocusNode();
         assert(() {
           if (_internalFocusNode != null) {
