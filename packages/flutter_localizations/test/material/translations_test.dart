@@ -549,4 +549,13 @@ void main() {
     expect(localizations, isA<MaterialLocalizationEn>());
     expect(localizations.shareButtonLabel, 'Share');
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/141764
+  testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
+    const Locale locale = Locale('zh');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations.lookUpButtonLabel, '查询');
+  });
 }
