@@ -458,7 +458,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.textAlign = value;
-    markNeedsPaint();
     markNeedsLayout();
   }
 
