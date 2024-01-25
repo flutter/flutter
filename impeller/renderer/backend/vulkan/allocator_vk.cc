@@ -353,8 +353,18 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                      << vk::to_string(result);
       return;
     }
+    // Create a specialized view for render target attachments.
+    view_info.subresourceRange.levelCount = 1u;
+    auto [rt_result, rt_image_view] = device.createImageViewUnique(view_info);
+    if (rt_result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Unable to create an image view for allocation: "
+                     << vk::to_string(rt_result);
+      return;
+    }
+
     resource_.Swap(ImageResource(ImageVMA{allocator, allocation, image},
-                                 std::move(image_view)));
+                                 std::move(image_view),
+                                 std::move(rt_image_view)));
     is_valid_ = true;
   }
 
@@ -368,20 +378,28 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     return resource_->image_view.get();
   }
 
+  vk::ImageView GetRenderTargetView() const override {
+    return resource_->rt_image_view.get();
+  }
+
+  bool IsSwapchainImage() const override { return false; }
+
  private:
   struct ImageResource {
     UniqueImageVMA image;
     vk::UniqueImageView image_view;
+    vk::UniqueImageView rt_image_view;
 
     ImageResource() = default;
 
-    ImageResource(ImageVMA p_image, vk::UniqueImageView p_image_view)
-        : image(p_image), image_view(std::move(p_image_view)) {}
+    ImageResource(ImageVMA p_image,
+                  vk::UniqueImageView p_image_view,
+                  vk::UniqueImageView p_rt_image_view)
+        : image(p_image),
+          image_view(std::move(p_image_view)),
+          rt_image_view(std::move(p_rt_image_view)) {}
 
-    ImageResource(ImageResource&& o) {
-      std::swap(image, o.image);
-      std::swap(image_view, o.image_view);
-    }
+    ImageResource(ImageResource&& o) = default;
 
     ImageResource(const ImageResource&) = delete;
 

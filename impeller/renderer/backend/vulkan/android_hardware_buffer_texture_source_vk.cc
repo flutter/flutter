@@ -201,6 +201,13 @@ vk::ImageView AndroidHardwareBufferTextureSourceVK::GetImageView() const {
   return image_view_.get();
 }
 
+// |TextureSourceVK|
+vk::ImageView AndroidHardwareBufferTextureSourceVK::GetRenderTargetView()
+    const {
+  FML_CHECK(IsValid());
+  return image_view_.get();
+}
+
 }  // namespace impeller
 
 #endif

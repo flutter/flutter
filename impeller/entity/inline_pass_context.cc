@@ -56,23 +56,25 @@ bool InlinePassContext::EndPass() {
   if (!IsActive()) {
     return true;
   }
+  FML_DCHECK(command_buffer_);
 
-  if (command_buffer_) {
-    if (!command_buffer_->EncodeAndSubmit(pass_)) {
-      VALIDATION_LOG
-          << "Failed to encode and submit command buffer while ending "
-             "render pass.";
-      return false;
-    }
+  if (!pass_->EncodeCommands()) {
+    VALIDATION_LOG << "Failed to encode and submit command buffer while ending "
+                      "render pass.";
+    return false;
   }
 
-  std::shared_ptr<Texture> target_texture =
+  const std::shared_ptr<Texture>& target_texture =
       GetPassTarget().GetRenderTarget().GetRenderTargetTexture();
   if (target_texture->GetMipCount() > 1) {
-    fml::Status mip_status = AddMipmapGeneration(context_, target_texture);
+    fml::Status mip_status =
+        AddMipmapGeneration(command_buffer_, context_, target_texture);
     if (!mip_status.ok()) {
       return false;
     }
+  }
+  if (!command_buffer_->SubmitCommands()) {
+    return false;
   }
 
   pass_ = nullptr;
