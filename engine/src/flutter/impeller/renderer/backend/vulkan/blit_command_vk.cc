@@ -85,7 +85,21 @@ bool BlitCopyTextureToTextureCommandVK::Encode(
                        image_copy               //
   );
 
-  return true;
+  // If this is an onscreen texture, do not transition the layout
+  // back to shader read.
+  if (dst.IsSwapchainImage()) {
+    return true;
+  }
+
+  BarrierVK barrier;
+  barrier.cmd_buffer = cmd_buffer;
+  barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+  barrier.src_access = {};
+  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+
+  return dst.SetLayout(barrier);
 }
 
 //------------------------------------------------------------------------------
@@ -352,6 +366,7 @@ bool BlitGenerateMipmapCommandVK::Encode(CommandEncoderVK& encoder) const {
   // We modified the layouts of this image from underneath it. Tell it its new
   // state so it doesn't try to perform redundant transitions under the hood.
   src.SetLayoutWithoutEncoding(vk::ImageLayout::eShaderReadOnlyOptimal);
+  src.SetMipMapGenerated();
 
   return true;
 }

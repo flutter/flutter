@@ -27,6 +27,8 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   vk::ImageView GetImageView() const;
 
+  vk::ImageView GetRenderTargetView() const;
+
   bool SetLayout(const BarrierVK& barrier) const;
 
   vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout) const;
@@ -37,6 +39,10 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   // |Texture|
   ISize GetSize() const override;
+
+  void SetMipMapGenerated() { mipmap_generated_ = true; }
+
+  bool IsSwapchainImage() const { return source_->IsSwapchainImage(); }
 
  private:
   std::weak_ptr<Context> context_;

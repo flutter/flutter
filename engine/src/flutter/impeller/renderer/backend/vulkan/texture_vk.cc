@@ -169,4 +169,8 @@ vk::ImageLayout TextureVK::GetLayout() const {
   return source_ ? source_->GetLayout() : vk::ImageLayout::eUndefined;
 }
 
+vk::ImageView TextureVK::GetRenderTargetView() const {
+  return source_->GetRenderTargetView();
+}
+
 }  // namespace impeller
