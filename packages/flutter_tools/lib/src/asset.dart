@@ -11,6 +11,7 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/deferred_component.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -1298,8 +1299,16 @@ class _AssetDirectoryCache {
   List<String> variantsFor(String assetPath) {
     final String directory = _fileSystem.path.dirname(assetPath);
 
-    if (!_fileSystem.directory(directory).existsSync()) {
-      return const <String>[];
+    try {
+      if (!_fileSystem.directory(directory).existsSync()) {
+        return const <String>[];
+      }
+    } on FileSystemException catch (e) {
+      throwToolExit(
+        'Unable to check the existence of asset file "$assetPath". '
+        'Ensure that the asset file is declared is a valid local file system path.\n'
+        'Details: $e',
+      );
     }
 
     if (_cache.containsKey(assetPath)) {

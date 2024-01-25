@@ -153,7 +153,7 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('throws ToolExit when directory entry contains invalid characters', () async {
+    testUsingContext('throws ToolExit when directory entry contains invalid characters (Windows only)', () async {
       testFileSystem.file('.packages').createSync();
       testFileSystem.file('pubspec.yaml')
         ..createSync()
@@ -173,6 +173,35 @@ flutter:
       ));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+    });
+
+    testUsingContext('throws ToolExit when file entry contains invalid characters (Windows only)', () async {
+      globals.fs.file('.packages').createSync();
+      globals.fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - http://website.com/hi.png
+''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      expect(() => bundle.build(packagesPath: '.packages'), throwsToolExit(
+        message: 'Unable to check the existence of asset file ',
+      ));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows,
+      opHandle: (String context, FileSystemOp operation) {
+        if (operation == FileSystemOp.exists && context == r'C:\http:\\website.com') {
+          throw const FileSystemException(
+            r"FileSystemException: Exists failed, path = 'C:\http:\\website.com' "
+            '(OS Error: The filename, directory name, or volume label syntax is '
+            'incorrect., errno = 123)',
+          );
+        }
+      },),
       ProcessManager: () => FakeProcessManager.any(),
       Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
