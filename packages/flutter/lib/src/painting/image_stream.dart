@@ -18,7 +18,7 @@ const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 /// The disposing contract for [ImageInfo] (as well as for [ui.Image])
 /// is different from traditional one, where
 /// an object should dispose a member if the object created the member.
-/// Instead:
+/// Instead, the disposal contract is as follows:
 ///
 /// * [ImageInfo] disposes [image], even if it is received as a constructor argument.
 /// * [ImageInfo] is expected to be disposed not by the object, that created it,
