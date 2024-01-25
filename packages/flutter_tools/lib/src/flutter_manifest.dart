@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
+import 'base/common.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -296,6 +298,51 @@ class FlutterManifest {
 
   late final List<AssetsEntry> assets = _computeAssets(_flutterDescriptor['assets']);
 
+  late final List<AssetTransformerEntry> assetTransformers = _parseAssetTransformers();
+
+  List<AssetTransformerEntry> _parseAssetTransformers() {
+    const String assetTransformersKey = 'asset-transformers';
+
+    if (!_flutterDescriptor.containsKey(assetTransformersKey)) {
+      return <AssetTransformerEntry>[];
+    }
+
+    final List<YamlMap> transformers = (_flutterDescriptor[assetTransformersKey]! as YamlList).value.cast();
+
+    return transformers.map((YamlMap transformerEntry) {
+      final Object? package = transformerEntry['package'];
+      if (package is! String || package.isEmpty) {
+        throw ToolExit('Asset transformer has a "package" that is not a non-empty String');
+      }
+
+      final String? args = transformerEntry['args'] as String?;
+      final Object? assetsEntry = transformerEntry['assets'];
+      if (assetsEntry is! List<Object?>) {
+        throw ToolExit('Expected assets section in asset transformer definition to be a list. Got "${assetsEntry.runtimeType}" instead.');
+      }
+
+      final List<Glob> assets = assetsEntry
+        .map((Object? entry) {
+          if (entry is! String || entry == '') {
+            _logger.printError(
+                'A transformer with package "$package" contains a null or empty entry.');
+            return null;
+          }
+          return Glob(entry); // TODO—dontmerge - can this throw given a bad pattern?
+        })
+        .whereType<Glob>()
+        .toList();
+
+      final AssetTransformerEntry transformer = AssetTransformerEntry(
+          assets: assets,
+          package: package,
+          args: args,
+      );
+
+      return transformer;
+    }).toList();
+  }
+
   late final List<Font> fonts = _extractFonts();
 
   List<Font> _extractFonts() {
@@ -468,6 +515,19 @@ bool _validate(Object? manifest, Logger logger) {
   return true;
 }
 
+@immutable
+final class AssetTransformerEntry {
+  const AssetTransformerEntry({
+    required this.assets,
+    required this.package,
+    this.args,
+  });
+
+  final List<Glob> assets;
+  final String package;
+  final String? args;
+}
+
 void _validateFlutter(YamlMap? yaml, List<String> errors) {
   if (yaml == null) {
     return;
@@ -556,6 +616,9 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
+      case 'asset-transformers':
+        // TODO—dontmerge — implement.
+        break;
       default:
         errors.add('Unexpected child "$yamlKey" found under "flutter".');
         break;

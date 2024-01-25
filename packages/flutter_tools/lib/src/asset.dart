@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
@@ -88,10 +89,12 @@ enum AssetKind {
 final class AssetBundleEntry {
   const AssetBundleEntry(this.content, {
     required this.kind,
+    required this.transformers,
   });
 
   final DevFSContent content;
   final AssetKind kind;
+  final List<AssetTransformerEntry> transformers;
 
   Future<List<int>> contentsAsBytes() => content.contentsAsBytes();
 }
@@ -264,6 +267,7 @@ class ManifestAssetBundle implements AssetBundle {
       entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
         DevFSStringContent('{}'),
         kind: AssetKind.regular,
+        transformers: const <AssetTransformerEntry>[],
       );
       final ByteData emptyAssetManifest =
         const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
@@ -272,12 +276,14 @@ class ManifestAssetBundle implements AssetBundle {
           emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes),
         ),
         kind: AssetKind.regular,
+        transformers: const <AssetTransformerEntry>[],
       );
       // Create .bin.json on web builds.
       if (targetPlatform == TargetPlatform.web_javascript) {
         entries[_kAssetManifestBinJsonFilename] = AssetBundleEntry(
           DevFSStringContent('""'),
           kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[],
         );
       }
       return 0;
@@ -423,6 +429,7 @@ class ManifestAssetBundle implements AssetBundle {
         entries[variant.entryUri.path] ??= AssetBundleEntry(
           DevFSFileContent(variantFile),
           kind: variant.kind,
+          transformers: variant.transformers,
         );
       }
     }
@@ -456,6 +463,7 @@ class ManifestAssetBundle implements AssetBundle {
           deferredComponentsEntries[componentName]![variant.entryUri.path] ??= AssetBundleEntry(
             DevFSFileContent(variantFile),
             kind: AssetKind.regular,
+            transformers: const <AssetTransformerEntry>[],
           );
         }
       }
@@ -471,7 +479,11 @@ class ManifestAssetBundle implements AssetBundle {
     for (final _Asset asset in materialAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
-      entries[asset.entryUri.path] ??= AssetBundleEntry(DevFSFileContent(assetFile), kind: asset.kind);
+      entries[asset.entryUri.path] ??= AssetBundleEntry(
+        DevFSFileContent(assetFile),
+        kind: asset.kind,
+        transformers: const <AssetTransformerEntry>[],
+      );
     }
 
     // Update wildcard directories we can detect changes in them.
@@ -534,6 +546,7 @@ class ManifestAssetBundle implements AssetBundle {
     entries[key] = AssetBundleEntry(
       content,
       kind: assetKind,
+      transformers: const <AssetTransformerEntry>[],
     );
   }
 
@@ -579,6 +592,7 @@ class ManifestAssetBundle implements AssetBundle {
           hintString: 'copyrightsoftwaretothisinandorofthe',
         ),
         kind: AssetKind.regular,
+        transformers: const <AssetTransformerEntry>[],
       );
     }
   }
@@ -605,6 +619,7 @@ class ManifestAssetBundle implements AssetBundle {
           entryUri: entryUri,
           package: null,
           kind: AssetKind.font,
+          transformers: const <AssetTransformerEntry>[],
         ));
       }
     }
@@ -632,6 +647,7 @@ class ManifestAssetBundle implements AssetBundle {
         entryUri: entryUri,
         package: null,
         kind: AssetKind.shader,
+        transformers: const <AssetTransformerEntry>[],
       ));
     }
 
@@ -675,6 +691,7 @@ class ManifestAssetBundle implements AssetBundle {
       final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
       final Map<_Asset, List<_Asset>> componentAssets = <_Asset, List<_Asset>>{};
       for (final AssetsEntry assetsEntry in component.assets) {
+        final List<AssetTransformerEntry> transformers = _matchingTransformersForAsset(flutterManifest, assetsEntry.uri);
         if (assetsEntry.uri.path.endsWith('/')) {
           wildcardDirectories.add(assetsEntry.uri);
           _parseAssetsFromFolder(
@@ -684,6 +701,7 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             componentAssets,
             assetsEntry.uri,
+            transformers: transformers,
           );
         } else {
           _parseAssetFromFile(
@@ -693,6 +711,7 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             componentAssets,
             assetsEntry.uri,
+            transformers: transformers,
           );
         }
       }
@@ -701,6 +720,19 @@ class ManifestAssetBundle implements AssetBundle {
       deferredComponentsAssetVariants[component.name] = componentAssets;
     }
     return deferredComponentsAssetVariants;
+  }
+
+  List<AssetTransformerEntry> _matchingTransformersForAsset(FlutterManifest manifest, Uri assetUri) {
+    String path = assetUri.path;
+    return manifest.assetTransformers
+      .where((AssetTransformerEntry transformer) =>
+          transformer.assets.any((Glob glob) {
+            if (path.endsWith('/')) {
+              path = path.substring(0, path.length - 1);
+            }
+            return glob.matches(assetUri.path);
+          }))
+      .toList();
   }
 
   Map<String, List<String>> _createAssetManifest(
@@ -851,6 +883,10 @@ class ManifestAssetBundle implements AssetBundle {
 
     final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
     for (final AssetsEntry assetsEntry in flutterManifest.assets) {
+      final List<AssetTransformerEntry> transformers = _matchingTransformersForAsset(
+        flutterManifest,
+        assetsEntry.uri,
+      );
       if (assetsEntry.uri.path.endsWith('/')) {
         wildcardDirectories.add(assetsEntry.uri);
         _parseAssetsFromFolder(
@@ -863,6 +899,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
+          transformers: transformers,
         );
       } else {
         _parseAssetFromFile(
@@ -875,6 +912,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
+          transformers: transformers,
         );
       }
     }
@@ -950,6 +988,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     List<String>? flavors,
+    List<AssetTransformerEntry>? transformers,
   }) {
     final String directoryPath;
     try {
@@ -985,6 +1024,7 @@ class ManifestAssetBundle implements AssetBundle {
         attributedPackage: attributedPackage,
         originUri: assetUri,
         flavors: flavors,
+        transformers: transformers,
       );
     }
   }
@@ -1001,6 +1041,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
     List<String>? flavors,
+    List<AssetTransformerEntry>? transformers,
   }) {
     final _Asset asset = _resolveAsset(
       packageConfig,
@@ -1011,6 +1052,7 @@ class ManifestAssetBundle implements AssetBundle {
       assetKind: assetKind,
       originUri: originUri,
       flavors: flavors,
+      transformers: transformers,
     );
 
     _checkForFlavorConflicts(asset, result.keys.toList());
@@ -1032,6 +1074,7 @@ class ManifestAssetBundle implements AssetBundle {
             relativeUri: relativeUri,
             package: attributedPackage,
             kind: assetKind,
+            transformers: transformers,
           ),
         );
       }
@@ -1117,6 +1160,7 @@ class ManifestAssetBundle implements AssetBundle {
     Uri? originUri,
     AssetKind assetKind = AssetKind.regular,
     List<String>? flavors,
+    List<AssetTransformerEntry>? transformers,
   }) {
     final String assetPath = _fileSystem.path.fromUri(assetUri);
     if (assetUri.pathSegments.first == 'packages'
@@ -1130,6 +1174,7 @@ class ManifestAssetBundle implements AssetBundle {
         assetKind: assetKind,
         originUri: originUri,
         flavors: flavors,
+        transformers: transformers,
       );
       if (packageAsset != null) {
         return packageAsset;
@@ -1146,6 +1191,7 @@ class ManifestAssetBundle implements AssetBundle {
       originUri: originUri,
       kind: assetKind,
       flavors: flavors,
+      transformers: transformers,
     );
   }
 
@@ -1156,6 +1202,7 @@ class ManifestAssetBundle implements AssetBundle {
     AssetKind assetKind = AssetKind.regular,
     Uri? originUri,
     List<String>? flavors,
+    List<AssetTransformerEntry>? transformers,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
     if (assetUri.pathSegments.length > 1) {
@@ -1171,6 +1218,7 @@ class ManifestAssetBundle implements AssetBundle {
           kind: assetKind,
           originUri: originUri,
           flavors: flavors,
+          transformers: transformers,
         );
       }
     }
@@ -1193,7 +1241,10 @@ class _Asset {
     required this.package,
     this.kind = AssetKind.regular,
     List<String>? flavors,
-  }): originUri = originUri ?? entryUri, flavors = flavors ?? const <String>[];
+    List<AssetTransformerEntry>? transformers,
+  })  : originUri = originUri ?? entryUri,
+        flavors = flavors ?? const <String>[],
+        transformers = transformers ?? const <AssetTransformerEntry>[];
 
   final String baseDir;
 
@@ -1213,6 +1264,8 @@ class _Asset {
   final AssetKind kind;
 
   final List<String> flavors;
+
+  final List<AssetTransformerEntry> transformers;
 
   File lookupAssetFile(FileSystem fileSystem) {
     return fileSystem.file(fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri)));

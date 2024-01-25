@@ -17,8 +17,10 @@ import 'base/os.dart';
 import 'build_info.dart';
 import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
+import 'build_system/targets/asset_transformer.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
+import 'globals.dart' as globals; // TODO—dontmerge — don't depend on globals.
 import 'vmservice.dart';
 
 const String _kFontManifest = 'FontManifest.json';
@@ -456,25 +458,35 @@ class DevFS {
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  }) : _vmService = serviceProtocol,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _httpWriter = _DevFSHttpWriter(
-        fsName,
-        serviceProtocol,
-        osUtils: osUtils,
-        logger: logger,
-        uploadRetryThrottle: uploadRetryThrottle,
-        httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
-          ? HttpClient()
-          : context.get<HttpClientFactory>()!())),
-       _stopwatchFactory = stopwatchFactory;
+  })  : _vmService = serviceProtocol,
+        _logger = logger,
+        _fileSystem = fileSystem,
+        _httpWriter = _DevFSHttpWriter(
+          fsName,
+          serviceProtocol,
+          osUtils: osUtils,
+          logger: logger,
+          uploadRetryThrottle: uploadRetryThrottle,
+          httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
+            ? HttpClient()
+            : context.get<HttpClientFactory>()!())),
+        _stopwatchFactory = stopwatchFactory,
+        _assetTransformer = DevelopmentAssetTransformer(
+          transformer: AssetTransformer(
+            processManager: globals.processManager,
+            logger: logger,
+            fileSystem: fileSystem,
+            artifacts: globals.artifacts!,
+          ),
+          fileSystem: fileSystem,
+        );
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
   final StopwatchFactory _stopwatchFactory;
+  final DevelopmentAssetTransformer _assetTransformer;
 
   final String fsName;
   final Directory? rootDirectory;
@@ -634,7 +646,8 @@ class DevFS {
           didUpdateFontManifest = true;
         }
 
-        switch (bundle.entries[archivePath]?.kind) {
+        final AssetKind? kind = bundle.entries[archivePath]?.kind;
+        switch (kind) {
           case AssetKind.shader:
             final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
             pendingAssetBuilds.add(pending);
@@ -669,10 +682,31 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            dirtyEntries[deviceUri] = entry.content;
-            syncedBytes += entry.content.size;
-            if (!bundleFirstUpload) {
-              assetPathsToEvict.add(archivePath);
+            if (kind == AssetKind.regular && entry.transformers.isNotEmpty) {
+              final Future<DevFSContent?> pending = _assetTransformer.retransformAsset(
+                inputAsset: entry.content,
+                transformerEntries: entry.transformers,
+                workingDirectory: projectRootPath,
+              );
+              pendingAssetBuilds.add(pending);
+              pending.then((DevFSContent? content) {
+                if (content == null) {
+                  assetBuildFailed = true;
+                  return;
+                }
+                // TODO—dontmerge — copypasta code.
+                dirtyEntries[deviceUri] = entry.content;
+                syncedBytes += entry.content.size;
+                if (!bundleFirstUpload) {
+                  assetPathsToEvict.add(archivePath);
+                }
+              });
+            } else {
+              dirtyEntries[deviceUri] = entry.content;
+              syncedBytes += entry.content.size;
+              if (!bundleFirstUpload) {
+                assetPathsToEvict.add(archivePath);
+              }
             }
         }
       });
