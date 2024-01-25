@@ -173,7 +173,7 @@ PhysicalWindowBounds FlutterWindow::GetPhysicalWindowBounds() {
 }
 
 void FlutterWindow::UpdateFlutterCursor(const std::string& cursor_name) {
-  current_cursor_ = GetCursorByName(cursor_name);
+  SetFlutterCursor(GetCursorByName(cursor_name));
 }
 
 void FlutterWindow::SetFlutterCursor(HCURSOR cursor) {

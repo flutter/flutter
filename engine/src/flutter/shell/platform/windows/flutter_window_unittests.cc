@@ -435,5 +435,12 @@ TEST(FlutterWindowTest, PosthumousWindowMessage) {
   EXPECT_GE(msg_count, 1);
 }
 
+TEST(FlutterWindowTest, UpdateCursor) {
+  FlutterWindow win32window(100, 100);
+  win32window.UpdateFlutterCursor("text");
+  HCURSOR cursor = ::GetCursor();
+  EXPECT_EQ(cursor, ::LoadCursor(nullptr, IDC_IBEAM));
+}
+
 }  // namespace testing
 }  // namespace flutter
