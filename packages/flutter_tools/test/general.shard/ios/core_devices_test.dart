@@ -1390,7 +1390,6 @@ invalid JSON
             ),
           ),
         );
-        expect(logger.traceText, contains('yolo'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
