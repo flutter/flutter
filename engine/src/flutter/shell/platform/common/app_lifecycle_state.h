@@ -32,9 +32,9 @@ namespace flutter {
 enum class AppLifecycleState {
   /**
    * Corresponds to the Framework's AppLifecycleState.detached: The initial
-   * state of the state machine. On Android and iOS, also the final state of the
-   * state machine when all views are detached. Other platforms do not enter
-   * this state again after initially leaving it.
+   * state of the state machine. On Android, iOS, and web, also the final state
+   * of the state machine when all views are detached. Other platforms do not
+   * re-enter this state after initially leaving it.
    */
   kDetached,
 

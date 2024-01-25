@@ -1832,13 +1832,13 @@ enum AppLifecycleState {
   /// any host views.
   ///
   /// The application defaults to this state before it initializes, and can be
-  /// in this state (on Android and iOS only) after all views have been
+  /// in this state (applicable on Android, iOS, and web) after all views have been
   /// detached.
   ///
   /// When the application is in this state, the engine is running without a
   /// view.
   ///
-  /// This state is only entered on iOS and Android, although on all platforms
+  /// This state is only entered on iOS, Android, and web, although on all platforms
   /// it is the default state before the application begins running.
   detached,
 

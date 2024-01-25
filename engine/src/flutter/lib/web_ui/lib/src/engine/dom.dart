@@ -339,6 +339,10 @@ extension DomHTMLDocumentExtension on DomHTMLDocument {
   @JS('getElementById')
   external DomElement? _getElementById(JSString id);
   DomElement? getElementById(String id) => _getElementById(id.toJS);
+
+  @JS('visibilityState')
+  external JSString get _visibilityState;
+  String get visibilityState => _visibilityState.toDart;
 }
 
 @JS('document')

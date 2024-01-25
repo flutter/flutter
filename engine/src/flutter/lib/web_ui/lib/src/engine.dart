@@ -123,6 +123,7 @@ export 'engine/noto_font_encoding.dart';
 export 'engine/onscreen_logging.dart';
 export 'engine/picture.dart';
 export 'engine/platform_dispatcher.dart';
+export 'engine/platform_dispatcher/app_lifecycle_state.dart';
 export 'engine/platform_views.dart';
 export 'engine/platform_views/content_manager.dart';
 export 'engine/platform_views/message_handler.dart';
