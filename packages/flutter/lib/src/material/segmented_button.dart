@@ -439,9 +439,6 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
     ButtonStyle segmentStyleFor(ButtonStyle? style) {
       return ButtonStyle(
-        minimumSize: style?.minimumSize,
-        fixedSize: style?.fixedSize,
-        maximumSize: style?.maximumSize,
         textStyle: style?.textStyle,
         backgroundColor: style?.backgroundColor,
         foregroundColor: style?.foregroundColor,
@@ -536,6 +533,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       child: TextButtonTheme(
         data: TextButtonThemeData(style: segmentThemeStyle),
         child: _SegmentedButtonRenderWidget<T>(
+          padding: resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding, enabledState) ?? EdgeInsets.zero,
           visualDensity: segmentStyle.visualDensity ?? segmentThemeStyle.visualDensity ?? Theme.of(context).visualDensity,
           tapTargetSize: segmentStyle.tapTargetSize ?? segmentThemeStyle.tapTargetSize ?? Theme.of(context).materialTapTargetSize,
           segments: widget.segments,
@@ -580,6 +578,7 @@ class _SegmentButtonDefaultColor extends MaterialStateProperty<Color?> with Diag
 class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   const _SegmentedButtonRenderWidget({
     super.key,
+    required this.padding,
     required this.visualDensity,
     required this.tapTargetSize,
     required this.segments,
@@ -589,6 +588,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
     required super.children,
   }) : assert(children.length == segments.length);
 
+  final EdgeInsetsGeometry padding;
   final VisualDensity visualDensity;
   final MaterialTapTargetSize tapTargetSize;
   final List<ButtonSegment<T>> segments;
@@ -599,6 +599,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSegmentedButton<T>(
+      padding: padding,
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       segments: segments,
@@ -628,18 +629,30 @@ class _RenderSegmentedButton<T> extends RenderBox with
      ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
      RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedButton({
+    required EdgeInsetsGeometry padding,
     required VisualDensity visualDensity,
     required MaterialTapTargetSize tapTargetSize,
     required List<ButtonSegment<T>> segments,
     required OutlinedBorder enabledBorder,
     required OutlinedBorder disabledBorder,
     required TextDirection textDirection,
-  }) : _visualDensity = visualDensity,
+  }) : _padding = padding,
+       _visualDensity = visualDensity,
        _tapTargetSize = tapTargetSize,
        _segments = segments,
        _enabledBorder = enabledBorder,
        _disabledBorder = disabledBorder,
        _textDirection = textDirection;
+
+  EdgeInsetsGeometry get padding => _padding;
+  EdgeInsetsGeometry _padding;
+  set padding(EdgeInsetsGeometry value) {
+    if (padding == value) {
+      return;
+    }
+    _padding = value;
+    markNeedsLayout();
+  }
 
   VisualDensity get visualDensity => _visualDensity;
   VisualDensity _visualDensity;
@@ -844,22 +857,22 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // if tapTargetSize is MaterialTapTargetSize.padded -> segmentedButton is larger than expected
-    // -> We should paint smaller segemented button
     final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
-    print('$tapTargetSize');
-    print('$visualDensity');
-    print('$densityAdjustment');
-    if (tapTargetSize == MaterialTapTargetSize.padded) {
+    const double textButtonMinHeight = 40.0;
 
-    }
-    Size effectiveSize;
-    double deltaHeight = 0;
-    if (tapTargetSize == MaterialTapTargetSize.padded && size.height <= 48) {
-      deltaHeight = 48 - size.height;
+    const double textSize = 20; // Need to use TextStyle.fontSize
+    final double adjustButtonMinHeight = textButtonMinHeight + densityAdjustment.dy;
+    final double effectiveVerticalPadding = padding.vertical + densityAdjustment.dy * 2;
+    final double effectedButtonHeight = max(textSize + effectiveVerticalPadding, adjustButtonMinHeight);
+    final double tapTargetVerticalPadding;
+    switch (tapTargetSize) {
+      case MaterialTapTargetSize.shrinkWrap:
+        tapTargetVerticalPadding = 0;
+      case MaterialTapTargetSize.padded:
+        tapTargetVerticalPadding = max(0, kMinInteractiveDimension + densityAdjustment.dy - effectedButtonHeight);
     }
 
-    final Rect borderRect = (offset + Offset(0, deltaHeight / 2)) & (Size(size.width, size.height - deltaHeight));
+    final Rect borderRect = (offset + Offset(0, tapTargetVerticalPadding / 2)) & (Size(size.width, size.height - tapTargetVerticalPadding));
     final Path borderClipPath = enabledBorder.getInnerPath(borderRect, textDirection: textDirection);
     RenderBox? child = firstChild;
     RenderBox? previousChild;
