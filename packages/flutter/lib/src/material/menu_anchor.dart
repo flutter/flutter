@@ -1075,12 +1075,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   @override
   void didUpdateWidget(MenuItemButton oldWidget) {
     if (widget.focusNode != oldWidget.focusNode) {
-      if(widget.focusNode == null){
-        oldWidget.focusNode?.removeListener(_handleFocusChange);
-      }
-      else{
-        _focusNode.removeListener(_handleFocusChange);
-      }
+      (oldWidget.focusNode ?? _internalFocusNode)?.removeListener(_handleFocusChange);
       if (widget.focusNode != null) {
         _internalFocusNode?.dispose();
         _internalFocusNode = null;
