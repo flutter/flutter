@@ -99,11 +99,17 @@ enum WrapFit {
   /// Within this run, it is forced to fill the entire run, unless the [Wrap]
   /// has no max size constraint in the run direction.
   ///
+  /// This setting is more expensive, because it also computes the minimal
+  /// size of the child. Avoid using it for complex children.
+  ///
   /// The [Wrapped] widget assigns this kind of [WrapFit] to its child.
   runTight,
 
   /// The child is placed either in the current or the next run, depending on
   /// its min intrinsic size in the [Wrap.direction].
+  ///
+  /// This setting is more expensive, because it also computes the minimal
+  /// size of the child. Avoid using it for complex children.
   runLoose,
 
   /// The child is forced to fill the available space in a new run, unless the
