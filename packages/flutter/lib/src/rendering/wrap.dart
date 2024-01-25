@@ -94,20 +94,24 @@ class _RunMetrics {
 ///  * [Wrap], the wrap widget.
 ///  * [Wrapped], the widget to set the [WrapFit].
 enum WrapFit {
-  /// The child is forced to fill the available space in the current run, if
-  /// its min intrinsic size in the [Wrap.direction] allows it.
+  /// The child is placed either in the current or the next run, depending on
+  /// its min intrinsic size in the [Wrap.direction].
+  /// Within this run, it is forced to fill the entire run, unless the [Wrap]
+  /// has no max size constraint in the run direction.
   ///
   /// The [Wrapped] widget assigns this kind of [WrapFit] to its child.
   runTight,
 
-  /// The child can at most fill the available space in the current run, if
-  /// its min intrinsic size in the [Wrap.direction] allows it.
+  /// The child is placed either in the current or the next run, depending on
+  /// its min intrinsic size in the [Wrap.direction].
   runLoose,
 
-  /// The child is forced to fill the available space in an empty run.
+  /// The child is forced to fill the available space in a new run, unless the
+  /// [Wrap] has no max size constraint in the run direction.
   tight,
 
-  /// The child can at most fill the available space in an empty run.
+  /// The child can at most fill the available space in an empty run and is
+  /// placed base on its size and the remaining space.
   ///
   /// This is the default behavior for a child of [Wrap].
   loose,
@@ -567,6 +571,7 @@ class RenderWrap extends RenderBox
       final WrapParentData childParentData = child.parentData! as WrapParentData;
       WrapFit fit = childParentData.fit;
 
+      // Downgrade the [WrapFit] in an unbound scenario.
       if (mainAxisLimit.isInfinite) {
         switch (fit) {
           case WrapFit.runTight:
@@ -696,6 +701,7 @@ class RenderWrap extends RenderBox
       final WrapParentData childParentData = child.parentData! as WrapParentData;
       WrapFit fit = childParentData.fit;
 
+      // Downgrade the [WrapFit] in an unbound scenario.
       if (mainAxisLimit.isInfinite) {
         switch (fit){
           case WrapFit.runTight:
