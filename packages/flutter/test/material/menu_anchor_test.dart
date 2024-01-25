@@ -2600,8 +2600,7 @@ void main() {
       );
     });
 
-
-   testWidgets('tapping MenuItemButton with null focus node', (WidgetTester tester) async {
+    testWidgets('tapping MenuItemButton with null focus node', (WidgetTester tester) async {
 
       FocusNode? buttonFocusNode = FocusNode();
 
