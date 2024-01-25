@@ -13,7 +13,8 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    as native_assets_cli;
 import 'package:package_config/package_config.dart' show Package;
 
 import '../../../src/common.dart';
@@ -97,7 +98,7 @@ void main() {
   for (final bool isNativeAssetsEnabled in <bool>[true, false]) {
     final String postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
     testUsingContext(
-      'Successfull native_assets.yaml and native_assets.d creation with feature $postFix',
+      'Successful native_assets.yaml and native_assets.d creation with feature $postFix',
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
@@ -135,7 +136,7 @@ void main() {
             linkMode: native_assets_cli.LinkMode.dynamic,
             target: native_assets_cli.Target.iOSArm64,
             path: native_assets_cli.AssetAbsolutePath(
-              Uri.file('libfoo.dylib'),
+              Uri.file('foo.framework/foo'),
             ),
           )
         ], dependencies: <Uri>[
@@ -165,7 +166,7 @@ void main() {
         nativeAssetsYaml.readAsStringSync(),
         stringContainsInOrder(<String>[
           'package:foo/foo.dart',
-          'libfoo.dylib',
+          'foo.framework',
         ]),
       );
     },

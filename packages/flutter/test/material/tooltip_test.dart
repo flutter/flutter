@@ -1508,6 +1508,60 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/141644.
+  // This allows the user to quickly explore the UI via tooltips.
+  testWidgets('Tooltip shows without delay when the mouse moves from another tooltip', (WidgetTester tester) async {
+    const Duration waitDuration = Durations.extralong1;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Tooltip(
+              message: 'first tooltip',
+              waitDuration: waitDuration,
+              child: SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+            Tooltip(
+              message: 'last tooltip',
+              waitDuration: waitDuration,
+              child: SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(Tooltip).first));
+    await tester.pump();
+    // Wait for the first tooltip to appear.
+    await tester.pump(waitDuration);
+    expect(find.text('first tooltip'), findsOneWidget);
+    expect(find.text('last tooltip'), findsNothing);
+
+    // Move to the second tooltip and expect it to show up immediately.
+    await gesture.moveTo(tester.getCenter(find.byType(Tooltip).last));
+    await tester.pump();
+    expect(find.text('first tooltip'), findsNothing);
+    expect(find.text('last tooltip'), findsOneWidget);
+  });
+
   testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1876,12 +1930,12 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Material2 - Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, { required double textScaleFactor }) {
+  testWidgets('Material2 - Tooltip text scales with textScaler', (WidgetTester tester) async {
+    Widget buildApp(String text, { required TextScaler textScaler }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Navigator(
@@ -1907,7 +1961,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: TextScaler.noScaling));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(42.0, 14.0)));
@@ -1916,7 +1970,7 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: const TextScaler.linear(4.0)));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(168.0, 56.0)));
@@ -1927,10 +1981,10 @@ void main() {
   });
 
   testWidgets('Material3 - Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, { required double textScaleFactor }) {
+    Widget buildApp(String text, { required TextScaler textScaler }) {
       return MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
@@ -1953,7 +2007,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: TextScaler.noScaling));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)).width, equals(42.75));
@@ -1963,7 +2017,7 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: const TextScaler.linear(4.0)));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)).width, equals(168.75));
@@ -2430,7 +2484,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Hovered tooltips with showDuration set do dismiss when hovering elswhere', (WidgetTester tester) async {
+  testWidgets('Hovered tooltips with showDuration set do dismiss when hovering elsewhere', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     const Duration showDuration = Duration(seconds: 1);
 
@@ -2521,7 +2575,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsOneWidget,
-      reason: 'Tooltip should wait untill exitDuration expires before being hidden');
+      reason: 'Tooltip should wait until exitDuration expires before being hidden');
 
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();

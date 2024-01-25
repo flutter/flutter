@@ -754,6 +754,9 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
 /// A [PipelineManifold] implementation that is backed by the [RendererBinding].
 class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifold {
   _BindingPipelineManifold(this._binding) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _binding.addSemanticsEnabledListener(notifyListeners);
   }
 

@@ -2714,6 +2714,38 @@ void main() {
   });
 }
 
+class _TestVicinity extends ChildVicinity {
+  const _TestVicinity({required super.xIndex, required super.yIndex});
+}
+
+class _TestBaseDelegate extends TwoDimensionalChildDelegate { //ignore: unused_element
+  // Would fail analysis without covariant
+  @override
+  Widget? build(BuildContext context, _TestVicinity vicinity) => null;
+
+  @override
+  bool shouldRebuild(covariant TwoDimensionalChildDelegate oldDelegate) => false;
+
+}
+
+class _TestBuilderDelegate extends TwoDimensionalChildBuilderDelegate { //ignore: unused_element
+  _TestBuilderDelegate({required super.builder});
+  // Would fail analysis without covariant
+  @override
+  Widget? build(BuildContext context, _TestVicinity vicinity) {
+    return super.build(context, vicinity);
+  }
+}
+
+class _TestListDelegate extends TwoDimensionalChildListDelegate { //ignore: unused_element
+  _TestListDelegate({required super.children});
+  // Would fail analysis without covariant
+  @override
+  Widget? build(BuildContext context, _TestVicinity vicinity) {
+    return super.build(context, vicinity);
+  }
+}
+
 RenderTwoDimensionalViewport getViewport(WidgetTester tester, Key childKey) {
   return RenderAbstractViewport.of(
     tester.renderObject(find.byKey(childKey))
@@ -2777,6 +2809,11 @@ class _SomeRenderTwoDimensionalViewport extends RenderTwoDimensionalViewport { /
   @override
   set delegate(_SomeDelegateMixin value) { // Analysis would fail without covariant
     super.delegate = value;
+  }
+
+  @override
+  RenderBox? getChildFor(_TestVicinity vicinity) { // Analysis would fail without covariant
+    return super.getChildFor(vicinity);
   }
 
   @override
