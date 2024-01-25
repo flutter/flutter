@@ -137,8 +137,7 @@ Future<AssetBundle?> buildAssets({
 
 Future<void> writeBundle(
   Directory bundleDir,
-  Map<String, DevFSContent> assetEntries,
-  Map<String, AssetKind> entryKinds, {
+  Map<String, AssetBundleEntry> assetEntries, {
   Logger? loggerOverride,
   required TargetPlatform targetPlatform,
   required ImpellerStatus impellerStatus,
@@ -178,7 +177,7 @@ Future<void> writeBundle(
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
-    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+    assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource resource = await pool.request();
       try {
         // This will result in strange looking files, for example files with `/`
@@ -187,13 +186,12 @@ Future<void> writeBundle(
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
-        final AssetKind assetKind = entryKinds[entry.key] ?? AssetKind.regular;
         file.parent.createSync(recursive: true);
-        final DevFSContent devFSContent = entry.value;
+        final DevFSContent devFSContent = entry.value.content;
         if (devFSContent is DevFSFileContent) {
           final File input = devFSContent.file as File;
           bool doCopy = true;
-          switch (assetKind) {
+          switch (entry.value.kind) {
             case AssetKind.regular:
               break;
             case AssetKind.font:

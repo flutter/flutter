@@ -60,6 +60,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Kanselleer';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Maak toe';
 
   @override
@@ -548,6 +551,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ይቅር';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ዝጋ';
@@ -1040,6 +1046,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'الإلغاء';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'الإغلاق';
 
   @override
@@ -1528,6 +1537,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'বাতিল কৰক';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'বন্ধ কৰক';
@@ -2020,6 +2032,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Ləğv edin';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Bağlayın';
 
   @override
@@ -2508,6 +2523,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Скасаваць';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрыць';
@@ -3000,6 +3018,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Отказ';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Затваряне';
 
   @override
@@ -3488,6 +3509,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'বাতিল করুন';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'বন্ধ করুন';
@@ -3980,6 +4004,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Otkaži';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Zatvori';
 
   @override
@@ -4468,6 +4495,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancel·la';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Tanca';
@@ -4960,6 +4990,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Zrušit';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Zavřít';
 
   @override
@@ -5448,6 +5481,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Canslo';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Cau';
@@ -5940,6 +5976,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Annuller';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Luk';
 
   @override
@@ -6428,6 +6467,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Abbrechen';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Schließen';
@@ -6984,6 +7026,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Ακύρωση';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Κλείσιμο';
 
   @override
@@ -7472,6 +7517,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancel';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Close';
@@ -8780,6 +8828,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Cerrar';
@@ -13135,6 +13186,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Tühista';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Sule';
 
   @override
@@ -13623,6 +13677,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Utzi';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Itxi';
@@ -14115,6 +14172,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'لغو';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'بستن';
 
   @override
@@ -14603,6 +14663,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Peru';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Sulje';
@@ -15095,6 +15158,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Kanselahin';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Isara';
 
   @override
@@ -15583,6 +15649,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annuler';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Fermer';
@@ -16235,6 +16304,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Cancelar';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Pechar';
 
   @override
@@ -16723,6 +16795,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Abbrechen';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Schließen';
@@ -17215,6 +17290,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'રદ કરો';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'બંધ કરો';
 
   @override
@@ -17703,6 +17781,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ביטול';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'סגירה';
@@ -18195,6 +18276,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'रद्द करें';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'बंद करें';
 
   @override
@@ -18683,6 +18767,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Odustani';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zatvori';
@@ -19175,6 +19262,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Mégse';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Bezárás';
 
   @override
@@ -19663,6 +19753,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Չեղարկել';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Փակել';
@@ -20155,6 +20248,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Batal';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Tutup';
 
   @override
@@ -20643,6 +20739,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Hætta við';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Loka';
@@ -21135,6 +21234,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Annulla';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Chiudi';
 
   @override
@@ -21623,6 +21725,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'キャンセル';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '閉じる';
@@ -22115,6 +22220,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'გაუქმება';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'დახურვა';
 
   @override
@@ -22603,6 +22711,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Бас тарту';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Жабу';
@@ -23095,6 +23206,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'បោះបង់';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'បិទ';
 
   @override
@@ -23583,6 +23697,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
@@ -24075,6 +24192,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => '취소';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => '닫기';
 
   @override
@@ -24563,6 +24683,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Токтотуу';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Жабуу';
@@ -25055,6 +25178,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'ຍົກເລີກ';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'ປິດ';
 
   @override
@@ -25543,6 +25669,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Atšaukti';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Uždaryti';
@@ -26035,6 +26164,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Atcelt';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Aizvērt';
 
   @override
@@ -26523,6 +26655,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Откажи';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Затвори';
@@ -27015,6 +27150,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'റദ്ദാക്കുക';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'അടയ്ക്കുക';
 
   @override
@@ -27503,6 +27641,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Цуцлах';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Хаах';
@@ -27995,6 +28136,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'रद्द करा';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'बंद करा';
 
   @override
@@ -28483,6 +28627,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Batal';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Tutup';
@@ -28975,6 +29122,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'မလုပ်တော့';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'ပိတ်ရန်';
 
   @override
@@ -29463,6 +29613,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Lukk';
@@ -29955,6 +30108,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'रद्द गर्नुहोस्';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'बन्द गर्नुहोस्';
 
   @override
@@ -30443,6 +30599,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annuleren';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Sluiten';
@@ -30935,6 +31094,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Avbryt';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Lukk';
 
   @override
@@ -31423,6 +31585,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ବାତିଲ କରନ୍ତୁ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ବନ୍ଦ କରନ୍ତୁ';
@@ -31915,6 +32080,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'ਰੱਦ ਕਰੋ';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'ਬੰਦ ਕਰੋ';
 
   @override
@@ -32403,6 +32571,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Anuluj';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zamknij';
@@ -32895,6 +33066,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'لغوه کول';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'تړل';
 
   @override
@@ -33383,6 +33557,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Fechar';
@@ -34053,6 +34230,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Anulați';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Închideți';
 
   @override
@@ -34541,6 +34721,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Отмена';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрыть';
@@ -35033,6 +35216,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'අවලංගු කරන්න';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'වසන්න';
 
   @override
@@ -35521,6 +35707,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Zrušiť';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zavrieť';
@@ -36013,6 +36202,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Prekliči';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Zapri';
 
   @override
@@ -36503,6 +36695,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Anulo';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Mbyll';
 
   @override
@@ -36991,6 +37186,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Откажи';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Затвори';
@@ -37830,6 +38028,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Avbryt';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Stäng';
 
   @override
@@ -38318,6 +38519,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Ghairi';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Funga';
@@ -38810,6 +39014,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'ரத்துசெய்';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'மூடுக';
 
   @override
@@ -39298,6 +39505,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'రద్దు చేయండి';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'మూసివేయండి';
@@ -39790,6 +40000,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'ยกเลิก';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'ปิด';
 
   @override
@@ -40278,6 +40491,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Kanselahin';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Isara';
@@ -40770,6 +40986,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'İptal';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Kapat';
 
   @override
@@ -41258,6 +41477,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Скасувати';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрити';
@@ -41750,6 +41972,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'منسوخ کریں';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'بند کریں';
 
   @override
@@ -42238,6 +42463,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Bekor qilish';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Yopish';
@@ -42730,6 +42958,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Huỷ';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Đóng';
 
   @override
@@ -43220,6 +43451,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => '取消';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => '关闭';
 
   @override
@@ -43490,7 +43724,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '许可';
 
   @override
-  String get lookUpButtonLabel => '向上看';
+  String get lookUpButtonLabel => '查询';
 
   @override
   String get menuBarMenuLabel => '菜单栏的菜单';
@@ -44249,6 +44483,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Khansela';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Vala';

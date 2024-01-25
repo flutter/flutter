@@ -153,6 +153,30 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('throws ToolExit when directory entry contains invalid characters', () async {
+      testFileSystem.file('.packages').createSync();
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - https://mywebsite.com/images/
+''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      expect(() => bundle.build(packagesPath: '.packages'), throwsToolExit(
+        message: 'Unable to search for asset files in directory path "https%3A//mywebsite.com/images/". '
+        'Please ensure that this is valid URI that points to a directory that is '
+        'available on the local file system.\n'
+        'Error details:\n'
+        'Unsupported operation: Illegal character in path: https:',
+      ));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+    });
+
     testUsingContext('handle removal of wildcard directories', () async {
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       final File pubspec = globals.fs.file('pubspec.yaml')
@@ -624,8 +648,7 @@ flutter:
 
     await writeBundle(
       directory,
-      <String, DevFSContent>{},
-      <String, AssetKind>{},
+      const <String, AssetBundleEntry>{},
       loggerOverride: testLogger,
       targetPlatform: TargetPlatform.android,
       impellerStatus: ImpellerStatus.disabled,
@@ -648,12 +671,9 @@ assets:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(packagesPath: '.packages');
 
-    final DevFSStringContent? assetManifest = bundle.entries['AssetManifest.json']
-      as DevFSStringContent?;
-    final DevFSStringContent? fontManifest = bundle.entries['FontManifest.json']
-      as DevFSStringContent?;
-    final DevFSStringContent? license = bundle.entries['NOTICES']
-      as DevFSStringContent?;
+    final AssetBundleEntry? assetManifest = bundle.entries['AssetManifest.json'];
+    final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
+    final AssetBundleEntry? license = bundle.entries['NOTICES'];
 
     await bundle.build(packagesPath: '.packages');
 
@@ -751,7 +771,6 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.android,
         impellerStatus: ImpellerStatus.disabled,
@@ -773,7 +792,7 @@ flutter:
             '--include=/$assetsPath',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
@@ -798,7 +817,6 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
@@ -821,7 +839,7 @@ flutter:
             '--include=/$assetsPath',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
@@ -862,7 +880,7 @@ flutter:
             '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
@@ -882,7 +900,6 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        bundle.entryKinds,
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
@@ -1057,8 +1074,8 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
-    expect((bundle.entries['FontManifest.json']! as DevFSStringContent).string, '[]');
-    expect((bundle.entries['AssetManifest.json']! as DevFSStringContent).string, '{}');
+    expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
+    expect((bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string, '{}');
     expect(testLogger.errorText, contains(
       'package:foo has `uses-material-design: true` set'
     ));
@@ -1129,10 +1146,10 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
-    expect((bundle.entries['FontManifest.json']! as DevFSStringContent).string, '[]');
+    expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
     // The assets from deferred components and regular assets
     // are both included in alphabetical order
-    expect((bundle.entries['AssetManifest.json']! as DevFSStringContent).string, '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
+    expect((bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string, '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
