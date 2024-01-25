@@ -33,15 +33,7 @@ class HotReloadProject extends Project {
     WidgetsFlutterBinding.ensureInitialized();
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    // See https://github.com/flutter/flutter/issues/86202
-    if (kIsWeb) {
-      while (true) {
-        runApp(${constApp ? 'const ': ''}MyApp());
-        await Future.delayed(const Duration(seconds: 1));
-      }
-    } else {
-     runApp(${constApp ? 'const ': ''}MyApp());
-    }
+    runApp(${constApp ? 'const ': ''}MyApp());
   }
 
   int count = 1;
@@ -81,10 +73,20 @@ class HotReloadProject extends Project {
     }
   }
 
-  void printHotReloadWorked() {
+  Future<void> printHotReloadWorked() async {
     // The call to this function is uncommented by a test to verify that hot
     // reloading worked.
     print('(((((RELOAD WORKED)))))');
+
+    // We need to insist here for `const` Apps, so print statements don't
+    // get lost between the browser and the test driver.
+    // See: https://github.com/flutter/flutter/issues/86202
+    if (kIsWeb) {
+      while (true) {
+        await Future.delayed(const Duration(seconds: 1));
+        print('(((((RELOAD WORKED)))))');
+      }
+    }
   }
   ''';
 
