@@ -77,7 +77,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addFontSizeObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
-    _setAppLifecycleState(ui.AppLifecycleState.resumed);
+    AppLifecycleState.instance.addListener(_setAppLifecycleState);
     viewManager.onViewDisposed.listen((_) {
       // Send a metrics changed event to the framework when a view is disposed.
       // View creation/resize is handled by the `_didResize` handler in the
@@ -111,6 +111,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _disconnectFontSizeObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
+    AppLifecycleState.instance.removeListener(_setAppLifecycleState);
     viewManager.dispose();
   }
 
@@ -1033,10 +1034,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
-    sendPlatformMessage(
+    invokeOnPlatformMessage(
       'flutter/lifecycle',
-      ByteData.sublistView(utf8.encode(state.toString())),
-      null,
+      const StringCodec().encodeMessage(state.toString()),
+      (_) {},
     );
   }
 
