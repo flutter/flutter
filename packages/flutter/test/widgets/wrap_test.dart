@@ -15,9 +15,9 @@ void verify(WidgetTester tester, List<Offset> answerKey) {
 }
 
 void verifySize(WidgetTester tester, List<Size> answerKey) {
-  final List<Size> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Size>(
+  final Iterable<Size> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Size>(
     (RenderBox target) => target.size,
-  ).toList();
+  );
   expect(testAnswers, equals(answerKey));
 }
 
