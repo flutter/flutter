@@ -538,7 +538,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
-        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        final bool managed = line.contains(RegExp('def flutterPluginVersion = [\'"]managed[\'"]'));
         if (fileBasedApply || declarativeApply || managed) {
           return true;
         }

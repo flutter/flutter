@@ -2932,7 +2932,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2955,7 +2955,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2979,7 +2979,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -3002,7 +3002,7 @@ void main() {
     final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
 
     // Each build file should contain the expected namespace.
-    const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
+    const String expectedNameSpace = 'namespace "com.bar.foo.flutter_project"';
     expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
     expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
     const String expectedHostNameSpace = 'namespace "com.bar.foo.flutter_project.host"';
