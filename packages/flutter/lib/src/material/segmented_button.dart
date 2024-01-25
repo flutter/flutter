@@ -527,13 +527,10 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final double adjustButtonMinHeight = textButtonMinHeight + densityAdjustment.dy;
     final double effectiveVerticalPadding = resolvedPadding.vertical + densityAdjustment.dy * 2;
     final double effectedButtonHeight = max(fontSize + effectiveVerticalPadding, adjustButtonMinHeight);
-    final double tapTargetVerticalPadding;
-    switch (resolvedTapTargetSize) {
-      case MaterialTapTargetSize.shrinkWrap:
-        tapTargetVerticalPadding = 0;
-      case MaterialTapTargetSize.padded:
-        tapTargetVerticalPadding = max(0, kMinInteractiveDimension + densityAdjustment.dy - effectedButtonHeight);
-    }
+    final double tapTargetVerticalPadding = switch (resolvedTapTargetSize) {
+      MaterialTapTargetSize.shrinkWrap => 0.0,
+      MaterialTapTargetSize.padded => max(0, kMinInteractiveDimension + densityAdjustment.dy - effectedButtonHeight)
+    };
 
     return Material(
       type: MaterialType.transparency,
