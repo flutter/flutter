@@ -479,7 +479,7 @@ void main() {
           'assembleRelease',
         ],
         exitCode: 1,
-        onRun: () {
+        onRun: (_) {
           throw const ProcessException('', <String>[], 'Unrecognized');
         }
       ));

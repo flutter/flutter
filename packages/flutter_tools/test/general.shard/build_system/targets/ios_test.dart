@@ -599,7 +599,7 @@ void main() {
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
           outputDir.path,
           ],
-          onRun: () => binary.createSync(recursive: true),
+          onRun: (_) => binary.createSync(recursive: true),
         ),
         lipoCommandNonFatResult,
         FakeCommand(command: <String>[

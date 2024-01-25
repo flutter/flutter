@@ -670,7 +670,7 @@ void main() {
             '-d',
             tempDirectory.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempDirectory, exists);
             tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
             tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);

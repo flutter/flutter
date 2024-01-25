@@ -138,7 +138,7 @@ void main() {
           // destination
           environment.outputDir.path,
         ],
-        onRun: () {
+        onRun: (_) {
           entitlements.writeAsStringSync('foo');
           withoutEntitlements.writeAsStringSync('bar');
           nestedEntitlements.writeAsStringSync('somefile.bin');
