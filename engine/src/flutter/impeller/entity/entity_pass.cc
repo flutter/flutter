@@ -23,9 +23,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/matrix.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/geometry/size.h"
 #include "impeller/renderer/command_buffer.h"
 
 #ifdef IMPELLER_DEBUG
@@ -67,13 +65,6 @@ void EntityPass::SetBoundsLimit(std::optional<Rect> bounds_limit) {
 
 std::optional<Rect> EntityPass::GetBoundsLimit() const {
   return bounds_limit_;
-}
-
-std::optional<Rect> EntityPass::GetTransformedBoundsLimit() const {
-  if (bounds_limit_.has_value()) {
-    return bounds_limit_->TransformBounds(transform_);
-  }
-  return std::nullopt;
 }
 
 void EntityPass::AddEntity(Entity entity) {
@@ -199,11 +190,12 @@ std::optional<Rect> EntityPass::GetSubpassCoverage(
     return std::nullopt;
   }
 
-  auto user_bounds_coverage = subpass.GetTransformedBoundsLimit();
-  if (!user_bounds_coverage.has_value()) {
+  if (!subpass.bounds_limit_.has_value()) {
     return entities_coverage;
   }
-  return entities_coverage->Intersection(user_bounds_coverage.value());
+  auto user_bounds_coverage =
+      subpass.bounds_limit_->TransformBounds(subpass.transform_);
+  return entities_coverage->Intersection(user_bounds_coverage);
 }
 
 EntityPass* EntityPass::GetSuperpass() const {
@@ -493,43 +485,6 @@ bool EntityPass::Render(ContentContext& renderer,
       clip_coverage_stack);                      // clip_coverage_stack
 }
 
-// When a subpass size is close to, but still smaller than the root pass
-// size and smaller than the bounds hint, we may scale it up to the root
-// pass size. This will improve performance by improving the efficiency of
-// the render target cache, as only textures with exactly the same sizes +
-// descriptors can be recycled.
-static ISize MaybeRoundUpTextureSize(ISize subpass_size,
-                                     ISize root_pass_size,
-                                     std::optional<Rect> bounds_limit) {
-  // If the subpass is already bigger than the root pass size,
-  // return the existing subpass size.
-  if (subpass_size.width > root_pass_size.width ||
-      subpass_size.height > root_pass_size.height) {
-    return subpass_size;
-  }
-
-  // If there is a bounds limit and it is tigher than the root pass size,
-  // return the existing subpass size. This case could be removed if we
-  // conditionally inserted clips/scissor instead.
-  if (bounds_limit.has_value()) {
-    auto bounds_size = bounds_limit->GetSize();
-    if (bounds_size.width < root_pass_size.width ||
-        bounds_size.height < root_pass_size.height) {
-      return subpass_size;
-    }
-  }
-
-  // If the subpass size is within 10% of the root pass size, round up
-  // to the root pass size.
-  if (root_pass_size.width - subpass_size.width <=
-          (0.1 * root_pass_size.width) &&
-      root_pass_size.height - subpass_size.height <=
-          (0.1 * root_pass_size.height)) {
-    return root_pass_size;
-  }
-  return subpass_size;
-}
-
 EntityPass::EntityResult EntityPass::GetEntityForElement(
     const EntityPass::Element& element,
     ContentContext& renderer,
@@ -663,8 +618,6 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       return EntityPass::EntityResult::Skip();
     }
 
-    subpass_size = MaybeRoundUpTextureSize(
-        subpass_size, root_pass_size, subpass->GetTransformedBoundsLimit());
     auto subpass_target = CreateRenderTarget(
         renderer,      // renderer
         subpass_size,  // size
