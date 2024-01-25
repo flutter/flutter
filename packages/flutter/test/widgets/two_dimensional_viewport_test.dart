@@ -2401,6 +2401,89 @@ void main() {
       );
     }, variant: TargetPlatformVariant.all());
 
+    group('getOffset', () {
+      Finder findKey(ChildVicinity vicinity) {
+        return find.byKey(ValueKey<ChildVicinity>(vicinity));
+      }
+
+      testWidgets('Axis.vertical', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
+
+        final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+        expect(viewport.getOffset(axis: Axis.vertical).pixels, 0.0);
+        final RevealedOffset verticalOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 0, yIndex: 3))),
+          1.0,
+          axis: Axis.vertical,
+        );
+
+        // (0, 3) is in the cache extent, and will be brought into view next.
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 3)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(viewport.getOffset(axis: Axis.vertical).pixels, verticalOffset.offset);
+      });
+
+      testWidgets('Axis.horizontal', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
+
+        final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+        expect(viewport.getOffset(axis: Axis.horizontal).pixels, 0.0);
+        final RevealedOffset horizontalOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 0))),
+          1.0,
+          axis: Axis.horizontal,
+        );
+
+        // (5, 0) is in the cache extent, and will be brought into view next.
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(viewport.getOffset(axis: Axis.horizontal).pixels, horizontalOffset.offset);
+      });
+
+      testWidgets('both axes', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
+
+        final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+        expect(viewport.getOffset(axis: Axis.horizontal).pixels, 0.0);
+        final RevealedOffset horizontalOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 0))),
+          1.0,
+          axis: Axis.horizontal,
+        );
+
+        // (5, 0) is in the cache extent, and will be brought into view next.
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(viewport.getOffset(axis: Axis.horizontal).pixels, horizontalOffset.offset);
+        expect(viewport.getOffset(axis: Axis.vertical).pixels, 0.0);
+        expect(viewport.getOffset().pixels, 0.0); // Main axis is vertical by default.
+
+        // Move vertically to bring (5, 3) into view.
+        final RevealedOffset verticalOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 3))),
+          1.0,
+          axis: Axis.vertical,
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 3)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(viewport.getOffset(axis: Axis.horizontal).pixels, horizontalOffset.offset);
+        expect(viewport.getOffset(axis: Axis.vertical).pixels, verticalOffset.offset);
+        expect(viewport.getOffset().pixels, verticalOffset.offset); // Main axis is vertical by default.
+      });
+    });
+
     group('showOnScreen & showInViewport', () {
       Finder findKey(ChildVicinity vicinity) {
         return find.byKey(ValueKey<ChildVicinity>(vicinity));
