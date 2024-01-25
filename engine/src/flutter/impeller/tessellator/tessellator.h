@@ -24,11 +24,6 @@ void DestroyTessellator(TESStesselator* tessellator);
 using CTessellator =
     std::unique_ptr<TESStesselator, decltype(&DestroyTessellator)>;
 
-enum class WindingOrder {
-  kClockwise,
-  kCounterClockwise,
-};
-
 //------------------------------------------------------------------------------
 /// @brief      A utility that generates triangles of the specified fill type
 ///             given a polyline. This happens on the CPU.
