@@ -40,7 +40,7 @@ const String templateKotlinGradlePluginVersion = '1.7.10';
 //
 // Please see the README before changing any of these values.
 const String compileSdkVersion = '34';
-const String minSdkVersion = '19';
+const String minSdkVersion = '21';
 const String targetSdkVersion = '33';
 const String ndkVersion = '23.1.7779620';
 
@@ -107,9 +107,11 @@ final RegExp gradleOrgVersionMatch =
   );
 
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
-// file which have minSdkVersion 16,17, or 18 (the Jelly Bean api levels).
-final RegExp jellyBeanMinSdkVersionMatch =
-  RegExp(r'(?<=^\s*)minSdkVersion 1[678](?=\s*(?://|$))', multiLine: true);
+// file which have minSdkVersion 16,17, 18, 19, or 20.
+final RegExp tooOldMinSdkVersionMatch = RegExp(
+  r'(?<=^\s*)minSdkVersion (1[6789]|20)(?=\s*(?://|$))',
+  multiLine: true,
+);
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';
