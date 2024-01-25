@@ -48,4 +48,8 @@ public class SurfaceProducerPlatformViewRenderTarget implements PlatformViewRend
   public Surface getSurface() {
     return this.producer.getSurface();
   }
+
+  public void scheduleFrame() {
+    this.producer.scheduleFrame();
+  }
 }
