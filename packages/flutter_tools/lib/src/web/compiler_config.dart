@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import '../base/utils.dart';
 import 'compile.dart';
 
@@ -18,6 +20,8 @@ sealed class WebCompilerConfig {
   /// Otherwise, `false`–represents the JavaScript compiler.
   CompileTarget get compileTarget;
   final WebRendererMode renderer;
+
+  String get buildKey;
 
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{};
 }
@@ -113,6 +117,19 @@ class JsCompilerConfig extends WebCompilerConfig {
         if (noFrequencyBasedMinification) '--no-frequency-based-minification',
         if (csp) '--csp',
       ];
+
+  @override
+  String get buildKey {
+    final Map<String, dynamic> settings = <String, dynamic>{
+      'csp': csp,
+      'dumpInfo': dumpInfo,
+      'nativeNullAssertions': nativeNullAssertions,
+      'noFrequencyBasedMinification': noFrequencyBasedMinification,
+      'optimizationLevel': optimizationLevel,
+      'sourceMaps': sourceMaps,
+    };
+    return jsonEncode(settings);
+  }
 }
 
 /// Configuration for the Wasm compiler.
@@ -151,6 +168,16 @@ class WasmCompilerConfig extends WebCompilerConfig {
         kOmitTypeChecks: omitTypeChecks.toString(),
         kRunWasmOpt: wasmOpt.name,
       };
+
+  @override
+  String get buildKey {
+    final Map<String, dynamic> settings = <String, dynamic>{
+      'omitTypeChecks': omitTypeChecks,
+      'wasmOpt': wasmOpt.name,
+    };
+    return jsonEncode(settings);
+  }
+
 }
 
 enum WasmOptLevel implements CliEnum {

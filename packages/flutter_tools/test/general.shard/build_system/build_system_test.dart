@@ -21,10 +21,10 @@ import '../../src/fake_process_manager.dart';
 void main() {
   late FileSystem fileSystem;
   late Environment environment;
-  late Target fooTarget;
-  late Target barTarget;
-  late Target fizzTarget;
-  late Target sharedTarget;
+  late TestTarget fooTarget;
+  late TestTarget barTarget;
+  late TestTarget fizzTarget;
+  late TestTarget sharedTarget;
   late int fooInvocations;
   late int barInvocations;
   late int shared;
@@ -138,6 +138,23 @@ void main() {
       json.decode(stampFile.readAsStringSync()));
 
     expect(stampContents, containsPair('inputs', <Object>['/foo.dart']));
+    expect(stampContents!.containsKey('buildKey'), false);
+  });
+
+  testWithoutContext('Saves a stamp file with inputs, outputs and build key', () async {
+    fooTarget.buildKey = 'fooBuildKey';
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    await buildSystem.build(fooTarget, environment);
+    final File stampFile = fileSystem.file(
+      '${environment.buildDir.path}/foo.stamp');
+
+    expect(stampFile, exists);
+
+    final Map<String, Object?>? stampContents = castStringKeyedMap(
+      json.decode(stampFile.readAsStringSync()));
+
+    expect(stampContents, containsPair('inputs', <Object>['/foo.dart']));
+    expect(stampContents, containsPair('buildKey', 'fooBuildKey'));
   });
 
   testWithoutContext('Creates a BuildResult with inputs and outputs', () async {
@@ -162,6 +179,19 @@ void main() {
     await buildSystem.build(fooTarget, environment);
 
     fileSystem.file('foo.dart').writeAsStringSync('new contents');
+
+    await buildSystem.build(fooTarget, environment);
+
+    expect(fooInvocations, 2);
+  });
+
+  testWithoutContext('Re-invoke build if build key is modified', () async {
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    fooTarget.buildKey = 'old';
+
+    await buildSystem.build(fooTarget, environment);
+
+    fooTarget.buildKey = 'new';
 
     await buildSystem.build(fooTarget, environment);
 
@@ -723,4 +753,7 @@ class TestTarget extends Target {
 
   @override
   List<Source> outputs = <Source>[];
+
+  @override
+  String? buildKey;
 }

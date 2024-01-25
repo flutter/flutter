@@ -118,6 +118,8 @@ abstract class Dart2WebTarget extends Target {
 
   Source get compilerSnapshot;
 
+  WebCompilerConfig get compilerConfig;
+
   Map<String, dynamic> get buildConfig;
   List<String> get buildFiles;
 
@@ -140,11 +142,15 @@ abstract class Dart2WebTarget extends Target {
   List<Source> get outputs => buildFiles.map(
     (String file) => Source.pattern('{OUTPUT_DIR}/$file')
   ).toList();
+
+  @override
+  String get buildKey => compilerConfig.buildKey;
 }
 
 class Dart2JSTarget extends Dart2WebTarget {
   Dart2JSTarget(this.compilerConfig);
 
+  @override
   final JsCompilerConfig compilerConfig;
 
   @override
@@ -253,6 +259,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 class Dart2WasmTarget extends Dart2WebTarget {
   Dart2WasmTarget(this.compilerConfig);
 
+  @override
   final WasmCompilerConfig compilerConfig;
 
   @override
