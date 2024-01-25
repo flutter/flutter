@@ -881,26 +881,15 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
-    // Visit slot children.
-    for (final Element child in slotToChild.values) {
-      if (!_forgottenChildren.contains(child)) {
-        if (_shouldPaint(child) && offstageAncestor == null) {
-          visitor(child);
+    visitChildren((Element element) {
+      if (!_forgottenChildren.contains(element)) {
+        if (_shouldPaint(element) && offstageAncestor == null) {
+          visitor(element);
         } else {
-          child.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor ?? child);
+          element.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor ?? element);
         }
       }
-    }
-    // Visit list children.
-    for (final Element child in _children) {
-      if (!_forgottenChildren.contains(child)) {
-        if (_shouldPaint(child) && offstageAncestor == null) {
-          visitor(child);
-        } else {
-          child.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor ?? child);
-        }
-      }
-    }
+    });
   }
 
   @override

@@ -717,7 +717,7 @@ class _MultiChildComponentElement extends Element {
     // TODO(yiiim): The _viewElements need to be handled separately for whether they are onstage.
     if (offstageAncestor == null) {
       visitChildren(visitor);
-    } else if (Element.debugVisitOffstageChildren) {
+    } else if (Element.debugFinderVisitOffstageChildren) {
       visitChildren((Element element) {
         element.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor);
       });

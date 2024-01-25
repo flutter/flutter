@@ -2248,10 +2248,10 @@ void main() {
   });
 
   testWidgets('Using OverlayPortal with no child in ListView', (WidgetTester tester) async {
-    final bool debugVisitOffstageChildren = Element.debugVisitOffstageChildren;
-    Element.debugVisitOffstageChildren = true;
+    final bool debugVisitOffstageChildren = Element.debugFinderVisitOffstageChildren;
+    Element.debugFinderVisitOffstageChildren = true;
     addTearDown(() {
-      Element.debugVisitOffstageChildren = debugVisitOffstageChildren;
+      Element.debugFinderVisitOffstageChildren = debugVisitOffstageChildren;
     });
     await tester.pumpWidget(
       MaterialApp(

@@ -3473,10 +3473,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// Setting this property, the [debugVisitOnstageChildren] method will continue to
   /// visit potentially onstage children for elements that are offstage, which may
-  /// introduce some additional overhead.
+  /// introduce some additional overhead. Only set this property during testing,
+  /// for example, when writing tests for an OverlayPortal that could potentially be
+  /// in the offstage, set this property to true. See [debugVisitOnstageChildren]
+  /// for additional information.
   ///
   /// By default, this property is set to false.
-  static bool debugVisitOffstageChildren = false;
+  static bool debugFinderVisitOffstageChildren = false;
 
   /// The configuration for this element.
   ///
@@ -3688,13 +3691,18 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Calls the argument for each child considered onstage.
   ///
   /// Classes like [Offstage] and [Overlay] override this method to hide their
-  /// children.
+  /// children. When [OverlayPortal] is offstage but its [Overlay] is onstage,
+  /// [OverlayPortal] also overrides this method to visit its children that are on the [Overlay].
   ///
-  /// [OverlayPortal] also overrides this method to visit its onstage
-  /// children when it itself is offstage. Specifically, when [offstageAncestor] is specified,
-  /// it means that the current element is also offstage because the ancestor [offstageAncestor]
-  /// is offstage (where [offstageAncestor] is the first ancestor to transition from onstage to offstage).
-  /// This method gives the children a chance to be back onstage.
+  /// When [debugVisitOnstageChildren] is calledand [offstageAncestor] is null, it should consider
+  /// itself to be onstage and invoke [visitor] for all onstage children. For its offstage children,
+  /// it should call debugVisitOnstageChildren and pass itself as offstageAncestor.
+  /// If offstageAncestor is not null, it is considered offstage and should not invoke visitor.
+  /// Instead, it should call [debugVisitOnstageChildren] on its children with the same arguments - unless
+  /// it considers any of its children onstage, in which case it should invoke [visitor] for them.
+  /// Additionally, to avoid unnecessary recursion of offstage children, this method is influenced by
+  /// [debugFinderVisitOffstageChildren] and will only call this method for offstage elements when [debugFinderVisitOffstageChildren]
+  /// is true.
   ///
   /// Being onstage affects the element's discoverability during testing when
   /// you use Flutter's [Finder] objects. For example, when you instruct the
@@ -3717,7 +3725,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void debugVisitOnstageChildren(ElementVisitor visitor, { Element? offstageAncestor }) {
     if (offstageAncestor == null) {
       visitChildren(visitor);
-    } else if (debugVisitOffstageChildren) {
+    } else if (debugFinderVisitOffstageChildren) {
       visitChildren((Element element) {
         element.debugVisitOnstageChildren(visitor, offstageAncestor: offstageAncestor);
       });
