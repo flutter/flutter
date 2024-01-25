@@ -81,9 +81,4 @@ final class SurfaceTextureSurfaceProducer
     }
     return surface;
   }
-
-  @Override
-  public void scheduleFrame() {
-    flutterJNI.markTextureFrameAvailable(id);
-  }
 }

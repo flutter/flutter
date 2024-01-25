@@ -167,7 +167,6 @@ public class PlatformViewWrapper extends FrameLayout {
       // Override the canvas that this subtree of views will use to draw.
       super.draw(targetCanvas);
     } finally {
-      renderTarget.scheduleFrame();
       targetSurface.unlockCanvasAndPost(targetCanvas);
     }
   }

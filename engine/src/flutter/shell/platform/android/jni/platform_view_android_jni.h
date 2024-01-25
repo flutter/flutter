@@ -92,11 +92,6 @@ class PlatformViewAndroidJNI {
                                                int textureId) = 0;
 
   //----------------------------------------------------------------------------
-  /// @brief      Returns true if surface_texture should be updated.
-  ///
-  virtual bool SurfaceTextureShouldUpdate(JavaLocalRef surface_texture) = 0;
-
-  //----------------------------------------------------------------------------
   /// @brief      Updates the texture image to the most recent frame from the
   ///             image stream.
   ///

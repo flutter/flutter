@@ -94,8 +94,6 @@ public interface TextureRegistry {
      * @return a Surface to use for a drawing target for various APIs.
      */
     Surface getSurface();
-
-    void scheduleFrame();
   };
 
   /** A registry entry for a managed SurfaceTexture. */

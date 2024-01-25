@@ -40,7 +40,6 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   virtual void Detach();
 
   void Attach(int gl_tex_id);
-  bool ShouldUpdate();
   void Update();
 
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
@@ -49,6 +48,7 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   fml::jni::ScopedJavaGlobalRef<jobject> surface_texture_;
   AttachmentState state_ = AttachmentState::kUninitialized;
   SkMatrix transform_;
+  bool new_frame_ready_ = false;
   sk_sp<flutter::DlImage> dl_image_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SurfaceTextureExternalTexture);
