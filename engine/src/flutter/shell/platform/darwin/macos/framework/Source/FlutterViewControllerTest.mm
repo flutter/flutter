@@ -995,6 +995,12 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
   EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
 
+  // Test that stray NSEventPhaseCancelled event does not crash
+  called = false;
+  [viewController rotateWithEvent:flutter::testing::MockGestureEvent(NSEventTypeRotate,
+                                                                     NSEventPhaseCancelled, 0, 0)];
+  EXPECT_FALSE(called);
+
   return true;
 }
 
