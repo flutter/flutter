@@ -17,7 +17,8 @@ const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 ///
 /// The disposing contract for [ImageInfo] (as well as for [ui.Image])
 /// is different from traditional one, where
-/// an object should dispose a member if the object created the member:
+/// an object should dispose a member if the object created the member.
+/// Instead:
 ///
 /// * [ImageInfo] disposes [image], even if it is received as a constructor argument.
 /// * [ImageInfo] is expected to be disposed not by the object, that created it,
@@ -28,7 +29,8 @@ const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 ///
 ///  * To share the [ImageInfo] or [ui.Image] between objects, use the [clone] method,
 /// which will not clone the entire underlying image, but only reference to it and information about it.
-///  * After passing a [ui.Image] or [ImageInfo] reference to another object, release the reference.
+///  * After passing a [ui.Image] or [ImageInfo] reference to another object,
+/// release the reference.
 @immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
