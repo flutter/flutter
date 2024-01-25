@@ -97,6 +97,11 @@ bool CompositorOpenGL::Present(const FlutterLayer** layers,
     return false;
   }
 
+  if (!engine_->egl_manager()->surface() ||
+      !engine_->egl_manager()->surface()->IsValid()) {
+    return false;
+  }
+
   // Clear the view if there are no layers to present.
   if (layers_count == 0) {
     // Normally the compositor is initialized when the first backing store is
@@ -128,7 +133,7 @@ bool CompositorOpenGL::Present(const FlutterLayer** layers,
     return false;
   }
 
-  if (!engine_->egl_manager()->MakeCurrent()) {
+  if (!engine_->egl_manager()->surface()->MakeCurrent()) {
     return false;
   }
 
@@ -154,7 +159,7 @@ bool CompositorOpenGL::Present(const FlutterLayer** layers,
                        GL_NEAREST            // filter
   );
 
-  if (!engine_->egl_manager()->SwapBuffers()) {
+  if (!engine_->egl_manager()->surface()->SwapBuffers()) {
     return false;
   }
 
@@ -165,7 +170,7 @@ bool CompositorOpenGL::Present(const FlutterLayer** layers,
 bool CompositorOpenGL::Initialize() {
   FML_DCHECK(!is_initialized_);
 
-  if (!engine_->egl_manager()->MakeCurrent()) {
+  if (!engine_->egl_manager()->surface()->MakeCurrent()) {
     return false;
   }
 
@@ -186,14 +191,14 @@ bool CompositorOpenGL::ClearSurface() {
   // Resize the surface if needed.
   engine_->view()->OnEmptyFrameGenerated();
 
-  if (!engine_->egl_manager()->MakeCurrent()) {
+  if (!engine_->egl_manager()->surface()->MakeCurrent()) {
     return false;
   }
 
   gl_->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   gl_->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-  if (!engine_->egl_manager()->SwapBuffers()) {
+  if (!engine_->egl_manager()->surface()->SwapBuffers()) {
     return false;
   }
 
