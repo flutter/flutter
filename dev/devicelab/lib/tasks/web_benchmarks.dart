@@ -39,7 +39,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         '--omit-type-checks',
       ],
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-      '--web-renderer=${benchmarkOptions.webRenderer}',
+      if (!benchmarkOptions.useWasm) '--web-renderer=${benchmarkOptions.webRenderer}',
       '--profile',
       '--no-web-resources-cdn',
       '-t',
