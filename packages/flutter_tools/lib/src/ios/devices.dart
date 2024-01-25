@@ -359,6 +359,9 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
     String? userIdentifier,
@@ -784,7 +787,7 @@ class IOSDevice extends Device {
         deviceLogReader.debuggerStream = iosDeployDebugger;
       }
     }
-    // Don't port foward if debugging with a wireless device.
+    // Don't port forward if debugging with a wireless device.
     return ProtocolDiscovery.vmService(
       deviceLogReader,
       portForwarder: isWirelesslyConnected ? null : portForwarder,
@@ -1389,7 +1392,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     if (!useSyslogLogging) {
       return;
     }
-    _iMobileDevice.startLogger(_deviceId).then<void>((Process process) {
+    _iMobileDevice.startLogger(_deviceId, _isWirelesslyConnected).then<void>((Process process) {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {

@@ -79,7 +79,7 @@ void main() {
   // Returns the command matching the build_windows call to generate CMake
   // files.
   FakeCommand cmakeGenerationCommand({
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
     String generator = _defaultGenerator,
   }) {
     return FakeCommand(
@@ -102,7 +102,7 @@ void main() {
   // Returns the command matching the build_windows call to build.
   FakeCommand buildCommand(String buildMode, {
     bool verbose = false,
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -948,7 +948,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
-      buildCommand('Release', onRun: () {
+      buildCommand('Release', onRun: (_) {
         fileSystem.file(r'build\flutter_size_01\snapshot.windows-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''

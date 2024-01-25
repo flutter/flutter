@@ -23,15 +23,15 @@ void testNoStopwatches(Stopwatch stopwatch) {
 
   StopwatchAtHome().runtimeType;               // Bad: introducing a Stopwatch subclass.
 
-  Stopwatch anothorStopwatch = stopwatch;      // OK: not directly introducing Stopwatch.
+  Stopwatch anotherStopwatch = stopwatch;      // OK: not directly introducing Stopwatch.
   StopwatchAtHome Function() constructor = StopwatchAtHome.new; // Bad: introducing a Stopwatch constructor.
   assert(() {
-    anothorStopwatch = constructor()..runtimeType;
+    anotherStopwatch = constructor()..runtimeType;
     constructor = StopwatchAtHome.create;               // Bad: introducing a Stopwatch constructor.
-    anothorStopwatch = constructor()..runtimeType;
+    anotherStopwatch = constructor()..runtimeType;
     return true;
   }());
-  anothorStopwatch.runtimeType;
+  anotherStopwatch.runtimeType;
 
   externallib.MyStopwatch.create();                     // Bad: introducing an external Stopwatch constructor.
   ExternalStopwatchConstructor? externalConstructor;

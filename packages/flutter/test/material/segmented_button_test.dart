@@ -232,7 +232,7 @@ void main() {
     expect(selection, <int>{2, 3});
   });
 
-testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
+  testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
     int callbackCount = 0;
     int? selectedSegment = 1;
 
@@ -285,7 +285,7 @@ testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) 
     expect(selectedSegment, 3);
   });
 
-testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
+  testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
     Widget frameWithSelection(int selected) {
       return Material(
         child: boilerplate(
@@ -646,10 +646,10 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
                 ButtonSegment<int>(value: 1, label: Text('1')),
                 ButtonSegment<int>(value: 2, label: Text('2'), tooltip: 't2'),
                 ButtonSegment<int>(
-                    value: 3,
-                    label: Text('3'),
-                    tooltip: 't3',
-                    enabled: false,
+                  value: 3,
+                  label: Text('3'),
+                  tooltip: 't3',
+                  enabled: false,
                 ),
               ],
               selected: const <int>{2},
@@ -773,6 +773,45 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     await gesture.down(tester.getCenter(find.text('1')));
     await tester.pumpAndSettle();
     expect(overlayColor(), paints..rect(color: foregroundColor.withOpacity(0.08)));
+  });
+
+  testWidgets('Disabled SegmentedButton has correct states when rebuilding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Column(
+                  children: <Widget>[
+                    SegmentedButton<int>(
+                      segments: const <ButtonSegment<int>>[
+                        ButtonSegment<int>(value: 0, label: Text('foo')),
+                      ],
+                      selected: const <int>{0},
+                    ),
+                    ElevatedButton(
+                      onPressed: () => setState(() {}),
+                      child: const Text('Trigger rebuild'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    final Set<MaterialState> states = <MaterialState>{ MaterialState.selected, MaterialState.disabled };
+    // Check the initial states.
+    SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers.values.first.value, states);
+    // Trigger a rebuild.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    // Check the states after the rebuild.
+    state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers.values.first.value, states);
   });
 }
 

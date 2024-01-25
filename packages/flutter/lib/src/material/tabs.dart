@@ -107,7 +107,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.text,
     this.icon,
-    this.iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.iconMargin,
     this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
@@ -132,7 +132,10 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   ///
   /// Only useful when used in combination with [icon], and either one of
   /// [text] or [child] is non-null.
-  final EdgeInsetsGeometry iconMargin;
+  ///
+  /// Defaults to 2 pixels of bottom margin. If [ThemeData.useMaterial3] is false,
+  /// then defaults to 10 pixels of bottom margin.
+  final EdgeInsetsGeometry? iconMargin;
 
   /// The height of the [Tab].
   ///
@@ -159,11 +162,15 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       label = icon!;
     } else {
       calculatedHeight = _kTextAndIconTabHeight;
+      final EdgeInsetsGeometry effectiveIconMargin = iconMargin ??
+        (Theme.of(context).useMaterial3
+          ? _TabsPrimaryDefaultsM3.iconMargin
+          : _TabsDefaultsM2.iconMargin);
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            margin: iconMargin,
+            margin: effectiveIconMargin,
             child: icon,
           ),
           _buildLabelText(),
@@ -437,6 +444,15 @@ class _IndicatorPainter extends CustomPainter {
     this.dividerHeight,
     required this.showDivider,
   }) : super(repaint: controller.animation) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_IndicatorPainter',
+        object: this,
+      );
+    }
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
     }
@@ -466,6 +482,9 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _painter?.dispose();
   }
 
@@ -1693,17 +1712,26 @@ class _TabBarState extends State<TabBar> {
           TabAlignment.start || TabAlignment.startOffset || TabAlignment.fill => AlignmentDirectional.centerStart,
         };
 
-        tabBar = CustomPaint(
-          painter: _DividerPainter(
-            dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
-            dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
-          ),
-          child: Align(
-            heightFactor: 1.0,
-            alignment: effectiveAlignment,
-            child: tabBar,
-          ),
+        final Color dividerColor = widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!;
+        final double dividerHeight = widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!;
+        final bool showDivider = dividerColor != Colors.transparent && dividerHeight > 0;
+
+        tabBar = Align(
+          heightFactor: 1.0,
+          widthFactor: showDivider ? null : 1.0,
+          alignment: effectiveAlignment,
+          child: tabBar,
         );
+
+        if (showDivider) {
+          tabBar = CustomPaint(
+            painter: _DividerPainter(
+              dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
+              dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
+            ),
+            child: tabBar,
+          );
+        }
       }
     } else if (widget.padding != null) {
       tabBar = Padding(
@@ -2245,6 +2273,8 @@ class _TabsDefaultsM2 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
+
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 10);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Tabs
@@ -2319,6 +2349,11 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 
   static double indicatorWeight = 3.0;
+
+  // TODO(davidmartos96): This value doesn't currently exist in
+  // https://m3.material.io/components/tabs/specs
+  // Update this when the token is available.
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
 class _TabsSecondaryDefaultsM3 extends TabBarTheme {

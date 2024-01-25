@@ -1208,6 +1208,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     bool ipv6 = false,
     FlutterProject? flutterProject,
     Analytics? analytics,
+    String? nativeAssetsYamlFile,
   }) {
     if (_artifactTester != null) {
       for (final FlutterDevice device in devices) {

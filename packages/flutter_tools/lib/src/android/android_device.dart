@@ -373,6 +373,9 @@ class AndroidDevice extends Device {
   String get name => modelID;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
     String? userIdentifier,
@@ -608,7 +611,7 @@ class AndroidDevice extends Device {
     if (debuggingOptions.debuggingEnabled) {
       vmServiceDiscovery = ProtocolDiscovery.vmService(
         // Avoid using getLogReader, which returns a singleton instance, because the
-        // VM Service discovery will dipose at the end. creating a new logger here allows
+        // VM Service discovery will dispose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,

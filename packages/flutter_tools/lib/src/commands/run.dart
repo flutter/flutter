@@ -331,6 +331,7 @@ class RunCommand extends RunCommandBase {
     usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
+    usesNativeAssetsOption(hide: !verboseHelp);
 
     // By default, the app should to publish the VM service port over mDNS.
     // This will allow subsequent "flutter attach" commands to connect to the VM
@@ -610,6 +611,13 @@ class RunCommand extends RunCommandBase {
     webMode = featureFlags.isWebEnabled &&
       devices!.length == 1  &&
       await devices!.single.targetPlatform == TargetPlatform.web_javascript;
+
+    final String? flavor = stringArg('flavor');
+    final bool flavorsSupportedOnEveryDevice = devices!
+      .every((Device device) => device.supportsFlavors);
+    if (flavor != null && !flavorsSupportedOnEveryDevice) {
+      throwToolExit('--flavor is only supported for Android, macOS, and iOS devices.');
+    }
   }
 
   @visibleForTesting
@@ -634,6 +642,7 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6 ?? false,
         multidexEnabled: boolArg('multidex'),
         analytics: globals.analytics,
+        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
