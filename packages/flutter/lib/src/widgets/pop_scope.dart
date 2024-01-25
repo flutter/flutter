@@ -26,8 +26,8 @@ import 'routes.dart';
 /// [PopScope], in which case it will be `false`.
 ///
 /// {@tool dartpad}
-/// This sample demonstrates how to use this widget to handle nested navigation
-/// in a bottom navigation bar.
+/// This sample demonstrates showing a confirmation dialog before navigating
+/// away from a page.
 ///
 /// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
 /// {@end-tool}
