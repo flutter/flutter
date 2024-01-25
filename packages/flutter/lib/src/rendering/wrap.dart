@@ -103,24 +103,33 @@ enum WrapFit {
   /// size of the child. Avoid using it for complex children.
   ///
   /// The [Wrapped] widget assigns this kind of [WrapFit] to its child.
-  runTight,
+  runTight(true),
 
   /// The child is placed either in the current or the next run, depending on
   /// its min intrinsic size in the [Wrap.direction].
   ///
   /// This setting is more expensive, because it also computes the minimal
   /// size of the child. Avoid using it for complex children.
-  runLoose,
+  runLoose(false),
 
   /// The child is forced to fill the available space in a new run, unless the
   /// [Wrap] has no max size constraint in the run direction.
-  tight,
+  tight(true),
 
   /// The child can at most fill the available space in an empty run and is
   /// placed base on its size and the remaining space.
   ///
   /// This is the default behavior for a child of [Wrap].
-  loose,
+  loose(false);
+
+  const WrapFit(this.isTight);
+
+  /// `true` if the [WrapFit] forces the child to fill the assigned run.
+  final bool isTight;
+
+  /// `true` if the [WrapFit] allows the child to only fill the assigned run
+  /// partially.
+  bool get isLoose => !isTight;
 }
 
 /// Parent data for use with [RenderWrap].
@@ -593,24 +602,16 @@ class RenderWrap extends RenderBox
         case WrapFit.runTight:
         case WrapFit.runLoose:
           if (runMainAxisExtent != 0 && runMainAxisExtent + getChildMinIntrinsicMainAxisExtent(child, double.infinity) + spacing <= mainAxisLimit) {
-            switch (fit) {
-              case WrapFit.runTight:
-                childSize = layoutChild(child, childConstraintsFittingTightInRun(mainAxisLimit - runMainAxisExtent - spacing));
-              case WrapFit.runLoose:
-                childSize = layoutChild(child, childConstraintsFittingLooseInRun(mainAxisLimit - runMainAxisExtent - spacing));
-              case WrapFit.tight:
-              case WrapFit.loose:
-                throw Exception('Unreachable!');
+            if (fit.isTight) {
+              childSize = layoutChild(child, childConstraintsFittingTightInRun(mainAxisLimit - runMainAxisExtent - spacing));
+            } else {
+              childSize = layoutChild(child, childConstraintsFittingLooseInRun(mainAxisLimit - runMainAxisExtent - spacing));
             }
           } else {
-            switch (fit) {
-              case WrapFit.runTight:
-                childSize = layoutChild(child, childConstraintsFittingTightInRun(mainAxisLimit));
-              case WrapFit.runLoose:
-                childSize = layoutChild(child, childConstraintsFittingLooseInRun(mainAxisLimit));
-              case WrapFit.tight:
-              case WrapFit.loose:
-                throw Exception('Unreachable!');
+            if (fit.isTight) {
+              childSize = layoutChild(child, childConstraintsFittingTightInRun(mainAxisLimit));
+            } else {
+              childSize = layoutChild(child, childConstraintsFittingLooseInRun(mainAxisLimit));
             }
           }
         case WrapFit.tight:
@@ -722,24 +723,16 @@ class RenderWrap extends RenderBox
         case WrapFit.runTight:
         case WrapFit.runLoose:
           if (runMainAxisExtent != 0 && runMainAxisExtent + getChildMinIntrinsicMainAxisExtent(child, double.infinity) + spacing <= mainAxisLimit) {
-            switch (fit) {
-              case WrapFit.runTight:
-                child.layout(childConstraintsFittingTightInRun(mainAxisLimit - runMainAxisExtent - spacing), parentUsesSize: true);
-              case WrapFit.runLoose:
-                child.layout(childConstraintsFittingLooseInRun(mainAxisLimit - runMainAxisExtent - spacing), parentUsesSize: true);
-              case WrapFit.tight:
-              case WrapFit.loose:
-                throw Exception('Unreachable!');
+            if (fit.isTight) {
+              child.layout(childConstraintsFittingTightInRun(mainAxisLimit - runMainAxisExtent - spacing), parentUsesSize: true);
+            } else {
+              child.layout(childConstraintsFittingLooseInRun(mainAxisLimit - runMainAxisExtent - spacing), parentUsesSize: true);
             }
           } else {
-            switch (fit) {
-              case WrapFit.runTight:
-                child.layout(childConstraintsFittingTightInRun(mainAxisLimit), parentUsesSize: true);
-              case WrapFit.runLoose:
-                child.layout(childConstraintsFittingLooseInRun(mainAxisLimit), parentUsesSize: true);
-              case WrapFit.tight:
-              case WrapFit.loose:
-                throw Exception('Unreachable!');
+            if (fit.isTight) {
+              child.layout(childConstraintsFittingTightInRun(mainAxisLimit), parentUsesSize: true);
+            } else {
+              child.layout(childConstraintsFittingLooseInRun(mainAxisLimit), parentUsesSize: true);
             }
           }
         case WrapFit.tight:
