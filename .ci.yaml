@@ -2197,13 +2197,13 @@ targets:
     # TODO(https://github.com/flutter/flutter/issues/142178): Enable this.
     bringup: true
     timeout: 60
+    # Functionally the same as "presubmit: false", except that we will run on
+    # presubmit during engine rolls. This test is the *only* automated e2e
+    # test for external textures for the engine, it should never break.
+    runIf:
+      - bin/internal/engine.version
+      - .ci.yaml
     properties:
-      # Functionally the same as "presubmit: false", except that we will run on
-      # presubmit during engine rolls. This test is the *only* automated e2e
-      # test for external textures for the engine, it should never break.
-      runIf:
-        - bin/internal/engine.version
-        - .ci.yaml
       contexts: >-
         [
           "android_virtual_device"
