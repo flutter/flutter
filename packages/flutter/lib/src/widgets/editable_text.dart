@@ -1788,11 +1788,28 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.EditableText.contextMenuBuilder}
   /// Builds the text selection toolbar when requested by the user.
   ///
-  /// `primaryAnchor` is the desired anchor position for the context menu, while
-  /// `secondaryAnchor` is the fallback location if the menu doesn't fit.
+  /// The context menu is built when [EditableTextState.showToolbar] is called,
+  /// typically by one of the callbacks installed by the widget created by
+  /// [TextSelectionGestureDetectorBuilder.buildGestureDetector]. The widget
+  /// returned by [contextMenuBuilder] is passed to a [ContextMenuController].
   ///
-  /// `buttonItems` represents the buttons that would be built by default for
-  /// this widget.
+  /// If no callback is provided, no context menu will be shown.
+  ///
+  /// The [EditableTextContextMenuBuilder] signature used by the
+  /// [contextMenuBuilder] callback has two parameters, the [BuildContext] of
+  /// the [EditableText] and the [EditableTextState] of the [EditableText].
+  ///
+  /// The [EditableTextState] has two properties that are especially useful when
+  /// building the widgets for the context menu:
+  ///
+  /// * [EditableTextState.contextMenuAnchors] specifies the desired anchor
+  ///   position for the context menu.
+  ///
+  /// * [EditableTextState.contextMenuButtonItems] represents the buttons that
+  ///   should typically be built for this widget (e.g. cut, copy, paste).
+  ///
+  /// The [TextSelectionToolbarLayoutDelegate] class may be particularly useful
+  /// in honoring the preferred anchor positions.
   ///
   /// For backwards compatibility, when [selectionControls] is set to an object
   /// that does not mix in [TextSelectionHandleControls], [contextMenuBuilder]
@@ -1823,8 +1840,6 @@ class EditableText extends StatefulWidget {
   ///   * [BrowserContextMenu], which allows the browser's context menu on web
   ///     to be disabled and Flutter-rendered context menus to appear.
   /// {@endtemplate}
-  ///
-  /// If not provided, no context menu will be shown.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
@@ -1841,11 +1856,10 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  /// The configuration for the magnifier to use with selections in this text
+  /// field.
   ///
   /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
