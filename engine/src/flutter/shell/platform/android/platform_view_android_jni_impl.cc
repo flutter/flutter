@@ -111,6 +111,8 @@ static jmethodID g_java_weak_reference_get_method = nullptr;
 
 static jmethodID g_attach_to_gl_context_method = nullptr;
 
+static jmethodID g_surface_texture_wrapper_should_update = nullptr;
+
 static jmethodID g_update_tex_image_method = nullptr;
 
 static jmethodID g_get_transform_matrix_method = nullptr;
@@ -521,6 +523,10 @@ static void MarkTextureFrameAvailable(JNIEnv* env,
       static_cast<int64_t>(texture_id));
 }
 
+static void ScheduleFrame(JNIEnv* env, jobject jcaller, jlong shell_holder) {
+  ANDROID_SHELL_HOLDER->GetPlatformView()->ScheduleFrame();
+}
+
 static void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                                   jobject jcaller,
                                                   jlong shell_holder,
@@ -796,11 +802,15 @@ bool RegisterApi(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&MarkTextureFrameAvailable),
       },
       {
+          .name = "nativeScheduleFrame",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&ScheduleFrame),
+      },
+      {
           .name = "nativeUnregisterTexture",
           .signature = "(JJ)V",
           .fnPtr = reinterpret_cast<void*>(&UnregisterTexture),
       },
-
       // Methods for Dart callback functionality.
       {
           .name = "nativeLookupCallbackInformation",
@@ -1159,6 +1169,15 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_surface_texture_wrapper_should_update =
+      env->GetMethodID(g_texture_wrapper_class->obj(), "shouldUpdate", "()Z");
+
+  if (g_surface_texture_wrapper_should_update == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate SurfaceTextureWrapper.shouldUpdate method";
+    return false;
+  }
+
   g_update_tex_image_method =
       env->GetMethodID(g_texture_wrapper_class->obj(), "updateTexImage", "()V");
 
@@ -1451,6 +1470,29 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureAttachToGLContext(
                       g_attach_to_gl_context_method, textureId);
 
   FML_CHECK(fml::jni::CheckException(env));
+}
+
+bool PlatformViewAndroidJNIImpl::SurfaceTextureShouldUpdate(
+    JavaLocalRef surface_texture) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  if (surface_texture.is_null()) {
+    return false;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jobject> surface_texture_local_ref(
+      env, env->CallObjectMethod(surface_texture.obj(),
+                                 g_java_weak_reference_get_method));
+  if (surface_texture_local_ref.is_null()) {
+    return false;
+  }
+
+  jboolean shouldUpdate = env->CallBooleanMethod(
+      surface_texture_local_ref.obj(), g_surface_texture_wrapper_should_update);
+
+  FML_CHECK(fml::jni::CheckException(env));
+
+  return shouldUpdate;
 }
 
 void PlatformViewAndroidJNIImpl::SurfaceTextureUpdateTexImage(
