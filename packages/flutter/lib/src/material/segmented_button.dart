@@ -468,7 +468,6 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
       : null;
 
-    print(segmentStyle.tapTargetSize);
     Widget buttonFor(ButtonSegment<T> segment) {
       final Widget label = segment.label ?? segment.icon ?? const SizedBox.shrink();
       final bool segmentSelected = widget.selected.contains(segment.value);
@@ -528,7 +527,6 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     //   case MaterialTapTargetSize.shrinkWrap:
     //
     // }
-    print('------- ${segmentStyle.tapTargetSize}');
     return Material(
       type: MaterialType.transparency,
       shape: enabledBorder.copyWith(side: BorderSide.none),
@@ -538,7 +536,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       child: TextButtonTheme(
         data: TextButtonThemeData(style: segmentThemeStyle),
         child: _SegmentedButtonRenderWidget<T>(
-          tapTargetSize: segmentStyle.tapTargetSize ?? segmentThemeStyle.tapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+          visualDensity: segmentStyle.visualDensity ?? segmentThemeStyle.visualDensity ?? Theme.of(context).visualDensity,
+          tapTargetSize: segmentStyle.tapTargetSize ?? segmentThemeStyle.tapTargetSize ?? Theme.of(context).materialTapTargetSize,
           segments: widget.segments,
           enabledBorder: _enabled ? enabledBorder : disabledBorder,
           disabledBorder: disabledBorder,
@@ -581,6 +580,7 @@ class _SegmentButtonDefaultColor extends MaterialStateProperty<Color?> with Diag
 class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   const _SegmentedButtonRenderWidget({
     super.key,
+    required this.visualDensity,
     required this.tapTargetSize,
     required this.segments,
     required this.enabledBorder,
@@ -589,6 +589,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
     required super.children,
   }) : assert(children.length == segments.length);
 
+  final VisualDensity visualDensity;
   final MaterialTapTargetSize tapTargetSize;
   final List<ButtonSegment<T>> segments;
   final OutlinedBorder enabledBorder;
@@ -597,8 +598,8 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    print('........ $tapTargetSize');
     return _RenderSegmentedButton<T>(
+      visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       segments: segments,
       enabledBorder: enabledBorder,
@@ -627,16 +628,28 @@ class _RenderSegmentedButton<T> extends RenderBox with
      ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
      RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedButton({
+    required VisualDensity visualDensity,
     required MaterialTapTargetSize tapTargetSize,
     required List<ButtonSegment<T>> segments,
     required OutlinedBorder enabledBorder,
     required OutlinedBorder disabledBorder,
     required TextDirection textDirection,
-  }) : _tapTargetSize = tapTargetSize,
+  }) : _visualDensity = visualDensity,
+       _tapTargetSize = tapTargetSize,
        _segments = segments,
        _enabledBorder = enabledBorder,
        _disabledBorder = disabledBorder,
        _textDirection = textDirection;
+
+  VisualDensity get visualDensity => _visualDensity;
+  VisualDensity _visualDensity;
+  set visualDensity(VisualDensity value) {
+    if (visualDensity == value) {
+      return;
+    }
+    _visualDensity = value;
+    markNeedsLayout();
+  }
 
   MaterialTapTargetSize get tapTargetSize => _tapTargetSize;
   MaterialTapTargetSize _tapTargetSize;
@@ -833,11 +846,16 @@ class _RenderSegmentedButton<T> extends RenderBox with
   void paint(PaintingContext context, Offset offset) {
     // if tapTargetSize is MaterialTapTargetSize.padded -> segmentedButton is larger than expected
     // -> We should paint smaller segemented button
+    final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
+    print('$tapTargetSize');
+    print('$visualDensity');
+    print('$densityAdjustment');
+    if (tapTargetSize == MaterialTapTargetSize.padded) {
+
+    }
     Size effectiveSize;
     double deltaHeight = 0;
-    print('$tapTargetSize ${size.height}');
     if (tapTargetSize == MaterialTapTargetSize.padded && size.height <= 48) {
-      print(size.height);
       deltaHeight = 48 - size.height;
     }
 
