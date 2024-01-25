@@ -9,6 +9,7 @@
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/typographer_context.h"
 
+#include <memory>
 #include <utility>
 
 namespace impeller {
