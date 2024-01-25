@@ -3778,7 +3778,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Rect renderEditableBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), renderEditable.paintBounds);
       final Rect viewportRect = _calculateViewportRect();
       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
-      final bool? renderEditableInViewport = _renderEditableInViewport(notification);
+      final bool? renderEditableInViewport = _renderEditableInViewport();
       final bool renderEditableIsVisible = renderEditableInViewport == null || (renderEditableInViewport && viewportRect.overlaps(renderEditableBounds));
 
       if (selectionIsVisible && renderEditableIsVisible) {
@@ -3788,7 +3788,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  bool? _renderEditableInViewport(ScrollNotification notification) {
+  bool? _renderEditableInViewport() {
     RenderAbstractViewport? closestViewport = RenderAbstractViewport.maybeOf(renderEditable);
     if (closestViewport == null) {
       return null;
