@@ -101,6 +101,7 @@ test_fixtures("file_fixtures") {
     "stage1.comp",
     "stage2.comp",
     "struct_def_bug.vert",
+    "struct_internal.frag",
     "table_mountain_nx.png",
     "table_mountain_ny.png",
     "table_mountain_nz.png",
