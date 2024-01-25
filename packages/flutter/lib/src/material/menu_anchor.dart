@@ -1075,7 +1075,12 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   @override
   void didUpdateWidget(MenuItemButton oldWidget) {
     if (widget.focusNode != oldWidget.focusNode) {
-      _focusNode.removeListener(_handleFocusChange);
+      if(widget.focusNode == null){
+        oldWidget.focusNode?.removeListener(_handleFocusChange);
+      }
+      else{
+        _focusNode.removeListener(_handleFocusChange);
+      }
       if (widget.focusNode != null) {
         _internalFocusNode?.dispose();
         _internalFocusNode = null;
@@ -1859,6 +1864,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         oldWidget.focusNode!.removeListener(_handleFocusChange);
       }
       if (widget.focusNode == null) {
+        print('Internal focus node is about to be updated....');
         _internalFocusNode ??= FocusNode();
         assert(() {
           if (_internalFocusNode != null) {
