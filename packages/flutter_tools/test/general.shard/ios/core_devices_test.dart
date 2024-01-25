@@ -156,7 +156,7 @@ void main() {
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -231,7 +231,7 @@ void main() {
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -277,7 +277,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -314,7 +314,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -385,7 +385,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -460,7 +460,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -506,7 +506,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -543,7 +543,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -633,7 +633,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -722,7 +722,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -792,7 +792,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -837,7 +837,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -875,7 +875,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -976,7 +976,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1084,7 +1084,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1154,7 +1154,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1222,7 +1222,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1266,7 +1266,7 @@ ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1305,7 +1305,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1340,7 +1340,7 @@ invalid JSON
         ];
         fakeProcessManager.addCommand(FakeCommand(
           command: args,
-          onRun: () {
+          onRun: (_) {
             // Simulate that this command threw and simultaneously the OS
             // deleted the temp directory
             expect(tempFile, exists);
@@ -1395,7 +1395,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1457,7 +1457,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1520,7 +1520,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1576,7 +1576,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1640,7 +1640,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1713,7 +1713,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1797,7 +1797,7 @@ invalid JSON
             '--json-output',
             tempFile.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempFile, exists);
             tempFile.writeAsStringSync(deviceControlOutput);
           },
@@ -1852,7 +1852,7 @@ invalid JSON
               '--json-output',
               tempFile.path,
             ],
-            onRun: () {
+            onRun: (_) {
               expect(tempFile, exists);
               tempFile.writeAsStringSync(deviceControlOutput);
             },
@@ -1902,7 +1902,7 @@ invalid JSON
               '--json-output',
               tempFile.path,
             ],
-            onRun: () {
+            onRun: (_) {
               expect(tempFile, exists);
               tempFile.writeAsStringSync(deviceControlOutput);
             },
@@ -1957,7 +1957,7 @@ invalid JSON
               '--json-output',
               tempFile.path,
             ],
-            onRun: () {
+            onRun: (_) {
               expect(tempFile, exists);
               tempFile.writeAsStringSync(deviceControlOutput);
             },
