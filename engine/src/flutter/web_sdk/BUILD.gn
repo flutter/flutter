@@ -363,9 +363,14 @@ template("_compile_ddc_modules") {
     amd_js_path =
         "$root_out_dir/flutter_web_sdk/kernel/amd${name_suffix}/dart_sdk.js"
 
+    ddc_js_path =
+        "$root_out_dir/flutter_web_sdk/kernel/ddc${name_suffix}/dart_sdk.js"
+
     outputs = [
       amd_js_path,
       amd_js_path + ".map",
+      ddc_js_path,
+      ddc_js_path + ".map",
     ]
 
     if (invoker.sound_null_safety) {
@@ -403,6 +408,10 @@ template("_compile_ddc_modules") {
       "amd",
       "-o",
       rebase_path(amd_js_path),
+      "--modules",
+      "ddc",
+      "-o",
+      rebase_path(ddc_js_path),
     ]
     if (flutter_prebuilt_dart_sdk) {
       args += [
