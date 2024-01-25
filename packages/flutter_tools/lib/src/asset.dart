@@ -1296,10 +1296,10 @@ class _AssetDirectoryCache {
   final Map<String, List<File>> _variantsPerFolder = <String, List<File>>{};
 
   List<String> variantsFor(String assetPath) {
-    final String directory = _fileSystem.path.dirname(assetPath);
+    final String directoryName = _fileSystem.path.dirname(assetPath);
 
     try {
-      if (!_fileSystem.directory(directory).existsSync()) {
+      if (!_fileSystem.directory(directoryName).existsSync()) {
         return const <String>[];
       }
     } on FileSystemException catch (e) {
@@ -1313,8 +1313,8 @@ class _AssetDirectoryCache {
     if (_cache.containsKey(assetPath)) {
       return _cache[assetPath]!;
     }
-    if (!_variantsPerFolder.containsKey(directory)) {
-      _variantsPerFolder[directory] = _fileSystem.directory(directory)
+    if (!_variantsPerFolder.containsKey(directoryName)) {
+      _variantsPerFolder[directoryName] = _fileSystem.directory(directoryName)
         .listSync()
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
@@ -1323,7 +1323,7 @@ class _AssetDirectoryCache {
         .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
-    final List<File> potentialVariants = _variantsPerFolder[directory]!;
+    final List<File> potentialVariants = _variantsPerFolder[directoryName]!;
     final String basename = assetFile.basename;
     return _cache[assetPath] = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
