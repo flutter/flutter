@@ -69,7 +69,7 @@ class FakeCommand {
 
   /// A callback that is run after [duration] expires but before the [exitCode]
   /// (and output) are passed back.
-  final VoidCallback? onRun;
+  final void Function(List<String> command)? onRun;
 
   /// The process' exit code.
   ///
@@ -306,7 +306,7 @@ abstract class FakeProcessManager implements ProcessManager {
       throw fakeCommand.exception!; // ignore: only_throw_errors
     }
     if (fakeCommand.onRun != null) {
-      fakeCommand.onRun!();
+      fakeCommand.onRun!(command);
     }
     return FakeProcess(
       duration: fakeCommand.duration,
