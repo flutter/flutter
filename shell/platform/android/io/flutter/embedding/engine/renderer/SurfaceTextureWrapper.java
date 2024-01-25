@@ -22,7 +22,6 @@ public class SurfaceTextureWrapper {
   private boolean released;
   private boolean attached;
   private Runnable onFrameConsumed;
-  private boolean newFrameAvailable = false;
 
   public SurfaceTextureWrapper(@NonNull SurfaceTexture surfaceTexture) {
     this(surfaceTexture, null);
@@ -48,23 +47,10 @@ public class SurfaceTextureWrapper {
     return surfaceTexture;
   }
 
-  public void markDirty() {
-    synchronized (this) {
-      newFrameAvailable = true;
-    }
-  }
-
-  public boolean shouldUpdate() {
-    synchronized (this) {
-      return newFrameAvailable;
-    }
-  }
-
   // Called by native.
   @SuppressWarnings("unused")
   public void updateTexImage() {
     synchronized (this) {
-      newFrameAvailable = false;
       if (!released) {
         surfaceTexture.updateTexImage();
         if (onFrameConsumed != null) {
