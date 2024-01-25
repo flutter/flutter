@@ -792,7 +792,7 @@ flutter:
             '--include=/$assetsPath',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
@@ -839,7 +839,7 @@ flutter:
             '--include=/$assetsPath',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
@@ -880,7 +880,7 @@ flutter:
             '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
