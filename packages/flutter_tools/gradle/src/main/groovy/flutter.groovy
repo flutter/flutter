@@ -639,7 +639,7 @@ class FlutterPlugin implements Plugin<Project> {
      * the tool generates a `.flutter-plugins` file, which contains a 1:1 map to each plugin location.
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
-    private void configurePlugins() { //TODO(camsim99): merge new changes into this method
+    private void configurePlugins() {
         getPluginList().each(this.&configurePluginProject)
         getPluginDependencies().each(this.&configurePluginDependencies)
     }
