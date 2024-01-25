@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import '../widgets/constants.dart';
 import 'button_style.dart';
 import 'button_style_button.dart';
 import 'color_scheme.dart';
@@ -437,6 +439,9 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
     ButtonStyle segmentStyleFor(ButtonStyle? style) {
       return ButtonStyle(
+        minimumSize: style?.minimumSize,
+        fixedSize: style?.fixedSize,
+        maximumSize: style?.maximumSize,
         textStyle: style?.textStyle,
         backgroundColor: style?.backgroundColor,
         foregroundColor: style?.foregroundColor,
@@ -463,6 +468,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
       : null;
 
+    print(segmentStyle.tapTargetSize);
     Widget buttonFor(ButtonSegment<T> segment) {
       final Widget label = segment.label ?? segment.icon ?? const SizedBox.shrink();
       final bool segmentSelected = widget.selected.contains(segment.value);
@@ -513,7 +519,16 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final OutlinedBorder disabledBorder = resolvedDisabledBorder.copyWith(side: disabledSide);
 
     final List<Widget> buttons = widget.segments.map(buttonFor).toList();
-
+    //
+    // final MaterialTapTargetSize effectiveTTS = segmentStyle.tapTargetSize ?? segmentThemeStyle.tapTargetSize ?? MaterialTapTargetSize.shrinkWrap;
+    // final double HeightDelta;
+    // switch (effectiveTTS) {
+    //   case MaterialTapTargetSize.padded:
+    //     // mini
+    //   case MaterialTapTargetSize.shrinkWrap:
+    //
+    // }
+    print('------- ${segmentStyle.tapTargetSize}');
     return Material(
       type: MaterialType.transparency,
       shape: enabledBorder.copyWith(side: BorderSide.none),
@@ -523,6 +538,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       child: TextButtonTheme(
         data: TextButtonThemeData(style: segmentThemeStyle),
         child: _SegmentedButtonRenderWidget<T>(
+          tapTargetSize: segmentStyle.tapTargetSize ?? segmentThemeStyle.tapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
           segments: widget.segments,
           enabledBorder: _enabled ? enabledBorder : disabledBorder,
           disabledBorder: disabledBorder,
@@ -565,6 +581,7 @@ class _SegmentButtonDefaultColor extends MaterialStateProperty<Color?> with Diag
 class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   const _SegmentedButtonRenderWidget({
     super.key,
+    required this.tapTargetSize,
     required this.segments,
     required this.enabledBorder,
     required this.disabledBorder,
@@ -572,6 +589,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
     required super.children,
   }) : assert(children.length == segments.length);
 
+  final MaterialTapTargetSize tapTargetSize;
   final List<ButtonSegment<T>> segments;
   final OutlinedBorder enabledBorder;
   final OutlinedBorder disabledBorder;
@@ -579,7 +597,9 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    print('........ $tapTargetSize');
     return _RenderSegmentedButton<T>(
+      tapTargetSize: tapTargetSize,
       segments: segments,
       enabledBorder: enabledBorder,
       disabledBorder: disabledBorder,
@@ -607,14 +627,26 @@ class _RenderSegmentedButton<T> extends RenderBox with
      ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
      RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedButton({
+    required MaterialTapTargetSize tapTargetSize,
     required List<ButtonSegment<T>> segments,
     required OutlinedBorder enabledBorder,
     required OutlinedBorder disabledBorder,
     required TextDirection textDirection,
-  }) : _segments = segments,
+  }) : _tapTargetSize = tapTargetSize,
+       _segments = segments,
        _enabledBorder = enabledBorder,
        _disabledBorder = disabledBorder,
        _textDirection = textDirection;
+
+  MaterialTapTargetSize get tapTargetSize => _tapTargetSize;
+  MaterialTapTargetSize _tapTargetSize;
+  set tapTargetSize(MaterialTapTargetSize value) {
+    if (tapTargetSize == value) {
+      return;
+    }
+    _tapTargetSize = value;
+    markNeedsLayout();
+  }
 
   List<ButtonSegment<T>> get segments => _segments;
   List<ButtonSegment<T>> _segments;
@@ -799,7 +831,17 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Rect borderRect = offset & size;
+    // if tapTargetSize is MaterialTapTargetSize.padded -> segmentedButton is larger than expected
+    // -> We should paint smaller segemented button
+    Size effectiveSize;
+    double deltaHeight = 0;
+    print('$tapTargetSize ${size.height}');
+    if (tapTargetSize == MaterialTapTargetSize.padded && size.height <= 48) {
+      print(size.height);
+      deltaHeight = 48 - size.height;
+    }
+
+    final Rect borderRect = (offset + Offset(0, deltaHeight / 2)) & (Size(size.width, size.height - deltaHeight));
     final Path borderClipPath = enabledBorder.getInnerPath(borderRect, textDirection: textDirection);
     RenderBox? child = firstChild;
     RenderBox? previousChild;
