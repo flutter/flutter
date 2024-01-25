@@ -2192,29 +2192,20 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: external_textures_integration_test
 
-  - name: Linux_android_emulator external_ui_integration_test
+  - name: Linux_android_emu external_ui_integration_test
     recipe: devicelab/devicelab_drone
     # TODO(https://github.com/flutter/flutter/issues/142178): Enable this.
     bringup: true
     timeout: 60
-    # Functionally the same as "presubmit: false", except that we will run on
-    # presubmit during engine rolls. This test is the *only* automated e2e
-    # test for external textures for the engine, it should never break.
-    runIf:
-      - bin/internal/engine.version
-      - .ci.yaml
     properties:
-      contexts: >-
-        [
-          "android_virtual_device"
-        ]
-      device_type: "none"
+      # Functionally the same as "presubmit: false", except that we will run on
+      # presubmit during engine rolls. This test is the *only* automated e2e
+      # test for external textures for the engine, it should never break.
+      runIf:
+        - bin/internal/engine.version
+        - .ci.yaml
       tags: >
         ["devicelab", "linux"]
-      dependencies: >-
-        [
-          {"dependency": "android_virtual_device", "version": "34"}
-        ]
       # TODO(https://github.com/flutter/flutter/issues/142178): Rename this.
       task_name: external_textures_integration_test
 
