@@ -2197,7 +2197,8 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-static Picture BlendModeTest(BlendMode blend_mode,
+static Picture BlendModeTest(Vector2 content_scale,
+                             BlendMode blend_mode,
                              const std::shared_ptr<Image>& src_image,
                              const std::shared_ptr<Image>& dst_image) {
   Color destination_color = Color::CornflowerBlue().WithAlpha(0.75);
@@ -2206,7 +2207,6 @@ static Picture BlendModeTest(BlendMode blend_mode,
                                            Color::Black().WithAlpha(0.75)});
 
   Canvas canvas;
-
   canvas.DrawPaint({.color = Color::Black()});
 
   //----------------------------------------------------------------------------
@@ -2217,7 +2217,7 @@ static Picture BlendModeTest(BlendMode blend_mode,
   for (const auto& color : source_colors) {
     canvas.Save();
     {
-      canvas.ClipRect(Rect::MakeXYWH(50, 50, 100, 100));
+      canvas.ClipRect(Rect::MakeXYWH(25, 25, 100, 100));
       // Perform the blend in a SaveLayer so that the initial backdrop color is
       // fully transparent black. SourceOver blend the result onto the parent
       // pass.
@@ -2228,7 +2228,7 @@ static Picture BlendModeTest(BlendMode blend_mode,
         // pass.
         canvas.SaveLayer({.blend_mode = blend_mode});
         {  //
-          canvas.DrawRect(Rect::MakeXYWH(50, 50, 100, 100), {.color = color});
+          canvas.DrawRect(Rect::MakeXYWH(25, 25, 100, 100), {.color = color});
         }
         canvas.Restore();
       }
@@ -2249,10 +2249,9 @@ static Picture BlendModeTest(BlendMode blend_mode,
   // Perform the blend in a SaveLayer so that the initial backdrop color is
   // fully transparent black. SourceOver blend the result onto the parent pass.
   canvas.SaveLayer({});
-  // canvas.DrawPaint({.color = destination_color});
   for (const auto& color : source_colors) {
     // Simply write the CPU blended color to the pass.
-    canvas.DrawRect(Rect::MakeXYWH(50, 50, 100, 100),
+    canvas.DrawRect(Rect::MakeXYWH(25, 25, 100, 100),
                     {.color = destination_color.Blend(color, blend_mode),
                      .blend_mode = BlendMode::kSourceOver});
     canvas.Translate(Vector2(100, 0));
@@ -2260,32 +2259,61 @@ static Picture BlendModeTest(BlendMode blend_mode,
   canvas.RestoreToCount(0);
 
   //----------------------------------------------------------------------------
-  /// 3. Image blending (top right).
+  /// 3. Image blending (bottom images).
   ///
   /// Compare these results with the images in the Flutter blend mode
   /// documentation: https://api.flutter.dev/flutter/dart-ui/BlendMode.html
   ///
 
+  canvas.Translate({0, 250});
+
+  // Draw grid behind the images.
+  canvas.DrawRect(Rect::MakeLTRB(0, 0, 800, 400),
+                  {.color = Color::MakeRGBA8(41, 41, 41, 255)});
+  Paint square_paint = {.color = Color::MakeRGBA8(15, 15, 15, 255)};
+  for (int y = 0; y < 400 / 8; y++) {
+    for (int x = 0; x < 800 / 16; x++) {
+      canvas.DrawRect(Rect::MakeXYWH(x * 16 + (y % 2) * 8, y * 8, 8, 8),
+                      square_paint);
+    }
+  }
+
+  // Uploaded image source (unpremultiplied source texture).
   canvas.Save();
-  // canvas.ClipRect(Rect::MakeXYWH(500, 0, 500, 500));
   canvas.SaveLayer({.blend_mode = BlendMode::kSourceOver});
   {
-    canvas.DrawImage(dst_image, {400, 50}, {.blend_mode = BlendMode::kSource});
-    canvas.DrawImage(src_image, {400, 50}, {.blend_mode = blend_mode});
+    canvas.DrawImage(dst_image, {0, 0}, {.blend_mode = BlendMode::kSourceOver});
+    canvas.DrawImage(src_image, {0, 0}, {.blend_mode = blend_mode});
   }
+  canvas.RestoreToCount(0);
+
+  // Rendered image source (premultiplied source texture).
+  canvas.Save();
+  canvas.SaveLayer({.blend_mode = BlendMode::kSourceOver});
+  {
+    canvas.DrawImage(dst_image, {400, 0},
+                     {.blend_mode = BlendMode::kSourceOver});
+    canvas.SaveLayer({.blend_mode = blend_mode});
+    {
+      canvas.DrawImage(src_image, {400, 0},
+                       {.blend_mode = BlendMode::kSourceOver});
+    }
+    canvas.Restore();
+  }
+  canvas.Restore();
   canvas.RestoreToCount(0);
 
   return canvas.EndRecordingAsPicture();
 }
 
-#define BLEND_MODE_TEST(blend_mode)                                     \
-  TEST_P(AiksTest, BlendMode##blend_mode) {                             \
-    auto src_image = std::make_shared<Image>(                           \
-        CreateTextureForFixture("blend_mode_src.png"));                 \
-    auto dst_image = std::make_shared<Image>(                           \
-        CreateTextureForFixture("blend_mode_dst.png"));                 \
-    OpenPlaygroundHere(                                                 \
-        BlendModeTest(BlendMode::k##blend_mode, src_image, dst_image)); \
+#define BLEND_MODE_TEST(blend_mode)                                          \
+  TEST_P(AiksTest, BlendMode##blend_mode) {                                  \
+    auto src_image = std::make_shared<Image>(                                \
+        CreateTextureForFixture("blend_mode_src.png"));                      \
+    auto dst_image = std::make_shared<Image>(                                \
+        CreateTextureForFixture("blend_mode_dst.png"));                      \
+    OpenPlaygroundHere(BlendModeTest(                                        \
+        GetContentScale(), BlendMode::k##blend_mode, src_image, dst_image)); \
   }
 IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
 
