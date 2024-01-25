@@ -231,6 +231,14 @@ void main() {
     expect(buttonItems.first.onPressed, isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/141764
+  testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
+    const Locale locale = Locale('zh');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationZh>());
+    expect(localizations.lookUpButtonLabel, '查询');
+  });
 }
 
 class _FakeEditableText extends EditableText {
