@@ -623,7 +623,9 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
       messenger.shouldDisplayLicenseTerms();
 
   // Prints the welcome message if needed for legacy analytics.
-  globals.flutterUsage.printWelcome();
+  if (!(await globals.isRunningOnBot)) {
+    globals.flutterUsage.printWelcome();
+  }
 
   // Ensure that the consent message has been displayed for unified analytics
   if (globals.analytics.shouldShowMessage) {

@@ -428,6 +428,7 @@ class TestUsage implements Usage {
   final List<dynamic> exceptions = <dynamic>[];
   final List<TestTimingEvent> timings = <TestTimingEvent>[];
   int ensureAnalyticsSentCalls = 0;
+  bool _printedWelcome = false;
 
   @override
   bool enabled = true;
@@ -438,6 +439,9 @@ class TestUsage implements Usage {
   @override
   String get clientId => 'test-client';
 
+  /// Confirms if the [printWelcome] method was invoked.
+  bool get printedWelcome => _printedWelcome;
+
   @override
   Future<void> ensureAnalyticsSent() async {
     ensureAnalyticsSentCalls++;
@@ -447,7 +451,9 @@ class TestUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => throw UnimplementedError();
 
   @override
-  void printWelcome() { }
+  void printWelcome() {
+    _printedWelcome = true;
+  }
 
   @override
   void sendCommand(String command, {CustomDimensions? parameters}) {
