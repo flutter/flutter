@@ -4520,25 +4520,6 @@ targets:
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
 
-  - name: Mac_x64_ios ios_content_validation_test
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: ios_content_validation_test
-
-  - name: Mac_arm64_ios ios_content_validation_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
-      task_name: ios_content_validation_test
-
   - name: Mac_ios ios_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: false

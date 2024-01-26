@@ -195,7 +195,6 @@
 /dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @vashworth @flutter/tool
-/dev/devicelab/bin/tasks/ios_content_validation_test.dart @christopherfujino @flutter/tool
 /dev/devicelab/bin/tasks/ios_defines_test.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/ios_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/ios_platform_view_tests.dart @stuartmorgan @flutter/plugin
