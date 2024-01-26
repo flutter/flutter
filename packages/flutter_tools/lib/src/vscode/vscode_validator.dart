@@ -6,7 +6,6 @@ import 'package:process/process.dart';
 
 import '../base/file_system.dart';
 import '../base/platform.dart';
-import '../base/user_messages.dart';
 import '../doctor_validator.dart';
 import 'vscode.dart';
 
@@ -14,7 +13,6 @@ class VsCodeValidator extends DoctorValidator {
   VsCodeValidator(this._vsCode) : super(_vsCode.productName);
 
   final VsCode _vsCode;
-  final UserMessages _userMessages = UserMessages();
 
   static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform, ProcessManager processManager) {
     return VsCode
@@ -28,8 +26,8 @@ class VsCodeValidator extends DoctorValidator {
       List<ValidationMessage>.from(_vsCode.validationMessages);
 
     final String vsCodeVersionText = _vsCode.version == null
-        ? _userMessages.vsCodeVersion('unknown')
-        : _userMessages.vsCodeVersion(_vsCode.version.toString());
+        ? 'version unknown'
+        : 'version ${_vsCode.version}';
 
     if (_vsCode.version == null) {
       validationMessages.add(const ValidationMessage.error('Unable to determine VS Code version.'));

@@ -202,11 +202,6 @@ class UserMessages {
       '$consequence\n'
       'To re-install $reinstallInstructions';
 
-  // Messages used in VsCodeValidator
-  String vsCodeVersion(String version) => 'version $version';
-  String vsCodeLocation(String location) => 'VS Code at $location';
-  String vsCodeFlutterExtensionMissing(String url) => 'Flutter extension not installed; install from\n$url';
-
   // Messages used in VisualStudioValidator
   String visualStudioVersion(String name, String version) => '$name version $version';
   String visualStudioLocation(String location) => 'Visual Studio at $location';
