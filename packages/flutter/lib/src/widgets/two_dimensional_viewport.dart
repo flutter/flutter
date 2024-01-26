@@ -646,7 +646,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   ///
   ///  * [TwoDimensionalScrollView], which assigns the [PrimaryScrollController]
   ///    to the [TwoDimensionalScrollView.mainAxis] and shares this value.
-  Axis get mainAxis => _mainAxis;
+  Axis  get mainAxis => _mainAxis;
   Axis _mainAxis;
   set mainAxis(Axis value) {
     if (_mainAxis == value) {
@@ -658,7 +658,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
-  double get cacheExtent => _cacheExtent ?? RenderAbstractViewport.defaultCacheExtent;
+  double  get cacheExtent => _cacheExtent ?? RenderAbstractViewport.defaultCacheExtent;
   double? _cacheExtent;
   set cacheExtent(double? value) {
     if (_cacheExtent == value) {
@@ -917,18 +917,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       // Specs can depend on viewport size.
       _didResize = true;
     }
-  }
-
-  @override
-  ViewportOffset getOffset({
-    Axis? axis,
-  }) {
-    axis ??= mainAxis;
-    final ViewportOffset axisAwareOffset = switch (axis) {
-      Axis.horizontal => horizontalOffset,
-      Axis.vertical => verticalOffset,
-    };
-    return axisAwareOffset;
   }
 
   @protected

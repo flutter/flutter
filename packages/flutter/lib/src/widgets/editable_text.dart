@@ -3801,7 +3801,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       closestViewport = RenderAbstractViewport.maybeOf(closestViewport.parent);
     }
-    return true;
+    return false;
   }
 
   TextSelectionOverlay _createSelectionOverlay() {

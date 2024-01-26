@@ -130,21 +130,6 @@ abstract interface class RenderAbstractViewport extends RenderObject {
     Axis? axis,
   });
 
-  /// Which part of the content inside the viewport should be visible.
-  ///
-  /// The [ViewportOffset.pixels] value determines the scroll offset that the
-  /// viewport uses to select which part of its content to display. As the user
-  /// scrolls the viewport, this value changes, which changes the content that
-  /// is displayed.
-  ///
-  /// The optional [Axis] is used by [RenderTwoDimensionalViewport.getOffset] to
-  /// determine which of the two axes to return an offset for. One dimensional
-  /// subclasses like [RenderViewportBase] and [RenderListWheelViewport] will
-  /// ignore the `axis` value if provided, since there is only one [Axis].
-  ViewportOffset getOffset({
-    Axis? axis,
-  });
-
   /// The default value for the cache extent of the viewport.
   ///
   /// This default assumes [CacheExtentStyle.pixel].
@@ -365,13 +350,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// For example, if the [axisDirection] is [AxisDirection.down], then the
   /// [axis] is [Axis.vertical] and the viewport scrolls vertically.
   Axis get axis => axisDirectionToAxis(axisDirection);
-
-  @override
-  ViewportOffset getOffset({
-    Axis? axis,
-  }) {
-    return offset;
-  }
 
   /// Which part of the content inside the viewport should be visible.
   ///
