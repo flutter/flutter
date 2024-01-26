@@ -1148,7 +1148,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     // below center alignments are interpolated independently.
     final double outlineCenterBaseline = inputInternalBaseline
       + baselineAdjustment / 2.0
-      + (containerHeight - (2.0 + inputHeight)) / 2.0;
+      + (containerHeight - inputHeight) / 2.0;
     final double outlineTopBaseline = topInputBaseline;
     final double outlineBottomBaseline = topInputBaseline + maxVerticalOffset;
     final double outlineBaseline = _interpolateThree(
