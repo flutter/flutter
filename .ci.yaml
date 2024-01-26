@@ -2185,8 +2185,7 @@ targets:
   # an emulator test instead of a physical device.
   - name: Linux_pixel_7pro external_ui_integration_test
     recipe: devicelab/devicelab_drone
-    # FIXME: Move back to presubmit: false, this is for a single CI run only.
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4316,8 +4315,7 @@ targets:
   # with the Android test, but that can wait until we've figured out the flake.
   - name: Mac_ios external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
-    # FIXME: Move back to presubmit: false, this is for a single CI run only.
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
