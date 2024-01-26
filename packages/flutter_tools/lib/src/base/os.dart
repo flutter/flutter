@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
+
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -472,8 +474,17 @@ class _WindowsUtils extends OperatingSystemUtils {
     required super.processManager,
   }) : super._private();
 
+  HostPlatform? _hostPlatform;
+
   @override
-  HostPlatform hostPlatform = HostPlatform.windows_x64;
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
+       final Abi abi = Abi.current();
+      _hostPlatform = (abi == Abi.windowsArm64) ? HostPlatform.windows_arm64 :
+                                                  HostPlatform.windows_x64;
+    }
+    return _hostPlatform!;
+  }
 
   @override
   void makeExecutable(File file) {}
@@ -607,7 +618,8 @@ enum HostPlatform {
   darwin_arm64,
   linux_x64,
   linux_arm64,
-  windows_x64;
+  windows_x64,
+  windows_arm64;
 
   String get platformName {
     return switch (this) {
@@ -615,7 +627,8 @@ enum HostPlatform {
       HostPlatform.darwin_arm64 => 'arm64',
       HostPlatform.linux_x64 => 'x64',
       HostPlatform.linux_arm64 => 'arm64',
-      HostPlatform.windows_x64 => 'x64'
+      HostPlatform.windows_x64 => 'x64',
+      HostPlatform.windows_arm64 => 'arm64',
     };
   }
 }
@@ -626,6 +639,7 @@ String getNameForHostPlatform(HostPlatform platform) {
     HostPlatform.darwin_arm64 => 'darwin-arm64',
     HostPlatform.linux_x64 => 'linux-x64',
     HostPlatform.linux_arm64 => 'linux-arm64',
-    HostPlatform.windows_x64 => 'windows-x64'
+    HostPlatform.windows_x64 => 'windows-x64',
+    HostPlatform.windows_arm64 => 'windows-arm64',
   };
 }

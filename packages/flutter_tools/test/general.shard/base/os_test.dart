@@ -160,7 +160,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
-    testWithoutContext('Windows', () async {
+    testWithoutContext('Windows default', () async {
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.hostPlatform, HostPlatform.windows_x64);

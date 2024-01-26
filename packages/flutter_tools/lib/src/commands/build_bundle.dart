@@ -45,6 +45,7 @@ class BuildBundleCommand extends BuildSubCommand {
           'linux-x64',
           'linux-arm64',
           'windows-x64',
+          'windows-arm64',
         ],
         help: 'The architecture for which to build the application.',
       )
@@ -116,6 +117,7 @@ class BuildBundleCommand extends BuildSubCommand {
           throwToolExit('macOS is not a supported target platform.');
         }
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }

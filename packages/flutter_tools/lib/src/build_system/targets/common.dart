@@ -206,6 +206,7 @@ class KernelSnapshot extends Target {
     switch (targetPlatform) {
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
       case TargetPlatform.android:
@@ -233,7 +234,7 @@ class KernelSnapshot extends Target {
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
-      TargetPlatform.windows_x64 => 'windows',
+      TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
     };
 

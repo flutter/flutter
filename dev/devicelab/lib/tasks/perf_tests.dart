@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show LineSplitter, json, utf8;
+import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -953,11 +954,12 @@ class StartupTest {
             '--target=$target',
           ]);
           final String basename = path.basename(testDirectory);
+          final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
           applicationBinaryPath = path.join(
             testDirectory,
             'build',
             'windows',
-            'x64',
+            arch,
             'runner',
             'Profile',
             '$basename.exe'
@@ -1763,11 +1765,12 @@ class CompileTest {
         await flutter('build', options: options);
         watch.stop();
         final String basename = path.basename(cwd);
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
         final String exePath = path.join(
           cwd,
           'build',
           'windows',
-          'x64',
+          arch,
           'runner',
           'release',
           '$basename.exe');
