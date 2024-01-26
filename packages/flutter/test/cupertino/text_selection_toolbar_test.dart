@@ -273,7 +273,7 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgetsWithLeakTracking('correctly sizes large toolbar buttons', (WidgetTester tester) async {
+  testWidgets('correctly sizes large toolbar buttons', (WidgetTester tester) async {
     final firstBoxKey = GlobalKey();
     final secondBoxKey = GlobalKey();
     final thirdBoxKey = GlobalKey();
