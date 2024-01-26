@@ -341,6 +341,26 @@ void testMain() {
 
       dispatcher.dispose();
     });
+
+    test('disconnects view disposal event on dispose', () {
+      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher();
+      final EngineFlutterView view1 =
+          EngineFlutterView(dispatcher, createDomHTMLDivElement());
+
+      dispatcher.viewManager.registerView(view1);
+
+      expect(view1.isDisposed, isFalse);
+
+      bool onMetricsChangedCalled = false;
+      dispatcher.onMetricsChanged = () {
+        onMetricsChangedCalled = true;
+      };
+
+      dispatcher.dispose();
+
+      expect(onMetricsChangedCalled, isFalse);
+      expect(view1.isDisposed, isTrue);
+    });
   });
 }
 
