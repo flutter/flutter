@@ -2169,7 +2169,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextSelectionOverlay? _selectionOverlay;
   ScrollNotificationObserverState? _scrollNotificationObserver;
-  TextEditingValue? _valueWhenToolbarShowScheduled;
+  ({TextEditingValue value, Rect selectionBounds})? _dataWhenToolbarShowScheduled;
   bool _listeningToScrollNotificationObserver = false;
 
   bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
@@ -3707,16 +3707,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     if (notification is ScrollStartNotification
-       && _valueWhenToolbarShowScheduled != null) {
+       && _dataWhenToolbarShowScheduled != null) {
       return;
     }
     if (notification is ScrollEndNotification
-       && _valueWhenToolbarShowScheduled == null) {
+       && _dataWhenToolbarShowScheduled == null) {
       return;
     }
     if (notification is ScrollEndNotification
-       && _valueWhenToolbarShowScheduled != _value) {
-      _valueWhenToolbarShowScheduled = null;
+       && _dataWhenToolbarShowScheduled!.value != _value) {
+      _dataWhenToolbarShowScheduled = null;
       _disposeScrollNotificationObserver();
       return;
     }
@@ -3729,7 +3729,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _handleContextMenuOnScroll(notification);
   }
 
-  Rect _calculateViewportRect() {
+  Rect _calculateDeviceRect() {
     final Size screenSize = MediaQuery.sizeOf(context);
     final ui.FlutterView view = View.of(context);
     final double obscuredVertical = (view.padding.top + view.padding.bottom + view.viewInsets.bottom) / view.devicePixelRatio;
@@ -3754,49 +3754,50 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // then the toolbar is shown when they are scrolled back into view, unless
     // invalidated by a change in TextEditingValue.
     if (notification is ScrollStartNotification) {
-      if (_valueWhenToolbarShowScheduled != null) {
+      if (_dataWhenToolbarShowScheduled != null) {
         return;
       }
       final bool toolbarIsVisible = _selectionOverlay != null
                                   && _selectionOverlay!.toolbarIsVisible
                                   && !_selectionOverlay!.spellCheckToolbarIsVisible;
-      _valueWhenToolbarShowScheduled = toolbarIsVisible ? _value : null;
-      if (_valueWhenToolbarShowScheduled != null) {
+      final Rect? selectionBounds = toolbarIsVisible ? renderEditable.getBoxesForSelection(_value.selection)
+                                           .map((TextBox box) => box.toRect())
+                                           .reduce((Rect result, Rect rect) => result.expandToInclude(rect)) : null;
+      _dataWhenToolbarShowScheduled = toolbarIsVisible ? (value: _value, selectionBounds: selectionBounds!) : null;
+      if (_dataWhenToolbarShowScheduled != null) {
         _selectionOverlay?.hideToolbar();
       }
     } else if (notification is ScrollEndNotification) {
-      if (_valueWhenToolbarShowScheduled == null) {
+      if (_dataWhenToolbarShowScheduled == null) {
         return;
       }
-      if (_valueWhenToolbarShowScheduled != _value) {
+      if (_dataWhenToolbarShowScheduled!.value != _value) {
         // Value has changed so we should invalidate any toolbar scheduling.
-        _valueWhenToolbarShowScheduled = null;
+        _dataWhenToolbarShowScheduled = null;
         _disposeScrollNotificationObserver();
         return;
       }
 
-      final Rect renderEditableBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), renderEditable.paintBounds);
-      final Rect viewportRect = _calculateViewportRect();
-      final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
-      final bool? renderEditableInViewport = _renderEditableInViewport();
-      final bool renderEditableIsVisible = renderEditableInViewport == null || (renderEditableInViewport && viewportRect.overlaps(renderEditableBounds));
+      final Rect deviceRect = _calculateDeviceRect();
+      final bool selectionVisibleInEditable = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
+      final Rect selectionBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), _dataWhenToolbarShowScheduled!.selectionBounds);
+      final bool selectionOverlapsWithDeviceRect = !selectionBounds.hasNaN && deviceRect.overlaps(selectionBounds);
 
-      if (selectionIsVisible && renderEditableIsVisible) {
+      if (selectionVisibleInEditable && selectionOverlapsWithDeviceRect && (_selectionInViewport(selectionBounds) ?? true)) {
         showToolbar();
-        _valueWhenToolbarShowScheduled = null;
+        _dataWhenToolbarShowScheduled = null;
       }
     }
   }
 
-  bool? _renderEditableInViewport() {
+  bool? _selectionInViewport(Rect selectionBounds) {
     RenderAbstractViewport? closestViewport = RenderAbstractViewport.maybeOf(renderEditable);
     if (closestViewport == null) {
       return null;
     }
     while (closestViewport != null) {
-      final Rect renderEditableBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), renderEditable.paintBounds);
       final Rect closestViewportBounds = MatrixUtils.transformRect(closestViewport.getTransformTo(null), closestViewport.paintBounds);
-      if (renderEditableBounds.hasNaN || closestViewportBounds.hasNaN || !closestViewportBounds.overlaps(renderEditableBounds)) {
+      if (selectionBounds.hasNaN || closestViewportBounds.hasNaN || !closestViewportBounds.overlaps(selectionBounds)) {
         return false;
       }
       closestViewport = RenderAbstractViewport.maybeOf(closestViewport.parent);
