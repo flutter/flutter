@@ -141,6 +141,25 @@ platform_properties:
         {
           "sdk_version": "15a240d"
         }
+  mac_android_benchmark:
+    properties:
+      contexts: >-
+        [
+          "osx_sdk"
+        ]
+      dependencies: >-
+        [
+          {"dependency": "apple_signing", "version": "version:to_2024"}
+        ]
+      device_type: "msm8952"
+      mac_model: "Macmini8,1"
+      os: Mac-13
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "15a240d"
+        }
   mac_x64:
     properties:
       contexts: >-
@@ -4102,7 +4121,7 @@ targets:
       task_name: hello_world_android__compile
 
   # mac motog4 benchmark
-  - name: Mac_arm64_android hot_mode_dev_cycle__benchmark
+  - name: Mac_android_benchmark hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
