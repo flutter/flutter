@@ -664,7 +664,7 @@ void main() {
   testWidgets('passing a view to pumpWidget with wrapWithView: true throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       View(
-        view: tester.view,
+        view: FakeView(tester.view),
         child: const SizedBox.shrink(),
       ),
     );
