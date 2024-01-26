@@ -2144,6 +2144,18 @@ void Shell::RemoveView(int64_t view_id) {
 Rasterizer::Screenshot Shell::Screenshot(
     Rasterizer::ScreenshotType screenshot_type,
     bool base64_encode) {
+  if (settings_.enable_impeller) {
+    switch (screenshot_type) {
+      case Rasterizer::ScreenshotType::SkiaPicture:
+        FML_LOG(ERROR)
+            << "Impeller backend cannot produce ScreenshotType::SkiaPicture.";
+        return {};
+      case Rasterizer::ScreenshotType::UncompressedImage:
+      case Rasterizer::ScreenshotType::CompressedImage:
+      case Rasterizer::ScreenshotType::SurfaceData:
+        break;
+    }
+  }
   TRACE_EVENT0("flutter", "Shell::Screenshot");
   fml::AutoResetWaitableEvent latch;
   Rasterizer::Screenshot screenshot;
