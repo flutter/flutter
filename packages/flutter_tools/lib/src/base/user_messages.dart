@@ -4,7 +4,12 @@
 
 import 'platform.dart';
 
-/// Class containing message strings that can be produced by Flutter tools.
+/// Class containing some message strings that can be produced by Flutter tools.
+///
+/// This allows partial reimplementations of the flutter tool to override
+/// certain messages.
+// TODO(andrewkolos): It is unclear if this is worth keeping. See
+// https://github.com/flutter/flutter/issues/125155.
 class UserMessages {
   // Messages used in multiple components.
   String get flutterToolBugInstructions =>

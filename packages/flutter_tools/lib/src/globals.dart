@@ -118,12 +118,7 @@ ProcessUtils get processUtils => context.get<ProcessUtils>()!;
 const Platform _kLocalPlatform = LocalPlatform();
 Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
-/// Contains messages produced by Flutter tools.
-//
-// This allows partial reimplementations of the flutter tool to override
-// certain messages.
-// TODO(andrewkolos): It is unclear if this is worth keeping. See
-// https://github.com/flutter/flutter/issues/125155.
+/// Contains some messages produced by Flutter tools.
 UserMessages get userMessages => context.get<UserMessages>()!;
 
 final OutputPreferences _default = OutputPreferences(
