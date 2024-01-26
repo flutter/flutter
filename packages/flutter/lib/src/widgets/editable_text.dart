@@ -3794,15 +3794,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return null;
     }
     while (closestViewport != null) {
-      final RevealedOffset leadingEdgeOffset = closestViewport.getOffsetToReveal(renderEditable, 0.0);
-      final RevealedOffset trailingEdgeOffset = closestViewport.getOffsetToReveal(renderEditable, 1.0);
-      final double currentOffset = closestViewport.getOffset().pixels;
-      final RevealedOffset? targetOffset = RevealedOffset.clampOffset(
-        leadingEdgeOffset: leadingEdgeOffset,
-        trailingEdgeOffset: trailingEdgeOffset,
-        currentOffset: currentOffset,
-      );
-      if (targetOffset != null) {
+      final Rect renderEditableBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), renderEditable.paintBounds);
+      final Rect closestViewportBounds = MatrixUtils.transformRect(closestViewport.getTransformTo(null), closestViewport.paintBounds);
+      if (renderEditableBounds.hasNaN || closestViewportBounds.hasNaN || !closestViewportBounds.overlaps(renderEditableBounds)) {
         return false;
       }
       closestViewport = RenderAbstractViewport.maybeOf(closestViewport.parent);
