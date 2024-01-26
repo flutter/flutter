@@ -15168,7 +15168,71 @@ void main() {
 
     expect(materialHandleFinder, findsNothing);
     expect(cupertinoHandleFinder, findsNWidgets(2));
-  });
+  },
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
+
+  testWidgets('onSelectionHandleTapped can be updated', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/142077.
+    late StateSetter setState;
+    int tapCount = 0;
+    VoidCallback? onSelectionHandleTapped;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: focusNode,
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                selectionControls: materialTextSelectionControls,
+                onSelectionHandleTapped: onSelectionHandleTapped,
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    final Finder materialHandleFinder = find.byWidgetPredicate((Widget widget) {
+      if (widget.runtimeType != CustomPaint) {
+        return false;
+      }
+      final CustomPaint customPaint = widget as CustomPaint;
+      return '${customPaint.painter.runtimeType}' == '_TextSelectionHandlePainter';
+    });
+    expect(materialHandleFinder, findsOneWidget);
+    expect(tapCount, equals(0));
+
+    await tester.tap(materialHandleFinder);
+    await tester.pump();
+    expect(tapCount, equals(0));
+
+    setState(() {
+      onSelectionHandleTapped = () => tapCount += 1;
+    });
+    await tester.pumpAndSettle();
+
+    await tester.tap(materialHandleFinder);
+    await tester.pump();
+    expect(tapCount, equals(1));
+  },
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
 
   group('Spell check', () {
     testWidgets(
