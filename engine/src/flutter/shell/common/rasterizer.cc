@@ -17,6 +17,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/base64.h"
 #include "flutter/shell/common/serialization_callbacks.h"
+#include "fml/closure.h"
 #include "fml/make_copyable.h"
 #include "fml/synchronization/waitable_event.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -822,15 +823,14 @@ static void RenderFrameForScreenshot(
   root_surface_transformation.reset();
 
   auto frame = compositor_context.AcquireFrame(
-      surface_context,              // skia context
-      canvas,                       // canvas
-      nullptr,                      // view embedder
-      root_surface_transformation,  // root surface transformation
-      false,                        // instrumentation enabled
-      true,                         // render buffer readback supported
-      nullptr,                      // thread merger
-      aiks_context.get()            // aiks context
-  );
+      /*gr_context=*/surface_context,
+      /*canvas=*/canvas,
+      /*view_embedder=*/nullptr,
+      /*root_surface_transformation=*/root_surface_transformation,
+      /*instrumentation_enabled=*/false,
+      /*surface_supports_readback=*/true,
+      /*raster_thread_merger=*/nullptr,
+      /*aiks_context=*/aiks_context.get());
   canvas->Clear(DlColor::kTransparent());
   frame->Raster(*tree, true, nullptr);
   canvas->Flush();
@@ -903,14 +903,12 @@ ScreenshotLayerTreeAsImageImpeller(
   sk_sp<SkData> sk_data;
   auto completion = [buffer, &buffer_desc, &sk_data,
                      &latch](impeller::CommandBuffer::Status status) {
+    fml::ScopedCleanupClosure cleanup([&latch]() { latch.Signal(); });
     if (status != impeller::CommandBuffer::Status::kCompleted) {
       FML_LOG(ERROR) << "Failed to complete blit pass.";
-      latch.Signal();
       return;
     }
     sk_data = SkData::MakeWithCopy(buffer->OnGetContents(), buffer_desc.size);
-
-    latch.Signal();
   };
 
   if (!command_buffer->SubmitCommands(completion)) {
