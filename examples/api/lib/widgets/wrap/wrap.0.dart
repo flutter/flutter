@@ -28,7 +28,7 @@ class WrapExample extends StatefulWidget {
 }
 
 class _WrapExampleState extends State<WrapExample> {
-  List<String> items = <String>['test1', 'test2'];
+  List<String> items = <String>['Item 0', 'Item 1'];
 
   @override
   Widget build(BuildContext context) {
