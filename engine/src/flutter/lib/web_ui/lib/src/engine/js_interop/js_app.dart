@@ -25,9 +25,7 @@ extension JsFlutterViewOptionsExtension on JsFlutterViewOptions {
     return _hostElement!;
   }
 
-  @JS('initialData')
-  external JSObject? get _initialData;
-  Object? get initialData => _initialData?.toObjectDeep;
+  external JSAny? get initialData;
 }
 
 /// The public JS API of a running Flutter Web App.
