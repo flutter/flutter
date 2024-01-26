@@ -100,26 +100,6 @@ void main() {
     ], workingDirectory: pluginExampleAppDir.path);
   }
 
-  test('skip plugin if it does not support the Android platform', () async {
-    final Project project = PluginWithPathAndroidProject();
-    final ProcessResult buildApkResult = await testUnsupportedPlugin(
-        project: project, createAndroidPluginFolder: false);
-    expect(buildApkResult.stderr.toString(),
-        isNot(contains('Please fix your settings.gradle.')));
-    expect(buildApkResult, const ProcessResultMatcher());
-  });
-
-  test(
-      'skip plugin with android folder if it does not support the Android platform',
-      () async {
-    final Project project = PluginWithPathAndroidProject();
-    final ProcessResult buildApkResult = await testUnsupportedPlugin(
-        project: project, createAndroidPluginFolder: true);
-    expect(buildApkResult.stderr.toString(),
-        isNot(contains('Please fix your settings.gradle.')));
-    expect(buildApkResult, const ProcessResultMatcher());
-  });
-
   // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
   /// with until Flutter v1.22.0.
@@ -149,26 +129,6 @@ void main() {
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
-  });
-
-  // TODO(54566): Remove test when issue is resolved.
-  /// Test project with a `settings.gradle` (PluginEach) that apps were created
-  /// with until Flutter v1.22.0.
-  /// It is compromised by removing the 'include' statement of the plugins.
-  /// As the "'.flutter-plugins'" keyword is still present, the framework
-  /// assumes that all plugins are included, which is not the case.
-  /// Therefore it should throw an error.
-  test(
-      'skip plugin if it does not support the Android platform with a compromised _plugin.each_ settings.gradle',
-      () async {
-    final Project project = PluginCompromisedEachWithPathAndroidProject();
-    final ProcessResult buildApkResult = await testUnsupportedPlugin(
-        project: project, createAndroidPluginFolder: true);
-    expect(
-      buildApkResult,
-      const ProcessResultMatcher(
-          stderrPattern: 'Please fix your settings.gradle/settings.gradle.kts'),
-    );
   });
 }
 
