@@ -70,8 +70,8 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
     }
 
     if (!transform_.isIdentity()) {
-      DlImageColorSource source(dl_image_, DlTileMode::kRepeat,
-                                DlTileMode::kRepeat, sampling, &transform_);
+      DlImageColorSource source(dl_image_, DlTileMode::kClamp,
+                                DlTileMode::kClamp, sampling, &transform_);
 
       DlPaint paintWithShader;
       if (context.paint) {
