@@ -960,7 +960,7 @@ void main() {
     expect(tester.getSize(find.byType(IntrinsicWidth)).width, 5 * 16 + 60 + 3 * 16);
   });
 
-  testWidgetsWithLeakTracking('WrapFit horizontal', (WidgetTester tester)async {
+  testWidgets('WrapFit horizontal', (WidgetTester tester)async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -1044,7 +1044,7 @@ void main() {
                           ]);
   });
 
-  testWidgetsWithLeakTracking('WrapFit vertical', (WidgetTester tester)async {
+  testWidgets('WrapFit vertical', (WidgetTester tester)async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -1129,7 +1129,7 @@ void main() {
                           ]);
   });
 
-  testWidgetsWithLeakTracking('Wrapped', (WidgetTester tester) async {
+  testWidgets('Wrapped', (WidgetTester tester) async {
 
     expect(const Wrapped(child: SizedBox()).fit, WrapFit.runTight);
 
