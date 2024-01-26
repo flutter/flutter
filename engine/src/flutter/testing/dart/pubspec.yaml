@@ -40,7 +40,7 @@ dependency_overrides:
   file:
     path: ../../../third_party/dart/third_party/pkg/file/packages/file
   ffi:
-    path: ../../../third_party/dart/third_party/pkg/ffi
+    path: ../../../third_party/dart/third_party/pkg/native/pkgs/ffi
   fixnum:
     path: ../../../third_party/dart/third_party/pkg/fixnum
   litetest:
