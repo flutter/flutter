@@ -558,10 +558,12 @@ class _BottomNavigationTile extends StatelessWidget {
       ).evaluate(animation);
     }
 
-    size = switch (type) {
-      BottomNavigationBarType.fixed => 1,
-      BottomNavigationBarType.shifting => (flex! * 1000.0).round(),
-    };
+    switch (type) {
+      case BottomNavigationBarType.fixed:
+        size = 1;
+      case BottomNavigationBarType.shifting:
+        size = (flex! * 1000.0).round();
+    }
 
     Widget result = InkResponse(
       onTap: onTap,
@@ -856,10 +858,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // Unselected labels are shown by default for [BottomNavigationBarType.fixed],
   // and hidden by default for [BottomNavigationBarType.shifting].
   bool get _defaultShowUnselected {
-    return switch (_effectiveType) {
-      BottomNavigationBarType.shifting => false,
-      BottomNavigationBarType.fixed    => true,
-    };
+    switch (_effectiveType) {
+      case BottomNavigationBarType.shifting:
+        return false;
+      case BottomNavigationBarType.fixed:
+        return true;
+    }
   }
 
   @override
@@ -965,10 +969,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
-    final Color themeColor = switch (themeData.brightness) {
-      Brightness.light => themeData.colorScheme.primary,
-      Brightness.dark  => themeData.colorScheme.secondary,
-    };
+    final Color themeColor;
+    switch (themeData.brightness) {
+      case Brightness.light:
+        themeColor = themeData.colorScheme.primary;
+      case Brightness.dark:
+        themeColor = themeData.colorScheme.secondary;
+    }
 
     final TextStyle effectiveSelectedLabelStyle =
       _effectiveTextStyle(
@@ -1131,10 +1138,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       ?? BottomNavigationBarLandscapeLayout.spread;
     final double additionalBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
-    final Color? backgroundColor = switch (_effectiveType) {
-      BottomNavigationBarType.fixed    => widget.backgroundColor ?? bottomTheme.backgroundColor,
-      BottomNavigationBarType.shifting => _backgroundColor,
-    };
+    Color? backgroundColor;
+    switch (_effectiveType) {
+      case BottomNavigationBarType.fixed:
+        backgroundColor = widget.backgroundColor ?? bottomTheme.backgroundColor;
+      case BottomNavigationBarType.shifting:
+        backgroundColor = _backgroundColor;
+    }
 
     return Semantics(
       explicitChildNodes: true,
@@ -1288,8 +1298,8 @@ class _RadialPainter extends CustomPainter {
     for (int i = 0; i < circles.length; i += 1) {
       if (circles[i] != oldPainter.circles[i]) {
         return true;
-      }
     }
+      }
     return false;
   }
 
@@ -1299,10 +1309,13 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      final double leftFraction = switch (textDirection) {
-        TextDirection.rtl => 1.0 - circle.horizontalLeadingOffset,
-        TextDirection.ltr => circle.horizontalLeadingOffset,
-      };
+      final double leftFraction;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          leftFraction = 1.0 - circle.horizontalLeadingOffset;
+        case TextDirection.ltr:
+          leftFraction = circle.horizontalLeadingOffset;
+      }
       final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = Tween<double>(
         begin: 0.0,

@@ -241,11 +241,16 @@ class ButtonThemeData with Diagnosticable {
   ///  * [getPadding], which is used to calculate padding for the [button]'s
   ///    child (typically the button's label).
   EdgeInsetsGeometry get padding {
-    return _padding ?? switch (textTheme) {
-      ButtonTextTheme.normal  => const EdgeInsets.symmetric(horizontal: 16.0),
-      ButtonTextTheme.accent  => const EdgeInsets.symmetric(horizontal: 16.0),
-      ButtonTextTheme.primary => const EdgeInsets.symmetric(horizontal: 24.0),
-    };
+    if (_padding != null) {
+      return _padding;
+    }
+    switch (textTheme) {
+      case ButtonTextTheme.normal:
+      case ButtonTextTheme.accent:
+        return const EdgeInsets.symmetric(horizontal: 16.0);
+      case ButtonTextTheme.primary:
+        return const EdgeInsets.symmetric(horizontal: 24.0);
+    }
   }
   final EdgeInsetsGeometry? _padding;
 
@@ -264,12 +269,20 @@ class ButtonThemeData with Diagnosticable {
   ///  * [getShape], which is used to calculate the shape of the [button]'s
   ///    [Material].
   ShapeBorder get shape {
-    return _shape ?? switch (textTheme) {
-      ButtonTextTheme.normal || ButtonTextTheme.accent =>
-        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
-      ButtonTextTheme.primary =>
-        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
-    };
+    if (_shape != null) {
+      return _shape;
+    }
+    switch (textTheme) {
+      case ButtonTextTheme.normal:
+      case ButtonTextTheme.accent:
+        return const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(2.0)),
+        );
+      case ButtonTextTheme.primary:
+        return const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        );
+    }
   }
   final ShapeBorder? _shape;
 

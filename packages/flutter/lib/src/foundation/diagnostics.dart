@@ -1718,23 +1718,34 @@ abstract class DiagnosticsNode {
   @protected
   TextTreeConfiguration? get textTreeConfiguration {
     assert(style != null);
-    return switch (style!) {
-      DiagnosticsTreeStyle.none          => null,
-      DiagnosticsTreeStyle.dense         => denseTextConfiguration,
-      DiagnosticsTreeStyle.sparse        => sparseTextConfiguration,
-      DiagnosticsTreeStyle.offstage      => dashedTextConfiguration,
-      DiagnosticsTreeStyle.whitespace    => whitespaceTextConfiguration,
-      DiagnosticsTreeStyle.transition    => transitionTextConfiguration,
-      DiagnosticsTreeStyle.singleLine    => singleLineTextConfiguration,
-      DiagnosticsTreeStyle.errorProperty => errorPropertyTextConfiguration,
-      DiagnosticsTreeStyle.shallow       => shallowTextConfiguration,
-      DiagnosticsTreeStyle.error         => errorTextConfiguration,
-      DiagnosticsTreeStyle.flat          => flatTextConfiguration,
-
-      // Truncate children doesn't really need its own text style as the
-      // rendering is quite custom.
-      DiagnosticsTreeStyle.truncateChildren => whitespaceTextConfiguration,
-    };
+    switch (style!) {
+      case DiagnosticsTreeStyle.none:
+        return null;
+      case DiagnosticsTreeStyle.dense:
+        return denseTextConfiguration;
+      case DiagnosticsTreeStyle.sparse:
+        return sparseTextConfiguration;
+      case DiagnosticsTreeStyle.offstage:
+        return dashedTextConfiguration;
+      case DiagnosticsTreeStyle.whitespace:
+        return whitespaceTextConfiguration;
+      case DiagnosticsTreeStyle.transition:
+        return transitionTextConfiguration;
+      case DiagnosticsTreeStyle.singleLine:
+        return singleLineTextConfiguration;
+      case DiagnosticsTreeStyle.errorProperty:
+        return errorPropertyTextConfiguration;
+      case DiagnosticsTreeStyle.shallow:
+        return shallowTextConfiguration;
+      case DiagnosticsTreeStyle.error:
+        return errorTextConfiguration;
+      case DiagnosticsTreeStyle.truncateChildren:
+        // Truncate children doesn't really need its own text style as the
+        // rendering is quite custom.
+        return whitespaceTextConfiguration;
+      case DiagnosticsTreeStyle.flat:
+        return flatTextConfiguration;
+    }
   }
 
   /// Returns a string representation of this node and its descendants.
