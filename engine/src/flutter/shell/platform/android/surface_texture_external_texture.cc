@@ -37,7 +37,7 @@ void SurfaceTextureExternalTexture::OnGrContextCreated() {
 }
 
 void SurfaceTextureExternalTexture::MarkNewFrameAvailable() {
-  new_frame_ready_ = true;
+  // NOOP.
 }
 
 void SurfaceTextureExternalTexture::Paint(PaintContext& context,
@@ -48,10 +48,9 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
     return;
   }
   const bool should_process_frame =
-      (!freeze && new_frame_ready_) || dl_image_ == nullptr;
+      !freeze || ShouldUpdate() || dl_image_ == nullptr;
   if (should_process_frame) {
     ProcessFrame(context, bounds);
-    new_frame_ready_ = false;
   }
   FML_CHECK(state_ == AttachmentState::kAttached);
 
@@ -109,6 +108,11 @@ void SurfaceTextureExternalTexture::Attach(int gl_tex_id) {
   jni_facade_->SurfaceTextureAttachToGLContext(
       fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_), gl_tex_id);
   state_ = AttachmentState::kAttached;
+}
+
+bool SurfaceTextureExternalTexture::ShouldUpdate() {
+  return jni_facade_->SurfaceTextureShouldUpdate(
+      fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_));
 }
 
 void SurfaceTextureExternalTexture::Update() {
