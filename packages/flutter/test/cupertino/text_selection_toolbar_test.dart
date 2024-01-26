@@ -275,6 +275,11 @@ void main() {
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgetsWithLeakTracking('correctly sizes large toolbar buttons', (WidgetTester tester) async {
+    final firstBoxKey = GlobalKey();
+    final secondBoxKey = GlobalKey();
+    final thirdBoxKey = GlobalKey();
+    final fourthBoxKey = GlobalKey();
+
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -283,11 +288,11 @@ void main() {
             child: CupertinoTextSelectionToolbar(
               anchorAbove: const Offset(50.0, 100.0),
               anchorBelow: const Offset(50.0, 200.0),
-              children: const <Widget>[
-                SizedBox(width: 100),
-                SizedBox(width: 300),
-                SizedBox(width: 100),
-                SizedBox(width: 100),
+              children: <Widget>[
+                SizedBox(key: firstBoxKey, width: 100),
+                SizedBox(key: secondBoxKey, width: 300),
+                SizedBox(key: thirdBoxKey, width: 100),
+                SizedBox(key: fourthBoxKey, width: 100),
               ],
             ),
           ),
@@ -295,29 +300,34 @@ void main() {
       ),
     );
 
-    Finder findSizedBoxWithWidth(double width) =>
-      find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.width == width);
-
     // The first page isn't wide enough to show the second button.
-    expect(findSizedBoxWithWidth(100), findsOneWidget);
-    expect(findSizedBoxWithWidth(300), findsNothing);
+    expect(find.byKey(firstBoxKey), findsOneWidget);
+    expect(find.byKey(secondBoxKey), findsNothing);
+    expect(find.byKey(thirdBoxKey), findsNothing);
+    expect(find.byKey(fourthBoxKey), findsNothing);
 
     // Show the next page.
     await tester.tapAt(tester.getCenter(findOverflowNextButton()));
     await tester.pumpAndSettle();
 
-    // The second page should show only the second button, but it should not
-    // limit its width.
-    // expect(findSizedBoxWithWidth(100), findsNothing);
-    // expect(findSizedBoxWithWidth(300), findsOneWidget);
-    expect(tester.getSize(findSizedBoxWithWidth(300)).width, 300);
+    // The second page should show only the second button.
+    expect(find.byKey(firstBoxKey), findsNothing);
+    expect(find.byKey(secondBoxKey), findsOneWidget);
+    expect(find.byKey(thirdBoxKey), findsNothing);
+    expect(find.byKey(fourthBoxKey), findsNothing);
 
-    // Show the next page
+    // The button's width shouldn't be limited by the first page's width.
+    expect(tester.getSize(find.byKey(secondBoxKey)).width, 300);
+
+    // Show the next page.
     await tester.tapAt(tester.getCenter(findOverflowNextButton()));
     await tester.pumpAndSettle();
 
     // The third page should show the last two items.
-    expect(findSizedBoxWithWidth(100), findsNWidgets(2));
+    expect(find.byKey(firstBoxKey), findsNothing);
+    expect(find.byKey(secondBoxKey), findsNothing);
+    expect(find.byKey(thirdBoxKey), findsOneWidget);
+    expect(find.byKey(fourthBoxKey), findsOneWidget);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgetsWithLeakTracking('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
