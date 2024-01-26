@@ -30,8 +30,9 @@ MaterialApp _buildAppWithDialog(
                   context: context,
                   traversalEdgeBehavior: traversalEdgeBehavior,
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: dialog,
                     );
                   },
