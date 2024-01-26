@@ -1,7 +1,0 @@
-solutions = [{
-  "name"        : "src/flutter",
-  "url"         : "https://github.com/flutter/engine.git",
-  "deps_file"   : "DEPS",
-  "managed"     : False,
-  "safesync_url": "",
-}]
