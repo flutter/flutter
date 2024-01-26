@@ -2928,7 +2928,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.controller.addListener(_didChangeTextEditingValue);
       _updateRemoteEditingValueIfNeeded();
     }
-    if (widget.controller.selection != oldWidget.controller.selection) {
+
+    if (_selectionOverlay != null
+        && widget.contextMenuBuilder != oldWidget.contextMenuBuilder) {
+      final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
+      _selectionOverlay = _createSelectionOverlay();
+      if (shouldShowToolbar) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+          _selectionOverlay!.showToolbar();
+        });
+      }
+    } else if (widget.controller.selection != oldWidget.controller.selection) {
       _selectionOverlay?.update(_value);
     }
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;

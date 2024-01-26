@@ -15045,7 +15045,6 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter localSetState) {
               setState = localSetState;
-              print('justin builder');
               return EditableText(
                 maxLines: 10,
                 controller: controller,
@@ -15062,7 +15061,6 @@ void main() {
                   BuildContext context,
                   EditableTextState editableTextState,
                 ) {
-                  print('justin context menu builder $key');
                   return SizedBox(
                     key: key,
                     width: 10.0,
