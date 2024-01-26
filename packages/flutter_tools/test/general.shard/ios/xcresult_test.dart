@@ -35,7 +35,7 @@ void main() {
       stdout: stdout,
       stderr: stderr,
       exitCode: exitCode,
-      onRun: () {},
+      onRun: (_) {},
     );
   }
 

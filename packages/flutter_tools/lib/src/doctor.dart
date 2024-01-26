@@ -119,7 +119,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators(
         fileSystem: globals.fs,
         platform: platform,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         plistParser: globals.plistParser,
         processManager: globals.processManager,
         logger: _logger,
@@ -134,7 +134,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
@@ -150,7 +150,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
             xcode: globals.xcode!,
-            userMessages: userMessages,
+            userMessages: globals.userMessages,
             iosSimulatorUtils: globals.iosSimulatorUtils!,
           ),
           globals.cocoapodsValidator!,
@@ -170,7 +170,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
           processManager: globals.processManager,
-          userMessages: userMessages,
+          userMessages: globals.userMessages,
         ),
       if (windowsWorkflow!.appliesToHostPlatform)
         visualStudioValidator!,
