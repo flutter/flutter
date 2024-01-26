@@ -104,11 +104,7 @@ fml::Status ComputePassVK::Compute(const ISize& grid_size) {
 
   // Special case for linear processing.
   if (height == 1) {
-    int64_t minimum = 1;
-    int64_t threadGroups = std::max(
-        static_cast<int64_t>(std::ceil(width * 1.0 / max_wg_size_[0] * 1.0)),
-        minimum);
-    command_buffer_vk.dispatch(threadGroups, 1, 1);
+    command_buffer_vk.dispatch(width, 1, 1);
   } else {
     while (width > max_wg_size_[0]) {
       width = std::max(static_cast<int64_t>(1), width / 2);
@@ -216,8 +212,53 @@ bool ComputePassVK::BindResource(size_t binding,
   return true;
 }
 
+// Note:
+// https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples
+// Seems to suggest that anything more finely grained than a global memory
+// barrier is likely to be weakened into a global barrier. Confirming this on
+// mobile devices will require some experimentation.
+
+// |ComputePass|
+void ComputePassVK::AddBufferMemoryBarrier() {
+  vk::MemoryBarrier barrier;
+  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
+  barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+  command_buffer_->GetEncoder()->GetCommandBuffer().pipelineBarrier(
+      vk::PipelineStageFlagBits::eComputeShader,
+      vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0, {});
+}
+
+// |ComputePass|
+void ComputePassVK::AddTextureMemoryBarrier() {
+  vk::MemoryBarrier barrier;
+  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
+  barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+  command_buffer_->GetEncoder()->GetCommandBuffer().pipelineBarrier(
+      vk::PipelineStageFlagBits::eComputeShader,
+      vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0, {});
+}
+
 // |ComputePass|
 bool ComputePassVK::EncodeCommands() const {
+  // Since we only use global memory barrier, we don't have to worry about
+  // compute to compute dependencies across cmd buffers. Instead, we pessimize
+  // here and assume that we wrote to a storage image or buffer and that a
+  // render pass will read from it. if there are ever scenarios where we end up
+  // with compute to compute dependencies this should be revisited.
+
+  // This does not currently handle image barriers as we do not use them
+  // for anything.
+  vk::MemoryBarrier barrier;
+  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
+  barrier.dstAccessMask =
+      vk::AccessFlagBits::eIndexRead | vk::AccessFlagBits::eVertexAttributeRead;
+
+  command_buffer_->GetEncoder()->GetCommandBuffer().pipelineBarrier(
+      vk::PipelineStageFlagBits::eComputeShader,
+      vk::PipelineStageFlagBits::eVertexInput, {}, 1, &barrier, 0, {}, 0, {});
+
   return true;
 }
 
