@@ -4102,9 +4102,10 @@ targets:
       task_name: hello_world_android__compile
 
   # mac motog4 benchmark
-  - name: Mac_android hot_mode_dev_cycle__benchmark
+  - name: Mac_arm64_android hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
