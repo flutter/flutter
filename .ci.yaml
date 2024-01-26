@@ -1741,27 +1741,14 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux_pixel_7pro android_defines_test
+  - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    bringup: true
     timeout: 60
-    dimensions:
-      kvm: "1"
-      cores: "8"
-      machine_type: "n1-standard-8"
     properties:
-      contexts: >-
-        [
-          "android_virtual_device"
-        ]
-      device_type: "none"
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
-      dependencies: >-
-        [
-          {"dependency": "android_virtual_device", "version": "34"}
-        ]
 
   - name: Linux_pixel_7pro android_obfuscate_test
     recipe: devicelab/devicelab_drone
