@@ -371,7 +371,7 @@ flutter:
           flutterRoot: Cache.defaultFlutterRoot(
             platform: platform,
             fileSystem: testFileSystem,
-            userMessages: userMessages,
+            userMessages: UserMessages(),
           ),
           splitDeferredAssets: true,
         );
