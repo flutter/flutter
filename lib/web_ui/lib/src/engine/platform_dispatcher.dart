@@ -78,13 +78,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
     AppLifecycleState.instance.addListener(_setAppLifecycleState);
-    viewManager.onViewDisposed.listen((_) {
+    _onViewDisposedListener = viewManager.onViewDisposed.listen((_) {
       // Send a metrics changed event to the framework when a view is disposed.
       // View creation/resize is handled by the `_didResize` handler in the
       // EngineFlutterView itself.
       invokeOnMetricsChanged();
     });
   }
+
+  late StreamSubscription<int> _onViewDisposedListener;
 
   /// The [EnginePlatformDispatcher] singleton.
   static EnginePlatformDispatcher get instance => _instance;
@@ -112,6 +114,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
     AppLifecycleState.instance.removeListener(_setAppLifecycleState);
+    _onViewDisposedListener.cancel();
     viewManager.dispose();
   }
 
