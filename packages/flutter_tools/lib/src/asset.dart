@@ -64,7 +64,12 @@ abstract class AssetBundleFactory {
     required FileSystem fileSystem,
     required Platform platform,
     bool splitDeferredAssets = false,
-  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, splitDeferredAssets: splitDeferredAssets);
+  }) => _ManifestAssetBundleFactory(
+    logger: logger,
+    fileSystem: fileSystem,
+    platform: platform,
+    splitDeferredAssets: splitDeferredAssets,
+  );
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -138,7 +143,13 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   final bool _splitDeferredAssets;
 
   @override
-  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform, splitDeferredAssets: _splitDeferredAssets);
+  AssetBundle createBundle() => ManifestAssetBundle(
+    logger: _logger,
+    fileSystem: _fileSystem,
+    platform: _platform,
+    flutterRoot: Cache.flutterRoot!,
+    splitDeferredAssets: _splitDeferredAssets,
+  );
 }
 
 /// An asset bundle based on a pubspec.yaml file.
@@ -149,10 +160,12 @@ class ManifestAssetBundle implements AssetBundle {
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
+    required String flutterRoot,
     bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
+       _flutterRoot = flutterRoot,
        _splitDeferredAssets = splitDeferredAssets,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem);
 
@@ -160,6 +173,7 @@ class ManifestAssetBundle implements AssetBundle {
   final FileSystem _fileSystem;
   final LicenseCollector _licenseCollector;
   final Platform _platform;
+  final String _flutterRoot;
   final bool _splitDeferredAssets;
 
   @override
@@ -584,7 +598,7 @@ class ManifestAssetBundle implements AssetBundle {
         final Uri entryUri = _fileSystem.path.toUri(asset);
         result.add(_Asset(
           baseDir: _fileSystem.path.join(
-            Cache.flutterRoot!,
+            _flutterRoot,
             'bin', 'cache', 'artifacts', 'material_fonts',
           ),
           relativeUri: Uri(path: entryUri.pathSegments.last),
@@ -600,8 +614,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   List<_Asset> _getMaterialShaders() {
     final String shaderPath = _fileSystem.path.join(
-      Cache.flutterRoot!,
-      'packages', 'flutter', 'lib', 'src', 'material', 'shaders',
+      _flutterRoot, 'packages', 'flutter', 'lib', 'src', 'material', 'shaders',
     );
     // This file will exist in a real invocation unless the git checkout is
     // corrupted somehow, but unit tests generally don't create this file

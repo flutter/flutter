@@ -368,6 +368,11 @@ flutter:
           logger: logger,
           fileSystem: testFileSystem,
           platform: platform,
+          flutterRoot: Cache.defaultFlutterRoot(
+            platform: platform,
+            fileSystem: testFileSystem,
+            userMessages: UserMessages(),
+          ),
           splitDeferredAssets: true,
         );
 
@@ -378,15 +383,6 @@ flutter:
         );
         return bundle;
       }
-
-      late String? previousCacheFlutterRootValue;
-
-      setUp(() {
-        previousCacheFlutterRootValue = Cache.flutterRoot;
-        Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: testFileSystem, userMessages: UserMessages());
-      });
-
-      tearDown(() => Cache.flutterRoot = previousCacheFlutterRootValue);
 
       testWithoutContext('correctly bundles assets given a simple asset manifest with flavors', () async {
         testFileSystem.file('.packages').createSync();
