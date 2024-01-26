@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
 import 'test_data/plugin_each_settings_gradle_project.dart';
-import 'test_data/plugin_project.dart';
 import 'test_data/project.dart';
 import 'test_utils.dart';
 
@@ -144,25 +143,10 @@ dependencies:
     path: ../
 ''';
 
-/// Project that load's a plugin from the specified path.
-class PluginWithPathAndroidProject extends PluginProject {
-  @override
-  String get pubspec => pubspecWithPluginPath;
-}
-
 // TODO(54566): Remove class when issue is resolved.
 /// [PluginEachSettingsGradleProject] that load's a plugin from the specified
 /// path.
 class PluginEachWithPathAndroidProject extends PluginEachSettingsGradleProject {
-  @override
-  String get pubspec => pubspecWithPluginPath;
-}
-
-// TODO(54566): Remove class when issue is resolved.
-/// [PluginCompromisedEachSettingsGradleProject] that load's a plugin from the
-/// specified path.
-class PluginCompromisedEachWithPathAndroidProject
-    extends PluginCompromisedEachSettingsGradleProject {
   @override
   String get pubspec => pubspecWithPluginPath;
 }
