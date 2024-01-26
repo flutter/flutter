@@ -2167,6 +2167,9 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: embedded_android_views_integration_test
 
+  # TODO(https://github.com/flutter/flutter/issues/142178): Remove this.
+  # In the process of (a) renaming this "external_textures" and (b) making it
+  # an emulator test instead of a physical device.
   - name: Linux_pixel_7pro external_ui_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2174,7 +2177,24 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: external_ui_integration_test
+      task_name: external_textures_integration_test
+
+  - name: Linux_android_emu external_ui_integration_test
+    recipe: devicelab/devicelab_drone
+    # TODO(https://github.com/flutter/flutter/issues/142178): Enable this.
+    bringup: true
+    timeout: 60
+    # Functionally the same as "presubmit: false", except that we will run on
+    # presubmit during engine rolls. This test is the *only* automated e2e
+    # test for external textures for the engine, it should never break.
+    runIf:
+      - bin/internal/engine.version
+      - .ci.yaml
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      # TODO(https://github.com/flutter/flutter/issues/142178): Rename this.
+      task_name: external_textures_integration_test
 
   # linux motog4 benchmark
   - name: Linux_android fading_child_animation_perf__timeline_summary
@@ -4274,6 +4294,13 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: imagefiltered_transform_animation_perf_ios__timeline_summary
 
+  # TODO(https://github.com/flutter/flutter/issues/106806): Find a way to
+  # re-enable this without "ignore_flakiness: "true"", likely by loostening the
+  # test assertions, or potentially not running the frame rate tests at all on
+  # iOS (for example, doing pixel-tests instead).
+  #
+  # Also, rename this to "external_textures_integration_test" to be consistent
+  # with the Android test, but that can wait until we've figured out the flake.
   - name: Mac_ios external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4281,7 +4308,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: external_ui_integration_test_ios
+      task_name: external_textures_integration_test_ios
       ignore_flakiness: "true"
 
   - name: Mac_ios route_test_ios
