@@ -105,6 +105,8 @@ FLUTTER_ASSERT_ARC
       return;
     }
 
+    CGContextRelease(context);
+
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(),
                    callback);
   };
@@ -112,6 +114,8 @@ FLUTTER_ASSERT_ARC
                  callback);
 
   [self waitForExpectationsWithTimeout:30.0 handler:nil];
+
+  CGColorSpaceRelease(color_space);
 }
 
 @end
