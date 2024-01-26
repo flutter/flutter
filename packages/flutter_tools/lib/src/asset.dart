@@ -1305,7 +1305,7 @@ class _AssetDirectoryCache {
     } on FileSystemException catch (e) {
       throwToolExit(
         'Unable to check the existence of asset file "$assetPath". '
-        'Ensure that the asset file is declared is a valid local file system path.\n'
+        'Ensure that the asset file is declared as a valid local file system path.\n'
         'Details: $e',
       );
     }

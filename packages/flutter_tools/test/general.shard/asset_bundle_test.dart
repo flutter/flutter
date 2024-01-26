@@ -177,35 +177,6 @@ flutter:
       Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
-    testUsingContext('throws ToolExit when file entry contains invalid characters (Windows only)', () async {
-      globals.fs.file('.packages').createSync();
-      globals.fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
-name: example
-flutter:
-  assets:
-    - http://website.com/hi.png
-''');
-      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      expect(() => bundle.build(packagesPath: '.packages'), throwsToolExit(
-        message: 'Unable to check the existence of asset file ',
-      ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows,
-      opHandle: (String context, FileSystemOp operation) {
-        if (operation == FileSystemOp.exists && context == r'C:\http:\\website.com') {
-          throw const FileSystemException(
-            r"FileSystemException: Exists failed, path = 'C:\http:\\website.com' "
-            '(OS Error: The filename, directory name, or volume label syntax is '
-            'incorrect., errno = 123)',
-          );
-        }
-      },),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'windows'),
-    });
-
     testUsingContext('handle removal of wildcard directories', () async {
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       final File pubspec = globals.fs.file('pubspec.yaml')
@@ -564,6 +535,56 @@ flutter:
             'specifies the flavor(s): "strawberry".'),
         );
       });
+    });
+  });
+
+  group('AssetBundle.build (hermetic)', () {
+    testWithoutContext('throws ToolExit when file entry contains invalid characters (Windows only)', () async {
+      final FileSystem fileSystem = MemoryFileSystem(
+        style: FileSystemStyle.windows,
+        opHandle: (String context, FileSystemOp operation) {
+          if (operation == FileSystemOp.exists && context == r'C:\http:\\website.com') {
+            throw const FileSystemException(
+              r"FileSystemException: Exists failed, path = 'C:\http:\\website.com' "
+              '(OS Error: The filename, directory name, or volume label syntax is '
+              'incorrect., errno = 123)',
+            );
+          }
+        },
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final FakePlatform platform = FakePlatform(operatingSystem: 'windows');
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - http://website.com/hi.png
+''');
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
+
+      expect(
+        () => bundle.build(
+          packagesPath: '.packages',
+          flutterProject: FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          ),
+        ),
+        throwsToolExit(
+          message: 'Unable to check the existence of asset file ',
+        ));
     });
   });
 
