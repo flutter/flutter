@@ -3783,7 +3783,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Rect selectionBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), _dataWhenToolbarShowScheduled!.selectionBounds);
       final bool selectionOverlapsWithDeviceRect = !selectionBounds.hasNaN && deviceRect.overlaps(selectionBounds);
 
-      if (selectionVisibleInEditable && selectionOverlapsWithDeviceRect && (_selectionInViewport(selectionBounds) ?? true)) {
+      if (selectionVisibleInEditable
+         && selectionOverlapsWithDeviceRect
+         && (_selectionInViewport(_dataWhenToolbarShowScheduled!.selectionBounds) ?? true)) {
         showToolbar();
         _dataWhenToolbarShowScheduled = null;
       }
@@ -3796,8 +3798,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return null;
     }
     while (closestViewport != null) {
-      final Rect closestViewportBounds = MatrixUtils.transformRect(closestViewport.getTransformTo(null), closestViewport.paintBounds);
-      if (selectionBounds.hasNaN || closestViewportBounds.hasNaN || !closestViewportBounds.overlaps(selectionBounds)) {
+      final Rect selectionBoundsLocalToViewport = MatrixUtils.transformRect(renderEditable.getTransformTo(closestViewport), selectionBounds);
+      if (selectionBoundsLocalToViewport.hasNaN
+         || closestViewport.paintBounds.hasNaN
+         || !closestViewport.paintBounds.overlaps(selectionBoundsLocalToViewport)) {
         return false;
       }
       closestViewport = RenderAbstractViewport.maybeOf(closestViewport.parent);
