@@ -9,9 +9,9 @@ import 'package:yaml/yaml.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'plugins.dart';
+import 'globals.dart' as globals;
 
 /// Whether or not Impeller Scene 3D model import is enabled.
 const bool kIs3dSceneSupported = true;
@@ -103,7 +103,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        _logger.printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
+        _logger.printStatus(globals.userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }

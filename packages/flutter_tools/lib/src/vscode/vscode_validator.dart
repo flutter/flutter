@@ -14,6 +14,7 @@ class VsCodeValidator extends DoctorValidator {
   VsCodeValidator(this._vsCode) : super(_vsCode.productName);
 
   final VsCode _vsCode;
+  final UserMessages _userMessages = UserMessages();
 
   static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform, ProcessManager processManager) {
     return VsCode
@@ -27,8 +28,8 @@ class VsCodeValidator extends DoctorValidator {
       List<ValidationMessage>.from(_vsCode.validationMessages);
 
     final String vsCodeVersionText = _vsCode.version == null
-        ? userMessages.vsCodeVersion('unknown')
-        : userMessages.vsCodeVersion(_vsCode.version.toString());
+        ? _userMessages.vsCodeVersion('unknown')
+        : _userMessages.vsCodeVersion(_vsCode.version.toString());
 
     if (_vsCode.version == null) {
       validationMessages.add(const ValidationMessage.error('Unable to determine VS Code version.'));

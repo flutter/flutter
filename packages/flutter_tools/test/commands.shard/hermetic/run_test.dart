@@ -419,7 +419,7 @@ void main() {
         expect(
           testLogger.statusText,
           containsIgnoringWhitespace(
-            userMessages.flutterMissPlatformProjects(
+            UserMessages().flutterMissPlatformProjects(
               Device.devicesPlatformTypes(<Device>[mockDevice]),
             ),
           ),

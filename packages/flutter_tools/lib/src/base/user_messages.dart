@@ -2,16 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'context.dart';
 import 'platform.dart';
-
-/// Contains messages produced by Flutter tools.
-//
-// This allows partial reimplementations of the flutter tool to override
-// certain messages.
-// TODO(andrewkolos): It is unclear if this is worth keeping. See
-// https://github.com/flutter/flutter/issues/125155.
-UserMessages get userMessages => context.get<UserMessages>()!;
 
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
