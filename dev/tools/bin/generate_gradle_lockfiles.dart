@@ -87,7 +87,7 @@ void main(List<String> arguments) {
 
     rootBuildGradle.writeAsStringSync(rootGradleFileContent);
     settingsGradle.writeAsStringSync(settingGradleFile);
-    wrapperGradle.writeAsStringSync(wrapperGradleFileContent)
+    wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
 
     final String appDirectory = androidDirectory.parent.absolute.path;
 
