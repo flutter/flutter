@@ -15030,6 +15030,77 @@ void main() {
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
 
+  testWidgets('contextMenuBuilder can be updated to display a new menu', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/142077.
+    late StateSetter setState;
+    final GlobalKey keyOne = GlobalKey();
+    final GlobalKey keyTwo = GlobalKey();
+    GlobalKey key = keyOne;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              print('justin builder');
+              return EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: focusNode,
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                selectionControls: materialTextSelectionHandleControls,
+                contextMenuBuilder: (
+                  BuildContext context,
+                  EditableTextState editableTextState,
+                ) {
+                  print('justin context menu builder $key');
+                  return SizedBox(
+                    key: key,
+                    width: 10.0,
+                    height: 10.0,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    expect(find.byKey(keyOne), findsNothing);
+    expect(find.byKey(keyTwo), findsNothing);
+
+    // Long-press to bring up the context menu.
+    final Finder textFinder = find.byType(EditableText);
+    await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(keyOne), findsOneWidget);
+    expect(find.byKey(keyTwo), findsNothing);
+
+    setState(() {
+      key = keyTwo;
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(keyOne), findsNothing);
+    expect(find.byKey(keyTwo), findsOneWidget);
+  },
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
+
   group('Spell check', () {
     testWidgets(
       'Spell check configured properly when spell check disabled by default',
