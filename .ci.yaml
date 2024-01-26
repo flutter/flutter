@@ -730,6 +730,9 @@ targets:
       shard: fuchsia_precache
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    runIf:
+      - bin/internal/engine.version
+      - .ci.yaml
 
   - name: Linux gradle_desugar_classes_test
     recipe: devicelab/devicelab_drone
