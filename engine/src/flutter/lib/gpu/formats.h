@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_LIB_GPU_FORMATS_H_
+#define FLUTTER_LIB_GPU_FORMATS_H_
+
 #include "fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
@@ -500,3 +503,5 @@ constexpr impeller::StencilOperation ToImpellerStencilOperation(int value) {
 
 }  // namespace gpu
 }  // namespace flutter
+
+#endif  // FLUTTER_LIB_GPU_FORMATS_H_

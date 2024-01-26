@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_
+#define FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_
+
 #include <emscripten/threading.h>
 #include <cinttypes>
 #include "third_party/skia/include/core/SkPicture.h"
@@ -36,3 +39,5 @@ extern unsigned int skwasm_createGlTextureFromTextureSource(
     int width,
     int height);
 }
+
+#endif  // FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_

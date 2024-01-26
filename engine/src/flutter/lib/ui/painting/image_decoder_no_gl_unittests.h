@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_DECODER_NO_GL_UNITTESTS_H_
+#define FLUTTER_LIB_UI_PAINTING_IMAGE_DECODER_NO_GL_UNITTESTS_H_
+
 #include <stdint.h>
 
 #include "flutter/impeller/core/allocator.h"
@@ -99,3 +102,5 @@ float DecodeBGR10(uint32_t x);
 
 }  // namespace testing
 }  // namespace flutter
+
+#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_DECODER_NO_GL_UNITTESTS_H_

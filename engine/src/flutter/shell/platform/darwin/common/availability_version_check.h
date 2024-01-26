@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_AVAILABILITY_VERSION_CHECK_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_AVAILABILITY_VERSION_CHECK_H_
+
 #include <cstdint>
 #include <optional>
 #include <tuple>
@@ -16,3 +19,5 @@ std::optional<ProductVersion> ProductVersionFromSystemVersionPList();
 bool IsEncodedVersionLessThanOrSame(uint32_t encoded_lhs, ProductVersion rhs);
 
 }  // namespace flutter
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_AVAILABILITY_VERSION_CHECK_H_
