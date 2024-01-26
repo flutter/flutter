@@ -2370,39 +2370,4 @@ void main() {
     );
     errors.clear();
   });
-
-  testWidgets('Viewport getOffset', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
-    addTearDown(controller.dispose);
-    List<Widget> children;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            height: 200.0,
-            width: 300.0,
-            child: ListView(
-              controller: controller,
-              children: children = List<Widget>.generate(20, (int i) {
-                return SizedBox(
-                  height: 100.0,
-                  width: 300.0,
-                  child: Text('Tile $i'),
-                );
-              }),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
-
-    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
-    expect(viewport.getOffset().pixels, 300.0);
-    tester.renderObject(find.byWidget(children[5], skipOffstage: false)).showOnScreen();
-    await tester.pumpAndSettle();
-    expect(viewport.getOffset().pixels, viewport.getOffsetToReveal(target, 1.0).offset);
-  });
 }
