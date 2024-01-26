@@ -15099,6 +15099,77 @@ void main() {
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
 
+  testWidgets('selectionControls can be updated', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/142077.
+    controller.text = 'test';
+    late StateSetter setState;
+    TextSelectionControls selectionControls = materialTextSelectionControls;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: focusNode,
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                selectionControls: selectionControls,
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    final Finder materialHandleFinder = find.byWidgetPredicate((Widget widget) {
+      if (widget.runtimeType != CustomPaint) {
+        return false;
+      }
+      final CustomPaint customPaint = widget as CustomPaint;
+      return '${customPaint.painter.runtimeType}' == '_TextSelectionHandlePainter';
+    });
+    final Finder cupertinoHandleFinder = find.byWidgetPredicate((Widget widget) {
+      if (widget.runtimeType != CustomPaint) {
+        return false;
+      }
+      final CustomPaint customPaint = widget as CustomPaint;
+      return '${customPaint.painter.runtimeType}' == '_CupertinoTextSelectionHandlePainter';
+    });
+    expect(materialHandleFinder, findsOneWidget);
+    expect(cupertinoHandleFinder, findsNothing);
+
+    // Long-press to select the text because Cupertino doesn't show a selection
+    // handle when the selection is collapsed.
+    final Finder textFinder = find.byType(EditableText);
+    await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
+    await tester.pumpAndSettle();
+
+    expect(materialHandleFinder, findsNWidgets(2));
+    expect(cupertinoHandleFinder, findsNothing);
+
+    setState(() {
+      selectionControls = cupertinoTextSelectionControls;
+    });
+    await tester.pumpAndSettle();
+
+    expect(materialHandleFinder, findsNothing);
+    expect(cupertinoHandleFinder, findsNWidgets(2));
+  });
+
   group('Spell check', () {
     testWidgets(
       'Spell check configured properly when spell check disabled by default',

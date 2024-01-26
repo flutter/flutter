@@ -2930,12 +2930,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (_selectionOverlay != null
-        && widget.contextMenuBuilder != oldWidget.contextMenuBuilder) {
+        && (widget.contextMenuBuilder != oldWidget.contextMenuBuilder
+            || widget.selectionControls != oldWidget.selectionControls)) {
       final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
+      final bool shouldShowHandles = _selectionOverlay!.handlesVisible;
+      _selectionOverlay!.dispose();
       _selectionOverlay = _createSelectionOverlay();
-      if (shouldShowToolbar) {
+      if (shouldShowToolbar || shouldShowHandles) {
         SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-          _selectionOverlay!.showToolbar();
+          if (shouldShowToolbar) {
+            _selectionOverlay!.showToolbar();
+          }
+          if (shouldShowHandles) {
+            _selectionOverlay!.showHandles();
+          }
         });
       }
     } else if (widget.controller.selection != oldWidget.controller.selection) {
