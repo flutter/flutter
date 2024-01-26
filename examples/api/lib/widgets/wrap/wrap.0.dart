@@ -40,7 +40,7 @@ class _WrapExampleState extends State<WrapExample> {
           runSpacing: 8,
           spacing: 8,
           children: <Widget>[
-            for(int i = 0; i < items.length; i++)
+            for (int i = 0; i < items.length; i++)
               Container(
                 decoration: BoxDecoration(border: Border.all()),
                 child: Row(
