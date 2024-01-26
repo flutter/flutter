@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTUREREGISTRYRELAY_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTUREREGISTRYRELAY_H_
+
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 
@@ -22,3 +25,5 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, assign) NSObject<FlutterTextureRegistry>* parent;
 - (instancetype)initWithParent:(NSObject<FlutterTextureRegistry>*)parent;
 @end
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTUREREGISTRYRELAY_H_

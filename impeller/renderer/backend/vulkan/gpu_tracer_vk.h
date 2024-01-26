@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_GPU_TRACER_VK_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_GPU_TRACER_VK_H_
+
 #include <memory>
 #include <thread>
 
@@ -115,3 +118,5 @@ class GPUProbe {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_GPU_TRACER_VK_H_

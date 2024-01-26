@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_HEADERS_FLUTTERMACOS_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_HEADERS_FLUTTERMACOS_H_
+
 #import "FlutterAppDelegate.h"
 #import "FlutterAppLifecycleDelegate.h"
 #import "FlutterBinaryMessenger.h"
@@ -14,3 +17,5 @@
 #import "FlutterPluginRegistrarMacOS.h"
 #import "FlutterTexture.h"
 #import "FlutterViewController.h"
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_HEADERS_FLUTTERMACOS_H_

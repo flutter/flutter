@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_TESTING_SCENARIO_APP_IOS_SCENARIOS_SCENARIOS_CONTINUOUSTEXTURE_H_
+#define FLUTTER_TESTING_SCENARIO_APP_IOS_SCENARIOS_SCENARIOS_CONTINUOUSTEXTURE_H_
+
 #import <Flutter/Flutter.h>
 #import <Foundation/Foundation.h>
 
@@ -18,3 +21,5 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif  // FLUTTER_TESTING_SCENARIO_APP_IOS_SCENARIOS_SCENARIOS_CONTINUOUSTEXTURE_H_

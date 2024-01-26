@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_IMPELLER_AIKS_AIKS_PLAYGROUND_INSPECTOR_H_
+#define FLUTTER_IMPELLER_AIKS_AIKS_PLAYGROUND_INSPECTOR_H_
+
 #include <functional>
 #include <optional>
 
@@ -48,3 +51,5 @@ class AiksInspector {
 };
 
 };  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_AIKS_AIKS_PLAYGROUND_INSPECTOR_H_
