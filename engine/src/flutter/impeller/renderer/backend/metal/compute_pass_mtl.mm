@@ -32,7 +32,8 @@ ComputePassMTL::ComputePassMTL(std::shared_ptr<const Context> context,
   if (!buffer_) {
     return;
   }
-  encoder_ = [buffer_ computeCommandEncoder];
+  encoder_ = [buffer_ computeCommandEncoderWithDispatchType:
+                          MTLDispatchType::MTLDispatchTypeConcurrent];
   if (!encoder_) {
     return;
   }
@@ -65,6 +66,16 @@ void ComputePassMTL::SetPipeline(
     const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
   pass_bindings_cache_.SetComputePipelineState(
       ComputePipelineMTL::Cast(*pipeline).GetMTLComputePipelineState());
+}
+
+// |ComputePass|
+void ComputePassMTL::AddBufferMemoryBarrier() {
+  [encoder_ memoryBarrierWithScope:MTLBarrierScopeBuffers];
+}
+
+// |ComputePass|
+void ComputePassMTL::AddTextureMemoryBarrier() {
+  [encoder_ memoryBarrierWithScope:MTLBarrierScopeTextures];
 }
 
 // |ComputePass|

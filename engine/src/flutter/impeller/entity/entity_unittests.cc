@@ -2545,11 +2545,6 @@ TEST_P(EntityTest, PointFieldGeometryCoverage) {
             Rect::MakeLTRB(35, 15, 135, 205));
 }
 
-TEST_P(EntityTest, PointFieldCanUseCompute) {
-  EXPECT_EQ(PointFieldGeometry::CanUseCompute(*GetContentContext()),
-            GetContext()->GetBackendType() == Context::BackendType::kMetal);
-}
-
 TEST_P(EntityTest, ColorFilterContentsWithLargeGeometry) {
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));

@@ -66,6 +66,12 @@ class ComputePassMTL final : public ComputePass {
   // |ComputePass|
   bool EncodeCommands() const override;
 
+  // |ComputePass|
+  void AddBufferMemoryBarrier() override;
+
+  // |ComputePass|
+  void AddTextureMemoryBarrier() override;
+
   ComputePassMTL(const ComputePassMTL&) = delete;
 
   ComputePassMTL& operator=(const ComputePassMTL&) = delete;
