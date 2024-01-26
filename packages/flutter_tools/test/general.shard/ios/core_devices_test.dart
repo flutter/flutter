@@ -1371,7 +1371,7 @@ invalid JSON
         ];
         fakeProcessManager.addCommand(FakeCommand(
           command: args,
-          onRun: () {
+          onRun: (_) {
             // Simulate that this command deleted tempFile, did not create a
             // new one, and exited successfully
             expect(tempFile, exists);
@@ -1391,7 +1391,7 @@ invalid JSON
           ),
         );
         expect(
-          logger.traceText,
+          logger.errorText,
           contains('After running the command xcrun devicectl list devices '
             '--timeout 5 --json-output ${tempFile.path} the file\n'
             '${tempFile.path} was expected to exist, but it did not',

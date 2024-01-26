@@ -81,13 +81,12 @@ class IOSCoreDeviceControl {
       final RunResult result = await _processUtils.run(command, throwOnError: true);
 
       if (!output.existsSync()) {
-        final buffer = StringBuffer();
-        buffer.writeln('After running the command ${command.join(' ')} the file');
-        buffer.writeln('${output.path} was expected to exist, but it did not.');
-        buffer.writeln('The process exited with code ${result.exitCode} and');
-        buffer.writeln('Stdout:\n\n${result.stdout.trim()}\n');
-        buffer.writeln('Stderr:\n\n${result.stderr.trim()}');
-        throw StateError(buffer.toString());
+        _logger.printError('After running the command ${command.join(' ')} the file');
+        _logger.printError('${output.path} was expected to exist, but it did not.');
+        _logger.printError('The process exited with code ${result.exitCode} and');
+        _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
+        _logger.printError('Stderr:\n\n${result.stderr.trim()}');
+        throw StateError('Expected the file ${output.path} to exist but it did not');
       }
       final String stringOutput = output.readAsStringSync();
       _logger.printTrace(stringOutput);
