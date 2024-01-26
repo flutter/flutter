@@ -448,7 +448,11 @@ class IOSDeployDebugger {
         if (line.contains('PROCESS_STOPPED') || _lldbProcessStopped.hasMatch(line)) {
           // The app has been stopped. Dump the backtrace, and detach.
           _logger.printTrace(line);
-          _iosDeployProcess?.stdin.writeln(_backTraceAll);
+          _stdinWriteln(
+            _backTraceAll,
+            onError: (Object error, StackTrace stackTrace) => _logger
+                .printTrace('Failed to dump backtrace.\n$error\n$stackTrace'),
+          );
           if (_processResumeCompleter == null) {
             detach();
           }
@@ -556,15 +560,19 @@ class IOSDeployDebugger {
     }
     final Completer<void> completer = Completer<void>();
     _processResumeCompleter = completer;
-    try {
-      // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
-      _iosDeployProcess?.stdin.writeln(_processInterrupt);
-    } on SocketException catch (error) {
-      _logger.printTrace('Could not stop app from debugger: $error');
-    }
+    // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
+    await _stdinWriteln(
+      _processInterrupt,
+      onError: (Object error, StackTrace stackTrace) => _logger.printTrace(
+          'Could not stop app from debugger.\n$error\n$stackTrace'),
+    );
     // wait for backtrace to be dumped
     await completer.future;
-    _iosDeployProcess?.stdin.writeln(_processResume);
+    await _stdinWriteln(
+      _processResume,
+      onError: (Object error, StackTrace stackTrace) => _logger.printTrace(
+          'Could not resume app from debugger.\n$error\n$stackTrace'),
+    );
   }
 
   /// Check what files are found in the device's iOS DeviceSupport directory.
@@ -600,7 +608,7 @@ class IOSDeployDebugger {
     }
     // Stop the app, which will prompt the backtrace to be printed for all
     // threads in the stdoutSubscription handler.
-    await stdinWriteln(
+    await _stdinWriteln(
       _signalStop,
       onError: (Object error, _) {
         _logger.printTrace('Could not stop the app: $error');
@@ -623,7 +631,7 @@ class IOSDeployDebugger {
   ///
   /// This method needs to keep track of the [_stdinWriteFuture] from previous
   /// calls because the future returned by [detach] is not always await-ed.
-  Future<void> stdinWriteln(String line, {required void Function(Object, StackTrace) onError}) async {
+  Future<void> _stdinWriteln(String line, {required void Function(Object, StackTrace) onError}) async {
     final Process? process = _iosDeployProcess;
     if (process == null) {
       return;
@@ -651,7 +659,7 @@ class IOSDeployDebugger {
       return;
     }
 
-    return stdinWriteln(
+    return _stdinWriteln(
       'process detach',
       onError: (Object error, _) {
         // Best effort, try to detach, but maybe the app already exited or already detached.
