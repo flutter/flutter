@@ -5347,7 +5347,7 @@ class Expanded extends Flexible {
 /// This example shows a typical application of the [Wrap] widget. With user
 /// inputs and a [TextField] that prefers to be in the current run.
 ///
-/// ** See code in examples/api/lib/widgets/wrap/wrap.0.dart
+/// ** See code in examples/api/lib/widgets/wrap/wrap.0.dart **
 /// {@end-tool}
 ///
 /// See also:
