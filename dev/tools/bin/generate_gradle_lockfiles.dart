@@ -39,7 +39,7 @@ void main(List<String> arguments) {
       print('${settingsGradle.path} does not exist - skipping');
       continue;
     }
-    
+
     final File wrapperGradle = androidDirectory
         .childDirectory('gradle')
         .childDirectory('wrapper')
@@ -230,5 +230,5 @@ distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.2-all.zip
 ''';
