@@ -213,16 +213,12 @@ class PlatformViewManager {
   bool isVisible(int viewId) => !isInvisible(viewId);
 
   /// Clears the state. Used in tests.
-  ///
-  /// Returns the set of know view ids, so they can be cleaned up.
-  Set<int> debugClear() {
-    final Set<int> result = _contents.keys.toSet();
-    result.forEach(clearPlatformView);
+  void debugClear() {
+    _contents.keys.toList().forEach(clearPlatformView);
     _factories.clear();
     _contents.clear();
     _invisibleViews.clear();
     _viewIdToType.clear();
-    return result;
   }
 }
 

@@ -410,8 +410,7 @@ class HtmlViewEmbedder {
       // are going to be added back. Moving rather than removing and re-adding
       // the view helps it maintain state.
       disposeViews(diffResult.viewsToRemove
-          .where((int view) => !diffResult.viewsToAdd.contains(view))
-          .toSet());
+          .where((int view) => !diffResult.viewsToAdd.contains(view)));
       _activeCompositionOrder.addAll(_compositionOrder);
       unusedViews.removeAll(_compositionOrder);
 
@@ -510,7 +509,7 @@ class HtmlViewEmbedder {
     );
   }
 
-  void disposeViews(Set<int> viewsToDispose) {
+  void disposeViews(Iterable<int> viewsToDispose) {
     for (final int viewId in viewsToDispose) {
       // Remove viewId from the _viewClipChains Map, and then from the DOM.
       final ViewClipChain? clipChain = _viewClipChains.remove(viewId);
@@ -659,8 +658,7 @@ class HtmlViewEmbedder {
 
   /// Disposes the state of this view embedder.
   void dispose() {
-    final Set<int> allViews = PlatformViewManager.instance.debugClear();
-    disposeViews(allViews);
+    disposeViews(_viewClipChains.keys);
     _context = EmbedderFrameContext();
     _currentCompositionParams.clear();
     debugCleanupSvgClipPaths();

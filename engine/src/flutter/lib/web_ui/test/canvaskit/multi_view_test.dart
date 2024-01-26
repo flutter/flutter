@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
 import 'common.dart';
@@ -67,6 +68,29 @@ void testMain() {
         CanvasKitRenderer.instance.debugGetRasterizerForView(view),
         isNull,
       );
+    });
+
+    // Issue https://github.com/flutter/flutter/issues/142094
+    test('does not reset platform view factories when disposing a view', () async {
+      expect(PlatformViewManager.instance.knowsViewType('self-test'), isFalse);
+
+      final EngineFlutterView view = EngineFlutterView(
+          EnginePlatformDispatcher.instance, createDomElement('multi-view'));
+      EnginePlatformDispatcher.instance.viewManager.registerView(view);
+      expect(
+        CanvasKitRenderer.instance.debugGetRasterizerForView(view),
+        isNotNull,
+      );
+
+      EnginePlatformDispatcher.instance.viewManager
+          .disposeAndUnregisterView(view.viewId);
+      expect(
+        CanvasKitRenderer.instance.debugGetRasterizerForView(view),
+        isNull,
+      );
+
+      expect(PlatformViewManager.instance.knowsViewType(ui_web.PlatformViewRegistry.defaultVisibleViewType), isTrue);
+      expect(PlatformViewManager.instance.knowsViewType(ui_web.PlatformViewRegistry.defaultInvisibleViewType), isTrue);
     });
   });
 }
