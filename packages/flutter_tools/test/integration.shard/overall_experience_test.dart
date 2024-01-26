@@ -66,8 +66,8 @@ void main() {
   //    tryToDelete(fileSystem.directory(tempDirectory));
   //  }
   //}, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
-  for (int i = 0; i < 20; i++) {
-    testWithoutContext('flutter run handle SIGUSR1/2 run 1', () async {
+  for (int i = 0; i < 100; i++) {
+    testWithoutContext('flutter run handle SIGUSR1/2 run $i', () async {
       final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
       final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
       final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
