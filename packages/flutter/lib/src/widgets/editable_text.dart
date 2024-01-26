@@ -3785,17 +3785,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       if (selectionVisibleInEditable
          && selectionOverlapsWithDeviceRect
-         && (_selectionInViewport(_dataWhenToolbarShowScheduled!.selectionBounds) ?? true)) {
+         && _selectionInViewport(_dataWhenToolbarShowScheduled!.selectionBounds)) {
         showToolbar();
         _dataWhenToolbarShowScheduled = null;
       }
     }
   }
 
-  bool? _selectionInViewport(Rect selectionBounds) {
+  bool _selectionInViewport(Rect selectionBounds) {
     RenderAbstractViewport? closestViewport = RenderAbstractViewport.maybeOf(renderEditable);
     if (closestViewport == null) {
-      return null;
+      return true;
     }
     while (closestViewport != null) {
       final Rect selectionBoundsLocalToViewport = MatrixUtils.transformRect(renderEditable.getTransformTo(closestViewport), selectionBounds);
