@@ -64,13 +64,12 @@ abstract class AssetBundleFactory {
     required FileSystem fileSystem,
     required Platform platform,
     bool splitDeferredAssets = false,
-  }) =>
-      _ManifestAssetBundleFactory(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        splitDeferredAssets: splitDeferredAssets,
-      );
+  }) => _ManifestAssetBundleFactory(
+    logger: logger,
+    fileSystem: fileSystem,
+    platform: platform,
+    splitDeferredAssets: splitDeferredAssets,
+  );
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -145,12 +144,12 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
 
   @override
   AssetBundle createBundle() => ManifestAssetBundle(
-        logger: _logger,
-        fileSystem: _fileSystem,
-        platform: _platform,
-        flutterRoot: Cache.flutterRoot!,
-        splitDeferredAssets: _splitDeferredAssets,
-      );
+    logger: _logger,
+    fileSystem: _fileSystem,
+    platform: _platform,
+    flutterRoot: Cache.flutterRoot!,
+    splitDeferredAssets: _splitDeferredAssets,
+  );
 }
 
 /// An asset bundle based on a pubspec.yaml file.
