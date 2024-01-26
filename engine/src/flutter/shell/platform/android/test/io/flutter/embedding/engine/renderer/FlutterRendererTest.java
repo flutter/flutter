@@ -621,6 +621,28 @@ public class FlutterRendererTest {
     assertEquals(0, texture.numImages());
   }
 
+  // A 0x0 ImageReader is a runtime error.
+  @Test
+  public void ImageReaderSurfaceProducerClampsWidthAndHeightTo1() {
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer.ImageReaderSurfaceProducer texture =
+        flutterRenderer.new ImageReaderSurfaceProducer(0);
+
+    // Default values.
+    assertEquals(texture.getWidth(), 1);
+    assertEquals(texture.getHeight(), 1);
+
+    // Try setting width and height to 0.
+    texture.setSize(0, 0);
+
+    // Ensure we can still create/get a surface without an exception being raised.
+    assertNotNull(texture.getSurface());
+
+    // Expect clamp to 1.
+    assertEquals(texture.getWidth(), 1);
+    assertEquals(texture.getHeight(), 1);
+  }
+
   @Test
   public void SurfaceTextureSurfaceProducerCreatesAConnectedTexture() {
     // Force creating a SurfaceTextureSurfaceProducer regardless of Android API version.
