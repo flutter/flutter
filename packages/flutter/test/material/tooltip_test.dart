@@ -1605,8 +1605,6 @@ void main() {
       for (final Future<void> Function() action in actions) {
         await action();
       }
-      // Wait for the first tooltip to appear / disappear.
-      await tester.pump(waitDuration);
     }
 
     await performSequence(<Future<void> Function()>[mouseEnterAndWaitUntilVisible]);
