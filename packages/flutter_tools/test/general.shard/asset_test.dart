@@ -169,7 +169,7 @@ dependencies:
       testWithoutContext('bundles material shaders on non-web platforms',
           () async {
         final String shaderPath = fileSystem.path.join(
-          Cache.flutterRoot!,
+          flutterRoot,
           'packages',
           'flutter',
           'lib',
@@ -214,7 +214,7 @@ dependencies:
       testWithoutContext('bundles material shaders on web platforms',
           () async {
         final String shaderPath = fileSystem.path.join(
-          Cache.flutterRoot!,
+          flutterRoot,
           'packages',
           'flutter',
           'lib',
