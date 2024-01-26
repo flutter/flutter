@@ -3352,6 +3352,10 @@ enum LiveTextInputStatus {
 )
 mixin TextSelectionHandleControls on TextSelectionControls {
   /// Builds the text selection toolbar.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
@@ -3365,28 +3369,60 @@ mixin TextSelectionHandleControls on TextSelectionControls {
       const SizedBox.shrink();
 
   /// Returns true if the cut action is enabled on this toolbar.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   bool canCut(TextSelectionDelegate delegate) => false;
 
   /// Returns true if the copy action is enabled on this toolbar.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   bool canCopy(TextSelectionDelegate delegate) => false;
 
   /// Returns true if the paste action is enabled on this toolbar.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   bool canPaste(TextSelectionDelegate delegate) => false;
 
   /// Returns true if the select all action is enabled on this toolbar.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   bool canSelectAll(TextSelectionDelegate delegate) => false;
 
   /// Performs the cut action.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   void handleCut(TextSelectionDelegate delegate,
       [ClipboardStatusNotifier? clipboardStatus]) {}
 
   /// Performs the copy action.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   void handleCopy(TextSelectionDelegate delegate,
       [ClipboardStatusNotifier? clipboardStatus]) {}
 
   /// Performs the paste action.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {}
 
   /// Performs the select all action.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.19.0-0.1.pre.',
+  )
   void handleSelectAll(TextSelectionDelegate delegate) {}
 }
