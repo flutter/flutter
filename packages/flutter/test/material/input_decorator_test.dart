@@ -2316,7 +2316,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // within the input. Here, that will be content of height 106, centered
     // within an input of height 145. That gives 20 pixels of space on each side
     // of the content, so the prefix is positioned at 19, and the text is at
-    // 20+100-15=104.
+    // 20+100-15=105.
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
     expect(tester.getSize(find.byType(InputDecorator)).height, 145);
