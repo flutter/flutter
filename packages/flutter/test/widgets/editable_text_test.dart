@@ -16651,6 +16651,34 @@ void main() {
       expect(editableTextState.selectAllEnabled, isFalse);
     });
   });
+
+  testWidgets('should notify on size change', (WidgetTester tester) async {
+    int notifyCount = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: NotificationListener<SizeChangedLayoutNotification>(
+          onNotification: (SizeChangedLayoutNotification notification) {
+            notifyCount += 1;
+            return false;
+          },
+          child: EditableText(
+            backgroundCursorColor: Colors.grey,
+            cursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: 3,
+            minLines: 1,
+            style: textStyle,
+          ),
+        ),
+      ),
+    ));
+
+    expect(notifyCount, equals(0));
+    await tester.enterText(find.byType(EditableText), '\n');
+    await tester.pumpAndSettle();
+    expect(notifyCount, equals(1));
+  });
 }
 
 class UnsettableController extends TextEditingController {
