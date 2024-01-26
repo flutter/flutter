@@ -172,27 +172,59 @@ static BOOL _forceSoftwareRendering;
 
   fml::CFRef<CGColorSpaceRef> colorspace(CGColorSpaceCreateDeviceRGB());
 
+  // Defaults for RGBA8888.
+  size_t bits_per_component = 8u;
+  size_t bits_per_pixel = 32u;
+  size_t bytes_per_row_multiplier = 4u;
+  CGBitmapInfo bitmap_info =
+      static_cast<CGBitmapInfo>(static_cast<uint32_t>(kCGImageAlphaPremultipliedLast) |
+                                static_cast<uint32_t>(kCGBitmapByteOrder32Big));
+
+  switch (screenshot.pixel_format) {
+    case flutter::Rasterizer::ScreenshotFormat::kUnknown:
+    case flutter::Rasterizer::ScreenshotFormat::kR8G8B8A8UNormInt:
+      // Assume unknown is Skia and is RGBA8888. Keep defaults.
+      break;
+    case flutter::Rasterizer::ScreenshotFormat::kB8G8R8A8UNormInt:
+      // Treat this as little endian with the alpha first so that it's read backwards.
+      bitmap_info =
+          static_cast<CGBitmapInfo>(static_cast<uint32_t>(kCGImageAlphaPremultipliedFirst) |
+                                    static_cast<uint32_t>(kCGBitmapByteOrder32Little));
+      break;
+    case flutter::Rasterizer::ScreenshotFormat::kR16G16B16A16Float:
+      bits_per_component = 16u;
+      bits_per_pixel = 64u;
+      bytes_per_row_multiplier = 8u;
+      bitmap_info =
+          static_cast<CGBitmapInfo>(static_cast<uint32_t>(kCGImageAlphaPremultipliedLast) |
+                                    static_cast<uint32_t>(kCGBitmapFloatComponents) |
+                                    static_cast<uint32_t>(kCGBitmapByteOrder16Little));
+      break;
+  }
+
   fml::CFRef<CGImageRef> image(CGImageCreate(
-      screenshot.frame_size.width(),      // size_t width
-      screenshot.frame_size.height(),     // size_t height
-      8,                                  // size_t bitsPerComponent
-      32,                                 // size_t bitsPerPixel,
-      4 * screenshot.frame_size.width(),  // size_t bytesPerRow
-      colorspace,                         // CGColorSpaceRef space
-      static_cast<CGBitmapInfo>(
-          static_cast<uint32_t>(kCGImageAlphaPremultipliedLast) |
-          static_cast<uint32_t>(kCGBitmapByteOrder32Big)),  // CGBitmapInfo bitmapInfo
-      image_data_provider,                                  // CGDataProviderRef provider
-      nullptr,                                              // const CGFloat* decode
-      false,                                                // bool shouldInterpolate
-      kCGRenderingIntentDefault                             // CGColorRenderingIntent intent
+      screenshot.frame_size.width(),                             // size_t width
+      screenshot.frame_size.height(),                            // size_t height
+      bits_per_component,                                        // size_t bitsPerComponent
+      bits_per_pixel,                                            // size_t bitsPerPixel,
+      bytes_per_row_multiplier * screenshot.frame_size.width(),  // size_t bytesPerRow
+      colorspace,                                                // CGColorSpaceRef space
+      bitmap_info,                                               // CGBitmapInfo bitmapInfo
+      image_data_provider,                                       // CGDataProviderRef provider
+      nullptr,                                                   // const CGFloat* decode
+      false,                                                     // bool shouldInterpolate
+      kCGRenderingIntentDefault                                  // CGColorRenderingIntent intent
       ));
 
   const CGRect frame_rect =
       CGRectMake(0.0, 0.0, screenshot.frame_size.width(), screenshot.frame_size.height());
-
   CGContextSaveGState(context);
-  CGContextTranslateCTM(context, 0.0, CGBitmapContextGetHeight(context));
+  // If the CGContext is not a bitmap based context, this returns zero.
+  CGFloat height = CGBitmapContextGetHeight(context);
+  if (height == 0) {
+    height = CGFloat(screenshot.frame_size.height());
+  }
+  CGContextTranslateCTM(context, 0.0, height);
   CGContextScaleCTM(context, 1.0, -1.0);
   CGContextDrawImage(context, frame_rect, image);
   CGContextRestoreGState(context);

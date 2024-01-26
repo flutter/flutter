@@ -14,6 +14,7 @@ import 'locale_initialization.dart';
 import 'platform_view.dart';
 import 'poppable_screen.dart';
 import 'scenario.dart';
+import 'solid_blue.dart';
 import 'texture.dart';
 import 'touches_scenario.dart';
 
@@ -23,6 +24,7 @@ int _viewId = 0;
 
 Map<String, _ScenarioFactory> _scenarios = <String, _ScenarioFactory>{
   'animated_color_square': (FlutterView view) => AnimatedColorSquareScenario(view),
+  'solid_blue': (FlutterView view) => SolidBlueScenario(view),
   'locale_initialization': (FlutterView view) => LocaleInitialization(view),
   'platform_view': (FlutterView view) => PlatformViewScenario(view, id: _viewId++),
   'platform_view_no_overlay_intersection': (FlutterView view) => PlatformViewNoOverlayIntersectionScenario(view, id: _viewId++),

@@ -60,4 +60,58 @@ FLUTTER_ASSERT_ARC
   [self waitForExpectationsWithTimeout:30.0 handler:nil];
 }
 
+- (void)testDrawLayer {
+  XCTestExpectation* firstFrameRendered = [self expectationWithDescription:@"firstFrameRendered"];
+  XCTestExpectation* imageRendered = [self expectationWithDescription:@"imageRendered"];
+
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+  [engine.binaryMessenger
+      setMessageHandlerOnChannel:@"waiting_for_status"
+            binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
+              FlutterMethodChannel* channel = [FlutterMethodChannel
+                  methodChannelWithName:@"driver"
+                        binaryMessenger:engine.binaryMessenger
+                                  codec:[FlutterJSONMethodCodec sharedInstance]];
+              [channel invokeMethod:@"set_scenario" arguments:@{@"name" : @"solid_blue"}];
+            }];
+
+  self.flutterViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                     nibName:nil
+                                                                      bundle:nil];
+
+  XCTAssertFalse(self.flutterViewController.isDisplayingFlutterUI);
+
+  [self.flutterViewController setFlutterViewDidRenderCallback:^{
+    [firstFrameRendered fulfill];
+  }];
+
+  AppDelegate* appDelegate = (AppDelegate*)UIApplication.sharedApplication.delegate;
+  UIViewController* rootVC = appDelegate.window.rootViewController;
+  [rootVC presentViewController:self.flutterViewController animated:NO completion:nil];
+
+  CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
+
+  __block dispatch_block_t callback;
+  callback = ^{
+    size_t width = 300u;
+    CGContextRef context =
+        CGBitmapContextCreate(nil, width, width, 8, 4 * width, color_space,
+                              kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+    [appDelegate.window.layer renderInContext:context];
+    uint32_t* image_data = (uint32_t*)CGBitmapContextGetData(context);
+    if (image_data[20] == 0xFF0000FF) {
+      [imageRendered fulfill];
+      return;
+    }
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(),
+                   callback);
+  };
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(),
+                 callback);
+
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
+}
+
 @end
