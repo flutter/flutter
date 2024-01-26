@@ -436,8 +436,8 @@ public class FlutterRenderer implements TextureRegistry {
     private boolean ignoringFence = false;
 
     // The requested width and height are updated by setSize.
-    private int requestedWidth = 0;
-    private int requestedHeight = 0;
+    private int requestedWidth = 1;
+    private int requestedHeight = 1;
     // Whenever the requested width and height change we set this to be true so we
     // create a new ImageReader (inside getSurface) with the correct width and height.
     // We use this flag so that we lazily create the ImageReader only when a frame
@@ -676,6 +676,10 @@ public class FlutterRenderer implements TextureRegistry {
 
     @Override
     public void setSize(int width, int height) {
+      // Clamp to a minimum of 1. A 0x0 texture is a runtime exception in ImageReader.
+      width = Math.max(1, width);
+      height = Math.max(1, height);
+
       if (requestedWidth == width && requestedHeight == height) {
         // No size change.
         return;
