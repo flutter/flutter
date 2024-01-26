@@ -98,9 +98,9 @@ void main() {
   testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
-    await tester.pumpWidget(
-      wrapWithView: false,
-      Builder(
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: Builder(
         builder: (BuildContext context) {
           late FlutterError error;
           try {
@@ -342,4 +342,10 @@ void main() {
     renderObject = tester.firstRenderObject(find.byType(CompositedTransformFollower));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
   });
+}
+
+Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
+  tester.binding.attachRootWidget(widget);
+  tester.binding.scheduleFrame();
+  return tester.binding.pump();
 }

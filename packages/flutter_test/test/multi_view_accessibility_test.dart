@@ -112,8 +112,7 @@ Future<void> pumpViews({required WidgetTester tester, required  List<Widget> vie
       ),
   ];
 
-  return tester.pumpWidget(
-    wrapWithView: false,
+  tester.binding.attachRootWidget(
     Directionality(
       textDirection: TextDirection.ltr,
       child: ViewCollection(
@@ -121,4 +120,6 @@ Future<void> pumpViews({required WidgetTester tester, required  List<Widget> vie
       ),
     ),
   );
+  tester.binding.scheduleFrame();
+  return tester.binding.pump();
 }
