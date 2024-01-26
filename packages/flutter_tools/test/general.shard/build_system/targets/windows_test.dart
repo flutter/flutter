@@ -55,7 +55,7 @@ void main() {
     }
     fileSystem.directory('windows').createSync();
 
-    await const UnpackWindows().build(environment);
+    await const UnpackWindows(TargetPlatform.windows_x64).build(environment);
 
     // Output files are copied correctly.
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_export.h'), exists);
@@ -147,7 +147,7 @@ void main() {
       },
     ));
 
-    await const DebugBundleWindowsAssets().build(environment);
+    await const DebugBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
     // Depfile is created and dill is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
@@ -175,7 +175,7 @@ void main() {
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
     await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
-    await const ProfileBundleWindowsAssets().build(environment);
+    await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
     // Depfile is created and so is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
@@ -202,7 +202,7 @@ void main() {
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
     await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
-    await const ReleaseBundleWindowsAssets().build(environment);
+    await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
     // Depfile is created and so is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
