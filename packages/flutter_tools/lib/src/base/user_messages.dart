@@ -5,9 +5,9 @@
 import 'platform.dart';
 
 /// Class containing some message strings that can be produced by Flutter tools.
-///
-/// This allows partial reimplementations of the flutter tool to override
-/// certain messages.
+//
+// This allows partial reimplementations of the flutter tool to override
+// certain messages.
 // TODO(andrewkolos): It is unclear if this is worth keeping. See
 // https://github.com/flutter/flutter/issues/125155.
 class UserMessages {
