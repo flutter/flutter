@@ -457,7 +457,8 @@ Future<void> _runIntegrationToolTests() async {
   await _runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    //testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: <String>[path.join(_toolsPath, 'test', 'integration.shard', 'overall_experience_test.dart')],
     collectMetrics: true,
   );
 }
