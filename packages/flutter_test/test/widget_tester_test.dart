@@ -16,6 +16,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/expect.dart' as matcher;
 import 'package:matcher/src/expect/async_matcher.dart';
 
+import 'multi_view_testing.dart';
+
 void main() {
   group('expectLater', () {
     testWidgets('completes when matcher completes', (WidgetTester tester) async {
