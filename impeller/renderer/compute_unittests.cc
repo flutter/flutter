@@ -308,6 +308,7 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     CS1::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer_1));
 
     ASSERT_TRUE(pass->Compute(ISize(512, 1)).ok());
+    pass->AddBufferMemoryBarrier();
   }
 
   {
