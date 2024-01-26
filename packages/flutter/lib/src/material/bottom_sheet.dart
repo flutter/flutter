@@ -428,7 +428,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
-typedef _SizeChangeCallback<Size> = void Function(Size);
+typedef _SizeChangeCallback<Size> = void Function(Size size);
 
 class _DragHandle extends StatelessWidget {
   const _DragHandle({
@@ -1333,6 +1333,7 @@ PersistentBottomSheetController showBottomSheet({
   Clip? clipBehavior,
   BoxConstraints? constraints,
   bool? enableDrag,
+  bool? showDragHandle,
   AnimationController? transitionAnimationController,
 }) {
   assert(debugCheckHasScaffold(context));
@@ -1345,6 +1346,7 @@ PersistentBottomSheetController showBottomSheet({
     clipBehavior: clipBehavior,
     constraints: constraints,
     enableDrag: enableDrag,
+    showDragHandle: showDragHandle,
     transitionAnimationController: transitionAnimationController,
   );
 }

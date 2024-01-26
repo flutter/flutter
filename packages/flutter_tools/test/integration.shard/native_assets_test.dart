@@ -17,7 +17,9 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart' show ProcessResultMatcher, fileSystem, platform;
@@ -33,6 +35,7 @@ final List<String> devices = <String>[
 final List<String> buildSubcommands = <String>[
   hostOs,
   if (hostOs == 'macos') 'ios',
+  'apk',
 ];
 
 final List<String> add2appBuildSubcommands = <String>[
@@ -208,6 +211,8 @@ void main() {
             expectDylibIsBundledLinux(exampleDirectory, buildMode);
           } else if (buildSubcommand == 'windows') {
             expectDylibIsBundledWindows(exampleDirectory, buildMode);
+          } else if (buildSubcommand == 'apk') {
+            expectDylibIsBundledAndroid(exampleDirectory, buildMode);
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
@@ -225,7 +230,7 @@ void main() {
         // Overrides the build to output static libraries.
         final String buildDotDartContentsNew = buildDotDartContents.replaceFirst(
           'final buildConfig = await BuildConfig.fromArgs(args);',
-          r'''
+          '''
   final buildConfig = await BuildConfig.fromArgs([
     '-D${LinkModePreference.configKey}=${LinkModePreference.static}',
     ...args,
@@ -246,11 +251,11 @@ void main() {
           ],
           workingDirectory: exampleDirectory.path,
         );
-        expect(result.exitCode, isNot(0));
         expect(
           (result.stdout as String) + (result.stderr as String),
           contains('link mode set to static, but this is not yet supported'),
         );
+        expect(result.exitCode, isNot(0));
       });
     });
   }
@@ -287,18 +292,48 @@ void main() {
 void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   final Directory appBundle = appDirectory.childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app');
   expect(appBundle, exists);
-  final Directory dylibsFolder = appBundle.childDirectory('Contents/Frameworks');
-  expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(OS.macOS.dylibFileName(packageName));
-  expect(dylib, exists);
+  final Directory frameworksFolder =
+      appBundle.childDirectory('Contents/Frameworks');
+  expect(frameworksFolder, exists);
+
+  // MyFramework.framework/
+  //   MyFramework  -> Versions/Current/MyFramework
+  //   Resources    -> Versions/Current/Resources
+  //   Versions/
+  //     A/
+  //       MyFramework
+  //       Resources/
+  //         Info.plist
+  //     Current  -> A
+  final String frameworkName = packageName.substring(0, 15);
+  final Directory frameworkDir =
+      frameworksFolder.childDirectory('$frameworkName.framework');
+  final Directory versionsDir = frameworkDir.childDirectory('Versions');
+  final Directory versionADir = versionsDir.childDirectory('A');
+  final Directory resourcesDir = versionADir.childDirectory('Resources');
+  expect(resourcesDir, exists);
+  final File dylibFile = versionADir.childFile(frameworkName);
+  expect(dylibFile, exists);
+  final Link currentLink = versionsDir.childLink('Current');
+  expect(currentLink, exists);
+  expect(currentLink.resolveSymbolicLinksSync(), versionADir.path);
+  final Link resourcesLink = frameworkDir.childLink('Resources');
+  expect(resourcesLink, exists);
+  expect(resourcesLink.resolveSymbolicLinksSync(), resourcesDir.path);
+  final Link dylibLink = frameworkDir.childLink(frameworkName);
+  expect(dylibLink, exists);
+  expect(dylibLink.resolveSymbolicLinksSync(), dylibFile.path);
 }
 
 void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   final Directory appBundle = appDirectory.childDirectory('build/ios/${buildMode.upperCaseFirst()}-iphoneos/Runner.app');
   expect(appBundle, exists);
-  final Directory dylibsFolder = appBundle.childDirectory('Frameworks');
-  expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(OS.iOS.dylibFileName(packageName));
+  final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
+  expect(frameworksFolder, exists);
+  final String frameworkName = packageName.substring(0, 15);
+  final File dylib = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile(frameworkName);
   expect(dylib, exists);
 }
 
@@ -338,12 +373,46 @@ void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
   expect(dylib, exists);
 }
 
+void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
+  final File apk = appDirectory
+      .childDirectory('build')
+      .childDirectory('app')
+      .childDirectory('outputs')
+      .childDirectory('flutter-apk')
+      .childFile('app-$buildMode.apk');
+  expect(apk, exists);
+  final OperatingSystemUtils osUtils = OperatingSystemUtils(
+    fileSystem: fileSystem,
+    logger: BufferLogger.test(),
+    platform: platform,
+    processManager: processManager,
+  );
+  final Directory apkUnzipped = appDirectory.childDirectory('apk-unzipped');
+  apkUnzipped.createSync();
+  osUtils.unzip(apk, apkUnzipped);
+  final Directory lib = apkUnzipped.childDirectory('lib');
+  for (final String arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
+    final Directory archDir = lib.childDirectory(arch);
+    expect(archDir, exists);
+    // The dylibs should be next to the flutter and app so.
+    expect(archDir.childFile('libflutter.so'), exists);
+    if (buildMode != 'debug') {
+      expect(archDir.childFile('libapp.so'), exists);
+    }
+    final File dylib = archDir.childFile(OS.android.dylibFileName(packageName));
+    expect(dylib, exists);
+  }
+}
+
 /// For `flutter build` we can't easily test whether running the app works.
 /// Check that we have the dylibs in the app.
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
   final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
-  final File dylib = frameworksFolder.childFile(OS.macOS.dylibFileName(packageName));
+  final String frameworkName = packageName.substring(0, 15);
+  final File dylib = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile(frameworkName);
   expect(dylib, exists);
 }
 

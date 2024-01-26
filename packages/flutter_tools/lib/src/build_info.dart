@@ -286,6 +286,8 @@ class BuildInfo {
       'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+      if (flavor != null)
+        'FLAVOR': flavor!,
     };
   }
 
@@ -511,6 +513,7 @@ enum TargetPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
+  windows_arm64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -542,6 +545,7 @@ enum TargetPlatform {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         throw UnsupportedError('Unexpected Fuchsia platform $this');
     }
   }
@@ -553,6 +557,7 @@ enum TargetPlatform {
       case TargetPlatform.windows_x64:
         return 'x64';
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.windows_arm64:
         return 'arm64';
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -711,6 +716,8 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
       return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
+    case TargetPlatform.windows_arm64:
+      return 'windows-arm64';
     case TargetPlatform.fuchsia_arm64:
       return 'fuchsia-arm64';
     case TargetPlatform.fuchsia_x64:
@@ -754,6 +761,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
+    case 'windows-arm64':
+      return TargetPlatform.windows_arm64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
     case 'flutter-tester':
@@ -925,6 +934,24 @@ const String kIosArchs = 'IosArchs';
 /// Supported values are x86_64 and arm64.
 const String kDarwinArchs = 'DarwinArchs';
 
+/// The define to control what Android architectures are built for.
+///
+/// This is expected to be a space-delimited list of architectures.
+const String kAndroidArchs = 'AndroidArchs';
+
+/// The define to control what min Android SDK version is built for.
+///
+/// This is expected to be int.
+///
+/// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
+///
+/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+///
+/// For more info, see:
+/// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
+/// https://developer.android.com/ndk/guides/other_build_systems#overview
+const String kMinSdkVersion = 'MinSdkVersion';
+
 /// Path to the SDK root to be used as the isysroot.
 const String kSdkRoot = 'SdkRoot';
 
@@ -963,6 +990,9 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 
 /// The define to pass build name
 const String kBuildName = 'BuildName';
+
+/// The app flavor to build.
+const String kFlavor = 'Flavor';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';

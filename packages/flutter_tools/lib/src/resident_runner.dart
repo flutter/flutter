@@ -229,7 +229,6 @@ class FlutterDevice {
   FlutterVmService? vmService;
   DevFS? devFS;
   ApplicationPackage? package;
-  // ignore: cancel_subscriptions
   StreamSubscription<String>? _loggingSubscription;
   bool? _isListeningForVmServiceUri;
 
@@ -1631,6 +1630,7 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
       return null;
   }
 }

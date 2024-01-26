@@ -8,37 +8,54 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
+const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
 ///
-/// The receiver of an [ImageInfo] object must call [dispose]. To safely share
-/// the object with other clients, use the [clone] method before calling
-/// dispose.
+/// The disposing contract for [ImageInfo] (as well as for [ui.Image])
+/// is different from traditional one, where
+/// an object should dispose a member if the object created the member.
+/// Instead, the disposal contract is as follows:
+///
+/// * [ImageInfo] disposes [image], even if it is received as a constructor argument.
+/// * [ImageInfo] is expected to be disposed not by the object, that created it,
+/// but by the object that owns reference to it.
+/// * It is expected that only one object owns reference to [ImageInfo] object.
+///
+/// Safety tips:
+///
+///  * To share the [ImageInfo] or [ui.Image] between objects, use the [clone] method,
+/// which will not clone the entire underlying image, but only reference to it and information about it.
+///  * After passing a [ui.Image] or [ImageInfo] reference to another object,
+/// release the reference.
 @immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
   /// The [debugLabel] may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
+  ///
+  /// See details for disposing contract in the class description.
+  ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
+        className: '$ImageInfo',
+        object: this,
+      );
+    }
+  }
 
   /// Creates an [ImageInfo] with a cloned [image].
-  ///
-  /// Once all outstanding references to the [image] are disposed, it is no
-  /// longer safe to access properties of it or attempt to draw it. Clones serve
-  /// to create new references to the underlying image data that can safely be
-  /// disposed without knowledge of whether some other reference holder will
-  /// still need access to the underlying image. Once a client disposes of its
-  /// own image reference, it can no longer access the image, but other clients
-  /// will be able to access their own references.
   ///
   /// This method must be used in cases where a client holding an [ImageInfo]
   /// needs to share the image info object with another client and will still
   /// need to access the underlying image data at some later point, e.g. to
   /// share it again with another client.
+  ///
+  /// See details for disposing contract in the class description.
   ///
   /// See also:
   ///
@@ -125,6 +142,9 @@ class ImageInfo {
   /// and no clones of it or the image it contains can be made.
   void dispose() {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     image.dispose();
   }
 
@@ -442,8 +462,8 @@ class ImageStreamCompleterHandle {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
         className: '$ImageStreamCompleterHandle',
         object: this,
       );
@@ -467,7 +487,7 @@ class ImageStreamCompleterHandle {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
   }
 }

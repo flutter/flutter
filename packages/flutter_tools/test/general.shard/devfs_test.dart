@@ -621,9 +621,14 @@ void main() {
           return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
         };
       final FakeBundle bundle = FakeBundle()
-        ..entries['foo.frag'] = DevFSByteContent(<int>[1, 2, 3, 4])
-        ..entries['not.frag'] = DevFSByteContent(<int>[1, 2, 3, 4])
-        ..entryKinds['foo.frag'] = AssetKind.shader;
+        ..entries['foo.frag'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.shader,
+        )
+        ..entries['not.frag'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),
@@ -673,7 +678,10 @@ void main() {
           return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
         };
       final FakeBundle bundle = FakeBundle()
-        ..entries['FontManifest.json'] = DevFSByteContent(<int>[1, 2, 3, 4]);
+        ..entries['FontManifest.json'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),
@@ -733,18 +741,22 @@ class FakeBundle extends AssetBundle {
   List<File> get additionalDependencies => <File>[];
 
   @override
-  Future<int> build({String manifestPath = defaultManifestPath, String? assetDirPath, String? packagesPath, bool deferredComponentsEnabled = false, TargetPlatform? targetPlatform}) async {
+  Future<int> build({
+    String manifestPath = defaultManifestPath,
+    String? assetDirPath,
+    String? packagesPath,
+    bool deferredComponentsEnabled = false,
+    TargetPlatform? targetPlatform,
+    String? flavor,
+  }) async {
     return 0;
   }
 
   @override
-  Map<String, Map<String, DevFSContent>> get deferredComponentsEntries => <String, Map<String, DevFSContent>>{};
+  Map<String, Map<String, AssetBundleEntry>> get deferredComponentsEntries => <String, Map<String, AssetBundleEntry>>{};
 
   @override
-  final Map<String, DevFSContent> entries = <String, DevFSContent>{};
-
-  @override
-  final Map<String, AssetKind> entryKinds = <String, AssetKind>{};
+  final Map<String, AssetBundleEntry> entries = <String, AssetBundleEntry>{};
 
   @override
   List<File> get inputFiles => <File>[];

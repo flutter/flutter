@@ -10,7 +10,6 @@ library;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   Widget buildTest(
@@ -77,7 +76,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('Stretch overscroll will do nothing when axes do not match', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll will do nothing when axes do not match', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final ScrollController controller = ScrollController();
@@ -138,7 +137,7 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll vertically', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll vertically', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -217,7 +216,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dy, 350.0);
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll works in reverse - vertical', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll works in reverse - vertical', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -252,7 +251,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll works in reverse - horizontal', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll works in reverse - horizontal', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -294,7 +293,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll works in reverse - horizontal - RTL', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll works in reverse - horizontal - RTL', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -382,7 +381,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dx, 500.0);
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll horizontally', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll horizontally', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -461,7 +460,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dx, 500.0);
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll horizontally RTL', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll horizontally RTL', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -503,7 +502,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Disallow stretching overscroll', (WidgetTester tester) async {
+  testWidgets('Disallow stretching overscroll', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -547,7 +546,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Stretch does not overflow bounds of container', (WidgetTester tester) async {
+  testWidgets('Stretch does not overflow bounds of container', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/90197
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -604,7 +603,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Clip behavior is updated as needed', (WidgetTester tester) async {
+  testWidgets('Clip behavior is updated as needed', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/97867
     await tester.pumpWidget(
       Directionality(
@@ -664,7 +663,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('clipBehavior parameter updates overscroll clipping behavior', (WidgetTester tester) async {
+  testWidgets('clipBehavior parameter updates overscroll clipping behavior', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103491
 
     Widget buildFrame(Clip clipBehavior) {
@@ -728,7 +727,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Stretch limit', (WidgetTester tester) async {
+  testWidgets('Stretch limit', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99264
     await tester.pumpWidget(
       Directionality(
@@ -779,7 +778,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Multiple pointers will not exceed stretch limit', (WidgetTester tester) async {
+  testWidgets('Multiple pointers will not exceed stretch limit', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99264
     await tester.pumpWidget(
       Directionality(
@@ -849,7 +848,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll vertically, change direction mid scroll', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll vertically, change direction mid scroll', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -920,7 +919,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll horizontally, change direction mid scroll', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll horizontally, change direction mid scroll', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -992,7 +991,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking('Fling toward the trailing edge causes stretch toward the leading edge', (WidgetTester tester) async {
+  testWidgets('Fling toward the trailing edge causes stretch toward the leading edge', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -1034,7 +1033,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dy, 350.0);
   });
 
-  testWidgetsWithLeakTracking('Fling toward the leading edge causes stretch toward the trailing edge', (WidgetTester tester) async {
+  testWidgets('Fling toward the leading edge causes stretch toward the trailing edge', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -1088,7 +1087,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dy, 500.0);
   });
 
-  testWidgetsWithLeakTracking('changing scroll direction during recede animation will not change the stretch direction', (WidgetTester tester) async {
+  testWidgets('changing scroll direction during recede animation will not change the stretch direction', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -1152,7 +1151,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Stretch overscroll only uses image filter during stretch effect', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll only uses image filter during stretch effect', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();

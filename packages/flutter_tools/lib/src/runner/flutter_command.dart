@@ -150,6 +150,7 @@ abstract final class FlutterOptions {
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
+  static const String kNativeAssetsYamlFile = 'native-assets-yaml-file';
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
@@ -365,6 +366,9 @@ abstract class FlutterCommand extends Command<void> {
     }
     return bundle.defaultMainPath;
   }
+
+  /// Indicates if the current command running has a terminal attached.
+  bool get hasTerminal => globals.stdio.hasTerminal;
 
   /// Path to the Dart's package config file.
   ///
@@ -1004,6 +1008,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesNativeAssetsOption({ required bool hide }) {
+    argParser.addOption(FlutterOptions.kNativeAssetsYamlFile,
+      help: 'Initializes the resident compiler with a custom native assets '
+      'yaml file instead of the default cached location.',
+      hide: hide,
+    );
+  }
+
   void addMultidexOption({ bool hide = false }) {
     argParser.addFlag('multidex',
       defaultsTo: true,
@@ -1135,16 +1147,6 @@ abstract class FlutterCommand extends Command<void> {
         help: 'Enable vulkan validation on the Impeller rendering backend if '
               'Vulkan is in use and the validation layers are available to the '
               'application.',
-    );
-  }
-
-  void addImpellerForceGLFlag({required bool verboseHelp}) {
-    argParser.addFlag('impeller-force-gl',
-        hide: !verboseHelp,
-        help: 'On platforms that support OpenGL Rendering using Impeller, force '
-              'rendering using OpenGL over other APIs. If Impeller is not '
-              'enabled or the platform does not support OpenGL ES, this flag '
-              'does nothing.',
     );
   }
 
@@ -1358,6 +1360,14 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Additional usage values to be sent with the usage ping.
   Future<CustomDimensions> get usageValues async => const CustomDimensions();
+
+  /// Additional usage values to be sent with the usage ping for
+  /// package:unified_analytics.
+  ///
+  /// Implementations of [FlutterCommand] can override this getter in order
+  /// to add additional parameters in the [Event.commandUsageValues] constructor.
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async =>
+    Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
 
   /// Runs this command.
   ///
@@ -1621,7 +1631,7 @@ abstract class FlutterCommand extends Command<void> {
       commandPath: commandPath,
       result: commandResult.toString(),
       maxRss: maxRss,
-      commandHasTerminal: globals.stdio.hasTerminal,
+      commandHasTerminal: hasTerminal,
     ));
 
     // Send timing.
@@ -1748,9 +1758,17 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     setupApplicationPackages();
 
     if (commandPath != null) {
+      // Until the GA4 migration is complete, we will continue to send to the GA3 instance
+      // as well as GA4. Once migration is complete, we will only make a call for GA4 values
+      final List<Object> pairOfUsageValues = await Future.wait<Object>(<Future<Object>>[
+        usageValues,
+        unifiedAnalyticsUsageValues(commandPath),
+      ]);
+
       Usage.command(commandPath, parameters: CustomDimensions(
-        commandHasTerminal: globals.stdio.hasTerminal,
-      ).merge(await usageValues));
+        commandHasTerminal: hasTerminal,
+      ).merge(pairOfUsageValues[0] as CustomDimensions));
+      analytics.send(pairOfUsageValues[1] as Event);
     }
 
     return runCommand();
@@ -1944,6 +1962,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       }
       return null;
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
       if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }

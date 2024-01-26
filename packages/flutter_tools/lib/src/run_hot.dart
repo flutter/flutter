@@ -95,11 +95,13 @@ class HotRunner extends ResidentRunner {
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
     NativeAssetsBuildRunner? buildRunner,
+    String? nativeAssetsYamlFile,
     required Analytics analytics,
   })  : _stopwatchFactory = stopwatchFactory,
         _reloadSourcesHelper = reloadSourcesHelper,
         _reassembleHelper = reassembleHelper,
         _buildRunner = buildRunner,
+        _nativeAssetsYamlFile = nativeAssetsYamlFile,
         _analytics = analytics,
         super(
           hotMode: true,
@@ -140,6 +142,9 @@ class HotRunner extends ResidentRunner {
   bool? _emulator;
 
   NativeAssetsBuildRunner? _buildRunner;
+  final String? _nativeAssetsYamlFile;
+
+  String? flavor;
 
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatform != null) {
@@ -369,19 +374,24 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    final Uri projectUri = Uri.directory(projectRootPath);
-    _buildRunner ??= NativeAssetsBuildRunnerImpl(
-      projectUri,
-      debuggingOptions.buildInfo.packageConfig,
-      fileSystem,
-      globals.logger,
-    );
-    final Uri? nativeAssetsYaml = await dryRunNativeAssets(
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      buildRunner: _buildRunner!,
-      flutterDevices: flutterDevices,
-    );
+    final Uri? nativeAssetsYaml;
+    if (_nativeAssetsYamlFile != null) {
+      nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
+    } else {
+      final Uri projectUri = Uri.directory(projectRootPath);
+      _buildRunner ??= NativeAssetsBuildRunnerImpl(
+        projectUri,
+        debuggingOptions.buildInfo.packageConfig,
+        fileSystem,
+        globals.logger,
+      );
+      nativeAssetsYaml = await dryRunNativeAssets(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: _buildRunner!,
+        flutterDevices: flutterDevices,
+      );
+    }
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
@@ -494,7 +504,10 @@ class HotRunner extends ResidentRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build(packagesPath: '.packages');
+      final int result = await assetBundle.build(
+        packagesPath: '.packages',
+        flavor: debuggingOptions.buildInfo.flavor,
+      );
       if (result != 0) {
         return UpdateFSReport();
       }

@@ -66,12 +66,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  void onSingleTapUp(TapDragUpDetails details) {
-    super.onSingleTapUp(details);
-    _state._requestKeyboard();
-  }
-
-  @override
   bool get onUserTapAlwaysCalled => _state.widget.onTapAlwaysCalled;
 
   @override
@@ -1000,7 +994,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _hasError => widget.decoration?.errorText != null || widget.decoration?.error != null || _hasIntrinsicError;
 
-  Color get _errorColor => widget.cursorErrorColor ?? widget.decoration?.errorStyle?.color ?? Theme.of(context).colorScheme.error;
+  Color get _errorColor => widget.cursorErrorColor ?? _getEffectiveDecoration().errorStyle?.color ?? Theme.of(context).colorScheme.error;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -1052,7 +1046,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.maxLength! > 0) {
       // Show the maxLength in the counter
       counterText += '/${widget.maxLength}';
-      final int remaining = (widget.maxLength! - currentLength).clamp(0, widget.maxLength!); // ignore_clamp_double_lint
+      final int remaining = (widget.maxLength! - currentLength).clamp(0, widget.maxLength!);
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
     }
 

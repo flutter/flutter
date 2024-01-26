@@ -94,6 +94,7 @@ Future<T> runInContext<T>(
         flutterVersion: globals.flutterVersion,
         environment: globals.platform.environment,
         clientIde: globals.platform.environment['FLUTTER_HOST'],
+        config: globals.config,
       ),
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
@@ -350,6 +351,7 @@ Future<T> runInContext<T>(
           platform: globals.platform,
           logger: globals.logger,
           processManager: globals.processManager,
+          osUtils: globals.os,
         )
       ),
       WebWorkflow: () => WebWorkflow(

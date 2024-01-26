@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -171,29 +170,14 @@ class ElevatedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
-    @Deprecated(
-      'Use backgroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? primary,
-    @Deprecated(
-      'Use foregroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? onPrimary,
-    @Deprecated(
-      'Use disabledForegroundColor and disabledBackgroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? onSurface,
   }) {
-    final Color? background = backgroundColor ?? primary;
-    final Color? disabledBackground = disabledBackgroundColor ?? onSurface?.withOpacity(0.12);
+    final Color? background = backgroundColor;
+    final Color? disabledBackground = disabledBackgroundColor;
     final MaterialStateProperty<Color?>? backgroundColorProp = (background == null && disabledBackground == null)
       ? null
       : _ElevatedButtonDefaultColor(background, disabledBackground);
-    final Color? foreground = foregroundColor ?? onPrimary;
-    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final Color? foreground = foregroundColor;
+    final Color? disabledForeground = disabledForegroundColor;
     final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
       : _ElevatedButtonDefaultColor(foreground, disabledForeground);
@@ -498,7 +482,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
   }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _ElevatedButtonWithIconChild(icon: icon, label: label),
+         child: _ElevatedButtonWithIconChild(icon: icon, label: label, buttonStyle: style),
       );
 
   @override
@@ -527,15 +511,17 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
 }
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {
-  const _ElevatedButtonWithIconChild({ required this.label, required this.icon });
+  const _ElevatedButtonWithIconChild({ required this.label, required this.icon, required this.buttonStyle });
 
   final Widget label;
   final Widget icon;
+  final ButtonStyle? buttonStyle;
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.textScalerOf(context).textScaleFactor;
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
+    final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
+    final double gap = lerpDouble(8, 4, scale)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],

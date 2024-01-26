@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -26,6 +27,7 @@ void main() {
   late FakeProcessManager processManager;
   late Platform platform;
   late Cache cache;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -43,6 +45,10 @@ void main() {
       rootOverride: flutterRoot,
       logger: logger,
       processManager: processManager,
+    );
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fs,
+      fakeFlutterVersion: FakeFlutterVersion(),
     );
   });
 
@@ -105,7 +111,7 @@ flutter:
           ...List<RegExp>.filled(5, RegExp(r'-P[a-zA-Z-]+=.*')),
           'assembleAar$buildMode',
         ],
-        onRun: () => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
+        onRun: (_) => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
       )),
     ]);
 
@@ -126,9 +132,19 @@ flutter:
 
     await createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']);
     expect(processManager, hasNoRemainingExpectations);
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(Event.commandUsageValues(
+        workflow: 'build/aar',
+        commandHasTerminal: false,
+        buildAarProjectType: 'module',
+        buildAarTargetPlatform: 'android-arm,android-arm64,android-x64',
+      )),
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     Platform: () => platform,
     ProcessManager: () => processManager,
+    Analytics: () => fakeAnalytics,
   });
 }

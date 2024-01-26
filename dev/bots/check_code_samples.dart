@@ -234,7 +234,7 @@ class SampleChecker {
     final RegExp validExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
     // Looks for some common broken versions of example links. This looks for
     // something that is at minimum "///*seecode<something>*" to indicate that it
-    // looks like an example link. It should be narrowed if we start gettting false
+    // looks like an example link. It should be narrowed if we start getting false
     // positives.
     final RegExp malformedLinkRe = RegExp(r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)');
     for (final File file in files) {
@@ -367,14 +367,8 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/scaffold/scaffold_messenger.of.1_test.dart',
   'examples/api/test/material/scaffold/scaffold_messenger_state.show_snack_bar.0_test.dart',
   'examples/api/test/material/segmented_button/segmented_button.0_test.dart',
-  'examples/api/test/material/app_bar/app_bar.2_test.dart',
-  'examples/api/test/material/app_bar/sliver_app_bar.1_test.dart',
   'examples/api/test/material/app_bar/sliver_app_bar.2_test.dart',
   'examples/api/test/material/app_bar/sliver_app_bar.3_test.dart',
-  'examples/api/test/material/app_bar/app_bar.1_test.dart',
-  'examples/api/test/material/app_bar/sliver_app_bar.4_test.dart',
-  'examples/api/test/material/app_bar/app_bar.3_test.dart',
-  'examples/api/test/material/app_bar/app_bar.0_test.dart',
   'examples/api/test/material/banner/material_banner.1_test.dart',
   'examples/api/test/material/banner/material_banner.0_test.dart',
   'examples/api/test/material/checkbox/checkbox.1_test.dart',

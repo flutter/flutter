@@ -233,6 +233,52 @@ abstract class ProcessUtils {
     List<String> cli, {
     Map<String, String>? environment,
   });
+
+  /// Write [line] to [stdin] and catch any errors with [onError].
+  ///
+  /// Specifically with [Process] file descriptors, an exception that is
+  /// thrown as part of a write can be most reliably caught with a
+  /// [ZoneSpecification] error handler.
+  ///
+  /// On some platforms, the following code appears to work:
+  ///
+  /// ```dart
+  /// stdin.writeln(line);
+  /// try {
+  ///   await stdin.flush(line);
+  /// } catch (err) {
+  ///   // handle error
+  /// }
+  /// ```
+  ///
+  /// However it did not catch a [SocketException] on Linux.
+  static Future<void> writelnToStdinGuarded({
+    required IOSink stdin,
+    required String line,
+    required void Function(Object, StackTrace) onError,
+  }) async {
+    final Completer<void> completer = Completer<void>();
+
+    void writeFlushAndComplete() {
+      stdin.writeln(line);
+      stdin.flush().whenComplete(() {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
+    }
+
+    runZonedGuarded(
+      writeFlushAndComplete,
+      (Object error, StackTrace stackTrace) {
+        onError(error, stackTrace);
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+    );
+    return completer.future;
+  }
 }
 
 class _DefaultProcessUtils implements ProcessUtils {
@@ -577,7 +623,9 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
       messenger.shouldDisplayLicenseTerms();
 
   // Prints the welcome message if needed for legacy analytics.
-  globals.flutterUsage.printWelcome();
+  if (!(await globals.isRunningOnBot)) {
+    globals.flutterUsage.printWelcome();
+  }
 
   // Ensure that the consent message has been displayed for unified analytics
   if (globals.analytics.shouldShowMessage) {

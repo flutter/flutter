@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('value is not accessible when not registered', (WidgetTester tester) async {
+  testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
     final RestorableNum<num> numValue = RestorableNum<num>(0);
     addTearDown(numValue.dispose);
     expect(() => numValue.value, throwsAssertionError);
@@ -58,14 +58,14 @@ void main() {
     expect(() => objectValue.value, throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('$RestorableProperty dispatches creation in constructor', (WidgetTester widgetTester) async {
+  testWidgets('$RestorableProperty dispatches creation in constructor', (WidgetTester widgetTester) async {
     await expectLater(
       await memoryEvents(() => RestorableDateTimeN(null).dispose(), RestorableDateTimeN),
       areCreateAndDispose,
     );
   });
 
-  testWidgetsWithLeakTracking('work when not in restoration scope', (WidgetTester tester) async {
+  testWidgets('work when not in restoration scope', (WidgetTester tester) async {
     await tester.pumpWidget(const _RestorableWidget());
 
     expect(find.text('hello world'), findsOneWidget);
@@ -129,7 +129,7 @@ void main() {
     expect(find.text('guten tag'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('restart and restore', (WidgetTester tester) async {
+  testWidgets('restart and restore', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -220,7 +220,7 @@ void main() {
     expect(find.text('guten tag'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('restore to older state', (WidgetTester tester) async {
+  testWidgets('restore to older state', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -318,7 +318,7 @@ void main() {
     expect(find.text('hello world'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('call notifiers when value changes', (WidgetTester tester) async {
+  testWidgets('call notifiers when value changes', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -500,7 +500,7 @@ void main() {
     expect(notifyLog, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('RestorableValue calls didUpdateValue', (WidgetTester tester) async {
+  testWidgets('RestorableValue calls didUpdateValue', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -524,7 +524,7 @@ void main() {
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
 
-  testWidgetsWithLeakTracking('RestorableEnum and RestorableEnumN assert if default value is not in enum', (WidgetTester tester) async {
+  testWidgets('RestorableEnum and RestorableEnumN assert if default value is not in enum', (WidgetTester tester) async {
     expect(() => RestorableEnum<TestEnum>(
       TestEnum.four,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
@@ -533,7 +533,7 @@ void main() {
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('RestorableEnum and RestorableEnumN assert if unknown values are set', (WidgetTester tester) async {
+  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are set', (WidgetTester tester) async {
     final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
@@ -548,7 +548,7 @@ void main() {
     expect(() => nullableEnumMissingValue.value = TestEnum.four, throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('RestorableEnum and RestorableEnumN assert if unknown values are restored', (WidgetTester tester) async {
+  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are restored', (WidgetTester tester) async {
     final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
@@ -563,7 +563,7 @@ void main() {
     expect(() => nullableEnumMissingValue.fromPrimitives('four'), throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('RestorableN types are properly defined', (WidgetTester tester) async {
+  testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
