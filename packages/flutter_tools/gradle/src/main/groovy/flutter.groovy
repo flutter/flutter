@@ -43,10 +43,10 @@ import org.gradle.internal.os.OperatingSystem
 class FlutterExtension {
 
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    final int compileSdkVersion = 34
+    public final int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    final int minSdkVersion = 19
+    public  final int minSdkVersion = 19
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -54,14 +54,14 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    final int targetSdkVersion = 33
+    public final int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    final String ndkVersion = "23.1.7779620"
+    public final String ndkVersion = "23.1.7779620"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -73,13 +73,13 @@ class FlutterExtension {
     String target
 
     /** The versionCode that was read from app's local.properties. */
-    String flutterVersionCode = null
+    public String flutterVersionCode = null
 
     /** The versionName that was read from app's local.properties. */
-    String flutterVersionName = null
+    public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    Integer versionCode() {
+    public Integer versionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -92,7 +92,7 @@ class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    String versionName() {
+    public String versionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
         }
@@ -644,6 +644,24 @@ class FlutterPlugin implements Plugin<Project> {
         getPluginDependencies().each(this.&configurePluginDependencies)
     }
 
+    // TODO(54566): Can remove this function and its call sites once resolved.
+    /**
+     * Returns `true` if the given path contains an `android` directory
+     * containing a `build.gradle` or `build.gradle.kts` file.
+     */
+    private Boolean doesSupportAndroidPlatform(String path) {
+        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
+        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+        if (buildGradle.exists() && buildGradleKts.exists()) {
+            project.logger.error(
+                "Both build.gradle and build.gradle.kts exist, so " +
+                "build.gradle.kts is ignored. This is likely a mistake."
+            )
+        }
+
+        return buildGradle.exists() || buildGradleKts.exists()
+    }
+
     /** Adds the plugin project dependency to the app project. */
     private void configurePluginProject(String pluginName, String _) {
         Project pluginProject = project.rootProject.findProject(":$pluginName")
@@ -775,24 +793,6 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private String getCompileSdkFromProject(Project gradleProject) {
         return gradleProject.android.compileSdkVersion.substring(8)
-    }
-
-    // TODO(54566): Can remove this function and its call sites once resolved.
-    /**
-     * Returns `true` if the given path contains an `android` directory
-     * containing a `build.gradle` or `build.gradle.kts` file.
-     */
-    private Boolean doesSupportAndroidPlatform(String path) {
-        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
-        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
-        if (buildGradle.exists() && buildGradleKts.exists()) {
-            logger.error(
-                "Both build.gradle and build.gradle.kts exist, so " +
-                "build.gradle.kts is ignored. This is likely a mistake."
-            )
-        }
-
-        return buildGradle.exists() || buildGradleKts.exists()
     }
 
     /**
