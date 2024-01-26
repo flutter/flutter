@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERKEYPRIMARYRESPONDER_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERKEYPRIMARYRESPONDER_H_
+
 #import <Cocoa/Cocoa.h>
 
 typedef void (^FlutterAsyncKeyCallback)(BOOL handled);
@@ -43,3 +46,5 @@ typedef void (^FlutterAsyncKeyCallback)(BOOL handled);
 @property(nonatomic, nullable, strong) NSMutableDictionary<NSNumber*, NSNumber*>* layoutMap;
 
 @end
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERKEYPRIMARYRESPONDER_H_

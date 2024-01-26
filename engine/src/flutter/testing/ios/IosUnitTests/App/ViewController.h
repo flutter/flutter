@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_TESTING_IOS_IOSUNITTESTS_APP_VIEWCONTROLLER_H_
+#define FLUTTER_TESTING_IOS_IOSUNITTESTS_APP_VIEWCONTROLLER_H_
+
 #import <UIKit/UIKit.h>
 
 @interface ViewController : UIViewController
 
 @end
+
+#endif  // FLUTTER_TESTING_IOS_IOSUNITTESTS_APP_VIEWCONTROLLER_H_

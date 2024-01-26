@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_TESTING_SCENARIO_APP_IOS_SCENARIOS_SCENARIOSUITESTS_GOLDENTESTMANAGER_H_
+#define FLUTTER_TESTING_SCENARIO_APP_IOS_SCENARIOS_SCENARIOSUITESTS_GOLDENTESTMANAGER_H_
+
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "GoldenImage.h"
@@ -33,3 +36,5 @@ const extern double kDefaultRmseThreshold;
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif  // FLUTTER_TESTING_SCENARIO_APP_IOS_SCENARIOS_SCENARIOSUITESTS_GOLDENTESTMANAGER_H_

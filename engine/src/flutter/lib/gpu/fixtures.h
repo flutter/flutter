@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_LIB_GPU_FIXTURES_H_
+#define FLUTTER_LIB_GPU_FIXTURES_H_
+
 #include "impeller/core/shader_types.h"
 
 struct FlutterGPUUnlitVertexShader {
   struct PerVertexData {
     impeller::Point position;  // (offset 0, size 8)
-  };                           // struct PerVertexData (size 8)
+  };  // struct PerVertexData (size 8)
 
   static constexpr auto kInputPosition = impeller::ShaderStageIOSlot{
       // position
@@ -46,7 +49,7 @@ struct FlutterGPUTextureVertexShader {
     impeller::Vector3 position;      // (offset 0, size 12)
     impeller::Point texture_coords;  // (offset 12, size 8)
     impeller::Vector4 color;         // (offset 20, size 16)
-  };                                 // struct PerVertexData (size 36)
+  };  // struct PerVertexData (size 36)
 
   static constexpr auto kInputTextureCoords = impeller::ShaderStageIOSlot{
       // texture_coords
@@ -107,3 +110,5 @@ extern unsigned char kFlutterGPUTextureVertIPLR[];
 
 constexpr unsigned int kFlutterGPUTextureFragIPLRLength = 800;
 extern unsigned char kFlutterGPUTextureFragIPLR[];
+
+#endif  // FLUTTER_LIB_GPU_FIXTURES_H_

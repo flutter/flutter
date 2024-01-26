@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLERTESTUTILS_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLERTESTUTILS_H_
+
 #import <Foundation/NSString.h>
 #import <OCMock/OCMock.h>
 
@@ -15,3 +18,5 @@ namespace flutter::testing {
 id CreateMockViewController();
 
 }  // namespace flutter::testing
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLERTESTUTILS_H_

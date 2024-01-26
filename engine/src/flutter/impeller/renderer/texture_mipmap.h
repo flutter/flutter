@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_TEXTURE_MIPMAP_H_
-#define FLUTTER_IMPELLER_TEXTURE_MIPMAP_H_
+#ifndef FLUTTER_IMPELLER_RENDERER_TEXTURE_MIPMAP_H_
+#define FLUTTER_IMPELLER_RENDERER_TEXTURE_MIPMAP_H_
 
 #include "flutter/fml/status.h"
 #include "impeller/core/texture.h"
@@ -20,4 +20,4 @@ namespace impeller {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_TEXTURE_MIPMAP_H_
+#endif  // FLUTTER_IMPELLER_RENDERER_TEXTURE_MIPMAP_H_

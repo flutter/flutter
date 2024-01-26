@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_HEADERS_FLUTTERENGINEGROUP_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_HEADERS_FLUTTERENGINEGROUP_H_
+
 #import <Foundation/Foundation.h>
 
 #import "FlutterEngine.h"
@@ -108,3 +111,5 @@ FLUTTER_DARWIN_EXPORT
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_HEADERS_FLUTTERENGINEGROUP_H_

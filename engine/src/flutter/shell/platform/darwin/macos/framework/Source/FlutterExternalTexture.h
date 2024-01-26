@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTEREXTERNALTEXTURE_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTEREXTERNALTEXTURE_H_
+
 #import <Foundation/Foundation.h>
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
@@ -34,3 +37,5 @@
 - (BOOL)populateTexture:(nonnull FlutterMetalExternalTexture*)metalTexture;
 
 @end
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTEREXTERNALTEXTURE_H_

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERMETALLAYER_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERMETALLAYER_H_
+
 #import <QuartzCore/QuartzCore.h>
 
 /// Drop-in replacement (as far as Flutter is concerned) for CAMetalLayer
@@ -24,3 +27,5 @@
 + (BOOL)enabled;
 
 @end
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERMETALLAYER_H_

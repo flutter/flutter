@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define FML_USED_ON_EMBEDDER
-
 #ifndef FLUTTER_SHELL_COMMON_VSYNC_WAITERS_TEST_H_
 #define FLUTTER_SHELL_COMMON_VSYNC_WAITERS_TEST_H_
+
+#define FML_USED_ON_EMBEDDER
 
 #include <utility>
 

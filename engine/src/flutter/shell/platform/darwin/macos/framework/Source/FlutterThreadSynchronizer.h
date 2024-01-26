@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERTHREADSYNCHRONIZER_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERTHREADSYNCHRONIZER_H_
+
 #import <Cocoa/Cocoa.h>
 
 /**
@@ -96,3 +99,5 @@
 - (void)blockUntilFrameAvailable;
 
 @end
+
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERTHREADSYNCHRONIZER_H_

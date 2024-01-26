@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_H_
+#define FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_H_
+
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/switches.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
@@ -33,3 +36,5 @@ bool GenerateShaderBundle(Switches& switches);
 
 }  // namespace compiler
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_H_
