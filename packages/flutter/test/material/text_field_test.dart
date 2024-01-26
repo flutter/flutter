@@ -6573,7 +6573,6 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -1000.0));
     await tester.pumpAndSettle();
     await gesture.up();
-    await tester.pump();
     await tester.pumpAndSettle();
 
     // Now the first line is scrolled up, and the fourth line is visible.
