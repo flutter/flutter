@@ -361,7 +361,6 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
         );
       },
     );
-    process.stdin.writeln(payload);
   }
 
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).
