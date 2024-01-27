@@ -9,6 +9,7 @@ import 'dart:io' as io; // flutter_ignore: dart_io_import
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -750,7 +751,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       id: requestId,
       ignoreAppStopEvent: method == 'app.stop' || method == 'app.detach',
     );
-    _process?.stdin.writeln(jsonEncoded);
+    if (_process != null) {
+      await ProcessUtils.writelnToStdinUnsafe(_process!.stdin, jsonEncoded);
+    }
     final Map<String, Object?> response = await responseFuture;
 
     if (response['error'] != null || response['result'] == null) {

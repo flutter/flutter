@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_tools/src/base/process.dart';
+
 late Process daemon;
 
 // To use, start from the console and enter:
@@ -95,6 +97,6 @@ int id = 0;
 void _send(Map<String, dynamic> map) {
   map['id'] = id++;
   final String str = '[${json.encode(map)}]';
-  daemon.stdin.writeln(str);
+  ProcessUtils.writelnToStdinUnsafe(daemon.stdin, str);
   print('==> $str');
 }
