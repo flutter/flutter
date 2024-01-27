@@ -68,11 +68,11 @@ GeometryResult ComputeUVGeometryForRect(Rect source_rect,
 class Geometry {
  public:
   static std::shared_ptr<Geometry> MakeFillPath(
-      Path path,
+      const Path& path,
       std::optional<Rect> inner_rect = std::nullopt);
 
   static std::shared_ptr<Geometry> MakeStrokePath(
-      Path path,
+      const Path& path,
       Scalar stroke_width = 0.0,
       Scalar miter_limit = 4.0,
       Cap stroke_cap = Cap::kButt,

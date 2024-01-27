@@ -15,7 +15,7 @@ namespace impeller {
 /// @brief A geometry that is created from a filled path object.
 class FillPathGeometry final : public Geometry {
  public:
-  explicit FillPathGeometry(Path path,
+  explicit FillPathGeometry(const Path& path,
                             std::optional<Rect> inner_rect = std::nullopt);
 
   ~FillPathGeometry() = default;

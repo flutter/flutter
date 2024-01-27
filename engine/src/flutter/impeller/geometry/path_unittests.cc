@@ -462,7 +462,8 @@ TEST(PathTest, CanBeCloned) {
   builder.SetConvexity(Convexity::kConvex);
 
   auto path_a = builder.TakePath(FillType::kAbsGeqTwo);
-  auto path_b = path_a.Clone();
+  // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
+  auto path_b = path_a;
 
   EXPECT_EQ(path_a.GetBoundingBox(), path_b.GetBoundingBox());
   EXPECT_EQ(path_a.GetFillType(), path_b.GetFillType());
@@ -483,6 +484,206 @@ TEST(PathTest, CanBeCloned) {
     EXPECT_EQ(poly_a.contours[i].start_direction,
               poly_b.contours[i].start_direction);
   }
+}
+
+TEST(PathTest, PathBuilderDoesNotMutateTakenPaths) {
+  auto test_isolation =
+      [](const std::function<void(PathBuilder & builder)>& mutator,
+         bool will_close, Point mutation_offset, const std::string& label) {
+        PathBuilder builder;
+        builder.MoveTo({10, 10});
+        builder.LineTo({20, 20});
+        builder.LineTo({20, 10});
+
+        auto verify_path = [](const Path& path, bool is_mutated, bool is_closed,
+                              Point offset, const std::string& label) {
+          if (is_mutated) {
+            // We can only test the initial state before the mutator did
+            // its work. We have >= 3 components and the first 3 components
+            // will match what we saw before the mutation.
+            EXPECT_GE(path.GetComponentCount(), 3u) << label;
+          } else {
+            EXPECT_EQ(path.GetComponentCount(), 3u) << label;
+          }
+          {
+            ContourComponent contour;
+            EXPECT_TRUE(path.GetContourComponentAtIndex(0, contour)) << label;
+            EXPECT_EQ(contour.destination, offset + Point(10, 10)) << label;
+            EXPECT_EQ(contour.is_closed, is_closed) << label;
+          }
+          {
+            LinearPathComponent line;
+            EXPECT_TRUE(path.GetLinearComponentAtIndex(1, line)) << label;
+            EXPECT_EQ(line.p1, offset + Point(10, 10)) << label;
+            EXPECT_EQ(line.p2, offset + Point(20, 20)) << label;
+          }
+          {
+            LinearPathComponent line;
+            EXPECT_TRUE(path.GetLinearComponentAtIndex(2, line)) << label;
+            EXPECT_EQ(line.p1, offset + Point(20, 20)) << label;
+            EXPECT_EQ(line.p2, offset + Point(20, 10)) << label;
+          }
+        };
+
+        auto path1 = builder.TakePath();
+        verify_path(path1, false, false, {},
+                    "Initial Path1 state before " + label);
+
+        for (int i = 0; i < 10; i++) {
+          auto path = builder.TakePath();
+          verify_path(
+              path, false, false, {},
+              "Extra TakePath #" + std::to_string(i + 1) + " for " + label);
+        }
+        mutator(builder);
+        verify_path(path1, false, false, {},
+                    "Path1 state after subsequent " + label);
+
+        auto path2 = builder.TakePath();
+        verify_path(path1, false, false, {},
+                    "Path1 state after subsequent " + label + " and TakePath");
+        verify_path(path2, true, will_close, mutation_offset,
+                    "Initial Path2 state with subsequent " + label);
+      };
+
+  test_isolation(
+      [](PathBuilder& builder) {  //
+        builder.SetConvexity(Convexity::kConvex);
+      },
+      false, {}, "SetConvex");
+
+  test_isolation(
+      [](PathBuilder& builder) {  //
+        builder.SetConvexity(Convexity::kUnknown);
+      },
+      false, {}, "SetUnknownConvex");
+
+  test_isolation(
+      [](PathBuilder& builder) {  //
+        builder.Close();
+      },
+      true, {}, "Close");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.MoveTo({20, 30}, false);
+      },
+      false, {}, "Absolute MoveTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.MoveTo({20, 30}, true);
+      },
+      false, {}, "Relative MoveTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.LineTo({20, 30}, false);
+      },
+      false, {}, "Absolute LineTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.LineTo({20, 30}, true);
+      },
+      false, {}, "Relative LineTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {  //
+        builder.HorizontalLineTo(100, false);
+      },
+      false, {}, "Absolute HorizontalLineTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {  //
+        builder.HorizontalLineTo(100, true);
+      },
+      false, {}, "Relative HorizontalLineTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {  //
+        builder.VerticalLineTo(100, false);
+      },
+      false, {}, "Absolute VerticalLineTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {  //
+        builder.VerticalLineTo(100, true);
+      },
+      false, {}, "Relative VerticalLineTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.QuadraticCurveTo({20, 30}, {30, 20}, false);
+      },
+      false, {}, "Absolute QuadraticCurveTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.QuadraticCurveTo({20, 30}, {30, 20}, true);
+      },
+      false, {}, "Relative QuadraticCurveTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.CubicCurveTo({20, 30}, {30, 20}, {30, 30}, false);
+      },
+      false, {}, "Absolute CubicCurveTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.CubicCurveTo({20, 30}, {30, 20}, {30, 30}, true);
+      },
+      false, {}, "Relative CubicCurveTo");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.AddLine({100, 100}, {150, 100});
+      },
+      false, {}, "AddLine");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.AddRect(Rect::MakeLTRB(100, 100, 120, 120));
+      },
+      false, {}, "AddRect");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.AddOval(Rect::MakeLTRB(100, 100, 120, 120));
+      },
+      false, {}, "AddOval");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.AddCircle({100, 100}, 20);
+      },
+      false, {}, "AddCircle");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.AddArc(Rect::MakeLTRB(100, 100, 120, 120), Degrees(10),
+                       Degrees(170));
+      },
+      false, {}, "AddArc");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.AddQuadraticCurve({100, 100}, {150, 100}, {150, 150});
+      },
+      false, {}, "AddQuadraticCurve");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.AddCubicCurve({100, 100}, {150, 100}, {100, 150}, {150, 150});
+      },
+      false, {}, "AddCubicCurve");
+
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.Shift({23, 42});
+      },
+      false, {23, 42}, "Shift");
 }
 
 }  // namespace testing

@@ -1554,7 +1554,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
   // This is the more practical result. The bounds are "almost" 0,0,100x100
   EXPECT_EQ(display_list->bounds().roundOut(), SkIRect::MakeWH(100, 100));
   EXPECT_EQ(display_list->op_count(), 19u);
-  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 352u);
+  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 384u);
 }
 
 TEST_F(DisplayListTest, TranslateAffectsCurrentTransform) {
@@ -3237,6 +3237,98 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
               builder.SaveLayer(nullptr, &save_paint);
               builder.DrawImage(TestImage1, {10, 10}, DlImageSampling::kLinear);
             });
+}
+
+TEST_F(DisplayListTest, ImpellerPathPreferenceIsHonored) {
+  class Tester : virtual public DlOpReceiver,
+                 public IgnoreClipDispatchHelper,
+                 public IgnoreDrawDispatchHelper,
+                 public IgnoreAttributeDispatchHelper,
+                 public IgnoreTransformDispatchHelper {
+   public:
+    explicit Tester(bool prefer_impeller_paths)
+        : prefer_impeller_paths_(prefer_impeller_paths) {}
+
+    bool PrefersImpellerPaths() const override {
+      return prefer_impeller_paths_;
+    }
+
+    void drawPath(const SkPath& path) override { skia_draw_path_calls_++; }
+
+    void drawPath(const CacheablePath& cache) override {
+      impeller_draw_path_calls_++;
+    }
+
+    void clipPath(const SkPath& path, ClipOp op, bool is_aa) override {
+      skia_clip_path_calls_++;
+    }
+
+    void clipPath(const CacheablePath& cache, ClipOp op, bool is_aa) override {
+      impeller_clip_path_calls_++;
+    }
+
+    virtual void drawShadow(const SkPath& sk_path,
+                            const DlColor color,
+                            const SkScalar elevation,
+                            bool transparent_occluder,
+                            SkScalar dpr) override {
+      skia_draw_shadow_calls_++;
+    }
+
+    virtual void drawShadow(const CacheablePath& cache,
+                            const DlColor color,
+                            const SkScalar elevation,
+                            bool transparent_occluder,
+                            SkScalar dpr) override {
+      impeller_draw_shadow_calls_++;
+    }
+
+    int skia_draw_path_calls() const { return skia_draw_path_calls_; }
+    int skia_clip_path_calls() const { return skia_draw_path_calls_; }
+    int skia_draw_shadow_calls() const { return skia_draw_path_calls_; }
+    int impeller_draw_path_calls() const { return impeller_draw_path_calls_; }
+    int impeller_clip_path_calls() const { return impeller_draw_path_calls_; }
+    int impeller_draw_shadow_calls() const { return impeller_draw_path_calls_; }
+
+   private:
+    const bool prefer_impeller_paths_;
+    int skia_draw_path_calls_ = 0;
+    int skia_clip_path_calls_ = 0;
+    int skia_draw_shadow_calls_ = 0;
+    int impeller_draw_path_calls_ = 0;
+    int impeller_clip_path_calls_ = 0;
+    int impeller_draw_shadow_calls_ = 0;
+  };
+
+  DisplayListBuilder builder;
+  builder.DrawPath(SkPath::Rect(SkRect::MakeLTRB(0, 0, 100, 100)), DlPaint());
+  builder.ClipPath(SkPath::Rect(SkRect::MakeLTRB(0, 0, 100, 100)),
+                   ClipOp::kIntersect, true);
+  builder.DrawShadow(SkPath::Rect(SkRect::MakeLTRB(20, 20, 80, 80)),
+                     DlColor::kBlue(), 1.0f, true, 1.0f);
+  auto display_list = builder.Build();
+
+  {
+    Tester skia_tester(false);
+    display_list->Dispatch(skia_tester);
+    EXPECT_EQ(skia_tester.skia_draw_path_calls(), 1);
+    EXPECT_EQ(skia_tester.skia_clip_path_calls(), 1);
+    EXPECT_EQ(skia_tester.skia_draw_shadow_calls(), 1);
+    EXPECT_EQ(skia_tester.impeller_draw_path_calls(), 0);
+    EXPECT_EQ(skia_tester.impeller_clip_path_calls(), 0);
+    EXPECT_EQ(skia_tester.impeller_draw_shadow_calls(), 0);
+  }
+
+  {
+    Tester impeller_tester(true);
+    display_list->Dispatch(impeller_tester);
+    EXPECT_EQ(impeller_tester.skia_draw_path_calls(), 0);
+    EXPECT_EQ(impeller_tester.skia_clip_path_calls(), 0);
+    EXPECT_EQ(impeller_tester.skia_draw_shadow_calls(), 0);
+    EXPECT_EQ(impeller_tester.impeller_draw_path_calls(), 1);
+    EXPECT_EQ(impeller_tester.impeller_clip_path_calls(), 1);
+    EXPECT_EQ(impeller_tester.impeller_draw_shadow_calls(), 1);
+  }
 }
 
 }  // namespace testing

@@ -713,7 +713,7 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
       paint.stroke_join = join;
       for (auto cap : {Cap::kButt, Cap::kSquare, Cap::kRound}) {
         paint.stroke_cap = cap;
-        canvas.DrawPath(path.Clone(), paint);
+        canvas.DrawPath(path, paint);
         canvas.Translate({80, 0});
       }
       canvas.Translate({-240, 60});

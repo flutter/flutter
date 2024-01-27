@@ -25,7 +25,7 @@ static Tessellator tess;
 template <class... Args>
 static void BM_Polyline(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
-  auto path = std::get<Path>(args_tuple).Clone();
+  auto path = std::get<Path>(args_tuple);
   bool tessellate = std::get<bool>(args_tuple);
 
   size_t point_count = 0u;
@@ -67,7 +67,7 @@ static void BM_Polyline(benchmark::State& state, Args&&... args) {
 template <class... Args>
 static void BM_Convex(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
-  auto path = std::get<Path>(args_tuple).Clone();
+  auto path = std::get<Path>(args_tuple);
 
   size_t point_count = 0u;
   size_t single_point_count = 0u;
