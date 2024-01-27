@@ -51,17 +51,17 @@ void main() {
       ..writeAsStringSync(r'''
 name: example
 flutter:
-assets:
-- assets/common/
-- path: assets/vanilla/
-  flavors:
-    - vanilla
-- path: assets/strawberry/
-  flavors:
-    - strawberry
-- path: assets/orange/ice-cream.png
-  flavors:
-    - orange
+  assets:
+  - assets/common/
+  - path: assets/vanilla/
+    flavors:
+      - vanilla
+  - path: assets/strawberry/
+    flavors:
+      - strawberry
+  - path: assets/orange/ice-cream.png
+    flavors:
+      - orange
 ''');
 
     ManifestAssetBundle bundle;
@@ -113,12 +113,12 @@ assets:
       ..writeAsStringSync(r'''
 name: example
 flutter:
-assets:
-  - assets/
-  - path: assets/vanillaOrange.png
-    flavors:
-      - vanilla
-      - orange
+  assets:
+    - assets/
+    - path: assets/vanillaOrange.png
+      flavors:
+        - vanilla
+        - orange
 ''');
 
     expect(
@@ -150,11 +150,11 @@ assets:
       ..writeAsStringSync(r'''
 name: example
 flutter:
-assets:
-  - path: vanilla/
-    flavors:
-      - vanilla
-  - vanilla/flavorless.png
+  assets:
+    - path: vanilla/
+      flavors:
+        - vanilla
+    - vanilla/flavorless.png
 ''');
     expect(
       buildBundleWithFlavor(
@@ -183,13 +183,13 @@ assets:
       ..writeAsStringSync(r'''
 name: example
 flutter:
-assets:
-  - path: orange.png
-    flavors:
-      - orange
-  - path: orange.png
-    flavors:
-      - mango
+  assets:
+    - path: orange.png
+      flavors:
+        - orange
+    - path: orange.png
+      flavors:
+        - mango
 ''');
 
     expect(
@@ -220,13 +220,13 @@ assets:
       ..writeAsStringSync(r'''
 name: example
 flutter:
-assets:
-  - path: vanilla/
-    flavors:
-      - vanilla
-  - path: vanilla/actually-strawberry.png
-    flavors:
-      - strawberry
+  assets:
+    - path: vanilla/
+      flavors:
+        - vanilla
+    - path: vanilla/actually-strawberry.png
+      flavors:
+        - strawberry
 ''');
     expect(
       buildBundleWithFlavor(
