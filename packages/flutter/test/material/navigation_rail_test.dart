@@ -1856,8 +1856,9 @@ void main() {
             return Scaffold(
               body: Row(
                 children: <Widget>[
-                  MediaQuery(
-                    data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+                  MediaQuery.withClampedTextScaling(
+                    minScaleFactor: 3.0,
+                    maxScaleFactor: 3.0,
                     child: NavigationRail(
                       selectedIndex: 0,
                       destinations: const <NavigationRailDestination>[
@@ -5135,8 +5136,9 @@ void main() {
               return Scaffold(
                 body: Row(
                   children: <Widget>[
-                    MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+                    MediaQuery.withClampedTextScaling(
+                      minScaleFactor: 3.0,
+                      maxScaleFactor: 3.0,
                       child: NavigationRail(
                         selectedIndex: 0,
                         destinations: const <NavigationRailDestination>[
@@ -5511,8 +5513,9 @@ Future<void> _pumpNavigationRail(
       ),
       home: Builder(
         builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: textScaleFactor,
+            maxScaleFactor: textScaleFactor,
             child: Scaffold(
               body: Row(
                 children: <Widget>[

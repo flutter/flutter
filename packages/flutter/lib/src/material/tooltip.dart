@@ -665,19 +665,18 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // tooltip is the first to be hit in the widget tree's hit testing order.
     // See also _ExclusiveMouseRegion for the exact behavior.
     _activeHoveringPointerDevices.add(event.device);
-    final List<TooltipState> openedTooltips = Tooltip._openedTooltips.toList();
-    bool otherTooltipsDismissed = false;
-    for (final TooltipState tooltip in openedTooltips) {
+    // Dismiss other open tooltips unless they're kept visible by other mice.
+    // The mouse tracker implementation always dispatches all `onExit` events
+    // before dispatching any `onEnter` events, so `event.device` must have
+    // already been removed from _activeHoveringPointerDevices of the tooltips
+    // that are no longer being hovered over.
+    final List<TooltipState> tooltipsToDismiss = Tooltip._openedTooltips
+      .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty).toList();
+    for (final TooltipState tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
-      final Set<int> hoveringDevices = tooltip._activeHoveringPointerDevices;
-      final bool shouldDismiss = tooltip != this
-                              && (hoveringDevices.length == 1 && hoveringDevices.single == event.device);
-      if (shouldDismiss) {
-        otherTooltipsDismissed = true;
-        tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
-      }
+      tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
     }
-    _scheduleShowTooltip(withDelay: otherTooltipsDismissed ? Duration.zero : _waitDuration);
+    _scheduleShowTooltip(withDelay: tooltipsToDismiss.isNotEmpty ? Duration.zero : _waitDuration);
   }
 
   void _handleMouseExit(PointerExitEvent event) {
