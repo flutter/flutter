@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io' hide Directory;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -50,10 +51,11 @@ void main() {
     expect(response['event'], 'daemon.connected');
 
     // start listening for devices
-    daemonProcess.stdin.writeln('[${jsonEncode(<String, dynamic>{
+    final String enableMessage = '[${jsonEncode(<String, Object?>{
       'id': 1,
       'method': 'device.enable',
-    })}]');
+    })}]';
+    await ProcessUtils.writelnToStdinUnsafe(daemonProcess.stdin, enableMessage);
     response = (await stream.firstWhere((Map<String, Object?>? json) => json!['id'] == 1))!;
     expect(response['id'], 1);
     expect(response['error'], isNull);
@@ -64,16 +66,17 @@ void main() {
     expect(response['event'], 'device.added');
 
     // get the list of all devices
-    daemonProcess.stdin.writeln('[${jsonEncode(<String, dynamic>{
+    final String getDevicesMessage = '[${jsonEncode(<String, Object?>{
       'id': 2,
       'method': 'device.getDevices',
-    })}]');
+    })}]';
+    await ProcessUtils.writelnToStdinUnsafe(daemonProcess.stdin, getDevicesMessage);
     // Skip other device.added events that may fire (desktop/web devices).
     response = (await stream.firstWhere((Map<String, Object?>? response) => response!['event'] != 'device.added'))!;
     expect(response['id'], 2);
     expect(response['error'], isNull);
 
-    final dynamic result = response['result'];
+    final Object? result = response['result'];
     expect(result, isList);
     expect(result, isNotEmpty);
   });

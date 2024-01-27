@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
 import '../convert.dart';
 import '../web/compile.dart';
 import 'test_compiler.dart';
@@ -154,7 +155,7 @@ class TestGoldenComparatorProcess {
       'update': updateGoldens,
     });
     _logger.printTrace('Preparing to send command: $command');
-    process.stdin.writeln(command);
+    ProcessUtils.writelnToStdinUnsafe(process.stdin, command.toString());
   }
 
   Future<Map<String, dynamic>> getResponse() async {
