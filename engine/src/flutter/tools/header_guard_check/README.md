@@ -22,9 +22,6 @@ If the header file does not follow this pattern, the tool will print an error
 message and exit with a non-zero exit code. For more information about why we
 use this pattern, see [the Google C++ style guide](https://google.github.io/styleguide/cppguide.html#The__define_Guard).
 
-> [!IMPORTANT]
-> This is a prototype tool and is not yet integrated into the engine's CI.
-
 ## Automatic fixes
 
 The tool can automatically fix header files that do not follow the pattern:

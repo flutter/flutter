@@ -34,6 +34,21 @@ final FileContentPair pythonContentPair = FileContentPair(
 final FileContentPair whitespaceContentPair = FileContentPair(
     'int main() {\n  return 0;       \n}\n',
     'int main() {\n  return 0;\n}\n');
+final FileContentPair headerContentPair = FileContentPair(
+    <String>[
+      '#ifndef FOO_H_',
+      '#define FOO_H_',
+      '',
+      '#endif  // FOO_H_',
+    ].join('\n'),
+    <String>[
+      '#ifndef FLUTTER_FORMAT_TEST_H_',
+      '#define FLUTTER_FORMAT_TEST_H_',
+      '',
+      '#endif  // FLUTTER_FORMAT_TEST_H_',
+      '',
+    ].join('\n'),
+);
 
 class TestFileFixture {
   TestFileFixture(this.type) {
@@ -62,6 +77,10 @@ class TestFileFixture {
         final io.File whitespaceFile = io.File('${repoDir.path}/format_test.c');
         whitespaceFile.writeAsStringSync(whitespaceContentPair.original);
         files.add(whitespaceFile);
+      case target.FormatCheck.header:
+        final io.File headerFile = io.File('${repoDir.path}/format_test.h');
+        headerFile.writeAsStringSync(headerContentPair.original);
+        files.add(headerFile);
     }
   }
 
@@ -117,6 +136,11 @@ class TestFileFixture {
           return FileContentPair(
             content,
             whitespaceContentPair.formatted,
+          );
+        case target.FormatCheck.header:
+          return FileContentPair(
+            content,
+            headerContentPair.formatted,
           );
       }
     });
@@ -202,6 +226,23 @@ void main() {
           formatterPath, <String>['--check', 'whitespace', '--fix'],
           workingDirectory: repoDir.path);
 
+      final Iterable<FileContentPair> files = fixture.getFileContents();
+      for (final FileContentPair pair in files) {
+        expect(pair.original, equals(pair.formatted));
+      }
+    } finally {
+      fixture.gitRemove();
+    }
+  });
+
+  test('Can fix header guard formatting errors', () {
+    final TestFileFixture fixture = TestFileFixture(target.FormatCheck.header);
+    try {
+      fixture.gitAdd();
+      io.Process.runSync(
+        formatterPath, <String>['--check', 'header', '--fix'],
+        workingDirectory: repoDir.path,
+      );
       final Iterable<FileContentPair> files = fixture.getFileContents();
       for (final FileContentPair pair in files) {
         expect(pair.original, equals(pair.formatted));

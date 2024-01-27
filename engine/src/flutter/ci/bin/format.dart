@@ -39,11 +39,13 @@ enum MessageType {
 }
 
 enum FormatCheck {
-  clang,
   gn,
   java,
   python,
   whitespace,
+  header,
+  // Run clang after the header check.
+  clang,
 }
 
 FormatCheck nameToFormatCheck(String name) {
@@ -58,6 +60,8 @@ FormatCheck nameToFormatCheck(String name) {
       return FormatCheck.python;
     case 'whitespace':
       return FormatCheck.whitespace;
+    case 'header':
+      return FormatCheck.header;
     default:
       throw FormattingException('Unknown FormatCheck type $name');
   }
@@ -75,6 +79,8 @@ String formatCheckToName(FormatCheck check) {
       return 'Python';
     case FormatCheck.whitespace:
       return 'Trailing whitespace';
+    case FormatCheck.header:
+      return 'Header guards';
   }
 }
 
@@ -161,6 +167,14 @@ abstract class FormatChecker {
         );
       case FormatCheck.whitespace:
         return WhitespaceFormatChecker(
+          processManager: processManager,
+          baseGitRef: baseGitRef,
+          repoDir: repoDir,
+          allFiles: allFiles,
+          messageCallback: messageCallback,
+        );
+      case FormatCheck.header:
+        return HeaderFormatChecker(
           processManager: processManager,
           baseGitRef: baseGitRef,
           repoDir: repoDir,
@@ -941,6 +955,94 @@ class WhitespaceFormatChecker extends FormatChecker {
       message('No trailing whitespace found.');
     }
     return found.map<File>((_GrepResult result) => result.file).toList();
+  }
+}
+
+final class HeaderFormatChecker extends FormatChecker {
+  HeaderFormatChecker({
+    required super.baseGitRef,
+    required super.repoDir,
+    super.processManager,
+    super.allFiles,
+    super.messageCallback,
+  });
+
+  // $ENGINE/third_party/dart/tools/sdks/dart-sdk/bin/dart
+  late final String _dartBin = path.join(
+    repoDir.absolute.parent.path,
+    'third_party',
+    'dart',
+    'tools',
+    'sdks',
+    'dart-sdk',
+    'bin',
+    'dart',
+  );
+
+  // $ENGINE/src/flutter/tools/bin/main.dart
+  late final String _headerGuardCheckBin = path.join(
+    repoDir.absolute.path,
+    'tools',
+    'header_guard_check',
+    'bin',
+    'main.dart',
+  );
+
+  @override
+  Future<bool> checkFormatting() async {
+    final List<String> include = <String>[];
+    if (!allFiles) {
+      include.addAll(await getFileList(<String>[
+        '*.h',
+      ]));
+      if (include.isEmpty) {
+        message('No header files with changes, skipping header guard check.');
+        return true;
+      }
+    }
+    final List<String> args = <String>[
+      _dartBin,
+      _headerGuardCheckBin,
+      ...include.map((String f) => '--include=$f'),
+    ];
+    // TIP: --exclude is encoded into the tool itself.
+    // see tools/header_guard_check/lib/header_guard_check.dart
+    final ProcessRunnerResult result = await _processRunner.runProcess(args);
+    if (result.exitCode != 0) {
+      error('Header check failed. The following files have incorrect header guards:');
+      message(result.stdout);
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Future<bool> fixFormatting() async {
+    final List<String> include = <String>[];
+    if (!allFiles) {
+      include.addAll(await getFileList(<String>[
+        '*.h',
+      ]));
+      if (include.isEmpty) {
+        message('No header files with changes, skipping header guard fix.');
+        return true;
+      }
+    }
+    final List<String> args = <String>[
+      _dartBin,
+      _headerGuardCheckBin,
+      '--fix',
+      ...include.map((String f) => '--include=$f'),
+    ];
+    // TIP: --exclude is encoded into the tool itself.
+    // see tools/header_guard_check/lib/header_guard_check.dart
+    final ProcessRunnerResult result = await _processRunner.runProcess(args);
+    if (result.exitCode != 0) {
+      error('Header check fix failed:');
+      message(result.stdout);
+      return false;
+    }
+    return true;
   }
 }
 
