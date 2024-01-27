@@ -6348,8 +6348,6 @@ ORIGIN: ../../../flutter/shell/platform/android/image_external_texture.h + ../..
 ORIGIN: ../../../flutter/shell/platform/android/image_external_texture_gl.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/image_external_texture_gl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/image_external_texture_vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/image_lru.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/image_lru.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/BuildConfig.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/FlutterInjector.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/Log.java + ../../../flutter/LICENSE
@@ -9207,8 +9205,6 @@ FILE: ../../../flutter/shell/platform/android/image_external_texture_gl.cc
 FILE: ../../../flutter/shell/platform/android/image_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/android/image_external_texture_vk.cc
 FILE: ../../../flutter/shell/platform/android/image_external_texture_vk.h
-FILE: ../../../flutter/shell/platform/android/image_lru.cc
-FILE: ../../../flutter/shell/platform/android/image_lru.h
 FILE: ../../../flutter/shell/platform/android/io/flutter/BuildConfig.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/FlutterInjector.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/Log.java
