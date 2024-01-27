@@ -279,7 +279,28 @@ abstract class ProcessUtils {
     );
     return completer.future;
   }
+
+  static Future<void> writelnToStdinUnsafe(IOSink stdin, String line) async {
+    return writelnToStdinGuarded(
+      stdin: stdin,
+      line: line,
+      onError: (Object error, StackTrace stackTrace) {
+        throw BrokenPipeException('Failed to write to stdin.', error, stackTrace);
+      },
+    );
+  }
 }
+
+class BrokenPipeException implements Exception {
+  BrokenPipeException(this.message, this.error, this.stackTrace);
+  final String message;
+  final Object error;
+  final StackTrace stackTrace;
+
+  @override
+  String toString() => 'BrokenPipeException: $message\n$error\n$stackTrace)';
+}
+
 
 class _DefaultProcessUtils implements ProcessUtils {
   _DefaultProcessUtils({
