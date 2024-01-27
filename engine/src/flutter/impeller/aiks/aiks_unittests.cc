@@ -672,7 +672,7 @@ TEST_P(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
                   .AddRoundedRect(Rect::MakeXYWH(100, 100, 500, 500), radii)
                   .TakePath();
 
-  canvas.DrawPath(std::move(path), paint);
+  canvas.DrawPath(path, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
@@ -2392,7 +2392,7 @@ TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
                       .TakePath();
       Paint paint = p;
       paint.style = Paint::Style::kStroke;
-      canvas.DrawPath(std::move(path), paint);
+      canvas.DrawPath(path, paint);
     };
     // Registration marks for the edge of the SaveLayer
     DrawLine(Point(75, 100), Point(225, 100), {.color = Color::White()});

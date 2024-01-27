@@ -76,16 +76,16 @@ static std::shared_ptr<Contents> CreateContentsForGeometryWithFilters(
 
 static std::shared_ptr<Contents> CreatePathContentsWithFilters(
     const Paint& paint,
-    Path path = {}) {
+    const Path& path) {
   std::shared_ptr<Geometry> geometry;
   switch (paint.style) {
     case Paint::Style::kFill:
-      geometry = Geometry::MakeFillPath(std::move(path));
+      geometry = Geometry::MakeFillPath(path);
       break;
     case Paint::Style::kStroke:
-      geometry = Geometry::MakeStrokePath(std::move(path), paint.stroke_width,
-                                          paint.stroke_miter, paint.stroke_cap,
-                                          paint.stroke_join);
+      geometry =
+          Geometry::MakeStrokePath(path, paint.stroke_width, paint.stroke_miter,
+                                   paint.stroke_cap, paint.stroke_join);
       break;
   }
 
@@ -283,12 +283,12 @@ void Canvas::RestoreToCount(size_t count) {
   }
 }
 
-void Canvas::DrawPath(Path path, const Paint& paint) {
+void Canvas::DrawPath(const Path& path, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetClipDepth(GetClipDepth());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(CreatePathContentsWithFilters(paint, std::move(path)));
+  entity.SetContents(CreatePathContentsWithFilters(paint, path));
 
   GetCurrentPass().AddEntity(std::move(entity));
 }
@@ -425,7 +425,7 @@ void Canvas::DrawRRect(const Rect& rect,
                   .AddRoundedRect(rect, corner_radii)
                   .SetBounds(rect)
                   .TakePath();
-  DrawPath(std::move(path), paint);
+  DrawPath(path, paint);
 }
 
 void Canvas::DrawCircle(const Point& center,
@@ -452,9 +452,9 @@ void Canvas::DrawCircle(const Point& center,
   GetCurrentPass().AddEntity(std::move(entity));
 }
 
-void Canvas::ClipPath(Path path, Entity::ClipOperation clip_op) {
+void Canvas::ClipPath(const Path& path, Entity::ClipOperation clip_op) {
   auto bounds = path.GetBoundingBox();
-  ClipGeometry(Geometry::MakeFillPath(std::move(path)), clip_op);
+  ClipGeometry(Geometry::MakeFillPath(path), clip_op);
   if (clip_op == Entity::ClipOperation::kIntersect) {
     if (bounds.has_value()) {
       IntersectCulling(bounds.value());
