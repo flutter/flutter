@@ -24,9 +24,10 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-const String _shaderLibDir = '/./shader_lib';
 
 void main() {
+  const String shaderLibDir = '/./shader_lib';
+
   group('AssetBundle.build', () {
     late FileSystem testFileSystem;
     late Platform platform;
@@ -679,7 +680,7 @@ flutter:
             '--input=/$shaderPath',
             '--input-type=frag',
             '--include=/$assetsPath',
-            '--include=$_shaderLibDir',
+            '--include=$shaderLibDir',
           ],
           onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
@@ -726,7 +727,7 @@ flutter:
             '--input=/$shaderPath',
             '--input-type=frag',
             '--include=/$assetsPath',
-            '--include=$_shaderLibDir',
+            '--include=$shaderLibDir',
           ],
           onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
@@ -767,7 +768,7 @@ flutter:
             '--input=${fileSystem.path.join(materialDir.path, 'shaders', 'ink_sparkle.frag')}',
             '--input-type=frag',
             '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
-            '--include=$_shaderLibDir',
+            '--include=$shaderLibDir',
           ],
           onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
