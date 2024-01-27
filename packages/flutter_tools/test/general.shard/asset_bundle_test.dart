@@ -27,7 +27,7 @@ import '../src/context.dart';
 void main() {
   const String shaderLibDir = '/./shader_lib';
 
-  group('AssetBundle.build', () {
+  group('AssetBundle.build (non-hermetic)', () {
     late FileSystem testFileSystem;
     late Platform platform;
 
@@ -337,8 +337,8 @@ flutter:
     });
   });
 
-  group('AssetBundle.build (hermetic)', () {
-    testUsingContext('throws ToolExit when directory entry contains invalid characters (Windows only)', () async {
+  group('AssetBundle.build', () {
+    testWithoutContext('throws ToolExit when directory entry contains invalid characters (Windows only)', () async {
       final MemoryFileSystem fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
       final BufferLogger logger = BufferLogger.test();
       final FakePlatform platform = FakePlatform(operatingSystem: 'windows');
@@ -373,8 +373,7 @@ flutter:
         ),
         throwsToolExit(
           message: 'Unable to search for asset files in directory path "https%3A//mywebsite.com/images/". '
-            'Please ensure that this is a valid URI that points to a directory '
-            'that is available on the local file system.\n'
+            'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
             'Error details:\n'
             'Unsupported operation: Illegal character in path: https:',
         ),

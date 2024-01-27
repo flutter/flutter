@@ -958,8 +958,8 @@ class ManifestAssetBundle implements AssetBundle {
     } on UnsupportedError catch (e) {
       throwToolExit(
         'Unable to search for asset files in directory path "${assetUri.path}". '
-        'Please ensure that this is a valid URI that points to a directory '
-        'that is available on the local file system.\nError details:\n$e');
+        'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
+        'Error details:\n$e');
     }
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
