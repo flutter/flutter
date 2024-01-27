@@ -14,8 +14,6 @@
 
 namespace flutter {
 
-using HardwareBufferKey = uint64_t;
-
 // A collection of NDK functions that are available depending on the version of
 // the Android SDK we are linked with at runtime.
 class NDKHelpers {
@@ -29,7 +27,6 @@ class NDKHelpers {
   static void AHardwareBuffer_release(AHardwareBuffer* buffer);
   static void AHardwareBuffer_describe(AHardwareBuffer* buffer,
                                        AHardwareBuffer_Desc* desc);
-  static HardwareBufferKey AHardwareBuffer_getId(AHardwareBuffer* buffer);
   static EGLClientBuffer eglGetNativeClientBufferANDROID(
       AHardwareBuffer* buffer);
 

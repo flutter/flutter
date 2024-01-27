@@ -282,7 +282,6 @@
 ../../../flutter/shell/platform/android/external_view_embedder/surface_pool_unittests.cc
 ../../../flutter/shell/platform/android/flutter_shell_native_unittests.cc
 ../../../flutter/shell/platform/android/gradle.properties
-../../../flutter/shell/platform/android/image_lru_unittests.cc
 ../../../flutter/shell/platform/android/jni/jni_mock_unittest.cc
 ../../../flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate_unittests.cc
 ../../../flutter/shell/platform/android/platform_view_android_unittests.cc
