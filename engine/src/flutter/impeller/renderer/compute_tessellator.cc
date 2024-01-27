@@ -145,6 +145,7 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
         context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
     FML_DCHECK(compute_pipeline);
 
+    pass->AddBufferMemoryBarrier();
     pass->SetPipeline(compute_pipeline);
     pass->SetCommandLabel("Compute Stroke");
 
