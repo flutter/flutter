@@ -37,8 +37,8 @@ TEST_P(AiksTest, RotateColorFilteredPath) {
           ColorFilter::MakeBlend(BlendMode::kSourceIn, Color::AliceBlue()),
   };
 
-  canvas.DrawPath(std::move(arrow_stem), paint);
-  canvas.DrawPath(std::move(arrow_head), paint);
+  canvas.DrawPath(arrow_stem, paint);
+  canvas.DrawPath(arrow_head, paint);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
@@ -125,7 +125,7 @@ TEST_P(AiksTest, CanRenderDifferencePaths) {
   canvas.DrawImage(
       std::make_shared<Image>(CreateTextureForFixture("boston.jpg")), {10, 10},
       Paint{});
-  canvas.DrawPath(std::move(path), paint);
+  canvas.DrawPath(path, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
@@ -229,7 +229,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
       paint.stroke_join = join;
       for (auto cap : {Cap::kButt, Cap::kSquare, Cap::kRound}) {
         paint.stroke_cap = cap;
-        canvas.DrawPath(path.Clone(), paint);
+        canvas.DrawPath(path, paint);
         canvas.Translate({80, 0});
       }
       canvas.Translate({-240, 60});

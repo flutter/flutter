@@ -268,7 +268,7 @@ TEST(AiksCanvasTest, PathClipIntersectAgainstEmptyCullRect) {
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas;
-  canvas.ClipPath(std::move(path), Entity::ClipOperation::kIntersect);
+  canvas.ClipPath(path, Entity::ClipOperation::kIntersect);
 
   ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
   ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), rect_clip);
@@ -283,7 +283,7 @@ TEST(AiksCanvasTest, PathClipDiffAgainstEmptyCullRect) {
   Path path = builder.TakePath();
 
   Canvas canvas;
-  canvas.ClipPath(std::move(path), Entity::ClipOperation::kDifference);
+  canvas.ClipPath(path, Entity::ClipOperation::kDifference);
 
   ASSERT_FALSE(canvas.GetCurrentLocalCullingBounds().has_value());
 }
@@ -299,7 +299,7 @@ TEST(AiksCanvasTest, PathClipIntersectAgainstCullRect) {
   Rect result_cull = Rect::MakeXYWH(5, 5, 5, 5);
 
   Canvas canvas(initial_cull);
-  canvas.ClipPath(std::move(path), Entity::ClipOperation::kIntersect);
+  canvas.ClipPath(path, Entity::ClipOperation::kIntersect);
 
   ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
   ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
@@ -316,7 +316,7 @@ TEST(AiksCanvasTest, PathClipDiffAgainstNonCoveredCullRect) {
   Rect result_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
   Canvas canvas(initial_cull);
-  canvas.ClipPath(std::move(path), Entity::ClipOperation::kDifference);
+  canvas.ClipPath(path, Entity::ClipOperation::kDifference);
 
   ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
   ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
@@ -331,7 +331,7 @@ TEST(AiksCanvasTest, PathClipDiffAgainstFullyCoveredCullRect) {
   Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas(initial_cull);
-  canvas.ClipPath(std::move(path), Entity::ClipOperation::kDifference);
+  canvas.ClipPath(path, Entity::ClipOperation::kDifference);
 
   ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
   ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);

@@ -466,27 +466,27 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
        }},
       {"ClipPath",
        {
-           {1, 24, 1, 24,
+           {1, 40, 1, 40,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPath1, DlCanvas::ClipOp::kIntersect, true);
             }},
-           {1, 24, 1, 24,
+           {1, 40, 1, 40,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPath2, DlCanvas::ClipOp::kIntersect, true);
             }},
-           {1, 24, 1, 24,
+           {1, 40, 1, 40,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPath3, DlCanvas::ClipOp::kIntersect, true);
             }},
-           {1, 24, 1, 24,
+           {1, 40, 1, 40,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPath1, DlCanvas::ClipOp::kIntersect, false);
             }},
-           {1, 24, 1, 24,
+           {1, 40, 1, 40,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPath1, DlCanvas::ClipOp::kDifference, true);
             }},
-           {1, 24, 1, 24,
+           {1, 40, 1, 40,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPath1, DlCanvas::ClipOp::kDifference, false);
             }},
@@ -617,11 +617,11 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawPath",
        {
-           {1, 24, 1, 24, [](DlOpReceiver& r) { r.drawPath(kTestPath1); }},
-           {1, 24, 1, 24, [](DlOpReceiver& r) { r.drawPath(kTestPath2); }},
-           {1, 24, 1, 24, [](DlOpReceiver& r) { r.drawPath(kTestPath3); }},
-           {1, 24, 1, 24, [](DlOpReceiver& r) { r.drawPath(kTestPathRect); }},
-           {1, 24, 1, 24, [](DlOpReceiver& r) { r.drawPath(kTestPathOval); }},
+           {1, 40, 1, 40, [](DlOpReceiver& r) { r.drawPath(kTestPath1); }},
+           {1, 40, 1, 40, [](DlOpReceiver& r) { r.drawPath(kTestPath2); }},
+           {1, 40, 1, 40, [](DlOpReceiver& r) { r.drawPath(kTestPath3); }},
+           {1, 40, 1, 40, [](DlOpReceiver& r) { r.drawPath(kTestPathRect); }},
+           {1, 40, 1, 40, [](DlOpReceiver& r) { r.drawPath(kTestPathOval); }},
        }},
       {"DrawArc",
        {
@@ -929,27 +929,27 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        {
            // cv shadows are turned into an opaque ShadowRec which is not
            // exposed
-           {1, 32, -1, 32,
+           {1, 48, -1, 48,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, false, 1.0);
             }},
-           {1, 32, -1, 32,
+           {1, 48, -1, 48,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath2, DlColor(SK_ColorGREEN), 1.0, false, 1.0);
             }},
-           {1, 32, -1, 32,
+           {1, 48, -1, 48,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorBLUE), 1.0, false, 1.0);
             }},
-           {1, 32, -1, 32,
+           {1, 48, -1, 48,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 2.0, false, 1.0);
             }},
-           {1, 32, -1, 32,
+           {1, 48, -1, 48,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, true, 1.0);
             }},
-           {1, 32, -1, 32,
+           {1, 48, -1, 48,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, false, 2.5);
             }},

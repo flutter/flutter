@@ -12,7 +12,8 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/fml/macros.h"
 
-#include "impeller/typographer/text_frame.h"
+#include "flutter/impeller/geometry/path.h"
+#include "flutter/impeller/typographer/text_frame.h"
 #include "third_party/skia/include/core/SkRSXform.h"
 
 namespace flutter {
@@ -571,7 +572,7 @@ struct TransformResetOp final : TransformClipOpBase {
 // SkRect is 16 more bytes, which packs efficiently into 24 bytes total
 // SkRRect is 52 more bytes, which rounds up to 56 bytes (4 bytes unused)
 //         which packs into 64 bytes total
-// SkPath is 16 more bytes, which packs efficiently into 24 bytes total
+// CacheablePath is 128 more bytes, which packs efficiently into 136 bytes total
 //
 // We could pack the clip_op and the bool both into the free 4 bytes after
 // the header, but the Windows compiler keeps wanting to expand that
@@ -600,27 +601,33 @@ DEFINE_CLIP_SHAPE_OP(Rect, Difference)
 DEFINE_CLIP_SHAPE_OP(RRect, Difference)
 #undef DEFINE_CLIP_SHAPE_OP
 
-#define DEFINE_CLIP_PATH_OP(clipop)                                      \
-  struct Clip##clipop##PathOp final : TransformClipOpBase {              \
-    static const auto kType = DisplayListOpType::kClip##clipop##Path;    \
-                                                                         \
-    Clip##clipop##PathOp(const SkPath& path, bool is_aa)                 \
-        : is_aa(is_aa), path(path) {}                                    \
-                                                                         \
-    const bool is_aa;                                                    \
-    const SkPath path;                                                   \
-                                                                         \
-    void dispatch(DispatchContext& ctx) const {                          \
-      if (op_needed(ctx)) {                                              \
-        ctx.receiver.clipPath(path, DlCanvas::ClipOp::k##clipop, is_aa); \
-      }                                                                  \
-    }                                                                    \
-                                                                         \
-    DisplayListCompare equals(const Clip##clipop##PathOp* other) const { \
-      return is_aa == other->is_aa && path == other->path                \
-                 ? DisplayListCompare::kEqual                            \
-                 : DisplayListCompare::kNotEqual;                        \
-    }                                                                    \
+#define DEFINE_CLIP_PATH_OP(clipop)                                       \
+  struct Clip##clipop##PathOp final : TransformClipOpBase {               \
+    static const auto kType = DisplayListOpType::kClip##clipop##Path;     \
+                                                                          \
+    Clip##clipop##PathOp(const SkPath& path, bool is_aa)                  \
+        : is_aa(is_aa), cached_path(path) {}                              \
+                                                                          \
+    const bool is_aa;                                                     \
+    const DlOpReceiver::CacheablePath cached_path;                        \
+                                                                          \
+    void dispatch(DispatchContext& ctx) const {                           \
+      if (op_needed(ctx)) {                                               \
+        if (ctx.receiver.PrefersImpellerPaths()) {                        \
+          ctx.receiver.clipPath(cached_path, DlCanvas::ClipOp::k##clipop, \
+                                is_aa);                                   \
+        } else {                                                          \
+          ctx.receiver.clipPath(cached_path.sk_path,                      \
+                                DlCanvas::ClipOp::k##clipop, is_aa);      \
+        }                                                                 \
+      }                                                                   \
+    }                                                                     \
+                                                                          \
+    DisplayListCompare equals(const Clip##clipop##PathOp* other) const {  \
+      return is_aa == other->is_aa && cached_path == other->cached_path   \
+                 ? DisplayListCompare::kEqual                             \
+                 : DisplayListCompare::kNotEqual;                         \
+    }                                                                     \
   };
 DEFINE_CLIP_PATH_OP(Intersect)
 DEFINE_CLIP_PATH_OP(Difference)
@@ -685,24 +692,28 @@ DEFINE_DRAW_1ARG_OP(Oval, SkRect, oval)
 DEFINE_DRAW_1ARG_OP(RRect, SkRRect, rrect)
 #undef DEFINE_DRAW_1ARG_OP
 
-// 4 byte header + 16 byte payload uses 20 bytes but is rounded up to 24 bytes
-// (4 bytes unused)
+// 4 byte header + 128 byte payload uses 132 bytes but is rounded
+// up to 136 bytes (4 bytes unused)
 struct DrawPathOp final : DrawOpBase {
   static const auto kType = DisplayListOpType::kDrawPath;
 
-  explicit DrawPathOp(const SkPath& path) : path(path) {}
+  explicit DrawPathOp(const SkPath& path) : cached_path(path) {}
 
-  const SkPath path;
+  const DlOpReceiver::CacheablePath cached_path;
 
   void dispatch(DispatchContext& ctx) const {
     if (op_needed(ctx)) {
-      ctx.receiver.drawPath(path);
+      if (ctx.receiver.PrefersImpellerPaths()) {
+        ctx.receiver.drawPath(cached_path);
+      } else {
+        ctx.receiver.drawPath(cached_path.sk_path);
+      }
     }
   }
 
   DisplayListCompare equals(const DrawPathOp* other) const {
-    return path == other->path ? DisplayListCompare::kEqual
-                               : DisplayListCompare::kNotEqual;
+    return cached_path == other->cached_path ? DisplayListCompare::kEqual
+                                             : DisplayListCompare::kNotEqual;
   }
 };
 
@@ -1104,28 +1115,40 @@ struct DrawTextFrameOp final : DrawOpBase {
   }
 };
 
-// 4 byte header + 28 byte payload packs evenly into 32 bytes
-#define DEFINE_DRAW_SHADOW_OP(name, transparent_occluder)                     \
-  struct Draw##name##Op final : DrawOpBase {                                  \
-    static const auto kType = DisplayListOpType::kDraw##name;                 \
-                                                                              \
-    Draw##name##Op(const SkPath& path,                                        \
-                   DlColor color,                                             \
-                   SkScalar elevation,                                        \
-                   SkScalar dpr)                                              \
-        : color(color), elevation(elevation), dpr(dpr), path(path) {}         \
-                                                                              \
-    const DlColor color;                                                      \
-    const SkScalar elevation;                                                 \
-    const SkScalar dpr;                                                       \
-    const SkPath path;                                                        \
-                                                                              \
-    void dispatch(DispatchContext& ctx) const {                               \
-      if (op_needed(ctx)) {                                                   \
-        ctx.receiver.drawShadow(path, color, elevation, transparent_occluder, \
-                                dpr);                                         \
-      }                                                                       \
-    }                                                                         \
+// 4 byte header + 140 byte payload packs evenly into 140 bytes
+#define DEFINE_DRAW_SHADOW_OP(name, transparent_occluder)                    \
+  struct Draw##name##Op final : DrawOpBase {                                 \
+    static const auto kType = DisplayListOpType::kDraw##name;                \
+                                                                             \
+    Draw##name##Op(const SkPath& path,                                       \
+                   DlColor color,                                            \
+                   SkScalar elevation,                                       \
+                   SkScalar dpr)                                             \
+        : color(color), elevation(elevation), dpr(dpr), cached_path(path) {} \
+                                                                             \
+    const DlColor color;                                                     \
+    const SkScalar elevation;                                                \
+    const SkScalar dpr;                                                      \
+    const DlOpReceiver::CacheablePath cached_path;                           \
+                                                                             \
+    void dispatch(DispatchContext& ctx) const {                              \
+      if (op_needed(ctx)) {                                                  \
+        if (ctx.receiver.PrefersImpellerPaths()) {                           \
+          ctx.receiver.drawShadow(cached_path, color, elevation,             \
+                                  transparent_occluder, dpr);                \
+        } else {                                                             \
+          ctx.receiver.drawShadow(cached_path.sk_path, color, elevation,     \
+                                  transparent_occluder, dpr);                \
+        }                                                                    \
+      }                                                                      \
+    }                                                                        \
+                                                                             \
+    DisplayListCompare equals(const Draw##name##Op* other) const {           \
+      return color == other->color && elevation == other->elevation &&       \
+                     dpr == other->dpr && cached_path == other->cached_path  \
+                 ? DisplayListCompare::kEqual                                \
+                 : DisplayListCompare::kNotEqual;                            \
+    }                                                                        \
   };
 DEFINE_DRAW_SHADOW_OP(Shadow, false)
 DEFINE_DRAW_SHADOW_OP(ShadowTransparentOccluder, true)

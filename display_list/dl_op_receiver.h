@@ -18,6 +18,8 @@
 #include "flutter/display_list/effects/dl_path_effect.h"
 #include "flutter/display_list/image/dl_image.h"
 
+#include "flutter/impeller/geometry/path.h"
+
 namespace flutter {
 
 class DisplayList;
@@ -48,6 +50,46 @@ class DlOpReceiver {
  public:
   // MaxDrawPointsCount * sizeof(SkPoint) must be less than 1 << 32
   static constexpr int kMaxDrawPointsCount = ((1 << 29) - 1);
+
+  // ---------------------------------------------------------------------
+  // The CacheablePath forms of the drawPath, clipPath, and drawShadow
+  // methods are only called if the DlOpReceiver indicates that it prefers
+  // impeller paths by returning true from |PrefersImpellerPaths|.
+  // Note that we pass in both the SkPath and (a place to cache the)
+  // impeller::Path forms of the path since the SkPath version can contain
+  // information about the type of path that lets the receiver optimize
+  // the operation (and potentially avoid the need to cache it).
+  // It is up to the receiver to convert the path to Impeller form and
+  // cache it to avoid needing to do a lot of Impeller-specific processing
+  // inside the DisplayList code.
+
+  virtual bool PrefersImpellerPaths() const { return false; }
+
+  struct CacheablePath {
+    explicit CacheablePath(const SkPath& path) : sk_path(path) {}
+
+    const SkPath sk_path;
+    mutable impeller::Path cached_impeller_path;
+
+    bool operator==(const CacheablePath& other) const {
+      return sk_path == other.sk_path;
+    }
+  };
+
+  virtual void clipPath(const CacheablePath& cache,
+                        ClipOp clip_op,
+                        bool is_aa) {
+    FML_UNREACHABLE();
+  }
+  virtual void drawPath(const CacheablePath& cache) { FML_UNREACHABLE(); }
+  virtual void drawShadow(const CacheablePath& cache,
+                          const DlColor color,
+                          const SkScalar elevation,
+                          bool transparent_occluder,
+                          SkScalar dpr) {
+    FML_UNREACHABLE();
+  }
+  // ---------------------------------------------------------------------
 
   // The following methods are nearly 1:1 with the methods on DlPaint and
   // carry the same meanings. Each method sets a persistent value for the
