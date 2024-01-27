@@ -2712,7 +2712,7 @@ void main() {
       });
     });
 
-    testWidgets('correctly reorders children and wont throw assertion failure',
+    testWidgets('state is preserved after reordering',
         (WidgetTester tester) async {
       final TwoDimensionalChildBuilderDelegate delegate1 =
           TwoDimensionalChildBuilderDelegate(
@@ -2728,7 +2728,7 @@ void main() {
                     const ChildVicinity(xIndex: 1, yIndex: 2)) {
                   key = const ValueKey<int>(2);
                 }
-                return SizedBox.square(key: key, dimension: 200);
+                return Checkbox(key: key, value: false, onChanged: (_) {});
               });
       final TwoDimensionalChildBuilderDelegate delegate2 =
           TwoDimensionalChildBuilderDelegate(
@@ -2744,18 +2744,26 @@ void main() {
                     const ChildVicinity(xIndex: 1, yIndex: 1)) {
                   key = const ValueKey<int>(2);
                 }
-                return SizedBox.square(key: key, dimension: 200);
+                return Checkbox(key: key, value: false, onChanged: (_) {});
               });
       addTearDown(delegate1.dispose);
       addTearDown(delegate2.dispose);
 
       await tester.pumpWidget(simpleBuilderTest(delegate: delegate1));
+      final State stateBeforeReordering =
+          tester.state(find.byKey(const ValueKey<int>(2)));
       expect(tester.getRect(find.byKey(const ValueKey<int>(1))),
           const Rect.fromLTWH(200.0, 200.0, 200.0, 200.0));
+
       await tester.pumpWidget(simpleBuilderTest(delegate: delegate2));
+      expect(tester.state(find.byKey(const ValueKey<int>(2))),
+          stateBeforeReordering);
       expect(tester.getRect(find.byKey(const ValueKey<int>(1))),
           const Rect.fromLTWH(0.0, 0.0, 200.0, 200.0));
+
       await tester.pumpWidget(simpleBuilderTest(delegate: delegate1));
+      expect(tester.state(find.byKey(const ValueKey<int>(2))),
+          stateBeforeReordering);
       expect(tester.getRect(find.byKey(const ValueKey<int>(1))),
           const Rect.fromLTWH(200.0, 200.0, 200.0, 200.0));
     }, variant: TargetPlatformVariant.all());
