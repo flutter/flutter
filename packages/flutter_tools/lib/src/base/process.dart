@@ -280,6 +280,12 @@ abstract class ProcessUtils {
     return completer.future;
   }
 
+  /// Writes [line] to [stdin].
+  ///
+  /// Will throw a [BrokenPipeException] if the operation fails (e.g. the process
+  /// from which [stdin] came from has already been destroyed, closing [stdin].)
+  ///
+  /// Consider wrapping calls in a `try` block or using [writelnToStdinGuarded] instead.
   static Future<void> writelnToStdinUnsafe(IOSink stdin, String line) async {
     return writelnToStdinGuarded(
       stdin: stdin,
@@ -300,7 +306,6 @@ class BrokenPipeException implements Exception {
   @override
   String toString() => 'BrokenPipeException: $message\n$error\n$stackTrace)';
 }
-
 
 class _DefaultProcessUtils implements ProcessUtils {
   _DefaultProcessUtils({

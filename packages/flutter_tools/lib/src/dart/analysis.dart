@@ -11,6 +11,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
@@ -132,7 +133,9 @@ class AnalysisServer {
       'method': method,
       'params': params,
     });
-    _process?.stdin.writeln(message);
+    if (_process != null) {
+      ProcessUtils.writelnToStdinUnsafe(_process!.stdin, message);
+    }
     _logger.printTrace('==> $message');
   }
 
