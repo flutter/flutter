@@ -35,6 +35,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'common.dart';
 import 'fake_http_client.dart';
@@ -120,6 +121,7 @@ void testUsingContext(
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
           CrashReporter: () => const NoopCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
+          Analytics: () => NoOpAnalytics(),
         },
         body: () {
           return runZonedGuarded<Future<dynamic>>(() {
