@@ -8,13 +8,20 @@
 #include <android/sensor.h>
 
 #include "flutter/common/graphics/texture.h"
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/flow/layers/layer.h"
 #include "flutter/impeller/core/formats.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
+#include "flutter/impeller/renderer/backend/gles/texture_gles.h"
 #include "flutter/impeller/toolkit/egl/image.h"
 #include "flutter/impeller/toolkit/gles/texture.h"
 #include "flutter/shell/platform/android/ndk_helpers.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkColorType.h"
+#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "third_party/skia/include/gpu/gl/GrGLTypes.h"
@@ -29,61 +36,40 @@ ImageExternalTextureGL::ImageExternalTextureGL(
 
 void ImageExternalTextureGL::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
-    if (!latest_android_image_.is_null() && !latest_bounds_.isEmpty()) {
-      // After detach the cache of textures will have been cleared. If
-      // there is an android image we must populate it now so that the
-      // first frame isn't blank.
-      JavaLocalRef hardware_buffer = HardwareBufferFor(latest_android_image_);
-      UpdateImage(hardware_buffer, context);
+    if (!android_image_.is_null()) {
+      JavaLocalRef hardware_buffer = HardwareBufferFor(android_image_);
+      AHardwareBuffer* hardware_buffer_ahw =
+          AHardwareBufferFor(hardware_buffer);
+      egl_image_ = CreateEGLImage(hardware_buffer_ahw);
       CloseHardwareBuffer(hardware_buffer);
     }
     state_ = AttachmentState::kAttached;
   }
 }
 
-void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
-                                         PaintContext& context) {
-  AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
-  HardwareBufferKey key =
-      flutter::NDKHelpers::AHardwareBuffer_getId(latest_hardware_buffer);
-  auto existing_image = image_lru_.FindImage(key);
-  if (existing_image != nullptr) {
-    dl_image_ = existing_image;
-    return;
-  }
-
-  auto egl_image = CreateEGLImage(latest_hardware_buffer);
-  if (!egl_image.is_valid()) {
-    return;
-  }
-
-  dl_image_ = CreateDlImage(context, latest_bounds_, key, std::move(egl_image));
-  gl_entries_.erase(image_lru_.AddImage(dl_image_, key));
+void ImageExternalTextureGL::Detach() {
+  egl_image_.reset();
 }
 
-void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
-                                          const SkRect& bounds) {
+bool ImageExternalTextureGL::MaybeSwapImages() {
   JavaLocalRef image = AcquireLatestImage();
   if (image.is_null()) {
-    return;
+    return false;
   }
-  JavaLocalRef hardware_buffer = HardwareBufferFor(image);
-  UpdateImage(hardware_buffer, context);
-  CloseHardwareBuffer(hardware_buffer);
-
   // NOTE: In the following code it is important that old_android_image is
   // not closed until after the update of egl_image_ otherwise the image might
   // be closed before the old EGLImage referencing it has been deleted. After
   // an image is closed the underlying HardwareBuffer may be recycled and used
   // for a future frame.
-  JavaLocalRef old_android_image(latest_android_image_);
-  latest_android_image_.Reset(image);
+  JavaLocalRef old_android_image(android_image_);
+  android_image_.Reset(image);
+  JavaLocalRef hardware_buffer = HardwareBufferFor(image);
+  egl_image_ = CreateEGLImage(AHardwareBufferFor(hardware_buffer));
+  CloseHardwareBuffer(hardware_buffer);
+  // IMPORTANT: We only close the old image after egl_image_ stops referencing
+  // it.
   CloseImage(old_android_image);
-}
-
-void ImageExternalTextureGL::Detach() {
-  image_lru_.Clear();
-  gl_entries_.clear();
+  return true;
 }
 
 impeller::UniqueEGLImageKHR ImageExternalTextureGL::CreateEGLImage(
@@ -124,11 +110,26 @@ void ImageExternalTextureGLSkia::Attach(PaintContext& context) {
     // After this call state_ will be AttachmentState::kAttached and egl_image_
     // will have been created if we still have an Image associated with us.
     ImageExternalTextureGL::Attach(context);
+    GLuint texture_name;
+    glGenTextures(1, &texture_name);
+    texture_.reset(impeller::GLTexture{texture_name});
   }
 }
 
 void ImageExternalTextureGLSkia::Detach() {
   ImageExternalTextureGL::Detach();
+  texture_.reset();
+}
+
+void ImageExternalTextureGLSkia::ProcessFrame(PaintContext& context,
+                                              const SkRect& bounds) {
+  const bool swapped = MaybeSwapImages();
+  if (!swapped && !egl_image_.is_valid()) {
+    // Nothing to do.
+    return;
+  }
+  BindImageToTexture(egl_image_, texture_.get().texture_name);
+  dl_image_ = CreateDlImage(context, bounds);
 }
 
 void ImageExternalTextureGLSkia::BindImageToTexture(
@@ -144,22 +145,11 @@ void ImageExternalTextureGLSkia::BindImageToTexture(
 
 sk_sp<flutter::DlImage> ImageExternalTextureGLSkia::CreateDlImage(
     PaintContext& context,
-    const SkRect& bounds,
-    HardwareBufferKey id,
-    impeller::UniqueEGLImageKHR&& egl_image) {
-  GLuint texture_name;
-  glGenTextures(1, &texture_name);
-  auto gl_texture = impeller::GLTexture{texture_name};
-  impeller::UniqueGLTexture unique_texture;
-  unique_texture.reset(gl_texture);
-
-  BindImageToTexture(egl_image, unique_texture.get().texture_name);
-  GrGLTextureInfo textureInfo = {
-      GL_TEXTURE_EXTERNAL_OES, unique_texture.get().texture_name, GL_RGBA8_OES};
+    const SkRect& bounds) {
+  GrGLTextureInfo textureInfo = {GL_TEXTURE_EXTERNAL_OES,
+                                 texture_.get().texture_name, GL_RGBA8_OES};
   auto backendTexture =
       GrBackendTextures::MakeGL(1, 1, skgpu::Mipmapped::kNo, textureInfo);
-  gl_entries_[id] = GlEntry{.egl_image = std::move(egl_image),
-                            .texture = std::move(unique_texture)};
   return DlImage::Make(SkImages::BorrowTextureFrom(
       context.gr_context, backendTexture, kTopLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr));
@@ -181,11 +171,19 @@ void ImageExternalTextureGLImpeller::Attach(PaintContext& context) {
   }
 }
 
+void ImageExternalTextureGLImpeller::ProcessFrame(PaintContext& context,
+                                                  const SkRect& bounds) {
+  const bool swapped = MaybeSwapImages();
+  if (!swapped && !egl_image_.is_valid()) {
+    // Nothing to do.
+    return;
+  }
+  dl_image_ = CreateDlImage(context, bounds);
+}
+
 sk_sp<flutter::DlImage> ImageExternalTextureGLImpeller::CreateDlImage(
     PaintContext& context,
-    const SkRect& bounds,
-    HardwareBufferKey id,
-    impeller::UniqueEGLImageKHR&& egl_image) {
+    const SkRect& bounds) {
   impeller::TextureDescriptor desc;
   desc.type = impeller::TextureType::kTextureExternalOES;
   desc.storage_mode = impeller::StorageMode::kDevicePrivate;
@@ -203,10 +201,7 @@ sk_sp<flutter::DlImage> ImageExternalTextureGLImpeller::CreateDlImage(
   }
   // Associate the hardware buffer image with the texture.
   glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES,
-                               (GLeglImageOES)egl_image.get().image);
-  gl_entries_[id] = GlEntry{
-      .egl_image = std::move(egl_image),
-  };
+                               (GLeglImageOES)egl_image_.get().image);
   return impeller::DlImageImpeller::Make(texture);
 }
 
