@@ -11,6 +11,7 @@ import '../base/context.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
 import '../convert.dart';
@@ -334,7 +335,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
         environment: _java?.environment,
       );
-      process.stdin.write('n\n');
+      await ProcessUtils.writelnToStdinUnsafe(process.stdin, 'n\n');
       // We expect logcat streams to occasionally contain invalid utf-8,
       // see: https://github.com/flutter/flutter/pull/8864.
       final Future<void> output = process.stdout
