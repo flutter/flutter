@@ -263,69 +263,90 @@ bool Manager::IsValid() const {
   return is_valid_;
 }
 
-bool Manager::CreateWindowSurface(HWND hwnd, size_t width, size_t height) {
-  FML_DCHECK(surface_ == nullptr || !surface_->IsValid());
-
+bool Manager::CreateSurface(HWND hwnd, EGLint width, EGLint height) {
   if (!hwnd || !is_valid_) {
     return false;
   }
 
+  EGLSurface surface = EGL_NO_SURFACE;
+
   // Disable ANGLE's automatic surface resizing and provide an explicit size.
   // The surface will need to be destroyed and re-created if the HWND is
   // resized.
-  const EGLint surface_attributes[] = {EGL_FIXED_SIZE_ANGLE,
-                                       EGL_TRUE,
-                                       EGL_WIDTH,
-                                       static_cast<EGLint>(width),
-                                       EGL_HEIGHT,
-                                       static_cast<EGLint>(height),
-                                       EGL_NONE};
+  const EGLint surface_attributes[] = {
+      EGL_FIXED_SIZE_ANGLE, EGL_TRUE, EGL_WIDTH, width,
+      EGL_HEIGHT,           height,   EGL_NONE};
 
-  auto const surface = ::eglCreateWindowSurface(
-      display_, config_, static_cast<EGLNativeWindowType>(hwnd),
-      surface_attributes);
+  surface = ::eglCreateWindowSurface(display_, config_,
+                                     static_cast<EGLNativeWindowType>(hwnd),
+                                     surface_attributes);
   if (surface == EGL_NO_SURFACE) {
     LogEGLError("Surface creation failed.");
     return false;
   }
 
-  surface_ = std::make_unique<WindowSurface>(
-      display_, render_context_->GetHandle(), surface, width, height);
+  surface_width_ = width;
+  surface_height_ = height;
+  surface_ = surface;
   return true;
 }
 
-void Manager::ResizeWindowSurface(HWND hwnd, size_t width, size_t height) {
-  FML_CHECK(surface_ != nullptr);
-
-  auto const existing_width = surface_->width();
-  auto const existing_height = surface_->height();
-  auto const existing_vsync = surface_->vsync_enabled();
-
+void Manager::ResizeSurface(HWND hwnd,
+                            EGLint width,
+                            EGLint height,
+                            bool vsync_enabled) {
+  EGLint existing_width, existing_height;
+  GetSurfaceDimensions(&existing_width, &existing_height);
   if (width != existing_width || height != existing_height) {
+    surface_width_ = width;
+    surface_height_ = height;
+
     // TODO: Destroying the surface and re-creating it is expensive.
     // Ideally this would use ANGLE's automatic surface sizing instead.
     // See: https://github.com/flutter/flutter/issues/79427
-    if (!surface_->Destroy()) {
-      FML_LOG(ERROR) << "Manager::ResizeSurface failed to destroy surface";
-      return;
-    }
-
-    if (!CreateWindowSurface(hwnd, width, height)) {
+    render_context_->ClearCurrent();
+    DestroySurface();
+    if (!CreateSurface(hwnd, width, height)) {
       FML_LOG(ERROR) << "Manager::ResizeSurface failed to create surface";
-      return;
-    }
-
-    if (!surface_->SetVSyncEnabled(existing_vsync)) {
-      // Surfaces block until the v-blank by default.
-      // Failing to update the vsync might result in unnecessary blocking.
-      // This regresses performance but not correctness.
-      FML_LOG(ERROR) << "Manager::ResizeSurface failed to set vsync";
     }
   }
+
+  SetVSyncEnabled(vsync_enabled);
+}
+
+void Manager::GetSurfaceDimensions(EGLint* width, EGLint* height) {
+  if (surface_ == EGL_NO_SURFACE || !is_valid_) {
+    *width = 0;
+    *height = 0;
+    return;
+  }
+
+  // This avoids eglQuerySurface as ideally surfaces would be automatically
+  // sized by ANGLE to avoid expensive surface destroy & re-create. With
+  // automatic sizing, ANGLE could resize the surface before Flutter asks it to,
+  // which would break resize redraw synchronization.
+  *width = surface_width_;
+  *height = surface_height_;
+}
+
+void Manager::DestroySurface() {
+  if (display_ != EGL_NO_DISPLAY && surface_ != EGL_NO_SURFACE) {
+    ::eglDestroySurface(display_, surface_);
+  }
+  surface_ = EGL_NO_SURFACE;
 }
 
 bool Manager::HasContextCurrent() {
   return ::eglGetCurrentContext() != EGL_NO_CONTEXT;
+}
+
+bool Manager::MakeCurrent() {
+  return (::eglMakeCurrent(display_, surface_, surface_,
+                           render_context_->GetHandle()) == EGL_TRUE);
+}
+
+bool Manager::SwapBuffers() {
+  return (::eglSwapBuffers(display_, surface_));
 }
 
 EGLSurface Manager::CreateSurfaceFromHandle(EGLenum handle_type,
@@ -333,6 +354,23 @@ EGLSurface Manager::CreateSurfaceFromHandle(EGLenum handle_type,
                                             const EGLint* attributes) const {
   return ::eglCreatePbufferFromClientBuffer(display_, handle_type, handle,
                                             config_, attributes);
+}
+
+void Manager::SetVSyncEnabled(bool enabled) {
+  if (!MakeCurrent()) {
+    LogEGLError("Unable to make surface current to update the swap interval");
+    return;
+  }
+
+  // OpenGL swap intervals can be used to prevent screen tearing.
+  // If enabled, the raster thread blocks until the v-blank.
+  // This is unnecessary if DWM composition is enabled.
+  // See: https://www.khronos.org/opengl/wiki/Swap_Interval
+  // See: https://learn.microsoft.com/windows/win32/dwm/composition-ovw
+  if (::eglSwapInterval(display_, enabled ? 1 : 0) != EGL_TRUE) {
+    LogEGLError("Unable to update the swap interval");
+    return;
+  }
 }
 
 bool Manager::GetDevice(ID3D11Device** device) {
@@ -352,10 +390,6 @@ Context* Manager::render_context() const {
 
 Context* Manager::resource_context() const {
   return resource_context_.get();
-}
-
-WindowSurface* Manager::surface() const {
-  return surface_.get();
 }
 
 }  // namespace egl
