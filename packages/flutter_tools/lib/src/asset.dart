@@ -958,7 +958,7 @@ class ManifestAssetBundle implements AssetBundle {
     } on UnsupportedError catch (e) {
       throwToolExit(
         'Unable to search for asset files in directory path "${assetUri.path}". '
-        'Please ensure that this is valid URI that points to a directory '
+        'Please ensure that this is a valid URI that points to a directory '
         'that is available on the local file system.\nError details:\n$e');
     }
 

@@ -24,7 +24,6 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-
 void main() {
   const String shaderLibDir = '/./shader_lib';
 
