@@ -996,7 +996,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
         // Entering text happens in the center as well.
         await tester.enterText(find.byType(InputDecorator), text);
-        expect(tester.getTopLeft(find.text(text)).dy, 291.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 292.0);
         controller.clear();
         focusNode.unfocus();
 
@@ -1004,13 +1004,13 @@ void runAllTests({ required bool useMaterial3 }) {
         // that's where the hint is.
         await tester.pumpWidget(buildFrame(true));
         await tester.pumpAndSettle();
-        expect(tester.getTopLeft(find.text('label')).dy, 291.0);
+        expect(tester.getTopLeft(find.text('label')).dy, 292.0);
         expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
         expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
 
         // Entering text still happens in the center.
         await tester.enterText(find.byType(InputDecorator), text);
-        expect(tester.getTopLeft(find.text(text)).dy, 291.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 292.0);
         controller.clear();
         focusNode.unfocus();
       });
@@ -2313,17 +2313,17 @@ void runAllTests({ required bool useMaterial3 }) {
     //    0 - bottom prefix/suffix padding
     //   16 - bottom padding
     // When a border is present, the input text and prefix/suffix are centered
-    // within the input. Here, that will be content of height 106, including 2
-    // extra pixels of space, centered within an input of height 145. That gives
-    // 19 pixels of space on each side of the content, so the prefix is
-    // positioned at 19, and the text is at 19+100-15=104.
+    // within the input. Here, that will be content of height 106, centered
+    // within an input of height 145. That gives 20 pixels of space on each side
+    // of the content, so the prefix is positioned at 19, and the text is at
+    // 20+100-15=105.
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
     expect(tester.getSize(find.byType(InputDecorator)).height, 145);
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 104);
-    expect(tester.getTopLeft(find.byKey(pKey)).dy, 19.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 105);
+    expect(tester.getTopLeft(find.byKey(pKey)).dy, 20.0);
 
     // layout is a row: [prefix text suffix]
     expect(tester.getTopLeft(find.byKey(pKey)).dx, 12.0);
@@ -2890,7 +2890,7 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // Below the top aligned case.
-        expect(tester.getTopLeft(find.text(text)).dy, 289.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 290.0);
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -3040,8 +3040,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // In the middle of the expanded InputDecorator.
-        expect(tester.getTopLeft(find.text(text)).dy, 331.5);
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 246.5);
+        expect(tester.getTopLeft(find.text(text)).dy, 332.5);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 247.5);
       });
 
       testWidgets('InputDecorator tall prefix with border align top', (WidgetTester tester) async {
@@ -3138,8 +3138,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // Between the top and center examples.
-        expect(tester.getTopLeft(find.text(text)).dy, 354.75);
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 269.75);
+        expect(tester.getTopLeft(find.text(text)).dy, 355.65);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 270.65);
       });
     });
 
@@ -3237,8 +3237,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 19.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 35.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 20.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 36.0);
         expect(getBorderBottom(tester), 56.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3255,8 +3255,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 19.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 35.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 20.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 36.0);
         expect(getBorderBottom(tester), 56.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3276,8 +3276,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
         expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3297,8 +3297,8 @@ void runAllTests({ required bool useMaterial3 }) {
           ),
         );
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
-        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
         expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3319,8 +3319,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 120.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 51.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 67.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 52.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 68.0);
         expect(getBorderBottom(tester), 120.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3407,8 +3407,8 @@ void runAllTests({ required bool useMaterial3 }) {
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
         // Baseline is on the center of the 600px high input.
-        expect(tester.getTopLeft(find.text('text')).dy, 291.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 307.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 292.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 308.0);
         expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3455,8 +3455,8 @@ void runAllTests({ required bool useMaterial3 }) {
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
         // Same position as the center example above.
-        expect(tester.getTopLeft(find.text('text')).dy, 291.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 307.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 292.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 308.0);
         expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
