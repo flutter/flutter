@@ -193,30 +193,42 @@ static constexpr inline Color FromRGB(Vector3 color, Scalar alpha) {
   return {color.x, color.y, color.z, alpha};
 }
 
+/// Composite a blended color onto the destination.
+/// All three parameters are unpremultiplied. Returns a premultiplied result.
+///
+/// This routine is the same as `IPApplyBlendedColor` in the Impeller shader
+/// library.
+static constexpr inline Color ApplyBlendedColor(Color dst,
+                                                Color src,
+                                                Vector3 blend_result) {
+  dst = dst.Premultiply();
+  src =
+      // Use the blended color for areas where the source and destination
+      // colors overlap.
+      FromRGB(blend_result, src.alpha * dst.alpha).Premultiply() +
+      // Use the original source color for any remaining non-overlapping areas.
+      src.Premultiply() * (1.0f - dst.alpha);
+
+  // Source-over composite the blended source color atop the destination.
+  return src + dst * (1.0f - src.alpha);
+}
+
 static constexpr inline Color DoColorBlend(
-    Color d,
-    Color s,
+    Color dst,
+    Color src,
     const std::function<Vector3(Vector3, Vector3)>& blend_rgb_func) {
-  d = d.Premultiply();
-  s = s.Premultiply();
-  const Vector3 rgb = blend_rgb_func(ToRGB(d), ToRGB(s));
-  const Color blended = Color::Lerp(s, FromRGB(rgb, d.alpha), d.alpha);
-  return Color::Lerp(d, blended, s.alpha).Unpremultiply();
+  const Vector3 blend_result = blend_rgb_func(ToRGB(dst), ToRGB(src));
+  return ApplyBlendedColor(dst, src, blend_result).Unpremultiply();
 }
 
 static constexpr inline Color DoColorBlendComponents(
-    Color d,
-    Color s,
+    Color dst,
+    Color src,
     const std::function<Scalar(Scalar, Scalar)>& blend_func) {
-  d = d.Premultiply();
-  s = s.Premultiply();
-  const Color blended = Color::Lerp(s,
-                                    Color(blend_func(d.red, s.red),      //
-                                          blend_func(d.green, s.green),  //
-                                          blend_func(d.blue, s.blue),    //
-                                          d.alpha),
-                                    d.alpha);
-  return Color::Lerp(d, blended, s.alpha).Unpremultiply();
+  Vector3 blend_result = Vector3(blend_func(dst.red, src.red),      //
+                                 blend_func(dst.green, src.green),  //
+                                 blend_func(dst.blue, src.blue));   //
+  return ApplyBlendedColor(dst, src, blend_result).Unpremultiply();
 }
 
 Color Color::Blend(Color src, BlendMode blend_mode) const {

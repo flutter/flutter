@@ -6,8 +6,27 @@
 #define BLENDING_GLSL_
 
 #include <impeller/branching.glsl>
+#include <impeller/color.glsl>
 #include <impeller/constants.glsl>
 #include <impeller/types.glsl>
+
+/// Composite a blended color onto the destination.
+/// All three parameters are unpremultiplied. Returns a premultiplied result.
+///
+/// This routine is the same as `ApplyBlendedColor` in
+/// `impeller/geometry/color.cc`.
+f16vec4 IPApplyBlendedColor(f16vec4 dst, f16vec4 src, f16vec3 blend_result) {
+  dst = IPHalfPremultiply(dst);
+  src =
+      // Use the blended color for areas where the source and destination
+      // colors overlap.
+      IPHalfPremultiply(f16vec4(blend_result, src.a * dst.a)) +
+      // Use the original source color for any remaining non-overlapping areas.
+      IPHalfPremultiply(src) * (1.0hf - dst.a);
+
+  // Source-over composite the blended source color atop the destination.
+  return src + dst * (1.0hf - src.a);
+}
 
 //------------------------------------------------------------------------------
 /// HSV utilities.
