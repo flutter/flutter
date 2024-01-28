@@ -39,7 +39,7 @@ void main() {
   });
 
   testWidgets('runApp throws if given a View',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design because of exception.
   (WidgetTester tester) async {
     runApp(
       View(
