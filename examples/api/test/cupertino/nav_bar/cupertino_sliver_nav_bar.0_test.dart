@@ -59,10 +59,37 @@ void main() {
     expect(nextButton, findsNothing);
 
     // Go back to the previous page.
-    final Finder backButton = find.byType(CupertinoButton);
-    expect(backButton, findsOneWidget);
+    final Finder backButton = find.byType(CupertinoButton).first;
     await tester.tap(backButton);
     await tester.pumpAndSettle();
     expect(nextButton, findsOneWidget);
+  });
+
+  testWidgets('CupertinoSliverNavigationBar with expandedTransparent has transparent background in expanded state', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.SliverNavBarApp(),
+    );
+
+    // Navigate to a page with expandedTransparent
+    final Finder nextButton = find.text('Go to Next Page');
+    expect(nextButton, findsOneWidget);
+    await tester.tap(nextButton);
+    await tester.pumpAndSettle();
+    final Finder lastButton = find.text('Go to Last Page');
+    expect(lastButton, findsOneWidget);
+    await tester.tap(lastButton);
+    await tester.pumpAndSettle();
+
+
+   final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoSliverNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first as DecoratedBox;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    expect(decoration.color?.opacity, isZero);
+    final BorderSide side = decoration.border!.bottom;
+    expect(side.width, isZero);
   });
 }
