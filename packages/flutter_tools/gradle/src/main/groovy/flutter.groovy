@@ -257,7 +257,27 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        project.extensions.create("flutter", FlutterExtension)
+        FlutterExtension extension = project.extensions.create("flutter", FlutterExtension)
+        Properties localProperties = new Properties()
+        File localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.withReader("UTF-8") { reader ->
+                localProperties.load(reader)
+            }
+        }
+
+        Object flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+        if (flutterVersionCode == null) {
+            flutterVersionCode = "1"
+        }
+        extension.flutterVersionCode = flutterVersionCode
+
+        Object flutterVersionName = localProperties.getProperty("flutter.versionName")
+        if (flutterVersionName == null) {
+            flutterVersionName = "1.0"
+        }
+        extension.flutterVersionName = flutterVersionName
+
         this.addFlutterTasks(project)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
