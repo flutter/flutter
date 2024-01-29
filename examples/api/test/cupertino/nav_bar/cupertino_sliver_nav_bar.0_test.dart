@@ -65,7 +65,9 @@ void main() {
     expect(nextButton, findsOneWidget);
   });
 
-  testWidgets('CupertinoSliverNavigationBar with expandedTransparent has transparent background in expanded state', (WidgetTester tester) async {
+  testWidgets(
+      'CupertinoSliverNavigationBar with expandedTransparent has transparent background in expanded state',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SliverNavBarApp(),
     );
@@ -80,16 +82,42 @@ void main() {
     await tester.tap(lastButton);
     await tester.pumpAndSettle();
 
-
-   final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
-      of: find.byType(CupertinoSliverNavigationBar),
-      matching: find.byType(DecoratedBox),
-    )).first as DecoratedBox;
+    DecoratedBox decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoSliverNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color?.opacity, isZero);
-    final BorderSide side = decoration.border!.bottom;
+    BorderSide side = decoration.border!.bottom;
     expect(side.width, isZero);
+
+    await tester.fling(find.text('Drag me up'), dragUp, 500.0);
+    await tester.pumpAndSettle();
+
+    decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoSliverNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
+
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+    decoration = decoratedBox.decoration as BoxDecoration;
+
+    final CupertinoSliverNavigationBar navigationBar = find
+        .byType(CupertinoSliverNavigationBar)
+        .evaluate()
+        .first
+        .widget as CupertinoSliverNavigationBar;
+
+    expect(decoration.color?.opacity, isNonZero);
+    expect(decoration.color?.value, navigationBar.backgroundColor?.value);
+    expect(decoration.border, navigationBar.border);
+    side = decoration.border!.bottom;
+    expect(side.width, isNonZero);
   });
 }
