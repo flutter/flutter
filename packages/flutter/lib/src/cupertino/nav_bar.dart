@@ -440,9 +440,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor =
-        CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ??
-            CupertinoTheme.of(context).barBackgroundColor;
+    final Color backgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -747,9 +745,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           keys: keys,
           components: components,
           userMiddle: widget.middle,
-          backgroundColor: CupertinoDynamicColor.maybeResolve(
-                  widget.backgroundColor, context) ??
-              CupertinoTheme.of(context).barBackgroundColor,
+          backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
           brightness: widget.brightness,
           border: widget.border,
           padding: widget.padding,

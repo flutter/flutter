@@ -82,6 +82,15 @@ void main() {
     await tester.tap(lastButton);
     await tester.pumpAndSettle();
 
+    // Takes navigation bar
+     final CupertinoSliverNavigationBar navigationBar = find
+        .byType(CupertinoSliverNavigationBar)
+        .evaluate()
+        .first
+        .widget as CupertinoSliverNavigationBar;
+
+
+    // Checking background and border in the expanded state
     DecoratedBox decoratedBox = tester
         .widgetList(find.descendant(
           of: find.byType(CupertinoSliverNavigationBar),
@@ -89,12 +98,14 @@ void main() {
         ))
         .first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
-
     BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+
     expect(decoration.color?.opacity, isZero);
     BorderSide side = decoration.border!.bottom;
     expect(side.width, isZero);
 
+
+    // Checking background and border in the non-expanded state
     await tester.fling(find.text('Drag me up'), dragUp, 500.0);
     await tester.pumpAndSettle();
 
@@ -104,15 +115,7 @@ void main() {
           matching: find.byType(DecoratedBox),
         ))
         .first as DecoratedBox;
-
-    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
     decoration = decoratedBox.decoration as BoxDecoration;
-
-    final CupertinoSliverNavigationBar navigationBar = find
-        .byType(CupertinoSliverNavigationBar)
-        .evaluate()
-        .first
-        .widget as CupertinoSliverNavigationBar;
 
     expect(decoration.color?.opacity, isNonZero);
     expect(decoration.color?.value, navigationBar.backgroundColor?.value);
