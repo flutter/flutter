@@ -15301,6 +15301,81 @@ void main() {
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
 
+  testWidgets('magnifierConfiguration can be updated to display a new magnifier', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/142077.
+    late StateSetter setState;
+    final GlobalKey keyOne = GlobalKey();
+    final GlobalKey keyTwo = GlobalKey();
+    GlobalKey key = keyOne;
+
+    final TextMagnifierConfiguration magnifierConfiguration = TextMagnifierConfiguration(
+      magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? info) {
+        return Placeholder(
+          key: key,
+        );
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: focusNode,
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                selectionControls: materialTextSelectionHandleControls,
+                magnifierConfiguration: magnifierConfiguration,
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    void checkMagnifierKey(Key testKey) {
+      final EditableText editableText = tester.widget(find.byType(EditableText));
+      final BuildContext context = tester.firstElement(find.byType(EditableText));
+      final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      expect(
+        editableText.magnifierConfiguration.magnifierBuilder(
+          context,
+          MagnifierController(),
+          magnifierInfo,
+        ),
+        isA<Widget>().having(
+          (Widget widget) => widget.key,
+          'built magnifier key equal to passed in magnifier key',
+          equals(testKey),
+        ),
+      );
+    }
+
+    checkMagnifierKey(keyOne);
+
+    setState(() {
+      key = keyTwo;
+    });
+    await tester.pumpAndSettle();
+
+    checkMagnifierKey(keyTwo);
+  },
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
+
   group('Spell check', () {
     testWidgets(
       'Spell check configured properly when spell check disabled by default',
