@@ -16,10 +16,11 @@
 
 // NOLINTBEGIN(google-explicit-constructor)
 
-#ifdef FML_OS_WIN
-using InternalHalf = uint16_t;
-#else
+#if defined(FML_OS_MACOSX) || defined(FML_OS_IOS) || \
+    defined(FML_OS_IOS_SIMULATOR)
 using InternalHalf = _Float16;
+#else
+using InternalHalf = uint16_t;
 #endif
 
 namespace impeller {
