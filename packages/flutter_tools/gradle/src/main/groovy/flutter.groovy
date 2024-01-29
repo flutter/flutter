@@ -222,9 +222,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        // Load shared gradle functions
-        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
-
         project.extensions.create("flutter", FlutterExtension)
         this.addFlutterTasks(project)
 
