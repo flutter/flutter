@@ -3529,7 +3529,6 @@ targets:
   - name: Mac_arm64 framework_tests_misc
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       dependencies: >-
         [
