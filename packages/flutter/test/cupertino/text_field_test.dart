@@ -635,7 +635,7 @@ void main() {
         home: Center(
           child: CupertinoTheme(
             data: const CupertinoThemeData(
-              primaryColor: expectedSelectionHandleColor, 
+              primaryColor: expectedSelectionHandleColor,
             ),
             child: CupertinoTextField(controller: controller),
           ),
