@@ -692,6 +692,42 @@ void main() {
     expect(controller.offset, 1000);
     expect(counter, equals(2));
   });
+
+  testWidgets('SliverMainAxisGroup does not cause extra builds for lazy sliver children', (WidgetTester tester) async {
+    // By setting the correct SliverGeometry in the first SliverMainAxisGroup,
+    // the following SliverMainAxisGroups will not perform extra work.
+    final Map<int, int> buildsPerGroup = <int, int>{
+      0 : 0,
+      1 : 0,
+      2 : 0,
+    };
+    await tester.pumpWidget(MaterialApp(
+      home: CustomScrollView(
+        slivers: <Widget>[
+          for (int groupIndex = 0; groupIndex < 3; groupIndex++)
+            SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverList.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    buildsPerGroup[groupIndex] = buildsPerGroup[groupIndex]! + 1;
+                    return const SizedBox.square(dimension: 50);
+                  },
+                ),
+              ],
+            ),
+        ]
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(buildsPerGroup[0], 17); // First sliver filled the screen and cache extent
+    expect(buildsPerGroup[1], 1); // Second only lays out one child
+    expect(buildsPerGroup[2], 1); // Third only lays out one child
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(
+        find.byType(SliverMainAxisGroup).first,
+    ) as RenderSliverMainAxisGroup;
+    expect(renderGroup.geometry!.cacheExtent, 850.0);
+  });
 }
 
 Widget _buildSliverList({
