@@ -958,8 +958,8 @@ class ManifestAssetBundle implements AssetBundle {
     } on UnsupportedError catch (e) {
       throwToolExit(
         'Unable to search for asset files in directory path "${assetUri.path}". '
-        'Please ensure that this is valid URI that points to a directory '
-        'that is available on the local file system.\nError details:\n$e');
+        'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
+        'Error details:\n$e');
     }
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
@@ -1296,17 +1296,25 @@ class _AssetDirectoryCache {
   final Map<String, List<File>> _variantsPerFolder = <String, List<File>>{};
 
   List<String> variantsFor(String assetPath) {
-    final String directory = _fileSystem.path.dirname(assetPath);
+    final String directoryName = _fileSystem.path.dirname(assetPath);
 
-    if (!_fileSystem.directory(directory).existsSync()) {
-      return const <String>[];
+    try {
+      if (!_fileSystem.directory(directoryName).existsSync()) {
+        return const <String>[];
+      }
+    } on FileSystemException catch (e) {
+      throwToolExit(
+        'Unable to check the existence of asset file "$assetPath". '
+        'Ensure that the asset file is declared as a valid local file system path.\n'
+        'Details: $e',
+      );
     }
 
     if (_cache.containsKey(assetPath)) {
       return _cache[assetPath]!;
     }
-    if (!_variantsPerFolder.containsKey(directory)) {
-      _variantsPerFolder[directory] = _fileSystem.directory(directory)
+    if (!_variantsPerFolder.containsKey(directoryName)) {
+      _variantsPerFolder[directoryName] = _fileSystem.directory(directoryName)
         .listSync()
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
@@ -1315,7 +1323,7 @@ class _AssetDirectoryCache {
         .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
-    final List<File> potentialVariants = _variantsPerFolder[directory]!;
+    final List<File> potentialVariants = _variantsPerFolder[directoryName]!;
     final String basename = assetFile.basename;
     return _cache[assetPath] = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
