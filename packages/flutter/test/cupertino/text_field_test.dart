@@ -643,7 +643,9 @@ void main() {
       ),
     );
 
-    await tester.longPressAt(textOffsetToPosition(tester, 0));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await tester.tapAt(textOffsetToPosition(tester, 0));
     await tester.pumpAndSettle();
     final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
       find.descendant(
