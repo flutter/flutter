@@ -2387,7 +2387,6 @@ targets:
   # linux motog4 benchmark
   - name: Linux_android hello_world__memory
     recipe: devicelab/devicelab_drone
-    presubmit: true
     timeout: 60
     properties:
       tags: >
