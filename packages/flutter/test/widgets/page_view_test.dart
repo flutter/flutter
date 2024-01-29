@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
@@ -1321,20 +1320,20 @@ void main() {
     }
 
     Future<void> testPageViewWithController(PageController controller, WidgetTester tester, bool controls) async  {
-      int curentVisiblePage() {
+      int currentVisiblePage() {
         return int.parse(tester.widgetList(find.byType(Text)).whereType<Text>().first.data!);
       }
 
-      final int initialPageInView = curentVisiblePage();
+      final int initialPageInView = currentVisiblePage();
 
       for (int i = 0; i < 3; i++) {
         if (controls) {
           controller.jumpToPage(i);
           await tester.pumpAndSettle();
-          expect(curentVisiblePage(), i);
+          expect(currentVisiblePage(), i);
         } else {
           expect(()=> controller.jumpToPage(i), throwsAssertionError);
-          expect(curentVisiblePage(), initialPageInView);
+          expect(currentVisiblePage(), initialPageInView);
         }
       }
     }
