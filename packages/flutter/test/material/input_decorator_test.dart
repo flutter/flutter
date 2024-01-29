@@ -7047,4 +7047,16 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     await tester.pumpAndSettle();
     expect(getLabelStyle(tester).height, beforeStyle.height);
   });
+
+  test('InputDecorationTheme.copyWith keeps original iconColor.', () async {
+    const InputDecorationTheme original = InputDecorationTheme(iconColor: Color(0xDEADBEEF));
+    expect(original.iconColor, const Color(0xDEADBEEF));
+    expect(original.fillColor, isNot(const Color(0xDEADCAFE)));
+    final InputDecorationTheme copy1 = original.copyWith(fillColor: const Color(0xDEADCAFE));
+    expect(copy1.iconColor, const Color(0xDEADBEEF));
+    expect(copy1.fillColor, const Color(0xDEADCAFE));
+    final InputDecorationTheme copy2 = original.copyWith(iconColor: const Color(0xDEADCAFE));
+    expect(copy2.iconColor, const Color(0xDEADCAFE));
+    expect(copy2.fillColor, isNot(const Color(0xDEADCAFE)));
+  });
 }
