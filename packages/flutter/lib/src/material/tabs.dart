@@ -578,6 +578,13 @@ class _IndicatorPainter extends CustomPainter {
 
   /// Applies the stretch effect to the indicator.
   Rect _applyStretchEffect(Rect rect) {
+    // If the tab animation is completed, there is no need to stretch the indicator
+    // This only works for the tab change animation via tab index, not when
+    // dragging a [TabBarView], but it's still ok, to avoid unnecessary calculations.
+    if (controller.animation!.status == AnimationStatus.completed) {
+      return rect;
+    }
+
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
 
