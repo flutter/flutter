@@ -2394,6 +2394,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: hello_world__memory
     runIf:
+      - .ci.yaml
       - examples/hello_world/android/app/**
 
   # linux motog4 benchmark
