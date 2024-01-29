@@ -6535,6 +6535,55 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Can scroll multiline input when disabled', (WidgetTester tester) async {
+    final Key textFieldKey = UniqueKey();
+    final TextEditingController controller = _textEditingController(
+      text: kMoreThanFourLines,
+    );
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          key: textFieldKey,
+          controller: controller,
+          ignorePointers: false,
+          enabled: false,
+          style: const TextStyle(color: Colors.black, fontSize: 34.0),
+          maxLines: 2,
+        ),
+      ),
+    );
+
+    RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
+    final RenderBox inputBox = findInputBox();
+
+    // Check that the last line of text is not displayed.
+    final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    expect(firstPos.dx, fourthPos.dx);
+    expect(firstPos.dy, lessThan(fourthPos.dy));
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
+
+    final TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
+    await tester.pump();
+    await gesture.moveBy(const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Now the first line is scrolled up, and the fourth line is visible.
+    final Offset finalFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    final Offset finalFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+
+    expect(finalFirstPos.dy, lessThan(firstPos.dy));
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(finalFirstPos)), isFalse);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(finalFourthPos)), isTrue);
+  });
+
   testWidgets('Disabled text field does not have tap action', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
