@@ -65,7 +65,10 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,

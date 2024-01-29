@@ -15,10 +15,7 @@ import 'states.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgets('PageView.builder respects findChildIndexCallback',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
@@ -333,10 +330,7 @@ void main() {
     expect(find.text('California'), findsOneWidget);
   });
 
-  testWidgets('PageController page stability',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('PageController page stability', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -422,10 +416,7 @@ void main() {
     expect(previousPageCompleted, true);
   });
 
-  testWidgets('PageView in zero-size container',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('PageView in zero-size container', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -605,10 +596,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(790.0, 0.0));
   });
 
-  testWidgets('Page snapping disable and reenable',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     Widget build({ required bool pageSnapping }) {
