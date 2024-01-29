@@ -587,7 +587,6 @@ class AndroidDevice extends Device {
             debuggingOptions.buildInfo,
             targetArchs: <AndroidArch>[androidArch],
             fastStart: debuggingOptions.fastStart,
-            multidexEnabled: (platformArgs['multidex'] as bool?) ?? false,
           ),
       );
       // Package has been built, so we can get the updated application ID and
