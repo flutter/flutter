@@ -9294,7 +9294,6 @@ void main() {
 
   testWidgets('selection handles color respects Theme', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/74890.
-    const Color parentSelectionHandleColor = Color.fromARGB(255, 100, 100, 100);
     const Color expectedSelectionHandleColor = Color.fromARGB(255, 10, 200, 255);
 
     final TextEditingController controller = TextEditingController(text: 'Some text.');
@@ -9303,7 +9302,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           textSelectionTheme: const TextSelectionThemeData(
-            selectionHandleColor: parentSelectionHandleColor,
+            selectionHandleColor: Colors.red,
           ),
         ),
         home: Material(
