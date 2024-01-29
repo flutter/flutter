@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('runApp uses deprecated pipelineOwner and renderView', (WidgetTester tester) async {
@@ -37,7 +38,9 @@ void main() {
     expect(tester.element(find.byType(ColoredBox)).owner, equals(tester.binding.buildOwner));
   });
 
-  testWidgets('runApp throws if given a View', (WidgetTester tester) async {
+  testWidgets('runApp throws if given a View',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design because of exception.
+  (WidgetTester tester) async {
     runApp(
       View(
         view: FakeFlutterView(tester.view),
