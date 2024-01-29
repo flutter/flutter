@@ -1614,8 +1614,6 @@ public class PlatformViewsControllerTest {
               public Surface getSurface() {
                 return null;
               }
-
-              public void scheduleFrame() {}
             };
           }
         };
