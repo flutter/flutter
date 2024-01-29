@@ -572,7 +572,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows build outputs path when successful', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
