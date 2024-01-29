@@ -30,8 +30,9 @@ MaterialApp _buildAppWithDialog(
                   context: context,
                   traversalEdgeBehavior: traversalEdgeBehavior,
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: dialog,
                     );
                   },
@@ -1716,36 +1717,31 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   id: 3,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 4,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 5,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 6,
-                              label: 'title',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            // The content semantics does not merge into the semantics
-                            // node 4.
-                            TestSemantics(
-                              id: 7,
-                              label: 'content',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              id: 8,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState,
-                              ],
-                              label: 'action',
-                              textDirection: TextDirection.ltr,
-                            ),
+                          label: 'title',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        // The content semantics does not merge into the semantics
+                        // node 4.
+                        TestSemantics(
+                          id: 6,
+                          label: 'content',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 7,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
                           ],
+                          label: 'action',
+                          textDirection: TextDirection.ltr,
                         ),
                       ],
                     ),
@@ -1887,40 +1883,35 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   id: 3,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 4,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
+                        // Title semantics does not merge into the semantics
+                        // node 4.
                         TestSemantics(
                           id: 5,
+                          label: 'title',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 6,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
-                            // Title semantics does not merge into the semantics
-                            // node 4.
                             TestSemantics(
-                              id: 6,
-                              label: 'title',
+                              id: 7,
+                              label: 'content',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              id: 7,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 8,
-                                  label: 'content',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 9,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton,
-                                    SemanticsFlag.hasEnabledState,
-                                  ],
-                                  label: 'action',
-                                  textDirection: TextDirection.ltr,
-                                ),
+                              id: 8,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
                               ],
+                              label: 'action',
+                              textDirection: TextDirection.ltr,
                             ),
                           ],
                         ),

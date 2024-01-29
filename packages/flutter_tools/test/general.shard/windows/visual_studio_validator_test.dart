@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/user_messages.dart' hide userMessages;
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:flutter_tools/src/windows/visual_studio_validator.dart';
@@ -10,11 +10,11 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
-final UserMessages userMessages = UserMessages();
 
 void main() {
   group('Visual Studio validation', () {
     late FakeVisualStudio fakeVisualStudio;
+    final UserMessages userMessages = UserMessages();
 
     setUp(() {
       fakeVisualStudio = FakeVisualStudio();
