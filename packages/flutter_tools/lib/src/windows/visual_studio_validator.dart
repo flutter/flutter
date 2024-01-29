@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/user_messages.dart' hide userMessages;
+import '../base/user_messages.dart';
 import '../doctor_validator.dart';
 import 'visual_studio.dart';
 
