@@ -594,7 +594,7 @@ class RunCommand extends RunCommandBase {
       throwToolExit(null);
     }
 
-    if (devices!.any((Device device) => device is MacOSDesignedForIPadDevice)) {
+    if (devices!.length == 1 && devices!.first is MacOSDesignedForIPadDevice) {
       throwToolExit('Mac Designed for iPad is currently not supported for flutter run -d.');
     }
 
