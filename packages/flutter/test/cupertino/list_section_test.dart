@@ -4,10 +4,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('shows header', (WidgetTester tester) async {
+  testWidgets('shows header', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -24,7 +23,7 @@ void main() {
     expect(find.text('Header'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('shows footer', (WidgetTester tester) async {
+  testWidgets('shows footer', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -41,7 +40,7 @@ void main() {
     expect(find.text('Footer'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
+  testWidgets('shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -60,7 +59,7 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgetsWithLeakTracking('shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
+  testWidgets('shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -81,7 +80,7 @@ void main() {
     expect(childrenColumn.children.length, 5);
   });
 
-  testWidgetsWithLeakTracking('does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
+  testWidgets('does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -101,7 +100,7 @@ void main() {
     expect(childrenColumn.children.length, 1);
   });
 
-  testWidgetsWithLeakTracking('does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
+  testWidgets('does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -122,7 +121,7 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgetsWithLeakTracking('sets background color for section', (WidgetTester tester) async {
+  testWidgets('sets background color for section', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
 
     await tester.pumpWidget(
@@ -145,7 +144,7 @@ void main() {
     expect(boxDecoration.color, backgroundColor);
   });
 
-  testWidgetsWithLeakTracking('setting clipBehavior clips children section', (WidgetTester tester) async {
+  testWidgets('setting clipBehavior clips children section', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -162,7 +161,7 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('not setting clipBehavior does not clip children section', (WidgetTester tester) async {
+  testWidgets('not setting clipBehavior does not clip children section', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -178,7 +177,7 @@ void main() {
     expect(find.byType(ClipRRect), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('CupertinoListSection respects separatorColor', (WidgetTester tester) async {
+  testWidgets('CupertinoListSection respects separatorColor', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -201,7 +200,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('CupertinoListSection.separatorColor defaults CupertinoColors.separator', (WidgetTester tester) async {
+  testWidgets('CupertinoListSection.separatorColor defaults CupertinoColors.separator', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -222,5 +221,45 @@ void main() {
         expect(e.color, CupertinoColors.separator.resolveFrom(context));
       }
     }
+  });
+
+  testWidgets('does not show margin by default', (WidgetTester tester) async {
+    const Widget child = CupertinoListTile(title: Text('CupertinoListTile'));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            header: const Text('Header'),
+            children: const <Widget>[
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byWidget(child)), offsetMoreOrLessEquals(const Offset(0, 41), epsilon: 1));
+  });
+
+  testWidgets('shows custom margin', (WidgetTester tester) async {
+    const Widget child = CupertinoListTile(title: Text('CupertinoListTile'));
+    const double margin = 10;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            header: const Text('Header'),
+            margin: const EdgeInsets.all(margin),
+            children: const <Widget>[
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byWidget(child)), offsetMoreOrLessEquals(const Offset(margin, 41 + margin), epsilon: 1));
   });
 }

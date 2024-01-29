@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -101,7 +102,7 @@ class IOSCoreDeviceControl {
       _logger.printError('Error executing devicectl: $err');
       return <Object?>[];
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -369,7 +370,7 @@ class IOSCoreDevice {
     required this.connectionProperties,
     required this.deviceProperties,
     required this.hardwareProperties,
-    required this.coreDeviceIdentifer,
+    required this.coreDeviceIdentifier,
     required this.visibilityClass,
   });
 
@@ -431,7 +432,7 @@ class IOSCoreDevice {
       connectionProperties: connectionProperties,
       deviceProperties: deviceProperties,
       hardwareProperties: hardwareProperties,
-      coreDeviceIdentifer: data['identifier']?.toString(),
+      coreDeviceIdentifier: data['identifier']?.toString(),
       visibilityClass: data['visibilityClass']?.toString(),
     );
   }
@@ -461,7 +462,7 @@ class IOSCoreDevice {
   @visibleForTesting
   final _IOSCoreDeviceHardwareProperties? hardwareProperties;
 
-  final String? coreDeviceIdentifer;
+  final String? coreDeviceIdentifier;
   final String? visibilityClass;
 }
 

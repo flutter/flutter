@@ -53,17 +53,20 @@ abstract class DoctorValidatorsProvider {
   // [FeatureFlags].
   factory DoctorValidatorsProvider.test({
     Platform? platform,
+    Logger? logger,
     required FeatureFlags featureFlags,
   }) {
     return _DefaultDoctorValidatorsProvider(
       featureFlags: featureFlags,
       platform: platform ?? FakePlatform(),
+      logger: logger ?? BufferLogger.test(),
     );
   }
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
+    logger: globals.logger,
     platform: globals.platform,
     featureFlags: featureFlags,
   );
@@ -76,12 +79,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   _DefaultDoctorValidatorsProvider({
     required this.platform,
     required this.featureFlags,
-  });
+    required Logger logger,
+  }) : _logger = logger;
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
   final Platform platform;
   final FeatureFlags featureFlags;
+  final Logger _logger;
 
   late final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
     platform: platform,
@@ -114,9 +119,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators(
         fileSystem: globals.fs,
         platform: platform,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         plistParser: globals.plistParser,
         processManager: globals.processManager,
+        logger: _logger,
       ),
       ...VsCodeValidator.installedValidators(globals.fs, platform, globals.processManager),
     ];
@@ -128,7 +134,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
@@ -136,6 +142,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (platform.isWindows)
         WindowsVersionValidator(
           operatingSystemUtils: globals.os,
+          processLister: ProcessLister(globals.processManager),
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
@@ -143,7 +150,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
             xcode: globals.xcode!,
-            userMessages: userMessages,
+            userMessages: globals.userMessages,
             iosSimulatorUtils: globals.iosSimulatorUtils!,
           ),
           globals.cocoapodsValidator!,
@@ -163,7 +170,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
           processManager: globals.processManager,
-          userMessages: userMessages,
+          userMessages: globals.userMessages,
         ),
       if (windowsWorkflow!.appliesToHostPlatform)
         visualStudioValidator!,
@@ -421,7 +428,7 @@ class Doctor {
             final DoctorValidator subValidator = validator.subValidators[i];
 
             // Ensure that all of the subvalidators in the group have
-            // a corresponding subresult incase a validator crashed
+            // a corresponding subresult in case a validator crashed
             final ValidationResult subResult;
             try {
               subResult = validator.subResults[i];

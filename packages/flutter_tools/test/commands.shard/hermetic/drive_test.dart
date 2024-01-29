@@ -539,8 +539,6 @@ void main() {
   });
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
 class ThrowingScreenshotDevice extends ScreenshotDevice {
   @override
   Future<LaunchResult> startApp(
@@ -558,9 +556,6 @@ class ThrowingScreenshotDevice extends ScreenshotDevice {
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class ScreenshotDevice extends Fake implements Device {
   final List<File> screenshots = <File>[];
 
@@ -699,9 +694,6 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
   Stream<io.ProcessSignal> watch() => controller.stream;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIosDevice extends Fake implements IOSDevice {
   @override
   DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;

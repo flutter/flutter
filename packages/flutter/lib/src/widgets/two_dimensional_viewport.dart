@@ -54,7 +54,7 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 ///  * [NullableIndexedWidgetBuilder], which is similar but may return null.
 ///  * [IndexedWidgetBuilder], which is similar but not nullable.
-typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext, ChildVicinity vicinity);
+typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext context, ChildVicinity vicinity);
 
 /// A widget through which a portion of larger content can be viewed, typically
 /// in combination with a [TwoDimensionalScrollable].
@@ -779,8 +779,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// Children must have a [ParentData] of type
   /// [TwoDimensionalViewportParentData], or a subclass thereof.
   @protected
+  @mustCallSuper
   TwoDimensionalViewportParentData parentDataOf(RenderBox child) {
-    assert(_children.containsValue(child));
+    assert(_children.containsValue(child) ||
+        _keepAliveBucket.containsValue(child) ||
+        _debugOrphans!.contains(child));
     return child.parentData! as TwoDimensionalViewportParentData;
   }
 
@@ -793,7 +796,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   ///
   /// Returns null if there is no active child for the given [ChildVicinity].
   @protected
-  RenderBox? getChildFor(ChildVicinity vicinity) => _children[vicinity];
+  RenderBox? getChildFor(covariant ChildVicinity vicinity) => _children[vicinity];
 
   @override
   void attach(PipelineOwner owner) {

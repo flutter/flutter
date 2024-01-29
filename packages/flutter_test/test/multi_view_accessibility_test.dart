@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'multi_view_testing.dart';
 
 void main() {
   testWidgets('Detects tap targets in all views', (WidgetTester tester) async {
@@ -111,7 +112,8 @@ Future<void> pumpViews({required WidgetTester tester, required  List<Widget> vie
       ),
   ];
 
-  tester.binding.attachRootWidget(
+  return tester.pumpWidget(
+    wrapWithView: false,
     Directionality(
       textDirection: TextDirection.ltr,
       child: ViewCollection(
@@ -119,17 +121,4 @@ Future<void> pumpViews({required WidgetTester tester, required  List<Widget> vie
       ),
     ),
   );
-  tester.binding.scheduleFrame();
-  return tester.binding.pump();
-}
-
-class FakeView extends TestFlutterView{
-  FakeView(FlutterView view, { this.viewId = 100 }) : super(
-    view: view,
-    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
-    display: view.display as TestDisplay,
-  );
-
-  @override
-  final int viewId;
 }

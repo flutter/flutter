@@ -7,6 +7,9 @@ import 'dart:collection';
 
 import 'package:meta/meta.dart';
 
+// TODO(ianh): We should remove AppContext's mechanism and replace it with
+// passing dependencies directly in constructors, methods, etc. See #47161.
+
 /// Generates an [AppContext] value.
 ///
 /// Generators are allowed to return `null`, in which case the context will

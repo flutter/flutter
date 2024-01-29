@@ -54,7 +54,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
           fileSystem.file(outputSpirvPath).createSync(recursive: true);
         },
@@ -94,7 +94,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
         },
       ),
@@ -118,12 +118,13 @@ void main() {
     expect(fileSystem.file(outputPath).existsSync(), true);
   });
 
-  testWithoutContext('compileShader invokes impellerc for .frag files and opengl es', () async {
+  testWithoutContext('compileShader invokes impellerc for .frag files and Android', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
           '--runtime-stage-gles',
+          '--runtime-stage-vulkan',
           '--iplr',
           '--sl=$outputPath',
           '--spirv=$outputPath.spirv',
@@ -132,7 +133,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
         },
       ),
@@ -170,7 +171,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
           fileSystem.file(outputSpirvPath).createSync(recursive: true);
         },
@@ -252,7 +253,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
             ..createSync()
@@ -286,12 +287,12 @@ void main() {
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
   });
 
-  testWithoutContext('DevelopmentShaderCompiler can compile for android with impeller', () async {
+  testWithoutContext('DevelopmentShaderCompiler can compile for Flutter Tester with Impeller and Vulkan', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
-          '--runtime-stage-gles',
+          '--runtime-stage-vulkan',
           '--iplr',
           '--sl=/.tmp_rand0/0.8255140718871702.temp',
           '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
@@ -300,7 +301,55 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
+          fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+        }
+      ),
+    ]);
+    fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
+    final ShaderCompiler shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final DevelopmentShaderCompiler developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(
+      TargetPlatform.tester,
+      impellerStatus: ImpellerStatus.enabled,
+    );
+
+    final DevFSContent? content = await developmentShaderCompiler
+      .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));
+
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler can compile for android with impeller', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--runtime-stage-gles',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=/.tmp_rand0/0.8255140718871702.temp',
+          '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+          '--include=$shaderLibDir',
+        ],
+        onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
             ..createSync()
@@ -349,7 +398,7 @@ void main() {
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
-        onRun: () {
+        onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
             ..createSync()

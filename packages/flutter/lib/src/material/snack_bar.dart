@@ -116,7 +116,7 @@ class SnackBarAction extends StatefulWidget {
   /// [SnackBarAction] is dismissed.
   final Color? disabledTextColor;
 
-  /// The button diabled background color. This color is shown after the
+  /// The button disabled background color. This color is shown after the
   /// [SnackBarAction] is dismissed.
   ///
   /// If not provided, defaults to [SnackBarThemeData.disabledActionBackgroundColor].
@@ -289,7 +289,7 @@ class SnackBar extends StatefulWidget {
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
-    this.dismissDirection = DismissDirection.down,
+    this.dismissDirection,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(width == null || margin == null,
@@ -463,8 +463,10 @@ class SnackBar extends StatefulWidget {
 
   /// The direction in which the SnackBar can be dismissed.
   ///
-  /// Defaults to [DismissDirection.down].
-  final DismissDirection dismissDirection;
+  /// If this property is null, then [SnackBarThemeData.dismissDirection] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
+  /// [DismissDirection.down].
+  final DismissDirection? dismissDirection;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -737,6 +739,7 @@ class _SnackBarState extends State<SnackBar> {
     final double elevation = widget.elevation ?? snackBarTheme.elevation ?? defaults.elevation!;
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? defaults.backgroundColor!;
     final ShapeBorder? shape = widget.shape ?? snackBarTheme.shape ?? (isFloatingSnackBar ? defaults.shape : null);
+    final DismissDirection dismissDirection = widget.dismissDirection ?? snackBarTheme.dismissDirection ?? DismissDirection.down;
 
     snackBar = Material(
       shape: shape,
@@ -783,7 +786,7 @@ class _SnackBarState extends State<SnackBar> {
       },
       child: Dismissible(
         key: const Key('dismissible'),
-        direction: widget.dismissDirection,
+        direction: dismissDirection,
         resizeDuration: null,
         behavior: widget.hitTestBehavior ?? (widget.margin != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
         onDismissed: (DismissDirection direction) {

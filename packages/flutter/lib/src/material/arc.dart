@@ -279,12 +279,12 @@ class MaterialRectArcTween extends RectTween {
   }
 
   Offset _cornerFor(Rect rect, _CornerId id) {
-    switch (id) {
-      case _CornerId.topLeft: return rect.topLeft;
-      case _CornerId.topRight: return rect.topRight;
-      case _CornerId.bottomLeft: return rect.bottomLeft;
-      case _CornerId.bottomRight: return rect.bottomRight;
-    }
+    return switch (id) {
+      _CornerId.topLeft     => rect.topLeft,
+      _CornerId.topRight    => rect.topRight,
+      _CornerId.bottomLeft  => rect.bottomLeft,
+      _CornerId.bottomRight => rect.bottomRight,
+    };
   }
 
   /// The path of the corresponding [begin], [end] rectangle corners that lead

@@ -165,21 +165,45 @@ Future<Directory> createTestProject(
   String packageName,
   Directory tempDirectory,
 ) async {
-  final int createResult = await exec(
+  await exec(
     _flutterBin,
     <String>[
       'create',
+      '--no-pub',
       '--template=package_ffi',
       packageName,
     ],
     workingDirectory: tempDirectory.path,
-    canFail: true,
   );
-  assert(createResult == 0);
 
-  final Directory packageDirectory = Directory.fromUri(tempDirectory.uri.resolve('$packageName/'));
+  final Directory packageDirectory = Directory(
+    path.join(tempDirectory.path, packageName),
+  );
+  await _pinDependencies(
+    File(path.join(packageDirectory.path, 'pubspec.yaml')),
+  );
+  await _pinDependencies(
+    File(path.join(packageDirectory.path, 'example', 'pubspec.yaml')),
+  );
+
+  await exec(
+    _flutterBin,
+    <String>[
+      'pub',
+      'get',
+    ],
+    workingDirectory: packageDirectory.path,
+  );
+
   return packageDirectory;
 }
+
+Future<void> _pinDependencies(File pubspecFile) async {
+  final String oldPubspec = await pubspecFile.readAsString();
+  final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
+  await pubspecFile.writeAsString(newPubspec);
+}
+
 
 Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
   final Directory tempDirectory = dir(Directory.systemTemp.createTempSync().resolveSymbolicLinksSync());

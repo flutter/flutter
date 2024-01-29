@@ -22,13 +22,14 @@ import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  impellerAndroid('--runtime-stage-gles'),
-  impelleriOS('--runtime-stage-metal'),
-  sksl('--sksl');
+  impellerAndroid(<String>['--runtime-stage-gles', '--runtime-stage-vulkan']),
+  impelleriOS(<String>['--runtime-stage-metal']),
+  impellerSwiftShader(<String>['--runtime-stage-vulkan']),
+  sksl(<String>['--sksl']);
 
-  const ShaderTarget(this.target);
+  const ShaderTarget(this.stages);
 
-  final String target;
+  final List<String> stages;
 }
 
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
@@ -68,11 +69,13 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
-        assert(impellerStatus != ImpellerStatus.enabled);
-        _shaderTarget = ShaderTarget.sksl;
+        _shaderTarget =  impellerStatus == ImpellerStatus.enabled
+          ? ShaderTarget.impellerSwiftShader
+          : ShaderTarget.sksl;
       case TargetPlatform.web_javascript:
         assert(impellerStatus != ImpellerStatus.enabled);
         _shaderTarget = ShaderTarget.sksl;
@@ -177,7 +180,7 @@ class ShaderCompiler {
     final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
     final List<String> cmd = <String>[
       impellerc.path,
-      target.target,
+      ...target.stages,
       '--iplr',
       if (json)
         '--json',

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
@@ -91,6 +92,15 @@ class CreateCommand extends CreateBase {
     );
   }
 
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
+    workflow: commandPath,
+    commandHasTerminal: hasTerminal,
+    createProjectType: stringArg('template'),
+    createAndroidLanguage: stringArg('android-language'),
+    createIosLanguage: stringArg('ios-language'),
+  );
+
   // Lazy-initialize the net utilities with values from the context.
   late final Net _net = Net(
     httpClientFactory: context.get<HttpClientFactory>(),
@@ -101,7 +111,7 @@ class CreateCommand extends CreateBase {
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost => globals.flutterVersion.channel == 'stable'
         ? 'api.flutter.dev'
-        : 'master-api.flutter.dev';
+        : 'main-api.flutter.dev';
 
   Future<String?> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
@@ -198,17 +208,19 @@ class CreateCommand extends CreateBase {
     String? sampleCode;
     final String? sampleArgument = stringArg('sample');
     final bool emptyArgument = boolArg('empty');
+    final FlutterProjectType template = _getProjectType(projectDir);
     if (sampleArgument != null) {
-      final String? templateArgument = stringArg('template');
-      if (templateArgument != null && FlutterProjectType.fromCliName(templateArgument) != FlutterProjectType.app) {
+      if (template != FlutterProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
           '"${FlutterProjectType.app.cliName}"');
       }
       // Fetch the sample from the server.
       sampleCode = await _fetchSampleFromServer(sampleArgument);
     }
+    if (emptyArgument && template != FlutterProjectType.app) {
+      throwToolExit('The --empty flag is only supported for the app template.');
+    }
 
-    final FlutterProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
     final bool generateMethodChannelsPlugin = template == FlutterProjectType.plugin;
     final bool generateFfiPackage = template == FlutterProjectType.packageFfi;
@@ -754,8 +766,15 @@ Your $application code is in $relativeAppMain.
 
   int _removeTestDir(Directory directory) {
     final Directory testDir = directory.childDirectory('test');
+    if (!testDir.existsSync()) {
+      return 0;
+    }
     final List<FileSystemEntity> files = testDir.listSync(recursive: true);
-    testDir.deleteSync(recursive: true);
+    try {
+      testDir.deleteSync(recursive: true);
+    } on FileSystemException catch (exception) {
+      throwToolExit('Failed to delete test directory: $exception');
+    }
     return -files.length;
   }
 
@@ -967,7 +986,7 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
   final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
   final VersionRange validJavaRange = gradle.getJavaVersionFor(gradleV: templateGradleVersion, agpV: templateAgpVersion);
-  // validJavaRange should have non-null verisonMin and versionMax since it based on our template AGP and Gradle versions.
+  // validJavaRange should have non-null versionMin and versionMax since it based on our template AGP and Gradle versions.
   final String validJavaRangeMessage = '(Java ${validJavaRange.versionMin!} <= compatible Java version < Java ${validJavaRange.versionMax!})';
 
   return '''

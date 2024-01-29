@@ -24,10 +24,12 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -70,6 +72,7 @@ final Platform notMacosPlatform = FakePlatform(
 void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
+  late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeProcessManager processManager;
   late ProcessUtils processUtils;
@@ -83,6 +86,10 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
     usage = TestUsage();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
@@ -110,7 +117,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpRsyncCommand({void Function()? onRun}) {
+  FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
         'rsync',
@@ -124,7 +131,7 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -150,7 +157,7 @@ void main() {
     String? deviceId,
     int exitCode = 0,
     String? stdout,
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -289,7 +296,7 @@ void main() {
 
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -328,7 +335,7 @@ void main() {
       xattrCommand,
       setUpFakeXcodeBuildHandler(
         disablePortPublication: true,
-        onRun: () {
+        onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
         },
       ),
@@ -359,7 +366,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(
-        onRun: () {
+        onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
         },
       ),
@@ -382,7 +389,7 @@ void main() {
 
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(customNaming: true, onRun: () {
+      setUpFakeXcodeBuildHandler(customNaming: true, onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -416,7 +423,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(deviceId: '1234', onRun: () {
+      setUpFakeXcodeBuildHandler(deviceId: '1234', onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -446,7 +453,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(simulator: true, onRun: () {
+      setUpFakeXcodeBuildHandler(simulator: true, onRun: (_) {
         fileSystem.directory('build/ios/Debug-iphonesimulator/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -476,7 +483,7 @@ void main() {
     createMinimalMockProjectFiles();
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(verbose: true, onRun: () {
+      setUpFakeXcodeBuildHandler(verbose: true, onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -504,7 +511,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
@@ -521,7 +528,7 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      setUpRsyncCommand(onRun: () => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+      setUpRsyncCommand(onRun: (_) => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
     ]);
@@ -536,6 +543,9 @@ void main() {
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'ios')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,
@@ -543,6 +553,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -587,15 +598,22 @@ void main() {
           parameters:CustomDimensions(),
         ),
       ));
+
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+          label: 'plist-impeller-enabled',
+          buildType: 'ios',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(onRun: () {
+        setUpFakeXcodeBuildHandler(onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app')
             .createSync(recursive: true);
         }),
-        setUpRsyncCommand(onRun: () =>
+        setUpRsyncCommand(onRun: (_) =>
           fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
             ..createSync(recursive: true)
             ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
@@ -607,6 +625,7 @@ void main() {
       ),
       Usage: () => usage,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('Sends an analytics event when Impeller is disabled', () async {
@@ -642,15 +661,22 @@ void main() {
           parameters:CustomDimensions(),
         ),
       ));
+
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+          label: 'plist-impeller-disabled',
+          buildType: 'ios',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(onRun: () {
+        setUpFakeXcodeBuildHandler(onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app')
             .createSync(recursive: true);
         }),
-        setUpRsyncCommand(onRun: () =>
+        setUpRsyncCommand(onRun: (_) =>
           fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
             ..createSync(recursive: true)
             ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
@@ -673,6 +699,7 @@ void main() {
           plutilCommand, plutilCommand, plutilCommand,
         ]),
       ),
+      Analytics: () => fakeAnalytics,
     });
   });
 
@@ -689,7 +716,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(),
@@ -724,7 +751,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }, stdout: 'Lots of spew from Xcode',
         ),
@@ -763,7 +790,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
@@ -780,7 +807,7 @@ void main() {
       expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
       expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
       expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-      expect(logger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+      expect(logger.warningText, isNot(contains('but the range of supported deployment target versions is')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
@@ -833,7 +860,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
@@ -874,7 +901,7 @@ void main() {
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -911,7 +938,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
@@ -950,13 +977,13 @@ void main() {
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           stdout: '$kConcurrentRunFailureMessage1 $kConcurrentRunFailureMessage2',
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).childFile('result.xcresult').createSync(recursive: true);
           }
         ),
         // The second xcodebuild is triggered due to above concurrent run failure message.
         setUpFakeXcodeBuildHandler(
-          onRun: () {
+          onRun: (_) {
             // If the file is not cleaned, throw an error, test failure.
             if (fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).existsSync()) {
               throwToolExit('xcresult bundle file existed.', exitCode: 2);
@@ -998,7 +1025,7 @@ void main() {
           stdout: '''
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1036,7 +1063,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1088,7 +1115,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           stdout: '''
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1114,7 +1141,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1151,7 +1178,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1190,7 +1217,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1232,7 +1259,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),
@@ -1271,7 +1298,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),
@@ -1312,7 +1339,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),
@@ -1330,7 +1357,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
       expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
       expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-      expect(logger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+      expect(logger.warningText, isNot(contains('but the range of supported deployment target versions is')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,

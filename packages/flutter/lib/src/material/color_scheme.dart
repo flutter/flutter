@@ -37,7 +37,7 @@ import 'theme_data.dart';
 ///   for makers to use at their discretion and are intended to support
 ///   broader color expression in products.
 ///
-/// The remaining colors of the scheme are comprised of neutral colors used for
+/// The remaining colors of the scheme are composed of neutral colors used for
 /// backgrounds and surfaces, as well as specific colors for errors, dividers
 /// and shadows.
 ///
@@ -193,13 +193,10 @@ class ColorScheme with Diagnosticable {
     Color? scrim,
     Color? surfaceTint,
   }) {
-    final Scheme scheme;
-    switch (brightness) {
-      case Brightness.light:
-        scheme = Scheme.light(seedColor.value);
-      case Brightness.dark:
-        scheme = Scheme.dark(seedColor.value);
-    }
+    final Scheme scheme = switch (brightness) {
+      Brightness.light => Scheme.light(seedColor.value),
+      Brightness.dark  => Scheme.dark(seedColor.value),
+    };
     return ColorScheme(
       primary: primary ?? Color(scheme.primary),
       onPrimary: onPrimary ?? Color(scheme.onPrimary),
@@ -1073,13 +1070,10 @@ class ColorScheme with Diagnosticable {
     final List<int> scoredResults = Score.score(colorToCount, desired: 1);
     final ui.Color baseColor = Color(scoredResults.first);
 
-    final Scheme scheme;
-    switch (brightness) {
-      case Brightness.light:
-        scheme = Scheme.light(baseColor.value);
-      case Brightness.dark:
-        scheme = Scheme.dark(baseColor.value);
-    }
+    final Scheme scheme = switch (brightness) {
+      Brightness.light => Scheme.light(baseColor.value),
+      Brightness.dark  => Scheme.dark(baseColor.value),
+    };
 
     return ColorScheme(primary: primary ?? Color(scheme.primary),
       onPrimary: onPrimary ?? Color(scheme.onPrimary),

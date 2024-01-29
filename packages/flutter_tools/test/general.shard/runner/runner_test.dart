@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
@@ -32,6 +33,9 @@ void main() {
   late MemoryFileSystem fileSystem;
 
   group('runner', () {
+    late FakeAnalytics fakeAnalytics;
+    late TestUsage testUsage;
+
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
@@ -50,6 +54,13 @@ void main() {
 
       Cache.disableLocking();
       fileSystem = MemoryFileSystem.test();
+
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+
+      testUsage = TestUsage();
     });
 
     tearDown(() {
@@ -92,6 +103,7 @@ void main() {
       // attempt.
       final CrashingUsage crashingUsage = globals.flutterUsage as CrashingUsage;
       expect(crashingUsage.sentException.toString(), 'Exception: an exception % --');
+      expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
@@ -102,6 +114,7 @@ void main() {
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
       HttpClientFactory: () => () => FakeHttpClient.any(),
+      Analytics: () => fakeAnalytics,
     });
 
     // This Completer completes when CrashingFlutterCommand.runCommand
@@ -314,6 +327,27 @@ void main() {
         HttpClientFactory: () => () => FakeHttpClient.any(),
       });
     });
+
+    testUsingContext('do not print welcome on bots', () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        await runner.run(
+          <String>['--version', '--machine'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(testUsage.printedWelcome, false);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        BotDetector: () => const FakeBotDetector(true),
+        Usage: () => testUsage,
+      },
+    );
   });
 
   group('unified_analytics', () {

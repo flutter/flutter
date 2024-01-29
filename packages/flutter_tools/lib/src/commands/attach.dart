@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
@@ -89,6 +90,7 @@ class AttachCommand extends FlutterCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
+    usesNativeAssetsOption(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -538,6 +540,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           dillOutputPath: stringArg('output-dill'),
           ipv6: usesIpv6,
           flutterProject: flutterProject,
+          nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+          analytics: analytics,
         )
       : ColdRunner(
           flutterDevices,
@@ -570,6 +574,8 @@ class HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
+    String? nativeAssetsYamlFile,
+    required Analytics analytics,
   }) => HotRunner(
     devices,
     target: target,
@@ -581,5 +587,7 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
+    nativeAssetsYamlFile: nativeAssetsYamlFile,
+    analytics: analytics,
   );
 }

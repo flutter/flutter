@@ -81,6 +81,9 @@ enum HostArtifact {
   /// The libraries JSON file for web release builds.
   flutterWebLibrariesJson,
 
+  // The flutter.js bootstrapping file provided by the engine.
+  flutterJsDirectory,
+
   /// Folder that contains platform dill files for the web sdk.
   webPlatformKernelFolder,
 
@@ -141,6 +144,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
@@ -232,6 +236,8 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
   switch (artifact) {
     case HostArtifact.flutterWebSdk:
       return '';
+    case HostArtifact.flutterJsDirectory:
+      return 'flutter_js';
     case HostArtifact.iosDeploy:
       return 'ios-deploy';
     case HostArtifact.idevicesyslog:
@@ -440,6 +446,9 @@ class CachedArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
+      case HostArtifact.flutterJsDirectory:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'flutter_js');
+        return _fileSystem.directory(path);
       case HostArtifact.webPlatformKernelFolder:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
         return _fileSystem.file(path);
@@ -518,6 +527,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         return _getDesktopArtifactPath(artifact, platform, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -735,8 +745,9 @@ class CachedArtifacts implements Artifacts {
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, _platform, mode));
       case Artifact.windowsCppClientWrapper:
+        final String platformDirName = _enginePlatformDirectoryName(platform);
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, _platform, mode));
+        return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, _platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact, _platform));
@@ -767,6 +778,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -805,10 +817,11 @@ TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils oper
   }
   if (platform.isLinux) {
     return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?
-             TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
+        TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
   }
   if (platform.isWindows) {
-    return TargetPlatform.windows_x64;
+    return operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64 ?
+        TargetPlatform.windows_arm64 : TargetPlatform.windows_x64;
   }
   throw UnimplementedError('Host OS not supported.');
 }
@@ -893,6 +906,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
+      case HostArtifact.flutterJsDirectory:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'flutter_js');
+        return _fileSystem.directory(path);
       case HostArtifact.webPlatformKernelFolder:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
         return _fileSystem.file(path);
@@ -1028,7 +1044,12 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
       case Artifact.flutterPreviewDevice:
-        throw UnimplementedError('The preview device is not supported with local engine builds');
+        return _backupCache.getArtifactPath(
+          artifact,
+          platform: platform,
+          mode: mode,
+          environmentType: environmentType,
+        );
     }
   }
 
@@ -1073,6 +1094,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return 'linux-x64';
       case TargetPlatform.windows_x64:
         return 'windows-x64';
+      case TargetPlatform.windows_arm64:
+        return 'windows-arm64';
       case TargetPlatform.ios:
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -1200,6 +1223,9 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
+      case HostArtifact.flutterJsDirectory:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'flutter_js');
+        return _fileSystem.directory(path);
       case HostArtifact.webPlatformKernelFolder:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
         return _fileSystem.file(path);
@@ -1271,6 +1297,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         return 'linux-x64';
       case TargetPlatform.windows_x64:
         return 'windows-x64';
+      case TargetPlatform.windows_arm64:
+        return 'windows-arm64';
       case TargetPlatform.ios:
       case TargetPlatform.android:
       case TargetPlatform.android_arm:

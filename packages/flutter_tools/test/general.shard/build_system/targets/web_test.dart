@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_js.dart' as flutter_js;
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 
 import '../../../src/common.dart';
@@ -70,6 +69,8 @@ void main() {
         ..writeAsStringSync('foo:foo/lib/\n');
       globals.fs.currentDirectory.childDirectory('bar').createSync();
       processManager = FakeProcessManager.empty();
+      globals.fs.file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
+        .createSync(recursive: true);
 
       environment = Environment.test(
         globals.fs.currentDirectory,
@@ -589,7 +590,7 @@ void main() {
         '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
-      ], onRun: () {
+      ], onRun: (_) {
         environment.buildDir.childFile('app.dill.deps')
           .writeAsStringSync('file:///a.dart');
       },
@@ -808,7 +809,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ],
-      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
     processManager.addCommand(FakeCommand(
@@ -847,7 +848,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ],
-      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
     processManager.addCommand(FakeCommand(
@@ -883,7 +884,7 @@ void main() {
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
-      ], onRun: () => outputJsFile..createSync()..writeAsStringSync('foo')));
+      ], onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo')));
 
       processManager.addCommand(FakeCommand(
         command: <String>[
@@ -918,7 +919,7 @@ void main() {
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
-      ], onRun: () => outputJsFile..createSync()..writeAsStringSync('foo')));
+      ], onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo')));
 
     await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
@@ -941,7 +942,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ],
-      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
     processManager.addCommand(FakeCommand(
@@ -1054,41 +1055,6 @@ void main() {
     // Expected twice, once for RESOURCES and once for CORE.
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
       contains('"main.dart.js"'));
-  }));
-
-  test('flutter.js sanity checks', () => testbed.run(() {
-    final String fileGeneratorsPath = environment.artifacts
-        .getArtifactPath(Artifact.flutterToolsFileGenerators);
-    final String flutterJsContents =
-        flutter_js.generateFlutterJsFile(fileGeneratorsPath);
-    expect(flutterJsContents, contains('"use strict";'));
-    expect(flutterJsContents, contains('main.dart.js'));
-    expect(flutterJsContents, contains('if (!("serviceWorker" in navigator))'));
-    expect(flutterJsContents, contains(r'/\.js$/,'));
-    expect(flutterJsContents, contains('flutter_service_worker.js?v='));
-    expect(flutterJsContents, contains('document.createElement("script")'));
-    expect(flutterJsContents, contains('"application/javascript"'));
-    expect(flutterJsContents, contains('const baseUri = '));
-    expect(flutterJsContents, contains('document.querySelector("base")'));
-    expect(flutterJsContents, contains('.getAttribute("href")'));
-  }));
-
-  test('flutter.js is not dynamically generated', () => testbed.run(() async {
-    globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/foo')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('OL');
-
-    await WebBuiltInAssets(globals.fs, WebRendererMode.auto, isWasm: false).build(environment);
-
-    // No caching of source maps.
-    final String fileGeneratorsPath = environment.artifacts
-        .getArtifactPath(Artifact.flutterToolsFileGenerators);
-    final String flutterJsContents =
-        flutter_js.generateFlutterJsFile(fileGeneratorsPath);
-    expect(
-      environment.outputDir.childFile('flutter.js').readAsStringSync(),
-      equals(flutterJsContents),
-    );
   }));
 
   test('wasm build copies and generates specific files', () => testbed.run(() async {
