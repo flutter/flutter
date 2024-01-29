@@ -67,8 +67,13 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       return itemExtent * index;
     } else {
       double offset = 0.0;
+      double? itemExtent;
       for (int i = 0; i < index; i++) {
-        offset += itemExtentBuilder!(i, _currentLayoutDimensions);
+        itemExtent = itemExtentBuilder!(i, _currentLayoutDimensions);
+        if (itemExtent == null) {
+          break;
+        }
+        offset += itemExtent;
       }
       return offset;
     }
@@ -179,8 +184,13 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       return childManager.childCount * itemExtent;
     } else {
       double offset = 0.0;
+      double? itemExtent;
       for (int i = 0; i < childManager.childCount; i++) {
-        offset += itemExtentBuilder!(i, _currentLayoutDimensions);
+        itemExtent = itemExtentBuilder!(i, _currentLayoutDimensions);
+        if (itemExtent == null) {
+          break;
+        }
+        offset += itemExtent;
       }
       return offset;
     }
@@ -212,8 +222,13 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     }
     double position = 0.0;
     int index = 0;
+    double? itemExtent;
     while (position < scrollOffset) {
-      position += callback(index, _currentLayoutDimensions);
+      itemExtent = callback(index, _currentLayoutDimensions);
+      if (itemExtent == null) {
+        break;
+      }
+      position += itemExtent;
       ++index;
     }
     return index - 1;
@@ -224,7 +239,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (itemExtentBuilder == null) {
       extent = itemExtent!;
     } else {
-      extent = itemExtentBuilder!(index, _currentLayoutDimensions);
+      extent = itemExtentBuilder!(index, _currentLayoutDimensions)!;
     }
     return constraints.asBoxConstraints(
       minExtent: extent,
