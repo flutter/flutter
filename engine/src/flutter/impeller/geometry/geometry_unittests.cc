@@ -1773,10 +1773,8 @@ TEST(GeometryTest, Gradient) {
 }
 
 TEST(GeometryTest, HalfConversions) {
-#ifdef FML_OS_WIN
-  GTEST_SKIP() << "Half-precision floats (IEEE 754) are not portable and "
-                  "unavailable on Windows.";
-#else
+#if defined(FML_OS_MACOSX) || defined(FML_OS_IOS) || \
+    defined(FML_OS_IOS_SIMULATOR)
   ASSERT_EQ(ScalarToHalf(0.0), 0.0f16);
   ASSERT_EQ(ScalarToHalf(0.05), 0.05f16);
   ASSERT_EQ(ScalarToHalf(2.43), 2.43f16);
@@ -1803,7 +1801,10 @@ TEST(GeometryTest, HalfConversions) {
   ASSERT_EQ(Half(0.5f), Half(0.5f16));
   ASSERT_EQ(Half(0.5), Half(0.5f16));
   ASSERT_EQ(Half(5), Half(5.0f16));
-#endif  // FML_OS_WIN
+#else
+  GTEST_SKIP() << "Half-precision floats (IEEE 754) are not portable and "
+                  "only used on Apple platforms.";
+#endif  // FML_OS_MACOSX || FML_OS_IOS || FML_OS_IOS_SIMULATOR
 }
 
 }  // namespace testing
