@@ -45,7 +45,7 @@ class FlutterExtension {
     public final int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    public  final int minSdkVersion = 19
+    public  final int minSdkVersion = 21
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -323,22 +323,6 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile()
 
-        final String propMultidexEnabled = "multidex-enabled"
-        if (project.hasProperty(propMultidexEnabled) &&
-            project.property(propMultidexEnabled).toBoolean()) {
-            String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
-                "gradle", "flutter_multidex_keepfile.txt")
-            project.android {
-                buildTypes {
-                    release {
-                        multiDexKeepFile(project.file(flutterMultidexKeepfile))
-                    }
-                }
-            }
-            project.dependencies {
-                implementation("androidx.multidex:multidex:2.0.1")
-            }
-            }
         // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "kotlin", "flutter.gradle.kts")
 

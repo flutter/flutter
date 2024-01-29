@@ -902,7 +902,7 @@ abstract class SliderComponentShape {
   /// The `textScaleFactor` argument can be used to determine whether the
   /// component should paint larger or smaller, depending on whether
   /// [textScaleFactor] is greater than 1 for larger, and between 0 and 1 for
-  /// smaller. It usually comes from [MediaQueryData.textScaleFactor].
+  /// smaller. It's usually computed from [MediaQueryData.textScaler].
   /// {@endtemplate}
   ///
   /// {@template flutter.material.SliderComponentShape.paint.sizeWithOverflow}

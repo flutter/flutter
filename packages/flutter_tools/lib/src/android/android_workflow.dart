@@ -12,7 +12,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/user_messages.dart' hide userMessages;
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
