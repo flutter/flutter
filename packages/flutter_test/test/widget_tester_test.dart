@@ -16,6 +16,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/expect.dart' as matcher;
 import 'package:matcher/src/expect/async_matcher.dart';
 
+import 'multi_view_testing.dart';
+
 void main() {
   group('expectLater', () {
     testWidgets('completes when matcher completes', (WidgetTester tester) async {
@@ -664,7 +666,7 @@ void main() {
   testWidgets('passing a view to pumpWidget with wrapWithView: true throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       View(
-        view: tester.view,
+        view: FakeView(tester.view),
         child: const SizedBox.shrink(),
       ),
     );
