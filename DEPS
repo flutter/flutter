@@ -14,8 +14,6 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  # OCMock is for testing only
-  'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
   'skia_revision': 'c699bb0d86fd24c0f04e91b0591427deb409ad4e',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
