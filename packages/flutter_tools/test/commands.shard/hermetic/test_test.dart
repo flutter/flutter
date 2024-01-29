@@ -37,6 +37,38 @@ import '../../src/fake_vm_services.dart';
 import '../../src/logging_logger.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+final String _flutterToolsPackageConfigContents = json.encode(<String, Object>{
+  'configVersion': 2,
+  'packages': <Map<String, Object>>[
+    <String, String>{
+      'name': 'ffi',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/ffi-2.1.2',
+      'packageUri': 'lib/',
+      'languageVersion': '3.3',
+    },
+    <String, String>{
+      'name': 'test',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test-1.24.9',
+      'packageUri': 'lib/',
+      'languageVersion': '3.0'
+    },
+    <String, String>{
+      'name': 'test_api',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_api-0.6.1',
+      'packageUri': 'lib/',
+      'languageVersion': '3.0'
+    },
+    <String, String>{
+      'name': 'test_core',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_core-0.5.9',
+      'packageUri': 'lib/',
+      'languageVersion': '3.0'
+    },
+  ],
+  'generated': '2021-02-24T07:55:20.084834Z',
+  'generator': 'pub',
+  'generatorVersion': '2.13.0-68.0.dev',
+});
 const String _pubspecContents = '''
 dev_dependencies:
   flutter_test:
@@ -71,6 +103,7 @@ void main() {
 
   setUp(() {
     fs = MemoryFileSystem.test(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
+
     final Directory package = fs.directory('package');
     package.childFile('pubspec.yaml').createSync(recursive: true);
     package.childFile('pubspec.yaml').writeAsStringSync(_pubspecContents);
@@ -80,6 +113,20 @@ void main() {
         .writeAsString(_packageConfigContents);
     package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
     package.childDirectory('integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
+
+    final File flutterToolsPackageConfigFile = fs.file(
+      fs.path.join(
+        getFlutterRoot(),
+        'packages',
+        'flutter_tools/'
+        '.dart_tool/'
+        'package_config.json'
+      ),
+    );
+    flutterToolsPackageConfigFile.createSync(recursive: true);
+    flutterToolsPackageConfigFile.writeAsStringSync(
+      _flutterToolsPackageConfigContents,
+    );
 
     fs.currentDirectory = package.path;
 
@@ -488,6 +535,72 @@ dev_dependencies:
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
+  testUsingContext('Generates a satisfactory test runner package_config.json when --experimental-faster-testing is set',
+      () async {
+    final TestCommand testCommand = TestCommand();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    bool caughtToolExit = false;
+    await asyncGuard<void>(
+      () => commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--experimental-faster-testing',
+        '--',
+        'fake_test.dart',
+        'fake_test_2.dart',
+      ]),
+      onError: (Object error) async {
+        expect(error, isA<ToolExit>());
+        // We expect this message because we are using a fake ProcessManager.
+        expect(
+          (error as ToolExit).message,
+          contains('the Dart compiler exited unexpectedly.'),
+        );
+        caughtToolExit = true;
+
+        final File isolateSpawningTesterPackageConfigFile = fs.file(
+          fs.path.join(
+            'build',
+            'isolate_spawning_tester',
+            '.dart_tool',
+            'package_config.json',
+          ),
+        );
+        expect(isolateSpawningTesterPackageConfigFile.existsSync(), true);
+        // We expect [isolateSpawningTesterPackageConfigFile] to contain the
+        // union of the packages in [_packageConfigContents] and
+        // [_flutterToolsPackageConfigContents].
+        expect(
+          isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "integration_test"'),
+          true,
+        );
+        expect(
+          isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "ffi"'),
+          true,
+        );
+        expect(
+          isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "test"'),
+          true,
+        );
+        expect(
+          isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "test_api"'),
+          true,
+        );
+        expect(
+          isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "test_core"'),
+          true,
+        );
+      }
+    );
+    expect(caughtToolExit, true);
+  }, overrides: <Type, Generator>{
+    AnsiTerminal: () => _FakeTerminal(),
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
   testUsingContext('Pipes specified arguments to package:test when --experimental-faster-testing is set',
       () async {
     final TestCommand testCommand = TestCommand();
@@ -524,14 +637,14 @@ dev_dependencies:
         );
         caughtToolExit = true;
 
-        final bool childTestIsolateSpawnerSourceFileExists = await fs.isFile(
-          globals.fs.path.join('build', 'child_test_isolate_spawner.dart'),
-        );
-        expect(childTestIsolateSpawnerSourceFileExists, true);
-
         final File childTestIsolateSpawnerSourceFile = fs.file(
-          globals.fs.path.join('build', 'child_test_isolate_spawner.dart'),
+          fs.path.join(
+            'build',
+            'isolate_spawning_tester/'
+            'child_test_isolate_spawner.dart',
+          ),
         );
+        expect(childTestIsolateSpawnerSourceFile.existsSync(), true);
         expect(childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
 const List<String> packageTestArgs = <String>[
   '--no-color',
@@ -540,7 +653,6 @@ const List<String> packageTestArgs = <String>[
   '--file-reporter=json:reports/tests.json',
   '--timeout',
   '100',
-  '--concurrency=1',
   '--name',
   'name1',
   '--plain-name',
@@ -590,14 +702,14 @@ const List<String> packageTestArgs = <String>[
         );
         caughtToolExit = true;
 
-        final bool childTestIsolateSpawnerSourceFileExists = await fs.isFile(
-          globals.fs.path.join('build', 'child_test_isolate_spawner.dart'),
-        );
-        expect(childTestIsolateSpawnerSourceFileExists, true);
-
         final File childTestIsolateSpawnerSourceFile = fs.file(
-          globals.fs.path.join('build', 'child_test_isolate_spawner.dart'),
+          fs.path.join(
+            'build',
+            'isolate_spawning_tester/'
+            'child_test_isolate_spawner.dart',
+          ),
         );
+        expect(childTestIsolateSpawnerSourceFile.existsSync(), true);
         expect(childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
 const List<String> packageTestArgs = <String>[
   '--no-color',
@@ -1287,7 +1399,6 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? excludeTags,
     bool machine = false,
     bool updateGoldens = false,
-    required int? concurrency,
     String? testAssetDirectory,
     FlutterProject? flutterProject,
     String? icudtlPath,
