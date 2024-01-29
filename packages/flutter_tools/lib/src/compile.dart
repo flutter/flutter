@@ -16,6 +16,7 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'build_info.dart';
 import 'convert.dart';
 
@@ -741,10 +742,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final String inputKey = Uuid().generateV4();
 
     if (nativeAssets != null && nativeAssets.isNotEmpty) {
-      server.stdin.writeln('native-assets $nativeAssets');
+      await _writelnToServerStdin(server, 'native-assets $nativeAssets');
       _logger.printTrace('<- native-assets $nativeAssets');
     }
-    server.stdin.writeln('recompile $mainUri $inputKey');
+    await _writelnToServerStdin(server, 'recompile $mainUri $inputKey');
     _logger.printTrace('<- recompile $mainUri $inputKey');
     final List<Uri>? invalidatedFiles = request.invalidatedFiles;
     if (invalidatedFiles != null) {
@@ -756,11 +757,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
           message = request.packageConfig.toPackageUri(fileUri)?.toString() ??
               toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
         }
-        server.stdin.writeln(message);
+        await _writelnToServerStdin(server, message);
         _logger.printTrace(message);
       }
     }
-    server.stdin.writeln(inputKey);
+    await _writelnToServerStdin(server, inputKey);
     _logger.printTrace('<- $inputKey');
 
     return _stdoutHandler.compilerOutput?.future;
@@ -944,24 +945,24 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     final String inputKey = Uuid().generateV4();
-    server.stdin
-      ..writeln('compile-expression $inputKey')
-      ..writeln(request.expression);
-    request.definitions?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.definitionTypes?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeDefinitions?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeBounds?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeDefaults?.forEach(server.stdin.writeln);
-    server.stdin
-      ..writeln(inputKey)
-      ..writeln(request.libraryUri ?? '')
-      ..writeln(request.klass ?? '')
-      ..writeln(request.method ?? '')
-      ..writeln(request.isStatic);
+    await _writeAllToServerStdin(server, <String> [
+      'compile-expression $inputKey',
+      request.expression,
+      ...?request.definitions,
+      inputKey,
+      ...?request.definitionTypes,
+      inputKey,
+      ...?request.typeDefinitions,
+      inputKey,
+      ...?request.typeBounds,
+      inputKey,
+      ...?request.typeDefaults,
+      inputKey,
+      request.libraryUri ?? '',
+      request.klass ?? '',
+      request.method ?? '',
+      request.isStatic.toString(),
+    ]);
 
     return _stdoutHandler.compilerOutput?.future;
   }
@@ -999,18 +1000,20 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     final String inputKey = Uuid().generateV4();
-    server.stdin
-      ..writeln('compile-expression-to-js $inputKey')
-      ..writeln(request.libraryUri ?? '')
-      ..writeln(request.line)
-      ..writeln(request.column);
-    request.jsModules?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
-    server.stdin.writeln(inputKey);
-    request.jsFrameValues?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
-    server.stdin
-      ..writeln(inputKey)
-      ..writeln(request.moduleName ?? '')
-      ..writeln(request.expression ?? '');
+    await _writeAllToServerStdin(server, <String>[
+      'compile-expression-to-js $inputKey',
+      request.libraryUri ?? '',
+      request.line.toString(),
+      request.column.toString(),
+      for (final MapEntry<String, String> entry in request.jsModules?.entries ?? <MapEntry<String, String>>[])
+        '${entry.key}:${entry.value}',
+      inputKey,
+      for (final MapEntry<String, String> entry in request.jsFrameValues?.entries ?? <MapEntry<String, String>>[])
+        '${entry.key}:${entry.value}',
+      inputKey,
+      request.moduleName ?? '',
+      request.expression ?? ''
+    ]);
 
     return _stdoutHandler.compilerOutput?.future;
   }
@@ -1018,7 +1021,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
   @override
   void accept() {
     if (_compileRequestNeedsConfirmation) {
-      _server?.stdin.writeln('accept');
+      if (_server != null) {
+        _writelnToServerStdin(_server!, 'accept');
+      }
       _logger.printTrace('<- accept');
     }
     _compileRequestNeedsConfirmation = false;
@@ -1048,7 +1053,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   @override
   void reset() {
-    _server?.stdin.writeln('reset');
+    if (_server != null) {
+      _writelnToServerStdin(_server!, 'reset');
+    }
     _logger.printTrace('<- reset');
   }
 
@@ -1062,6 +1069,14 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _logger.printTrace('killing pid ${server.pid}');
     server.kill();
     return server.exitCode;
+  }
+
+  Future<void> _writelnToServerStdin(Process server, String line) {
+    return ProcessUtils.writelnToStdinUnsafe(server.stdin, line);
+  }
+
+  Future<void> _writeAllToServerStdin(Process server, List<String> lines) {
+    return ProcessUtils.writeAllToStdinUnsafe(server.stdin, lines);
   }
 }
 

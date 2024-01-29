@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../reporting/first_run.dart';
+import 'async_guard.dart';
 import 'io.dart';
 import 'logger.dart';
 
@@ -257,10 +258,24 @@ abstract class ProcessUtils {
     required String line,
     required void Function(Object, StackTrace) onError,
   }) async {
+    await writeAllToStdinGuarded(
+      stdin: stdin,
+      lines: <String>[line],
+      onError: onError,
+    );
+  }
+
+  /// Like [writelnToStdinGuarded], but writes several lines before flushing
+  /// [stdin].
+  static Future<void> writeAllToStdinGuarded({
+    required IOSink stdin,
+    required List<String> lines,
+    required void Function(Object, StackTrace) onError,
+  }) async {
     final Completer<void> completer = Completer<void>();
 
     void writeFlushAndComplete() {
-      stdin.writeln(line);
+      lines.forEach(stdin.writeln);
       stdin.flush().whenComplete(() {
         if (!completer.isCompleted) {
           completer.complete();
@@ -268,15 +283,15 @@ abstract class ProcessUtils {
       });
     }
 
-    runZonedGuarded(
-      writeFlushAndComplete,
-      (Object error, StackTrace stackTrace) {
-        onError(error, stackTrace);
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      },
-    );
+    try {
+      await asyncGuard(() async => writeFlushAndComplete);
+    } on Object catch (error, stackTrace) {
+      onError(error, stackTrace);
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }
+
     return completer.future;
   }
 
@@ -290,6 +305,19 @@ abstract class ProcessUtils {
     return writelnToStdinGuarded(
       stdin: stdin,
       line: line,
+      onError: (Object error, StackTrace stackTrace) {
+        throw BrokenPipeException('Failed to write to stdin.', error, stackTrace);
+      },
+    );
+  }
+
+  static Future<void> writeAllToStdinUnsafe(IOSink stdin, List<String> lines) async {
+    if (lines.isEmpty) {
+      return;
+    }
+    return writeAllToStdinGuarded(
+      stdin: stdin,
+      lines: lines,
       onError: (Object error, StackTrace stackTrace) {
         throw BrokenPipeException('Failed to write to stdin.', error, stackTrace);
       },
