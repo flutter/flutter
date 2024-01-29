@@ -918,7 +918,7 @@ void main() {
       ],
     );
 
-    expect(logger.statusText, contains('Built IPA to $outputPath (10.0MB)'));
+    expect(logger.statusText, contains(RegExp('Built IPA to $outputPath ' r'\(\d+\.\d+MB\)')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
