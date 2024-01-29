@@ -5396,6 +5396,7 @@ targets:
   - name: Windows_arm64 plugin_test_windows
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
