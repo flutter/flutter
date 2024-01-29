@@ -1618,6 +1618,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
+    debugPrint('updateEndEdge ${range.textInside(fullText)}, $range, $_selectableContainsOriginTextBoundary');
     TextPosition? targetPosition;
     if (textBoundary != null) {
       assert(textBoundary.boundaryStart.offset >= range.start && textBoundary.boundaryEnd.offset <= range.end);
@@ -1770,6 +1771,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
+    if (!_rect.contains(localPosition)) {
+      return _updateSelectionEdge(globalPosition, isEnd: isEnd);
+    }
     if (_rect.isEmpty) {
       return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
     }
@@ -1798,12 +1802,15 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
     if (targetPosition.offset == range.end) {
+      debugPrint('wowza');
       return SelectionResult.next;
     }
 
     if (targetPosition.offset == range.start) {
+      debugPrint('sadza $targetPosition $_textSelectionStart');
       return SelectionResult.previous;
     }
+    debugPrint('oops');
     // TODO(chunhtai): The geometry information should not be used to determine
     // selection result. This is a workaround to RenderParagraph, where it does
     // not have a way to get accurate text length if its text is truncated due to

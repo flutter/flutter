@@ -1358,14 +1358,11 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     return result;
   }
 
-  ({int start, int end, SelectionEvent event})? originBoundary;
-
   /// Selects a paragraph in a selectable at the location
   /// [SelectParagraphSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = _handleSelectParagraph(event);
-    originBoundary = (start: currentSelectionStartIndex, end: currentSelectionEndIndex, event: event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
     }
@@ -1774,6 +1771,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
       (false, false, false) => 0,
     };
     bool? forward;
+    bool foundStart = false;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to one of the following to determine
     // the direction of the search.
@@ -1790,6 +1788,44 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     // 2. the selectable returns previous when looking forward.
     // 2. the selectable returns next when looking backward.
     while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
+      // currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
+      bool globalRectsContainsPosition = false;
+      if (!foundStart) {
+        if (selectables[newIndex].boundingBoxes.isNotEmpty) {
+          for (final Rect rect in selectables[newIndex].boundingBoxes) {
+            final Rect globalRect = MatrixUtils.transformRect(selectables[newIndex].getTransformTo(null), rect);
+            if (globalRect.contains(event.globalPosition)) {
+              globalRectsContainsPosition = true;
+              break;
+            }
+          }
+        }
+        if (globalRectsContainsPosition) {
+          if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
+            if (isEnd) {
+              currentSelectionEndIndex = newIndex;
+            } else {
+              currentSelectionStartIndex = newIndex;
+            }
+            dispatchSelectionEventToChild(selectables[newIndex], event);
+            _flushInactiveSelections();
+            return SelectionResult.end;
+          } else {
+            foundStart = true;
+          }
+        }
+      } else {
+        if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
+          dispatchSelectionEventToChild(selectables[newIndex], SelectAllSelectionEvent());
+          if (currentSelectableResult == SelectionResult.previous) {
+            newIndex -= 1;
+          } else if (currentSelectableResult == SelectionResult.next) {
+            newIndex += 1;
+          }
+          debugPrint('continue');
+          continue;
+        }
+      }
       currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
       switch (currentSelectableResult) {
         case SelectionResult.end:
@@ -1819,23 +1855,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
       }
     }
     if (isEnd) {
-      if (originBoundary != null && currentSelectionEndIndex != originBoundary!.end) {
-        debugPrint('originBoundary not null $originBoundary');
-        int? start = currentSelectionStartIndex < originBoundary!.start ? null : originBoundary!.start;
-        int? end = newIndex > originBoundary!.end ? null : originBoundary!.end;
-
-        for (int i = start ?? newIndex; i <= originBoundary!.end; i += 1) {
-          debugPrint('$i');
-          if (paragraph.selectables != null && paragraph.selectables!.contains(selectables[i])) {
-            debugPrint('root');
-            dispatchSelectionEventToChild(selectables[i], originBoundary!.event);
-          } else {
-            debugPrint('non root');
-            dispatchSelectionEventToChild(selectables[i], SelectAllSelectionEvent());
-          }
-        }
-      }
-      currentSelectionEndIndex = originBoundary != null && originBoundary!.end > newIndex ?  originBoundary!.end : newIndex;
+      currentSelectionEndIndex = newIndex;
     } else {
       currentSelectionStartIndex = newIndex;
     }
