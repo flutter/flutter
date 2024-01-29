@@ -329,8 +329,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
-  // save the move deltas before persistentCallbacks
-  final Map<int, Set<Offset>> _moveDeltasBeforeFrame = <int, Set<Offset>>{};
+  // The move delta of each pointer before the next frame.
+  //
+  // The key is the pointer ID. It is cleared whenever a new batch of pointer events is detected.
+  final Map<int, Set<Offset>> _moveDeltaBeforeFrame = <int, Set<Offset>>{};
+
+  // The timestamp of all events of the current frame.
+  //
+  // On a event with a different timestamp, the event is considered a new batch.
   Duration? _frameTimeStamp;
 
   @override
@@ -404,18 +410,18 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _resetMoveDeltaRecords() {
     if (_frameTimeStamp != null) {
-      _moveDeltasBeforeFrame.clear();
+      _moveDeltaBeforeFrame.clear();
       _frameTimeStamp = null;
     }
 
     assert(_frameTimeStamp == null);
-    assert(_moveDeltasBeforeFrame.isEmpty);
+    assert(_moveDeltaBeforeFrame.isEmpty);
   }
 
   void _recordMoveDeltaForMultitouch(int pointer, Offset localDelta) {
     if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
       assert(_frameTimeStamp == null);
-      assert(_moveDeltasBeforeFrame.isEmpty);
+      assert(_moveDeltaBeforeFrame.isEmpty);
       return;
     }
 
@@ -425,10 +431,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return;
     }
 
-    if (_moveDeltasBeforeFrame.containsKey(pointer)) {
-      _moveDeltasBeforeFrame[pointer]!.add(localDelta);
+    if (_moveDeltaBeforeFrame.containsKey(pointer)) {
+      _moveDeltaBeforeFrame[pointer]!.add(localDelta);
     } else {
-      _moveDeltasBeforeFrame[pointer] = <Offset>{ localDelta };
+      _moveDeltaBeforeFrame[pointer] = <Offset>{ localDelta };
     }
   }
 
@@ -439,11 +445,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }) {
     double sum = 0.0;
 
-    if (!_moveDeltasBeforeFrame.containsKey(pointer)) {
+    if (!_moveDeltaBeforeFrame.containsKey(pointer)) {
       return sum;
     }
 
-    for (final Offset delta in _moveDeltasBeforeFrame[pointer]!) {
+    for (final Offset delta in _moveDeltaBeforeFrame[pointer]!) {
       if (positive) {
         if (axis == _DragDirection.vertical) {
           if (delta.dy > 0.0) {
@@ -473,14 +479,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     required bool positive,
     required _DragDirection axis,
   }) {
-    if (_moveDeltasBeforeFrame.isEmpty) {
+    if (_moveDeltaBeforeFrame.isEmpty) {
       return null;
     }
 
     int? ret;
     double? max;
     double sum;
-    for (final int pointer in _moveDeltasBeforeFrame.keys) {
+    for (final int pointer in _moveDeltaBeforeFrame.keys) {
       sum = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
       if (ret == null) {
         ret = pointer;
@@ -511,13 +517,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     final Duration currentSystemFrameTimeStamp = SchedulerBinding.instance.currentSystemFrameTimeStamp;
     if (_frameTimeStamp != currentSystemFrameTimeStamp) {
-      _moveDeltasBeforeFrame.clear();
+      _moveDeltaBeforeFrame.clear();
       _frameTimeStamp = currentSystemFrameTimeStamp;
     }
 
     assert(_frameTimeStamp == SchedulerBinding.instance.currentSystemFrameTimeStamp);
 
-    if (localDelta == Offset.zero || _moveDeltasBeforeFrame.isEmpty) {
+    if (localDelta == Offset.zero || _moveDeltaBeforeFrame.isEmpty) {
       return localDelta;
     }
 
