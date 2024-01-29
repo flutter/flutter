@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
+import groovy.json.JsonSlurper
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -66,7 +67,7 @@ class FlutterExtension {
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
-    String source = "../.."
+    String source
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
@@ -255,9 +256,6 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        // Load shared gradle functions
-        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
 
         FlutterExtension extension = project.extensions.create("flutter", FlutterExtension)
         Properties localProperties = new Properties()
@@ -600,7 +598,7 @@ class FlutterPlugin implements Plugin<Project> {
         // This prevents duplicated classes when using custom build types. That is, a custom build
         // type like profile is used, and the plugin and app projects have API dependencies on the
         // embedding.
-        if (!isFlutterAppProject() || getPluginList(project).size() == 0) {
+        if (!isFlutterAppProject() || getPluginList().size() == 0) {
             addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
@@ -622,104 +620,19 @@ class FlutterPlugin implements Plugin<Project> {
      * Configures the Flutter plugin dependencies.
      *
      * The plugins are added to pubspec.yaml. Then, upon running `flutter pub get`,
-     * the tool generates a `.flutter-plugins-dependencies` file, which contains a map to each plugin location.
+     * the tool generates a `.flutter-plugins` file, which contains a 1:1 map to each plugin location.
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
-    private void configurePlugins(Project project) {
-        configureLegacyPluginEachProjects(project)
-        getPluginList(project).each(this.&configurePluginProject)
-        getPluginList(project).each(this.&configurePluginDependencies)
-    }
-
-    // TODO(54566, 48918): Can remove once the issues are resolved.
-    //  This means all references to `.flutter-plugins` are then removed and
-    //  apps only depend exclusively on the `plugins` property in `.flutter-plugins-dependencies`.
-    /**
-     * Workaround to load non-native plugins for developers who may still use an
-     * old `settings.gradle` which includes all the plugins from the
-     * `.flutter-plugins` file, even if not made for Android.
-     * The settings.gradle then:
-     *     1) tries to add the android plugin implementation, which does not
-     *        exist at all, but is also not included successfully
-     *        (which does not throw an error and therefore isn't a problem), or
-     *     2) includes the plugin successfully as a valid android plugin
-     *        directory exists, even if the surrounding flutter package does not
-     *        support the android platform (see e.g. apple_maps_flutter: 1.0.1).
-     *        So as it's included successfully it expects to be added as API.
-     *        This is only possible by taking all plugins into account, which
-     *        only appear on the `dependencyGraph` and in the `.flutter-plugins` file.
-     * So in summary the plugins are currently selected from the `dependencyGraph`
-     * and filtered then with the [doesSupportAndroidPlatform] method instead of
-     * just using the `plugins.android` list.
-     */
-    private void configureLegacyPluginEachProjects(Project project) {
-        try {
-            if (!settingsGradleFile(project).text.contains("'.flutter-plugins'")) {
-                return
-            }
-        } catch (FileNotFoundException ignored) {
-            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${settingsGradleFile(project).absolutePath}")
-        }
-        List<Map<String, Object>> deps = getPluginDependencies(project)
-        List<String> plugins = getPluginList(project).collect { it.name as String }
-        deps.removeIf { plugins.contains(it.name) }
-        deps.each {
-            Project pluginProject = project.rootProject.findProject(":${it.name}")
-            if (pluginProject == null) {
-                // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
-                project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
-            } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
-                // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
-                // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
-                configurePluginProject(it)
-            /* groovylint-disable-next-line EmptyElseBlock */
-            } else {
-            // Plugin has no or an empty `android` folder. No action required.
-            }
-        }
-    }
-
-    // TODO(54566): Can remove this function and its call sites once resolved.
-    /**
-     * Returns `true` if the given path contains an `android` directory
-     * containing a `build.gradle` or `build.gradle.kts` file.
-     */
-    private Boolean doesSupportAndroidPlatform(String path) {
-        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
-        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
-        if (buildGradle.exists() && buildGradleKts.exists()) {
-            project.logger.error(
-                "Both build.gradle and build.gradle.kts exist, so " +
-                "build.gradle.kts is ignored. This is likely a mistake."
-            )
-        }
-
-        return buildGradle.exists() || buildGradleKts.exists()
-    }
-
-    /**
-     * Returns the Gradle settings script for the build. When both Groovy and
-     * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
-     * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
-     */
-    private File settingsGradleFile(Project project) {
-        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
-        File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
-        if (settingsGradle.exists() && settingsGradleKts.exists()) {
-            project.logger.error(
-                "Both settings.gradle and settings.gradle.kts exist, so " +
-                "settings.gradle.kts is ignored. This is likely a mistake."
-            )
-        }
-
-        return settingsGradle.exists() ? settingsGradle : settingsGradleKts
+    private void configurePlugins() {
+        getPluginList().each(this.&configurePluginProject)
+        getPluginDependencies().each(this.&configurePluginDependencies)
     }
 
     /** Adds the plugin project dependency to the app project. */
-    private void configurePluginProject(Map<String, Object> pluginObject) {
-        assert(pluginObject.name instanceof String)
-        Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
+    private void configurePluginProject(String pluginName, String _) {
+        Project pluginProject = project.rootProject.findProject(":$pluginName")
         if (pluginProject == null) {
+            project.logger.error("Plugin project :$pluginName not found. Please update settings.gradle.")
             return
         }
         // Add plugin dependency to the app project.
@@ -758,7 +671,7 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${getCompileSdkFromProject(pluginProject)} or higher.")
+                project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${getCompileSdkFromProject(pluginProject)} or higher.")
                 project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
 
@@ -811,14 +724,10 @@ class FlutterPlugin implements Plugin<Project> {
             String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
             String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
             String maxPluginNdkVersion = projectNdkVersion
-            int numProcessedPlugins = getPluginList(project).size()
+            int numProcessedPlugins = getPluginList().size()
 
-            getPluginList(project).each { pluginObject ->
-                assert(pluginObject.name instanceof String)
-                Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-                if (pluginProject == null) {
-                    return
-                }
+            getPluginList().each { plugin ->
+                Project pluginProject = project.rootProject.findProject(plugin.key)
                 pluginProject.afterEvaluate {
                     // Default to int min if using a preview version to skip the sdk check.
                     int pluginCompileSdkVersion = Integer.MIN_VALUE
@@ -853,24 +762,34 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
+     * Returns `true` if the given path contains an `android/build.gradle` file.
+     */
+    private Boolean doesSupportAndroidPlatform(String path) {
+        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+        return editableAndroidProject.exists()
+    }
+
+    /**
      * Add the dependencies on other plugin projects to the plugin project.
      * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
      * making the Gradle plugin project A depend on the Gradle plugin project B.
      */
-    private void configurePluginDependencies(Map<String, Object> pluginObject) {
-        assert(pluginObject.name instanceof String)
-        Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        if (pluginProject == null) {
+    private void configurePluginDependencies(Object dependencyObject) {
+        assert(dependencyObject.name instanceof String)
+        Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
+        if (pluginProject == null ||
+            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
             return
         }
-        def dependencies = pluginObject.dependencies
-        assert(dependencies instanceof List<String>)
-        dependencies.each { pluginDependencyName ->
+        assert(dependencyObject.dependencies instanceof List)
+        dependencyObject.dependencies.each { pluginDependencyName ->
+            assert(pluginDependencyName instanceof String)
             if (pluginDependencyName.empty) {
                 return
             }
             Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null) {
+            if (dependencyProject == null ||
+                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
                 return
             }
             // Wait for the Android plugin to load and add the dependency to the plugin project.
@@ -882,27 +801,52 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    /**
-     * Gets the list of plugins (as map) that support the Android platform.
-     *
-     * The map value contains either the plugins `name` (String),
-     * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
-     */
-    private List<Map<String, Object>> getPluginList(Project project) {
-        return project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
+    private Properties getPluginList() {
+        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
+        Properties allPlugins = readPropertiesIfExist(pluginsFile)
+        Properties androidPlugins = new Properties()
+        allPlugins.each { name, path ->
+            if (doesSupportAndroidPlatform(path)) {
+                androidPlugins.setProperty(name, path)
+            }
+        // TODO(amirh): log an error if this plugin was specified to be an Android
+        // plugin according to the new schema, and was missing a build.gradle file.
+        // https://github.com/flutter/flutter/issues/40784
+        }
+        return androidPlugins
     }
 
-    // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
-    //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
-    private List<Map<String, Object>> getPluginDependencies(Project project) {
-        Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
-        if (meta == null) {
-            return []
+    private List getPluginDependencies() {
+        // Consider a `.flutter-plugins-dependencies` file with the following content:
+        // {
+        //     "dependencyGraph": [
+        //       {
+        //         "name": "plugin-a",
+        //         "dependencies": ["plugin-b","plugin-c"]
+        //       },
+        //       {
+        //         "name": "plugin-b",
+        //         "dependencies": ["plugin-c"]
+        //       },
+        //       {
+        //         "name": "plugin-c",
+        //         "dependencies": []'
+        //       }
+        //     ]
+        //  }
+        //
+        // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
+        // `plugin-b` depends on `plugin-c`.
+        // `plugin-c` doesn't depend on anything.
+        File pluginsDependencyFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins-dependencies')
+        if (pluginsDependencyFile.exists()) {
+            def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
+            assert(object instanceof Map)
+            assert(object.dependencyGraph instanceof List)
+            return object.dependencyGraph
         }
-        assert(meta.dependencyGraph instanceof List<Map>)
-        return meta.dependencyGraph as List<Map<String, Object>>
+        return []
     }
 
     private String resolveProperty(String name, String defaultValue) {
@@ -1342,7 +1286,7 @@ class FlutterPlugin implements Plugin<Project> {
                 String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
                 project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             }
-            configurePlugins(project)
+            configurePlugins()
             detectLowCompileSdkVersionOrNdkVersion()
             return
         }
@@ -1394,7 +1338,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-        configurePlugins(project)
+        configurePlugins()
         detectLowCompileSdkVersionOrNdkVersion()
     }
 
