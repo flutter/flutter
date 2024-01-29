@@ -89,7 +89,6 @@ class HotRunner extends ResidentRunner {
     super.stayResident,
     bool super.ipv6 = false,
     super.machine,
-    this.multidexEnabled = false,
     super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
@@ -115,7 +114,6 @@ class HotRunner extends ResidentRunner {
   final bool benchmarkMode;
   final File? applicationBinary;
   final bool hostIsIde;
-  final bool multidexEnabled;
 
   /// When performing a hot restart, the tool needs to upload a new main.dart.dill to
   /// each attached device's devfs. Replacing the existing file is not safe and does
