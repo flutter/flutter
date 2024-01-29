@@ -89,17 +89,18 @@ class HotRunner extends ResidentRunner {
     super.stayResident,
     bool super.ipv6 = false,
     super.machine,
-    this.multidexEnabled = false,
     super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
     NativeAssetsBuildRunner? buildRunner,
+    String? nativeAssetsYamlFile,
     required Analytics analytics,
   })  : _stopwatchFactory = stopwatchFactory,
         _reloadSourcesHelper = reloadSourcesHelper,
         _reassembleHelper = reassembleHelper,
         _buildRunner = buildRunner,
+        _nativeAssetsYamlFile = nativeAssetsYamlFile,
         _analytics = analytics,
         super(
           hotMode: true,
@@ -113,7 +114,6 @@ class HotRunner extends ResidentRunner {
   final bool benchmarkMode;
   final File? applicationBinary;
   final bool hostIsIde;
-  final bool multidexEnabled;
 
   /// When performing a hot restart, the tool needs to upload a new main.dart.dill to
   /// each attached device's devfs. Replacing the existing file is not safe and does
@@ -140,6 +140,7 @@ class HotRunner extends ResidentRunner {
   bool? _emulator;
 
   NativeAssetsBuildRunner? _buildRunner;
+  final String? _nativeAssetsYamlFile;
 
   String? flavor;
 
@@ -371,19 +372,24 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    final Uri projectUri = Uri.directory(projectRootPath);
-    _buildRunner ??= NativeAssetsBuildRunnerImpl(
-      projectUri,
-      debuggingOptions.buildInfo.packageConfig,
-      fileSystem,
-      globals.logger,
-    );
-    final Uri? nativeAssetsYaml = await dryRunNativeAssets(
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      buildRunner: _buildRunner!,
-      flutterDevices: flutterDevices,
-    );
+    final Uri? nativeAssetsYaml;
+    if (_nativeAssetsYamlFile != null) {
+      nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
+    } else {
+      final Uri projectUri = Uri.directory(projectRootPath);
+      _buildRunner ??= NativeAssetsBuildRunnerImpl(
+        projectUri,
+        debuggingOptions.buildInfo.packageConfig,
+        fileSystem,
+        globals.logger,
+      );
+      nativeAssetsYaml = await dryRunNativeAssets(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: _buildRunner!,
+        flutterDevices: flutterDevices,
+      );
+    }
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);

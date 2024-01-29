@@ -371,13 +371,10 @@ void main() {
     final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
     final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
     final List<String> info = getDebugInfo(layer);
+
     expect(
       info,
-      contains(
-        isBrowser && !isCanvasKit
-          ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)'
-          : 'filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'
-      ),
+      contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'),
     );
     expect(info, contains('blendMode: clear'));
   });

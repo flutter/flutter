@@ -671,6 +671,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // in slider.dart.
     Size screenSize() => MediaQuery.sizeOf(context);
 
+    final double fontSize = sliderTheme.valueIndicatorTextStyle?.fontSize ?? kDefaultFontSize;
+    final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+
     return FocusableActionDetector(
       enabled: _enabled,
       onShowHoverHighlight: _handleHoverChanged,
@@ -683,7 +687,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           divisions: widget.divisions,
           labels: widget.labels,
           sliderTheme: sliderTheme,
-          textScaleFactor: MediaQuery.of(context).textScaleFactor,
+          textScaleFactor: effectiveTextScale,
           screenSize: screenSize(),
           onChanged: _enabled && (widget.max > widget.min) ? _handleChanged : null,
           onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
@@ -1628,10 +1632,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   /// Describe the semantics of the start thumb.
-  SemanticsNode? _startSemanticsNode = SemanticsNode();
+  SemanticsNode? _startSemanticsNode;
 
   /// Describe the semantics of the end thumb.
-  SemanticsNode? _endSemanticsNode = SemanticsNode();
+  SemanticsNode? _endSemanticsNode;
 
   // Create the semantics configuration for a single value.
   SemanticsConfiguration _createSemanticsConfiguration(
@@ -1697,6 +1701,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       width: kMinInteractiveDimension,
       height: kMinInteractiveDimension,
     );
+
+    _startSemanticsNode ??= SemanticsNode();
+    _endSemanticsNode ??= SemanticsNode();
+
     switch (textDirection) {
       case TextDirection.ltr:
         _startSemanticsNode!.rect = leftRect;

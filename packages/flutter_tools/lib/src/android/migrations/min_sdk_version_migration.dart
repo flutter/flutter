@@ -42,6 +42,8 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    return fileContents.replaceAll(jellyBeanMinSdkVersionMatch, replacementMinSdkText);
+    return fileContents.replaceAll(
+      tooOldMinSdkVersionMatch, replacementMinSdkText,
+    );
   }
 }

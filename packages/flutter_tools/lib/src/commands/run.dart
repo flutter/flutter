@@ -331,12 +331,12 @@ class RunCommand extends RunCommandBase {
     usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
+    usesNativeAssetsOption(hide: !verboseHelp);
 
     // By default, the app should to publish the VM service port over mDNS.
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
-    addMultidexOption();
     addIgnoreDeprecationOption();
     argParser
       ..addFlag('await-first-frame-when-tracing',
@@ -639,8 +639,8 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6 ?? false,
-        multidexEnabled: boolArg('multidex'),
         analytics: globals.analytics,
+        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -668,7 +668,6 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       ipv6: ipv6 ?? false,
       stayResident: stayResident,
-      multidexEnabled: boolArg('multidex'),
     );
   }
 
@@ -713,7 +712,6 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6 ?? false,
-          multidexEnabled: boolArg('multidex'),
           userIdentifier: userIdentifier,
           enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         );
