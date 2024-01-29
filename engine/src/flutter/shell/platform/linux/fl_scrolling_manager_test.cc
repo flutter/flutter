@@ -62,7 +62,9 @@ G_END_DECLS
 
 struct _FlMockScrollingViewDelegate {
   GObject parent_instance;
+};
 
+struct FlMockScrollingViewDelegatePrivate {
   MousePointerCallHandler mouse_handler;
   PointerPanZoomCallHandler pan_zoom_handler;
 };
@@ -75,10 +77,26 @@ G_DEFINE_TYPE_WITH_CODE(
     fl_mock_scrolling_view_delegate,
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE(fl_scrolling_view_delegate_get_type(),
-                          fl_mock_view_scroll_delegate_iface_init))
+                          fl_mock_view_scroll_delegate_iface_init);
+    G_ADD_PRIVATE(FlMockScrollingViewDelegate))
+
+#define FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(obj)    \
+  static_cast<FlMockScrollingViewDelegatePrivate*>(         \
+      fl_mock_scrolling_view_delegate_get_instance_private( \
+          FL_MOCK_SCROLLING_VIEW_DELEGATE(obj)))
 
 static void fl_mock_scrolling_view_delegate_init(
-    FlMockScrollingViewDelegate* self) {}
+    FlMockScrollingViewDelegate* self) {
+  FlMockScrollingViewDelegatePrivate* priv =
+      FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(self);
+
+  new (priv) FlMockScrollingViewDelegatePrivate();
+}
+
+static void fl_mock_scrolling_view_delegate_finalize(GObject* object) {
+  FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(object)
+      ->~FlMockScrollingViewDelegatePrivate();
+}
 
 static void fl_mock_scrolling_view_delegate_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_mock_scrolling_view_delegate_parent_class)->dispose(object);
@@ -87,6 +105,7 @@ static void fl_mock_scrolling_view_delegate_dispose(GObject* object) {
 static void fl_mock_scrolling_view_delegate_class_init(
     FlMockScrollingViewDelegateClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_mock_scrolling_view_delegate_dispose;
+  G_OBJECT_CLASS(klass)->finalize = fl_mock_scrolling_view_delegate_finalize;
 }
 
 static void fl_mock_view_send_mouse_pointer_event(
@@ -98,8 +117,9 @@ static void fl_mock_view_send_mouse_pointer_event(
     double scroll_delta_x,
     double scroll_delta_y,
     int64_t buttons) {
-  FlMockScrollingViewDelegate* self = FL_MOCK_SCROLLING_VIEW_DELEGATE(delegate);
-  self->mouse_handler(phase, timestamp, x, y, scroll_delta_x, scroll_delta_y,
+  FlMockScrollingViewDelegatePrivate* priv =
+      FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(delegate);
+  priv->mouse_handler(phase, timestamp, x, y, scroll_delta_x, scroll_delta_y,
                       buttons);
 }
 
@@ -113,8 +133,9 @@ static void fl_mock_view_send_pointer_pan_zoom_event(
     double pan_y,
     double scale,
     double rotation) {
-  FlMockScrollingViewDelegate* self = FL_MOCK_SCROLLING_VIEW_DELEGATE(delegate);
-  self->pan_zoom_handler(timestamp, x, y, phase, pan_x, pan_y, scale, rotation);
+  FlMockScrollingViewDelegatePrivate* priv =
+      FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(delegate);
+  priv->pan_zoom_handler(timestamp, x, y, phase, pan_x, pan_y, scale, rotation);
 }
 
 static void fl_mock_view_scroll_delegate_iface_init(
@@ -136,13 +157,19 @@ static FlMockScrollingViewDelegate* fl_mock_scrolling_view_delegate_new() {
 static void fl_mock_scrolling_view_set_mouse_handler(
     FlMockScrollingViewDelegate* self,
     MousePointerCallHandler handler) {
-  self->mouse_handler = std::move(handler);
+  FlMockScrollingViewDelegatePrivate* priv =
+      FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(self);
+
+  priv->mouse_handler = std::move(handler);
 }
 
 static void fl_mock_scrolling_view_set_pan_zoom_handler(
     FlMockScrollingViewDelegate* self,
     PointerPanZoomCallHandler handler) {
-  self->pan_zoom_handler = std::move(handler);
+  FlMockScrollingViewDelegatePrivate* priv =
+      FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(self);
+
+  priv->pan_zoom_handler = std::move(handler);
 }
 
 /***** End FlMockScrollingViewDelegate *****/

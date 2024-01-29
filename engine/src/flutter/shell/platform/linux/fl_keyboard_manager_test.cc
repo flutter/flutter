@@ -163,7 +163,9 @@ MATCHER_P(MethodSuccessResponse, result, "") {
 
 struct _FlMockKeyBinaryMessenger {
   GObject parent_instance;
+};
 
+struct FlMockKeyBinaryMessengerPrivate {
   ChannelCallHandler callback_handler;
 };
 
@@ -175,10 +177,29 @@ G_DEFINE_TYPE_WITH_CODE(
     fl_mock_key_binary_messenger,
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE(fl_binary_messenger_get_type(),
-                          fl_mock_key_binary_messenger_iface_init))
+                          fl_mock_key_binary_messenger_iface_init);
+    G_ADD_PRIVATE(FlMockKeyBinaryMessenger))
+
+#define FL_MOCK_KEY_BINARY_MESSENGER_GET_PRIVATE(obj)    \
+  static_cast<FlMockKeyBinaryMessengerPrivate*>(         \
+      fl_mock_key_binary_messenger_get_instance_private( \
+          FL_MOCK_KEY_BINARY_MESSENGER(obj)))
+
+static void fl_mock_key_binary_messenger_init(FlMockKeyBinaryMessenger* self) {
+  FlMockKeyBinaryMessengerPrivate* priv =
+      FL_MOCK_KEY_BINARY_MESSENGER_GET_PRIVATE(self);
+  new (priv) FlMockKeyBinaryMessengerPrivate();
+}
+
+static void fl_mock_key_binary_messenger_finalize(GObject* object) {
+  FL_MOCK_KEY_BINARY_MESSENGER_GET_PRIVATE(object)
+      ->~FlMockKeyBinaryMessengerPrivate();
+}
 
 static void fl_mock_key_binary_messenger_class_init(
-    FlMockKeyBinaryMessengerClass* klass) {}
+    FlMockKeyBinaryMessengerClass* klass) {
+  G_OBJECT_CLASS(klass)->finalize = fl_mock_key_binary_messenger_finalize;
+}
 
 static void fl_mock_key_binary_messenger_send_on_channel(
     FlBinaryMessenger* messenger,
@@ -191,20 +212,21 @@ static void fl_mock_key_binary_messenger_send_on_channel(
 
   if (callback != nullptr) {
     EXPECT_STREQ(channel, kKeyEventChannelName);
-    self->callback_handler([self, cancellable, callback,
-                            user_data](bool handled) {
-      g_autoptr(GTask) task =
-          g_task_new(self, cancellable, callback, user_data);
-      g_autoptr(FlValue) result = fl_value_new_map();
-      fl_value_set_string_take(result, "handled", fl_value_new_bool(handled));
-      g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
-      g_autoptr(GError) error = nullptr;
-      GBytes* data = fl_message_codec_encode_message(FL_MESSAGE_CODEC(codec),
-                                                     result, &error);
+    FL_MOCK_KEY_BINARY_MESSENGER_GET_PRIVATE(self)->callback_handler(
+        [self, cancellable, callback, user_data](bool handled) {
+          g_autoptr(GTask) task =
+              g_task_new(self, cancellable, callback, user_data);
+          g_autoptr(FlValue) result = fl_value_new_map();
+          fl_value_set_string_take(result, "handled",
+                                   fl_value_new_bool(handled));
+          g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
+          g_autoptr(GError) error = nullptr;
+          GBytes* data = fl_message_codec_encode_message(
+              FL_MESSAGE_CODEC(codec), result, &error);
 
-      g_task_return_pointer(task, data,
-                            reinterpret_cast<GDestroyNotify>(g_bytes_unref));
-    });
+          g_task_return_pointer(
+              task, data, reinterpret_cast<GDestroyNotify>(g_bytes_unref));
+        });
   }
 }
 
@@ -255,8 +277,6 @@ static void fl_mock_key_binary_messenger_iface_init(
       fl_mock_binary_messenger_set_warns_on_channel_overflow;
 }
 
-static void fl_mock_key_binary_messenger_init(FlMockKeyBinaryMessenger* self) {}
-
 static FlMockKeyBinaryMessenger* fl_mock_key_binary_messenger_new() {
   FlMockKeyBinaryMessenger* self = FL_MOCK_KEY_BINARY_MESSENGER(
       g_object_new(fl_mock_key_binary_messenger_get_type(), NULL));
@@ -270,14 +290,17 @@ static FlMockKeyBinaryMessenger* fl_mock_key_binary_messenger_new() {
 static void fl_mock_key_binary_messenger_set_callback_handler(
     FlMockKeyBinaryMessenger* self,
     ChannelCallHandler handler) {
-  self->callback_handler = std::move(handler);
+  FL_MOCK_KEY_BINARY_MESSENGER_GET_PRIVATE(self)->callback_handler =
+      std::move(handler);
 }
 
 /***** FlMockViewDelegate *****/
 
 struct _FlMockViewDelegate {
   GObject parent_instance;
+};
 
+struct FlMockViewDelegatePrivate {
   FlMockKeyBinaryMessenger* messenger;
   EmbedderCallHandler embedder_handler;
   bool text_filter_result;
@@ -294,20 +317,33 @@ G_DEFINE_TYPE_WITH_CODE(
     fl_mock_view_delegate,
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE(fl_keyboard_view_delegate_get_type(),
-                          fl_mock_view_keyboard_delegate_iface_init))
+                          fl_mock_view_keyboard_delegate_iface_init);
+    G_ADD_PRIVATE(FlMockViewDelegate))
 
-static void fl_mock_view_delegate_init(FlMockViewDelegate* self) {}
+#define FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(obj) \
+  static_cast<FlMockViewDelegatePrivate*>(     \
+      fl_mock_view_delegate_get_instance_private(FL_MOCK_VIEW_DELEGATE(obj)))
+
+static void fl_mock_view_delegate_init(FlMockViewDelegate* self) {
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(self);
+  new (priv) FlMockViewDelegatePrivate();
+}
+
+static void fl_mock_view_delegate_finalize(GObject* object) {
+  FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(object)->~FlMockViewDelegatePrivate();
+}
 
 static void fl_mock_view_delegate_dispose(GObject* object) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(object);
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(object);
 
-  g_clear_object(&self->messenger);
+  g_clear_object(&priv->messenger);
 
   G_OBJECT_CLASS(fl_mock_view_delegate_parent_class)->dispose(object);
 }
 
 static void fl_mock_view_delegate_class_init(FlMockViewDelegateClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_mock_view_delegate_dispose;
+  G_OBJECT_CLASS(klass)->finalize = fl_mock_view_delegate_finalize;
 }
 
 static FlKeyEvent* fl_key_event_clone_information_only(FlKeyEvent* event);
@@ -317,8 +353,9 @@ static void fl_mock_view_keyboard_send_key_event(
     const FlutterKeyEvent* event,
     FlutterKeyEventCallback callback,
     void* user_data) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(view_delegate);
-  self->embedder_handler(event, [callback, user_data](bool handled) {
+  FlMockViewDelegatePrivate* priv =
+      FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(view_delegate);
+  priv->embedder_handler(event, [callback, user_data](bool handled) {
     if (callback != nullptr) {
       callback(handled, user_data);
     }
@@ -328,38 +365,41 @@ static void fl_mock_view_keyboard_send_key_event(
 static gboolean fl_mock_view_keyboard_text_filter_key_press(
     FlKeyboardViewDelegate* view_delegate,
     FlKeyEvent* event) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(view_delegate);
-  return self->text_filter_result;
+  FlMockViewDelegatePrivate* priv =
+      FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(view_delegate);
+  return priv->text_filter_result;
 }
 
 static FlBinaryMessenger* fl_mock_view_keyboard_get_messenger(
     FlKeyboardViewDelegate* view_delegate) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(view_delegate);
-  return FL_BINARY_MESSENGER(self->messenger);
+  FlMockViewDelegatePrivate* priv =
+      FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(view_delegate);
+  return FL_BINARY_MESSENGER(priv->messenger);
 }
 
 static void fl_mock_view_keyboard_redispatch_event(
     FlKeyboardViewDelegate* view_delegate,
     std::unique_ptr<FlKeyEvent> event) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(view_delegate);
-  if (self->redispatch_handler) {
-    self->redispatch_handler(std::move(event));
+  FlMockViewDelegatePrivate* priv =
+      FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(view_delegate);
+  if (priv->redispatch_handler) {
+    priv->redispatch_handler(std::move(event));
   }
 }
 
 static void fl_mock_view_keyboard_subscribe_to_layout_change(
     FlKeyboardViewDelegate* delegate,
     KeyboardLayoutNotifier notifier) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(delegate);
-  self->layout_notifier = std::move(notifier);
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(delegate);
+  priv->layout_notifier = std::move(notifier);
 }
 
 static guint fl_mock_view_keyboard_lookup_key(FlKeyboardViewDelegate* delegate,
                                               const GdkKeymapKey* key) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(delegate);
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(delegate);
   guint8 group = static_cast<guint8>(key->group);
-  EXPECT_LT(group, self->layout_data->size());
-  const MockGroupLayoutData* group_layout = (*self->layout_data)[group];
+  EXPECT_LT(group, priv->layout_data->size());
+  const MockGroupLayoutData* group_layout = (*priv->layout_data)[group];
   EXPECT_TRUE(group_layout != nullptr);
   EXPECT_TRUE(key->level == 0 || key->level == 1);
   bool shift = key->level == 1;
@@ -394,31 +434,36 @@ static FlMockViewDelegate* fl_mock_view_delegate_new() {
   // Added to stop compiler complaining about an unused function.
   FL_IS_MOCK_VIEW_DELEGATE(self);
 
-  self->messenger = fl_mock_key_binary_messenger_new();
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(self);
+  priv->messenger = fl_mock_key_binary_messenger_new();
 
   return self;
 }
 
 static void fl_mock_view_set_embedder_handler(FlMockViewDelegate* self,
                                               EmbedderCallHandler handler) {
-  self->embedder_handler = std::move(handler);
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(self);
+  priv->embedder_handler = std::move(handler);
 }
 
 static void fl_mock_view_set_text_filter_result(FlMockViewDelegate* self,
                                                 bool result) {
-  self->text_filter_result = result;
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(self);
+  priv->text_filter_result = result;
 }
 
 static void fl_mock_view_set_redispatch_handler(FlMockViewDelegate* self,
                                                 RedispatchHandler handler) {
-  self->redispatch_handler = std::move(handler);
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(self);
+  priv->redispatch_handler = std::move(handler);
 }
 
 static void fl_mock_view_set_layout(FlMockViewDelegate* self,
                                     const MockLayoutData* layout) {
-  self->layout_data = layout;
-  if (self->layout_notifier != nullptr) {
-    self->layout_notifier();
+  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(self);
+  priv->layout_data = layout;
+  if (priv->layout_notifier != nullptr) {
+    priv->layout_notifier();
   }
 }
 
@@ -557,16 +602,20 @@ class KeyboardTester {
   }
 
   void respondToChannelCallsWith(bool response) {
+    FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(view_);
+
     fl_mock_key_binary_messenger_set_callback_handler(
-        view_->messenger, [response, this](const AsyncKeyCallback& callback) {
+        priv->messenger, [response, this](const AsyncKeyCallback& callback) {
           EXPECT_FALSE(during_redispatch_);
           callback(response);
         });
   }
 
   void recordChannelCallsTo(std::vector<CallRecord>& storage) {
+    FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(view_);
+
     fl_mock_key_binary_messenger_set_callback_handler(
-        view_->messenger, [&storage, this](AsyncKeyCallback callback) {
+        priv->messenger, [&storage, this](AsyncKeyCallback callback) {
           EXPECT_FALSE(during_redispatch_);
           storage.push_back(CallRecord{
               .type = CallRecord::kKeyCallChannel,
