@@ -2393,6 +2393,8 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: hello_world__memory
+    runIf:
+      - examples/hello_world/android/app/**
 
   # linux motog4 benchmark
   - name: Linux_android home_scroll_perf__timeline_summary
