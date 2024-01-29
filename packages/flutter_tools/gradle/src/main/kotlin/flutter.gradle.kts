@@ -10,21 +10,13 @@ class FlutterPluginKts : Plugin<Project> {
         project.withGroovyBuilder {
             getProperty("android").withGroovyBuilder {
                 getProperty("defaultConfig").withGroovyBuilder {
-                    if (project.hasProperty("multidex-enabled") &&
-                        project.property("multidex-enabled").toString().toBoolean()) {
-                        setProperty("multiDexEnabled", true)
-                        getProperty("manifestPlaceholders").withGroovyBuilder {
-                            setProperty("applicationName", "io.flutter.app.FlutterMultiDexApplication")
-                        }
-                    } else {
-                        var baseApplicationName: String = "android.app.Application"
-                        if (project.hasProperty("base-application-name")) {
-                            baseApplicationName = project.property("base-application-name").toString()
-                        }
-                        // Setting to android.app.Application is the same as omitting the attribute.
-                        getProperty("manifestPlaceholders").withGroovyBuilder {
-                            setProperty("applicationName", baseApplicationName)
-                        }
+                    var baseApplicationName: String = "android.app.Application"
+                    if (project.hasProperty("base-application-name")) {
+                        baseApplicationName = project.property("base-application-name").toString()
+                    }
+                    // Setting to android.app.Application is the same as omitting the attribute.
+                    getProperty("manifestPlaceholders").withGroovyBuilder {
+                        setProperty("applicationName", baseApplicationName)
                     }
                 }
             }

@@ -1015,15 +1015,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addMultidexOption({ bool hide = false }) {
-    argParser.addFlag('multidex',
-      defaultsTo: true,
-      help: 'When enabled, indicates that the app should be built with multidex support. This '
-            'flag adds the dependencies for multidex when the minimum android sdk is 20 or '
-            'below. For android sdk versions 21 and above, multidex support is native.',
-    );
-  }
-
   void addIgnoreDeprecationOption({ bool hide = false }) {
     argParser.addFlag('ignore-deprecation',
       negatable: false,
