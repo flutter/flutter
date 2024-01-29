@@ -67,10 +67,10 @@ enum MultitouchDragStrategy {
   /// is determined by the maximum deltas of both directions.
   ///
   /// If the user is dragging with 3 pointers at the same time, each having
-  /// [+10, +20, +33] pixels of offset, the recognizer will report a delta of 33 pixels.
+  /// \[+10, +20, +33\] pixels of offset, the recognizer will report a delta of 33 pixels.
   ///
   /// If the user is dragging with 5 pointers at the same time, each having
-  /// [+10, +20, +33, -1, -12] pixels of offset, the recognizer will report a
+  /// \[+10, +20, +33, -1, -12\] pixels of offset, the recognizer will report a
   /// delta of (+33) + (-12) = 21 pixels.
   ///
   /// This is the behavior typically seen on iOS.
@@ -84,11 +84,11 @@ enum MultitouchDragStrategy {
   /// at the same time.
   ///
   /// If the user is dragging with 3 pointers at the same time, each having
-  /// [+10, +20, +33] pixels of offset, the recognizer will report a delta
+  /// \[+10, +20, +33\] pixels of offset, the recognizer will report a delta
   /// of 10 + 20 + 33 = 63 pixels.
   ///
   /// If the user is dragging with 5 pointers at the same time, each having
-  /// [+10, +20, +33, -1, -12] pixels of offset, the recognizer will report
+  /// \[+10, +20, +33, -1, -12\] pixels of offset, the recognizer will report
   /// a delta of 10 + 20 + 33 - 1 - 12 = 50 pixels.
   sumAllPointers,
 }
