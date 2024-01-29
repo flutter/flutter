@@ -456,7 +456,7 @@ void main([dynamic sendPort]) {
     buffer.writeln('''
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:io' show exit, exitCode;
+import 'dart:io' show exit, exitCode; // flutter_ignore: dart_io_import
 import 'dart:isolate';
 import 'dart:ui';
 
