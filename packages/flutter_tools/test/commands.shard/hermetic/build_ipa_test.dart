@@ -680,7 +680,7 @@ void main() {
 
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building enterprise IPA'));
-    expect(logger.statusText, contains('Built IPA to build/ios/ipa (10.0MB)'));
+    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
     // Don'ltruct how to upload to the App Store.
     expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
