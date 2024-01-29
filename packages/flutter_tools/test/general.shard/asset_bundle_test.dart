@@ -27,7 +27,7 @@ import '../src/context.dart';
 void main() {
   const String shaderLibDir = '/./shader_lib';
 
-  group('AssetBundle.build (non-hermetic)', () {
+  group('AssetBundle.build (using context)', () {
     late FileSystem testFileSystem;
     late Platform platform;
 
