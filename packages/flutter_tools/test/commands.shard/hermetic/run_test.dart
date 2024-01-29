@@ -595,61 +595,6 @@ void main() {
       });
 
       group('--machine', () {
-        testUsingContext('enables multidex by default', () async {
-          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
-          final FakeDevice device = FakeDevice();
-          testDeviceManager.devices = <Device>[device];
-
-          await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '--no-pub',
-              '--machine',
-              '-d',
-              device.id,
-            ]),
-            throwsToolExit(),
-          );
-          expect(command.appDomain.multidexEnabled, isTrue);
-        }, overrides: <Type, Generator>{
-          Artifacts: () => artifacts,
-          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => testDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => usage,
-          Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
-        });
-
-        testUsingContext('can disable multidex with --no-multidex', () async {
-          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
-          final FakeDevice device = FakeDevice();
-          testDeviceManager.devices = <Device>[device];
-
-          await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '--no-pub',
-              '--no-multidex',
-              '--machine',
-              '-d',
-              device.id,
-            ]),
-            throwsToolExit(),
-          );
-          expect(command.appDomain.multidexEnabled, isFalse);
-        }, overrides: <Type, Generator>{
-          Artifacts: () => artifacts,
-          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => testDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => usage,
-          Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
-        });
-
         testUsingContext('can pass --device-user', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice(platformType: PlatformType.android);
@@ -1570,7 +1515,6 @@ class DaemonCapturingRunCommand extends RunCommand {
 class CapturingAppDomain extends AppDomain {
   CapturingAppDomain(super.daemon);
 
-  bool? multidexEnabled;
   String? userIdentifier;
   bool? enableDevTools;
 
@@ -1588,14 +1532,12 @@ class CapturingAppDomain extends AppDomain {
     String? packagesFilePath,
     String? dillOutputPath,
     bool ipv6 = false,
-    bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
     bool enableDevTools = true,
     String? flavor,
   }) async {
-    this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;
     this.enableDevTools = enableDevTools;
     throwToolExit('');
