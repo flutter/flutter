@@ -1082,8 +1082,12 @@ void main() {
     expect(lastFrame, isNull);
     expect(lastFrameWasSync, isFalse);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+
+    final ImageInfo info = ImageInfo(image: image10x10);
+    addTearDown(info.dispose);
+    streamCompleter.setData(imageInfo: info);
     await tester.pump();
+
     expect(lastFrame, 0);
     expect(lastFrameWasSync, isFalse);
   });
@@ -1261,8 +1265,12 @@ void main() {
     expect(chunkEvents.length, 3);
     expect(find.text('loading 30 / 100'), findsOneWidget);
     expect(find.byType(RawImage), findsNothing);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+
+    final ImageInfo info = ImageInfo(image: image10x10);
+    addTearDown(info.dispose);
+    streamCompleter.setData(imageInfo: info);
     await tester.pump();
+
     expect(chunkEvents.length, 4);
     expect(find.byType(Text), findsNothing);
     expect(find.byType(RawImage), findsOneWidget);
@@ -1282,7 +1290,9 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+    final ImageInfo info = ImageInfo(image: image10x10);
+    addTearDown(info.dispose);
+    streamCompleter.setData(imageInfo: info);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
