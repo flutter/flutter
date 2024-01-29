@@ -4156,7 +4156,6 @@ targets:
   - name: Mac_pixel_7pro native_assets_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
