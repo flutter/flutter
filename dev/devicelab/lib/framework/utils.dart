@@ -475,6 +475,8 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
       ...<String>[
         '--device-timeout',
         '5',
+        '--device-connection',
+        'attached',
       ],
 
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
