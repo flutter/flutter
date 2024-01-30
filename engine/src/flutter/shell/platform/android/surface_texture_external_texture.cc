@@ -57,17 +57,11 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
   if (dl_image_) {
     DlAutoCanvasRestore autoRestore(context.canvas, true);
 
-    // The incoming texture is vertically flipped, so we flip it back.
-    //
-    // OpenGL's coordinate system has Positive Y equivalent to up, while Skia's
-    // coordinate system (as well as Impeller's) has Negative Y equvalent to up.
-    {
-      // Move (translate) the origin to the bottom-left corner of the image.
-      context.canvas->Translate(bounds.x(), bounds.y() + bounds.height());
-
-      // No change in the X axis, but we need to flip the Y axis.
-      context.canvas->Scale(1, -1);
-    }
+    // The incoming texture is vertically flipped, so we flip it
+    // back. OpenGL's coordinate system has Positive Y equivalent to up, while
+    // Skia's coordinate system has Negative Y equvalent to up.
+    context.canvas->Translate(bounds.x(), bounds.y() + bounds.height());
+    context.canvas->Scale(bounds.width(), -bounds.height());
 
     if (!transform_.isIdentity()) {
       DlImageColorSource source(dl_image_, DlTileMode::kClamp,
@@ -78,8 +72,7 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
         paintWithShader = *context.paint;
       }
       paintWithShader.setColorSource(&source);
-      context.canvas->DrawRect(SkRect::MakeWH(bounds.width(), bounds.height()),
-                               paintWithShader);
+      context.canvas->DrawRect(SkRect::MakeWH(1, 1), paintWithShader);
     } else {
       context.canvas->DrawImage(dl_image_, {0, 0}, sampling, context.paint);
     }
