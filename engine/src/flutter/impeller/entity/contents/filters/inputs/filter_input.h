@@ -51,7 +51,8 @@ class FilterInput {
       const std::string& label,
       const ContentContext& renderer,
       const Entity& entity,
-      std::optional<Rect> coverage_limit = std::nullopt) const = 0;
+      std::optional<Rect> coverage_limit = std::nullopt,
+      int32_t mip_count = 1) const = 0;
 
   std::optional<Rect> GetLocalCoverage(const Entity& entity) const;
 

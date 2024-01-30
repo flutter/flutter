@@ -121,6 +121,7 @@ class Contents {
       std::optional<Rect> coverage_limit = std::nullopt,
       const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
       bool msaa_enabled = true,
+      int32_t mip_count = 1,
       const std::string& label = "Snapshot") const;
 
   virtual bool ShouldRender(const Entity& entity,

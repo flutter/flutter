@@ -65,11 +65,12 @@ std::shared_ptr<Texture> TiledTextureContents::CreateFilterTexture(
   }
   auto color_filter_contents = color_filter_(FilterInput::Make(texture_));
   auto snapshot = color_filter_contents->RenderToSnapshot(
-      renderer,                          // renderer
-      Entity(),                          // entity
-      std::nullopt,                      // coverage_limit
-      std::nullopt,                      // sampler_descriptor
-      true,                              // msaa_enabled
+      renderer,      // renderer
+      Entity(),      // entity
+      std::nullopt,  // coverage_limit
+      std::nullopt,  // sampler_descriptor
+      true,          // msaa_enabled
+      /*mip_count=*/1,
       "TiledTextureContents Snapshot");  // label
   if (snapshot.has_value()) {
     return snapshot.value().texture;
@@ -236,6 +237,7 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     std::optional<Rect> coverage_limit,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
+    int32_t mip_count,
     const std::string& label) const {
   if (GetInverseEffectTransform().IsIdentity() &&
       GetGeometry()->IsAxisAlignedRect()) {
@@ -260,7 +262,8 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
       std::nullopt,                                      // coverage_limit
       sampler_descriptor.value_or(sampler_descriptor_),  // sampler_descriptor
       true,                                              // msaa_enabled
-      label);                                            // label
+      /*mip_count=*/1,
+      label);  // label
 }
 
 }  // namespace impeller

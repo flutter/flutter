@@ -131,6 +131,7 @@ class FilterContents : public Contents {
       std::optional<Rect> coverage_limit = std::nullopt,
       const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
       bool msaa_enabled = true,
+      int32_t mip_count = 1,
       const std::string& label = "Filter Snapshot") const override;
 
   // |Contents|

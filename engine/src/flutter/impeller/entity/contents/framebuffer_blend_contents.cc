@@ -46,7 +46,8 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
       Rect::MakeSize(pass.GetRenderTargetSize()),  // coverage_limit
       std::nullopt,                                // sampler_descriptor
       true,                                        // msaa_enabled
-      "FramebufferBlendContents Snapshot");        // label
+      /*mip_count=*/1,
+      "FramebufferBlendContents Snapshot");  // label
 
   if (!src_snapshot.has_value()) {
     return true;

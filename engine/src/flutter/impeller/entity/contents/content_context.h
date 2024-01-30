@@ -724,7 +724,8 @@ class ContentContext {
       const std::string& label,
       ISize texture_size,
       const SubpassCallback& subpass_callback,
-      bool msaa_enabled = true) const;
+      bool msaa_enabled = true,
+      int32_t mip_count = 1) const;
 
   /// Makes a subpass that will render to `subpass_target`.
   fml::StatusOr<RenderTarget> MakeSubpass(

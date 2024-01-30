@@ -2750,7 +2750,7 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
           .color = Color::Green(),
           .image_filter = ImageFilter::MakeBlur(
               Sigma(20.0), Sigma(20.0), FilterContents::BlurStyle::kNormal,
-              Entity::TileMode::kClamp),
+              Entity::TileMode::kDecal),
       });
   canvas.Restore();
 
@@ -3934,6 +3934,48 @@ TEST_P(AiksTest, GaussianBlurMipMapImageFilter) {
                                              FilterContents::BlurStyle::kNormal,
                                              Entity::TileMode::kClamp)});
   canvas.DrawCircle({200, 200}, 50, {.color = Color::Chartreuse()});
+
+  Picture picture = canvas.EndRecordingAsPicture();
+  std::shared_ptr<RenderTargetCache> cache =
+      std::make_shared<RenderTargetCache>(GetContext()->GetResourceAllocator());
+  AiksContext aiks_context(GetContext(), nullptr, cache);
+  picture.ToImage(aiks_context, {1024, 768});
+
+  size_t max_mip_count = 0;
+  for (auto it = cache->GetTextureDataBegin(); it != cache->GetTextureDataEnd();
+       ++it) {
+    max_mip_count =
+        std::max(it->texture->GetTextureDescriptor().mip_count, max_mip_count);
+  }
+  EXPECT_EQ(max_mip_count, blur_required_mip_count);
+  // The log is FML_DLOG, so only check in debug builds.
+#ifndef NDEBUG
+  if (GetParam() != PlaygroundBackend::kOpenGLES) {
+    EXPECT_EQ(log_capture.str().find(GaussianBlurFilterContents::kNoMipsError),
+              std::string::npos);
+  } else {
+    EXPECT_NE(log_capture.str().find(GaussianBlurFilterContents::kNoMipsError),
+              std::string::npos);
+  }
+#endif
+}
+
+TEST_P(AiksTest, GaussianBlurMipMapSolidColor) {
+  size_t blur_required_mip_count =
+      GetParam() == PlaygroundBackend::kOpenGLES ? 1 : 4;
+  fml::testing::LogCapture log_capture;
+  Canvas canvas;
+  canvas.DrawPath(PathBuilder{}
+                      .MoveTo({100, 100})
+                      .LineTo({200, 100})
+                      .LineTo({150, 200})
+                      .LineTo({50, 200})
+                      .Close()
+                      .TakePath(),
+                  {.color = Color::Chartreuse(),
+                   .image_filter = ImageFilter::MakeBlur(
+                       Sigma(30), Sigma(30), FilterContents::BlurStyle::kNormal,
+                       Entity::TileMode::kClamp)});
 
   Picture picture = canvas.EndRecordingAsPicture();
   std::shared_ptr<RenderTargetCache> cache =

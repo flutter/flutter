@@ -60,6 +60,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
     std::optional<Rect> coverage_limit,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
+    int32_t mip_count,
     const std::string& label) const {
   auto coverage = GetCoverage(entity);
   if (!coverage.has_value()) {
@@ -90,7 +91,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
             entity.GetTransform());
         return contents.Render(renderer, sub_entity, pass);
       },
-      msaa_enabled);
+      msaa_enabled, mip_count);
 
   if (!render_target.ok()) {
     return std::nullopt;
