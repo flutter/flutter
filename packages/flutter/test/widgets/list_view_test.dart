@@ -792,16 +792,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView.builder(
           controller: controller,
+          itemCount: numbers.length,
           itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
-            if (index > numbers.length - 1) {
-              return null;
-            }
             return numbers[index];
           },
           itemBuilder: (BuildContext context, int index) {
-            if (index > numbers.length - 1) {
-              return null;
-            }
             return SizedBox(
               height: numbers[index],
               child: Text('Item $index'),
@@ -832,7 +827,10 @@ void main() {
             return 100.0;
           },
           itemBuilder: (BuildContext context, int index) {
-            buildLog.insert(0, index);
+            if (index < 10000) {
+              // Filter out the call with int.max (to determine whether children count finite).
+              buildLog.insert(0, index);
+            }
             return Text('Item $index');
           },
         ),

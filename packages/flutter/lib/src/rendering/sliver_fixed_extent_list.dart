@@ -69,6 +69,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       double offset = 0.0;
       double? itemExtent;
       for (int i = 0; i < index; i++) {
+        if (_childCount != null && i > _childCount! - 1) {
+          break;
+        }
         itemExtent = itemExtentBuilder!(i, _currentLayoutDimensions);
         if (itemExtent == null) {
           break;
@@ -224,6 +227,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     int index = 0;
     double? itemExtent;
     while (position < scrollOffset) {
+      if (_childCount != null && index > _childCount! - 1) {
+        break;
+      }
       itemExtent = callback(index, _currentLayoutDimensions);
       if (itemExtent == null) {
         break;
@@ -249,6 +255,20 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
   late SliverLayoutDimensions _currentLayoutDimensions;
 
+  // Used by itemExtentBuilder to prevent out-of-bounds access.
+  int? _childCount;
+  void _cacheChildCountIfNeeded() {
+    if (itemExtentBuilder != null) {
+      if (childManager.isFiniteChildren ?? false) {
+        _childCount = childManager.childCount;
+      } else {
+        _childCount = null;
+      }
+    } else {
+      _childCount = null;
+    }
+  }
+
   @override
   void performLayout() {
     assert((itemExtent != null && itemExtentBuilder == null) ||
@@ -258,6 +278,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
+    _cacheChildCountIfNeeded();
 
     final double itemFixedExtent = itemExtent ?? 0;
     final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;

@@ -79,6 +79,9 @@ abstract class RenderSliverBoxChildManager {
   /// list).
   int get childCount;
 
+  /// Whether the number of children is finite.
+  bool? get isFiniteChildren => null;
+
   /// Called during [RenderSliverMultiBoxAdaptor.adoptChild] or
   /// [RenderSliverMultiBoxAdaptor.move].
   ///
