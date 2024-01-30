@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
-import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/target_devices.dart';
@@ -977,8 +976,6 @@ target-device-6 (mobile) • xxx • android • Android 10
     final FakeIOSDevice exactMatchAttachedIOSDevice = FakeIOSDevice(deviceName: 'target-device');
     final FakeIOSDevice exactMatchAttachedUnsupportedIOSDevice = FakeIOSDevice(deviceName: 'target-device', deviceSupported: false);
     final FakeIOSDevice exactMatchUnsupportedByProjectDevice = FakeIOSDevice(deviceName: 'target-device', deviceSupportForProject: false);
-
-    final FakeIpadForMac macDesignedForIpadDevice = FakeIpadForMac();
 
     setUp(() {
       platform = FakePlatform(operatingSystem: 'macos');
