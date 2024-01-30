@@ -114,7 +114,7 @@ class FlutterEmbedderTest : public ::loop_fixture::RealLoop,
  public:
   FlutterEmbedderTest()
       : realm_builder_(component_testing::RealmBuilder::Create()) {
-    FML_VLOG(-1) << "Setting up base realm";
+    FML_VLOG(1) << "Setting up base realm";
     SetUpRealmBase();
 
     // Post a "just in case" quit task, if the test hangs.

@@ -545,7 +545,7 @@ const std::string& ComponentV2::GetDebugLabel() const {
 }
 
 void ComponentV2::Kill() {
-  FML_VLOG(-1) << "received Kill event";
+  FML_VLOG(1) << "received Kill event";
 
   // From the documentation for ComponentController, ZX_OK should be sent when
   // the ComponentController receives a termination request. However, if the
@@ -582,7 +582,7 @@ void ComponentV2::KillWithEpitaph(zx_status_t epitaph_status) {
 }
 
 void ComponentV2::Stop() {
-  FML_VLOG(-1) << "received Stop event";
+  FML_VLOG(1) << "received Stop event";
 
   // TODO(fxb/89162): Any other cleanup logic we should do that's appropriate
   // for Stop but not for Kill?
@@ -617,8 +617,8 @@ void ComponentV2::OnEngineTerminate(const Engine* shell_holder) {
   shell_holders_.erase(found);
 
   if (shell_holders_.empty()) {
-    FML_VLOG(-1) << "Killing component because all shell holders have been "
-                    "terminated.";
+    FML_VLOG(1) << "Killing component because all shell holders have been "
+                   "terminated.";
     Kill();
     // WARNING: Don't do anything past this point because the delegate may have
     // collected this instance via the termination callback.
