@@ -341,6 +341,7 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
       assert(path.endsWith('.dart'));
       return path
           .replaceAll('.', '_')
+          .replaceAll(':', '_')
           .replaceAll('/', '_')
           .replaceAll(r'\', '_')
           .replaceRange(path.length - '.dart'.length, null, '');
