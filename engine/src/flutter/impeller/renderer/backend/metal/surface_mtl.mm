@@ -242,7 +242,7 @@ bool SurfaceMTL::Present() const {
     blit_pass->AddCopy(source_texture_, destination_texture_, std::nullopt,
                        clip_rect_->GetOrigin());
     blit_pass->EncodeCommands(context->GetResourceAllocator());
-    if (!blit_command_buffer->SubmitCommands()) {
+    if (!context->GetCommandQueue()->Submit({blit_command_buffer}).ok()) {
       return false;
     }
   }

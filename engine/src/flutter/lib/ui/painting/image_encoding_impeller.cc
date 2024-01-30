@@ -178,7 +178,9 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
     encode_task(sk_image);
   };
 
-  if (!command_buffer->SubmitCommands(completion)) {
+  if (!impeller_context->GetCommandQueue()
+           ->Submit({command_buffer}, completion)
+           .ok()) {
     FML_LOG(ERROR) << "Failed to submit commands.";
   }
 }
