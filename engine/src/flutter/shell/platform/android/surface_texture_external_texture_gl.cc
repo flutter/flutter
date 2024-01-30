@@ -48,11 +48,8 @@ void SurfaceTextureExternalTextureGL::ProcessFrame(PaintContext& context,
   // Create a
   GrGLTextureInfo textureInfo = {GL_TEXTURE_EXTERNAL_OES, texture_name_,
                                  GL_RGBA8_OES};
-  auto backendTexture = GrBackendTextures::MakeGL(
-      /*width=*/bounds.width(),
-      /*height=*/bounds.height(),
-      /*Mipmapped=*/skgpu::Mipmapped::kNo,
-      /*glInfo=*/textureInfo);
+  auto backendTexture =
+      GrBackendTextures::MakeGL(1, 1, skgpu::Mipmapped::kNo, textureInfo);
   dl_image_ = DlImage::Make(SkImages::BorrowTextureFrom(
       context.gr_context, backendTexture, kTopLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr));
