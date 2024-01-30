@@ -304,6 +304,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
                                  std::nullopt,          // coverage_limit
                                  std::nullopt,          // sampler_descriptor
                                  true,                  // msaa_enabled
+                                 /*mip_count=*/1,
                                  "AtlasContents Snapshot");  // label
   if (!snapshot.has_value()) {
     return false;

@@ -116,6 +116,7 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
                                      GetCoverageHint(),  // coverage_limit
                                      std::nullopt,       // sampler_descriptor
                                      true,               // msaa_enabled
+                                     /*mip_count=*/1,
                                      "VerticesUVContents Snapshot");  // label
   if (!snapshot.has_value()) {
     return false;

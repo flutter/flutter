@@ -79,6 +79,7 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
     std::optional<Rect> coverage_limit,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
+    int32_t mip_count,
     const std::string& label) const {
   // Passthrough textures that have simple rectangle paths and complete source
   // rects.
@@ -101,7 +102,8 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
       std::nullopt,                                      // coverage_limit
       sampler_descriptor.value_or(sampler_descriptor_),  // sampler_descriptor
       true,                                              // msaa_enabled
-      label);                                            // label
+      /*mip_count=*/mip_count,
+      label);  // label
 }
 
 bool TextureContents::Render(const ContentContext& renderer,

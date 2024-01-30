@@ -19,11 +19,11 @@ class TextureFilterInput final : public FilterInput {
   Variant GetInput() const override;
 
   // |FilterInput|
-  std::optional<Snapshot> GetSnapshot(
-      const std::string& label,
-      const ContentContext& renderer,
-      const Entity& entity,
-      std::optional<Rect> coverage_limit) const override;
+  std::optional<Snapshot> GetSnapshot(const std::string& label,
+                                      const ContentContext& renderer,
+                                      const Entity& entity,
+                                      std::optional<Rect> coverage_limit,
+                                      int32_t mip_count) const override;
 
   // |FilterInput|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
