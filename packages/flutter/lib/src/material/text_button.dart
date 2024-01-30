@@ -50,8 +50,9 @@ import 'theme_data.dart';
 /// button will be disabled, it will not react to touch.
 ///
 /// {@tool dartpad}
-/// This sample shows how to render a disabled TextButton, an enabled TextButton
-/// and lastly a TextButton with gradient background.
+/// This sample shows various ways to configure TextButtons, from the
+/// simplest default appearance to versions that don't resemble
+/// Material Design at all.
 ///
 /// ** See code in examples/api/lib/material/text_button/text_button.0.dart **
 /// {@end-tool}

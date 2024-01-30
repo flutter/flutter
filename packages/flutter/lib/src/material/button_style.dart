@@ -348,7 +348,7 @@ class ButtonStyle with Diagnosticable {
   /// instead of the button's child.
   ///
   /// The returned widget is clipped by the button's
-  /// [ButtonStyle.shape] inset by the button's [ButtonStyle.padding]
+  /// [ButtonStyle.shape], inset by the button's [ButtonStyle.padding]
   /// and aligned by the button's [ButtonStyle.alignment].
   ///
   /// See also:

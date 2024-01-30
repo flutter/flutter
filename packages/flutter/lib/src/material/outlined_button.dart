@@ -109,7 +109,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle].mouseCursor and
+  /// parameters are used to construct [ButtonStyle.mouseCursor] and
   /// [iconColor], [disabledIconColor] are used to construct
   /// [ButtonStyle.iconColor].
   ///

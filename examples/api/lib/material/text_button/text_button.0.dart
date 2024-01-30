@@ -69,14 +69,15 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     final Color color1;
     final Color color2;
     final Color color3;
-    if (colorScheme.brightness == Brightness.light) {
-      color1 = Colors.blue.withOpacity(0.5);
-      color2 = Colors.orange.withOpacity(0.5);
-      color3 = Colors.yellow.withOpacity(0.5);
-    } else {
-      color1 = Colors.purple.withOpacity(0.5);
-      color2 = Colors.cyan.withOpacity(0.5);
-      color3 = Colors.yellow.withOpacity(0.5);
+    switch (colorScheme.brightness) {
+      case Brightness.light:
+        color1 = Colors.blue.withOpacity(0.5);
+        color2 = Colors.orange.withOpacity(0.5);
+        color3 = Colors.yellow.withOpacity(0.5);
+      case Brightness.dark:
+        color1 = Colors.purple.withOpacity(0.5);
+        color2 = Colors.cyan.withOpacity(0.5);
+        color3 = Colors.yellow.withOpacity(0.5);
     }
 
     // This gradient's appearance reflects the button's state.
@@ -148,8 +149,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
 
         // This theme defines default property overrides for all of the buttons
         // that follow.
-        TextButtonTheme
-        (
+        TextButtonTheme(
           data: TextButtonThemeData(
             style: TextButton.styleFrom(
               visualDensity: visualDensity,
@@ -204,7 +204,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
                       ),
                       verticalSpacer,
 
-                      // Override button's shape its border.
+                      // Override the button's shape and its border.
                       //
                       // In this case we've specified a shape that has border - the
                       // RoundedRectangleBorder's side parameter. If the styleFrom
@@ -371,13 +371,14 @@ class _TextButtonExampleState extends State<TextButtonExample> {
                       // Override the foregroundBuilder to specify images for the button's pressed
                       // hovered and inactive states.
                       //
-                      // This is an example of completely change the default appearance of a button
+                      // This is an example of completely changing the default appearance of a button
                       // by specifying images for each state and by turning off the overlays by
                       // overlayColor: Colors.transparent. AnimatedContainer takes care of the
                       // fade in and out segues between images.
                       //
-                      // The foregroundBuilder its child parameter. Unfortunately TextButton's child
-                      // parameter is required, so we still have to provide one.
+                      // This foregroundBuilder function ignores its child parameter. Unfortunately
+                      // TextButton's child parameter is required, so we still have
+                      // to provide one.
                       TextButton(
                         onPressed: () {},
                         style: TextButton.styleFrom(
