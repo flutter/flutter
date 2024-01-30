@@ -25,7 +25,8 @@ std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
     const std::string& label,
     const ContentContext& renderer,
     const Entity& entity,
-    std::optional<Rect> coverage_limit) const {
+    std::optional<Rect> coverage_limit,
+    int32_t mip_count) const {
   if (!coverage_limit.has_value() && entity.GetContents()) {
     coverage_limit = entity.GetContents()->GetCoverageHint();
   }
@@ -36,6 +37,7 @@ std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
         coverage_limit,  // coverage_limit
         std::nullopt,    // sampler_descriptor
         msaa_enabled_,   // msaa_enabled
+        /*mip_count=*/mip_count,
         SPrintF("Contents to %s Filter Snapshot", label.c_str()));  // label
   }
   return snapshot_;
