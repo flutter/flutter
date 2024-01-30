@@ -200,6 +200,8 @@ class FlutterPlugin implements Plugin<Project> {
     private Properties localProperties
     private String engineVersion
     private String engineRealm
+    private List<Map<String, Object>> pluginList
+    private List<Map<String, Object>> pluginDependencies
 
     /**
      * Flutter Docs Website URLs for help messages.
@@ -890,19 +892,25 @@ class FlutterPlugin implements Plugin<Project> {
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
     private List<Map<String, Object>> getPluginList(Project project) {
-        return project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
+        if (pluginList == null) {
+            pluginList = project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
+        }
+        return pluginList
     }
 
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies(Project project) {
-        Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
-        if (meta == null) {
-            return []
+        if (pluginDependencies == null) {
+            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
+            if (meta == null) {
+                return []
+            }
+            assert(meta.dependencyGraph instanceof List<Map>)
+            pluginDependencies = meta.dependencyGraph as List<Map<String, Object>>
         }
-        assert(meta.dependencyGraph instanceof List<Map>)
-        return meta.dependencyGraph as List<Map<String, Object>>
+        return pluginDependencies
     }
 
     private String resolveProperty(String name, String defaultValue) {
