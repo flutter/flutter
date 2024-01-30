@@ -4,6 +4,7 @@
 
 #include <cstdint>
 
+#include "fml/logging.h"
 #include "gtest/gtest.h"
 
 #include "impeller/core/allocator.h"
@@ -11,6 +12,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/color.h"
 #include "impeller/renderer/capabilities.h"
+#include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
@@ -52,6 +54,7 @@ class FakeContext : public Context {
   std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const {
     return nullptr;
   }
+  std::shared_ptr<CommandQueue> GetCommandQueue() const { FML_UNREACHABLE(); }
   std::shared_ptr<CommandBuffer> CreateCommandBuffer() const { return nullptr; }
   void Shutdown() {}
 

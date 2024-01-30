@@ -125,7 +125,7 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
     }
   }
 
-  return cmd_buffer->SubmitCommands();
+  return context->GetCommandQueue()->Submit({cmd_buffer}).ok();
 }
 
 bool TextureVK::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
