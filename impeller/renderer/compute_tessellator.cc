@@ -6,6 +6,7 @@
 
 #include <cstdint>
 
+#include "impeller/core/host_buffer.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/path_polyline.comp.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -170,7 +171,7 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
     return Status::kCommandInvalid;
   }
 
-  if (!cmd_buffer->SubmitCommands(callback)) {
+  if (!context->GetCommandQueue()->Submit({cmd_buffer}, callback).ok()) {
     return Status::kCommandInvalid;
   }
 
