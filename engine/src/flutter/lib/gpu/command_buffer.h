@@ -18,8 +18,8 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   FML_FRIEND_MAKE_REF_COUNTED(CommandBuffer);
 
  public:
-  CommandBuffer(std::shared_ptr<impeller::Context> context,
-                std::shared_ptr<impeller::CommandBuffer> command_buffer);
+  explicit CommandBuffer(
+      std::shared_ptr<impeller::CommandBuffer> command_buffer);
 
   std::shared_ptr<impeller::CommandBuffer> GetCommandBuffer();
 
@@ -32,7 +32,6 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   ~CommandBuffer() override;
 
  private:
-  std::shared_ptr<impeller::Context> context_;
   std::shared_ptr<impeller::CommandBuffer> command_buffer_;
   std::vector<std::shared_ptr<impeller::RenderPass>> encodables_;
 

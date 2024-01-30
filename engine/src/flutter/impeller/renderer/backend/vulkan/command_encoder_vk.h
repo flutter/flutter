@@ -10,7 +10,6 @@
 #include <optional>
 
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
-#include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder.h"
@@ -61,6 +60,8 @@ class CommandEncoderVK {
 
   bool IsValid() const;
 
+  bool Submit(SubmitCallback callback = {});
+
   bool Track(std::shared_ptr<SharedObjectVK> object);
 
   bool Track(std::shared_ptr<const DeviceBuffer> buffer);
@@ -81,15 +82,12 @@ class CommandEncoderVK {
 
   void InsertDebugMarker(std::string_view label) const;
 
-  bool EndCommandBuffer() const;
-
   fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
       const vk::DescriptorSetLayout& layout,
       const ContextVK& context);
 
  private:
   friend class ContextVK;
-  friend class CommandQueueVK;
 
   std::weak_ptr<const DeviceHolder> device_holder_;
   std::shared_ptr<TrackedObjectsVK> tracked_objects_;

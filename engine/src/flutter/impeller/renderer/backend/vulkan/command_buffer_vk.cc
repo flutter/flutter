@@ -7,7 +7,6 @@
 #include <memory>
 #include <utility>
 
-#include "fml/logging.h"
 #include "impeller/renderer/backend/vulkan/blit_pass_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pass_vk.h"
@@ -50,7 +49,16 @@ const std::shared_ptr<CommandEncoderVK>& CommandBufferVK::GetEncoder() {
 }
 
 bool CommandBufferVK::OnSubmitCommands(CompletionCallback callback) {
-  FML_UNREACHABLE()
+  if (!encoder_) {
+    encoder_ = encoder_factory_->Create();
+  }
+  if (!callback) {
+    return encoder_->Submit();
+  }
+  return encoder_->Submit([callback](bool submitted) {
+    callback(submitted ? CommandBuffer::Status::kCompleted
+                       : CommandBuffer::Status::kError);
+  });
 }
 
 void CommandBufferVK::OnWaitUntilScheduled() {}

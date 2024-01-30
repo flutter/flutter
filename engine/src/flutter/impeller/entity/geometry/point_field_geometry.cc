@@ -220,10 +220,9 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
     output = geometry_uv_buffer;
   }
 
-  if (!compute_pass->EncodeCommands()) {
+  if (!compute_pass->EncodeCommands() || !cmd_buffer->SubmitCommands()) {
     return {};
   }
-  renderer.RecordCommandBuffer(std::move(cmd_buffer));
 
   return {
       .type = PrimitiveType::kTriangle,

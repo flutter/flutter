@@ -141,7 +141,8 @@ TEST_P(AiksTest, CanRenderColorFilterWithInvertColorsDrawPaint) {
 namespace {
 bool GenerateMipmap(const std::shared_ptr<Context>& context,
                     std::shared_ptr<Texture> texture,
-                    std::string label) {
+                    std::string label,
+                    bool async_submit) {
   auto buffer = context->CreateCommandBuffer();
   if (!buffer) {
     return false;
@@ -151,19 +152,23 @@ bool GenerateMipmap(const std::shared_ptr<Context>& context,
     return false;
   }
   pass->GenerateMipmap(std::move(texture), std::move(label));
+  if (async_submit) {
+    return buffer->EncodeAndSubmit(pass, context->GetResourceAllocator());
+  }
 
   pass->EncodeCommands(context->GetResourceAllocator());
-  return context->GetCommandQueue()->Submit({buffer}).ok();
+  return buffer->SubmitCommands();
 }
 
 void CanRenderTiledTexture(AiksTest* aiks_test,
                            Entity::TileMode tile_mode,
+                           bool async_submit = false,
                            Matrix local_matrix = {}) {
   auto context = aiks_test->GetContext();
   ASSERT_TRUE(context);
   auto texture = aiks_test->CreateTextureForFixture("table_mountain_nx.png",
                                                     /*enable_mipmapping=*/true);
-  GenerateMipmap(context, texture, "table_mountain_nx");
+  GenerateMipmap(context, texture, "table_mountain_nx", async_submit);
   Canvas canvas;
   canvas.Scale(aiks_test->GetContentScale());
   canvas.Translate({100.0f, 100.0f, 0});
@@ -210,6 +215,10 @@ TEST_P(AiksTest, CanRenderTiledTextureClamp) {
   CanRenderTiledTexture(this, Entity::TileMode::kClamp);
 }
 
+TEST_P(AiksTest, CanRenderTiledTextureClampAsync) {
+  CanRenderTiledTexture(this, Entity::TileMode::kClamp, /*async_submit=*/true);
+}
+
 TEST_P(AiksTest, CanRenderTiledTextureRepeat) {
   CanRenderTiledTexture(this, Entity::TileMode::kRepeat);
 }
@@ -223,7 +232,7 @@ TEST_P(AiksTest, CanRenderTiledTextureDecal) {
 }
 
 TEST_P(AiksTest, CanRenderTiledTextureClampWithTranslate) {
-  CanRenderTiledTexture(this, Entity::TileMode::kClamp,
+  CanRenderTiledTexture(this, Entity::TileMode::kClamp, /*async_submit=*/false,
                         Matrix::MakeTranslation({172.f, 172.f, 0.f}));
 }
 

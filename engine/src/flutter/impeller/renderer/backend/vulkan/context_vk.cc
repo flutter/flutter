@@ -5,7 +5,6 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
 #include "fml/concurrent_message_loop.h"
-#include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 
 #ifdef FML_OS_ANDROID
 #include <pthread.h>
@@ -27,7 +26,6 @@
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
-#include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/debug_report_vk.h"
 #include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
@@ -447,7 +445,6 @@ void ContextVK::Setup(Settings settings) {
   command_pool_recycler_ = std::move(command_pool_recycler);
   descriptor_pool_recycler_ = std::move(descriptor_pool_recycler);
   device_name_ = std::string(physical_device_properties.deviceName);
-  command_queue_vk_ = std::make_shared<CommandQueueVK>(weak_from_this());
   is_valid_ = true;
 
   // Create the GPU Tracer later because it depends on state from
@@ -564,10 +561,6 @@ ContextVK::CreateGraphicsCommandEncoderFactory() const {
 
 std::shared_ptr<GPUTracerVK> ContextVK::GetGPUTracer() const {
   return gpu_tracer_;
-}
-
-std::shared_ptr<CommandQueue> ContextVK::GetCommandQueue() const {
-  return command_queue_vk_;
 }
 
 }  // namespace impeller

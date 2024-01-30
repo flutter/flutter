@@ -306,7 +306,7 @@ bool Playground::OpenPlaygroundHere(
         ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass);
 
         pass->EncodeCommands();
-        if (!renderer->GetContext()->GetCommandQueue()->Submit({buffer}).ok()) {
+        if (!buffer->SubmitCommands()) {
           return false;
         }
       }
@@ -350,7 +350,7 @@ bool Playground::OpenPlaygroundHere(SinglePassCallback pass_callback) {
         }
 
         pass->EncodeCommands();
-        if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
+        if (!buffer->SubmitCommands()) {
           return false;
         }
         return true;
@@ -422,7 +422,7 @@ static std::shared_ptr<Texture> CreateTextureForDecompressedImage(
     blit_pass->SetLabel("Mipmap Blit Pass");
     blit_pass->GenerateMipmap(texture);
     blit_pass->EncodeCommands(context->GetResourceAllocator());
-    if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
+    if (!command_buffer->SubmitCommands()) {
       FML_DLOG(ERROR) << "Failed to submit blit pass command buffer.";
       return nullptr;
     }

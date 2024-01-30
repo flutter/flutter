@@ -8,7 +8,6 @@
 #include "fml/synchronization/waitable_event.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
-#include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
 namespace testing {
@@ -49,13 +48,13 @@ TEST(CommandEncoderVKTest, CleanupAfterSubmit) {
     fml::AutoResetWaitableEvent wait_for_thread_join;
     auto context = MockVulkanContextBuilder().Build();
     std::thread thread([&] {
-      auto buffer = context->CreateCommandBuffer();
-      context->GetCommandQueue()->Submit(
-          {buffer}, [&](CommandBuffer::Status status) {
-            ASSERT_EQ(status, CommandBuffer::Status::kCompleted);
-            wait_for_thread_join.Wait();
-            wait_for_submit.Signal();
-          });
+      CommandEncoderFactoryVK factory(context);
+      std::shared_ptr<CommandEncoderVK> encoder = factory.Create();
+      encoder->Submit([&](bool success) {
+        ASSERT_TRUE(success);
+        wait_for_thread_join.Wait();
+        wait_for_submit.Signal();
+      });
     });
     thread.join();
     wait_for_thread_join.Signal();

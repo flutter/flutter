@@ -53,10 +53,7 @@ bool Scene::Render(const RenderTarget& render_target,
 
   // TODO(bdero): Do post processing.
 
-  if (!scene_context_->GetContext()
-           ->GetCommandQueue()
-           ->Submit({command_buffer})
-           .ok()) {
+  if (!command_buffer->SubmitCommands()) {
     FML_LOG(ERROR) << "Failed to submit command buffer.";
     return false;
   }

@@ -193,13 +193,11 @@ TEST_F(ShellTest, EncodeImageAccessesSyncSwitch) {
 using ::impeller::testing::MockAllocator;
 using ::impeller::testing::MockBlitPass;
 using ::impeller::testing::MockCommandBuffer;
-using ::impeller::testing::MockCommandQueue;
 using ::impeller::testing::MockDeviceBuffer;
 using ::impeller::testing::MockImpellerContext;
 using ::impeller::testing::MockTexture;
 using ::testing::_;
 using ::testing::DoAll;
-using ::testing::Invoke;
 using ::testing::InvokeArgument;
 using ::testing::Return;
 
@@ -210,7 +208,6 @@ std::shared_ptr<impeller::Context> MakeConvertDlImageToSkImageContext(
   auto command_buffer = std::make_shared<MockCommandBuffer>(context);
   auto allocator = std::make_shared<MockAllocator>();
   auto blit_pass = std::make_shared<MockBlitPass>();
-  auto command_queue = std::make_shared<MockCommandQueue>();
   impeller::DeviceBufferDescriptor device_buffer_desc;
   device_buffer_desc.size = buffer.size();
   auto device_buffer = std::make_shared<MockDeviceBuffer>(device_buffer_desc);
@@ -218,14 +215,13 @@ std::shared_ptr<impeller::Context> MakeConvertDlImageToSkImageContext(
   EXPECT_CALL(*blit_pass, IsValid).WillRepeatedly(Return(true));
   EXPECT_CALL(*command_buffer, IsValid).WillRepeatedly(Return(true));
   EXPECT_CALL(*command_buffer, OnCreateBlitPass).WillOnce(Return(blit_pass));
+  EXPECT_CALL(*command_buffer, OnSubmitCommands(_))
+      .WillOnce(
+          DoAll(InvokeArgument<0>(impeller::CommandBuffer::Status::kCompleted),
+                Return(true)));
   EXPECT_CALL(*context, GetResourceAllocator).WillRepeatedly(Return(allocator));
   EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
   EXPECT_CALL(*device_buffer, OnGetContents).WillOnce(Return(buffer.data()));
-  EXPECT_CALL(*command_queue, Submit(_, _))
-      .WillRepeatedly(
-          DoAll(InvokeArgument<1>(impeller::CommandBuffer::Status::kCompleted),
-                Return(fml::Status())));
-  EXPECT_CALL(*context, GetCommandQueue).WillRepeatedly(Return(command_queue));
   return context;
 }
 }  // namespace

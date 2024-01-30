@@ -33,7 +33,7 @@ GPUTracerVK::GPUTracerVK(std::weak_ptr<ContextVK> context)
     // The device does not support timestamp queries.
     return;
   }
-// Disable tracing in release mode.
+  // Disable tracing in release mode.
 #ifdef IMPELLER_DEBUG
   enabled_ = true;
 #endif  // IMPELLER_DEBUG
@@ -61,7 +61,7 @@ void GPUTracerVK::InitializeQueryPool(const ContextVK& context) {
     buffer_vk.GetEncoder()->GetCommandBuffer().resetQueryPool(
         trace_states_[i].query_pool.get(), 0, kPoolSize);
   }
-  if (!context.GetCommandQueue()->Submit({buffer}).ok()) {
+  if (!buffer->SubmitCommands()) {
     VALIDATION_LOG << "Failed to reset query pool for trace events.";
     enabled_ = false;
   }
