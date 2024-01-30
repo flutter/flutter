@@ -1,4 +1,4 @@
-Signature: d382387c3cf8c7e14a768d5bb259d9b0
+Signature: 050d51a5eb7f748ed646a811d0c2e5c3
 
 ====================================================================================================
 LIBRARY: angle
@@ -9305,6 +9305,7 @@ ORIGIN: ../../../third_party/boringssl/src/crypto/base64/base64.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/bio/bio.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/bio/bio_mem.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/bio/connect.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/bio/errno.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/bio/fd.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/bio/file.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/bio/hexdump.c
@@ -9377,6 +9378,8 @@ ORIGIN: ../../../third_party/boringssl/src/crypto/pem/pem_oth.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/pem/pem_pk8.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/pem/pem_pkey.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/rc4/rc4.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/rsa_extra/internal.h
+ORIGIN: ../../../third_party/boringssl/src/crypto/rsa_extra/rsa_crypt.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/stack/stack.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/thread.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/x509/a_digest.c
@@ -9520,6 +9523,7 @@ FILE: ../../../third_party/boringssl/src/crypto/base64/base64.c
 FILE: ../../../third_party/boringssl/src/crypto/bio/bio.c
 FILE: ../../../third_party/boringssl/src/crypto/bio/bio_mem.c
 FILE: ../../../third_party/boringssl/src/crypto/bio/connect.c
+FILE: ../../../third_party/boringssl/src/crypto/bio/errno.c
 FILE: ../../../third_party/boringssl/src/crypto/bio/fd.c
 FILE: ../../../third_party/boringssl/src/crypto/bio/file.c
 FILE: ../../../third_party/boringssl/src/crypto/bio/hexdump.c
@@ -9592,6 +9596,8 @@ FILE: ../../../third_party/boringssl/src/crypto/pem/pem_oth.c
 FILE: ../../../third_party/boringssl/src/crypto/pem/pem_pk8.c
 FILE: ../../../third_party/boringssl/src/crypto/pem/pem_pkey.c
 FILE: ../../../third_party/boringssl/src/crypto/rc4/rc4.c
+FILE: ../../../third_party/boringssl/src/crypto/rsa_extra/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/rsa_extra/rsa_crypt.c
 FILE: ../../../third_party/boringssl/src/crypto/stack/stack.c
 FILE: ../../../third_party/boringssl/src/crypto/thread.c
 FILE: ../../../third_party/boringssl/src/crypto/x509/a_digest.c
@@ -33446,13 +33452,12 @@ ORIGIN: ../../../third_party/boringssl/src/crypto/bytestring/internal.h
 ORIGIN: ../../../third_party/boringssl/src/crypto/chacha/chacha.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/cipher_extra/e_chacha20poly1305.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/cipher_extra/e_tls.c
-ORIGIN: ../../../third_party/boringssl/src/crypto/cpu_arm.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/crypto.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/engine/engine.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/cipher/aead.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/hkdf/hkdf.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/rand/rand.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/rand/urandom.c
-ORIGIN: ../../../third_party/boringssl/src/crypto/hkdf/hkdf.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/pkcs7/pkcs7.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/poly1305/poly1305.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/poly1305/poly1305_arm.c
@@ -33494,13 +33499,12 @@ FILE: ../../../third_party/boringssl/src/crypto/bytestring/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/chacha/chacha.c
 FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/e_chacha20poly1305.c
 FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/e_tls.c
-FILE: ../../../third_party/boringssl/src/crypto/cpu_arm.c
 FILE: ../../../third_party/boringssl/src/crypto/crypto.c
 FILE: ../../../third_party/boringssl/src/crypto/engine/engine.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/cipher/aead.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/hkdf/hkdf.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rand/rand.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rand/urandom.c
-FILE: ../../../third_party/boringssl/src/crypto/hkdf/hkdf.c
 FILE: ../../../third_party/boringssl/src/crypto/pkcs7/pkcs7.c
 FILE: ../../../third_party/boringssl/src/crypto/poly1305/poly1305.c
 FILE: ../../../third_party/boringssl/src/crypto/poly1305/poly1305_arm.c
@@ -33770,8 +33774,7 @@ ORIGIN: ../../../third_party/boringssl/src/crypto/curve25519/asm/x25519-asm-arm.
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p224-64.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/util.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/rand/internal.h
-ORIGIN: ../../../third_party/boringssl/src/crypto/refcount_c11.c
-ORIGIN: ../../../third_party/boringssl/src/crypto/refcount_lock.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/refcount.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/thread_none.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/thread_pthread.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/thread_win.c
@@ -33795,8 +33798,7 @@ FILE: ../../../third_party/boringssl/src/crypto/curve25519/asm/x25519-asm-arm.S
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p224-64.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/util.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rand/internal.h
-FILE: ../../../third_party/boringssl/src/crypto/refcount_c11.c
-FILE: ../../../third_party/boringssl/src/crypto/refcount_lock.c
+FILE: ../../../third_party/boringssl/src/crypto/refcount.c
 FILE: ../../../third_party/boringssl/src/crypto/thread_none.c
 FILE: ../../../third_party/boringssl/src/crypto/thread_pthread.c
 FILE: ../../../third_party/boringssl/src/crypto/thread_win.c
@@ -33871,10 +33873,15 @@ written authorization of the copyright holder.
 LIBRARY: fiat
 ORIGIN: ../../../third_party/boringssl/src/third_party/fiat/LICENSE
 TYPE: LicenseType.mit
+FILE: ../../../third_party/boringssl/src/third_party/fiat/asm/fiat_curve25519_adx_mul.S
+FILE: ../../../third_party/boringssl/src/third_party/fiat/asm/fiat_curve25519_adx_square.S
 FILE: ../../../third_party/boringssl/src/third_party/fiat/curve25519_32.h
 FILE: ../../../third_party/boringssl/src/third_party/fiat/curve25519_64.h
+FILE: ../../../third_party/boringssl/src/third_party/fiat/curve25519_64_adx.h
+FILE: ../../../third_party/boringssl/src/third_party/fiat/curve25519_64_msvc.h
 FILE: ../../../third_party/boringssl/src/third_party/fiat/p256_32.h
 FILE: ../../../third_party/boringssl/src/third_party/fiat/p256_64.h
+FILE: ../../../third_party/boringssl/src/third_party/fiat/p256_64_msvc.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2015-2020 the fiat-crypto authors (see
 
@@ -33977,7 +33984,6 @@ ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/self_check/self_che
 ORIGIN: ../../../third_party/boringssl/src/crypto/pkcs7/internal.h
 ORIGIN: ../../../third_party/boringssl/src/crypto/pkcs7/pkcs7_x509.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/rand_extra/forkunsafe.c
-ORIGIN: ../../../third_party/boringssl/src/crypto/rand_extra/fuchsia.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/rand_extra/rand_extra.c
 ORIGIN: ../../../third_party/boringssl/src/decrepit/cfb/cfb.c
 ORIGIN: ../../../third_party/boringssl/src/include/openssl/is_boringssl.h
@@ -34001,7 +34007,6 @@ FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/self_check/self_check
 FILE: ../../../third_party/boringssl/src/crypto/pkcs7/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/pkcs7/pkcs7_x509.c
 FILE: ../../../third_party/boringssl/src/crypto/rand_extra/forkunsafe.c
-FILE: ../../../third_party/boringssl/src/crypto/rand_extra/fuchsia.c
 FILE: ../../../third_party/boringssl/src/crypto/rand_extra/rand_extra.c
 FILE: ../../../third_party/boringssl/src/decrepit/cfb/cfb.c
 FILE: ../../../third_party/boringssl/src/include/openssl/is_boringssl.h
@@ -34598,7 +34603,6 @@ IN THE MATERIALS.
 ====================================================================================================
 LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/crypto/asn1/posix_time.c
-ORIGIN: ../../../third_party/boringssl/src/crypto/cpu_aarch64_freebsd.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/cpu_arm_freebsd.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/evp/p_hkdf.c
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/dh/internal.h
@@ -34608,7 +34612,6 @@ ORIGIN: ../../../third_party/boringssl/src/include/openssl/kdf.h
 ORIGIN: ../../../third_party/boringssl/src/include/openssl/time.h
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/boringssl/src/crypto/asn1/posix_time.c
-FILE: ../../../third_party/boringssl/src/crypto/cpu_aarch64_freebsd.c
 FILE: ../../../third_party/boringssl/src/crypto/cpu_arm_freebsd.c
 FILE: ../../../third_party/boringssl/src/crypto/evp/p_hkdf.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/dh/internal.h
@@ -34634,11 +34637,52 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ====================================================================================================
 LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/cpu_aarch64_openbsd.c
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/crypto/cpu_aarch64_openbsd.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2022, Robert Nagy <robert.nagy@gmail.com>
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/cpu_aarch64_sysreg.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/curve25519/curve25519_64_adx.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/builtin_curves.h
 ORIGIN: ../../../third_party/boringssl/src/crypto/kyber/internal.h
 ORIGIN: ../../../third_party/boringssl/src/crypto/kyber/keccak.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/kyber/kyber.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/rand_extra/getentropy.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/rand_extra/ios.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/rand_extra/trusty.c
+ORIGIN: ../../../third_party/boringssl/src/include/openssl/asm_base.h
+ORIGIN: ../../../third_party/boringssl/src/include/openssl/kyber.h
+ORIGIN: ../../../third_party/boringssl/src/include/openssl/target.h
 TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/crypto/cpu_aarch64_sysreg.c
+FILE: ../../../third_party/boringssl/src/crypto/curve25519/curve25519_64_adx.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/builtin_curves.h
 FILE: ../../../third_party/boringssl/src/crypto/kyber/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/kyber/keccak.c
+FILE: ../../../third_party/boringssl/src/crypto/kyber/kyber.c
+FILE: ../../../third_party/boringssl/src/crypto/rand_extra/getentropy.c
+FILE: ../../../third_party/boringssl/src/crypto/rand_extra/ios.c
+FILE: ../../../third_party/boringssl/src/crypto/rand_extra/trusty.c
+FILE: ../../../third_party/boringssl/src/include/openssl/asm_base.h
+FILE: ../../../third_party/boringssl/src/include/openssl/kyber.h
+FILE: ../../../third_party/boringssl/src/include/openssl/target.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2023, Google Inc.
 
@@ -35863,6 +35907,17 @@ POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/pem.cc (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/pem.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2010 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+====================================================================================================
+
+====================================================================================================
 LIBRARY: icu
 ORIGIN: ../../../third_party/icu/source/i18n/double-conversion-bignum-dtoa.cpp
 ORIGIN: ../../../third_party/icu/source/i18n/double-conversion-bignum-dtoa.h
@@ -35978,6 +36033,17 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/pem.h (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/pem.h
+----------------------------------------------------------------------------------------------------
+Copyright 2011 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 ====================================================================================================
 
 ====================================================================================================
@@ -36155,6 +36221,21 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/asn1_util.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/asn1_util.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_status_flags.h (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/asn1_util.cc
+FILE: ../../../third_party/boringssl/src/pki/asn1_util.h
+FILE: ../../../third_party/boringssl/src/pki/cert_status_flags.h
+----------------------------------------------------------------------------------------------------
+Copyright 2012 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 ====================================================================================================
 
 ====================================================================================================
@@ -36669,6 +36750,17 @@ POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_status_flags_list.h (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/cert_status_flags_list.h
+----------------------------------------------------------------------------------------------------
+Copyright 2014 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+====================================================================================================
+
+====================================================================================================
 LIBRARY: angle
 LIBRARY: icu
 ORIGIN: ../../../third_party/angle/src/common/base/anglebase/numerics/safe_conversions.h + ../../../LICENSE
@@ -37100,6 +37192,89 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/certificate_policies.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/certificate_policies.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/certificate_policies_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/extended_key_usage.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/extended_key_usage.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/extended_key_usage_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/input.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/input.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/input_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/name_constraints.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/name_constraints.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/name_constraints_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_certificate.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_certificate.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_certificate_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_values.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_values.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_values_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parser.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parser.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parser_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/signature_algorithm.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/signature_algorithm.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/signature_algorithm_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/tag.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/tag.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/test_helpers.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/test_helpers.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_certificate_chain.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_certificate_chain.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_certificate_chain_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_name_match.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_name_match.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_name_match_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_signed_data.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_signed_data.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_signed_data_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/certificate_policies.cc
+FILE: ../../../third_party/boringssl/src/pki/certificate_policies.h
+FILE: ../../../third_party/boringssl/src/pki/certificate_policies_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/extended_key_usage.cc
+FILE: ../../../third_party/boringssl/src/pki/extended_key_usage.h
+FILE: ../../../third_party/boringssl/src/pki/extended_key_usage_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/input.cc
+FILE: ../../../third_party/boringssl/src/pki/input.h
+FILE: ../../../third_party/boringssl/src/pki/input_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/name_constraints.cc
+FILE: ../../../third_party/boringssl/src/pki/name_constraints.h
+FILE: ../../../third_party/boringssl/src/pki/name_constraints_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_certificate.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_certificate.h
+FILE: ../../../third_party/boringssl/src/pki/parse_certificate_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_values.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_values.h
+FILE: ../../../third_party/boringssl/src/pki/parse_values_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parser.cc
+FILE: ../../../third_party/boringssl/src/pki/parser.h
+FILE: ../../../third_party/boringssl/src/pki/parser_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/signature_algorithm.cc
+FILE: ../../../third_party/boringssl/src/pki/signature_algorithm.h
+FILE: ../../../third_party/boringssl/src/pki/signature_algorithm_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/tag.cc
+FILE: ../../../third_party/boringssl/src/pki/tag.h
+FILE: ../../../third_party/boringssl/src/pki/test_helpers.cc
+FILE: ../../../third_party/boringssl/src/pki/test_helpers.h
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain.h
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_name_match.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_name_match.h
+FILE: ../../../third_party/boringssl/src/pki/verify_name_match_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_signed_data.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_signed_data.h
+FILE: ../../../third_party/boringssl/src/pki/verify_signed_data_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2015 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 ====================================================================================================
 
 ====================================================================================================
@@ -37561,6 +37736,97 @@ POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_error_id.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_error_id.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_error_params.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_error_params.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_errors.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_errors.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_issuer_source.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_issuer_source_static.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_issuer_source_static.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_issuer_source_static_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_issuer_source_sync_unittest.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/cert_verify_proc_blocklist.inc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/encode_values.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/encode_values.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/encode_values_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/nist_pkits_unittest.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ocsp.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ocsp.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ocsp_revocation_status.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ocsp_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ocsp_verify_result.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ocsp_verify_result.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_name.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_name.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parse_name_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parsed_certificate.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parsed_certificate.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/path_builder.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/path_builder.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/path_builder_pkits_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/path_builder_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/path_builder_verify_certificate_chain_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/trust_store.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/trust_store.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/trust_store_collection.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/trust_store_collection.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/trust_store_collection_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/trust_store_in_memory.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/trust_store_in_memory.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_certificate_chain_pkits_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/verify_certificate_chain_typed_unittest.h (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/cert_error_id.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_error_id.h
+FILE: ../../../third_party/boringssl/src/pki/cert_error_params.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_error_params.h
+FILE: ../../../third_party/boringssl/src/pki/cert_errors.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_errors.h
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source.h
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source_static.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source_static.h
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source_static_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source_sync_unittest.h
+FILE: ../../../third_party/boringssl/src/pki/cert_verify_proc_blocklist.inc
+FILE: ../../../third_party/boringssl/src/pki/encode_values.cc
+FILE: ../../../third_party/boringssl/src/pki/encode_values.h
+FILE: ../../../third_party/boringssl/src/pki/encode_values_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/nist_pkits_unittest.h
+FILE: ../../../third_party/boringssl/src/pki/ocsp.cc
+FILE: ../../../third_party/boringssl/src/pki/ocsp.h
+FILE: ../../../third_party/boringssl/src/pki/ocsp_revocation_status.h
+FILE: ../../../third_party/boringssl/src/pki/ocsp_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/ocsp_verify_result.cc
+FILE: ../../../third_party/boringssl/src/pki/ocsp_verify_result.h
+FILE: ../../../third_party/boringssl/src/pki/parse_name.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_name.h
+FILE: ../../../third_party/boringssl/src/pki/parse_name_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parsed_certificate.cc
+FILE: ../../../third_party/boringssl/src/pki/parsed_certificate.h
+FILE: ../../../third_party/boringssl/src/pki/path_builder.cc
+FILE: ../../../third_party/boringssl/src/pki/path_builder.h
+FILE: ../../../third_party/boringssl/src/pki/path_builder_pkits_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/path_builder_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/path_builder_verify_certificate_chain_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store.h
+FILE: ../../../third_party/boringssl/src/pki/trust_store_collection.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store_collection.h
+FILE: ../../../third_party/boringssl/src/pki/trust_store_collection_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store_in_memory.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store_in_memory.h
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain_pkits_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain_typed_unittest.h
+----------------------------------------------------------------------------------------------------
+Copyright 2016 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+====================================================================================================
+
+====================================================================================================
 LIBRARY: angle
 ORIGIN: ../../../third_party/angle/include/EGL/eglext_angle.h + ../../../third_party/angle/LICENSE
 ORIGIN: ../../../third_party/angle/include/GLES2/gl2ext_angle.h + ../../../third_party/angle/LICENSE
@@ -37812,6 +38078,35 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/common_cert_errors.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/common_cert_errors.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/general_names.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/general_names.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/general_names_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/nist_pkits_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/parsed_certificate_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/common_cert_errors.cc
+FILE: ../../../third_party/boringssl/src/pki/common_cert_errors.h
+FILE: ../../../third_party/boringssl/src/pki/general_names.cc
+FILE: ../../../third_party/boringssl/src/pki/general_names.h
+FILE: ../../../third_party/boringssl/src/pki/general_names_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/nist_pkits_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parsed_certificate_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate.cc
+FILE: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate.h
+FILE: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 ====================================================================================================
 
 ====================================================================================================
@@ -39321,6 +39616,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/crl.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/crl.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/crl_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/revocation_util.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/revocation_util.h (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/crl.cc
+FILE: ../../../third_party/boringssl/src/pki/crl.h
+FILE: ../../../third_party/boringssl/src/pki/crl_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/revocation_util.cc
+FILE: ../../../third_party/boringssl/src/pki/revocation_util.h
+----------------------------------------------------------------------------------------------------
+Copyright 2019 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+====================================================================================================
+
+====================================================================================================
 LIBRARY: angle
 ORIGIN: ../../../third_party/angle/src/common/apple/SoftLinking.h + ../../../third_party/angle/LICENSE
 ORIGIN: ../../../third_party/angle/src/common/entry_points_enum_autogen.cpp + ../../../third_party/angle/LICENSE
@@ -40648,6 +40962,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/mock_signature_verify_cache.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/mock_signature_verify_cache.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/signature_verify_cache.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/string_util.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/string_util.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/string_util_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/mock_signature_verify_cache.cc
+FILE: ../../../third_party/boringssl/src/pki/mock_signature_verify_cache.h
+FILE: ../../../third_party/boringssl/src/pki/signature_verify_cache.h
+FILE: ../../../third_party/boringssl/src/pki/string_util.cc
+FILE: ../../../third_party/boringssl/src/pki/string_util.h
+FILE: ../../../third_party/boringssl/src/pki/string_util_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2022 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+====================================================================================================
+
+====================================================================================================
 LIBRARY: angle
 ORIGIN: ../../../third_party/angle/src/common/FixedQueue.h + ../../../third_party/angle/LICENSE
 ORIGIN: ../../../third_party/angle/src/common/platform_helpers.cpp + ../../../third_party/angle/LICENSE
@@ -40756,6 +41091,45 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/file_util.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/file_util.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/fillins_base64.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/fillins_base64.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/fillins_string_util.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/fillins_string_util.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/log.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/net_errors.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/openssl_util.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/openssl_util.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/path_service.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/fillins/path_service.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ip_util.cc (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ip_util.h (with ../../../third_party/boringssl/src/LICENSE)
+ORIGIN: ../../../third_party/boringssl/src/pki/ip_util_unittest.cc (with ../../../third_party/boringssl/src/LICENSE)
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/pki/fillins/file_util.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/file_util.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/fillins_base64.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/fillins_base64.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/fillins_string_util.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/fillins_string_util.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/log.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/net_errors.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/openssl_util.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/openssl_util.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/path_service.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/path_service.h
+FILE: ../../../third_party/boringssl/src/pki/ip_util.cc
+FILE: ../../../third_party/boringssl/src/pki/ip_util.h
+FILE: ../../../third_party/boringssl/src/pki/ip_util_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2023 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 ====================================================================================================
 
 ====================================================================================================
@@ -44686,6 +45060,7 @@ FILE: ../../../third_party/boringssl/src/crypto/hmac_extra/hmac_tests.txt
 FILE: ../../../third_party/boringssl/src/crypto/hpke/hpke_test_vectors.txt
 FILE: ../../../third_party/boringssl/src/crypto/hpke/test-vectors.json
 FILE: ../../../third_party/boringssl/src/crypto/kyber/keccak_tests.txt
+FILE: ../../../third_party/boringssl/src/crypto/kyber/kyber_tests.txt
 FILE: ../../../third_party/boringssl/src/crypto/obj/obj_mac.num
 FILE: ../../../third_party/boringssl/src/crypto/obj/objects.txt
 FILE: ../../../third_party/boringssl/src/crypto/poly1305/poly1305_arm_asm.S
@@ -44699,6 +45074,129 @@ FILE: ../../../third_party/boringssl/src/include/openssl/ssl.h
 FILE: ../../../third_party/boringssl/src/include/openssl/ssl3.h
 FILE: ../../../third_party/boringssl/src/include/openssl/tls1.h
 FILE: ../../../third_party/boringssl/src/include/openssl/x509.h
+FILE: ../../../third_party/boringssl/src/pki/asn1_util.cc
+FILE: ../../../third_party/boringssl/src/pki/asn1_util.h
+FILE: ../../../third_party/boringssl/src/pki/cert_error_id.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_error_id.h
+FILE: ../../../third_party/boringssl/src/pki/cert_error_params.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_error_params.h
+FILE: ../../../third_party/boringssl/src/pki/cert_errors.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_errors.h
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source.h
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source_static.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source_static.h
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source_static_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/cert_issuer_source_sync_unittest.h
+FILE: ../../../third_party/boringssl/src/pki/cert_status_flags.h
+FILE: ../../../third_party/boringssl/src/pki/cert_status_flags_list.h
+FILE: ../../../third_party/boringssl/src/pki/cert_verify_proc_blocklist.inc
+FILE: ../../../third_party/boringssl/src/pki/certificate_policies.cc
+FILE: ../../../third_party/boringssl/src/pki/certificate_policies.h
+FILE: ../../../third_party/boringssl/src/pki/certificate_policies_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/common_cert_errors.cc
+FILE: ../../../third_party/boringssl/src/pki/common_cert_errors.h
+FILE: ../../../third_party/boringssl/src/pki/crl.cc
+FILE: ../../../third_party/boringssl/src/pki/crl.h
+FILE: ../../../third_party/boringssl/src/pki/crl_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/encode_values.cc
+FILE: ../../../third_party/boringssl/src/pki/encode_values.h
+FILE: ../../../third_party/boringssl/src/pki/encode_values_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/extended_key_usage.cc
+FILE: ../../../third_party/boringssl/src/pki/extended_key_usage.h
+FILE: ../../../third_party/boringssl/src/pki/extended_key_usage_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/file_util.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/file_util.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/fillins_base64.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/fillins_base64.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/fillins_string_util.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/fillins_string_util.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/log.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/net_errors.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/openssl_util.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/openssl_util.h
+FILE: ../../../third_party/boringssl/src/pki/fillins/path_service.cc
+FILE: ../../../third_party/boringssl/src/pki/fillins/path_service.h
+FILE: ../../../third_party/boringssl/src/pki/general_names.cc
+FILE: ../../../third_party/boringssl/src/pki/general_names.h
+FILE: ../../../third_party/boringssl/src/pki/general_names_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/import_spec.json
+FILE: ../../../third_party/boringssl/src/pki/import_tool.go
+FILE: ../../../third_party/boringssl/src/pki/input.cc
+FILE: ../../../third_party/boringssl/src/pki/input.h
+FILE: ../../../third_party/boringssl/src/pki/input_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/ip_util.cc
+FILE: ../../../third_party/boringssl/src/pki/ip_util.h
+FILE: ../../../third_party/boringssl/src/pki/ip_util_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/mock_signature_verify_cache.cc
+FILE: ../../../third_party/boringssl/src/pki/mock_signature_verify_cache.h
+FILE: ../../../third_party/boringssl/src/pki/name_constraints.cc
+FILE: ../../../third_party/boringssl/src/pki/name_constraints.h
+FILE: ../../../third_party/boringssl/src/pki/name_constraints_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/nist_pkits_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/nist_pkits_unittest.h
+FILE: ../../../third_party/boringssl/src/pki/ocsp.cc
+FILE: ../../../third_party/boringssl/src/pki/ocsp.h
+FILE: ../../../third_party/boringssl/src/pki/ocsp_revocation_status.h
+FILE: ../../../third_party/boringssl/src/pki/ocsp_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/ocsp_verify_result.cc
+FILE: ../../../third_party/boringssl/src/pki/ocsp_verify_result.h
+FILE: ../../../third_party/boringssl/src/pki/parse_certificate.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_certificate.h
+FILE: ../../../third_party/boringssl/src/pki/parse_certificate_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_name.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_name.h
+FILE: ../../../third_party/boringssl/src/pki/parse_name_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_values.cc
+FILE: ../../../third_party/boringssl/src/pki/parse_values.h
+FILE: ../../../third_party/boringssl/src/pki/parse_values_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parsed_certificate.cc
+FILE: ../../../third_party/boringssl/src/pki/parsed_certificate.h
+FILE: ../../../third_party/boringssl/src/pki/parsed_certificate_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/parser.cc
+FILE: ../../../third_party/boringssl/src/pki/parser.h
+FILE: ../../../third_party/boringssl/src/pki/parser_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/patches/0001-Simplify-the-name-constraint-limit-to-resemble-Borin.patch
+FILE: ../../../third_party/boringssl/src/pki/path_builder.cc
+FILE: ../../../third_party/boringssl/src/pki/path_builder.h
+FILE: ../../../third_party/boringssl/src/pki/path_builder_pkits_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/path_builder_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/path_builder_verify_certificate_chain_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/pem.cc
+FILE: ../../../third_party/boringssl/src/pki/pem.h
+FILE: ../../../third_party/boringssl/src/pki/revocation_util.cc
+FILE: ../../../third_party/boringssl/src/pki/revocation_util.h
+FILE: ../../../third_party/boringssl/src/pki/signature_algorithm.cc
+FILE: ../../../third_party/boringssl/src/pki/signature_algorithm.h
+FILE: ../../../third_party/boringssl/src/pki/signature_algorithm_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/signature_verify_cache.h
+FILE: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate.cc
+FILE: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate.h
+FILE: ../../../third_party/boringssl/src/pki/simple_path_builder_delegate_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/string_util.cc
+FILE: ../../../third_party/boringssl/src/pki/string_util.h
+FILE: ../../../third_party/boringssl/src/pki/string_util_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/tag.cc
+FILE: ../../../third_party/boringssl/src/pki/tag.h
+FILE: ../../../third_party/boringssl/src/pki/test_helpers.cc
+FILE: ../../../third_party/boringssl/src/pki/test_helpers.h
+FILE: ../../../third_party/boringssl/src/pki/trust_store.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store.h
+FILE: ../../../third_party/boringssl/src/pki/trust_store_collection.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store_collection.h
+FILE: ../../../third_party/boringssl/src/pki/trust_store_collection_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store_in_memory.cc
+FILE: ../../../third_party/boringssl/src/pki/trust_store_in_memory.h
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain.h
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain_pkits_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain_typed_unittest.h
+FILE: ../../../third_party/boringssl/src/pki/verify_certificate_chain_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_name_match.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_name_match.h
+FILE: ../../../third_party/boringssl/src/pki/verify_name_match_unittest.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_signed_data.cc
+FILE: ../../../third_party/boringssl/src/pki/verify_signed_data.h
+FILE: ../../../third_party/boringssl/src/pki/verify_signed_data_unittest.cc
 FILE: ../../../third_party/boringssl/src/ssl/bio_ssl.cc
 FILE: ../../../third_party/boringssl/src/ssl/handshake.cc
 FILE: ../../../third_party/boringssl/src/ssl/handshake_client.cc
@@ -57164,4 +57662,4 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
 
-Total license count: 771
+Total license count: 782
