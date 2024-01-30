@@ -74,7 +74,6 @@ void main() {
       ServiceWorkerStrategy.offlineFirst,
       compilerConfigs: <WebCompilerConfig>[
         const WasmCompilerConfig(
-          omitTypeChecks: false,
           wasmOpt: WasmOptLevel.none,
           renderer: WebRendererMode.skwasm,
         ),

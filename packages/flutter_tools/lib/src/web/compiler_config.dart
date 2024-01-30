@@ -28,13 +28,13 @@ sealed class WebCompilerConfig {
 /// Configuration for the Dart-to-Javascript compiler (dart2js).
 class JsCompilerConfig extends WebCompilerConfig {
   const JsCompilerConfig({
-    required this.csp,
-    required this.dumpInfo,
-    required this.nativeNullAssertions,
-    required this.optimizationLevel,
-    required this.noFrequencyBasedMinification,
-    required this.sourceMaps,
-    required super.renderer,
+    this.csp = false,
+    this.dumpInfo = false,
+    this.nativeNullAssertions = false,
+    this.optimizationLevel = kDart2jsDefaultOptimizationLevel,
+    this.noFrequencyBasedMinification = false,
+    this.sourceMaps = true,
+    super.renderer = WebRendererMode.auto,
   });
 
   /// Instantiates [JsCompilerConfig] suitable for the `flutter run` command.
@@ -42,12 +42,8 @@ class JsCompilerConfig extends WebCompilerConfig {
     required bool nativeNullAssertions,
     required WebRendererMode renderer,
   }) : this(
-          csp: false,
-          dumpInfo: false,
           nativeNullAssertions: nativeNullAssertions,
-          noFrequencyBasedMinification: false,
           optimizationLevel: kDart2jsDefaultOptimizationLevel,
-          sourceMaps: true,
           renderer: renderer,
         );
 
@@ -134,9 +130,9 @@ class JsCompilerConfig extends WebCompilerConfig {
 /// Configuration for the Wasm compiler.
 class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
-    required this.omitTypeChecks,
-    required this.wasmOpt,
-    required super.renderer
+    this.omitTypeChecks = false,
+    this.wasmOpt = WasmOptLevel.defaultValue,
+    super.renderer = WebRendererMode.auto,
   });
 
   /// Build environment for [omitTypeChecks].

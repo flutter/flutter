@@ -1040,12 +1040,13 @@ class Node {
         );
       }
     }
-    return Node.withNoStamp(target,
+    return Node.withNoStamp(
+      target,
       inputs,
       outputs,
       dependencies,
       buildKey,
-      missingDepfile
+      missingDepfile,
     );
   }
 

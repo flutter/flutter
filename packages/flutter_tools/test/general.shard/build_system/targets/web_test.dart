@@ -121,7 +121,7 @@ void main() {
         .createSync(recursive: true);
     environment.buildDir.childFile('main.dart.js').createSync();
     await WebReleaseBundle(<WebCompilerConfig>[
-      const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+      const JsCompilerConfig()
     ]).build(environment);
 
     expect(environment.outputDir.childFile('version.json'), exists);
@@ -135,7 +135,7 @@ void main() {
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
       await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+        const JsCompilerConfig()
       ]).build(environment);
 
       final String versionFile = environment.outputDir
@@ -155,7 +155,7 @@ void main() {
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
     await WebReleaseBundle(<WebCompilerConfig>[
-      const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+        const JsCompilerConfig()
     ]).build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
@@ -170,7 +170,7 @@ void main() {
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
     await WebReleaseBundle(<WebCompilerConfig>[
-      const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+        const JsCompilerConfig()
     ]).build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
@@ -194,7 +194,7 @@ void main() {
     environment.buildDir.childFile('main.dart.js').createSync();
 
     await WebReleaseBundle(<WebCompilerConfig>[
-      const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+        const JsCompilerConfig()
     ]).build(environment);
 
     expect(environment.outputDir.childFile('foo.txt')
@@ -208,7 +208,7 @@ void main() {
     webResources.childFile('foo.txt').writeAsStringSync('B');
 
     await WebReleaseBundle(<WebCompilerConfig>[
-      const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+        const JsCompilerConfig()
     ]).build(environment);
 
     expect(environment.outputDir.childFile('foo.txt')
@@ -393,12 +393,7 @@ void main() {
     await Dart2JSTarget(
       const JsCompilerConfig(
           csp: true,
-          dumpInfo: false,
-          nativeNullAssertions: false,
-          noFrequencyBasedMinification: false,
-          optimizationLevel: 'O4',
           sourceMaps: false,
-          renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -437,13 +432,7 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -484,13 +473,7 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -528,13 +511,7 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -571,13 +548,7 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -617,13 +588,8 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
         nativeNullAssertions: true,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -661,13 +627,8 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
         optimizationLevel: 'O3',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -707,13 +668,7 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
 
@@ -762,13 +717,7 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -803,15 +752,7 @@ void main() {
     ));
 
     await Dart2JSTarget(
-      const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
-        sourceMaps: true,
-        renderer: WebRendererMode.auto,
-      )
+      const JsCompilerConfig()
     ).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
@@ -854,13 +795,7 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
-        dumpInfo: false,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -900,13 +835,8 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-        csp: false,
         dumpInfo: true,
-        nativeNullAssertions: false,
-        noFrequencyBasedMinification: false,
-        optimizationLevel: 'O4',
         sourceMaps: false,
-        renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -946,13 +876,8 @@ void main() {
 
     await Dart2JSTarget(
       const JsCompilerConfig(
-          csp: false,
-          dumpInfo: false,
-          nativeNullAssertions: false,
           noFrequencyBasedMinification: true,
-          optimizationLevel: 'O4',
           sourceMaps: false,
-          renderer: WebRendererMode.auto,
       )
     ).build(environment);
   }, overrides: <Type, Generator>{
@@ -993,8 +918,6 @@ void main() {
 
     await Dart2WasmTarget(
       const WasmCompilerConfig(
-        omitTypeChecks: false,
-        wasmOpt: WasmOptLevel.defaultValue,
         renderer: WebRendererMode.canvaskit
       )
     ).build(environment);
@@ -1041,7 +964,6 @@ void main() {
     await Dart2WasmTarget(
       const WasmCompilerConfig(
         omitTypeChecks: true,
-        wasmOpt: WasmOptLevel.defaultValue,
         renderer: WebRendererMode.canvaskit
       )
     ).build(environment);
@@ -1083,7 +1005,6 @@ void main() {
 
     await Dart2WasmTarget(
       const WasmCompilerConfig(
-        omitTypeChecks: false,
         wasmOpt: WasmOptLevel.debug,
         renderer: WebRendererMode.canvaskit
       )
@@ -1117,7 +1038,6 @@ void main() {
 
     await Dart2WasmTarget(
       const WasmCompilerConfig(
-        omitTypeChecks: false,
         wasmOpt: WasmOptLevel.none,
         renderer: WebRendererMode.canvaskit
       )
@@ -1159,8 +1079,6 @@ void main() {
 
     await Dart2WasmTarget(
       const WasmCompilerConfig(
-        omitTypeChecks: false,
-        wasmOpt: WasmOptLevel.defaultValue,
         renderer: WebRendererMode.skwasm,
       )
     ).build(environment);
@@ -1212,7 +1130,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
     await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-      const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+      const JsCompilerConfig()
     ]).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
@@ -1237,7 +1155,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
     await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-      const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+      const JsCompilerConfig()
     ]).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
@@ -1261,7 +1179,7 @@ void main() {
       .childFile('main.dart.js.map')
       .createSync(recursive: true);
     await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-      const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto)
+      const JsCompilerConfig()
     ]).build(environment);
 
     // No caching of source maps.
