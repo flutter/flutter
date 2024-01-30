@@ -461,6 +461,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   bool canRequestFocus() {
+    if (widget.focusNode != null) {
+      return widget.focusNode!.canRequestFocus;
+    }
     if (widget.requestFocusOnTap != null) {
       return widget.requestFocusOnTap!;
     }
