@@ -34,6 +34,31 @@ void CommandBuffer::WaitUntilScheduled() {
   return OnWaitUntilScheduled();
 }
 
+bool CommandBuffer::EncodeAndSubmit(
+    const std::shared_ptr<RenderPass>& render_pass) {
+  if (!render_pass->IsValid() || !IsValid()) {
+    return false;
+  }
+  if (!render_pass->EncodeCommands()) {
+    return false;
+  }
+
+  return SubmitCommands(nullptr);
+}
+
+bool CommandBuffer::EncodeAndSubmit(
+    const std::shared_ptr<BlitPass>& blit_pass,
+    const std::shared_ptr<Allocator>& allocator) {
+  if (!blit_pass->IsValid() || !IsValid()) {
+    return false;
+  }
+  if (!blit_pass->EncodeCommands(allocator)) {
+    return false;
+  }
+
+  return SubmitCommands(nullptr);
+}
+
 std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(
     const RenderTarget& render_target) {
   auto pass = OnCreateRenderPass(render_target);

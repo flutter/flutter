@@ -10,7 +10,6 @@
 #include "impeller/base/allocation.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
-#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity_pass_target.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/texture_mipmap.h"
@@ -18,12 +17,12 @@
 namespace impeller {
 
 InlinePassContext::InlinePassContext(
-    const ContentContext& renderer,
+    std::shared_ptr<Context> context,
     EntityPassTarget& pass_target,
     uint32_t pass_texture_reads,
     uint32_t entity_count,
     std::optional<RenderPassResult> collapsed_parent_pass)
-    : renderer_(renderer),
+    : context_(std::move(context)),
       pass_target_(pass_target),
       entity_count_(entity_count),
       is_collapsed_(collapsed_parent_pass.has_value()) {
@@ -68,13 +67,15 @@ bool InlinePassContext::EndPass() {
   const std::shared_ptr<Texture>& target_texture =
       GetPassTarget().GetRenderTarget().GetRenderTargetTexture();
   if (target_texture->GetMipCount() > 1) {
-    fml::Status mip_status = AddMipmapGeneration(
-        command_buffer_, renderer_.GetContext(), target_texture);
+    fml::Status mip_status =
+        AddMipmapGeneration(command_buffer_, context_, target_texture);
     if (!mip_status.ok()) {
       return false;
     }
   }
-  renderer_.RecordCommandBuffer(std::move(command_buffer_));
+  if (!command_buffer_->SubmitCommands()) {
+    return false;
+  }
 
   pass_ = nullptr;
   command_buffer_ = nullptr;
@@ -96,7 +97,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
   /// time this method is called, but it'll also run if the pass has been
   /// previously ended via `EndPass`.
 
-  command_buffer_ = renderer_.GetContext()->CreateCommandBuffer();
+  command_buffer_ = context_->CreateCommandBuffer();
   if (!command_buffer_) {
     VALIDATION_LOG << "Could not create command buffer.";
     return {};
@@ -121,7 +122,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
                        ->second.resolve_texture != nullptr;
     if (pass_count_ > 0 && is_msaa) {
       result.backdrop_texture =
-          pass_target_.Flip(*renderer_.GetContext()->GetResourceAllocator());
+          pass_target_.Flip(*context_->GetResourceAllocator());
       if (!result.backdrop_texture) {
         VALIDATION_LOG << "Could not flip the EntityPass render target.";
       }
@@ -173,7 +174,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
 
   result.pass = pass_;
 
-  if (!renderer_.GetContext()->GetCapabilities()->SupportsReadFromResolve() &&
+  if (!context_->GetCapabilities()->SupportsReadFromResolve() &&
       result.backdrop_texture ==
           result.pass->GetRenderTarget().GetRenderTargetTexture()) {
     VALIDATION_LOG << "EntityPass backdrop restore configuration is not valid "

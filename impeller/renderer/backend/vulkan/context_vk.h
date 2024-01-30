@@ -20,7 +20,6 @@
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_library_vk.h"
 #include "impeller/renderer/capabilities.h"
-#include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/context.h"
 
 namespace impeller {
@@ -36,7 +35,6 @@ class ResourceManagerVK;
 class SurfaceContextVK;
 class GPUTracerVK;
 class DescriptorPoolRecyclerVK;
-class CommandQueueVK;
 
 class ContextVK final : public Context,
                         public BackendCast<ContextVK, Context>,
@@ -165,8 +163,6 @@ class ContextVK final : public Context,
     return descriptor_pool_recycler_;
   }
 
-  std::shared_ptr<CommandQueue> GetCommandQueue() const override;
-
   std::shared_ptr<GPUTracerVK> GetGPUTracer() const;
 
   void RecordFrameEndTime() const;
@@ -201,7 +197,6 @@ class ContextVK final : public Context,
   std::unique_ptr<fml::Thread> queue_submit_thread_;
   std::shared_ptr<GPUTracerVK> gpu_tracer_;
   std::shared_ptr<DescriptorPoolRecyclerVK> descriptor_pool_recycler_;
-  std::shared_ptr<CommandQueue> command_queue_vk_;
 
   bool sync_presentation_ = false;
   const uint64_t hash_;

@@ -200,8 +200,7 @@ ContentContext::ContentContext(
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator())),
-      pending_command_buffers_(std::make_unique<PendingCommandBuffers>()) {
+      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator())) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -478,10 +477,9 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     return fml::Status(fml::StatusCode::kUnknown, "");
   }
 
-  if (!sub_renderpass->EncodeCommands()) {
+  if (!sub_command_buffer->EncodeAndSubmit(sub_renderpass)) {
     return fml::Status(fml::StatusCode::kUnknown, "");
   }
-  RecordCommandBuffer(std::move(sub_command_buffer));
 
   return subpass_target;
 }
@@ -532,17 +530,6 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
       it++;
     }
   }
-}
-
-void ContentContext::RecordCommandBuffer(
-    std::shared_ptr<CommandBuffer> command_buffer) const {
-  pending_command_buffers_->command_buffers.push_back(
-      std::move(command_buffer));
-}
-
-void ContentContext::FlushCommandBuffers() const {
-  auto buffers = std::move(pending_command_buffers_->command_buffers);
-  GetContext()->GetCommandQueue()->Submit(buffers);
 }
 
 }  // namespace impeller
