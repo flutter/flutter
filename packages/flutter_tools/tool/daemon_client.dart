@@ -94,7 +94,7 @@ Future<void> main() async {
 
 int id = 0;
 
-Future<void> await _send(Map<String, dynamic> map) async {
+Future<void> _send(Map<String, dynamic> map) async {
   map['id'] = id++;
   final String str = '[${json.encode(map)}]';
   await ProcessUtils.writelnToStdinUnsafe(daemon.stdin, str);

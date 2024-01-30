@@ -589,7 +589,7 @@ abstract class ResidentCompiler {
   /// Should be invoked when results of compilation are accepted by the client.
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
-  void accept();
+  Future<void> accept();
 
   /// Should be invoked when results of compilation are rejected by the client.
   ///
@@ -599,7 +599,7 @@ abstract class ResidentCompiler {
   /// Should be invoked when frontend server compiler should forget what was
   /// accepted previously so that next call to [recompile] produces complete
   /// kernel file.
-  void reset();
+  Future<void> reset();
 
   Future<Object> shutdown();
 }

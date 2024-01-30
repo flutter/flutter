@@ -261,7 +261,7 @@ class TestCompiler {
           request.result.complete(outputPath);
         }
         compiler!.accept();
-        compiler!.reset();
+        await compiler!.reset();
       }
       globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);

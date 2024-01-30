@@ -583,7 +583,7 @@ class DevFS {
     bool assetBuildFailed = false;
     int syncedBytes = 0;
     if (fullRestart) {
-      generator.reset();
+      await generator.reset();
     }
     // On a full restart, or on an initial compile for the attach based workflow,
     // this will produce a full dill. Subsequent invocations will produce incremental
