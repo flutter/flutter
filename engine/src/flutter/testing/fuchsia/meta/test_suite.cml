@@ -1,4 +1,7 @@
 {
+    include: [
+         "sys/component/realm_builder_absolute.shard.cml",
+    ],
     facets: {
         // shell_unittests and embedder_unittests require vulkan to function.
         "fuchsia.test": { type: "vulkan" },

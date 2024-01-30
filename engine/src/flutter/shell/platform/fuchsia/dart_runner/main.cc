@@ -5,12 +5,13 @@
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/sys/inspect/cpp/component.h>
-#include <lib/syslog/global.h>
 #include <lib/trace-provider/provider.h>
 #include <lib/trace/event.h>
 
 #include "dart_runner.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/platform/fuchsia/log_interest_listener.h"
+#include "flutter/fml/platform/fuchsia/log_state.h"
 #include "flutter/fml/trace_event.h"
 #include "logging.h"
 #include "platform/utils.h"
@@ -36,6 +37,12 @@ static void RegisterProfilerSymbols(const char* symbols_path,
 
 int main(int argc, const char** argv) {
   async::Loop loop(&kAsyncLoopConfigAttachToCurrentThread);
+
+  // Setup logging.
+  fml::LogState::Default().SetTags({LOG_TAG});
+  fml::LogInterestListener listener(fml::LogState::Default().TakeClientEnd(),
+                                    loop.dispatcher());
+  listener.AsyncWaitForInterestChanged();
 
   // Create our component context which is served later.
   auto context = sys::ComponentContext::Create();
