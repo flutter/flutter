@@ -7,6 +7,7 @@
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/android/image_lru.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
 
@@ -58,11 +59,13 @@ class ImageExternalTexture : public flutter::Texture {
 
   fml::jni::ScopedJavaGlobalRef<jobject> image_texture_entry_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  SkRect latest_bounds_ = SkRect::MakeEmpty();
+  fml::jni::ScopedJavaGlobalRef<jobject> latest_android_image_;
 
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
   AttachmentState state_ = AttachmentState::kUninitialized;
-
   sk_sp<flutter::DlImage> dl_image_;
+  ImageLRU image_lru_ = ImageLRU();
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTexture);
 };

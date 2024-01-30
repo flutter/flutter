@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_H_
 
+#include <unordered_map>
+
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/android/image_external_texture.h"
 
@@ -30,14 +32,26 @@ class ImageExternalTextureGL : public ImageExternalTexture {
  protected:
   void Attach(PaintContext& context) override;
   void Detach() override;
+  void ProcessFrame(PaintContext& context, const SkRect& bounds) override;
+  void UpdateImage(JavaLocalRef& hardware_buffer, PaintContext& context);
 
-  // Returns true if a new image was acquired and android_image_ and egl_image_
-  // were updated.
-  bool MaybeSwapImages();
+  virtual sk_sp<flutter::DlImage> CreateDlImage(
+      PaintContext& context,
+      const SkRect& bounds,
+      std::optional<HardwareBufferKey> id,
+      impeller::UniqueEGLImageKHR&& egl_image) = 0;
+
   impeller::UniqueEGLImageKHR CreateEGLImage(AHardwareBuffer* buffer);
 
-  fml::jni::ScopedJavaGlobalRef<jobject> android_image_;
-  impeller::UniqueEGLImageKHR egl_image_;
+  struct GlEntry {
+    impeller::UniqueEGLImageKHR egl_image;
+    impeller::UniqueGLTexture texture;
+  };
+
+  // Each GL entry is keyed off of the currently active
+  // hardware buffers and evicted when the hardware buffer
+  // is removed from the LRU cache.
+  std::unordered_map<HardwareBufferKey, GlEntry> gl_entries_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGL);
 };
@@ -53,13 +67,14 @@ class ImageExternalTextureGLSkia : public ImageExternalTextureGL {
  private:
   void Attach(PaintContext& context) override;
   void Detach() override;
-  void ProcessFrame(PaintContext& context, const SkRect& bounds) override;
 
   void BindImageToTexture(const impeller::UniqueEGLImageKHR& image, GLuint tex);
-  sk_sp<flutter::DlImage> CreateDlImage(PaintContext& context,
-                                        const SkRect& bounds);
 
-  impeller::UniqueGLTexture texture_;
+  sk_sp<flutter::DlImage> CreateDlImage(
+      PaintContext& context,
+      const SkRect& bounds,
+      std::optional<HardwareBufferKey> id,
+      impeller::UniqueEGLImageKHR&& egl_image) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGLSkia);
 };
@@ -75,11 +90,13 @@ class ImageExternalTextureGLImpeller : public ImageExternalTextureGL {
 
  private:
   void Attach(PaintContext& context) override;
-  void ProcessFrame(PaintContext& context, const SkRect& bounds) override;
   void Detach() override;
 
-  sk_sp<flutter::DlImage> CreateDlImage(PaintContext& context,
-                                        const SkRect& bounds);
+  sk_sp<flutter::DlImage> CreateDlImage(
+      PaintContext& context,
+      const SkRect& bounds,
+      std::optional<HardwareBufferKey> id,
+      impeller::UniqueEGLImageKHR&& egl_image) override;
 
   const std::shared_ptr<impeller::ContextGLES> impeller_context_;
 

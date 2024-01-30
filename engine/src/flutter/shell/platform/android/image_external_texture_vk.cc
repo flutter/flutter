@@ -1,5 +1,6 @@
 
 #include "flutter/shell/platform/android/image_external_texture_vk.h"
+#include <cstdint>
 
 #include "flutter/impeller/core/formats.h"
 #include "flutter/impeller/core/texture_descriptor.h"
@@ -37,14 +38,26 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
   if (image.is_null()) {
     return;
   }
-  JavaLocalRef old_android_image(android_image_);
-  android_image_.Reset(image);
-  JavaLocalRef hardware_buffer = HardwareBufferFor(android_image_);
+  JavaLocalRef old_android_image(latest_android_image_);
+  latest_android_image_.Reset(image);
+  JavaLocalRef hardware_buffer = HardwareBufferFor(latest_android_image_);
   AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
 
   AHardwareBuffer_Desc hb_desc = {};
   flutter::NDKHelpers::AHardwareBuffer_describe(latest_hardware_buffer,
                                                 &hb_desc);
+  std::optional<HardwareBufferKey> key =
+      flutter::NDKHelpers::AHardwareBuffer_getId(latest_hardware_buffer);
+  auto existing_image = image_lru_.FindImage(key);
+  if (existing_image != nullptr) {
+    dl_image_ = existing_image;
+
+    CloseHardwareBuffer(hardware_buffer);
+    // IMPORTANT: We have just received a new frame to display so close the
+    // previous Java Image so that it is recycled and used for a future frame.
+    CloseImage(old_android_image);
+    return;
+  }
 
   impeller::TextureDescriptor desc;
   desc.storage_mode = impeller::StorageMode::kDevicePrivate;
@@ -88,9 +101,12 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
   }
 
   dl_image_ = impeller::DlImageImpeller::Make(texture);
+  if (key.has_value()) {
+    image_lru_.AddImage(dl_image_, key.value());
+  }
   CloseHardwareBuffer(hardware_buffer);
-  // IMPORTANT: We only close the old image after texture stops referencing
-  // it.
+  // IMPORTANT: We have just received a new frame to display so close the
+  // previous Java Image so that it is recycled and used for a future frame.
   CloseImage(old_android_image);
 }
 

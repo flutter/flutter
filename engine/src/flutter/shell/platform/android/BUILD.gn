@@ -47,6 +47,7 @@ executable("flutter_shell_native_unittests") {
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
+    "image_lru_unittests.cc",
     "platform_view_android_unittests.cc",
   ]
   public_configs = [ "//flutter:config" ]
@@ -111,6 +112,8 @@ source_set("flutter_shell_native_src") {
     "image_external_texture_gl.h",
     "image_external_texture_vk.cc",
     "image_external_texture_vk.h",
+    "image_lru.cc",
+    "image_lru.h",
     "library_loader.cc",
     "ndk_helpers.cc",
     "ndk_helpers.h",

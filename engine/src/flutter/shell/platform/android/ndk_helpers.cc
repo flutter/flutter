@@ -22,6 +22,9 @@ typedef void (*fp_AHardwareBuffer_acquire)(AHardwareBuffer* buffer);
 typedef void (*fp_AHardwareBuffer_release)(AHardwareBuffer* buffer);
 typedef void (*fp_AHardwareBuffer_describe)(AHardwareBuffer* buffer,
                                             AHardwareBuffer_Desc* desc);
+typedef void (*fp_AHardwareBuffer_getId)(AHardwareBuffer* buffer,
+                                         uint64_t* outId);
+
 typedef EGLClientBuffer (*fp_eglGetNativeClientBufferANDROID)(
     AHardwareBuffer* buffer);
 
@@ -32,6 +35,8 @@ void (*_AHardwareBuffer_acquire)(AHardwareBuffer* buffer) = nullptr;
 void (*_AHardwareBuffer_release)(AHardwareBuffer* buffer) = nullptr;
 void (*_AHardwareBuffer_describe)(AHardwareBuffer* buffer,
                                   AHardwareBuffer_Desc* desc) = nullptr;
+void (*_AHardwareBuffer_getId)(AHardwareBuffer* buffer,
+                               uint64_t* outId) = nullptr;
 EGLClientBuffer (*_eglGetNativeClientBufferANDROID)(AHardwareBuffer* buffer) =
     nullptr;
 
@@ -61,6 +66,10 @@ void InitOnceCallback() {
                                  ->ResolveFunction<fp_AHardwareBuffer_release>(
                                      "AHardwareBuffer_release")
                                  .value_or(nullptr);
+  _AHardwareBuffer_getId =
+      android
+          ->ResolveFunction<fp_AHardwareBuffer_getId>("AHardwareBuffer_getId")
+          .value_or(nullptr);
   _AHardwareBuffer_describe =
       android
           ->ResolveFunction<fp_AHardwareBuffer_describe>(
@@ -105,6 +114,17 @@ void NDKHelpers::AHardwareBuffer_describe(AHardwareBuffer* buffer,
   NDKHelpers::Init();
   FML_CHECK(_AHardwareBuffer_describe != nullptr);
   _AHardwareBuffer_describe(buffer, desc);
+}
+
+std::optional<HardwareBufferKey> NDKHelpers::AHardwareBuffer_getId(
+    AHardwareBuffer* buffer) {
+  NDKHelpers::Init();
+  if (_AHardwareBuffer_getId == nullptr) {
+    return std::nullopt;
+  }
+  HardwareBufferKey outId;
+  _AHardwareBuffer_getId(buffer, &outId);
+  return outId;
 }
 
 EGLClientBuffer NDKHelpers::eglGetNativeClientBufferANDROID(
