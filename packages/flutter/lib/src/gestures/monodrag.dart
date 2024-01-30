@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -332,7 +334,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   // The move delta of each pointer before the next frame.
   //
   // The key is the pointer ID. It is cleared whenever a new batch of pointer events is detected.
-  final Map<int, Set<Offset>> _moveDeltaBeforeFrame = <int, Set<Offset>>{};
+  final Map<int, Offset> _moveDeltaBeforeFrame = <int, Offset>{};
 
   // The timestamp of all events of the current frame.
   //
@@ -408,16 +410,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     return result;
   }
 
-  void _resetMoveDeltaRecords() {
-    if (_frameTimeStamp != null) {
-      _moveDeltaBeforeFrame.clear();
-      _frameTimeStamp = null;
-    }
-
-    assert(_frameTimeStamp == null);
-    assert(_moveDeltaBeforeFrame.isEmpty);
-  }
-
   void _recordMoveDeltaForMultitouch(int pointer, Offset localDelta) {
     if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
       assert(_frameTimeStamp == null);
@@ -432,9 +424,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_moveDeltaBeforeFrame.containsKey(pointer)) {
-      _moveDeltaBeforeFrame[pointer]!.add(localDelta);
+      final Offset offset = _moveDeltaBeforeFrame[pointer]!;
+      _moveDeltaBeforeFrame[pointer] = offset + localDelta;
     } else {
-      _moveDeltaBeforeFrame[pointer] = <Offset>{ localDelta };
+      _moveDeltaBeforeFrame[pointer] = localDelta;
     }
   }
 
@@ -449,29 +442,21 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return sum;
     }
 
-    for (final Offset delta in _moveDeltaBeforeFrame[pointer]!) {
-      if (positive) {
-        if (axis == _DragDirection.vertical) {
-          if (delta.dy > 0.0) {
-            sum += delta.dy;
-          }
-        } else {
-          if (delta.dx > 0.0) {
-            sum += delta.dx;
-          }
-        }
+    final Offset offset = _moveDeltaBeforeFrame[pointer]!;
+    if (positive) {
+      if (axis == _DragDirection.vertical) {
+        sum = max(offset.dy, 0.0);
       } else {
-        if (axis == _DragDirection.vertical) {
-          if (delta.dy < 0.0) {
-            sum += delta.dy;
-          }
-        } else {
-          if (delta.dx < 0.0) {
-            sum += delta.dx;
-          }
-        }
+        sum = max(offset.dx, 0.0);
+      }
+    } else {
+      if (axis == _DragDirection.vertical) {
+        sum = min(offset.dy, 0.0);
+      } else {
+        sum = min(offset.dx, 0.0);
       }
     }
+
     return sum;
   }
 
@@ -511,7 +496,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Offset _resolveLocalDeltaForMultitouch(int pointer, Offset localDelta) {
     if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
-      _resetMoveDeltaRecords();
+      if (_frameTimeStamp != null) {
+        _moveDeltaBeforeFrame.clear();
+        _frameTimeStamp = null;
+      }
       return localDelta;
     }
 
@@ -527,63 +515,57 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return localDelta;
     }
 
-    final double dx;
-    _DragDirection axis = _DragDirection.horizontal;
-    bool positive = localDelta.dx > 0.0;
-
-    int? maxSumDeltaPointer = _getMaxSumDeltaPointer(positive: positive, axis: axis);
-    double maxSumDelta;
-    double curPointerSumDelta;
-
-    if (maxSumDeltaPointer == null || maxSumDeltaPointer == pointer) {
-      dx = localDelta.dx;
-    } else {
-      maxSumDelta = _getSumDelta(pointer: maxSumDeltaPointer, positive: positive, axis: axis);
-      curPointerSumDelta = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
-      if (positive) {
-        if (curPointerSumDelta + localDelta.dx > maxSumDelta) {
-          dx = curPointerSumDelta + localDelta.dx - maxSumDelta;
-        } else {
-          dx = 0.0;
-        }
-      } else {
-        if (curPointerSumDelta + localDelta.dx < maxSumDelta) {
-          dx = curPointerSumDelta + localDelta.dx - maxSumDelta;
-        } else {
-          dx = 0.0;
-        }
-      }
-    }
-
-    final double dy;
-    axis = _DragDirection.vertical;
-    positive = localDelta.dy > 0.0;
-
-    maxSumDeltaPointer = _getMaxSumDeltaPointer(positive: positive, axis: axis);
-    if (maxSumDeltaPointer == null || maxSumDeltaPointer == pointer) {
-      dy = localDelta.dy;
-    } else {
-      maxSumDelta = _getSumDelta(pointer: maxSumDeltaPointer, positive: positive, axis: axis);
-      curPointerSumDelta = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
-      if (positive) {
-        if (curPointerSumDelta + localDelta.dy > maxSumDelta) {
-          dy = curPointerSumDelta + localDelta.dy - maxSumDelta;
-        } else {
-          dy = 0.0;
-        }
-      } else {
-        if (curPointerSumDelta + localDelta.dy < maxSumDelta) {
-          dy = curPointerSumDelta + localDelta.dy - maxSumDelta;
-        } else {
-          dy = 0.0;
-        }
-      }
-    }
+    final double dx = _resolveDelta(
+      isX: true,
+      pointer: pointer,
+      positive: localDelta.dx > 0.0,
+      axis: _DragDirection.horizontal,
+      localDelta: localDelta,
+    );
+    final double dy = _resolveDelta(
+      isX: false,
+      pointer: pointer,
+      positive: localDelta.dy > 0.0,
+      axis: _DragDirection.vertical,
+      localDelta: localDelta,
+    );
 
     assert(dx.abs() <= localDelta.dx.abs());
     assert(dy.abs() <= localDelta.dy.abs());
 
     return Offset(dx, dy);
+  }
+
+  double _resolveDelta({
+    required bool isX,
+    required int pointer,
+    required bool positive,
+    required _DragDirection axis,
+    required Offset localDelta,
+  }) {
+    final int? maxSumDeltaPointer = _getMaxSumDeltaPointer(positive: positive, axis: axis);
+    assert(maxSumDeltaPointer != null);
+
+    if (maxSumDeltaPointer == pointer) {
+      return isX ? localDelta.dx : localDelta.dy;
+    } else {
+      final double maxSumDelta = _getSumDelta(pointer: maxSumDeltaPointer!, positive: positive, axis: axis);
+      final double curPointerSumDelta = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
+      final double delta = isX ? localDelta.dx : localDelta.dy;
+      if (positive) {
+        if (curPointerSumDelta + delta > maxSumDelta) {
+          return curPointerSumDelta + delta - maxSumDelta;
+        } else {
+          return 0.0;
+        }
+      } else {
+        if (curPointerSumDelta + delta < maxSumDelta) {
+          return curPointerSumDelta + delta - maxSumDelta;
+        } else {
+          return 0.0;
+        }
+      }
+    }
   }
 
   @override

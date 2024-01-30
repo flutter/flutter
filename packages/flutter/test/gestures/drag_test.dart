@@ -677,17 +677,16 @@ void main() {
     tester.closeArena(6);
     tester.route(down6);
 
-    // Currently, #5 pointer has the max move deltas and #6 pointer's move event
-    // may be merged.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), }
 
     log.add('-c');
-    // #6 pointer move to right 100.0, received delta should be (0.0, 0.0).
+    // #6 pointer move to right 100.0, received delta should be (100 - 50, 0.0).
     tester.route(pointer6.move(const Offset(100.0, 0.0)));
     log.add('-d');
-    // #6 pointer move to left 50.0, received delta should be (0.0, 0.0).
+    // #6 pointer move to left 50.0, received delta should be (-50.0, 0.0).
     tester.route(pointer6.move(const Offset(50.0, 0.0)));
 
-    // Currently, the two pointers have the same sum move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), 6: Offset(50, 0),}
 
     log.add('-e');
     // #6 pointer move to right 1.0, received delta should be (1.0, 0.0).
@@ -696,17 +695,16 @@ void main() {
     // #6 pointer move to left 1.0, received delta should be (-1.0, 0.0).
     tester.route(pointer6.move(const Offset(50.0, 0.0)));
 
-    // Currently, #6 pointer has the max move deltas and #5 pointer's move event
-    // may be merged.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), 6: Offset(50, 0),}
 
     log.add('-g');
-    // #5 pointer move to right 1.0, received delta should be (0.0, 0.0).
+    // #5 pointer move to right 1.0, received delta should be (1.0, 0.0).
     tester.route(pointer5.move(const Offset(51.0, 0.0)));
     log.add('-h');
-    // #5 pointer move to left 1.0, received delta should be (0.0, 0.0).
+    // #5 pointer move to left 1.0, received delta should be (-1.0, 0.0).
     tester.route(pointer5.move(const Offset(50.0, 0.0)));
 
-    // Currently, the two pointers have the same sum move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), 6: Offset(50, 0),}
 
     log.add('-i');
     // #6 pointer move to right 10.0, received delta should be (10.0, 0.0).
@@ -715,7 +713,7 @@ void main() {
     // #6 pointer move to left 10.0, received delta should be (-10.0, 0.0).
     tester.route(pointer6.move(const Offset(50.0, 0.0)));
 
-    // Currently, #6 pointer has the max move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), 6: Offset(50, 0),}
 
     // Trigger a new frame.
     SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
@@ -741,17 +739,17 @@ void main() {
       '-b',
       'drag-update (Offset(-50.0, 0.0))',
       '-c',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(50.0, 0.0))',
       '-d',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(-50.0, 0.0))',
       '-e',
       'drag-update (Offset(1.0, 0.0))',
       '-f',
       'drag-update (Offset(-1.0, 0.0))',
       '-g',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(1.0, 0.0))',
       '-h',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(-1.0, 0.0))',
       '-i',
       'drag-update (Offset(10.0, 0.0))',
       '-j',
@@ -791,17 +789,16 @@ void main() {
     tester.closeArena(6);
     tester.route(down6);
 
-    // Currently, #5 pointer has the max move deltas and #6 pointer's move event
-    // may be merged.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), }
 
     log.add('-c');
-    // #6 pointer move to down 100.0, received delta should be (0.0, 0.0).
+    // #6 pointer move to down 100.0, received delta should be (50.0, 0.0).
     tester.route(pointer6.move(const Offset(0.0, 100.0)));
     log.add('-d');
-    // #6 pointer move to up 50.0, received delta should be (0.0, 0.0).
+    // #6 pointer move to up 50.0, received delta should be (-50.0, 0.0).
     tester.route(pointer6.move(const Offset(0.0, 50.0)));
 
-    // Currently, the two pointers have the same sum move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), 6: Offset(50, 0),}
 
     log.add('-e');
     // #6 pointer move to down 1.0, received delta should be (0.0, 1.0).
@@ -810,17 +807,16 @@ void main() {
     // #6 pointer move to up 1.0, received delta should be (0.0, -1.0).
     tester.route(pointer6.move(const Offset(0.0, 50.0)));
 
-    // Currently, #6 pointer has the max move deltas and #5 pointer's move event
-    // may be merged.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), 6: Offset(50, 0),}
 
     log.add('-g');
-    // #5 pointer move to down 1.0, received delta should be (0.0, 0.0).
+    // #5 pointer move to down 1.0, received delta should be (1.0, 0.0).
     tester.route(pointer5.move(const Offset(0.0, 51.0)));
     log.add('-h');
-    // #5 pointer move to up 1.0, received delta should be (0.0, 0.0).
+    // #5 pointer move to up 1.0, received delta should be (-1.0, 0.0).
     tester.route(pointer5.move(const Offset(0.0, 50.0)));
 
-    // Currently, the two pointers have the same sum move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), 6: Offset(50, 0),}
 
     log.add('-i');
     // #6 pointer move to down 10.0, received delta should be (0.0, 10.0).
@@ -829,7 +825,7 @@ void main() {
     // #6 pointer move to up 10.0, received delta should be (0.0, -10.0).
     tester.route(pointer6.move(const Offset(0.0, 50.0)));
 
-    // Currently, #6 pointer has the max move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 0), 6: Offset(50, 0),}
 
     // Trigger a new frame.
     SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
@@ -855,17 +851,17 @@ void main() {
       '-b',
       'drag-update (Offset(0.0, -50.0))',
       '-c',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(0.0, 50.0))',
       '-d',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(0.0, -50.0))',
       '-e',
       'drag-update (Offset(0.0, 1.0))',
       '-f',
       'drag-update (Offset(0.0, -1.0))',
       '-g',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(0.0, 1.0))',
       '-h',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(0.0, -1.0))',
       '-i',
       'drag-update (Offset(0.0, 10.0))',
       '-j',
@@ -905,17 +901,16 @@ void main() {
     tester.closeArena(6);
     tester.route(down6);
 
-    // Currently, #5 pointer has the max move deltas and #6 pointer's move event
-    // may be merged.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 50), }
 
     log.add('-c');
-    // #6 pointer move Offset(100.0, 100.0), received delta should be (0.0, 0.0).
+    // #6 pointer move Offset(100.0, 100.0), received delta should be (50.0, 50.0).
     tester.route(pointer6.move(const Offset(100.0, 100.0)));
     log.add('-d');
-    // #6 pointer move Offset(-50.0, -50.0), received delta should be (0.0, 0.0).
+    // #6 pointer move Offset(-50.0, -50.0), received delta should be (-50.0, -50.0).
     tester.route(pointer6.move(const Offset(50.0, 50.0)));
 
-    // Currently, the two pointers have the same sum move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 50), 6: Offset(50, 50),}
 
     log.add('-e');
     // #6 pointer move Offset(1.0, 1.0), received delta should be (1.0, 1.0).
@@ -924,17 +919,16 @@ void main() {
     // #6 pointer move Offset(-1.0, -1.0), received delta should be (-1.0, -1.0).
     tester.route(pointer6.move(const Offset(50.0, 50.0)));
 
-    // Currently, #6 pointer has the max move deltas and #5 pointer's move event
-    // may be merged.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 50), 6: Offset(50, 50),}
 
     log.add('-g');
-    // #5 pointer move Offset(1.0, 1.0), received delta should be (0.0, 0.0).
+    // #5 pointer move Offset(1.0, 1.0), received delta should be (1.0, 1.0).
     tester.route(pointer5.move(const Offset(51.0, 51.0)));
     log.add('-h');
-    // #5 pointer move Offset(-1.0, -1.0), received delta should be (0.0, 0.0).
+    // #5 pointer move Offset(-1.0, -1.0), received delta should be (-1.0, -1.0).
     tester.route(pointer5.move(const Offset(50.0, 50.0)));
 
-    // Currently, the two pointers have the same sum move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 50), 6: Offset(50, 50),}
 
     log.add('-i');
     // #6 pointer move Offset(10.0, 10.0), received delta should be (10.0, 10.0).
@@ -943,7 +937,7 @@ void main() {
     // #6 pointer move Offset(-10.0, -10.0), received delta should be (-10.0, -10.0).
     tester.route(pointer6.move(const Offset(50.0, 50.0)));
 
-    // Currently, #6 pointer has the max move deltas.
+    // _moveDeltaBeforeFrame = { 5: Offset(50, 50), 6: Offset(50, 50),}
 
     // Trigger a new frame.
     SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
@@ -969,17 +963,17 @@ void main() {
       '-b',
       'drag-update (Offset(-50.0, -50.0))',
       '-c',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(50.0, 50.0))',
       '-d',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(-50.0, -50.0))',
       '-e',
       'drag-update (Offset(1.0, 1.0))',
       '-f',
       'drag-update (Offset(-1.0, -1.0))',
       '-g',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(1.0, 1.0))',
       '-h',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(-1.0, -1.0))',
       '-i',
       'drag-update (Offset(10.0, 10.0))',
       '-j',
