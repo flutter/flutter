@@ -280,16 +280,17 @@ void main() {
       });
 
       testUsingContext('Using flutter run -d all with MacOSDesignedForIPadDevices removes from device list, and attempts to launch', () async {
-        final RunCommand command = RunCommand();
+        final RunCommand command = TestRunCommandThatOnlyValidates();
         testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice(), FakeDevice()];
 
-        await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '-d',
-              'all',
-            ]), throwsUnsupportedError);
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '-d',
+          'all',
+        ]);
+
         expect(command.devices?.length, 1);
+        expect(command.devices?.first.id , 'fake_device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1611,6 +1612,9 @@ class TestRunCommandThatOnlyValidates extends RunCommand {
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
   }
+
+  @override
+  bool get shouldRunPub => false;
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
