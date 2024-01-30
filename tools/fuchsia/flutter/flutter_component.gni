@@ -84,6 +84,9 @@ import("//flutter/tools/fuchsia/flutter/internal/flutter_dart_component.gni")
 #     Specifies the parameters for building the component.
 #     See //flutter/tools/fuchsia/flutter/flutter_build_config.gni for predefined configs.
 #
+#   sound_null_safety (optional)
+#     Whether to generate sound null safe Dart kernel.
+#
 #  deps
 #  testonly
 #  visibility
