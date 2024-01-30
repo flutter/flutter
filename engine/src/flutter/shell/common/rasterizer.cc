@@ -911,9 +911,7 @@ ScreenshotLayerTreeAsImageImpeller(
     sk_data = SkData::MakeWithCopy(buffer->OnGetContents(), buffer_desc.size);
   };
 
-  if (!impeller_context->GetCommandQueue()
-           ->Submit({command_buffer}, completion)
-           .ok()) {
+  if (!command_buffer->SubmitCommands(completion)) {
     FML_LOG(ERROR) << "Failed to submit commands.";
   }
   latch.Wait();

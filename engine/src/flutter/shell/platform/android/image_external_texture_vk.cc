@@ -82,7 +82,7 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
     if (!texture->SetLayout(barrier)) {
       return;
     }
-    if (!impeller_context_->GetCommandQueue()->Submit({buffer}).ok()) {
+    if (!buffer->SubmitCommands()) {
       return;
     }
   }
