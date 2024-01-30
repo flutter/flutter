@@ -779,7 +779,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     }
     _logger.printStatus(
-      '${_logger.terminal.successMark} Built ${_fileSystem.path.relative(repoDirectory.path)}',
+      '${_logger.terminal.successMark} '
+      'Built ${_fileSystem.path.relative(repoDirectory.path)}',
       color: TerminalColor.green,
     );
   }
