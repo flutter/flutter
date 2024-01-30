@@ -899,11 +899,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }));
 
     if (nativeAssetsUri != null && nativeAssetsUri.isNotEmpty) {
-      _server?.stdin.writeln('native-assets $nativeAssetsUri');
+      if (_server != null) {
+        await _writelnToServerStdin(_server!, 'native-assets $nativeAssetsUri');
+      }
       _logger.printTrace('<- native-assets $nativeAssetsUri');
     }
 
-    _server?.stdin.writeln('compile $scriptUri');
+    if (_server != null) {
+      await _writelnToServerStdin(_server!, 'compile $scriptUri');
+    }
     _logger.printTrace('<- compile $scriptUri');
 
     return _stdoutHandler.compilerOutput?.future;
@@ -1048,7 +1052,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (_server != null) {
       await _writelnToServerStdin(_server!, 'reject');
     }
-    _server?.stdin.writeln('reject');
     _logger.printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;
     return _stdoutHandler.compilerOutput?.future;

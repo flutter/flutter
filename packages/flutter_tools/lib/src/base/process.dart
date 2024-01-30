@@ -10,7 +10,6 @@ import 'package:process/process.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../reporting/first_run.dart';
-import 'async_guard.dart';
 import 'io.dart';
 import 'logger.dart';
 
@@ -301,7 +300,7 @@ abstract class ProcessUtils {
   /// from which [stdin] came from has already been destroyed, closing [stdin].)
   ///
   /// Consider wrapping calls in a `try` block or using [writelnToStdinGuarded] instead.
-  static Future<void> writelnToStdinUnsafe(IOSink stdin, String line) async {
+  static Future<void> writelnToStdinUnsafe(IOSink stdin, String line) {
     return writelnToStdinGuarded(
       stdin: stdin,
       line: line,

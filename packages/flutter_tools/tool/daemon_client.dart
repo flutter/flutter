@@ -30,15 +30,15 @@ Future<void> main() async {
   daemon.stderr.listen(stderr.add);
 
   stdout.write('> ');
-  stdin.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+  stdin.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) async {
     final List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {
-      _send(<String, dynamic>{'method': 'daemon.version'});
+      await _send(<String, dynamic>{'method': 'daemon.version'});
     } else if (line == 'shutdown' || line == 'q') {
-      _send(<String, dynamic>{'method': 'daemon.shutdown'});
+      await _send(<String, dynamic>{'method': 'daemon.shutdown'});
     } else if (words.first == 'start') {
-      _send(<String, dynamic>{
+      await _send(<String, dynamic>{
         'method': 'app.start',
         'params': <String, dynamic>{
           'deviceId': words[1],
@@ -48,28 +48,28 @@ Future<void> main() async {
       });
     } else if (words.first == 'stop') {
       if (words.length > 1) {
-        _send(<String, dynamic>{
+        await _send(<String, dynamic>{
           'method': 'app.stop',
           'params': <String, dynamic>{'appId': words[1]},
         });
       } else {
-        _send(<String, dynamic>{'method': 'app.stop'});
+        await _send(<String, dynamic>{'method': 'app.stop'});
       }
     } else if (words.first == 'restart') {
       if (words.length > 1) {
-        _send(<String, dynamic>{
+        await _send(<String, dynamic>{
           'method': 'app.restart',
           'params': <String, dynamic>{'appId': words[1]},
         });
       } else {
-        _send(<String, dynamic>{'method': 'app.restart'});
+        await _send(<String, dynamic>{'method': 'app.restart'});
       }
     } else if (line == 'devices') {
-      _send(<String, dynamic>{'method': 'device.getDevices'});
+      await _send(<String, dynamic>{'method': 'device.getDevices'});
     } else if (line == 'emulators') {
-      _send(<String, dynamic>{'method': 'emulator.getEmulators'});
+      await _send(<String, dynamic>{'method': 'emulator.getEmulators'});
     } else if (words.first == 'emulator-launch') {
-      _send(<String, dynamic>{
+      await _send(<String, dynamic>{
         'method': 'emulator.launch',
         'params': <String, dynamic>{
           'emulatorId': words[1],
@@ -78,9 +78,9 @@ Future<void> main() async {
         },
       });
     } else if (line == 'enable') {
-      _send(<String, dynamic>{'method': 'device.enable'});
+      await _send(<String, dynamic>{'method': 'device.enable'});
     } else {
-      _send(<String, dynamic>{'method': line.trim()});
+      await _send(<String, dynamic>{'method': line.trim()});
     }
     stdout.write('> ');
   });
@@ -94,9 +94,9 @@ Future<void> main() async {
 
 int id = 0;
 
-void _send(Map<String, dynamic> map) {
+Future<void> await _send(Map<String, dynamic> map) async {
   map['id'] = id++;
   final String str = '[${json.encode(map)}]';
-  ProcessUtils.writelnToStdinUnsafe(daemon.stdin, str);
+  await ProcessUtils.writelnToStdinUnsafe(daemon.stdin, str);
   print('==> $str');
 }

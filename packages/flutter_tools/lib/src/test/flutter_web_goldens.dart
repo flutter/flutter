@@ -106,7 +106,7 @@ class TestGoldenComparator {
       return 'process was null';
     }
 
-    process.sendCommand(imageFile, goldenKey, updateGoldens);
+    await process.sendCommand(imageFile, goldenKey, updateGoldens);
 
     final Map<String, dynamic> result = await process.getResponse();
     return (result['success'] as bool) ? null : ((result['message'] as String?) ?? 'does not match');
@@ -148,14 +148,14 @@ class TestGoldenComparatorProcess {
     await process.exitCode;
   }
 
-  void sendCommand(File imageFile, Uri? goldenKey, bool? updateGoldens) {
+  Future<void> sendCommand(File imageFile, Uri? goldenKey, bool? updateGoldens) async {
     final Object command = jsonEncode(<String, dynamic>{
       'imageFile': imageFile.path,
       'key': goldenKey.toString(),
       'update': updateGoldens,
     });
     _logger.printTrace('Preparing to send command: $command');
-    ProcessUtils.writelnToStdinUnsafe(process.stdin, command.toString());
+    await ProcessUtils.writelnToStdinUnsafe(process.stdin, command.toString());
   }
 
   Future<Map<String, dynamic>> getResponse() async {
