@@ -134,7 +134,7 @@ class AnalysisServer {
       'params': params,
     });
     if (_process != null) {
-      ProcessUtils.writelnToStdinUnsafe(_process!.stdin, message);
+      ProcessUtils.writelnToStdinGuarded(stdin: _process!.stdin, line: message, onError: (_, __) {});
     }
     _logger.printTrace('==> $message');
   }
