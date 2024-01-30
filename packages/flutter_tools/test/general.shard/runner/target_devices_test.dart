@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/target_devices.dart';
@@ -977,6 +978,8 @@ target-device-6 (mobile) • xxx • android • Android 10
     final FakeIOSDevice exactMatchAttachedUnsupportedIOSDevice = FakeIOSDevice(deviceName: 'target-device', deviceSupported: false);
     final FakeIOSDevice exactMatchUnsupportedByProjectDevice = FakeIOSDevice(deviceName: 'target-device', deviceSupportForProject: false);
 
+    final FakeIpadForMac macDesignedForIpadDevice = FakeIpadForMac();
+
     setUp(() {
       platform = FakePlatform(operatingSystem: 'macos');
     });
@@ -1337,6 +1340,23 @@ not-a-match (mobile) • xxx • ios • iOS 16
         });
 
         testUsingContext('when no devices', () async {
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+No devices found yet. Checking for wireless devices...
+
+No devices found.
+'''));
+          expect(devices, isNull);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 3);
+          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+        });
+
+        testUsingContext('when no devices', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[
+            macDesignedForIpadDevice
+          ];
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
@@ -2771,6 +2791,27 @@ class FakeDevice extends Fake implements Device {
   @override
   Future<String> get targetPlatformDisplayName async =>
       getNameForTargetPlatform(await targetPlatform);
+}
+
+class FakeIpadForMac extends Fake implements MacOSDesignedForIPadDevice {
+
+  @override
+  String get id => 'mac-designed-for-ipad';
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
+
+  @override
+  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject project) => true;
 }
 
 class FakeIOSDevice extends Fake implements IOSDevice {

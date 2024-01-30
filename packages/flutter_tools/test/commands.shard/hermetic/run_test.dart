@@ -245,7 +245,7 @@ void main() {
 
       testUsingContext('Using flutter run -d with MacOSDesignedForIPadDevices throws an error', () async {
         final RunCommand command = RunCommand();
-        testDeviceManager.devices = <Device>[FakeIpadForMac()];
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice()];
 
         await expectLater(
               () => createTestCommandRunner(command).run(<String>[
@@ -253,6 +253,43 @@ void main() {
             '-d',
             'mac-designed-for-ipad',
               ]), throwsToolExit(message: 'Mac Designed for iPad is currently not supported for flutter run -d'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+        Stdio: () => FakeStdio(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('Using flutter run -d all with a single MacOSDesignedForIPadDevices throws a tool error', () async {
+        final RunCommand command = RunCommand();
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice()];
+
+        await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '-d',
+              'all',
+            ]), throwsToolExit(message: 'Mac Designed for iPad is currently not supported for flutter run -d'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+        Stdio: () => FakeStdio(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('Using flutter run -d all with MacOSDesignedForIPadDevices removes from device list, and attempts to launch', () async {
+        final RunCommand command = RunCommand();
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice(), FakeDevice()];
+
+        await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '-d',
+              'all',
+            ]), throwsUnsupportedError);
+        expect(command.devices?.length, 1);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1487,7 +1524,7 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeIpadForMac extends Fake implements MacOSDesignedForIPadDevice {
+class FakeMacDesignedForIpadDevice extends Fake implements MacOSDesignedForIPadDevice {
 
   @override
   String get id => 'mac-designed-for-ipad';
@@ -1499,7 +1536,13 @@ class FakeIpadForMac extends Fake implements MacOSDesignedForIPadDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
+  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
   bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject project) => true;
 }
 
 class FakeIOSDevice extends Fake implements IOSDevice {
