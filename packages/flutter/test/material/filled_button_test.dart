@@ -2171,7 +2171,7 @@ void main() {
       ),
     );
 
-    // Default
+    // Default.
     expect(backgroundStates.isEmpty, isTrue);
     expect(foregroundStates.isEmpty, isTrue);
 
