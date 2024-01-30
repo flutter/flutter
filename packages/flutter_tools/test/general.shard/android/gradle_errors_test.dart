@@ -597,6 +597,44 @@ Execution failed for task ':app:mergeDexDebug'.
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+
+    testUsingContext('generates correct path for Unix-like environment', () async {
+      const String expectedUnixPath = 'android/app/src/main/AndroidManifest.xml';
+
+      await multidexErrorHandler.handler(
+        line: '',
+        project: FakeFlutterProject(),
+        multidexEnabled: true,
+        usesAndroidX: true,
+      );
+      expect(testLogger.statusText, contains(expectedUnixPath));
+    }, overrides: <Type, Generator>{
+      Platform: () => fakePlatform('linux'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    group('windows', () {
+      setUp(() {
+        fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      });
+
+      testUsingContext('generates correct path', () async {
+        const String expectedWindowsPath = r'android\app\src\main\AndroidManifest.xml';
+
+        await multidexErrorHandler.handler(
+          line: '',
+          project: FakeFlutterProject(),
+          multidexEnabled: true,
+          usesAndroidX: true,
+        );
+        expect(testLogger.statusText, contains(expectedWindowsPath));
+      }, overrides: <Type, Generator>{
+        Platform: () => fakePlatform('windows'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      });
+    });
   });
 
   group('permission errors', () {
@@ -953,6 +991,41 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       Platform: () => fakePlatform('android'),
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+    });
+
+    testUsingContext('generates correct gradle command for Unix-like environment', () async {
+      await lockFileDepMissingHandler.handler(
+        line: '',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        multidexEnabled: true,
+        usesAndroidX: true,
+      );
+      expect(testLogger.statusText, contains('./gradlew'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('linux'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    group('windows', () {
+      setUp(() {
+        fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      });
+
+      testUsingContext('generates correct gradle command', () async {
+        await lockFileDepMissingHandler.handler(
+          line: '',
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          multidexEnabled: true,
+          usesAndroidX: true,
+        );
+        expect(testLogger.statusText, contains(r'.\gradlew.bat'));
+      }, overrides: <Type, Generator>{
+        Platform: () => fakePlatform('windows'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      }, testOn: 'windows');
     });
   });
 
@@ -1458,4 +1531,8 @@ class _TestPromptTerminal extends Fake implements AnsiTerminal {
   }
 }
 
-class FakeFlutterProject extends Fake implements FlutterProject {}
+class FakeFlutterProject extends Fake implements FlutterProject {
+  final FileSystem fileSystem = MemoryFileSystem();
+  @override
+  Directory get directory => fileSystem.directory('path/to/fake/project');
+}
