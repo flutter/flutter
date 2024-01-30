@@ -61,7 +61,6 @@ class ImageExternalTexture : public flutter::Texture {
 
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
   AttachmentState state_ = AttachmentState::kUninitialized;
-  bool new_frame_ready_ = false;
 
   sk_sp<flutter::DlImage> dl_image_;
 
