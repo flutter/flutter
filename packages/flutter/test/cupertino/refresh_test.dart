@@ -36,7 +36,7 @@ void main() {
 
   void uiTestGroup() {
     testWidgets("doesn't invoke anything without user interaction",
-    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
     experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
     (WidgetTester tester) async {
       await tester.pumpWidget(

@@ -264,7 +264,7 @@ void main() {
   });
 
   testWidgets('PageView restoration',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -282,10 +282,7 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgets('PageView.builder restoration',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('PageView.builder restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView.builder(
@@ -301,10 +298,7 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgets('PageView.custom restoration',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('PageView.custom restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView.custom(

@@ -92,7 +92,7 @@ void main() {
   });
 
   testWidgets('A menu can be hidden and then reshown',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
@@ -183,7 +183,7 @@ void main() {
   });
 
   testWidgets('Calling show when a built-in widget is already showing its context menu hides the built-in menu',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final GlobalKey builtInKey = GlobalKey();
