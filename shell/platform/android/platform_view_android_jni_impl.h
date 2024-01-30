@@ -45,6 +45,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   void SurfaceTextureAttachToGLContext(JavaLocalRef surface_texture,
                                        int textureId) override;
 
+  bool SurfaceTextureShouldUpdate(JavaLocalRef surface_texture) override;
+
   void SurfaceTextureUpdateTexImage(JavaLocalRef surface_texture) override;
 
   void SurfaceTextureGetTransformMatrix(JavaLocalRef surface_texture,

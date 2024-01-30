@@ -511,7 +511,7 @@ public class FlutterRendererTest {
   }
 
   @Test
-  public void ImageReaderSurfaceProducerSkipsFramesWhenResizeInflight() {
+  public void ImageReaderSurfaceProducerDoesNotDropFramesWhenResizeInflight() {
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
     FlutterRenderer.ImageReaderSurfaceProducer texture =
         flutterRenderer.new ImageReaderSurfaceProducer(0);
@@ -533,15 +533,15 @@ public class FlutterRendererTest {
     // Resize.
     texture.setSize(4, 4);
 
-    // Let callbacks run.
+    // Let callbacks run. The rendered frame will manifest here.
     shadowOf(Looper.getMainLooper()).idle();
 
-    // We should not get a new frame because the produced frame was for the previous size.
-    assertNull(texture.acquireLatestImage());
+    // We acquired the frame produced above.
+    assertNotNull(texture.acquireLatestImage());
   }
 
   @Test
-  public void ImageReaderSurfaceProducerHandlesLateFrameWhenResizeInflight() {
+  public void ImageReaderSurfaceProducerImageReadersAndImagesCount() {
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
     FlutterRenderer.ImageReaderSurfaceProducer texture =
         flutterRenderer.new ImageReaderSurfaceProducer(0);
@@ -563,6 +563,9 @@ public class FlutterRendererTest {
     // Let callbacks run, this will produce a single frame.
     shadowOf(Looper.getMainLooper()).idle();
 
+    assertEquals(1, texture.numImageReaders());
+    assertEquals(1, texture.numImages());
+
     // Resize.
     texture.setSize(4, 4);
 
@@ -574,15 +577,8 @@ public class FlutterRendererTest {
     // Let callbacks run.
     shadowOf(Looper.getMainLooper()).idle();
 
-    // We will acquire a frame that is the old size.
-    Image produced = texture.acquireLatestImage();
-    assertNotNull(produced);
-    assertEquals(produced.getWidth(), 1);
-    assertEquals(produced.getHeight(), 1);
-
-    // We will still have one pending reader to be closed.
-    // If we didn't we would have closed the reader that owned the image we just acquired.
-    assertEquals(1, texture.readersToCloseSize());
+    assertEquals(1, texture.numImageReaders());
+    assertEquals(2, texture.numImages());
 
     // Render a new frame with the current size.
     surface = texture.getSurface();
@@ -594,11 +590,36 @@ public class FlutterRendererTest {
     // Let callbacks run.
     shadowOf(Looper.getMainLooper()).idle();
 
-    // Acquire the new image.
-    assertNotNull(texture.acquireLatestImage());
+    assertEquals(2, texture.numImageReaders());
+    assertEquals(3, texture.numImages());
 
-    // We will have no pending readers to close.
-    assertEquals(0, texture.readersToCloseSize());
+    // Acquire first frame.
+    Image produced = texture.acquireLatestImage();
+    assertNotNull(produced);
+    assertEquals(1, produced.getWidth());
+    assertEquals(1, produced.getHeight());
+    assertEquals(2, texture.numImageReaders());
+    assertEquals(2, texture.numImages());
+    // Acquire second frame. This won't result in the first reader being closed because it has
+    // an active image from it.
+    produced = texture.acquireLatestImage();
+    assertNotNull(produced);
+    assertEquals(1, produced.getWidth());
+    assertEquals(1, produced.getHeight());
+    assertEquals(2, texture.numImageReaders());
+    assertEquals(1, texture.numImages());
+    // Acquire third frame. We will now close the first reader.
+    produced = texture.acquireLatestImage();
+    assertNotNull(produced);
+    assertEquals(4, produced.getWidth());
+    assertEquals(4, produced.getHeight());
+    assertEquals(1, texture.numImageReaders());
+    assertEquals(0, texture.numImages());
+
+    // Returns null image when no more images are queued.
+    assertNull(texture.acquireLatestImage());
+    assertEquals(1, texture.numImageReaders());
+    assertEquals(0, texture.numImages());
   }
 
   // A 0x0 ImageReader is a runtime error.

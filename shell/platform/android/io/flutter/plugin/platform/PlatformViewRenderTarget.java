@@ -32,4 +32,7 @@ public interface PlatformViewRenderTarget {
 
   // Returns the Surface to be rendered on to.
   public Surface getSurface();
+
+  // Schedules a frame to be drawn.
+  public default void scheduleFrame() {}
 }

@@ -951,6 +951,16 @@ public class FlutterJNI {
 
   private native void nativeMarkTextureFrameAvailable(long nativeShellHolderId, long textureId);
 
+  /** Schedule the engine to draw a frame but does not invalidate the layout tree. */
+  @UiThread
+  public void scheduleFrame() {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeScheduleFrame(nativeShellHolderId);
+  }
+
+  private native void nativeScheduleFrame(long nativeShellHolderId);
+
   /**
    * Unregisters a texture that was registered with {@link #registerTexture(long,
    * SurfaceTextureWrapper)}.
