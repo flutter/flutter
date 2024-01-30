@@ -21,6 +21,10 @@ import 'text_field.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late FocusNode myFocusNode;
+
 /// A callback function that returns the index of the item that matches the
 /// current contents of a text field.
 ///
@@ -313,22 +317,26 @@ class DropdownMenu<T> extends StatefulWidget {
   /// obscuring. In this case requesting the focus again will not
   /// cause the focus to change, and will not make the keyboard visible.
   ///
-  /// This widget builds an [EditableText] and, if [requestFocusOnTap] is set,
-  /// will ensure that the keyboard is showing when it is tapped by calling
-  /// [EditableTextState.requestKeyboard()].
+  /// If this is non-null, the behaviour of [requestFocusOnTap] is overridden
+  /// by the [FocusNode.canRequestFocus] property.
   final FocusNode? focusNode;
 
   /// Determine if the dropdown button requests focus and the on-screen virtual
   /// keyboard is shown in response to a touch event.
   ///
-  /// By default, on mobile platforms, tapping on the text field and opening
-  /// the menu will not cause a focus request and the virtual keyboard will not
-  /// appear. The default behavior for desktop platforms is for the dropdown to
-  /// take the focus.
+  /// Ignored if a [focusNode] is explicitly provided (in which case,
+  /// [FocusNode.canRequestFocus] controls the behavior).
   ///
-  /// Defaults to null. Setting this field to true or false, rather than allowing
-  /// the implementation to choose based on the platform, can be useful for
-  /// applications that want to override the default behavior.
+  /// Defaults to null, which enables platform-specific behavior:
+  ///
+  ///  * On mobile platforms, acts as if set to false; tapping on the text
+  ///    field and opening the menu will not cause a focus request and the
+  ///    virtual keyboard will not appear.
+  ///
+  ///  * On desktop platforms, acts as if set to true; the dropdown takes the
+  ///    focus when activated.
+  ///
+  /// Set this to true or false explicitly to override the default behavior.
   final bool? requestFocusOnTap;
 
   /// Descriptions of the menu items in the [DropdownMenu].
@@ -467,7 +475,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (widget.requestFocusOnTap != null) {
       return widget.requestFocusOnTap!;
     }
-
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
