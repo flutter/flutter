@@ -387,11 +387,12 @@ bool EntityPass::Render(ContentContext& renderer,
       blit_pass->AddCopy(
           offscreen_target.GetRenderTarget().GetRenderTargetTexture(),
           root_render_target.GetRenderTargetTexture());
-      if (!command_buffer->EncodeAndSubmit(
-              blit_pass, renderer.GetContext()->GetResourceAllocator())) {
+      if (!blit_pass->EncodeCommands(
+              renderer.GetContext()->GetResourceAllocator())) {
         VALIDATION_LOG << "Failed to encode root pass blit command.";
         return false;
       }
+      renderer.RecordCommandBuffer(std::move(command_buffer));
     } else {
       auto render_pass = command_buffer->CreateRenderPass(root_render_target);
       render_pass->SetLabel("EntityPass Root Render Pass");
@@ -415,10 +416,11 @@ bool EntityPass::Render(ContentContext& renderer,
         }
       }
 
-      if (!command_buffer->EncodeAndSubmit(render_pass)) {
+      if (!render_pass->EncodeCommands()) {
         VALIDATION_LOG << "Failed to encode root pass command buffer.";
         return false;
       }
+      renderer.RecordCommandBuffer(std::move(command_buffer));
     }
 
     return true;
@@ -855,8 +857,7 @@ bool EntityPass::OnRender(
         collapsed_parent_pass) const {
   TRACE_EVENT0("impeller", "EntityPass::OnRender");
 
-  const std::shared_ptr<Context>& context = renderer.GetContext();
-  InlinePassContext pass_context(context, pass_target,
+  InlinePassContext pass_context(renderer, pass_target,
                                  GetTotalPassReads(renderer), GetElementCount(),
                                  collapsed_parent_pass);
   if (!pass_context.IsValid()) {
