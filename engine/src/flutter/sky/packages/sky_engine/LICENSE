@@ -23718,6 +23718,22 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
 OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --------------------------------------------------------------------------------
+boringssl
+
+Copyright (c) 2022, Robert Nagy <robert.nagy@gmail.com>
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+--------------------------------------------------------------------------------
 dart
 
 Copyright (c) 2022, the Dart project authors.  Please see the AUTHORS file
@@ -24863,6 +24879,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+boringssl
+
+Copyright 2010 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+--------------------------------------------------------------------------------
 double-conversion
 icu
 
@@ -25057,6 +25079,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+boringssl
+
+Copyright 2011 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+--------------------------------------------------------------------------------
 skia
 
 Copyright 2012 Google Inc.
@@ -25218,6 +25246,12 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+--------------------------------------------------------------------------------
+boringssl
+
+Copyright 2012 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 --------------------------------------------------------------------------------
 double-conversion
 icu
@@ -25665,6 +25699,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+boringssl
+
+Copyright 2014 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+--------------------------------------------------------------------------------
 accessibility
 angle
 icu
@@ -25902,6 +25942,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+boringssl
+
+Copyright 2015 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+--------------------------------------------------------------------------------
 accessibility
 skia
 
@@ -26120,6 +26166,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+boringssl
+
+Copyright 2016 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+--------------------------------------------------------------------------------
 accessibility
 
 Copyright 2016 The Chromium Authors. All rights reserved.
@@ -26336,6 +26388,12 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+--------------------------------------------------------------------------------
+boringssl
+
+Copyright 2017 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 --------------------------------------------------------------------------------
 accessibility
 angle
@@ -27036,6 +27094,12 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+--------------------------------------------------------------------------------
+boringssl
+
+Copyright 2019 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 --------------------------------------------------------------------------------
 accessibility
 fuchsia_sdk
@@ -27922,6 +27986,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+boringssl
+
+Copyright 2022 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
+--------------------------------------------------------------------------------
 fuchsia_sdk
 
 Copyright 2022 The Fuchsia Authors. All rights reserved.
@@ -28142,6 +28212,12 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+--------------------------------------------------------------------------------
+boringssl
+
+Copyright 2023 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file
 --------------------------------------------------------------------------------
 fuchsia_sdk
 
@@ -31236,7 +31312,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/d0b48a00855979eb7be9255aec7d8715729bd23e
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/10bbb376de7e4ec0047d6a949fe69e5dddfb7b97
 /third_party/fallback_root_certificates/
 
 --------------------------------------------------------------------------------
