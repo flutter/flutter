@@ -89,11 +89,11 @@ class AnalysisServer {
         .transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
-    _sendCommand('server.setSubscriptions', <String, dynamic>{
+    await _sendCommand('server.setSubscriptions', <String, dynamic>{
       'subscriptions': <String>['STATUS'],
     });
 
-    _sendCommand('analysis.setAnalysisRoots',
+    await _sendCommand('analysis.setAnalysisRoots',
         <String, dynamic>{'included': directories, 'excluded': <String>[]});
   }
 
@@ -127,14 +127,14 @@ class AnalysisServer {
 
   Future<int?> get onExit async => _process?.exitCode;
 
-  void _sendCommand(String method, Map<String, dynamic> params) {
+  Future<void> _sendCommand(String method, Map<String, dynamic> params) async {
     final String message = json.encode(<String, dynamic>{
       'id': (++_id).toString(),
       'method': method,
       'params': params,
     });
     if (_process != null) {
-      ProcessUtils.writelnToStdinGuarded(stdin: _process!.stdin, line: message, onError: (_, __) {});
+      await ProcessUtils.writelnToStdinUnsafe(_process!.stdin, message);
     }
     _logger.printTrace('==> $message');
   }

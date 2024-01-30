@@ -258,7 +258,7 @@ abstract class ProcessUtils {
     required String line,
     required void Function(Object, StackTrace) onError,
   }) async {
-    await writeAllToStdinGuarded(
+    return writeAllToStdinGuarded(
       stdin: stdin,
       lines: <String>[line],
       onError: onError,
@@ -283,15 +283,15 @@ abstract class ProcessUtils {
       });
     }
 
-    try {
-      await asyncGuard(() async => writeFlushAndComplete);
-    } on Object catch (error, stackTrace) {
-      onError(error, stackTrace);
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
-    }
-
+    runZonedGuarded(
+      writeFlushAndComplete,
+      (Object error, StackTrace stackTrace) {
+        onError(error, stackTrace);
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+    );
     return completer.future;
   }
 
