@@ -17,8 +17,10 @@ namespace gpu {
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, CommandBuffer);
 
 CommandBuffer::CommandBuffer(
+    std::shared_ptr<impeller::Context> context,
     std::shared_ptr<impeller::CommandBuffer> command_buffer)
-    : command_buffer_(std::move(command_buffer)) {}
+    : context_(std::move(context)),
+      command_buffer_(std::move(command_buffer)) {}
 
 CommandBuffer::~CommandBuffer() = default;
 
@@ -35,7 +37,8 @@ bool CommandBuffer::Submit() {
   for (auto& encodable : encodables_) {
     encodable->EncodeCommands();
   }
-  return command_buffer_->SubmitCommands();
+
+  return context_->GetCommandQueue()->Submit({command_buffer_}).ok();
 }
 
 bool CommandBuffer::Submit(
@@ -43,7 +46,9 @@ bool CommandBuffer::Submit(
   for (auto& encodable : encodables_) {
     encodable->EncodeCommands();
   }
-  return command_buffer_->SubmitCommands(completion_callback);
+  return context_->GetCommandQueue()
+      ->Submit({command_buffer_}, completion_callback)
+      .ok();
 }
 
 }  // namespace gpu
@@ -57,6 +62,7 @@ bool InternalFlutterGpu_CommandBuffer_Initialize(
     Dart_Handle wrapper,
     flutter::gpu::Context* contextWrapper) {
   auto res = fml::MakeRefCounted<flutter::gpu::CommandBuffer>(
+      contextWrapper->GetContext(),
       contextWrapper->GetContext()->CreateCommandBuffer());
   res->AssociateWithDartWrapper(wrapper);
 

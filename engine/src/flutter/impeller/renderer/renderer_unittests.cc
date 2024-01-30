@@ -554,7 +554,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       pass->EncodeCommands();
     }
 
-    if (!buffer->SubmitCommands()) {
+    if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
       return false;
     }
     host_buffer->Reset();
@@ -639,10 +639,9 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
 
       // Blit `bridge` to the top left corner of the texture.
       pass->AddCopy(bridge, device_buffer);
-
       pass->EncodeCommands(context->GetResourceAllocator());
 
-      if (!buffer->SubmitCommands()) {
+      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
         return false;
       }
     }
@@ -690,7 +689,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
         pass->Draw().ok();
       }
       pass->EncodeCommands();
-      if (!buffer->SubmitCommands()) {
+      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
         return false;
       }
     }
@@ -812,7 +811,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
       pass->EncodeCommands();
     }
 
-    if (!buffer->SubmitCommands()) {
+    if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
       return false;
     }
     host_buffer->Reset();
@@ -1257,7 +1256,7 @@ TEST_P(RendererTest, StencilMask) {
       pass->EncodeCommands();
     }
 
-    if (!buffer->SubmitCommands()) {
+    if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
       return false;
     }
     host_buffer->Reset();

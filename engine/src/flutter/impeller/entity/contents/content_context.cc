@@ -201,7 +201,8 @@ ContentContext::ContentContext(
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator())) {
+      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator())),
+      pending_command_buffers_(std::make_unique<PendingCommandBuffers>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -493,9 +494,7 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     }
   }
 
-  if (!sub_command_buffer->SubmitCommands()) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
-  }
+  RecordCommandBuffer(std::move(sub_command_buffer));
 
   return subpass_target;
 }
@@ -546,6 +545,26 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
       it++;
     }
   }
+}
+
+void ContentContext::RecordCommandBuffer(
+    std::shared_ptr<CommandBuffer> command_buffer) const {
+  // Metal systems seem to have a limit on the number of command buffers that
+  // can be created concurrently, which appears to be in the range of 50 or so
+  // command buffers. When this limit is hit, creation of further command
+  // buffers will fail. To work around this, we regularly flush the
+  // command buffers on the metal backend.
+  if (GetContext()->GetBackendType() == Context::BackendType::kMetal) {
+    GetContext()->GetCommandQueue()->Submit({command_buffer});
+  } else {
+    pending_command_buffers_->command_buffers.push_back(
+        std::move(command_buffer));
+  }
+}
+
+void ContentContext::FlushCommandBuffers() const {
+  auto buffers = std::move(pending_command_buffers_->command_buffers);
+  GetContext()->GetCommandQueue()->Submit(buffers);
 }
 
 }  // namespace impeller

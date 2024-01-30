@@ -95,7 +95,7 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
     if (!texture->SetLayout(barrier)) {
       return;
     }
-    if (!buffer->SubmitCommands()) {
+    if (!impeller_context_->GetCommandQueue()->Submit({buffer}).ok()) {
       return;
     }
   }
