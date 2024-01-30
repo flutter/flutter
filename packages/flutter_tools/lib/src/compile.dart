@@ -1019,10 +1019,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  void accept() {
+  Future<void> accept() async {
     if (_compileRequestNeedsConfirmation) {
       if (_server != null) {
-        _writelnToServerStdin(_server!, 'accept');
+        await _writelnToServerStdin(_server!, 'accept');
       }
       _logger.printTrace('<- accept');
     }
@@ -1045,6 +1045,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return Future<CompilerOutput?>.value();
     }
     _stdoutHandler.reset(expectSources: false);
+    if (_server != null) {
+      await _writelnToServerStdin(_server!, 'reject');
+    }
     _server?.stdin.writeln('reject');
     _logger.printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;
@@ -1052,9 +1055,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  void reset() {
+  Future<void> reset() async {
     if (_server != null) {
-      _writelnToServerStdin(_server!, 'reset');
+      await _writelnToServerStdin(_server!, 'reset');
     }
     _logger.printTrace('<- reset');
   }
