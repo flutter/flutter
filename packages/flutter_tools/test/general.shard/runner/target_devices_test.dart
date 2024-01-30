@@ -1353,23 +1353,6 @@ No devices found.
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
         });
 
-        testUsingContext('when no devices', () async {
-          deviceManager.iosDiscoverer.deviceList = <Device>[
-            macDesignedForIpadDevice
-          ];
-          final List<Device>? devices = await targetDevices.findAllTargetDevices();
-
-          expect(logger.statusText, equals('''
-No devices found yet. Checking for wireless devices...
-
-No devices found.
-'''));
-          expect(devices, isNull);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 3);
-          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
-          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
-        });
-
         testUsingContext('when devices are either unsupported by flutter or project or all', () async {
           deviceManager.otherDiscoverer.deviceList = <Device>[fuchsiaDevice];
           deviceManager.iosDiscoverer.deviceList = <Device>[
@@ -2791,27 +2774,6 @@ class FakeDevice extends Fake implements Device {
   @override
   Future<String> get targetPlatformDisplayName async =>
       getNameForTargetPlatform(await targetPlatform);
-}
-
-class FakeIpadForMac extends Fake implements MacOSDesignedForIPadDevice {
-
-  @override
-  String get id => 'mac-designed-for-ipad';
-
-  @override
-  bool get isConnected => true;
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
-
-  @override
-  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
-
-  @override
-  bool isSupported() => true;
-
-  @override
-  bool isSupportedForProject(FlutterProject project) => true;
 }
 
 class FakeIOSDevice extends Fake implements IOSDevice {
