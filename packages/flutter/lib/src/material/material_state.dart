@@ -60,7 +60,6 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 
 /// Defines a [Color] that is also a [MaterialStateProperty].
 ///
-///  * [MaterialState.seleted], testing for build.
 /// This class exists to enable widgets with [Color] valued properties
 /// to also accept [MaterialStateProperty<Color>] values. A material
 /// state color property represents a color which depends on
