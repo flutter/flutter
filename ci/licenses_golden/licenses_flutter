@@ -4856,6 +4856,10 @@ ORIGIN: ../../../flutter/fml/platform/darwin/string_range_sanitization.h + ../..
 ORIGIN: ../../../flutter/fml/platform/darwin/string_range_sanitization.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/darwin/weak_nsobject.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/darwin/weak_nsobject.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/fuchsia/log_interest_listener.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/fuchsia/log_interest_listener.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/fuchsia/log_state.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/fuchsia/log_state.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc + ../../../flutter/LICENSE
@@ -7701,6 +7705,10 @@ FILE: ../../../flutter/fml/platform/darwin/string_range_sanitization.h
 FILE: ../../../flutter/fml/platform/darwin/string_range_sanitization.mm
 FILE: ../../../flutter/fml/platform/darwin/weak_nsobject.h
 FILE: ../../../flutter/fml/platform/darwin/weak_nsobject.mm
+FILE: ../../../flutter/fml/platform/fuchsia/log_interest_listener.cc
+FILE: ../../../flutter/fml/platform/fuchsia/log_interest_listener.h
+FILE: ../../../flutter/fml/platform/fuchsia/log_state.cc
+FILE: ../../../flutter/fml/platform/fuchsia/log_state.h
 FILE: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.cc
 FILE: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.h
 FILE: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc
