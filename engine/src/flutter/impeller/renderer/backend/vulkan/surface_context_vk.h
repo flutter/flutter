@@ -9,6 +9,7 @@
 
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/context.h"
 
 namespace impeller {
@@ -61,6 +62,9 @@ class SurfaceContextVK : public Context,
 
   // |Context|
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
+
+  // |Context|
+  std::shared_ptr<CommandQueue> GetCommandQueue() const override;
 
   // |Context|
   void Shutdown() override;

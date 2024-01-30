@@ -7,7 +7,6 @@
 #include "fml/synchronization/count_down_latch.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer//backend/vulkan/command_encoder_vk.h"
-#include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -29,8 +28,11 @@ TEST(GPUTracerVK, CanTraceCmdBuffer) {
 
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
 
-  if (!cmd_buffer->SubmitCommands(
-          [latch](CommandBuffer::Status status) { latch->CountDown(); })) {
+  if (!context->GetCommandQueue()
+           ->Submit(
+               {cmd_buffer},
+               [latch](CommandBuffer::Status status) { latch->CountDown(); })
+           .ok()) {
     GTEST_FAIL() << "Failed to submit cmd buffer";
   }
 
@@ -56,8 +58,11 @@ TEST(GPUTracerVK, DoesNotTraceOutsideOfFrameWorkload) {
   blit_pass->EncodeCommands(context->GetResourceAllocator());
 
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
-  if (!cmd_buffer->SubmitCommands(
-          [latch](CommandBuffer::Status status) { latch->CountDown(); })) {
+  if (!context->GetCommandQueue()
+           ->Submit(
+               {cmd_buffer},
+               [latch](CommandBuffer::Status status) { latch->CountDown(); })
+           .ok()) {
     GTEST_FAIL() << "Failed to submit cmd buffer";
   }
 
@@ -85,8 +90,11 @@ TEST(GPUTracerVK, TracesWithPartialFrameOverlap) {
   tracer->MarkFrameEnd();
 
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
-  if (!cmd_buffer->SubmitCommands(
-          [latch](CommandBuffer::Status status) { latch->CountDown(); })) {
+  if (!context->GetCommandQueue()
+           ->Submit(
+               {cmd_buffer},
+               [latch](CommandBuffer::Status status) { latch->CountDown(); })
+           .ok()) {
     GTEST_FAIL() << "Failed to submit cmd buffer";
   }
 
