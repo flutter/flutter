@@ -106,6 +106,7 @@
 ../../../flutter/fml/platform/darwin/string_range_sanitization_unittests.mm
 ../../../flutter/fml/platform/darwin/weak_nsobject_arc_unittests.mm
 ../../../flutter/fml/platform/darwin/weak_nsobject_unittests.mm
+../../../flutter/fml/platform/fuchsia/log_interest_listener_unittests.cc
 ../../../flutter/fml/platform/win/file_win_unittests.cc
 ../../../flutter/fml/platform/win/wstring_conversion_unittests.cc
 ../../../flutter/fml/raster_thread_merger_unittests.cc
