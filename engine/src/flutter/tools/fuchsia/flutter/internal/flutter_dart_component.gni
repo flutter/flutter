@@ -48,6 +48,9 @@ import("//flutter/tools/fuchsia/gn-sdk/component.gni")
 #     Type: boolean
 #     Default: false
 #
+#   sound_null_safety (optional)
+#     If true, generate sound null safe Dart kernel.
+#
 #  deps
 #  testonly
 #  visibility
@@ -144,6 +147,7 @@ template("flutter_dart_component") {
                              "visibility",
                              "main_dart",
                              "main_package",
+                             "sound_null_safety",
                            ])
 
     deps = [ ":$_dart_package_config_target_name" ]

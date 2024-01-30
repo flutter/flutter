@@ -26,9 +26,11 @@ final Map<int, String> hidToKey = {
 };
 
 int main() {
-  print('Launching text-input-view');
+  final bool soundNullSafety = <int?>[null] is! List<int>;
+  print('Launching text-input-view. Sound null safety: $soundNullSafety');
   TestApp app = TestApp();
   app.run();
+  return 0;
 }
 
 class TestApp {
@@ -37,8 +39,9 @@ class TestApp {
 
   void run() {
     // Set up window callbacks
-    window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
-      this.decodeAndReportPlatformMessage(name, data);
+    window.onPlatformMessage =
+        (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+      this.decodeAndReportPlatformMessage(name, data!);
     };
     window.onMetricsChanged = () {
       window.scheduleFrame();
@@ -81,7 +84,7 @@ class TestApp {
 
     if (name == "flutter/keyevent" && decodedJson["type"] == "keydown") {
       if (hidToKey[decodedJson["hidUsage"]] != null) {
-        _reportTextInput(hidToKey[decodedJson["hidUsage"]]);
+        _reportTextInput(hidToKey[decodedJson["hidUsage"]!]!);
       }
     }
 
@@ -91,10 +94,14 @@ class TestApp {
   void _reportTextInput(String text) {
     print('text-input-view reporting keyboard input to KeyboardInputListener');
 
-    final message = utf8.encode(json.encode({
-      'method': 'KeyboardInputListener.ReportTextInput',
-      'text': text,
-    })).buffer.asByteData();
-    PlatformDispatcher.instance.sendPlatformMessage('fuchsia/input_test', message, null);
+    final message = utf8
+        .encode(json.encode({
+          'method': 'KeyboardInputListener.ReportTextInput',
+          'text': text,
+        }))
+        .buffer
+        .asByteData();
+    PlatformDispatcher.instance
+        .sendPlatformMessage('fuchsia/input_test', message, null);
   }
 }

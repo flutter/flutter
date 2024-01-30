@@ -44,17 +44,11 @@ template("core_snapshot") {
     inputs = [ platform_dill ]
 
     vm_snapshot_data = "$target_gen_dir/vm_isolate_snapshot${suffix}.bin"
-    vm_snapshot_instructions =
-        "$target_gen_dir/vm_snapshot_instructions${suffix}.bin"
     isolate_snapshot_data = "$target_gen_dir/isolate_snapshot${suffix}.bin"
-    isolate_snapshot_instructions =
-        "$target_gen_dir/isolate_snapshot_instructions${suffix}.bin"
     snapshot_profile = "$target_gen_dir/snapshot_profile${suffix}.json"
     outputs = [
       vm_snapshot_data,
-      vm_snapshot_instructions,
       isolate_snapshot_data,
-      isolate_snapshot_instructions,
       snapshot_profile,
     ]
 
@@ -68,14 +62,10 @@ template("core_snapshot") {
     args = [
       "--enable_mirrors=false",
       "--deterministic",
-      "--snapshot_kind=core-jit",
+      "--snapshot_kind=core",
       "--vm_snapshot_data=" + rebase_path(vm_snapshot_data, root_build_dir),
-      "--vm_snapshot_instructions=" +
-          rebase_path(vm_snapshot_instructions, root_build_dir),
       "--isolate_snapshot_data=" +
           rebase_path(isolate_snapshot_data, root_build_dir),
-      "--isolate_snapshot_instructions=" +
-          rebase_path(isolate_snapshot_instructions, root_build_dir),
       "--write_v8_snapshot_profile_to=" +
           rebase_path(snapshot_profile, root_build_dir),
     ]
