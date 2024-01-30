@@ -619,6 +619,7 @@ class _AndroidViewState extends State<AndroidView> {
 class _WindowsViewState extends State<Win32View> {
   bool _initialized = false;
   Win32ViewController? _controller;
+  late FocusNode _node;
 
   void _initializeOnce() {
     if (_initialized) {
@@ -646,7 +647,11 @@ class _WindowsViewState extends State<Win32View> {
 
   Future<void> _createNewWin32View() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
-    final Win32ViewController controller = await PlatformViewsService.initWin32View(id: id, viewType: widget.viewType);
+    _node = FocusNode(debugLabel: 'Windows view: $id');
+    final Win32ViewController controller = await PlatformViewsService.initWin32View(id: id, viewType: widget.viewType, onFocus: () {
+      _node.requestFocus();
+      print('Node $id stole focus');
+    });
     setState(() {
       _controller = controller;
     });
@@ -658,7 +663,18 @@ class _WindowsViewState extends State<Win32View> {
     if (controller == null) {
       return const SizedBox.expand();
     }
-    return _Win32View(controller: controller);
+    return Semantics(
+      label: 'Platform view placeholder',
+      child: Focus(
+        focusNode: _node,
+        onFocusChange: (focus) {
+          if (focus) {
+            controller.focus(focus);
+          }
+        },
+        child: _Win32View(controller: controller)
+        ),
+    );
   }
 }
 

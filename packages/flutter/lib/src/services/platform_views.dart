@@ -295,7 +295,8 @@ class PlatformViewsService {
 
   static Future<Win32ViewController> initWin32View({
     required int id,
-    required String viewType
+    required String viewType,
+    VoidCallback? onFocus
   }) async {
     // TODO(schectman): send message
     final Map<String, dynamic> args = <String, dynamic>{
@@ -303,7 +304,18 @@ class PlatformViewsService {
       'viewType': viewType,
     };
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
     return Win32ViewController._(id);
+  }
+
+  static Future<void> focusWin32View({required int id, required bool focus}) async {
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'focus': focus,
+    };
+    await SystemChannels.platform_views.invokeMethod('focus', args);
   }
 }
 
@@ -1405,6 +1417,10 @@ class Win32ViewController {
   Win32ViewController._(this.id);
 
   final int id;
+
+  Future<void> focus(bool focus) async {
+    await PlatformViewsService.focusWin32View(id: id, focus: focus);
+  }
 }
 
 /// Base class for iOS and macOS view controllers.
