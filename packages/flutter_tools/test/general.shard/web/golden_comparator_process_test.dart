@@ -41,7 +41,7 @@ void main() {
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
-      process.sendCommand(imageFile, goldenKey, false);
+      await process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response = await process.getResponse();
       final String stringToStdin = ioSink.getAndClear();
@@ -64,11 +64,11 @@ void main() {
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
-      process.sendCommand(imageFile, goldenKey, false);
+      await process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response1 = await process.getResponse();
 
-      process.sendCommand(imageFile2, goldenKey2, true);
+      await process.sendCommand(imageFile2, goldenKey2, true);
 
       final Map<String, dynamic> response2 = await process.getResponse();
       final String stringToStdin = ioSink.getAndClear();
@@ -94,7 +94,7 @@ Other JSON data after the initial data
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess,logger: BufferLogger.test());
-      process.sendCommand(imageFile, goldenKey, false);
+      await process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response = await process.getResponse();
       final String stringToStdin = ioSink.getAndClear();

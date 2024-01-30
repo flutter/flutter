@@ -304,7 +304,7 @@ class HotRunner extends ResidentRunner {
       // VM must have accepted the kernel binary, there will be no reload
       // report, so we let incremental compiler know that source code was accepted.
       if (device!.generator != null) {
-        device.generator!.accept();
+        await device.generator!.accept();
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
@@ -642,7 +642,7 @@ class HotRunner extends ResidentRunner {
       // VM must have accepted the kernel binary, there will be no reload
       // report, so we let incremental compiler know that source code was accepted.
       if (device!.generator != null) {
-        device.generator!.accept();
+        await device.generator!.accept();
       }
     }
     // Check if the isolate is paused and resume it.

@@ -260,7 +260,7 @@ class TestCompiler {
         } else {
           request.result.complete(outputPath);
         }
-        compiler!.accept();
+        await compiler!.accept();
         await compiler!.reset();
       }
       globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');

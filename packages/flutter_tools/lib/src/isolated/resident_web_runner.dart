@@ -322,7 +322,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             appFailedToStart();
             return 1;
           }
-          device!.generator!.accept();
+          await device!.generator!.accept();
           cacheInitialDillCompilation();
         } else {
           final WebBuilder webBuilder = WebBuilder(
@@ -396,7 +396,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS();
       if (report.success) {
-        device!.generator!.accept();
+        await device!.generator!.accept();
       } else {
         status.stop();
         await device!.generator!.reject();

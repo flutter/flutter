@@ -521,7 +521,7 @@ Future<void> _accept(
   MemoryIOSink frontendServerStdIn,
   String expected,
 ) async {
-  generator.accept();
+  await generator.accept();
   final String commands = frontendServerStdIn.getAndClear();
   final RegExp re = RegExp(expected);
   expect(commands, matches(re));
