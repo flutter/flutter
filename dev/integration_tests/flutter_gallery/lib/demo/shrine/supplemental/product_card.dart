@@ -35,7 +35,7 @@ class ProductCard extends StatelessWidget {
 
     // The fontSize to use for computing the heuristic UI scaling factor.
     const double defaultFontSize = 14.0;
-    final double containerScaingFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
+    final double containerScalingFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext context, Widget? child, AppStateModel model) {
@@ -56,7 +56,7 @@ class ProductCard extends StatelessWidget {
                 child: imageWidget,
               ),
               SizedBox(
-                height: kTextBoxHeight * containerScaingFactor,
+                height: kTextBoxHeight * containerScalingFactor,
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
