@@ -1106,11 +1106,8 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 }
 
 class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
-  FakeMDnsVmServiceDiscovery({this.returnsNull = false, this.hangs = false});
+  FakeMDnsVmServiceDiscovery({this.returnsNull = false});
   bool returnsNull;
-
-  /// If true, the future of `getVMServiceUriForLaunch` will never complete.
-  bool hangs;
 
   Completer<void> completer = Completer<void>();
   @override
@@ -1123,10 +1120,6 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
   }) async {
-    if (hangs) {
-      final Completer<void> neverEndingCompleter = Completer<void>();
-      await neverEndingCompleter.future;
-    }
     completer.complete();
     if (returnsNull) {
       return null;
