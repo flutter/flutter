@@ -672,6 +672,8 @@ flutter:
           command: <String>[
             impellerc,
             '--sksl',
+            '--runtime-stage-gles',
+            '--runtime-stage-vulkan',
             '--iplr',
             '--sl=$outputPath',
             '--spirv=$outputPath.spirv',
