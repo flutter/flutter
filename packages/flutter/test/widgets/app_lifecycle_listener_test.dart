@@ -134,6 +134,14 @@ void main() {
     await setAppLifeCycleState(AppLifecycleState.paused);
     expect(transitions, equals(<String>['inactive', 'hide', 'pause']));
 
+    // Wraps around from pause to detach.
+    await setAppLifeCycleState(AppLifecycleState.detached);
+    expect(transitions, equals(<String>['inactive', 'hide', 'pause', 'detach']));
+    await setAppLifeCycleState(AppLifecycleState.resumed);
+    expect(transitions, equals(<String>['inactive', 'hide', 'pause', 'detach', 'resume']));
+    await setAppLifeCycleState(AppLifecycleState.paused);
+    expect(transitions, equals(<String>['inactive', 'hide', 'pause', 'detach', 'resume', 'inactive', 'hide', 'pause']));
+
     // Generates intermediate states from higher to lower lifecycle states
     transitions.clear();
     await setAppLifeCycleState(AppLifecycleState.resumed);
