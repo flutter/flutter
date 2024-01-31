@@ -62,8 +62,13 @@ class _PageTwo extends StatefulWidget {
 }
 
 class _PageTwoState extends State<_PageTwo> {
-  void _showBackDialog() {
-    showDialog<void>(
+  /// Shows a dialog and resolves to true when the user has indicated that they
+  /// want to pop.
+  ///
+  /// A return value of null indicates a desire not to pop, such as when the
+  /// user has dismissed the modal without tapping a button.
+  Future<bool?> _showBackDialog() {
+    return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -78,7 +83,7 @@ class _PageTwoState extends State<_PageTwo> {
               ),
               child: const Text('Nevermind'),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(context, false);
               },
             ),
             TextButton(
@@ -87,8 +92,7 @@ class _PageTwoState extends State<_PageTwo> {
               ),
               child: const Text('Leave'),
               onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.pop(context, true);
               },
             ),
           ],
@@ -107,15 +111,21 @@ class _PageTwoState extends State<_PageTwo> {
             const Text('Page Two'),
             PopScope(
               canPop: false,
-              onPopInvoked: (bool didPop) {
+              onPopInvoked: (bool didPop) async {
                 if (didPop) {
                   return;
                 }
-                _showBackDialog();
+                final bool shouldPop = await _showBackDialog() ?? false;
+                if (context.mounted && shouldPop) {
+                  Navigator.pop(context);
+                }
               },
               child: TextButton(
-                onPressed: () {
-                  _showBackDialog();
+                onPressed: () async {
+                  final bool shouldPop = await _showBackDialog() ?? false;
+                  if (context.mounted && shouldPop) {
+                    Navigator.pop(context);
+                  }
                 },
                 child: const Text('Go back'),
               ),

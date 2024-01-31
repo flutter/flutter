@@ -24,18 +24,16 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-const String shaderLibDir = '/./shader_lib';
-
 void main() {
-  group('AssetBundle.build', () {
-    late Logger logger;
+  const String shaderLibDir = '/./shader_lib';
+
+  group('AssetBundle.build (using context)', () {
     late FileSystem testFileSystem;
     late Platform platform;
 
     setUp(() async {
       testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
-      logger = BufferLogger.test();
       platform = FakePlatform();
     });
 
@@ -151,30 +149,6 @@ flutter:
       FileSystem: () => testFileSystem,
       Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('throws ToolExit when directory entry contains invalid characters', () async {
-      testFileSystem.file('.packages').createSync();
-      testFileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
-name: example
-flutter:
-  assets:
-    - https://mywebsite.com/images/
-''');
-      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      expect(() => bundle.build(packagesPath: '.packages'), throwsToolExit(
-        message: 'Unable to search for asset files in directory path "https%3A//mywebsite.com/images/". '
-        'Please ensure that this is valid URI that points to a directory that is '
-        'available on the local file system.\n'
-        'Error details:\n'
-        'Unsupported operation: Illegal character in path: https:',
-      ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('handle removal of wildcard directories', () async {
@@ -361,184 +335,98 @@ flutter:
       Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
+  });
 
-    group('flavors feature', () {
-      Future<ManifestAssetBundle> buildBundleWithFlavor(String? flavor) async {
-        final ManifestAssetBundle bundle = ManifestAssetBundle(
-          logger: logger,
-          fileSystem: testFileSystem,
-          platform: platform,
-          splitDeferredAssets: true,
-        );
+  group('AssetBundle.build', () {
+    testWithoutContext('throws ToolExit when directory entry contains invalid characters (Windows only)', () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
+      final BufferLogger logger = BufferLogger.test();
+      final FakePlatform platform = FakePlatform(operatingSystem: 'windows');
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
 
-        await bundle.build(
-          packagesPath: '.packages',
-          flutterProject: FlutterProject.fromDirectoryTest(testFileSystem.currentDirectory),
-          flavor: flavor,
-        );
-        return bundle;
-      }
-
-      late String? previousCacheFlutterRootValue;
-
-      setUp(() {
-        previousCacheFlutterRootValue = Cache.flutterRoot;
-        Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: testFileSystem, userMessages: UserMessages());
-      });
-
-      tearDown(() => Cache.flutterRoot = previousCacheFlutterRootValue);
-
-      testWithoutContext('correctly bundles assets given a simple asset manifest with flavors', () async {
-        testFileSystem.file('.packages').createSync();
-        testFileSystem.file(testFileSystem.path.join('assets', 'common', 'image.png')).createSync(recursive: true);
-        testFileSystem.file(testFileSystem.path.join('assets', 'vanilla', 'ice-cream.png')).createSync(recursive: true);
-        testFileSystem.file(testFileSystem.path.join('assets', 'strawberry', 'ice-cream.png')).createSync(recursive: true);
-        testFileSystem.file(testFileSystem.path.join('assets', 'orange', 'ice-cream.png')).createSync(recursive: true);
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: example
 flutter:
   assets:
-    - assets/common/
-    - path: assets/vanilla/
-      flavors:
-        - vanilla
-    - path: assets/strawberry/
-      flavors:
-        - strawberry
-    - path: assets/orange/ice-cream.png
-      flavors:
-        - orange
-  ''');
+    - https://mywebsite.com/images/
+''');
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
 
-        ManifestAssetBundle bundle;
-        bundle = await buildBundleWithFlavor(null);
-        expect(bundle.entries.keys, contains('assets/common/image.png'));
-        expect(bundle.entries.keys, isNot(contains('assets/vanilla/ice-cream.png')));
-        expect(bundle.entries.keys, isNot(contains('assets/strawberry/ice-cream.png')));
-        expect(bundle.entries.keys, isNot(contains('assets/orange/ice-cream.png')));
-
-        bundle = await buildBundleWithFlavor('strawberry');
-        expect(bundle.entries.keys, contains('assets/common/image.png'));
-        expect(bundle.entries.keys, isNot(contains('assets/vanilla/ice-cream.png')));
-        expect(bundle.entries.keys, contains('assets/strawberry/ice-cream.png'));
-        expect(bundle.entries.keys, isNot(contains('assets/orange/ice-cream.png')));
-
-        bundle = await buildBundleWithFlavor('orange');
-        expect(bundle.entries.keys, contains('assets/common/image.png'));
-        expect(bundle.entries.keys, isNot(contains('assets/vanilla/ice-cream.png')));
-        expect(bundle.entries.keys, isNot(contains('assets/strawberry/ice-cream.png')));
-        expect(bundle.entries.keys, contains('assets/orange/ice-cream.png'));
-      });
-
-      testWithoutContext('throws a tool exit when a non-flavored folder contains a flavored asset', () async {
-        testFileSystem.file('.packages').createSync();
-        testFileSystem.file(testFileSystem.path.join('assets', 'unflavored.png')).createSync(recursive: true);
-        testFileSystem.file(testFileSystem.path.join('assets', 'vanillaOrange.png')).createSync(recursive: true);
-
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
-  name: example
-  flutter:
-    assets:
-      - assets/
-      - path: assets/vanillaOrange.png
-        flavors:
-          - vanilla
-          - orange
-  ''');
-
-        expect(
-          buildBundleWithFlavor(null),
-          throwsToolExit(message: 'Multiple assets entries include the file '
-            '"assets/vanillaOrange.png", but they specify different lists of flavors.\n'
-            'An entry with the path "assets/" does not specify any flavors.\n'
-            'An entry with the path "assets/vanillaOrange.png" specifies the flavor(s): "vanilla", "orange".\n\n'
-            'Consider organizing assets with different flavors into different directories.'),
-        );
-      });
-
-      testWithoutContext('throws a tool exit when a flavored folder contains a flavorless asset', () async {
-        testFileSystem.file('.packages').createSync();
-        testFileSystem.file(testFileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
-        testFileSystem.file(testFileSystem.path.join('vanilla', 'flavorless.png')).createSync(recursive: true);
-
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
-  name: example
-  flutter:
-    assets:
-      - path: vanilla/
-        flavors:
-          - vanilla
-      - vanilla/flavorless.png
-  ''');
-        expect(
-          buildBundleWithFlavor(null),
-          throwsToolExit(message: 'Multiple assets entries include the file '
-            '"vanilla/flavorless.png", but they specify different lists of flavors.\n'
-            'An entry with the path "vanilla/" specifies the flavor(s): "vanilla".\n'
-            'An entry with the path "vanilla/flavorless.png" does not specify any flavors.\n\n'
-            'Consider organizing assets with different flavors into different directories.'),
-        );
-      });
-
-      testWithoutContext('tool exits when two file-explicit entries give the same asset different flavors', () {
-        testFileSystem.file('.packages').createSync();
-        testFileSystem.file('orange.png').createSync(recursive: true);
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
-  name: example
-  flutter:
-    assets:
-      - path: orange.png
-        flavors:
-          - orange
-      - path: orange.png
-        flavors:
-          - mango
-  ''');
-
-        expect(
-          buildBundleWithFlavor(null),
-          throwsToolExit(message: 'Multiple assets entries include the file '
-            '"orange.png", but they specify different lists of flavors.\n'
-            'An entry with the path "orange.png" specifies the flavor(s): "orange".\n'
-            'An entry with the path "orange.png" specifies the flavor(s): "mango".'),
-        );
+      expect(
+        () => bundle.build(
+          packagesPath: '.packages',
+          flutterProject: FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          ),
+        ),
+        throwsToolExit(
+          message: 'Unable to search for asset files in directory path "https%3A//mywebsite.com/images/". '
+            'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
+            'Error details:\n'
+            'Unsupported operation: Illegal character in path: https:',
+        ),
+      );
     });
 
-      testWithoutContext('throws ToolExit when flavor from file-level declaration has different flavor from containing folder flavor declaration', () async {
-        testFileSystem.file('.packages').createSync();
-        testFileSystem.file(testFileSystem.path.join('vanilla', 'actually-strawberry.png')).createSync(recursive: true);
-        testFileSystem.file(testFileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
+    testWithoutContext('throws ToolExit when file entry contains invalid characters (Windows only)', () async {
+      final FileSystem fileSystem = MemoryFileSystem(
+        style: FileSystemStyle.windows,
+        opHandle: (String context, FileSystemOp operation) {
+          if (operation == FileSystemOp.exists && context == r'C:\http:\\website.com') {
+            throw const FileSystemException(
+              r"FileSystemException: Exists failed, path = 'C:\http:\\website.com' "
+              '(OS Error: The filename, directory name, or volume label syntax is '
+              'incorrect., errno = 123)',
+            );
+          }
+        },
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final FakePlatform platform = FakePlatform(operatingSystem: 'windows');
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - http://website.com/hi.png
+''');
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
 
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
-  name: example
-  flutter:
-    assets:
-      - path: vanilla/
-        flavors:
-          - vanilla
-      - path: vanilla/actually-strawberry.png
-        flavors:
-          - strawberry
-  ''');
-        expect(
-          buildBundleWithFlavor(null),
-          throwsToolExit(message: 'Multiple assets entries include the file '
-            '"vanilla/actually-strawberry.png", but they specify different lists of flavors.\n'
-            'An entry with the path "vanilla/" specifies the flavor(s): "vanilla".\n'
-            'An entry with the path "vanilla/actually-strawberry.png" '
-            'specifies the flavor(s): "strawberry".'),
-        );
-      });
+      expect(
+        () => bundle.build(
+          packagesPath: '.packages',
+          flutterProject: FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          ),
+        ),
+        throwsToolExit(
+          message: 'Unable to check the existence of asset file ',
+        ),
+      );
     });
   });
 
@@ -784,6 +672,8 @@ flutter:
           command: <String>[
             impellerc,
             '--sksl',
+            '--runtime-stage-gles',
+            '--runtime-stage-vulkan',
             '--iplr',
             '--sl=$outputPath',
             '--spirv=$outputPath.spirv',
@@ -792,7 +682,7 @@ flutter:
             '--include=/$assetsPath',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
@@ -839,7 +729,7 @@ flutter:
             '--include=/$assetsPath',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
@@ -880,7 +770,7 @@ flutter:
             '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
             '--include=$shaderLibDir',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },

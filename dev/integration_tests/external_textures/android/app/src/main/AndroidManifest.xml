@@ -9,7 +9,7 @@ found in the LICENSE file. -->
 
     <application
         android:name="${applicationName}"
-        android:label="external_ui">
+        android:label="external_textures">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
