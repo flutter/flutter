@@ -84,6 +84,8 @@ if (is_mac) {
       "//flutter/impeller/aiks:aiks_unittests_golden",
       "//flutter/impeller/fixtures",
       "//flutter/third_party/swiftshader",
+      "//third_party/angle:libEGL",
+      "//third_party/angle:libGLESv2",
       "//third_party/googletest:gtest",
     ]
   }

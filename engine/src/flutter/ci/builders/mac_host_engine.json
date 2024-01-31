@@ -159,6 +159,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--enable-impeller-vulkan",
+                "--enable-impeller-opengles",
                 "--use-glfw-swiftshader"
             ],
             "name": "host_release",

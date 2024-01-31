@@ -717,9 +717,8 @@ def to_gn_args(args):
   # gen_snapshot, but the build defines otherwise make it look like the build is
   # for a host Windows build and make GN think we will be building ANGLE.
   # Angle is not used on Mac hosts as there are no tests for the OpenGL backend.
-  if (is_host_build(args) and
-      gn_args['host_os'] != 'mac') or (args.target_os == 'android' and
-                                       get_host_os() == 'win'):
+  if is_host_build(args) or (args.target_os == 'android' and
+                             get_host_os() == 'win'):
     # Do not build unnecessary parts of the ANGLE tree.
     gn_args['angle_build_all'] = False
     gn_args['angle_has_astc_encoder'] = False
@@ -728,6 +727,10 @@ def to_gn_args(args):
     # https://github.com/flutter/flutter/issues/114107
     if get_host_os() == 'win':
       gn_args['angle_force_context_check_every_call'] = True
+    if get_host_os() == 'mac':
+      gn_args['angle_enable_metal'] = True
+      gn_args['angle_enable_gl'] = False
+      gn_args['angle_enable_vulkan'] = False
 
     # ANGLE and SwiftShader share build flags to enable X11 and Wayland,
     # but we only need these enabled for SwiftShader.

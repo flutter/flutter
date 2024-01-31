@@ -641,11 +641,7 @@ template("_impeller_shaders_gles") {
     if (impeller_enable_metal || impeller_enable_vulkan) {
       intermediates_subdir = "gles"
     }
-    if (is_mac) {
-      shader_target_flags = [ "--opengl-desktop" ]
-    } else {
-      shader_target_flags = [ "--opengl-es" ]
-    }
+    shader_target_flags = [ "--opengl-es" ]
 
     defines = [ "IMPELLER_TARGET_OPENGLES" ]
   }

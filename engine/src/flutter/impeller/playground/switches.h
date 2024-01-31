@@ -20,6 +20,7 @@ struct PlaygroundSwitches {
   // rendered in the playground.
   std::optional<std::chrono::milliseconds> timeout;
   bool enable_vulkan_validation = false;
+  bool use_angle = false;
 
   PlaygroundSwitches();
 

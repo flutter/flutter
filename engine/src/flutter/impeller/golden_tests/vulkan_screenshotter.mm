@@ -6,8 +6,6 @@
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/impeller/golden_tests/metal_screenshot.h"
-#include "impeller/renderer/backend/vulkan/surface_context_vk.h"
-#include "impeller/renderer/backend/vulkan/texture_vk.h"
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
 
@@ -15,6 +13,15 @@ namespace impeller {
 namespace testing {
 
 namespace {
+
+using CGContextPtr = std::unique_ptr<std::remove_pointer<CGContextRef>::type,
+                                     decltype(&CGContextRelease)>;
+using CGImagePtr = std::unique_ptr<std::remove_pointer<CGImageRef>::type,
+                                   decltype(&CGImageRelease)>;
+using CGColorSpacePtr =
+    std::unique_ptr<std::remove_pointer<CGColorSpaceRef>::type,
+                    decltype(&CGColorSpaceRelease)>;
+
 std::unique_ptr<Screenshot> ReadTexture(
     const std::shared_ptr<Context>& surface_context,
     const std::shared_ptr<Texture>& texture) {
@@ -49,21 +56,45 @@ std::unique_ptr<Screenshot> ReadTexture(
   // TODO(gaaclarke): Replace CoreImage requirement with something
   // crossplatform.
 
-  CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
+  CGColorSpacePtr color_space(CGColorSpaceCreateDeviceRGB(),
+                              &CGColorSpaceRelease);
   CGBitmapInfo bitmap_info =
-      kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little;
-  CGContextRef context = CGBitmapContextCreate(
-      device_buffer->OnGetContents(), texture->GetSize().width,
-      texture->GetSize().height,
-      /*bitsPerComponent=*/8,
-      /*bytesPerRow=*/texture->GetTextureDescriptor().GetBytesPerRow(),
-      color_space, bitmap_info);
+      texture->GetTextureDescriptor().format == PixelFormat::kB8G8R8A8UNormInt
+          ? kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
+          : kCGImageAlphaPremultipliedLast;
+  CGContextPtr context(
+      CGBitmapContextCreate(
+          device_buffer->OnGetContents(), texture->GetSize().width,
+          texture->GetSize().height,
+          /*bitsPerComponent=*/8,
+          /*bytesPerRow=*/texture->GetTextureDescriptor().GetBytesPerRow(),
+          color_space.get(), bitmap_info),
+      &CGContextRelease);
   FML_CHECK(context);
-  CGImageRef image_ref = CGBitmapContextCreateImage(context);
-  FML_CHECK(image_ref);
-  CGContextRelease(context);
-  CGColorSpaceRelease(color_space);
-  return std::make_unique<MetalScreenshot>(image_ref);
+  CGImagePtr image(CGBitmapContextCreateImage(context.get()), &CGImageRelease);
+  FML_CHECK(image);
+
+  // TODO(tbd): Perform the flip at the blit stage to avoid this slow
+  // copy.
+  if (texture->GetYCoordScale() == -1) {
+    CGContextPtr flipped_context(
+        CGBitmapContextCreate(
+            nullptr, texture->GetSize().width, texture->GetSize().height,
+            /*bitsPerComponent=*/8,
+            /*bytesPerRow=*/0, color_space.get(), bitmap_info),
+        &CGContextRelease);
+    CGContextTranslateCTM(flipped_context.get(), 0, texture->GetSize().height);
+    CGContextScaleCTM(flipped_context.get(), 1.0, -1.0);
+    CGContextDrawImage(
+        flipped_context.get(),
+        CGRectMake(0, 0, texture->GetSize().width, texture->GetSize().height),
+        image.get());
+    CGImagePtr flipped_image(CGBitmapContextCreateImage(flipped_context.get()),
+                             &CGImageRelease);
+    image.swap(flipped_image);
+  }
+
+  return std::make_unique<MetalScreenshot>(image.release());
 }
 }  // namespace
 
@@ -84,8 +115,6 @@ std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
       aiks_context,
       ISize(size.width * content_scale.x, size.height * content_scale.y));
   std::shared_ptr<Texture> texture = image->GetTexture();
-  FML_CHECK(aiks_context.GetContext()->GetBackendType() ==
-            Context::BackendType::kVulkan);
   return ReadTexture(aiks_context.GetContext(), texture);
 }
 

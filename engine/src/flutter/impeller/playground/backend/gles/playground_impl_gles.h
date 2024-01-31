@@ -26,6 +26,8 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
   UniqueHandle handle_;
   std::shared_ptr<ReactorWorker> worker_;
+  const bool use_angle_;
+  void* angle_glesv2_;
 
   // |PlaygroundImpl|
   std::shared_ptr<Context> GetContext() const override;
