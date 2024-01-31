@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
 
@@ -40,7 +39,7 @@ void main() {
 
   group('SliverFillRemaining', () {
     group('hasScrollBody: true, default', () {
-      testWidgetsWithLeakTracking('no siblings', (WidgetTester tester) async {
+      testWidgets('no siblings', (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         addTearDown(controller.dispose);
         await tester.pumpWidget(
@@ -81,7 +80,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('one sibling', (WidgetTester tester) async {
+      testWidgets('one sibling', (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         addTearDown(controller.dispose);
         await tester.pumpWidget(
@@ -123,7 +122,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('scrolls beyond viewportMainAxisExtent', (WidgetTester tester) async {
+      testWidgets('scrolls beyond viewportMainAxisExtent', (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         addTearDown(controller.dispose);
         final List<Widget> slivers = <Widget>[
@@ -143,7 +142,7 @@ void main() {
     });
 
     group('hasScrollBody: false', () {
-      testWidgetsWithLeakTracking('does not extend past viewportMainAxisExtent', (WidgetTester tester) async {
+      testWidgets('does not extend past viewportMainAxisExtent', (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         addTearDown(controller.dispose);
         final List<Widget> slivers = <Widget>[
@@ -163,7 +162,7 @@ void main() {
         expect(find.byType(Container), findsNWidgets(2));
       });
 
-      testWidgetsWithLeakTracking('child without size is sized by extent', (WidgetTester tester) async {
+      testWidgets('child without size is sized by extent', (WidgetTester tester) async {
         final List<Widget> slivers = <Widget>[
           sliverBox,
           SliverFillRemaining(
@@ -184,7 +183,7 @@ void main() {
         expect(box.size.width, equals(650));
       });
 
-      testWidgetsWithLeakTracking('child with smaller size is sized by extent', (WidgetTester tester) async {
+      testWidgets('child with smaller size is sized by extent', (WidgetTester tester) async {
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
           sliverBox,
@@ -225,7 +224,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('extent is overridden by child with larger size', (WidgetTester tester) async {
+      testWidgets('extent is overridden by child with larger size', (WidgetTester tester) async {
         final List<Widget> slivers = <Widget>[
           sliverBox,
           SliverFillRemaining(
@@ -249,7 +248,7 @@ void main() {
         expect(box.size.width, equals(1000));
       });
 
-      testWidgetsWithLeakTracking('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+      testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
           SliverFixedExtentList(
@@ -290,7 +289,7 @@ void main() {
         expect(tester.getCenter(button).dx, equals(400.0));
       });
 
-      testWidgetsWithLeakTracking('alignment with a flexible works', (WidgetTester tester) async {
+      testWidgets('alignment with a flexible works', (WidgetTester tester) async {
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
           sliverBox,
@@ -359,7 +358,7 @@ void main() {
       }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
       group('fillOverscroll: true, relevant platforms', () {
-        testWidgetsWithLeakTracking('child without size is sized by extent and overscroll', (WidgetTester tester) async {
+        testWidgets('child without size is sized by extent and overscroll', (WidgetTester tester) async {
           final List<Widget> slivers = <Widget>[
             sliverBox,
             SliverFillRemaining(
@@ -386,7 +385,7 @@ void main() {
           expect(box3.size.height, equals(450));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgetsWithLeakTracking('child with smaller size is overridden and sized by extent and overscroll', (WidgetTester tester) async {
+        testWidgets('child with smaller size is overridden and sized by extent and overscroll', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -433,7 +432,7 @@ void main() {
           );
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgetsWithLeakTracking('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+        testWidgets('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);
@@ -498,7 +497,7 @@ void main() {
           );
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgetsWithLeakTracking('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+        testWidgets('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);
@@ -561,7 +560,7 @@ void main() {
           );
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgetsWithLeakTracking('alignment with a flexible works with fillOverscroll', (WidgetTester tester) async {
+        testWidgets('alignment with a flexible works with fillOverscroll', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -655,7 +654,7 @@ void main() {
 
       group('fillOverscroll: true, is ignored on irrelevant platforms', () {
         // Android/Other scroll physics when hasScrollBody: false, ignores fillOverscroll: true
-        testWidgetsWithLeakTracking('child without size is sized by extent', (WidgetTester tester) async {
+        testWidgets('child without size is sized by extent', (WidgetTester tester) async {
           final List<Widget> slivers = <Widget>[
             sliverBox,
             SliverFillRemaining(
@@ -674,7 +673,7 @@ void main() {
           expect(box2.size.height, equals(450));
         });
 
-        testWidgetsWithLeakTracking('child with size is overridden and sized by extent', (WidgetTester tester) async {
+        testWidgets('child with size is overridden and sized by extent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -713,7 +712,7 @@ void main() {
           expect(tester.getCenter(button).dx, equals(400.0));
         });
 
-        testWidgetsWithLeakTracking('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+        testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);
@@ -771,7 +770,7 @@ void main() {
           expect(tester.getCenter(button).dx, equals(400.0));
         });
 
-        testWidgetsWithLeakTracking('child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+        testWidgets('child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);

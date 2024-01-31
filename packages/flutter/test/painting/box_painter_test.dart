@@ -9,7 +9,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   tearDown(() {
@@ -161,7 +160,7 @@ void main() {
     expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.solid)'));
   });
 
-  testWidgetsWithLeakTracking('BoxShadow BoxStyle.solid', (WidgetTester tester) async {
+  testWidgets('BoxShadow BoxStyle.solid', (WidgetTester tester) async {
     final Key key = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(
@@ -193,7 +192,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('BoxShadow BoxStyle.outer', (WidgetTester tester) async {
+  testWidgets('BoxShadow BoxStyle.outer', (WidgetTester tester) async {
     final Key key = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(
@@ -225,7 +224,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('BoxShadow BoxStyle.inner', (WidgetTester tester) async {
+  testWidgets('BoxShadow BoxStyle.inner', (WidgetTester tester) async {
     final Key key = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(
@@ -257,7 +256,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('BoxShadow BoxStyle.normal', (WidgetTester tester) async {
+  testWidgets('BoxShadow BoxStyle.normal', (WidgetTester tester) async {
     final Key key = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(
@@ -289,7 +288,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('BoxShadow BoxStyle.normal.wide_radius', (WidgetTester tester) async {
+  testWidgets('BoxShadow BoxStyle.normal.wide_radius', (WidgetTester tester) async {
     final Key key = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(
@@ -322,7 +321,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('BoxShadow BoxStyle.outer.wide_radius', (WidgetTester tester) async {
+  testWidgets('BoxShadow BoxStyle.outer.wide_radius', (WidgetTester tester) async {
     final Key key = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(
@@ -355,7 +354,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('BoxShadow BoxStyle.solid.wide_radius', (WidgetTester tester) async {
+  testWidgets('BoxShadow BoxStyle.solid.wide_radius', (WidgetTester tester) async {
     final Key key = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(
@@ -387,7 +386,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('BoxShadow BoxStyle.inner.wide_radius', (WidgetTester tester) async {
+  testWidgets('BoxShadow BoxStyle.inner.wide_radius', (WidgetTester tester) async {
     final Key key = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(

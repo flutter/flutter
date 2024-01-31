@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show findRenderEditable, textOffsetToPosition;
@@ -111,13 +110,13 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('should return false when there is no text', (WidgetTester tester) async {
+    testWidgets('should return false when there is no text', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(key: key));
       expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
-    testWidgetsWithLeakTracking('should return true when there is text and collapsed selection', (WidgetTester tester) async {
+    testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -126,7 +125,7 @@ void main() {
       expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgetsWithLeakTracking('should return false when there is text and partial uncollapsed selection', (WidgetTester tester) async {
+    testWidgets('should return false when there is text and partial uncollapsed selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -136,7 +135,7 @@ void main() {
       expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
-    testWidgetsWithLeakTracking('should return false when there is text and full selection', (WidgetTester tester) async {
+    testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -148,7 +147,7 @@ void main() {
   });
 
   group('cupertino handles', () {
-    testWidgetsWithLeakTracking('draws transparent handle correctly', (WidgetTester tester) async {
+    testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
       await tester.pumpWidget(RepaintBoundary(
         child: CupertinoTheme(
           data: const CupertinoThemeData(
@@ -196,7 +195,7 @@ void main() {
       '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
     );
 
-    testWidgetsWithLeakTracking('All menu items show when they fit.', (WidgetTester tester) async {
+    testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
@@ -254,7 +253,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgetsWithLeakTracking("When a menu item doesn't fit, a second page is used.", (WidgetTester tester) async {
+    testWidgets("When a menu item doesn't fit, a second page is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
@@ -362,7 +361,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgetsWithLeakTracking('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
+    testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that two buttons can't fit on
       // the same page.
       tester.view.physicalSize = const Size(640, 800);
@@ -508,7 +507,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgetsWithLeakTracking('Handles very long locale strings', (WidgetTester tester) async {
+    testWidgets('Handles very long locale strings', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
@@ -620,7 +619,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
         final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
@@ -689,7 +688,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('iOS selection handles scale with rich text (selection style 1)', (WidgetTester tester) async {
+  testWidgets('iOS selection handles scale with rich text (selection style 1)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -769,7 +768,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('iOS selection handles scale with rich text (selection style 2)', (WidgetTester tester) async {
+  testWidgets('iOS selection handles scale with rich text (selection style 2)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -853,7 +852,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('iOS selection handles scale with rich text (grapheme clusters)', (WidgetTester tester) async {
+  testWidgets('iOS selection handles scale with rich text (grapheme clusters)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -934,7 +933,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'iOS selection handles scaling falls back to preferredLineHeight when the current frame does not match the previous', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(

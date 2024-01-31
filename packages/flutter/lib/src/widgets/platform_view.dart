@@ -419,30 +419,6 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// [onElementCreated] is called when the DOM element is created. It can be
   /// used by the app to customize the element by adding attributes and styles.
-  ///
-  /// ```dart
-  /// import 'package:flutter/widgets.dart';
-  /// import 'package:web/web.dart' as web;
-  ///
-  /// // ...
-  ///
-  /// class MyWidget extends StatelessWidget {
-  ///   const MyWidget({super.key});
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return HtmlElementView.fromTagName(
-  ///       tagName: 'div',
-  ///       onElementCreated: (Object element) {
-  ///         element as web.HTMLElement;
-  ///         element.style
-  ///             ..backgroundColor = 'blue'
-  ///             ..border = '1px solid red';
-  ///       },
-  ///     );
-  ///   }
-  /// }
-  /// ```
   factory HtmlElementView.fromTagName({
     Key? key,
     required String tagName,

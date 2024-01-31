@@ -200,7 +200,7 @@ class Configurator {
 
   /// The [Platform] to use for this run.
   ///
-  /// Can be replaced by tests to test behavior on different plaforms.
+  /// Can be replaced by tests to test behavior on different platforms.
   final Platform platform;
 
   void generateConfiguration() {

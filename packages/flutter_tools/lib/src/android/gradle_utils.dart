@@ -40,7 +40,7 @@ const String templateKotlinGradlePluginVersion = '1.7.10';
 //
 // Please see the README before changing any of these values.
 const String compileSdkVersion = '34';
-const String minSdkVersion = '19';
+const String minSdkVersion = '21';
 const String targetSdkVersion = '33';
 const String ndkVersion = '23.1.7779620';
 
@@ -107,9 +107,11 @@ final RegExp gradleOrgVersionMatch =
   );
 
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
-// file which have minSdkVersion 16,17, or 18 (the Jelly Bean api levels).
-final RegExp jellyBeanMinSdkVersionMatch =
-  RegExp(r'(?<=^\s*)minSdkVersion 1[678](?=\s*(?://|$))', multiLine: true);
+// file which have minSdkVersion 16,17, 18, 19, or 20.
+final RegExp tooOldMinSdkVersionMatch = RegExp(
+  r'(?<=^\s*)minSdkVersion (1[6789]|20)(?=\s*(?://|$))',
+  multiLine: true,
+);
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';
@@ -204,20 +206,26 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 /// The Android plugin version is specified in the [build.gradle] file within
 /// the project's Android directory.
 String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
-  final File buildFile = directory.childFile('build.gradle');
+  const String buildFileName = 'build.gradle/build.gradle.kts';
+
+  File buildFile = directory.childFile('build.gradle');
+  if (!buildFile.existsSync()) {
+    buildFile = directory.childFile('build.gradle.kts');
+  }
+
   if (!buildFile.existsSync()) {
     logger.printTrace(
-        "$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
+        "$buildFileName doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
   final Iterable<Match> pluginMatches = _buildAndroidGradlePluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
-    logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace("$buildFileName doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String? androidPluginVersion = pluginMatches.first.group(1);
-  logger.printTrace('$buildFile provides AGP version: $androidPluginVersion');
+  logger.printTrace('$buildFileName provides AGP version: $androidPluginVersion');
   return getGradleVersionFor(androidPluginVersion ?? 'unknown');
 }
 
@@ -325,9 +333,13 @@ OS:           Mac OS X 13.2.1 aarch64
 /// [settings.gradle] file within the project's
 /// Android directory ([androidDirectory]).
 String? getAgpVersion(Directory androidDirectory, Logger logger) {
-  final File buildFile = androidDirectory.childFile('build.gradle');
+  File buildFile = androidDirectory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
-    logger.printTrace('Can not find build.gradle in $androidDirectory');
+    buildFile = androidDirectory.childFile('build.gradle.kts');
+  }
+
+  if (!buildFile.existsSync()) {
+    logger.printTrace('Can not find build.gradle/build.gradle.kts in $androidDirectory');
     return null;
   }
   final String buildFileContent = buildFile.readAsStringSync();
@@ -560,7 +572,7 @@ bool validateJavaAndGradle(Logger logger,
 /// Returns compatibility information for the valid range of Gradle versions for
 /// the specified Java version.
 ///
-/// Returns null when the tooling has not documented the compatibile Gradle
+/// Returns null when the tooling has not documented the compatible Gradle
 /// versions for the Java version (either the version is too old or too new). If
 /// this seems like a mistake, the caller may need to update the
 /// [_javaGradleCompatList] detailing Java/Gradle compatibility.
@@ -633,7 +645,7 @@ bool validateJavaAndAgp(Logger logger,
   return null;
 }
 
-/// Returns valid Java range for specified Gradle and AGP verisons.
+/// Returns valid Java range for specified Gradle and AGP versions.
 ///
 /// Assumes that gradleV and agpV are compatible versions.
 VersionRange getJavaVersionFor({required String gradleV, required String agpV}) {
@@ -783,7 +795,7 @@ void exitWithNoSdkMessage() {
       'Try setting the ANDROID_HOME environment variable.');
 }
 
-// Data class to hold normal/defined Java <-> Gradle compatability criteria.
+// Data class to hold normal/defined Java <-> Gradle compatibility criteria.
 //
 // The [javaMax] is exclusive in terms of supporting the noted [gradleMin],
 // whereas [javaMin] is inclusive.
