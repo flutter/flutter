@@ -255,16 +255,18 @@ class DependencyVersionChecker {
 
 
 // Helper class to parse the versions that are provided as plain strings (Gradle, Kotlin) and
-// perform easy comparisons. All versions will have a major, minor, and patch value. It defaults
-// to 0, so for example the version strings "8.2" and "8.2.0" would parse to the same version.
+// perform easy comparisons. All versions will have a major, minor, and patch value. These values
+// default to 0 when they are not provided or are otherwise unparseable.
+// For example the version strings "8.2", "8.2.2hfd", and "8.2.0" would parse to the same version.
 class Version(val major : Int, val minor : Int, val patch : Int) : Comparable<Version> {
     companion object {
         fun fromString(version : String) : Version {
             val asList : List<String> = version.split(".")
+            val convertedToNumbers : List<Int> = asList.map {it.toIntOrNull() ?: 0}
             return Version(
-                major = asList.getOrElse(0, {"0"}).toInt(),
-                minor = asList.getOrElse(1, {"0"}).toInt(),
-                patch = asList.getOrElse(2, {"0"}).toInt()
+                major = convertedToNumbers.getOrElse(0, {0}),
+                minor = convertedToNumbers.getOrElse(1, {0}),
+                patch = convertedToNumbers.getOrElse(2, {0})
             )
         }
     }
