@@ -81,6 +81,8 @@ class FilledButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row with padding at the start and end
   /// and a gap between them.
+  ///
+  /// If [icon] is null, will create a [FilledButton] instead.
   factory FilledButton.icon({
     Key? key,
     required VoidCallback? onPressed,
@@ -92,9 +94,38 @@ class FilledButton extends ButtonStyleButton {
     bool? autofocus,
     Clip? clipBehavior,
     MaterialStatesController? statesController,
-    required Widget icon,
+    Widget? icon,
     required Widget label,
-  }) = _FilledButtonWithIcon;
+  }) {
+     if (icon == null) {
+      return FilledButton(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: label,
+      );
+    }
+    return _FilledButtonWithIcon( key: key,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      style: style,
+      focusNode: focusNode,
+      autofocus: autofocus ?? false,
+      clipBehavior: clipBehavior ?? Clip.none,
+      statesController: statesController,
+      icon: icon,
+      label: label,
+    );
+  }
 
   /// Create a tonal variant of FilledButton.
   ///
@@ -118,8 +149,10 @@ class FilledButton extends ButtonStyleButton {
 
   /// Create a filled tonal button from [icon] and [label].
   ///
-  /// The icon and label are arranged in a row with padding at the start and end
-  /// and a gap between them.
+  /// The [icon] and [label] are arranged in a row with padding at the start and
+  /// end and a gap between them.
+  ///
+  /// If [icon] is null, will create a [FilledButton.tonal] instead.
   factory FilledButton.tonalIcon({
     Key? key,
     required VoidCallback? onPressed,
@@ -131,9 +164,24 @@ class FilledButton extends ButtonStyleButton {
     bool? autofocus,
     Clip? clipBehavior,
     MaterialStatesController? statesController,
-    required Widget icon,
+    Widget? icon,
     required Widget label,
   }) {
+    if (icon == null) {
+      return FilledButton.tonal(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: label,
+      );
+    }
     return _FilledButtonWithIcon.tonal(
       key: key,
       onPressed: onPressed,
@@ -147,58 +195,6 @@ class FilledButton extends ButtonStyleButton {
       statesController: statesController,
       icon: icon,
       label: label,
-    );
-  }
-
-  /// If [icon] is not null, then this factory constructor returns a
-  /// [FilledButton.icon], otherwise it returns a [FilledButton].
-  ///
-  /// If the [icon] is not null, the icon and label are arranged in a row with
-  /// padding at the start and end and a gap between them.
-  ///
-  /// If the [icon] is null, then only the [child] is shown, without any
-  /// additional decorations.
-  factory FilledButton.withOptionalIcon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
-    Widget? icon,
-    required Widget child,
-  }) {
-    if (icon == null) {
-      return FilledButton(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: child,
-      );
-    }
-    return FilledButton.icon( key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      style: style,
-      focusNode: focusNode,
-      autofocus: autofocus ?? false,
-      clipBehavior: clipBehavior ?? Clip.none,
-      statesController: statesController,
-      icon: icon,
-      label: child,
     );
   }
 

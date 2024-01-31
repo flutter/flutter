@@ -154,7 +154,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('TextButton.withOptionalIcon produces the correct widgets', (WidgetTester tester) async {
+  testWidgets('TextButton.icon produces the correct widgets when icon is null', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
     final Key iconButtonKey = UniqueKey();
@@ -162,11 +162,11 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Center(
-          child: TextButton.withOptionalIcon(
+          child: TextButton.icon(
             key: iconButtonKey,
             onPressed: () { },
             icon: const Icon(Icons.add),
-            child: const Text('label'),
+            label: const Text('label'),
           ),
         ),
       ),
@@ -179,11 +179,11 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Center(
-          child: TextButton.withOptionalIcon(
+          child: TextButton.icon(
             key: iconButtonKey,
             onPressed: () { },
             // No icon specified.
-            child: const Text('label'),
+            label: const Text('label'),
           ),
         ),
       ),
