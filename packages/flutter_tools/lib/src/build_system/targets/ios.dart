@@ -503,9 +503,6 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      // Always specify an impeller shader target so that we support runtime toggling and
-      // the --enable-impeller debug flag.
-      shaderTarget: ShaderTarget.impelleriOS,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
