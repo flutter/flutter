@@ -41,6 +41,7 @@ class DependencyVersionChecker {
         // Before updating any "error" version, ensure that you have updated the corresponding
         // "warn" version for a full release to provide advanced warning. See
         // flutter.dev/go/android-dependency-versions for more.
+        // TODO(gmackall): https://github.com/flutter/flutter/issues/142653.
         val warnGradleVersion : Version = Version(7,0,2)
         val errorGradleVersion : Version = Version(0,0,0)
 
@@ -240,7 +241,8 @@ class DependencyVersionChecker {
 
 
 // Helper class to parse the versions that are provided as plain strings (Gradle, Kotlin) and
-// perform easy comparisons.
+// perform easy comparisons. All versions will have a major, minor, and patch value. It defaults
+// to 0, so for example the version strings "8.2" and "8.2.0" would parse to the same version.
 class Version(val major : Int, val minor : Int, val patch : Int) : Comparable<Version> {
     companion object {
         fun fromString(version : String) : Version {
