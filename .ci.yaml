@@ -4236,7 +4236,6 @@ targets:
 
   - name: Mac_arm64_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
