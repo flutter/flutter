@@ -3,6 +3,12 @@
 # Flutter infra uses this file to generate a checklist of tasks to be performed
 # for every commit.
 #
+# The recipes mentioned below refer to those in this repo:
+#   https://flutter.googlesource.com/recipes/+/refs/heads/main/recipes/
+#
+# The "flutter_drone" recipe just defers to dev/bots/test.dart in this repo,
+# with the shard set according to the "shard" key in this file.
+#
 # More information at:
 #  * https://github.com/flutter/cocoon/blob/main/CI_YAML.md
 enabled_branches:
@@ -421,6 +427,9 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
+    # This really just runs dev/bots/customer_testing/ci.sh,
+    # but it does so indirectly via the flutter_drone recipe
+    # calling the dev/bots/test.dart script.
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
@@ -433,7 +442,7 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/docs
     presubmit: false
-    timeout: 90 # https://github.com/flutter/flutter/issues/120901
+    timeout: 60
     dimensions:
       os: "Linux"
     properties:
@@ -1747,7 +1756,6 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2067,7 +2075,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
@@ -3376,7 +3383,6 @@ targets:
       - .ci.yaml
 
   - name: Mac flavors_test_macos
-    bringup: true
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3980,7 +3986,6 @@ targets:
 
   - name: Mac_x64 tool_tests_commands
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3996,7 +4001,6 @@ targets:
 
   - name: Mac_arm64 tool_tests_commands
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -4233,7 +4237,6 @@ targets:
 
   - name: Mac_arm64_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -4423,7 +4426,6 @@ targets:
   - name: Mac_x64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       device_os: iOS-16|iOS-17
@@ -4434,7 +4436,6 @@ targets:
   - name: Mac_arm64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       device_os: iOS-16|iOS-17
@@ -4731,7 +4732,6 @@ targets:
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       device_os: iOS-16|iOS-17
@@ -4829,7 +4829,6 @@ targets:
 
   - name: Mac_x64 native_ui_tests_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4847,7 +4846,6 @@ targets:
 
   - name: Mac_arm64 native_ui_tests_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5932,6 +5930,7 @@ targets:
 
   # windows motog4 benchmark
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/142608
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5944,7 +5943,6 @@ targets:
   - name: Windows_android native_assets_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
