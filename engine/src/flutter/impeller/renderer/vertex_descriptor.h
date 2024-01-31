@@ -67,10 +67,13 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   // |Comparable<VertexDescriptor>|
   bool IsEqual(const VertexDescriptor& other) const override;
 
+  bool UsesInputAttacments() const;
+
  private:
   std::vector<ShaderStageIOSlot> inputs_;
   std::vector<ShaderStageBufferLayout> layouts_;
   std::vector<DescriptorSetLayout> desc_set_layouts_;
+  bool uses_input_attachments_ = false;
 
   VertexDescriptor(const VertexDescriptor&) = delete;
 

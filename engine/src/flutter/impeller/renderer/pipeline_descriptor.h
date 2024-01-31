@@ -21,11 +21,6 @@ class VertexDescriptor;
 template <typename T>
 class Pipeline;
 
-enum class UseSubpassInput {
-  kYes,
-  kNo,
-};
-
 class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
  public:
   PipelineDescriptor();
@@ -134,17 +129,6 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   const std::vector<Scalar>& GetSpecializationConstants() const;
 
-  void SetUseSubpassInput(UseSubpassInput value) { use_subpass_input_ = value; }
-
-  bool UsesSubpassInput() const {
-    switch (use_subpass_input_) {
-      case UseSubpassInput::kYes:
-        return true;
-      case UseSubpassInput::kNo:
-        return false;
-    }
-  }
-
  private:
   std::string label_;
   SampleCount sample_count_ = SampleCount::kCount1;
@@ -163,7 +147,6 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       back_stencil_attachment_descriptor_;
   PrimitiveType primitive_type_ = PrimitiveType::kTriangle;
   PolygonMode polygon_mode_ = PolygonMode::kFill;
-  UseSubpassInput use_subpass_input_ = UseSubpassInput::kNo;
   std::vector<Scalar> specialization_constants_;
 };
 

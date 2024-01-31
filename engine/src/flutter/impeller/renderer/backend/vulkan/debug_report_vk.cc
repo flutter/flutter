@@ -103,10 +103,19 @@ DebugReportVK::Result DebugReportVK::OnDebugCallback(
     vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
     vk::DebugUtilsMessageTypeFlagsEXT type,
     const VkDebugUtilsMessengerCallbackDataEXT* data) {
+  // This is a real issue caused by INPUT_ATTACHMENT_BIT not being a supported
+  // `VkSurfaceCapabilitiesKHR::supportedUsageFlags` on any platform other than
+  // Android. This is necessary for all the framebuffer fetch related tests. We
+  // can get away with suppressing this on macOS but this must be fixed.
+  if (data->messageIdNumber == 0x2c36905d) {
+    return Result::kContinue;
+  }
+
   // Issue in older versions of the SDK.
   // https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/3554
-  if (strstr(data->pMessageIdName, "CoreValidation-Shader-OutputNotConsumed") !=
-      nullptr) {
+  if (data->pMessageIdName != nullptr &&
+      strstr(data->pMessageIdName, "CoreValidation-Shader-OutputNotConsumed") !=
+          nullptr) {
     return Result::kContinue;
   }
 

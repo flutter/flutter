@@ -163,7 +163,7 @@ SwapchainImplVK::SwapchainImplVK(
 
   auto& vk_context = ContextVK::Cast(*context);
 
-  auto [caps_result, caps] =
+  const auto [caps_result, surface_caps] =
       vk_context.GetPhysicalDevice().getSurfaceCapabilitiesKHR(*surface);
   if (caps_result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not get surface capabilities: "
@@ -188,7 +188,7 @@ SwapchainImplVK::SwapchainImplVK(
   vk_context.SetOffscreenFormat(ToPixelFormat(format.value().format));
 
   const auto composite =
-      ChooseAlphaCompositionMode(caps.supportedCompositeAlpha);
+      ChooseAlphaCompositionMode(surface_caps.supportedCompositeAlpha);
   if (!composite.has_value()) {
     VALIDATION_LOG << "No composition mode supported.";
     return;
@@ -209,22 +209,26 @@ SwapchainImplVK::SwapchainImplVK(
   swapchain_info.imageColorSpace = format.value().colorSpace;
   swapchain_info.presentMode = vk::PresentModeKHR::eFifo;
   swapchain_info.imageExtent = vk::Extent2D{
-      std::clamp(caps.currentExtent.width, caps.minImageExtent.width,
-                 caps.maxImageExtent.width),
-      std::clamp(caps.currentExtent.height, caps.minImageExtent.height,
-                 caps.maxImageExtent.height),
+      std::clamp(surface_caps.currentExtent.width,
+                 surface_caps.minImageExtent.width,
+                 surface_caps.maxImageExtent.width),
+      std::clamp(surface_caps.currentExtent.height,
+                 surface_caps.minImageExtent.height,
+                 surface_caps.maxImageExtent.height),
   };
-  swapchain_info.minImageCount = std::clamp(
-      caps.minImageCount + 1u,  // preferred image count
-      caps.minImageCount,       // min count cannot be zero
-      caps.maxImageCount == 0u ? caps.minImageCount + 1u
-                               : caps.maxImageCount  // max zero means no limit
-  );
+  swapchain_info.minImageCount =
+      std::clamp(surface_caps.minImageCount + 1u,  // preferred image count
+                 surface_caps.minImageCount,       // min count cannot be zero
+                 surface_caps.maxImageCount == 0u
+                     ? surface_caps.minImageCount + 1u
+                     : surface_caps.maxImageCount  // max zero means no limit
+      );
   swapchain_info.imageArrayLayers = 1u;
-  // Swapchain images are primarily used as color attachments (via resolve) or
-  // blit targets.
+  // Swapchain images are primarily used as color attachments (via resolve),
+  // blit targets, or input attachments.
   swapchain_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment |
-                              vk::ImageUsageFlagBits::eTransferDst;
+                              vk::ImageUsageFlagBits::eTransferDst |
+                              vk::ImageUsageFlagBits::eInputAttachment;
   swapchain_info.preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
   swapchain_info.compositeAlpha = composite.value();
   // If we set the clipped value to true, Vulkan expects we will never read back

@@ -75,6 +75,8 @@ impeller_component("vulkan") {
     "pipeline_vk.h",
     "queue_vk.cc",
     "queue_vk.h",
+    "render_pass_builder_vk.cc",
+    "render_pass_builder_vk.h",
     "render_pass_vk.cc",
     "render_pass_vk.h",
     "resource_manager_vk.cc",

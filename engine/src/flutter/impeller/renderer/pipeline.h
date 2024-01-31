@@ -64,12 +64,13 @@ class Pipeline {
       std::function<void(T& desc)> descriptor_callback) const;
 
  protected:
+  const std::weak_ptr<PipelineLibrary> library_;
+
+  const T desc_;
+
   Pipeline(std::weak_ptr<PipelineLibrary> library, T desc);
 
  private:
-  const std::weak_ptr<PipelineLibrary> library_;
-  const T desc_;
-
   Pipeline(const Pipeline&) = delete;
 
   Pipeline& operator=(const Pipeline&) = delete;

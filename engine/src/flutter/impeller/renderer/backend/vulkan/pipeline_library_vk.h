@@ -32,18 +32,21 @@ class PipelineLibraryVK final
 
   void DidAcquireSurfaceFrame();
 
+  const std::shared_ptr<PipelineCacheVK>& GetPSOCache() const;
+
+  const std::shared_ptr<fml::ConcurrentTaskRunner>& GetWorkerTaskRunner() const;
+
  private:
   friend ContextVK;
 
   std::weak_ptr<DeviceHolder> device_holder_;
-  bool supports_framebuffer_fetch_ = false;
   std::shared_ptr<PipelineCacheVK> pso_cache_;
   std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   Mutex pipelines_mutex_;
   PipelineMap pipelines_ IPLR_GUARDED_BY(pipelines_mutex_);
   Mutex compute_pipelines_mutex_;
-  ComputePipelineMap compute_pipelines_
-      IPLR_GUARDED_BY(compute_pipelines_mutex_);
+  ComputePipelineMap compute_pipelines_ IPLR_GUARDED_BY(
+      compute_pipelines_mutex_);
   std::atomic_size_t frames_acquired_ = 0u;
   bool is_valid_ = false;
 
@@ -67,8 +70,6 @@ class PipelineLibraryVK final
   // |PipelineLibrary|
   void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) override;
-
-  std::unique_ptr<PipelineVK> CreatePipeline(const PipelineDescriptor& desc);
 
   std::unique_ptr<ComputePipelineVK> CreateComputePipeline(
       const ComputePipelineDescriptor& desc);

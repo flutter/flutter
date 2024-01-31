@@ -18,6 +18,13 @@ namespace impeller {
 ///             and the Vulkan spec. The docs for the various member of this
 ///             class are based on verbiage in the spec.
 ///
+///             A useful mnemonic for building a mental model of how to add
+///             these barriers is to build a sentence like so; "All commands
+///             before this barrier may continue till they encounter a <src
+///             access> in the <src pipeline stage>. And, all commands after
+///             this barrier may proceed till <dst access> in the <dst pipeline
+///             stage>."
+///
 struct BarrierVK {
   vk::CommandBuffer cmd_buffer = {};
   vk::ImageLayout new_layout = vk::ImageLayout::eUndefined;
