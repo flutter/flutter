@@ -826,15 +826,13 @@ class ContentContext {
 
     void CreateDefault(const Context& context,
                        const ContentContextOptions& options,
-                       const std::initializer_list<Scalar>& constants = {},
-                       UseSubpassInput subpass_input = UseSubpassInput::kNo) {
+                       const std::initializer_list<Scalar>& constants = {}) {
       auto desc =
           PipelineT::Builder::MakeDefaultPipelineDescriptor(context, constants);
       if (!desc.has_value()) {
         VALIDATION_LOG << "Failed to create default pipeline.";
         return;
       }
-      desc->SetUseSubpassInput(subpass_input);
       options.ApplyToPipelineDescriptor(*desc);
       SetDefault(options, std::make_unique<PipelineT>(context, desc));
     }

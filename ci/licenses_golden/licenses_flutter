@@ -5478,6 +5478,8 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_vk.cc + ../..
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/queue_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/queue_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/render_pass_builder_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/render_pass_builder_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/render_pass_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/render_pass_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/resource_manager_vk.cc + ../../../flutter/LICENSE
@@ -8335,6 +8337,8 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/queue_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/queue_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/render_pass_builder_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/render_pass_builder_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/render_pass_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/render_pass_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/resource_manager_vk.cc

@@ -161,9 +161,7 @@ class ContextVK final : public Context,
 
   std::shared_ptr<CommandPoolRecyclerVK> GetCommandPoolRecycler() const;
 
-  std::shared_ptr<DescriptorPoolRecyclerVK> GetDescriptorPoolRecycler() const {
-    return descriptor_pool_recycler_;
-  }
+  std::shared_ptr<DescriptorPoolRecyclerVK> GetDescriptorPoolRecycler() const;
 
   std::shared_ptr<CommandQueue> GetCommandQueue() const override;
 

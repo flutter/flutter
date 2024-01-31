@@ -20,13 +20,11 @@
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
+#include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
-
-#include "vulkan/vulkan_enums.hpp"
-#include "vulkan/vulkan_handles.hpp"
-#include "vulkan/vulkan_to_string.hpp"
+#include "impeller/renderer/backend/vulkan/vk.h"
 
 namespace impeller {
 
@@ -35,7 +33,7 @@ namespace impeller {
 // manually changed.
 //
 // See: impeller/entity/shaders/blending/framebuffer_blend.frag
-static constexpr size_t kMagicSubpassInputBinding = 64;
+static constexpr size_t kMagicSubpassInputBinding = 64u;
 
 static vk::ClearColorValue VKClearValueFromColor(Color color) {
   vk::ClearColorValue value;
@@ -79,176 +77,65 @@ static std::vector<vk::ClearValue> GetVKClearValues(
   return clears;
 }
 
-static vk::AttachmentDescription CreateAttachmentDescription(
-    const Attachment& attachment,
-    const std::shared_ptr<Texture> Attachment::*texture_ptr,
-    bool supports_framebuffer_fetch) {
-  const auto& texture = attachment.*texture_ptr;
-  if (!texture) {
-    return {};
-  }
-  const auto& texture_vk = TextureVK::Cast(*texture);
-  const auto& desc = texture->GetTextureDescriptor();
-  auto current_layout = texture_vk.GetLayout();
-
-  auto load_action = attachment.load_action;
-  auto store_action = attachment.store_action;
-
-  if (current_layout == vk::ImageLayout::eUndefined) {
-    load_action = LoadAction::kClear;
-  }
-
-  if (desc.storage_mode == StorageMode::kDeviceTransient) {
-    store_action = StoreAction::kDontCare;
-  } else if (texture_ptr == &Attachment::resolve_texture) {
-    store_action = StoreAction::kStore;
-  }
-
-  // Always insert a barrier to transition to color attachment optimal.
-  if (current_layout != vk::ImageLayout::ePresentSrcKHR) {
-    // Note: This should incur a barrier.
-    current_layout = vk::ImageLayout::eGeneral;
-  }
-
-  return CreateAttachmentDescription(desc.format,        //
-                                     desc.sample_count,  //
-                                     load_action,        //
-                                     store_action,       //
-                                     current_layout,
-                                     supports_framebuffer_fetch  //
-  );
-}
-
-static void SetTextureLayout(
-    const Attachment& attachment,
-    const vk::AttachmentDescription& attachment_desc,
-    const std::shared_ptr<CommandBufferVK>& command_buffer,
-    const std::shared_ptr<Texture> Attachment::*texture_ptr) {
-  const auto& texture = attachment.*texture_ptr;
-  if (!texture) {
-    return;
-  }
-  const auto& texture_vk = TextureVK::Cast(*texture);
-
-  if (attachment_desc.initialLayout == vk::ImageLayout::eGeneral) {
-    BarrierVK barrier;
-    barrier.new_layout = vk::ImageLayout::eGeneral;
-    barrier.cmd_buffer = command_buffer->GetEncoder()->GetCommandBuffer();
-    barrier.src_access = vk::AccessFlagBits::eShaderRead;
-    barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader;
-    barrier.dst_access = vk::AccessFlagBits::eColorAttachmentWrite |
-                         vk::AccessFlagBits::eTransferWrite;
-    barrier.dst_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                        vk::PipelineStageFlagBits::eTransfer;
-
-    texture_vk.SetLayout(barrier);
-  }
-
-  // Instead of transitioning layouts manually using barriers, we are going to
-  // make the subpass perform our transitions.
-  texture_vk.SetLayoutWithoutEncoding(attachment_desc.finalLayout);
-}
-
 SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const ContextVK& context,
-    const std::shared_ptr<CommandBufferVK>& command_buffer,
-    bool supports_framebuffer_fetch) const {
-  std::vector<vk::AttachmentDescription> attachments;
+    const std::shared_ptr<CommandBufferVK>& command_buffer) const {
+  BarrierVK barrier;
+  barrier.new_layout = vk::ImageLayout::eGeneral;
+  barrier.cmd_buffer = command_buffer->GetEncoder()->GetCommandBuffer();
+  barrier.src_access = vk::AccessFlagBits::eShaderRead;
+  barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader;
+  barrier.dst_access = vk::AccessFlagBits::eColorAttachmentWrite |
+                       vk::AccessFlagBits::eTransferWrite;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                      vk::PipelineStageFlagBits::eTransfer;
 
-  std::vector<vk::AttachmentReference> color_refs;
-  std::vector<vk::AttachmentReference> resolve_refs;
-  vk::AttachmentReference depth_stencil_ref = kUnusedAttachmentReference;
-
-  // Spec says: "Each element of the pColorAttachments array corresponds to an
-  // output location in the shader, i.e. if the shader declares an output
-  // variable decorated with a Location value of X, then it uses the attachment
-  // provided in pColorAttachments[X]. If the attachment member of any element
-  // of pColorAttachments is VK_ATTACHMENT_UNUSED."
-  //
-  // Just initialize all the elements as unused and fill in the valid bind
-  // points in the loop below.
-  color_refs.resize(render_target_.GetMaxColorAttacmentBindIndex() + 1u,
-                    kUnusedAttachmentReference);
-  resolve_refs.resize(render_target_.GetMaxColorAttacmentBindIndex() + 1u,
-                      kUnusedAttachmentReference);
+  RenderPassBuilderVK builder;
 
   for (const auto& [bind_point, color] : render_target_.GetColorAttachments()) {
-    color_refs[bind_point] = vk::AttachmentReference{
-        static_cast<uint32_t>(attachments.size()),
-        supports_framebuffer_fetch ? vk::ImageLayout::eGeneral
-                                   : vk::ImageLayout::eColorAttachmentOptimal};
-    attachments.emplace_back(CreateAttachmentDescription(
-        color, &Attachment::texture, supports_framebuffer_fetch));
-    SetTextureLayout(color, attachments.back(), command_buffer,
-                     &Attachment::texture);
+    builder.SetColorAttachment(
+        bind_point,                                          //
+        color.texture->GetTextureDescriptor().format,        //
+        color.texture->GetTextureDescriptor().sample_count,  //
+        color.load_action,                                   //
+        color.store_action                                   //
+    );
+    TextureVK::Cast(*color.texture).SetLayout(barrier);
     if (color.resolve_texture) {
-      resolve_refs[bind_point] = vk::AttachmentReference{
-          static_cast<uint32_t>(attachments.size()),
-          supports_framebuffer_fetch
-              ? vk::ImageLayout::eGeneral
-              : vk::ImageLayout::eColorAttachmentOptimal};
-      attachments.emplace_back(CreateAttachmentDescription(
-          color, &Attachment::resolve_texture, supports_framebuffer_fetch));
-      SetTextureLayout(color, attachments.back(), command_buffer,
-                       &Attachment::resolve_texture);
+      TextureVK::Cast(*color.resolve_texture).SetLayout(barrier);
     }
   }
 
-  auto depth = render_target_.GetDepthAttachment();
-  if (depth.has_value()) {
-    depth_stencil_ref = vk::AttachmentReference{
-        static_cast<uint32_t>(attachments.size()),
-        vk::ImageLayout::eDepthStencilAttachmentOptimal};
-    attachments.emplace_back(CreateAttachmentDescription(
-        depth.value(), &Attachment::texture, supports_framebuffer_fetch));
-    SetTextureLayout(depth.value(), attachments.back(), command_buffer,
-                     &Attachment::texture);
+  if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
+    builder.SetDepthStencilAttachment(
+        depth->texture->GetTextureDescriptor().format,        //
+        depth->texture->GetTextureDescriptor().sample_count,  //
+        depth->load_action,                                   //
+        depth->store_action                                   //
+    );
+    TextureVK::Cast(*depth->texture).SetLayout(barrier);
   }
 
   if (auto stencil = render_target_.GetStencilAttachment();
       stencil.has_value()) {
-    depth_stencil_ref = vk::AttachmentReference{
-        static_cast<uint32_t>(attachments.size()),
-        vk::ImageLayout::eDepthStencilAttachmentOptimal};
-    attachments.emplace_back(CreateAttachmentDescription(
-        stencil.value(), &Attachment::texture, supports_framebuffer_fetch));
-
-    // If the depth and stencil are stored in the same texture, then we've
-    // already inserted a memory barrier to transition this texture as part of
-    // the depth branch above.
-    if (depth.has_value() && depth->texture != stencil->texture) {
-      SetTextureLayout(stencil.value(), attachments.back(), command_buffer,
-                       &Attachment::texture);
-    }
+    builder.SetStencilAttachment(
+        stencil->texture->GetTextureDescriptor().format,        //
+        stencil->texture->GetTextureDescriptor().sample_count,  //
+        stencil->load_action,                                   //
+        stencil->store_action                                   //
+    );
+    TextureVK::Cast(*stencil->texture).SetLayout(barrier);
   }
 
-  vk::SubpassDescription subpass_desc;
-  subpass_desc.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-  subpass_desc.setColorAttachments(color_refs);
-  subpass_desc.setResolveAttachments(resolve_refs);
-  subpass_desc.setPDepthStencilAttachment(&depth_stencil_ref);
+  auto pass = builder.Build(context.GetDevice());
 
-  std::vector<vk::SubpassDependency> subpass_dependencies;
-  std::vector<vk::AttachmentReference> subpass_color_ref;
-  subpass_color_ref.push_back(vk::AttachmentReference{
-      static_cast<uint32_t>(0), vk::ImageLayout::eColorAttachmentOptimal});
-  if (supports_framebuffer_fetch) {
-    subpass_desc.setFlags(vk::SubpassDescriptionFlagBits::
-                              eRasterizationOrderAttachmentColorAccessARM);
-    subpass_desc.setInputAttachments(subpass_color_ref);
-  }
-
-  vk::RenderPassCreateInfo render_pass_desc;
-  render_pass_desc.setAttachments(attachments);
-  render_pass_desc.setPSubpasses(&subpass_desc);
-  render_pass_desc.setSubpassCount(1u);
-
-  auto [result, pass] =
-      context.GetDevice().createRenderPassUnique(render_pass_desc);
-  if (result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to create render pass: " << vk::to_string(result);
+  if (!pass) {
+    VALIDATION_LOG << "Failed to create render pass for framebuffer.";
     return {};
   }
+
+  context.SetDebugName(pass.get(), debug_label_.c_str());
+
   return MakeSharedVK(std::move(pass));
 }
 
@@ -269,9 +156,7 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
-  render_pass_ = CreateVKRenderPass(
-      vk_context, command_buffer_,
-      vk_context.GetCapabilities()->SupportsFramebufferFetch());
+  render_pass_ = CreateVKRenderPass(vk_context, command_buffer_);
   if (!render_pass_) {
     VALIDATION_LOG << "Could not create renderpass.";
     is_valid_ = false;
@@ -355,7 +240,8 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
   std::vector<vk::ImageView> attachments;
 
   // This bit must be consistent to ensure compatibility with the pass created
-  // earlier. Follow this order: Color attachments, then depth, then stencil.
+  // earlier. Follow this order: Color attachments, then depth-stencil, then
+  // stencil.
   for (const auto& [_, color] : render_target_.GetColorAttachments()) {
     // The bind point doesn't matter here since that information is present in
     // the render pass.
@@ -369,9 +255,8 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
   if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
     attachments.emplace_back(
         TextureVK::Cast(*depth->texture).GetRenderTargetView());
-  }
-  if (auto stencil = render_target_.GetStencilAttachment();
-      stencil.has_value()) {
+  } else if (auto stencil = render_target_.GetStencilAttachment();
+             stencil.has_value()) {
     attachments.emplace_back(
         TextureVK::Cast(*stencil->texture).GetRenderTargetView());
   }
@@ -406,12 +291,14 @@ void RenderPassVK::SetPipeline(
   command_buffer_vk_.bindPipeline(vk::PipelineBindPoint::eGraphics,
                                   pipeline_vk.GetPipeline());
 
-  if (pipeline->GetDescriptor().UsesSubpassInput()) {
+  pipeline_uses_input_attachments_ =
+      pipeline->GetDescriptor().GetVertexDescriptor()->UsesInputAttacments();
+
+  if (pipeline_uses_input_attachments_) {
     if (bound_image_offset_ >= kMaxBindings) {
       pipeline_valid_ = false;
       return;
     }
-
     vk::DescriptorImageInfo image_info;
     image_info.imageLayout = vk::ImageLayout::eGeneral;
     image_info.sampler = VK_NULL_HANDLE;
@@ -548,6 +435,11 @@ fml::Status RenderPassVK::Draw() {
       nullptr                            // offsets
   );
 
+  if (pipeline_uses_input_attachments_) {
+    InsertBarrierForInputAttachmentRead(
+        command_buffer_vk_, TextureVK::Cast(*color_image_vk_).GetImage());
+  }
+
   if (has_index_buffer_) {
     command_buffer_vk_.drawIndexed(vertex_count_,    // index count
                                    instance_count_,  // instance count
@@ -577,6 +469,7 @@ fml::Status RenderPassVK::Draw() {
   base_vertex_ = 0u;
   vertex_count_ = 0u;
   pipeline_valid_ = false;
+  pipeline_uses_input_attachments_ = false;
   return fml::Status();
 }
 

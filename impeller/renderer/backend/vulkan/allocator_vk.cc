@@ -147,7 +147,6 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
   allocator_.reset(allocator);
   supports_memoryless_textures_ =
       capabilities.SupportsDeviceTransientTextures();
-  supports_framebuffer_fetch_ = capabilities.SupportsFramebufferFetch();
   is_valid_ = true;
 }
 
@@ -167,8 +166,7 @@ static constexpr vk::ImageUsageFlags ToVKImageUsageFlags(
     PixelFormat format,
     TextureUsageMask usage,
     StorageMode mode,
-    bool supports_memoryless_textures,
-    bool supports_framebuffer_fetch) {
+    bool supports_memoryless_textures) {
   vk::ImageUsageFlags vk_usage;
 
   switch (mode) {
@@ -188,9 +186,7 @@ static constexpr vk::ImageUsageFlags ToVKImageUsageFlags(
     } else {
       vk_usage |= vk::ImageUsageFlagBits::eColorAttachment;
     }
-    if (supports_framebuffer_fetch) {
-      vk_usage |= vk::ImageUsageFlagBits::eInputAttachment;
-    }
+    vk_usage |= vk::ImageUsageFlagBits::eInputAttachment;
   }
 
   if (usage & static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
@@ -267,8 +263,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                            const TextureDescriptor& desc,
                            VmaAllocator allocator,
                            vk::Device device,
-                           bool supports_memoryless_textures,
-                           bool supports_framebuffer_fetch)
+                           bool supports_memoryless_textures)
       : TextureSourceVK(desc), resource_(std::move(resource_manager)) {
     FML_DCHECK(desc.format != PixelFormat::kUnknown);
     vk::ImageCreateInfo image_info;
@@ -285,9 +280,9 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     image_info.arrayLayers = ToArrayLayerCount(desc.type);
     image_info.tiling = vk::ImageTiling::eOptimal;
     image_info.initialLayout = vk::ImageLayout::eUndefined;
-    image_info.usage = ToVKImageUsageFlags(
-        desc.format, desc.usage, desc.storage_mode,
-        supports_memoryless_textures, supports_framebuffer_fetch);
+    image_info.usage =
+        ToVKImageUsageFlags(desc.format, desc.usage, desc.storage_mode,
+                            supports_memoryless_textures);
     image_info.sharingMode = vk::SharingMode::eExclusive;
 
     VmaAllocationCreateInfo alloc_nfo = {};
@@ -433,8 +428,7 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
       desc,                                            //
       allocator_.get(),                                //
       device_holder->GetDevice(),                      //
-      supports_memoryless_textures_,                   //
-      supports_framebuffer_fetch_                      //
+      supports_memoryless_textures_                    //
   );
   if (!source->IsValid()) {
     return nullptr;
