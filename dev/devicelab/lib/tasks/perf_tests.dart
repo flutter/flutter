@@ -1326,10 +1326,9 @@ class PerfTest {
       try {
         if (enableImpeller ?? false) {
           changedManifest = true;
+          _addVulkanGPUTracingToManifest(testDirectory);
           if (forceOpenGLES ?? false) {
             _addOpenGLESToManifest(testDirectory);
-          } else {
-            _addVulkanGPUTracingToManifest(testDirectory);
           }
         }
         if (disablePartialRepaint) {
