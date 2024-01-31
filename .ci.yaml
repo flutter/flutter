@@ -4439,7 +4439,6 @@ targets:
   - name: Mac_arm64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       device_os: iOS-16|iOS-17
