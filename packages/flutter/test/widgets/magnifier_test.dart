@@ -78,12 +78,13 @@ void main() {
                     size: magnifierSize,
                     focalPointOffset: magnifierFocalPoint,
                     magnificationScale: magnificationScale,
+                    clipBehavior: Clip.hardEdge,
                     decoration: MagnifierDecoration(shadows: <BoxShadow>[
                       BoxShadow(
-                        spreadRadius: 10,
-                        blurRadius: 10,
+                        spreadRadius: 10.0,
+                        blurRadius: 10.0,
                         color: Colors.green,
-                        offset: Offset(5, 5),
+                        offset: Offset(5.0, 5.0),
                       ),
                     ]),
                   ),
@@ -91,8 +92,6 @@ void main() {
               ],
             ),
           )));
-
-      await tester.pumpAndSettle();
 
       // Should look like an orange screen, with two pink boxes.
       // One pink box is in the magnifier (so has a green shadow) and is double
@@ -324,5 +323,12 @@ void main() {
         });
       }
     });
+  });
+
+  testWidgets('MagnifierInfo.toString', (WidgetTester tester) async {
+    expect(MagnifierInfo.empty.toString(),
+      'MagnifierInfo(position: Offset(0.0, 0.0), line: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), '
+      'caret: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), field: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))',
+    );
   });
 }

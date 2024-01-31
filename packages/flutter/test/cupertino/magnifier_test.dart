@@ -28,10 +28,8 @@ void main() {
               controller: magnifierController,
               magnifierInfo: magnifierInfo,
             ));
-
-    WidgetsBinding.instance.scheduleFrame();
-    await tester.pumpAndSettle();
-
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
     await magnifierShown;
   }
 
