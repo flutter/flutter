@@ -318,7 +318,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       } else {
         switch (data.textDirection!) {
           case TextDirection.rtl:
-            effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}';
+            effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDI}';
           case TextDirection.ltr:
             effectivelabel = tooltipAndLabel;
         }
