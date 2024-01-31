@@ -244,6 +244,8 @@ void main() {
         command: <String>[
           impellerc,
           '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-vulkan',
           '--iplr',
           '--sl=/.tmp_rand0/0.8255140718871702.temp',
           '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
@@ -288,6 +290,7 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
+          '--sksl',
           '--runtime-stage-vulkan',
           '--iplr',
           '--sl=/.tmp_rand0/0.8255140718871702.temp',
@@ -332,6 +335,7 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
+          '--sksl',
           '--runtime-stage-gles',
           '--runtime-stage-vulkan',
           '--iplr',
