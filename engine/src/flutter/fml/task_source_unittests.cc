@@ -29,7 +29,7 @@ TEST(TaskSourceTests, MultipleTaskGrades) {
   task_source.RegisterTask(
       {2, [] {}, ChronoTicksSinceEpoch(), TaskSourceGrade::kUserInteraction});
   task_source.RegisterTask(
-      {3, [] {}, ChronoTicksSinceEpoch(), TaskSourceGrade::kDartMicroTasks});
+      {3, [] {}, ChronoTicksSinceEpoch(), TaskSourceGrade::kDartEventLoop});
   ASSERT_EQ(task_source.GetNumPendingTasks(), 3u);
 }
 
@@ -55,7 +55,7 @@ TEST(TaskSourceTests, SimpleOrderingMultiTaskHeaps) {
   auto time_stamp = ChronoTicksSinceEpoch();
   int value = 0;
   task_source.RegisterTask(
-      {1, [&] { value = 1; }, time_stamp, TaskSourceGrade::kDartMicroTasks});
+      {1, [&] { value = 1; }, time_stamp, TaskSourceGrade::kDartEventLoop});
   task_source.RegisterTask({2, [&] { value = 7; },
                             time_stamp + fml::TimeDelta::FromMilliseconds(1),
                             TaskSourceGrade::kUserInteraction});
@@ -75,7 +75,7 @@ TEST(TaskSourceTests, OrderingMultiTaskHeapsSecondaryPaused) {
   auto time_stamp = ChronoTicksSinceEpoch();
   int value = 0;
   task_source.RegisterTask(
-      {1, [&] { value = 1; }, time_stamp, TaskSourceGrade::kDartMicroTasks});
+      {1, [&] { value = 1; }, time_stamp, TaskSourceGrade::kDartEventLoop});
   task_source.RegisterTask({2, [&] { value = 7; },
                             time_stamp + fml::TimeDelta::FromMilliseconds(1),
                             TaskSourceGrade::kUserInteraction});
