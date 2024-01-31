@@ -67,8 +67,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
 
   @override
   void dispose() {
-    super.dispose();
     scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -185,7 +185,6 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         child: const Text('TextButton #4'),
       ),
     ];
-
 
     final List<Widget> columnTwoButtons = <Widget>[
       // Override the foregroundBuilder: apply a ShaderMask.
