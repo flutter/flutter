@@ -54,7 +54,6 @@ class TextButtonExample extends StatefulWidget {
 class _TextButtonExampleState extends State<TextButtonExample> {
   TextDirection textDirection = TextDirection.ltr;
   ThemeMode themeMode = ThemeMode.light;
-  VisualDensity visualDensity = VisualDensity.standard;
   late final ScrollController scrollController;
 
   static const Widget verticalSpacer = SizedBox(height: 16);
@@ -288,23 +287,23 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       ),
       verticalSpacer,
 
-      // Override the backgroundBuilder to add a burlap image background.
+      // Override the backgroundBuilder to add a grass image background.
       //
       // The image is clipped to the button's shape. We've included an Ink widget
       // because the background image is opaque and would otherwise obscure the splash
       // and highlight overlays that are painted on the button's Material widget
       // by default. They're drawn on the Ink widget instead. The foreground color
-      // was overridden as well because black shows up a little better on the mottled
-      // brown background.
+      // was overridden as well because white shows up a little better on the mottled
+      // green background.
       TextButton(
         onPressed: () {},
         style: TextButton.styleFrom(
-          foregroundColor: Colors.black,
+          foregroundColor: Colors.white,
           backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
             return Ink(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(burlapUrl),
+                  image: NetworkImage(grassUrl),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -375,43 +374,33 @@ class _TextButtonExampleState extends State<TextButtonExample> {
 
         // All of the button examples appear below. They're arranged in two columns.
 
-        // This theme defines default property overrides for all of the buttons
-        // that follow.
-        TextButtonTheme(
-          data: TextButtonThemeData(
-            style: TextButton.styleFrom(
-              visualDensity: visualDensity,
-              textStyle: theme.textTheme.labelLarge,
-            ),
-          ),
-          child: Expanded(
-            child:  Scrollbar(
+        Expanded(
+          child:  Scrollbar(
+            controller: scrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
               controller: scrollController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                controller: scrollController,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Directionality(
-                      textDirection: textDirection,
-                      child: Column(
-                        children: columnOneButtons,
-                      ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Directionality(
+                    textDirection: textDirection,
+                    child: Column(
+                      children: columnOneButtons,
                     ),
-                    horizontalSpacer,
+                  ),
+                  horizontalSpacer,
 
-                    Directionality(
-                      textDirection: textDirection,
-                      child: Column(
-                        children: columnTwoButtons
-                      ),
+                  Directionality(
+                    textDirection: textDirection,
+                    child: Column(
+                      children: columnTwoButtons
                     ),
-                    horizontalSpacer,
-                  ],
-                ),
+                  ),
+                  horizontalSpacer,
+                ],
               ),
             ),
           ),
@@ -472,7 +461,7 @@ class TextButtonExampleSwitches extends StatelessWidget {
   }
 }
 
-const String burlapUrl = 'https://media.istockphoto.com/id/152949844/photo/a-tan-burlap-textile-background-can-you-be-used-for-a-sack.jpg?s=612x612&w=0&k=20&c=AmUxRFPqpjzoi5D6r3flsRYANARdLQmyB5qt_LoryRs=';
-const String smiley1Url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/626f7f20-56da-4a6c-9996-50364c8b9ae2/dbc4dre-9244e67e-5e6b-44af-89e3-63cec6d18521.png/v1/fit/w_375,h_351/just_another_happy_smiley_____by_mondspeer_dbc4dre-375w.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NTYxIiwicGF0aCI6IlwvZlwvNjI2ZjdmMjAtNTZkYS00YTZjLTk5OTYtNTAzNjRjOGI5YWUyXC9kYmM0ZHJlLTkyNDRlNjdlLTVlNmItNDRhZi04OWUzLTYzY2VjNmQxODUyMS5wbmciLCJ3aWR0aCI6Ijw9NjAwIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.w7Xx-DmFGXjb6kbWn5_jXqcI6VKNZICN18hmkU8WmlQ';
-const String smiley2Url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/626f7f20-56da-4a6c-9996-50364c8b9ae2/d8gvlso-4b7bf222-1560-4f13-85b0-6a6371191aa3.png';
-const String smiley3Url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/626f7f20-56da-4a6c-9996-50364c8b9ae2/d8hfwwe-801502fe-7457-473e-9df2-b62e7bfdb1ff.png';
+const String grassUrl = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_grass.jpeg';
+const String smiley1Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley1.png';
+const String smiley2Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley2.png';
+const String smiley3Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley3.png';
