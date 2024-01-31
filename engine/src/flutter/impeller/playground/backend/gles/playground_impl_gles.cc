@@ -4,6 +4,12 @@
 
 #include "impeller/playground/backend/gles/playground_impl_gles.h"
 
+#define IMPELLER_PLAYGROUND_SUPPORTS_ANGLE FML_OS_MACOSX
+
+#if IMPELLER_PLAYGROUND_SUPPORTS_ANGLE
+#include <dlfcn.h>
+#endif
+
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
 
@@ -58,12 +64,26 @@ void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
 PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
-      worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())) {
+      worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())),
+      use_angle_(switches.use_angle) {
+  if (use_angle_) {
+#if IMPELLER_PLAYGROUND_SUPPORTS_ANGLE
+    angle_glesv2_ = dlopen("libGLESv2.dylib", RTLD_LAZY);
+#endif
+    FML_CHECK(angle_glesv2_ != nullptr);
+  }
+
   ::glfwDefaultWindowHints();
 
 #if FML_OS_MACOSX
-  // ES Profiles are not supported on Mac.
-  ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+  if (use_angle_) {
+    ::glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+    ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    ::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    ::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  } else {
+    ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+  }
 #else   // FML_OS_MACOSX
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -113,9 +133,18 @@ ShaderLibraryMappingsForPlayground() {
 
 // |PlaygroundImpl|
 std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
-  auto resolver = [](const char* name) -> void* {
-    return reinterpret_cast<void*>(::glfwGetProcAddress(name));
-  };
+  auto resolver = use_angle_ ? [](const char* name) -> void* {
+    void* symbol = nullptr;
+#if IMPELLER_PLAYGROUND_SUPPORTS_ANGLE
+    void* angle_glesv2 = dlopen("libGLESv2.dylib", RTLD_LAZY);
+    symbol = dlsym(angle_glesv2, name);
+#endif
+    FML_CHECK(symbol);
+    return symbol;
+  }
+  : [](const char* name) -> void* {
+      return reinterpret_cast<void*>(::glfwGetProcAddress(name));
+    };
   auto gl = std::make_unique<ProcTableGLES>(resolver);
   if (!gl->IsValid()) {
     FML_LOG(ERROR) << "Proc table when creating a playground was invalid.";
