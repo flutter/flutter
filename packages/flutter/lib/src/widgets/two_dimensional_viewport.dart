@@ -779,8 +779,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// Children must have a [ParentData] of type
   /// [TwoDimensionalViewportParentData], or a subclass thereof.
   @protected
+  @mustCallSuper
   TwoDimensionalViewportParentData parentDataOf(RenderBox child) {
-    assert(_children.containsValue(child));
+    assert(_children.containsValue(child) ||
+        _keepAliveBucket.containsValue(child) ||
+        _debugOrphans!.contains(child));
     return child.parentData! as TwoDimensionalViewportParentData;
   }
 
