@@ -966,6 +966,75 @@ void main() {
           MDnsVmServiceDiscovery: () => mdnsDiscovery,
         });
       });
+
+      testUsingContext('IOSDevice.startApp fails to find Dart VM in CI', () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final FakeProcessManager processManager = FakeProcessManager.empty();
+
+        const String pathToFlutterLogs = '/path/to/flutter/logs';
+        const String pathToHome = '/path/to/home';
+
+        final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_empty_xcode.rand0');
+        final Directory bundleLocation = fileSystem.currentDirectory;
+        final IOSDevice device = setUpIOSDevice(
+          processManager: processManager,
+          fileSystem: fileSystem,
+          isCoreDevice: true,
+          coreDeviceControl: FakeIOSCoreDeviceControl(),
+          xcodeDebug: FakeXcodeDebug(
+            expectedProject: XcodeDebugProject(
+              scheme: 'Runner',
+              xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
+              xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+              hostAppProjectName: 'Runner',
+            ),
+            expectedDeviceId: '123',
+            expectedLaunchArguments: <String>['--enable-dart-profiling'],
+            expectedBundlePath: bundleLocation.path,
+          ),
+          platform: FakePlatform(
+            operatingSystem: 'macos',
+            environment: <String, String>{
+              'FLUTTER_LOGS_DIR': pathToFlutterLogs,
+              'HOME': pathToHome,
+            },
+          ),
+        );
+
+        final IOSApp iosApp = PrebuiltIOSApp(
+          projectBundleId: 'app',
+          bundleName: 'Runner',
+          uncompressedBundle: bundleLocation,
+          applicationPackage: bundleLocation,
+        );
+        final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+        device.portForwarder = const NoOpDevicePortForwarder();
+        device.setLogReader(iosApp, deviceLogReader);
+
+        const String projectLogsPath = 'Runner-project1/Logs/Launch/Runner.xcresults';
+        fileSystem.directory('$pathToHome/Library/Developer/Xcode/DerivedData/$projectLogsPath').createSync(recursive: true);
+
+        final Completer<void> completer = Completer<void>();
+        await FakeAsync().run((FakeAsync time) {
+          final Future<LaunchResult> futureLaunchResult = device.startApp(iosApp,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, usingCISystem: true),
+            platformArgs: <String, dynamic>{},
+          );
+          futureLaunchResult.then((LaunchResult launchResult) {
+            expect(launchResult.started, false);
+            expect(launchResult.hasVmService, false);
+            expect(fileSystem.directory('$pathToFlutterLogs/DerivedDataLogs/$projectLogsPath').existsSync(), true);
+            completer.complete();
+          });
+          time.elapse(const Duration(minutes: 15));
+          time.flushMicrotasks();
+          return completer.future;
+        });
+      }, overrides: <Type, Generator>{
+        MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(returnsNull: true),
+      });
     });
   });
 }
@@ -980,9 +1049,10 @@ IOSDevice setUpIOSDevice({
   bool isCoreDevice = false,
   IOSCoreDeviceControl? coreDeviceControl,
   FakeXcodeDebug? xcodeDebug,
+  FakePlatform? platform,
 }) {
   final Artifacts artifacts = Artifacts.test();
-  final FakePlatform macPlatform = FakePlatform(
+  final FakePlatform macPlatform = platform ?? FakePlatform(
     operatingSystem: 'macos',
     environment: <String, String>{},
   );
@@ -1036,8 +1106,11 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 }
 
 class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
-  FakeMDnsVmServiceDiscovery({this.returnsNull = false});
+  FakeMDnsVmServiceDiscovery({this.returnsNull = false, this.hangs = false});
   bool returnsNull;
+
+  /// If true, the future of `getVMServiceUriForLaunch` will never complete.
+  bool hangs;
 
   Completer<void> completer = Completer<void>();
   @override
@@ -1050,6 +1123,10 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
   }) async {
+    if (hangs) {
+      final Completer<void> neverEndingCompleter = Completer<void>();
+      await neverEndingCompleter.future;
+    }
     completer.complete();
     if (returnsNull) {
       return null;
