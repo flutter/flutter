@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -21,6 +22,9 @@ abstract class ViewRasterizer {
 
   /// The view this rasterizer renders into.
   final EngineFlutterView view;
+
+  /// The queue of render requests for this view.
+  final RenderQueue queue = RenderQueue();
 
   /// The size of the current frame being rasterized.
   ui.Size currentFrameSize = ui.Size.zero;
@@ -120,4 +124,22 @@ abstract class DisplayCanvas {
 
   /// Disposes this overlay.
   void dispose();
+}
+
+/// Encapsulates a request to render a [ui.Scene]. Contains the scene to render
+/// and a [Completer] which completes when the scene has been rendered.
+typedef RenderRequest = ({
+  ui.Scene scene,
+  Completer<void> completer,
+});
+
+/// A per-view queue of render requests. Only contains the current render
+/// request and the next render request. If a new render request is made before
+/// the current request is complete, then the next render request is replaced
+/// with the most recently requested render and the other one is dropped.
+class RenderQueue {
+  RenderQueue();
+
+  RenderRequest? current;
+  RenderRequest? next;
 }

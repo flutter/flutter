@@ -71,7 +71,8 @@ void testMain() {
     });
 
     // Issue https://github.com/flutter/flutter/issues/142094
-    test('does not reset platform view factories when disposing a view', () async {
+    test('does not reset platform view factories when disposing a view',
+        () async {
       expect(PlatformViewManager.instance.knowsViewType('self-test'), isFalse);
 
       final EngineFlutterView view = EngineFlutterView(
@@ -89,8 +90,14 @@ void testMain() {
         isNull,
       );
 
-      expect(PlatformViewManager.instance.knowsViewType(ui_web.PlatformViewRegistry.defaultVisibleViewType), isTrue);
-      expect(PlatformViewManager.instance.knowsViewType(ui_web.PlatformViewRegistry.defaultInvisibleViewType), isTrue);
+      expect(
+          PlatformViewManager.instance.knowsViewType(
+              ui_web.PlatformViewRegistry.defaultVisibleViewType),
+          isTrue);
+      expect(
+          PlatformViewManager.instance.knowsViewType(
+              ui_web.PlatformViewRegistry.defaultInvisibleViewType),
+          isTrue);
     });
   });
 }
