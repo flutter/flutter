@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -52,10 +51,6 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 void main() {
-  tearDown(() {
-    MacOSDesignedForIPadDevices.allowDiscovery = false;
-  });
-
   group('attach', () {
     late StreamLogger logger;
     late FileSystem testFileSystem;
@@ -1067,7 +1062,6 @@ void main() {
       expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
       expect(testLogger.statusText, contains('yy2'));
-      expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
