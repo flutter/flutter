@@ -4851,7 +4851,6 @@ targets:
 
   - name: Mac_arm64 native_ui_tests_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
