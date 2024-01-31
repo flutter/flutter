@@ -158,7 +158,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   /// True if an iOS-style back swipe pop gesture is currently underway for [route].
   ///
-  /// This just check the route's [NavigatorState.userGestureInProgress].
+  /// This just checks the route's [NavigatorState.userGestureInProgress].
   ///
   /// See also:
   ///
@@ -293,6 +293,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => _isPopGestureEnabled<T>(route),
           onStartPopGesture: () => _startPopGesture<T>(route),
+          getIsCurrent: () => route.isCurrent,
           child: child,
         ),
       );
@@ -596,6 +597,7 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
+    required this.getIsCurrent,
   });
 
   final Widget child;
@@ -603,6 +605,8 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
   final ValueGetter<bool> enabledCallback;
 
   final ValueGetter<_CupertinoBackGestureController<T>> onStartPopGesture;
+
+  final ValueGetter<bool> getIsCurrent;
 
   @override
   _CupertinoBackGestureDetectorState<T> createState() => _CupertinoBackGestureDetectorState<T>();
@@ -612,8 +616,6 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   _CupertinoBackGestureController<T>? _backGestureController;
 
   late HorizontalDragGestureRecognizer _recognizer;
-
-  int? _trackedPointer;
 
   @override
   void initState() {
@@ -656,6 +658,13 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_backGestureController != null);
+    // TODO(justinmc): Why can't I drag to go back on page 3 after this?
+    print('justin _handleDragEnd. ${widget.getIsCurrent()}');
+    if (!widget.getIsCurrent()) {
+      _backGestureController?.dragEnd(0.0);
+      _backGestureController = null;
+      return;
+    }
     _backGestureController!.dragEnd(_convertToLogical(details.velocity.pixelsPerSecond.dx / context.size!.width));
     _backGestureController = null;
   }
@@ -671,12 +680,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   void _handlePointerDown(PointerDownEvent event) {
     if (widget.enabledCallback()) {
       _recognizer.addPointer(event);
-      _trackedPointer = event.pointer;
     }
-  }
-
-  void _handlePointerUp(PointerUpEvent event) {
-    _trackedPointer = null;
   }
 
   double _convertToLogical(double value) {
@@ -697,30 +701,21 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
                            MediaQuery.paddingOf(context).left :
                            MediaQuery.paddingOf(context).right;
     dragAreaWidth = max(dragAreaWidth, _kBackGestureWidth);
-    return PopScope(
-      onPopInvoked: (bool didPop) {
-        if (!didPop || _trackedPointer == null) {
-          return;
-        }
-        _recognizer.rejectGesture(_trackedPointer!);
-      },
-      child: Stack(
-        fit: StackFit.passthrough,
-        children: <Widget>[
-          widget.child,
-          PositionedDirectional(
-            start: 0.0,
-            width: dragAreaWidth,
-            top: 0.0,
-            bottom: 0.0,
-            child: Listener(
-              onPointerDown: _handlePointerDown,
-              onPointerUp: _handlePointerUp,
-              behavior: HitTestBehavior.translucent,
-            ),
+    return Stack(
+      fit: StackFit.passthrough,
+      children: <Widget>[
+        widget.child,
+        PositionedDirectional(
+          start: 0.0,
+          width: dragAreaWidth,
+          top: 0.0,
+          bottom: 0.0,
+          child: Listener(
+            onPointerDown: _handlePointerDown,
+            behavior: HitTestBehavior.translucent,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
