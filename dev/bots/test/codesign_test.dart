@@ -11,9 +11,11 @@ import './common.dart';
 
 void main() async {
   const String flutterRoot = '/a/b/c';
-  final List<String> allExpectedFiles = await binariesWithEntitlements(flutterRoot) + await binariesWithoutEntitlements(flutterRoot);
+  final List<String> allExpectedFiles = binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
   final String allFilesStdout = allExpectedFiles.join('\n');
-  final List<String> withEntitlements = await binariesWithEntitlements(flutterRoot);
+  final List<String> allExpectedXcframeworks = signedXcframeworks(flutterRoot);
+  final String allXcframeworksStdout = allExpectedXcframeworks.join('\n');
+  final List<String> withEntitlements = binariesWithEntitlements(flutterRoot);
 
   group('verifyExist', () {
     test('Not all files found', () async {
@@ -223,6 +225,19 @@ void main() async {
           )
         );
       }
+      commandList.add(
+        FakeCommand(
+          command: const <String>[
+            'find',
+            '$flutterRoot/bin/cache',
+            '-type',
+            'd',
+            '-name',
+            '*xcframework',
+          ],
+          stdout: allXcframeworksStdout,
+        ),
+      );
       for (final String expectedFile in allExpectedFiles) {
         commandList.add(
           FakeCommand(
@@ -247,6 +262,18 @@ void main() async {
             )
           );
         }
+      }
+
+      for (final String expectedXcframework in allExpectedXcframeworks) {
+        commandList.add(
+            FakeCommand(
+              command: <String>[
+                'codesign',
+                '-vvv',
+                expectedXcframework,
+              ],
+            )
+        );
       }
       final ProcessManager processManager = FakeProcessManager.list(commandList);
       await expectLater(verifySignatures(flutterRoot, processManager: processManager), completes);
@@ -276,6 +303,19 @@ void main() async {
           )
         );
       }
+      commandList.add(
+        FakeCommand(
+          command: const <String>[
+            'find',
+            '$flutterRoot/bin/cache',
+            '-type',
+            'd',
+            '-name',
+            '*xcframework',
+          ],
+          stdout: allXcframeworksStdout,
+        ),
+      );
       for (final String expectedFile in allExpectedFiles) {
         commandList.add(
           FakeCommand(
@@ -299,6 +339,17 @@ void main() async {
             )
           );
         }
+      }
+      for (final String expectedXcframework in allExpectedXcframeworks) {
+        commandList.add(
+            FakeCommand(
+              command: <String>[
+                'codesign',
+                '-vvv',
+                expectedXcframework,
+              ],
+            )
+        );
       }
       final ProcessManager processManager = FakeProcessManager.list(commandList);
 
