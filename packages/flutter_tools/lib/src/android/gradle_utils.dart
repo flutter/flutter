@@ -76,13 +76,13 @@ const String oldestDocumentedJavaAgpCompatibilityVersion = '4.2';
 const String _versionGroupName = 'version';
 
 // AGP can be defined in the dependencies block of [build.gradle] or [build.gradle.kts].
-
-// Expected content:
-// Groovy DSL - classpath 'com.android.tools.build:gradle:{{agpVersion}}'
-// Kotlin DSL - classpath("com.android.tools.build.gradle:{{agpVersion}}")
+// Expected content (covers both classpath and compileOnly cases):
+// Groovy DSL with single quotes - 'com.android.tools.build:gradle:{{agpVersion}}'
+// Groovy DSL with double quotes - "com.android.tools.build:gradle:{{agpVersion}}"
+// Kotlin DSL - ("com.android.tools.build.gradle:{{agpVersion}}")
 // ?<version> is used to name the version group which helps with extraction.
-final RegExp _androidGradlePluginRegExpFromClasspath = RegExp(
-    r"""[^\/]*\s*classpath\s*\(?['"]com\.android\.tools\.build:gradle:(?<version>\d+(\.\d+){1,2})""",
+final RegExp _androidGradlePluginRegExpFromDependencies = RegExp(
+    r"""[^\/]*\s*((\bclasspath\b)|(\bcompileOnly\b))\s*\(?['"]com\.android\.tools\.build:gradle:(?<version>\d+(\.\d+){1,2})\)?""",
     multiLine: true);
 
 // AGP can be defined in the plugins block of [build.gradle],
@@ -93,7 +93,7 @@ final RegExp _androidGradlePluginRegExpFromClasspath = RegExp(
 // Kotlin DSL - id("com.android.application") version "{{agpVersion}}"
 // ?<version> is used to name the version group which helps with extraction.
 final RegExp _androidGradlePluginRegExpFromId = RegExp(
-    r"""[^\/]*s*id\s*\(?['"]com.android.application['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})""",
+    r"""[^\/]*s*id\s*\(?['"]com\.android\.application['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
     multiLine: true);
 
 // Expected content format (with lines above and below).
@@ -337,7 +337,7 @@ String? getAgpVersion(Directory androidDirectory, Logger logger) {
   }
   final String buildFileContent = buildFile.readAsStringSync();
   final RegExpMatch? buildMatchClasspath =
-      _androidGradlePluginRegExpFromClasspath.firstMatch(buildFileContent);
+      _androidGradlePluginRegExpFromDependencies.firstMatch(buildFileContent);
   if (buildMatchClasspath != null) {
     final String? androidPluginVersion =
         buildMatchClasspath.namedGroup(_versionGroupName);

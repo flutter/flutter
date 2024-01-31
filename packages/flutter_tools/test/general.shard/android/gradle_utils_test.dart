@@ -388,7 +388,7 @@ OS:           Mac OS X 13.2.1 aarch64
     });
 
     testWithoutContext(
-        'returns the AGP version when set in Groovy build file as classpath',
+        'returns the AGP version when set in Groovy build file as classpath with single quotes and commented line',
         () async {
       const String expectedVersion = '7.3.0';
       final Directory androidDirectory = fileSystem.directory('/android')
@@ -401,6 +401,8 @@ buildscript {
     }
 
     dependencies {
+        // Decoy value to ensure we ignore commented out lines.
+        // classpath 'com.android.application' version '6.1.0' apply false
         classpath 'com.android.tools.build:gradle:$expectedVersion'
     }
 }
@@ -451,6 +453,41 @@ allprojects {
       );
     });
 
+
+    testWithoutContext(
+        'returns the AGP version when set in Groovy build file as compileOnly with double quotes',
+        () async {
+      const String expectedVersion = '7.1.0';
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+dependencies {
+    compileOnly "com.android.tools.build:gradle:$expectedVersion"
+}
+''');
+
+      expect(
+        getAgpVersion(androidDirectory, BufferLogger.test()),
+        expectedVersion,
+      );
+    });
+    testWithoutContext(
+        'returns the AGP version when set in Kotlin build file as compileOnly',
+        () async {
+      const String expectedVersion = '7.1.0';
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+dependencies {
+    compileOnly("com.android.tools.build:gradle:$expectedVersion")
+}
+''');
+
+      expect(
+        getAgpVersion(androidDirectory, BufferLogger.test()),
+        expectedVersion,
+      );
+    });
     testWithoutContext(
         'returns the AGP version when set in Groovy build file as plugin',
         () async {
@@ -637,6 +674,29 @@ pluginManagement {
       expect(
         getAgpVersion(androidDirectory, BufferLogger.test()),
         '7.5.0',
+      );
+    });
+
+    testWithoutContext(
+        'returns null when agp version is misconfigured',
+        () async {
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+plugins {
+    `java-gradle-plugin`
+    `groovy`
+}
+
+dependencies {
+    // intentional typo
+    compileOnl("com.android.tools.build:gradle:7.3.0")
+}
+''');
+
+      expect(
+        getAgpVersion(androidDirectory, BufferLogger.test()),
+        null,
       );
     });
 
