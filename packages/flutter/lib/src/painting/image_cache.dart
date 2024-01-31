@@ -606,7 +606,17 @@ abstract class _CachedImageBase {
   _CachedImageBase(
     this.completer, {
     this.sizeBytes,
-  }) : handle = completer.keepAlive();
+  }) : handle = completer.keepAlive() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/painting.dart',
+        className: '$_CachedImageBase',
+        object: this,
+      );
+    }
+  }
 
   final ImageStreamCompleter completer;
   int? sizeBytes;
@@ -615,6 +625,9 @@ abstract class _CachedImageBase {
   @mustCallSuper
   void dispose() {
     assert(handle != null);
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     // Give any interested parties a chance to listen to the stream before we
     // potentially dispose it.
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {

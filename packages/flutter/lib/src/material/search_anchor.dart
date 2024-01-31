@@ -20,6 +20,7 @@ import 'ink_well.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'material_state.dart';
 import 'search_bar_theme.dart';
 import 'search_view_theme.dart';
@@ -35,6 +36,7 @@ const Curve _kViewFadeOnInterval = Interval(0.0, 1/2);
 const Curve _kViewIconsFadeOnInterval = Interval(1/6, 2/6);
 const Curve _kViewDividerFadeOnInterval = Interval(0.0, 1/6);
 const Curve _kViewListFadeOnInterval = Interval(133 / _kOpenViewMilliseconds, 233 / _kOpenViewMilliseconds);
+const double _kDisableSearchBarOpacity = 0.38;
 
 /// Signature for a function that creates a [Widget] which is used to open a search view.
 ///
@@ -122,6 +124,7 @@ class SearchAnchor extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.headerHeight,
     this.headerTextStyle,
     this.headerHintStyle,
     this.dividerColor,
@@ -168,6 +171,7 @@ class SearchAnchor extends StatefulWidget {
     double? viewElevation,
     BorderSide? viewSide,
     OutlinedBorder? viewShape,
+    double? viewHeaderHeight,
     TextStyle? viewHeaderTextStyle,
     TextStyle? viewHeaderHintStyle,
     Color? dividerColor,
@@ -259,6 +263,12 @@ class SearchAnchor extends StatefulWidget {
   /// If this is also null, then the default value is a rectangle shape for full-screen
   /// mode and a [RoundedRectangleBorder] shape with a 28.0 radius otherwise.
   final OutlinedBorder? viewShape;
+
+  /// The height of the search field on the search view.
+  ///
+  /// If null, the value of [SearchViewThemeData.headerHeight] will be used. If
+  /// this is also null, the default value is 56.0.
+  final double? headerHeight;
 
   /// The style to use for the text being edited on the search view.
   ///
@@ -395,6 +405,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       viewSurfaceTintColor: widget.viewSurfaceTintColor,
       viewSide: widget.viewSide,
       viewShape: widget.viewShape,
+      viewHeaderHeight: widget.headerHeight,
       viewHeaderTextStyle: widget.headerTextStyle,
       viewHeaderHintStyle: widget.headerHintStyle,
       dividerColor: widget.dividerColor,
@@ -473,6 +484,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
@@ -500,6 +512,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
@@ -643,6 +656,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewSurfaceTintColor: viewSurfaceTintColor,
                 viewSide: viewSide,
                 viewShape: viewShape,
+                viewHeaderHeight: viewHeaderHeight,
                 viewHeaderTextStyle: viewHeaderTextStyle,
                 viewHeaderHintStyle: viewHeaderHintStyle,
                 dividerColor: dividerColor,
@@ -682,6 +696,7 @@ class _ViewContent extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
@@ -708,6 +723,7 @@ class _ViewContent extends StatefulWidget {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
@@ -796,13 +812,15 @@ class _ViewContentState extends State<_ViewContent> {
   Widget build(BuildContext context) {
     final Widget defaultLeading = IconButton(
       icon: const Icon(Icons.arrow_back),
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () { Navigator.of(context).pop(); },
       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
     );
 
     final List<Widget> defaultTrailing = <Widget>[
-      IconButton(
+      if (_controller.text.isNotEmpty) IconButton(
         icon: const Icon(Icons.close),
+        tooltip: MaterialLocalizations.of(context).clearButtonTooltip,
         onPressed: () {
           _controller.clear();
         },
@@ -835,6 +853,10 @@ class _ViewContentState extends State<_ViewContent> {
       ?? viewTheme.dividerColor
       ?? dividerTheme.color
       ?? viewDefaults.dividerColor!;
+    final double? effectiveHeaderHeight = widget.viewHeaderHeight ?? viewTheme.headerHeight;
+    final BoxConstraints? headerConstraints = effectiveHeaderHeight == null
+      ? null
+      : BoxConstraints.tightFor(height: effectiveHeaderHeight);
     final TextStyle? effectiveTextStyle = widget.viewHeaderTextStyle
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerTextStyle;
@@ -884,7 +906,7 @@ class _ViewContentState extends State<_ViewContent> {
                           bottom: false,
                           child: SearchBar(
                             autoFocus: true,
-                            constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
+                            constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -955,6 +977,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.viewElevation,
     super.viewSide,
     super.viewShape,
+    double? viewHeaderHeight,
     TextStyle? viewHeaderTextStyle,
     TextStyle? viewHeaderHintStyle,
     super.dividerColor,
@@ -970,6 +993,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.keyboardType,
   }) : super(
     viewHintText: viewHintText ?? barHintText,
+    headerHeight: viewHeaderHeight,
     headerTextStyle: viewHeaderTextStyle,
     headerHintStyle: viewHeaderHintStyle,
     viewOnSubmitted: onSubmitted,
@@ -1115,6 +1139,7 @@ class SearchBar extends StatefulWidget {
     this.textStyle,
     this.hintStyle,
     this.textCapitalization,
+    this.enabled = true,
     this.autoFocus = false,
     this.textInputAction,
     this.keyboardType,
@@ -1239,6 +1264,9 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
+  /// If false the text field is "disabled" so the SearchBar will ignore taps.
+  final bool enabled;
+
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autoFocus;
 
@@ -1340,62 +1368,69 @@ class _SearchBarState extends State<SearchBar> {
 
     return ConstrainedBox(
       constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,
-      child: Material(
-        elevation: effectiveElevation!,
-        shadowColor: effectiveShadowColor,
-        color: effectiveBackgroundColor,
-        surfaceTintColor: effectiveSurfaceTintColor,
-        shape: effectiveShape?.copyWith(side: effectiveSide),
-        child: InkWell(
-          onTap: () {
-            widget.onTap?.call();
-            if (!_focusNode.hasFocus) {
-              _focusNode.requestFocus();
-            }
-          },
-          overlayColor: effectiveOverlayColor,
-          customBorder: effectiveShape?.copyWith(side: effectiveSide),
-          statesController: _internalStatesController,
-          child: Padding(
-            padding: effectivePadding!,
-            child: Row(
-              textDirection: textDirection,
-              children: <Widget>[
-                if (leading != null) leading,
-                Expanded(
-                  child: Padding(
-                    padding: effectivePadding,
-                    child: TextField(
-                      autofocus: widget.autoFocus,
-                      onTap: widget.onTap,
-                      onTapAlwaysCalled: true,
-                      focusNode: _focusNode,
-                      onChanged: widget.onChanged,
-                      onSubmitted: widget.onSubmitted,
-                      controller: widget.controller,
-                      style: effectiveTextStyle,
-                      decoration: InputDecoration(
-                        hintText: widget.hintText,
-                      ).applyDefaults(InputDecorationTheme(
-                        hintStyle: effectiveHintStyle,
-                        // The configuration below is to make sure that the text field
-                        // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                        enabledBorder: InputBorder.none,
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        // Setting `isDense` to true to allow the text field height to be
-                        // smaller than 48.0
-                        isDense: true,
-                      )),
-                      textCapitalization: effectiveTextCapitalization,
-                      textInputAction: widget.textInputAction,
-                      keyboardType: widget.keyboardType,
+      child: Opacity(
+        opacity: widget.enabled ? 1 : _kDisableSearchBarOpacity,
+        child: Material(
+          elevation: effectiveElevation!,
+          shadowColor: effectiveShadowColor,
+          color: effectiveBackgroundColor,
+          surfaceTintColor: effectiveSurfaceTintColor,
+          shape: effectiveShape?.copyWith(side: effectiveSide),
+          child: IgnorePointer(
+            ignoring: !widget.enabled,
+            child: InkWell(
+              onTap: () {
+                widget.onTap?.call();
+                if (!_focusNode.hasFocus) {
+                  _focusNode.requestFocus();
+                }
+              },
+              overlayColor: effectiveOverlayColor,
+              customBorder: effectiveShape?.copyWith(side: effectiveSide),
+              statesController: _internalStatesController,
+              child: Padding(
+                padding: effectivePadding!,
+                child: Row(
+                  textDirection: textDirection,
+                  children: <Widget>[
+                    if (leading != null) leading,
+                    Expanded(
+                      child: Padding(
+                        padding: effectivePadding,
+                        child: TextField(
+                          autofocus: widget.autoFocus,
+                          onTap: widget.onTap,
+                          onTapAlwaysCalled: true,
+                          focusNode: _focusNode,
+                          onChanged: widget.onChanged,
+                          onSubmitted: widget.onSubmitted,
+                          controller: widget.controller,
+                          style: effectiveTextStyle,
+                          enabled: widget.enabled,
+                          decoration: InputDecoration(
+                            hintText: widget.hintText,
+                          ).applyDefaults(InputDecorationTheme(
+                            hintStyle: effectiveHintStyle,
+                            // The configuration below is to make sure that the text field
+                            // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                            enabledBorder: InputBorder.none,
+                            border: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            // Setting `isDense` to true to allow the text field height to be
+                            // smaller than 48.0
+                            isDense: true,
+                          )),
+                          textCapitalization: effectiveTextCapitalization,
+                          textInputAction: widget.textInputAction,
+                          keyboardType: widget.keyboardType,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (trailing != null) ...trailing,
+                  ],
                 ),
-                if (trailing != null) ...trailing,
-              ],
+              ),
             ),
           ),
         ),

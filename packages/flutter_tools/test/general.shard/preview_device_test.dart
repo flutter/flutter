@@ -52,7 +52,7 @@ void main() {
     );
 
     expect(await device.isLocalEmulator, false);
-    expect(device.name, 'preview');
+    expect(device.name, 'Preview');
     expect(await device.sdkNameAndVersion, 'preview');
     expect(await device.targetPlatform, TargetPlatform.windows_x64);
     expect(device.category, Category.desktop);

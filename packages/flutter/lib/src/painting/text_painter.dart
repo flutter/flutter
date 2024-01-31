@@ -6,6 +6,7 @@ import 'dart:math' show max, min;
 import 'dart:ui' as ui show
   BoxHeightStyle,
   BoxWidthStyle,
+  GlyphInfo,
   LineMetrics,
   Paragraph,
   ParagraphBuilder,
@@ -24,6 +25,7 @@ import 'strut_style.dart';
 import 'text_scaler.dart';
 import 'text_span.dart';
 
+export 'dart:ui' show LineMetrics;
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
 /// The default font size if none is specified.
@@ -274,7 +276,7 @@ class _TextLayout {
   // color of the text is changed).
   //
   // The creator of this _TextLayout is also responsible for disposing this
-  // object when it's no logner needed.
+  // object when it's no longer needed.
   ui.Paragraph _paragraph;
 
   /// Whether this layout has been invalidated and disposed.
@@ -504,7 +506,7 @@ class TextPainter {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterPaintingLibrary,
         className: '$TextPainter',
         object: this,
@@ -1493,7 +1495,24 @@ class TextPainter {
       : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
   }
 
-  /// Returns the position within the text for the given pixel offset.
+  /// Returns the [GlyphInfo] of the glyph closest to the given `offset` in the
+  /// paragraph coordinate system, or null if the text is empty, or is entirely
+  /// clipped or ellipsized away.
+  ///
+  /// This method first finds the line closest to `offset.dy`, and then returns
+  /// the [GlyphInfo] of the closest glyph(s) within that line.
+   ui.GlyphInfo? getClosestGlyphForOffset(Offset offset) {
+    assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
+    final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
+    final ui.GlyphInfo? rawGlyphInfo = cachedLayout.paragraph.getClosestGlyphInfoForOffset(offset - cachedLayout.paintOffset);
+    if (rawGlyphInfo == null || cachedLayout.paintOffset == Offset.zero) {
+      return rawGlyphInfo;
+    }
+    return ui.GlyphInfo(rawGlyphInfo.graphemeClusterLayoutBounds.shift(cachedLayout.paintOffset), rawGlyphInfo.graphemeClusterCodeUnitRange, rawGlyphInfo.writingDirection);
+  }
+
+  /// Returns the closest position within the text for the given pixel offset.
   TextPosition getPositionForOffset(Offset offset) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
@@ -1613,7 +1632,7 @@ class TextPainter {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _layoutTemplate?.dispose();
     _layoutTemplate = null;

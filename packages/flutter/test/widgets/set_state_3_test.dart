@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 late ChangerState changer;
 
@@ -53,7 +52,7 @@ class LeafState extends State<Leaf> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('three-way setState() smoke test', (WidgetTester tester) async {
+  testWidgets('three-way setState() smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const Changer(Wrapper(Leaf())));
     await tester.pumpWidget(const Changer(Wrapper(Leaf())));
     changer.test();

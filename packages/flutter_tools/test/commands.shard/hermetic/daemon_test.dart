@@ -7,10 +7,12 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:file/memory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -22,8 +24,10 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/preview_device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -121,10 +125,91 @@ void main() {
 
       expect(response.data['id'], 0);
       expect(response.data['result'], isNotEmpty);
-      expect((response.data['result']! as Map<String, Object?>)['platforms'], <String>{'macos'});
+      expect(
+        response.data['result']! as Map<String, Object?>,
+        const <String, Object>{
+          'platforms': <String>['macos', 'windows', 'windowsPreview'],
+          'platformTypes': <String, Map<String, Object>>{
+            'web': <String, Object>{
+              'isSupported': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the Web feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-web"',
+                  'fixCode': 'config',
+                },
+              ],
+            },
+            'android': <String, Object>{
+              'isSupported': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the Android feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-android"',
+                  'fixCode': 'config',
+                },
+              ],
+            },
+            'ios': <String, Object>{
+              'isSupported': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the iOS feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-ios"',
+                  'fixCode': 'config',
+                },
+              ],
+            },
+            'linux': <String, Object>{
+              'isSupported': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the Linux feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-linux-desktop"',
+                  'fixCode': 'config',
+                },
+              ],
+            },
+            'macos': <String, bool>{'isSupported': true},
+            'windows': <String, bool>{'isSupported': true},
+            'fuchsia': <String, Object>{
+              'isSupported': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the Fuchsia feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-fuchsia"',
+                  'fixCode': 'config',
+                },
+                <String, String>{
+                  'reasonText': 'the Fuchsia platform is not enabled for this project',
+                  'fixText': 'Run "flutter create --platforms=fuchsia ." in your application directory',
+                  'fixCode': 'create',
+                },
+              ],
+            },
+            'custom': <String, Object>{
+              'isSupported': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the custom devices feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-custom-devices"',
+                  'fixCode': 'config',
+                },
+              ],
+            },
+            'windowsPreview': <String, bool>{'isSupported': true},
+          },
+        },
+      );
     }, overrides: <Type, Generator>{
       // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
-      FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false, isIOSEnabled: false, isMacOSEnabled: true),
+      FeatureFlags: () => TestFeatureFlags(
+        isAndroidEnabled: false,
+        isIOSEnabled: false,
+        isMacOSEnabled: true,
+        isPreviewDeviceEnabled: true,
+        isWindowsEnabled: true,
+      ),
     });
 
     testUsingContext('printError should send daemon.logMessage event', () async {
@@ -342,18 +427,75 @@ void main() {
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      discoverer.addDevice(PreviewDevice(
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        previewBinary: fs.file(r'preview_device.exe'),
+        artifacts: Artifacts.test(fileSystem: fs),
+        builderFactory: () => throw UnimplementedError('TODO implement builder factory'),
+      ));
 
-      return daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).first.then<void>((DaemonMessage response) async {
+      final List<Map<String, Object?>> names = <Map<String, Object?>>[];
+      await daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).take(2).forEach((DaemonMessage response) async {
         expect(response.data['event'], 'device.added');
         expect(response.data['params'], isMap);
 
         final Map<String, Object?> params = castStringKeyedMap(response.data['params'])!;
-        expect(params['platform'], isNotEmpty); // the fake device has a platform of 'android-arm'
+        names.add(params);
       });
+      await daemonStreams.outputs.close();
+      expect(
+        names,
+        containsAll(const <Map<String, Object?>>[
+          <String, Object?>{
+            'id': 'device',
+            'name': 'android device',
+            'platform': 'android-arm',
+            'emulator': false,
+            'category': 'mobile',
+            'platformType': 'android',
+            'ephemeral': false,
+            'emulatorId': 'device',
+            'sdk': 'Android 12',
+            'capabilities': <String, Object?>{
+              'hotReload': true,
+              'hotRestart': true,
+              'screenshot': true,
+              'fastStart': true,
+              'flutterExit': true,
+              'hardwareRendering': true,
+              'startPaused': true,
+            },
+          },
+          <String, Object?>{
+            'id': 'preview',
+            'name': 'Preview',
+            'platform': 'windows-x64',
+            'emulator': false,
+            'category': 'desktop',
+            'platformType': 'windowsPreview',
+            'ephemeral': false,
+            'emulatorId': null,
+            'sdk': 'preview',
+            'capabilities': <String, Object?>{
+              'hotReload': true,
+              'hotRestart': true,
+              'screenshot': false,
+              'fastStart': false,
+              'flutterExit': true,
+              'hardwareRendering': true,
+              'startPaused': true,
+            },
+          },
+        ]),
+      );
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => FakeAndroidWorkflow(),
       IOSWorkflow: () => FakeIOSWorkflow(),
       FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
+      WindowsWorkflow: () => FakeWindowsWorkflow(),
     });
 
     testUsingContext('device.discoverDevices should respond with list', () async {
@@ -930,6 +1072,13 @@ bool _notEvent(DaemonMessage message) => message.data['event'] == null;
 
 bool _isConnectedEvent(DaemonMessage message) => message.data['event'] == 'daemon.connected';
 
+class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {
+  FakeWindowsWorkflow({ this.canListDevices = true });
+
+  @override
+  final bool canListDevices;
+}
+
 class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
   FakeFuchsiaWorkflow({ this.canListDevices = true });
 
@@ -951,15 +1100,12 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {
   final bool canListDevices;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   final String id = 'device';
 
   @override
-  final String name = 'device';
+  final String name = 'android device';
 
   @override
   Future<String> get emulatorId async => 'device';

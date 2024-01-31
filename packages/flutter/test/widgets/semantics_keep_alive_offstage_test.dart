@@ -5,12 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Un-layouted RenderObject in keep alive offstage area do not crash semantics compiler', (WidgetTester tester) async {
+  testWidgets('Un-layouted RenderObject in keep alive offstage area do not crash semantics compiler', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20313.
 
     final SemanticsTester semantics = SemanticsTester(tester);

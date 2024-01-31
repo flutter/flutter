@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show ViewConstraints;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -35,7 +33,7 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   final ViewConfiguration testConfiguration = ViewConfiguration(
-    constraints: ViewConstraints.tight(const Size(800.0, 600.0)),
+    logicalConstraints: BoxConstraints.tight(const Size(800.0, 600.0)),
   );
 
   test('onscreen layout does not affect offscreen', () {

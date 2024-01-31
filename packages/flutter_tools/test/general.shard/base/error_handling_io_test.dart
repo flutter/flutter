@@ -111,7 +111,7 @@ void main() {
       exceptionHandler = FileExceptionHandler();
     });
 
-    testWithoutContext('bypasses error handling when withAllowedFailure is used', () {
+    testWithoutContext('bypasses error handling when noExitOnFailure is used', () {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -123,9 +123,9 @@ void main() {
         FileSystemOp.write,
         FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
       );
-
+      final Matcher throwsNonToolExit = throwsA(isNot(isA<ToolExit>()));
       expect(() => ErrorHandlingFileSystem.noExitOnFailure(
-        () => file.writeAsStringSync('')), throwsException);
+        () => file.writeAsStringSync('')), throwsNonToolExit);
 
       // nesting does not unconditionally re-enable errors.
       expect(() {
@@ -133,7 +133,7 @@ void main() {
           ErrorHandlingFileSystem.noExitOnFailure(() { });
           file.writeAsStringSync('');
         });
-      }, throwsException);
+      }, throwsNonToolExit);
 
       // Check that state does not leak.
       expect(() => file.writeAsStringSync(''), throwsToolExit());

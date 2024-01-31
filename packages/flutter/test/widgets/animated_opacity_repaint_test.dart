@@ -5,10 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('RenderAnimatedOpacityMixin does not drop layer when animating to 1', (WidgetTester tester) async {
+  testWidgets('RenderAnimatedOpacityMixin does not drop layer when animating to 1', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
     addTearDown(controller.dispose);
@@ -42,7 +41,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgetsWithLeakTracking('RenderAnimatedOpacityMixin avoids repainting child as it animates', (WidgetTester tester) async {
+  testWidgets('RenderAnimatedOpacityMixin avoids repainting child as it animates', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
     addTearDown(controller.dispose);
@@ -76,7 +75,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgetsWithLeakTracking('RenderAnimatedOpacityMixin allows opacity layer to be disposed when animating to 0 opacity', (WidgetTester tester) async {
+  testWidgets('RenderAnimatedOpacityMixin allows opacity layer to be disposed when animating to 0 opacity', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
     addTearDown(controller.dispose);

@@ -7,7 +7,7 @@
 import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
 import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder show NativeAssetsBuildRunner;
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 import 'package:package_config/package_config_types.dart';
 
 import 'android/native_assets.dart';
@@ -322,7 +322,7 @@ Future<Uri?> dryRunNativeAssets({
   required List<FlutterDevice> flutterDevices,
 }) async {
   if (flutterDevices.length != 1) {
-    return dryRunNativeAssetsMultipeOSes(
+    return dryRunNativeAssetsMultipleOSes(
       projectUri: projectUri,
       fileSystem: fileSystem,
       targetPlatforms: flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
@@ -379,6 +379,7 @@ Future<Uri?> dryRunNativeAssets({
         fileSystem: fileSystem,
         buildRunner: buildRunner,
       );
+    case build_info.TargetPlatform.windows_arm64:
     case build_info.TargetPlatform.windows_x64:
       nativeAssetsYaml = await dryRunNativeAssetsWindows(
         projectUri: projectUri,
@@ -412,7 +413,7 @@ Future<Uri?> dryRunNativeAssets({
 /// Dry run the native builds for multiple OSes.
 ///
 /// Needed for `flutter run -d all`.
-Future<Uri?> dryRunNativeAssetsMultipeOSes({
+Future<Uri?> dryRunNativeAssetsMultipleOSes({
   required NativeAssetsBuildRunner buildRunner,
   required Uri projectUri,
   required FileSystem fileSystem,
@@ -441,7 +442,8 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
         false,
         buildRunner,
       ),
-    if (targetPlatforms.contains(build_info.TargetPlatform.windows_x64) ||
+    if (targetPlatforms.contains(build_info.TargetPlatform.windows_arm64) ||
+        targetPlatforms.contains(build_info.TargetPlatform.windows_x64) ||
         (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.windows))
       ...await dryRunNativeAssetsWindowsInternal(
         fileSystem,
@@ -652,6 +654,8 @@ Target _getNativeTarget(build_info.TargetPlatform targetPlatform) {
       return Target.linuxArm64;
     case build_info.TargetPlatform.windows_x64:
       return Target.windowsX64;
+    case build_info.TargetPlatform.windows_arm64:
+      return Target.windowsArm64;
     case build_info.TargetPlatform.android:
     case build_info.TargetPlatform.ios:
     case build_info.TargetPlatform.darwin:

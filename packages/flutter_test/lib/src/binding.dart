@@ -559,8 +559,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     final FlutterView view = renderView.flutterView;
     if (_surfaceSize != null && view == platformDispatcher.implicitView) {
+      final BoxConstraints constraints = BoxConstraints.tight(_surfaceSize!);
       return ViewConfiguration(
-        constraints: ui.ViewConstraints.tight(_surfaceSize!),
+        logicalConstraints: constraints,
+        physicalConstraints: constraints * view.devicePixelRatio,
         devicePixelRatio: view.devicePixelRatio,
       );
     }
@@ -1175,12 +1177,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
     // ignore: invalid_use_of_visible_for_testing_member
-    ServicesBinding.instance.resetLifecycleState();
+    ServicesBinding.instance.resetInternalState();
   }
 }
 
-/// A variant of [TestWidgetsFlutterBinding] for executing tests in
-/// the `flutter test` environment.
+/// A variant of [TestWidgetsFlutterBinding] for executing tests typically
+/// the `flutter test` environment, unless it is an integration test.
+///
+/// When doing integration test, [LiveTestWidgetsFlutterBinding] is utilized
+/// instead.
 ///
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
@@ -1630,9 +1635,9 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   benchmarkLive,
 }
 
-/// A variant of [TestWidgetsFlutterBinding] for executing tests in
-/// the `flutter run` environment, on a device. This is intended to
-/// allow interactive test development.
+/// A variant of [TestWidgetsFlutterBinding] for executing tests
+/// on a device, typically via `flutter run`, or via integration tests.
+/// This is intended to allow interactive test development.
 ///
 /// This is not the way to run a remote-control test. To run a test on
 /// a device from a development computer, see the [flutter_driver]
@@ -2119,7 +2124,11 @@ class TestViewConfiguration extends ViewConfiguration {
   TestViewConfiguration.fromView({required ui.FlutterView view, Size size = _kDefaultTestViewportSize})
       : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
         _physicalSize = view.physicalSize,
-        super(devicePixelRatio: view.devicePixelRatio, constraints: ui.ViewConstraints.tight(size));
+        super(
+          devicePixelRatio: view.devicePixelRatio,
+          logicalConstraints: BoxConstraints.tight(size),
+          physicalConstraints: BoxConstraints.tight(size) * view.devicePixelRatio,
+      );
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;

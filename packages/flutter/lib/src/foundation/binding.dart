@@ -585,14 +585,11 @@ abstract class BindingBase {
         name: FoundationServiceExtensions.brightnessOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
-            switch (parameters['value']) {
-              case 'Brightness.light':
-                debugBrightnessOverride = ui.Brightness.light;
-              case 'Brightness.dark':
-                debugBrightnessOverride = ui.Brightness.dark;
-              default:
-                debugBrightnessOverride = null;
-            }
+            debugBrightnessOverride = switch (parameters['value']) {
+              'Brightness.light' => ui.Brightness.light,
+              'Brightness.dark'  => ui.Brightness.dark,
+              _ => null,
+            };
             _postExtensionStateChangedEvent(
               FoundationServiceExtensions.brightnessOverride.name,
               (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
