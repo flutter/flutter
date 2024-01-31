@@ -31,22 +31,27 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "AGPREPLACEME" apply false
-    id "org.jetbrains.kotlin.android" version "KGPREPLACEME" apply false
+    id "com.android.application" version "AGP_REPLACE_ME" apply false
+    id "org.jetbrains.kotlin.android" version "KGP_REPLACE_ME" apply false
 }
 
 include ":app"
 
 ''';
 
+const String agpReplacementString = 'AGP_REPLACE_ME';
+const String kgpReplacementString = 'KGP_REPLACE_ME';
+
 const String gradleWrapperPropertiesFileContent = r'''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-REPLACEME-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE_ME-all.zip
 
 ''';
+
+const String gradleReplacementString = 'GRADLE_REPLACE_ME';
 
 void main() {
   late Directory tempDir;
@@ -80,7 +85,7 @@ void main() {
     final File gradleWrapperProperties = File(fileSystem.path.join(
         app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
     final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
-      'REPLACEME',
+      gradleReplacementString,
       gradleVersion,
     );
     await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
@@ -88,8 +93,8 @@ void main() {
     final File gradleSettings = File(fileSystem.path.join(
         app.path, 'android', 'settings.gradle'));
     final String settingsContent = gradleSettingsFileContent
-        .replaceFirst('AGPREPLACEME', agpVersion)
-        .replaceFirst('KGPREPLACEME', kgpVersion);
+        .replaceFirst(agpReplacementString, agpVersion)
+        .replaceFirst(kgpReplacementString, kgpVersion);
     await gradleSettings.writeAsString(settingsContent, flush: true);
 
 
@@ -125,7 +130,7 @@ void main() {
     final File gradleWrapperProperties = File(fileSystem.path.join(
         app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
     final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
-      'REPLACEME',
+      gradleReplacementString,
       gradleVersion,
     );
     await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
@@ -133,8 +138,8 @@ void main() {
     final File gradleSettings = File(fileSystem.path.join(
         app.path, 'android', 'settings.gradle'));
     final String settingsContent = gradleSettingsFileContent
-        .replaceFirst('AGPREPLACEME', agpVersion)
-        .replaceFirst('KGPREPLACEME', kgpVersion);
+        .replaceFirst(agpReplacementString, agpVersion)
+        .replaceFirst(kgpReplacementString, kgpVersion);
     await gradleSettings.writeAsString(settingsContent, flush: true);
 
 
@@ -170,7 +175,7 @@ void main() {
     final File gradleWrapperProperties = File(fileSystem.path.join(
         app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
     final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
-      'REPLACEME',
+      gradleReplacementString,
       gradleVersion,
     );
     await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
@@ -178,8 +183,8 @@ void main() {
     final File gradleSettings = File(fileSystem.path.join(
         app.path, 'android', 'settings.gradle'));
     final String settingsContent = gradleSettingsFileContent
-        .replaceFirst('AGPREPLACEME', agpVersion)
-        .replaceFirst('KGPREPLACEME', kgpVersion);
+        .replaceFirst(agpReplacementString, agpVersion)
+        .replaceFirst(kgpReplacementString, kgpVersion);
     await gradleSettings.writeAsString(settingsContent, flush: true);
 
 
