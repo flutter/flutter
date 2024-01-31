@@ -150,6 +150,58 @@ class FilledButton extends ButtonStyleButton {
     );
   }
 
+  /// If [icon] is not null, then this factory constructor returns a
+  /// [FilledButton.icon], otherwise it returns a [FilledButton].
+  ///
+  /// If the [icon] is not null, the icon and label are arranged in a row with
+  /// padding at the start and end and a gap between them.
+  ///
+  /// If the [icon] is null, then only the [child] is shown, without any
+  /// additional decorations.
+  factory FilledButton.withOptionalIcon({
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ValueChanged<bool>? onHover,
+    ValueChanged<bool>? onFocusChange,
+    ButtonStyle? style,
+    FocusNode? focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
+    MaterialStatesController? statesController,
+    Widget? icon,
+    required Widget child,
+  }) {
+    if (icon == null) {
+      return FilledButton(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: child,
+      );
+    }
+    return FilledButton.icon( key: key,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      style: style,
+      focusNode: focusNode,
+      autofocus: autofocus ?? false,
+      clipBehavior: clipBehavior ?? Clip.none,
+      statesController: statesController,
+      icon: icon,
+      label: child,
+    );
+  }
+
   /// A static convenience method that constructs a filled button
   /// [ButtonStyle] given simple values.
   ///
