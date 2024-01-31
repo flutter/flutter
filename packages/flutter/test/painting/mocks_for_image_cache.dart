@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class TestImageInfo extends ImageInfo {
-  const TestImageInfo(this.value, {
+  TestImageInfo(this.value, {
     required super.image,
     super.scale,
     super.debugLabel,

@@ -26,16 +26,8 @@ void main() {
     group('Assets (${style.name} file system)', () {
       late FileSystem fileSystem;
       late BufferLogger logger;
-      late String? previousCacheFlutterRootValue;
       late Platform platform;
-
-      setUpAll(() {
-        previousCacheFlutterRootValue = Cache.flutterRoot;
-      });
-
-      tearDownAll(() {
-        Cache.flutterRoot = previousCacheFlutterRootValue;
-      });
+      late String flutterRoot;
 
       setUp(() {
         fileSystem = MemoryFileSystem(
@@ -44,7 +36,7 @@ void main() {
         logger = BufferLogger.test();
         platform = FakePlatform(
             operatingSystem: style == Style.posix ? 'linux' : 'windows');
-        Cache.flutterRoot = Cache.defaultFlutterRoot(
+        flutterRoot = Cache.defaultFlutterRoot(
           platform: platform,
           fileSystem: fileSystem,
           userMessages: UserMessages(),
@@ -60,6 +52,7 @@ void main() {
           fileSystem: fileSystem,
           platform: platform,
           splitDeferredAssets: true,
+          flutterRoot: flutterRoot,
         );
 
         fileSystem.file(fileSystem.path.join('font', 'pubspec.yaml'))
@@ -157,6 +150,7 @@ dependencies:
           fileSystem: fileSystem,
           platform: platform,
           splitDeferredAssets: true,
+          flutterRoot: flutterRoot,
         );
 
         await assetBundle.build(
@@ -175,7 +169,7 @@ dependencies:
       testWithoutContext('bundles material shaders on non-web platforms',
           () async {
         final String shaderPath = fileSystem.path.join(
-          Cache.flutterRoot!,
+          flutterRoot,
           'packages',
           'flutter',
           'lib',
@@ -205,6 +199,7 @@ dependencies:
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
+          flutterRoot: flutterRoot,
         );
 
         await assetBundle.build(
@@ -219,7 +214,7 @@ dependencies:
       testWithoutContext('bundles material shaders on web platforms',
           () async {
         final String shaderPath = fileSystem.path.join(
-          Cache.flutterRoot!,
+          flutterRoot,
           'packages',
           'flutter',
           'lib',
@@ -249,6 +244,7 @@ dependencies:
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
+          flutterRoot: flutterRoot,
         );
 
         await assetBundle.build(

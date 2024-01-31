@@ -40,7 +40,7 @@ TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}
   ).call;
 }
 
-TaskFunction createExternalUiFrameRateIntegrationTest() {
+TaskFunction createExternalTexturesFrameRateIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/external_textures',
     'lib/frame_rate_main.dart',
