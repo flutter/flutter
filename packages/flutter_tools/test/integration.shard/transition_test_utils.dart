@@ -175,8 +175,8 @@ Future<ProcessTestResult> runFlutter(
   bool debug = false,
   bool logging = true,
   Duration expectedMaxDuration = const Duration(
-      minutes:
-          10), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
+    minutes: 10,
+  ), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
 }) async {
   const LocalPlatform platform = LocalPlatform();
   final Stopwatch clock = Stopwatch()..start();
