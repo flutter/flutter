@@ -245,6 +245,7 @@ class CupertinoMagnifier extends StatelessWidget {
         color: Color.fromARGB(25, 0, 0, 0),
         blurRadius: 11,
         spreadRadius: 0.2,
+        blurStyle: BlurStyle.outer,
       ),
     ],
     this.borderSide =
@@ -252,22 +253,27 @@ class CupertinoMagnifier extends StatelessWidget {
     this.inOutAnimation,
   });
 
-  /// The shadows displayed under the magnifier.
+  /// A list of shadows cast by the [Magnifier].
+  ///
+  /// The blur should use [BlurStyle.outer] to avoid the shadow itself occluding
+  /// the magnifier (the shadow is drawn above the magnifier).
   final List<BoxShadow> shadows;
 
   /// The border, or "rim", of this magnifier.
+  ///
+  /// This border is drawn on a [RoundedRectangleBorder] with radius
+  /// [borderRadius], and increases the [size] of the magnifier by the
+  /// [BorderSide.width].
   final BorderSide borderSide;
 
   /// The vertical offset that the magnifier is along the Y axis above
   /// the focal point.
-  @visibleForTesting
   static const double kMagnifierAboveFocalPoint = -26;
 
   /// The default size of the magnifier.
   ///
   /// This is public so that positioners can choose to depend on it, although
   /// it is overridable.
-  @visibleForTesting
   static const Size kDefaultSize = Size(80, 47.5);
 
   /// The duration that this magnifier animates in / out for.
@@ -278,9 +284,13 @@ class CupertinoMagnifier extends StatelessWidget {
   static const Duration _kInOutAnimationDuration = Duration(milliseconds: 150);
 
   /// The size of this magnifier.
+  ///
+  /// The size does not include the [borderSide] or [shadows].
   final Size size;
 
   /// The border radius of this magnifier.
+  ///
+  /// The magnifier's shape is a [RoundedRectangleBorder] with this radius.
   final BorderRadius borderRadius;
 
   /// This [RawMagnifier]'s controller.

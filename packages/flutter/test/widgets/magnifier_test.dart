@@ -80,10 +80,11 @@ void main() {
                     magnificationScale: magnificationScale,
                     decoration: MagnifierDecoration(shadows: <BoxShadow>[
                       BoxShadow(
-                        spreadRadius: 10,
-                        blurRadius: 10,
-                        color: Colors.green,
-                        offset: Offset(5, 5),
+                        spreadRadius: 10.0,
+                        blurRadius: 10.0,
+                        color: Color(0x804caf50), // semi-transparent so that we can see the magnifier below the shadow
+                        offset: Offset(5.0, 5.0),
+                        blurStyle: BlurStyle.outer, // this is ignored because debugDisableShadows is enabled
                       ),
                     ]),
                   ),
@@ -92,12 +93,10 @@ void main() {
             ),
           )));
 
-      await tester.pumpAndSettle();
-
-      // Should look like an orange screen, with two pink boxes.
-      // One pink box is in the magnifier (so has a green shadow) and is double
-      // size (from magnification). Also, the magnifier should be slightly orange
-      // since it has opacity.
+      // This should be an orange screen with a pink box in the center, and a green box offset to its upper left.
+      // Where the green box overlaps the pink box it should be purpleish gray.
+      // The green box should also contain its own purpleish gray box (the magnified pink box).
+      // The purpleish gray is semitransparent green blended with pink.
       await expectLater(
         find.byKey(appKey),
         matchesGoldenFile('widgets.magnifier.styled.png'),
@@ -324,5 +323,12 @@ void main() {
         });
       }
     });
+  });
+
+  testWidgets('MagnifierInfo.toString', (WidgetTester tester) async {
+    expect(MagnifierInfo.empty.toString(),
+      'MagnifierInfo(position: Offset(0.0, 0.0), line: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), '
+      'caret: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), field: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))',
+    );
   });
 }

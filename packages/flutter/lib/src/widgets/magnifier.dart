@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -70,8 +70,8 @@ class MagnifierInfo {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
+    if (other.runtimeType != runtimeType) {
+      return false;
     }
     return other is MagnifierInfo
         && other.globalGesturePosition == globalGesturePosition
@@ -87,6 +87,16 @@ class MagnifierInfo {
     fieldBounds,
     currentLineBoundaries,
   );
+
+  @override
+  String toString() {
+    return '${objectRuntimeType(this, 'MagnifierInfo')}('
+      'position: $globalGesturePosition, '
+      'line: $currentLineBoundaries, '
+      'caret: $caretRect, '
+      'field: $fieldBounds'
+    ')';
+  }
 }
 
 /// {@template flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
@@ -107,7 +117,7 @@ class TextMagnifierConfiguration {
   /// that never builds a magnifier.
   const TextMagnifierConfiguration({
     MagnifierBuilder? magnifierBuilder,
-    this.shouldDisplayHandlesInMagnifier = true
+    this.shouldDisplayHandlesInMagnifier = true,
   }) : _magnifierBuilder = magnifierBuilder;
 
   /// The passed in [MagnifierBuilder].
@@ -140,9 +150,6 @@ class TextMagnifierConfiguration {
 /// [Overlay].
 ///
 /// To check the status of the magnifier, see [MagnifierController.shown].
-// TODO(antholeole): This whole paradigm can be removed once portals
-// lands - then the magnifier can be controlled though a widget in the tree.
-// https://github.com/flutter/flutter/pull/105335
 class MagnifierController {
   /// If there is no in / out animation for the magnifier, [animationController] should be left
   /// null.
@@ -353,37 +360,79 @@ class MagnifierController {
   }
 }
 
-/// A decoration for a [RawMagnifier].
+/// The decorations to put around the loupe in a [RawMagnifier].
 ///
-/// [MagnifierDecoration] does not expose [ShapeDecoration.color], [ShapeDecoration.image],
-/// or [ShapeDecoration.gradient], since they will be covered by the [RawMagnifier]'s lens.
+/// See also:
 ///
-/// Also takes an [opacity] (see https://github.com/flutter/engine/pull/34435).
-class MagnifierDecoration extends ShapeDecoration {
+///  * [Decoration], a more general solution for [DecoratedBox].
+@immutable
+class MagnifierDecoration {
   /// Constructs a [MagnifierDecoration].
   ///
-  /// By default, [MagnifierDecoration] is a rectangular magnifier with no shadows, and
-  /// fully opaque.
+  /// By default, [MagnifierDecoration] is a rectangular magnifier with no
+  /// shadows, and fully opaque.
   const MagnifierDecoration({
-    this.opacity = 1,
-    super.shadows,
-    super.shape = const RoundedRectangleBorder(),
+    this.opacity = 1.0,
+    this.shadows,
+    this.shape = const RoundedRectangleBorder(),
   });
 
-  /// The magnifier's opacity.
+  // TODO(ianh): deprecate [opacity] (moving it to [RawMagnifier]), and then
+  // once [opacity] can be removed, replace [MagnifierDecoration] with a
+  // `typedef` to [ShapeDecoration] and make anywhere that accepts a
+  // [MagnifierDecoration] accept a [ShapeDecoration] instead, moving all the
+  // logic that puts [ColoredBox] inside [RawMagnifier] to instead use the
+  // `color` of the [ShapeDecoration].
+
+  /// The opacity of the magnifier and decorations around the magnifier.
+  ///
+  /// When this is 1.0, the magnified image shows in the [shape] of the
+  /// magnifier. When this is less than 1.0, the magnified image is transparent
+  /// and shows through the unmagnified background.
+  ///
+  /// Generally this is only useful for animating the magnifier in and out, as a
+  /// transparent magnifier looks quite confusing.
   final double opacity;
+
+  /// A list of shadows cast by the [shape].
+  ///
+  /// The blur should use [BlurStyle.outer] to avoid the shadow itself occluding
+  /// the magnifier (the shadow is drawn above the magnifier).
+  ///
+  /// In the event that [shape] consists of a stack of borders, the shadow is
+  /// drawn using the bounds of the last one.
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], which defines some shadows for Material design.
+  ///    Those shadows use [BlurStyle.normal] and must be converted to
+  ///    [BlurStyle.outer] for use with [MagnifierDecoration].
+  final List<BoxShadow>? shadows;
+
+  /// The shape of the magnifier and the outline (border) around it.
+  ///
+  /// Shapes can be stacked (using the `+` operator). In that case, the
+  /// magnifier and shadow are drawn according to the outside edge of the last
+  /// shape, with the borders painted on top.
+  final ShapeBorder shape;
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
+    if (other.runtimeType != runtimeType) {
+      return false;
     }
-
-    return super == other && other is MagnifierDecoration && other.opacity == opacity;
+    return other is MagnifierDecoration
+        && other.opacity == opacity
+        && listEquals<BoxShadow>(other.shadows, shadows)
+        && other.shape == shape;
   }
 
   @override
-  int get hashCode => Object.hash(super.hashCode, opacity);
+  int get hashCode => Object.hash(
+    opacity,
+    shape,
+    shadows == null ? null : Object.hashAll(shadows!),
+  );
 }
 
 /// A common base class for magnifiers.
@@ -409,13 +458,11 @@ class MagnifierDecoration extends ShapeDecoration {
 class RawMagnifier extends StatelessWidget {
   /// Constructs a [RawMagnifier].
   ///
-  /// {@template flutter.widgets.magnifier.RawMagnifier.invisibility_warning}
   /// By default, this magnifier uses the default [MagnifierDecoration],
   /// the focal point is directly under the magnifier, and there is no magnification:
   /// This means that a default magnifier will be entirely invisible to the naked eye,
   /// since it is painting exactly what is under it, exactly where it was painted
   /// originally.
-  /// {@endtemplate}
   const RawMagnifier({
       super.key,
       this.child,
@@ -429,14 +476,15 @@ class RawMagnifier extends StatelessWidget {
   /// An optional widget to position inside the len of the [RawMagnifier].
   ///
   /// This is positioned over the [RawMagnifier] - it may be useful for tinting the
-  /// [RawMagnifier], or drawing a crosshair like UI.
+  /// [RawMagnifier], or drawing a crosshair-like UI.
   final Widget? child;
 
   /// This magnifier's decoration.
   ///
-  /// {@macro flutter.widgets.magnifier.RawMagnifier.invisibility_warning}
+  /// This sets the shape of the loupe, plus any borders and shadows that it
+  /// casts. The default has no border, no shadow, and a [magnificationScale] of
+  /// 1.0 which results in the magnifier having no visible effect.
   final MagnifierDecoration decoration;
-
 
   /// The offset of the magnifier from [RawMagnifier]'s center.
   ///
@@ -451,11 +499,13 @@ class RawMagnifier extends StatelessWidget {
   final Offset focalPointOffset;
 
   /// How "zoomed in" the magnification subject is in the lens.
+  ///
+  /// The default is 1.0, which is no magnification.
   final double magnificationScale;
 
   /// The size of the magnifier.
   ///
-  /// This does not include added border; it only includes
+  /// This does not include the border from the [decoration]; it only includes
   /// the size of the magnifier.
   final Size size;
 
@@ -465,12 +515,12 @@ class RawMagnifier extends StatelessWidget {
       clipBehavior: Clip.none,
       alignment: Alignment.center,
       children: <Widget>[
+        // The magnified image is clipped to the outer path of the shape.
         ClipPath.shape(
           shape: decoration.shape,
           child: Opacity(
             opacity: decoration.opacity,
             child: _Magnifier(
-              shape: decoration.shape,
               focalPointOffset: focalPointOffset,
               magnificationScale: magnificationScale,
               child: SizedBox.fromSize(
@@ -485,81 +535,24 @@ class RawMagnifier extends StatelessWidget {
         // from seeing its own styling.
         Opacity(
           opacity: decoration.opacity,
-          child: _MagnifierStyle(
-            decoration,
-            size: size,
+          child: DecoratedBox(
+            decoration: ShapeDecoration(
+              shape: decoration.shape,
+              shadows: decoration.shadows,
+            ),
+            child: SizedBox.fromSize(
+              size: size,
+            ),
           ),
-        )
+        ),
       ],
     );
   }
 }
 
-class _MagnifierStyle extends StatelessWidget {
-  const _MagnifierStyle(this.decoration, {required this.size});
-
-  final MagnifierDecoration decoration;
-  final Size size;
-
-  @override
-  Widget build(BuildContext context) {
-    double largestShadow = 0;
-    for (final BoxShadow shadow in decoration.shadows ?? <BoxShadow>[]) {
-      largestShadow = math.max(
-          largestShadow,
-          (shadow.blurRadius + shadow.spreadRadius) +
-              math.max(shadow.offset.dy.abs(), shadow.offset.dx.abs()));
-    }
-
-    return ClipPath(
-      clipBehavior: Clip.hardEdge,
-      clipper: _DonutClip(
-        shape: decoration.shape,
-        spreadRadius: largestShadow,
-      ),
-      child: DecoratedBox(
-        decoration: decoration,
-        child: SizedBox.fromSize(
-          size: size,
-        ),
-      ),
-    );
-  }
-}
-
-/// A `clipPath` that looks like a donut if you were to fill its area.
-///
-/// This is necessary because the shadow must be added after the magnifier is drawn,
-/// so that the shadow does not end up in the magnifier. Without this clip, the magnifier would be
-/// entirely covered by the shadow.
-///
-/// The negative space of the donut is clipped out (the donut hole, outside the donut).
-/// The donut hole is cut out exactly like the shape of the magnifier.
-class _DonutClip extends CustomClipper<Path> {
-  _DonutClip({required this.shape, required this.spreadRadius});
-
-  final double spreadRadius;
-  final ShapeBorder shape;
-
-  @override
-  Path getClip(Size size) {
-    final Path path = Path();
-    final Rect rect = Offset.zero & size;
-
-    path.fillType = PathFillType.evenOdd;
-    path.addPath(shape.getOuterPath(rect.inflate(spreadRadius)), Offset.zero);
-    path.addPath(shape.getInnerPath(rect), Offset.zero);
-    return path;
-  }
-
-  @override
-  bool shouldReclip(_DonutClip oldClipper) => oldClipper.shape != shape;
-}
-
 class _Magnifier extends SingleChildRenderObjectWidget {
   const _Magnifier({
     super.child,
-    required this.shape,
     this.magnificationScale = 1,
     this.focalPointOffset = Offset.zero,
   });
@@ -574,12 +567,9 @@ class _Magnifier extends SingleChildRenderObjectWidget {
   // If greater than 1.0, the content appears bigger in the magnifier.
   final double magnificationScale;
 
-  // Shape of the magnifier.
-  final ShapeBorder shape;
-
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderMagnification(focalPointOffset, magnificationScale, shape);
+    return _RenderMagnification(focalPointOffset, magnificationScale);
   }
 
   @override
@@ -587,7 +577,6 @@ class _Magnifier extends SingleChildRenderObjectWidget {
       BuildContext context, _RenderMagnification renderObject) {
     renderObject
       ..focalPointOffset = focalPointOffset
-      ..shape = shape
       ..magnificationScale = magnificationScale;
   }
 }
@@ -595,8 +584,7 @@ class _Magnifier extends SingleChildRenderObjectWidget {
 class _RenderMagnification extends RenderProxyBox {
   _RenderMagnification(
     this._focalPointOffset,
-    this._magnificationScale,
-    this._shape, {
+    this._magnificationScale, {
     RenderBox? child,
   }) : super(child);
 
@@ -617,16 +605,6 @@ class _RenderMagnification extends RenderProxyBox {
       return;
     }
     _magnificationScale = value;
-    markNeedsPaint();
-  }
-
-  ShapeBorder get shape => _shape;
-  ShapeBorder _shape;
-  set shape(ShapeBorder value) {
-    if (_shape == value) {
-      return;
-    }
-    _shape = value;
     markNeedsPaint();
   }
 

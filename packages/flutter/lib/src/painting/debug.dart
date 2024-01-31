@@ -13,11 +13,11 @@ import 'package:flutter/foundation.dart';
 /// the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
 /// version to version (or even from run to run).
 ///
-/// In those tests, this is usually set to false at the beginning of a test and back
-/// to true before the end of the test case.
+/// This is set to true in [AutomatedTestWidgetsFlutterBinding]. Tests will fail
+/// if they change this value and do not reset it before the end of the test.
 ///
-/// If it remains true when the test ends, an exception is thrown to avoid state
-/// leaking from one test case to another.
+/// When this is set, [BoxShadow]s render as the [BoxShadow.blurStyle] was
+/// [BlurStyle.normal] regardless of the actual specified blur style.
 bool debugDisableShadows = false;
 
 /// Signature for a method that returns an [HttpClient].
