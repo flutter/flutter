@@ -166,7 +166,6 @@ void main() {
     expect(find.text('label'), findsOneWidget);
   });
 
-
   testWidgets('FilledButton.tonalIcon produces the correct widgets if icon is null', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
