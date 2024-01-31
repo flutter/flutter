@@ -13,8 +13,6 @@ void main() {
 }
 
 void testMain() {
-  ensureFlutterViewEmbedderInitialized();
-
   const MethodCodec codec = JSONMethodCodec();
 
   void sendSetSystemUIOverlayStyle({ui.Color? statusBarColor}) {

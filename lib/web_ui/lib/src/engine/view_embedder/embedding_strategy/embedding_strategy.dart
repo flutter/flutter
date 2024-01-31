@@ -26,16 +26,12 @@ abstract class EmbeddingStrategy {
     }
   }
 
+  /// The host element in which the Flutter view is embedded.
+  DomElement get hostElement;
+
   /// The global event target for the Flutter view.
   DomEventTarget get globalEventTarget;
 
-  void initialize({
-    Map<String, String>? hostElementAttributes,
-  });
-
   /// Attaches the view root element into the hostElement.
   void attachViewRoot(DomElement rootElement);
-
-  /// Attaches the resourceHost element into the hostElement.
-  void attachResourcesHost(DomElement resourceHost, {DomElement? nextTo});
 }

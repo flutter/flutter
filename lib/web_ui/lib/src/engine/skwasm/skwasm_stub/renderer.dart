@@ -158,11 +158,6 @@ class SkwasmRenderer implements Renderer {
   String get rendererTag => throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
-  void reset(FlutterViewEmbedder embedder) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
   void clearFragmentProgramCache() => _programs.clear();
 
   static final Map<String, Future<ui.FragmentProgram>> _programs = <String, Future<ui.FragmentProgram>>{};

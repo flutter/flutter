@@ -12,6 +12,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
 
+import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
 
 final InputConfiguration singlelineConfig = InputConfiguration();
@@ -33,7 +34,9 @@ void main() {
 }
 
 void testMain() {
-  ensureFlutterViewEmbedderInitialized();
+  setUpAll(() async {
+    await bootstrapAndRunApp(withImplicitView: true);
+  });
 
   setUp(() {
     EngineSemantics.debugResetSemantics();
