@@ -154,6 +154,45 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
+  testWidgets('TextButton.withOptionalIcon produces the correct widgets', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    final Key iconButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton.withOptionalIcon(
+            key: iconButtonKey,
+            onPressed: () { },
+            icon: const Icon(Icons.add),
+            child: const Text('label'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(find.text('label'), findsOneWidget);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton.withOptionalIcon(
+            key: iconButtonKey,
+            onPressed: () { },
+            // No icon specified.
+            child: const Text('label'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.add), findsNothing);
+    expect(find.text('label'), findsOneWidget);
+  });
+
   testWidgets('Default TextButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 

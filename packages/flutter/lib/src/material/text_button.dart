@@ -108,6 +108,59 @@ class TextButton extends ButtonStyleButton {
     required Widget label,
   }) = _TextButtonWithIcon;
 
+  /// If [icon] is not null, then this factory constructor returns a
+  /// [TextButton.icon], otherwise it returns a [TextButton].
+  ///
+  /// If the [icon] is not null, the [icon] and [child] are arranged in a row
+  /// and padded by 8 logical pixels at the ends, with an 8 pixel gap in
+  /// between.
+  ///
+  /// If the [icon] is null, then only the [child] is shown, without any
+  /// additional decorations.
+  factory TextButton.withOptionalIcon({
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ValueChanged<bool>? onHover,
+    ValueChanged<bool>? onFocusChange,
+    ButtonStyle? style,
+    FocusNode? focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
+    MaterialStatesController? statesController,
+    Widget? icon,
+    required Widget child,
+  }) {
+    if (icon == null) {
+      return TextButton(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: child,
+      );
+    }
+    return TextButton.icon( key: key,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      style: style,
+      focusNode: focusNode,
+      autofocus: autofocus ?? false,
+      clipBehavior: clipBehavior ?? Clip.none,
+      statesController: statesController,
+      icon: icon,
+      label: child,
+    );
+  }
+
   /// A static convenience method that constructs a text button
   /// [ButtonStyle] given simple values.
   ///
