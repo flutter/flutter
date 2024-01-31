@@ -89,7 +89,11 @@ class DependencyVersionChecker {
 
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.invocation/-gradle/index.html#-837060600%2FFunctions%2F-1793262594
         fun getGradleVersion(project : Project) : Version {
-            return Version.fromString(project.gradle.getGradleVersion())
+            val untrimmedGradleVersion : String = project.gradle.getGradleVersion()
+            // Trim to handle candidate gradle versions (example 7.6-rc-4). This means we treat all
+            // candidate versions of gradle as the same as their base version
+            // (i.e., "7.6"="7.6-rc-4").
+            return Version.fromString(untrimmedGradleVersion.substringBefore('-'))
         }
 
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
