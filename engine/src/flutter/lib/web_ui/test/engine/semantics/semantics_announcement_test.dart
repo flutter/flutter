@@ -91,18 +91,35 @@ void testMain() {
       expectNoMessages();
     });
 
-    test('Rapid-fire messages are each announced.', () async {
+    test('Rapid-fire messages are each announced', () async {
       sendAnnouncementMessage(message: 'Hello');
       expectMessages(polite: 'Hello');
 
       await Future<void>.delayed(liveMessageDuration * 0.5);
       sendAnnouncementMessage(message: 'There');
-      expectMessages(polite: 'HelloThere');
+      expectMessages(polite: 'HelloThere\u00A0');
 
       await Future<void>.delayed(liveMessageDuration * 0.6);
-      expectMessages(polite: 'There');
+      expectMessages(polite: 'There\u00A0');
 
       await Future<void>.delayed(liveMessageDuration * 0.5);
+      expectNoMessages();
+    });
+
+    test('Repeated announcements are modified to ensure screen readers announce them', () async {
+      sendAnnouncementMessage(message: 'Hello');
+      expectMessages(polite: 'Hello');
+      await Future<void>.delayed(liveMessageDuration);
+      expectNoMessages();
+
+      sendAnnouncementMessage(message: 'Hello');
+      expectMessages(polite: 'Hello\u00A0');
+      await Future<void>.delayed(liveMessageDuration);
+      expectNoMessages();
+
+      sendAnnouncementMessage(message: 'Hello');
+      expectMessages(polite: 'Hello');
+      await Future<void>.delayed(liveMessageDuration);
       expectNoMessages();
     });
 

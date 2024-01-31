@@ -51,6 +51,15 @@ class AccessibilityAnnouncements {
   /// accouncements assertively.
   final DomHTMLElement _assertiveElement;
 
+  /// Whether to append a non-breaking space to the end of the message
+  /// before outputting it.
+  ///
+  /// It's used to work around a VoiceOver bug where announcing the same message
+  /// repeatedly results in subsequent messages not being announced despite the
+  /// fact that the previous announcement was already removed from the DOM a
+  /// long while back. See https://github.com/flutter/flutter/issues/142250.
+  bool _appendSpace = false;
+
   /// Looks up the element used to announce messages of the given [assertiveness].
   DomHTMLElement ariaLiveElementFor(Assertiveness assertiveness) {
     switch (assertiveness) {
@@ -84,7 +93,9 @@ class AccessibilityAnnouncements {
     final DomHTMLElement ariaLiveElement = ariaLiveElementFor(assertiveness);
 
     final DomHTMLDivElement messageElement = createDomHTMLDivElement();
-    messageElement.text = message;
+    // See the doc-comment for [_appendSpace] for the rationale.
+    messageElement.text = _appendSpace ? '$message\u00A0' : message;
+    _appendSpace = !_appendSpace;
     ariaLiveElement.append(messageElement);
     Timer(liveMessageDuration, () => messageElement.remove());
   }
