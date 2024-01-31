@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
 #endif  // FML_OS_IOS
 
   ::testing::InitGoogleTest(&argc, argv);
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
 
   // Check if the user has specified a timeout.
   const auto timeout = GetTestTimeout();
