@@ -6092,7 +6092,7 @@ void main() {
     await tester.pump();
 
     expect((renderEditable.text! as TextSpan).children, isNull);
-    // Everything's just formated the same way now.
+    // Everything's just formatted the same way now.
     expect((renderEditable.text! as TextSpan).text, 'text composing text');
     expect(renderEditable.text!.style!.decoration, isNull);
   });
@@ -11185,14 +11185,15 @@ void main() {
     ));
     expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
 
-    // Setting a selection within the composing range clears the composing range.
+    // Setting a selection within the composing range doesn't clear the composing range.
     state.updateEditingValue(const TextEditingValue(
       text: 'foo composing bar',
       selection: TextSelection.collapsed(offset: 4),
       composing: TextRange(start: 4, end: 12),
     ));
     controller.selection = const TextSelection(baseOffset: 5, extentOffset: 7);
-    expect(state.currentTextEditingValue.composing, TextRange.empty);
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+    expect(state.currentTextEditingValue.selection, const TextSelection(baseOffset: 5, extentOffset: 7));
 
     // Reset the composing range.
     state.updateEditingValue(const TextEditingValue(
@@ -16729,6 +16730,34 @@ void main() {
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     expect(state.renderEditable.cursorColor, cursorColor.withOpacity(opacity));
+  });
+
+  testWidgets('should notify on size change', (WidgetTester tester) async {
+    int notifyCount = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: NotificationListener<SizeChangedLayoutNotification>(
+          onNotification: (SizeChangedLayoutNotification notification) {
+            notifyCount += 1;
+            return false;
+          },
+          child: EditableText(
+            backgroundCursorColor: Colors.grey,
+            cursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: 3,
+            minLines: 1,
+            style: textStyle,
+          ),
+        ),
+      ),
+    ));
+
+    expect(notifyCount, equals(0));
+    await tester.enterText(find.byType(EditableText), '\n');
+    await tester.pumpAndSettle();
+    expect(notifyCount, equals(1));
   });
 }
 

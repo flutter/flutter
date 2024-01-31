@@ -67,7 +67,7 @@ class BannerPainter extends CustomPainter {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$BannerPainter',
         object: this,
@@ -132,7 +132,7 @@ class BannerPainter extends CustomPainter {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _textPainter?.dispose();
     _textPainter = null;

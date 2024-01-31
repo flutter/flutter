@@ -12,6 +12,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 
@@ -94,7 +95,10 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (WidgetTester tester) async {
+  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final ErrorImageProvider errorImage = ErrorImageProvider();
     bool caughtForegroundImageError = false;
     await tester.pumpWidget(
@@ -167,7 +171,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(theme.colorScheme.onPrimaryContainer));
   });
 
-  testWidgets('CircleAvatar text does not expand with textScaleFactor', (WidgetTester tester) async {
+  testWidgets('CircleAvatar text does not expand with textScaler', (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
@@ -184,7 +188,7 @@ void main() {
       wrap(
         child: MediaQuery(
           data: const MediaQueryData(
-            textScaleFactor: 2.0,
+            textScaler: TextScaler.linear(2.0),
             size: Size(111.0, 111.0),
             devicePixelRatio: 1.1,
             padding: EdgeInsets.all(11.0),
@@ -200,7 +204,7 @@ void main() {
                 expect(data.padding, equals(const EdgeInsets.all(11.0)));
 
                 // This should be overridden to 1.0.
-                expect(data.textScaleFactor, equals(1.0));
+                expect(data.textScaler, TextScaler.noScaling);
                 return const Text('Z');
               },
             ),

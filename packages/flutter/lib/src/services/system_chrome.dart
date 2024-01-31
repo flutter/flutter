@@ -184,7 +184,7 @@ enum SystemUiMode {
 ///
 /// Used by [AppBar.systemOverlayStyle] for declaratively setting the style of
 /// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
-/// imperatively setting the style of the systeme overlays.
+/// imperatively setting the style of the system overlays.
 @immutable
 class SystemUiOverlayStyle {
   /// Creates a new [SystemUiOverlayStyle].

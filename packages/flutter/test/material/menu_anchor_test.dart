@@ -472,10 +472,9 @@ void main() {
     await tester.tap(find.text('Main Menu'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Scrollbar), findsOneWidget);
     // Test Scrollbar thumb color.
     expect(
-      find.byType(Scrollbar),
+      find.byType(Scrollbar).last,
       paints..rrect(color: const Color(0xffff0000)),
     );
 
@@ -521,10 +520,9 @@ void main() {
     await tester.tap(find.text('Main Menu'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Scrollbar), findsOneWidget);
     // Scrollbar thumb color should be updated.
     expect(
-      find.byType(Scrollbar),
+      find.byType(Scrollbar).last,
       paints..rrect(color: const Color(0xff00ff00)),
     );
   }, variant: TargetPlatformVariant.desktop());
@@ -2358,7 +2356,6 @@ void main() {
         description,
         equalsIgnoringHashCodes(
           <String>[
-            'child: Text("Menu 0")',
             'focusNode: null',
             'menuStyle: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: MaterialStatePropertyAll(20.0), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
@@ -3521,6 +3518,7 @@ void main() {
 
   testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     int onFocusChangeCalled = 0;
     await tester.pumpWidget(
       MaterialApp(

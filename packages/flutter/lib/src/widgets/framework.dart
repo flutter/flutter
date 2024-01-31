@@ -1006,7 +1006,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$State',
         object: this,
@@ -1325,9 +1325,10 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// To listen for platform shutdown messages (and other lifecycle changes),
   /// consider the [AppLifecycleListener] API.
   ///
-  /// ### Dismissing Flutter UI via platform native methods
-  ///
   /// {@macro flutter.widgets.runApp.dismissal}
+  ///
+  /// See the method used to bootstrap the app (e.g. [runApp] or [runWidget])
+  /// for suggestions on how to release resources more eagerly.
   ///
   /// See also:
   ///
@@ -1341,7 +1342,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
   }
 
@@ -3387,7 +3388,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element(Widget widget)
     : _widget = widget {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$Element',
         object: this,
@@ -4542,7 +4543,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(owner != null);
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget?.key;
@@ -6970,9 +6971,16 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
             'however, expects that a child will be attached.',
           ),
           ErrorHint(
-            'Try moving the subtree that contains the ${toStringShort()} widget into the '
-            'view property of a ViewAnchor widget or to the root of the widget tree, where '
-            'it is not expected to attach its RenderObject to a parent.',
+            'Try moving the subtree that contains the ${toStringShort()} widget '
+            'to a location where it is not expected to attach its RenderObject '
+            'to a parent. This could mean moving the subtree into the view '
+            'property of a "ViewAnchor" widget or - if the subtree is the root of '
+            'your widget tree - passing it to "runWidget" instead of "runApp".',
+          ),
+          ErrorHint(
+            'If you are seeing this error in a test and the subtree containing '
+            'the ${toStringShort()} widget is passed to "WidgetTester.pumpWidget", '
+            'consider setting the "wrapWithView" parameter of that method to false.'
           ),
         ],
       );

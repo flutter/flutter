@@ -494,7 +494,17 @@ class _DraggableSheetExtent {
         _currentSize = currentSize ?? ValueNotifier<double>(initialSize),
         availablePixels = double.infinity,
         hasDragged = hasDragged ?? false,
-        hasChanged = hasChanged ?? false;
+        hasChanged = hasChanged ?? false {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_DraggableSheetExtent',
+        object: this,
+      );
+    }
+  }
 
   VoidCallback? _cancelActivity;
 
@@ -590,6 +600,9 @@ class _DraggableSheetExtent {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _currentSize.dispose();
   }
 

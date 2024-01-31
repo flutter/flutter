@@ -738,6 +738,60 @@ apply plugin: 'kotlin-android'
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
+
+    testUsingContext('kotlin host app language with Gradle Kotlin DSL', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+''';
+        });
+        expect(project.android.isKotlin, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+    testUsingContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+''';
+        });
+        addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+}
+''';
+        });
+
+        expect(project.android.isKotlin, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
     });
 
     group('With mocked context', () {
@@ -1519,7 +1573,7 @@ void _testInMemory(
       ProcessManager: () => processManager ?? FakeProcessManager.any(),
       Java : () => java,
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
-      // Intentionlly null if not set. Some ios tests fail if this is a fake.
+      // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
       Cache: () => Cache(
             logger: globals.logger,
@@ -1568,11 +1622,18 @@ void addIosProjectFile(Directory directory, {required String Function() projectF
     ..writeAsStringSync(projectFileContent());
 }
 
-void addAndroidGradleFile(Directory directory, { required String Function() gradleFileContent }) {
+/// Adds app-level Gradle Groovy build file (build.gradle) to [directory].
+///
+/// If [kotlinDsl] is true, then build.gradle.kts is created instead of
+/// build.gradle. It's the caller's responsibility to make sure that
+/// [gradleFileContent] is consistent with the value of the [kotlinDsl] flag.
+void addAndroidGradleFile(Directory directory, {
+  required String Function() gradleFileContent, bool kotlinDsl = false,
+}) {
   directory
       .childDirectory('android')
       .childDirectory('app')
-      .childFile('build.gradle')
+      .childFile(kotlinDsl ? 'build.gradle.kts' : 'build.gradle')
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileContent());
 }
@@ -1608,8 +1669,8 @@ FileSystem getFileSystemForPlatform() {
   );
 }
 
-void addAndroidWithGroup(Directory directory, String id) {
-  directory.childDirectory('android').childFile('build.gradle')
+void addAndroidWithGroup(Directory directory, String id, {bool kotlinDsl = false}) {
+  directory.childDirectory('android').childFile(kotlinDsl ? 'build.gradle.kts' : 'build.gradle')
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileWithGroupId(id));
 }

@@ -4690,7 +4690,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(renderObject!['description'], contains('RenderView'));
 
         expect(result['parentRenderElement'], isNull);
-        expect(result['constraints'], isNull);
+
+        final Map<String, Object?>? constraints = result['constraints'] as Map<String, Object?>?;
+        expect(constraints, isNotNull);
+        expect(constraints!['type'], equals('BoxConstraints'));
+        expect(constraints['minWidth'], equals('800.0'));
+        expect(constraints['minHeight'], equals('600.0'));
+        expect(constraints['maxWidth'], equals('800.0'));
+        expect(constraints['maxHeight'], equals('600.0'));
         expect(result['isBox'], isNull);
 
         final Map<String, Object?>? size = result['size'] as Map<String, Object?>?;

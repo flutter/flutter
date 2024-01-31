@@ -1203,10 +1203,9 @@ void main() {
                 ),
                 home: Builder(
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        textScaleFactor: textScaleFactor,
-                      ),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: Directionality(
                         textDirection: textDirection,
                         child: Scaffold(
@@ -1339,10 +1338,9 @@ void main() {
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Builder(
           builder: (BuildContext context) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaleFactor: 2,
-              ),
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: 2,
+              maxScaleFactor: 2,
               child: Scaffold(
                 body: Center(
                   child: FilledButton(
@@ -1405,7 +1403,7 @@ void main() {
         theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: Scaffold(
                 body: Center(
-                  child: ElevatedButton(
+                  child: FilledButton(
                     key: key,
                     onPressed: () {},
                     child: const Text('FilledButton'),
@@ -1435,7 +1433,7 @@ void main() {
                     key: key,
                     icon: const Icon(Icons.favorite),
                     onPressed: () {},
-                    label: const Text('ElevatedButton'),
+                    label: const Text('FilledButton'),
                   ),
                 ),
               ),
@@ -1652,7 +1650,7 @@ void main() {
               children: <Widget>[
                 FilledButton(
                   key: key0,
-                  style: TextButton.styleFrom(
+                  style: FilledButton.styleFrom(
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(64),
                   ),
@@ -1661,7 +1659,7 @@ void main() {
                 ),
                 FilledButton.icon(
                   key: key1,
-                  style: TextButton.styleFrom(
+                  style: FilledButton.styleFrom(
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(104),
                   ),

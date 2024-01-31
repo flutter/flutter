@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 typedef ElementRebuildCallback = void Function(StatefulElement element);
 
@@ -1781,7 +1782,9 @@ The findRenderObject() method was called for the following element:
     );
   });
 
-  testWidgets('Elements use the identity hashCode', (WidgetTester tester) async {
+  testWidgets('Elements use the identity hashCode',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design.
+  (WidgetTester tester) async {
     final StatefulElement statefulElement = StatefulElement(const _StatefulLeaf());
     expect(statefulElement.hashCode, identityHashCode(statefulElement));
 
