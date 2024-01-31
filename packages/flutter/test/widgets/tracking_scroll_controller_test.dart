@@ -4,13 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 void main() {
-  testWidgets('TrackingScrollController saves offset',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
     addTearDown(controller.dispose);
     const double listItemHeight = 100.0;
@@ -64,10 +60,7 @@ void main() {
     expect(controller.initialScrollOffset, 0.0);
   });
 
-  testWidgets('TrackingScrollController saves offset',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
     int attach = 0;
     int detach = 0;
     final TrackingScrollController controller = TrackingScrollController(
