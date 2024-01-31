@@ -37,6 +37,8 @@ void VertexDescriptor::RegisterDescriptorSetLayouts(
     size_t count) {
   desc_set_layouts_.reserve(desc_set_layouts_.size() + count);
   for (size_t i = 0; i < count; i++) {
+    uses_input_attachments_ |=
+        desc_set_layout[i].descriptor_type == DescriptorType::kInputAttachment;
     desc_set_layouts_.emplace_back(desc_set_layout[i]);
   }
 }
@@ -70,6 +72,10 @@ const std::vector<ShaderStageBufferLayout>& VertexDescriptor::GetStageLayouts()
 const std::vector<DescriptorSetLayout>&
 VertexDescriptor::GetDescriptorSetLayouts() const {
   return desc_set_layouts_;
+}
+
+bool VertexDescriptor::UsesInputAttacments() const {
+  return uses_input_attachments_;
 }
 
 }  // namespace impeller

@@ -2689,39 +2689,6 @@ TEST_P(EntityTest, DecalSpecializationAppliedToMorphologyFilter) {
             expected_constants);
 }
 
-TEST_P(EntityTest, FramebufferFetchPipelinesDeclareUsage) {
-  auto content_context =
-      ContentContext(GetContext(), TypographerContextSkia::Make());
-  if (!content_context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
-    GTEST_SKIP() << "Framebuffer fetch not supported.";
-  }
-
-  ContentContextOptions options;
-  options.color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt;
-  auto color_burn =
-      content_context.GetFramebufferBlendColorBurnPipeline(options);
-
-  EXPECT_TRUE(color_burn->GetDescriptor().UsesSubpassInput());
-}
-
-TEST_P(EntityTest, PipelineDescriptorEqAndHash) {
-  auto desc_1 = std::make_shared<PipelineDescriptor>();
-  auto desc_2 = std::make_shared<PipelineDescriptor>();
-
-  EXPECT_TRUE(desc_1->IsEqual(*desc_2));
-  EXPECT_EQ(desc_1->GetHash(), desc_2->GetHash());
-
-  desc_1->SetUseSubpassInput(UseSubpassInput::kYes);
-
-  EXPECT_FALSE(desc_1->IsEqual(*desc_2));
-  EXPECT_NE(desc_1->GetHash(), desc_2->GetHash());
-
-  desc_2->SetUseSubpassInput(UseSubpassInput::kYes);
-
-  EXPECT_TRUE(desc_1->IsEqual(*desc_2));
-  EXPECT_EQ(desc_1->GetHash(), desc_2->GetHash());
-}
-
 // This doesn't really tell you if the hashes will have frequent
 // collisions, but since this type is only used to hash a bounded
 // set of options, we can just compare benchmarks.
