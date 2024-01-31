@@ -298,7 +298,13 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   double? get pressElevation => 1.0;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.onSurfaceVariant
+      : _colors.onSurface,
+  );
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -332,10 +338,18 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get checkmarkColor => _colors.onSecondaryContainer;
+  Color? get checkmarkColor => isEnabled
+    ? isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.primary
+    : _colors.onSurface;
 
   @override
-  Color? get deleteIconColor => _colors.onSecondaryContainer;
+  Color? get deleteIconColor => isEnabled
+    ? isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
@@ -347,7 +361,9 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? null
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.primary
       : _colors.onSurface,
     size: 18.0,
   );

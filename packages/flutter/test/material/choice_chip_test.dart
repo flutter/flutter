@@ -204,7 +204,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurfaceVariant.value,
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -339,7 +339,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurfaceVariant.value,
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -691,8 +691,11 @@ void main() {
   });
 
   testWidgets('ChoiceChip uses provided iconTheme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+
     Widget buildChip({ IconThemeData? iconTheme }) {
       return MaterialApp(
+        theme: theme,
         home: Material(
           child: ChoiceChip(
             iconTheme: iconTheme,
@@ -708,7 +711,7 @@ void main() {
     // Test default icon theme.
     await tester.pumpWidget(buildChip());
 
-    expect(getIconData(tester).color, ThemeData().iconTheme.color);
+    expect(getIconData(tester).color, theme.colorScheme.primary);
 
     // Test provided icon theme.
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));

@@ -263,7 +263,13 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.onSurfaceVariant
+      : _colors.onSurface,
+  );
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -287,10 +293,18 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  Color? get checkmarkColor => null;
+  Color? get checkmarkColor => isEnabled
+    ? isSelected
+      ? _colors.primary
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
-  Color? get deleteIconColor => _colors.onSecondaryContainer;
+  Color? get deleteIconColor => isEnabled
+    ? isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
   BorderSide? get side => !isSelected
@@ -302,7 +316,9 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? null
+      ? isSelected
+        ? _colors.primary
+        : _colors.onSurfaceVariant
       : _colors.onSurface,
     size: 18.0,
   );
