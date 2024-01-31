@@ -36,9 +36,10 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:native_assets_cli/native_assets_cli.dart'
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode, Target;
-import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    as native_assets_cli;
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/src/enums.dart';
@@ -2129,10 +2130,10 @@ flutter:
       vmServiceUris: Stream<Uri>.value(testUri),
     );
     final Completer<void> done = Completer<void>();
-    await runZonedGuarded(
+    unawaited(runZonedGuarded(
       () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
       (_, __) => done.complete(),
-    );
+    ));
     await done.future;
     expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
   }, overrides: <Type, Generator>{
@@ -2163,10 +2164,10 @@ flutter:
       vmServiceUris: Stream<Uri>.value(testUri),
     );
     final Completer<void>done = Completer<void>();
-    await runZonedGuarded(
+    unawaited(runZonedGuarded(
       () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
       (_, __) => done.complete(),
-    );
+    ));
     await done.future;
     expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInMessage'));
   }, overrides: <Type, Generator>{
@@ -2454,12 +2455,14 @@ flutter:
           targetPlatform: TargetPlatform.darwin,
           sdkNameAndVersion: 'Macos',
         );
+        final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
         final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
           ..testUri = testUri
           ..vmServiceHost = (() => fakeVmServiceHost)
           ..device = device
           .._devFS = devFS
-          ..targetPlatform = TargetPlatform.darwin;
+          ..targetPlatform = TargetPlatform.darwin
+          ..generator = residentCompiler;
 
         fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
           listViews,
@@ -2507,6 +2510,67 @@ flutter:
         expect(buildRunner.dryRunInvocations, 1);
         expect(buildRunner.hasPackageConfigInvocations, 1);
         expect(buildRunner.packagesWithNativeAssetsInvocations, 1);
+
+        expect(residentCompiler.recompileCalled, true);
+        expect(residentCompiler.receivedNativeAssetsYaml.toString(), endsWith('native_assets/macos/native_assets.yaml'));
+      }),
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+      });
+
+  testUsingContext(
+      'use the nativeAssetsYamlFile when provided',
+      () => testbed.run(() async {
+        final FakeDevice device = FakeDevice(
+          targetPlatform: TargetPlatform.darwin,
+          sdkNameAndVersion: 'Macos',
+        );
+        final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
+        final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+          ..testUri = testUri
+          ..vmServiceHost = (() => fakeVmServiceHost)
+          ..device = device
+          .._devFS = devFS
+          ..targetPlatform = TargetPlatform.darwin
+          ..generator = residentCompiler;
+
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+          listViews,
+          listViews,
+        ]);
+        globals.fs
+            .file(globals.fs.path.join('lib', 'main.dart'))
+            .createSync(recursive: true);
+        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
+        residentRunner = HotRunner(
+          <FlutterDevice>[
+            flutterDevice,
+          ],
+          stayResident: false,
+          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
+            BuildMode.debug,
+            '',
+            treeShakeIcons: false,
+            trackWidgetCreation: true,
+          )),
+          target: 'main.dart',
+          devtoolsHandler: createNoOpHandler,
+          buildRunner: buildRunner,
+          analytics: fakeAnalytics,
+          nativeAssetsYamlFile: 'foo.yaml',
+        );
+
+        final int? result = await residentRunner.run();
+        expect(result, 0);
+
+        expect(buildRunner.buildInvocations, 0);
+        expect(buildRunner.dryRunInvocations, 0);
+        expect(buildRunner.hasPackageConfigInvocations, 0);
+        expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
+
+        expect(residentCompiler.recompileCalled, true);
+        expect(residentCompiler.receivedNativeAssetsYaml, globals.fs.path.toUri('foo.yaml'));
       }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
@@ -2699,6 +2763,8 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   CompilerOutput? nextOutput;
   bool didSuppressErrors = false;
+  Uri? receivedNativeAssetsYaml;
+  bool recompileCalled = false;
 
   @override
   Future<CompilerOutput?> recompile(
@@ -2713,6 +2779,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
   }) async {
+    recompileCalled = true;
+    receivedNativeAssetsYaml = nativeAssetsYaml;
     didSuppressErrors = suppressErrors;
     return nextOutput ?? const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
@@ -2740,9 +2808,6 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     String sdkNameAndVersion = 'Android',
@@ -2892,10 +2957,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

@@ -26,5 +26,6 @@
   "menuDismissLabel": "Đóng trình đơn",
   "lookUpButtonLabel": "Tra cứu",
   "searchWebButtonLabel": "Tìm kiếm trên web",
-  "shareButtonLabel": "Chia sẻ..."
+  "shareButtonLabel": "Chia sẻ...",
+  "clearButtonLabel": "Clear"
 }

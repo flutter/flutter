@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';

@@ -10,7 +10,10 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SemanticsNodes overlapping in z', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes overlapping in z',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     // Cards are semantic boundaries that always own their own SemanticNode,
     // PhysicalModels merge their semantics information into parent.
     //
@@ -98,7 +101,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SemanticsNodes overlapping in z with switched children', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes overlapping in z with switched children', (WidgetTester tester) async {
     // Same as 'SemanticsNodes overlapping in z', but the order of children
     // is reversed
 
@@ -174,7 +177,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('single node thickness', (WidgetTester tester) async {
+  testWidgets('single node thickness', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const MaterialApp(
@@ -194,7 +197,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('force-merge', (WidgetTester tester) async {
+  testWidgets('force-merge', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -248,7 +251,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('force-merge with inversed children', (WidgetTester tester) async {
+  testWidgets('force-merge with inversed children', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(

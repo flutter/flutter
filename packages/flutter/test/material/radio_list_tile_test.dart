@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -24,7 +23,7 @@ Widget wrap({Widget? child}) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
+  testWidgets('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [RadioListTile], but they are
@@ -84,7 +83,7 @@ void main() {
     expect(generatedRadioListTiles[2].checked, equals(false));
   });
 
-  testWidgetsWithLeakTracking('RadioListTile simple control test', (WidgetTester tester) async {
+  testWidgets('RadioListTile simple control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final Key titleKey = UniqueKey();
     final List<int?> log = <int?>[];
@@ -156,7 +155,7 @@ void main() {
     expect(log, equals(<int>[1]));
   });
 
-  testWidgetsWithLeakTracking('RadioListTile control tests', (WidgetTester tester) async {
+  testWidgets('RadioListTile control tests', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
@@ -223,7 +222,7 @@ void main() {
     expect(log, equals(<dynamic>[1, '-', 2]));
   });
 
-  testWidgetsWithLeakTracking('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
+  testWidgets('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30311
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
@@ -275,7 +274,7 @@ void main() {
     expect(log, equals(<int>[0]));
   });
 
-  testWidgetsWithLeakTracking('Selected RadioListTile should trigger onChanged when toggleable', (WidgetTester tester) async {
+  testWidgets('Selected RadioListTile should trigger onChanged when toggleable', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
@@ -329,7 +328,7 @@ void main() {
     expect(log, equals(<int?>[0, null, 0]));
   });
 
-  testWidgetsWithLeakTracking('RadioListTile can be toggled when toggleable is set', (WidgetTester tester) async {
+  testWidgets('RadioListTile can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -384,7 +383,7 @@ void main() {
     expect(log, equals(<int>[1]));
   });
 
-  testWidgetsWithLeakTracking('RadioListTile semantics', (WidgetTester tester) async {
+  testWidgets('RadioListTile semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -533,7 +532,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('RadioListTile has semantic events', (WidgetTester tester) async {
+  testWidgets('RadioListTile has semantic events', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
@@ -572,7 +571,7 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgetsWithLeakTracking('RadioListTile can autofocus unless disabled.', (WidgetTester tester) async {
+  testWidgets('RadioListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -606,7 +605,7 @@ void main() {
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('RadioListTile contentPadding test', (WidgetTester tester) async {
+  testWidgets('RadioListTile contentPadding test', (WidgetTester tester) async {
     final Type radioType = const Radio<bool>(
       groupValue: true,
       value: true,
@@ -646,7 +645,7 @@ void main() {
     expect(paddingRect.right, titleRect.right + 15); //right padding
   });
 
-  testWidgetsWithLeakTracking('RadioListTile respects shape', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects shape', (WidgetTester tester) async {
     const ShapeBorder shapeBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
     );
@@ -666,7 +665,7 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
   });
 
-  testWidgetsWithLeakTracking('RadioListTile respects tileColor', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects tileColor', (WidgetTester tester) async {
     final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
@@ -686,7 +685,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
-  testWidgetsWithLeakTracking('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
     final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
@@ -707,7 +706,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgetsWithLeakTracking('RadioListTile selected item text Color', (WidgetTester tester) async {
+  testWidgets('RadioListTile selected item text Color', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/76906
 
     const Color activeColor = Color(0xff00ff00);
@@ -747,7 +746,7 @@ void main() {
     expect(textColor('title'), activeColor);
   });
 
-  testWidgetsWithLeakTracking('RadioListTile respects visualDensity', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects visualDensity', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -772,7 +771,7 @@ void main() {
     expect(box.size, equals(const Size(800, 56)));
   });
 
-  testWidgetsWithLeakTracking('RadioListTile respects focusNode', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects focusNode', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
       wrap(
@@ -795,7 +794,7 @@ void main() {
     expect(tileNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('RadioListTile onFocusChange callback', (WidgetTester tester) async {
+  testWidgets('RadioListTile onFocusChange callback', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'RadioListTile onFocusChange');
     addTearDown(node.dispose);
 
@@ -827,7 +826,7 @@ void main() {
     expect(node.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Radio changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('Radio changes mouse cursor when hovered', (WidgetTester tester) async {
     // Test Radio() constructor
     await tester.pumpWidget(
       wrap(child: MouseRegion(
@@ -878,7 +877,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('RadioListTile respects fillColor in enabled/disabled states', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects fillColor in enabled/disabled states', (WidgetTester tester) async {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
     const Color inactiveEnabledFillColor = Color(0xFF000003);
@@ -965,7 +964,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('RadioListTile respects fillColor in hovered state', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects fillColor in hovered state', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
@@ -1014,7 +1013,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - RadioListTile respects hoverColor', (WidgetTester tester) async {
+  testWidgets('Material3 - RadioListTile respects hoverColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     final Color? hoverColor = Colors.orange[500];
@@ -1080,7 +1079,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgets('Material3 - RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color fillColor = Color(0xFF000000);
@@ -1205,7 +1204,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('RadioListTile respects splashRadius', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects splashRadius', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
     Widget buildApp() {
@@ -1237,7 +1236,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Radio respects materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('Radio respects materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(child: RadioListTile<bool>(
         groupValue: true,
@@ -1261,7 +1260,7 @@ void main() {
     expect(tester.getSize(find.byType(Radio<bool>)), const Size(48.0, 48.0));
   });
 
-  testWidgetsWithLeakTracking('RadioListTile.adaptive shows the correct radio platform widget', (WidgetTester tester) async {
+  testWidgets('RadioListTile.adaptive shows the correct radio platform widget', (WidgetTester tester) async {
     Widget buildApp(TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -1303,7 +1302,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgetsWithLeakTracking('RadioListTile respects enableFeedback', (WidgetTester tester) async {
+    testWidgets('RadioListTile respects enableFeedback', (WidgetTester tester) async {
       const Key key = Key('test');
       Future<void> buildTest(bool enableFeedback) async {
         return tester.pumpWidget(
@@ -1341,7 +1340,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Material2 - RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+    testWidgets('Material2 - RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
       const Color fillColor = Color(0xFF000000);
@@ -1445,7 +1444,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Material2 - RadioListTile respects hoverColor', (WidgetTester tester) async {
+    testWidgets('Material2 - RadioListTile respects hoverColor', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       int? groupValue = 0;
       final Color? hoverColor = Colors.orange[500];

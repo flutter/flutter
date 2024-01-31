@@ -36,5 +36,6 @@
   "menuDismissLabel": "סגירת התפריט",
   "lookUpButtonLabel": "חיפוש",
   "searchWebButtonLabel": "חיפוש באינטרנט",
-  "shareButtonLabel": "שיתוף…"
+  "shareButtonLabel": "שיתוף…",
+  "clearButtonLabel": "Clear"
 }

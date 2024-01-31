@@ -58,6 +58,8 @@ class CopyFlutterBundle extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
+    final String? flavor = environment.defines[kFlavor];
+
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     environment.outputDir.createSync(recursive: true);
 
@@ -77,7 +79,7 @@ class CopyFlutterBundle extends Target {
       environment.outputDir,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
-      shaderTarget: ShaderTarget.sksl,
+      flavor: flavor,
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -203,6 +205,7 @@ class KernelSnapshot extends Target {
     switch (targetPlatform) {
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
       case TargetPlatform.android:
@@ -230,7 +233,7 @@ class KernelSnapshot extends Target {
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
-      TargetPlatform.windows_x64 => 'windows',
+      TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
     };
 

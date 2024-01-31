@@ -34,8 +34,8 @@
     - any-glob-to-any-file:
       - packages/flutter_driver/**/*
       - packages/flutter_goldens/**/*
-      - packages/flutter_goldens_client/**/*
       - packages/flutter_test/**/*
+      - packages/integration_test/**/*
 
 'a: text input':
   - changed-files:
@@ -106,7 +106,7 @@ framework:
       - packages/flutter/**/*
       - packages/flutter_driver/**/*
       - packages/flutter_goldens/**/*
-      - packages/flutter_goldens_client/**/*
+      - packages/flutter_localizations/**/*
       - packages/flutter_test/**/*
       - packages/integration_test/**/*
       - examples/api/**/*
@@ -120,6 +120,11 @@ platform-ios:
   - changed-files:
     - any-glob-to-any-file:
       - packages/flutter_tools/lib/src/ios/**/*
+
+platform-web:
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_web_plugins/**/*
 
 'customer: gallery':
   - changed-files:

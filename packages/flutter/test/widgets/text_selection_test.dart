@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show ValueListenable, defaultTargetPlatform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -108,7 +108,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('a series of taps all call onTaps', (WidgetTester tester) async {
+  testWidgets('a series of taps all call onTaps', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 150));
@@ -124,7 +124,7 @@ void main() {
     expect(tapCount, 6);
   });
 
-  testWidgetsWithLeakTracking('in a series of rapid taps, onTapDown, onDoubleTapDown, and onTripleTapDown alternate', (WidgetTester tester) async {
+  testWidgets('in a series of rapid taps, onTapDown, onDoubleTapDown, and onTripleTapDown alternate', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
@@ -160,7 +160,7 @@ void main() {
     expect(tapCount, 7);
   });
 
-  testWidgetsWithLeakTracking('quick tap-tap-hold is a double tap down', (WidgetTester tester) async {
+  testWidgets('quick tap-tap-hold is a double tap down', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
@@ -186,7 +186,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgetsWithLeakTracking('a very quick swipe is ignored', (WidgetTester tester) async {
+  testWidgets('a very quick swipe is ignored', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 20));
@@ -212,7 +212,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgetsWithLeakTracking('a slower swipe has a tap down and a canceled tap', (WidgetTester tester) async {
+  testWidgets('a slower swipe has a tap down and a canceled tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 120));
@@ -225,7 +225,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgetsWithLeakTracking('a force press initiates a force press', (WidgetTester tester) async {
+  testWidgets('a force press initiates a force press', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -307,7 +307,7 @@ void main() {
     expect(forcePressStartCount, 4);
   });
 
-  testWidgetsWithLeakTracking('a tap and then force press initiates a force press and not a double tap', (WidgetTester tester) async {
+  testWidgets('a tap and then force press initiates a force press and not a double tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -360,7 +360,7 @@ void main() {
     expect(doubleTapDownCount, 0);
   });
 
-  testWidgetsWithLeakTracking('a long press from a touch device is recognized as a long single tap', (WidgetTester tester) async {
+  testWidgets('a long press from a touch device is recognized as a long single tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -377,7 +377,7 @@ void main() {
     expect(singleLongTapStartCount, 1);
   });
 
-  testWidgetsWithLeakTracking('a long press from a mouse is just a tap', (WidgetTester tester) async {
+  testWidgets('a long press from a mouse is just a tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -395,7 +395,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgetsWithLeakTracking('a touch drag is recognized for text selection', (WidgetTester tester) async {
+  testWidgets('a touch drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -417,7 +417,7 @@ void main() {
     expect(dragEndCount, 1);
   });
 
-  testWidgetsWithLeakTracking('a mouse drag is recognized for text selection', (WidgetTester tester) async {
+  testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -442,7 +442,7 @@ void main() {
     expect(dragEndCount, 1);
   });
 
-  testWidgetsWithLeakTracking('a slow mouse drag is still recognized for text selection', (WidgetTester tester) async {
+  testWidgets('a slow mouse drag is still recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -467,7 +467,7 @@ void main() {
     expect(dragEndCount, 1);
   });
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder long press on Apple Platforms - focused renderEditable', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on Apple Platforms - focused renderEditable', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
@@ -486,7 +486,7 @@ void main() {
     expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder long press on iOS - renderEditable not focused', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on iOS - renderEditable not focused', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
@@ -504,7 +504,7 @@ void main() {
     expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
@@ -521,7 +521,7 @@ void main() {
     expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
+  testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80119
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
@@ -566,7 +566,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking('TextSelectionGestureDetectorBuilder right click non-Apple platforms', (WidgetTester tester) async {
+  testWidgets('TextSelectionGestureDetectorBuilder right click non-Apple platforms', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80119
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
@@ -616,7 +616,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
   );
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder tap', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
@@ -643,7 +643,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder toggles toolbar on single tap on previous selection iOS', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder toggles toolbar on single tap on previous selection iOS', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
@@ -675,7 +675,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on Android', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on Android', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
@@ -695,7 +695,7 @@ void main() {
 
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled and text selection toolbar on additonal taps', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled and text selection toolbar on additional taps', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
@@ -736,7 +736,7 @@ void main() {
     expect(state.toggleToolbarCalled, isTrue);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
@@ -756,7 +756,7 @@ void main() {
     expect(renderEditable.lastCause, SelectionChangedCause.doubleTap);
   });
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder forcePress enabled', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder forcePress enabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
@@ -783,7 +783,7 @@ void main() {
     expect(renderEditable.selectWordsInRangeCalled, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Mouse drag does not show handles nor toolbar', (WidgetTester tester) async {
+  testWidgets('Mouse drag does not show handles nor toolbar', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/69001
     await tester.pumpWidget(
       const MaterialApp(
@@ -807,7 +807,7 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Mouse drag selects and cannot drag cursor', (WidgetTester tester) async {
+  testWidgets('Mouse drag selects and cannot drag cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
     final TextEditingController controller = TextEditingController(
       text: 'I love flutter!',
@@ -873,7 +873,7 @@ void main() {
     expect(controller.selection.extentOffset, 10);
   });
 
-  testWidgetsWithLeakTracking('Touch drag moves the cursor', (WidgetTester tester) async {
+  testWidgets('Touch drag moves the cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
     final TextEditingController controller = TextEditingController(
       text: 'I love flutter!',
@@ -932,7 +932,7 @@ void main() {
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgetsWithLeakTracking('Stylus drag moves the cursor', (WidgetTester tester) async {
+  testWidgets('Stylus drag moves the cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
     final TextEditingController controller = TextEditingController(
       text: 'I love flutter!',
@@ -991,7 +991,7 @@ void main() {
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgetsWithLeakTracking('Drag of unknown type moves the cursor', (WidgetTester tester) async {
+  testWidgets('Drag of unknown type moves the cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
     final TextEditingController controller = TextEditingController(
       text: 'I love flutter!',
@@ -1050,7 +1050,7 @@ void main() {
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
 
@@ -1091,7 +1091,7 @@ void main() {
     expect(renderEditable.selectPositionAtTo, const Offset(300.0, 400.0));
   });
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder selection disabled', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder selection disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, selectionEnabled: false);
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
@@ -1107,7 +1107,7 @@ void main() {
     expect(renderEditable.selectWordsInRangeCalled, isFalse);
   });
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder mouse drag disabled', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder mouse drag disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, selectionEnabled: false);
     final TestGesture gesture = await tester.startGesture(
       Offset.zero,
@@ -1123,7 +1123,7 @@ void main() {
     expect(renderEditable.selectPositionAtCalled, isFalse);
   });
 
-  testWidgetsWithLeakTracking('test TextSelectionGestureDetectorBuilder forcePress disabled', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder forcePress disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, forcePressEnabled: false);
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
@@ -1145,7 +1145,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/37032.
-  testWidgetsWithLeakTracking("selection handle's GestureDetector should not cover the entire screen", (WidgetTester tester) async {
+  testWidgets("selection handle's GestureDetector should not cover the entire screen", (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'a');
     addTearDown(controller.dispose);
 
@@ -1242,7 +1242,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('dispatches memory events', (WidgetTester tester) async {
+    testWidgets('dispatches memory events', (WidgetTester tester) async {
       await expectLater(
         await memoryEvents(
           () async {
@@ -1255,7 +1255,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('can show and hide handles', (WidgetTester tester) async {
+    testWidgets('can show and hide handles', (WidgetTester tester) async {
       final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
@@ -1303,7 +1303,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('only paints one collapsed handle', (WidgetTester tester) async {
+    testWidgets('only paints one collapsed handle', (WidgetTester tester) async {
       final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
@@ -1326,7 +1326,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('can change handle parameter', (WidgetTester tester) async {
+    testWidgets('can change handle parameter', (WidgetTester tester) async {
       final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
@@ -1363,7 +1363,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('can trigger selection handle onTap', (WidgetTester tester) async {
+    testWidgets('can trigger selection handle onTap', (WidgetTester tester) async {
       bool selectionHandleTapped = false;
       void handleTapped() => selectionHandleTapped = true;
       final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
@@ -1398,7 +1398,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('can trigger selection handle drag', (WidgetTester tester) async {
+    testWidgets('can trigger selection handle drag', (WidgetTester tester) async {
       DragStartDetails? startDragStartDetails;
       DragUpdateDetails? startDragUpdateDetails;
       DragEndDetails? startDragEndDetails;
@@ -1472,7 +1472,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('can show magnifier when no handles exist', (WidgetTester tester) async {
+    testWidgets('can show magnifier when no handles exist', (WidgetTester tester) async {
       final GlobalKey magnifierKey = GlobalKey();
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
@@ -1555,7 +1555,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Mouse edge scrolling works in an outer scrollable', (WidgetTester tester) async {
+  testWidgets('Mouse edge scrolling works in an outer scrollable', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102484
     final TextEditingController controller = TextEditingController(
       text: 'I love flutter!\n' * 8,
@@ -1636,7 +1636,7 @@ void main() {
     expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
   });
 
-  testWidgetsWithLeakTracking('Mouse edge scrolling works with both an outer scrollable and scrolling in the EditableText', (WidgetTester tester) async {
+  testWidgets('Mouse edge scrolling works with both an outer scrollable and scrolling in the EditableText', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102484
     final TextEditingController controller = TextEditingController(
       text: 'I love flutter!\n' * 8,
@@ -1768,7 +1768,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('dispatches memory events', (WidgetTester tester) async {
+    testWidgets('dispatches memory events', (WidgetTester tester) async {
       await expectLater(
         await memoryEvents(
           () async {
@@ -1781,6 +1781,51 @@ void main() {
       );
     });
   });
+
+  testWidgets('Context menus', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'You make wine from sour grapes',
+    );
+    addTearDown(controller.dispose);
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: focusNode,
+            backgroundCursorColor: Colors.white,
+            cursorColor: Colors.white,
+            style: const TextStyle(),
+            contextMenuBuilder: (
+              BuildContext context,
+              EditableTextState editableTextState,
+            ) {
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final Offset position = textOffsetToPosition(tester, 0);
+    expect(find.byType(Placeholder), findsNothing);
+    await tester.tapAt(position, buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    expect(find.byType(Placeholder), findsOneWidget);
+  }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {

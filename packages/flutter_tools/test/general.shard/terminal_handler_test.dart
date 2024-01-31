@@ -1322,9 +1322,6 @@ class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandle
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   bool isSupported() => true;
@@ -1478,10 +1475,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

@@ -29,7 +29,7 @@ BundleBuilder _defaultBundleBuilder() {
   return BundleBuilder();
 }
 
-class PreviewDeviceDiscovery extends DeviceDiscovery {
+class PreviewDeviceDiscovery extends PollingDeviceDiscovery {
   PreviewDeviceDiscovery({
     required Platform platform,
     required Artifacts artifacts,
@@ -42,7 +42,8 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
        _processManager = processManager,
        _fileSystem = fileSystem,
        _platform = platform,
-       _features = featureFlags;
+       _features = featureFlags,
+       super('Flutter preview device');
 
   final Platform _platform;
   final Artifacts _artifacts;
@@ -61,9 +62,8 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   List<String> get wellKnownIds => <String>['preview'];
 
   @override
-  Future<List<Device>> devices({
+  Future<List<Device>> pollingGetDevices({
     Duration? timeout,
-    DeviceDiscoveryFilter? filter,
   }) async {
     final File previewBinary = _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
     if (!previewBinary.existsSync()) {
@@ -76,16 +76,8 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
       processManager: _processManager,
       previewBinary: previewBinary,
     );
-    final bool matchesRequirements;
-    if (!_features.isPreviewDeviceEnabled) {
-      matchesRequirements = false;
-    } else if (filter == null) {
-      matchesRequirements = true;
-    } else {
-      matchesRequirements = await filter.matchesRequirements(device);
-    }
     return <Device>[
-      if (matchesRequirements)
+      if (_features.isPreviewDeviceEnabled)
         device,
     ];
   }
@@ -114,7 +106,7 @@ class PreviewDevice extends Device {
        _fileSystem = fileSystem,
        _bundleBuilderFactory = builderFactory,
        _artifacts = artifacts,
-       super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.custom);
+       super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.windowsPreview);
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -161,7 +153,7 @@ class PreviewDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  String get name => 'preview';
+  String get name => 'Preview';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();

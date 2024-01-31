@@ -12,12 +12,20 @@ void main() {
     await pumpsUseCase(tester, DialogUseCase());
     expect(find.text('Show Dialog'), findsOneWidget);
 
-    await tester.tap(find.text('Show Dialog'));
-    await tester.pumpAndSettle();
-    expect(find.text('This is a typical dialog.'), findsOneWidget);
+    Future<void> invokeDialog() async {
+      await tester.tap(find.text('Show Dialog'));
+      await tester.pumpAndSettle();
+      expect(find.text('This is a typical dialog.'), findsOneWidget);
+    }
 
-    await tester.tap(find.text('Close'));
+    await invokeDialog();
+    await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
-    expect(find.text('Show Dialog'), findsOneWidget);
+    expect(find.text('This is a typical dialog.'), findsNothing);
+
+    await invokeDialog();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('This is a typical dialog.'), findsNothing);
   });
 }

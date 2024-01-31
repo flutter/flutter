@@ -17,19 +17,7 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../device.dart';
 import '../build_system.dart';
-
-/// The output shader format that should be used by the [ShaderCompiler].
-enum ShaderTarget {
-  impellerAndroid('--runtime-stage-gles'),
-  impelleriOS('--runtime-stage-metal'),
-  sksl('--sksl');
-
-  const ShaderTarget(this.target);
-
-  final String target;
-}
 
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
 class DevelopmentShaderCompiler {
@@ -46,40 +34,16 @@ class DevelopmentShaderCompiler {
   final Pool _compilationPool = Pool(4);
   final math.Random _random;
 
-  late ShaderTarget _shaderTarget;
+  late TargetPlatform _targetPlatform;
   bool _debugConfigured = false;
-  bool _jsonMode = false;
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform? platform, { required ImpellerStatus impellerStatus }) {
-    switch (platform) {
-      case TargetPlatform.ios:
-        _shaderTarget = ShaderTarget.impelleriOS;
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android:
-        _shaderTarget = impellerStatus == ImpellerStatus.enabled
-          ? ShaderTarget.impellerAndroid
-          : ShaderTarget.sksl;
-      case TargetPlatform.darwin:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.tester:
-        assert(impellerStatus != ImpellerStatus.enabled);
-        _shaderTarget = ShaderTarget.sksl;
-      case TargetPlatform.web_javascript:
-        assert(impellerStatus != ImpellerStatus.enabled);
-        _shaderTarget = ShaderTarget.sksl;
-        _jsonMode = true;
-      case null:
-        return;
+  void configureCompiler(TargetPlatform? platform) {
+    if (platform == null) {
+      return;
     }
+    _targetPlatform = platform;
     _debugConfigured = true;
   }
 
@@ -104,9 +68,8 @@ class DevelopmentShaderCompiler {
       final bool success = await _shaderCompiler.compileShader(
         input: inputFile,
         outputPath: output.path,
-        target: _shaderTarget,
+        targetPlatform: _targetPlatform,
         fatal: false,
-        json: _jsonMode,
       );
       if (!success) {
         return null;
@@ -141,6 +104,34 @@ class ShaderCompiler {
   final FileSystem _fs;
   final Artifacts _artifacts;
 
+  List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
+    switch (targetPlatform) {
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
+        return <String>['--sksl', '--runtime-stage-gles', '--runtime-stage-vulkan'];
+
+      case TargetPlatform.ios:
+      case TargetPlatform.darwin:
+        return <String>['--sksl', '--runtime-stage-metal'];
+
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.tester:
+        return <String>['--sksl', '--runtime-stage-vulkan'];
+
+      case TargetPlatform.web_javascript:
+        return <String>['--sksl'];
+
+    }
+  }
+
   /// The [Source] inputs that targets using this should depend on.
   ///
   /// See [Target.inputs].
@@ -160,9 +151,8 @@ class ShaderCompiler {
   Future<bool> compileShader({
     required File input,
     required String outputPath,
-    required ShaderTarget target,
+    required TargetPlatform targetPlatform,
     bool fatal = true,
-    required bool json,
   }) async {
     final File impellerc = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.impellerc),
@@ -177,9 +167,9 @@ class ShaderCompiler {
     final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
     final List<String> cmd = <String>[
       impellerc.path,
-      target.target,
+      ..._shaderTargetsFromTargetPlatform(targetPlatform),
       '--iplr',
-      if (json)
+      if (targetPlatform == TargetPlatform.web_javascript)
         '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',

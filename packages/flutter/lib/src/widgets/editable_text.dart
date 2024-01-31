@@ -37,6 +37,7 @@ import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
+import 'size_changed_layout_notifier.dart';
 import 'spell_check.dart';
 import 'tap_region.dart';
 import 'text.dart';
@@ -59,7 +60,7 @@ export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionCh
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
-typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
@@ -218,9 +219,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   ///
   /// This property can be set from a listener added to this
-  /// [TextEditingController]; however, one should not also set [selection]
+  /// [TextEditingController]; **however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
-  /// change the controller's [value].
+  /// change the controller's [value].**
   set text(String newText) {
     value = value.copyWith(
       text: newText,
@@ -285,16 +286,13 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
   ///
-  /// If the new selection is of non-zero length, or is outside the composing
-  /// range, the composing range is cleared.
+  /// If the new selection is outside the composing range, the composing range is
+  /// cleared.
   set selection(TextSelection newSelection) {
-    if (!isSelectionWithinTextBounds(newSelection)) {
+    if (!_isSelectionWithinTextBounds(newSelection)) {
       throw FlutterError('invalid text selection: $newSelection');
     }
-    final TextRange newComposing =
-        newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
-            ? value.composing
-            : TextRange.empty;
+    final TextRange newComposing = _isSelectionWithinComposingRange(newSelection) ? value.composing : TextRange.empty;
     value = value.copyWith(selection: newSelection, composing: newComposing);
   }
 
@@ -326,7 +324,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   }
 
   /// Check that the [selection] is inside of the bounds of [text].
-  bool isSelectionWithinTextBounds(TextSelection selection) {
+  bool _isSelectionWithinTextBounds(TextSelection selection) {
     return selection.start <= text.length && selection.end <= text.length;
   }
 
@@ -1096,6 +1094,11 @@ class EditableText extends StatefulWidget {
   /// while rendering the floating cursor.
   ///
   /// Typically this would be set to [CupertinoColors.inactiveGray].
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}
@@ -2199,6 +2202,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool get _spellCheckResultsReceived => spellCheckEnabled && spellCheckResults != null && spellCheckResults!.suggestionSpans.isNotEmpty;
 
+  /// The text processing service used to retrieve the native text processing actions.
+  final ProcessTextService _processTextService = DefaultProcessTextService();
+
+  /// The list of native text processing actions provided by the engine.
+  final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
+
   /// Whether to create an input connection with the platform for text editing
   /// or not.
   ///
@@ -2410,14 +2419,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.update();
   }
 
+  bool get _allowPaste {
+    return !widget.readOnly && textEditingValue.selection.isValid;
+  }
+
   /// Paste text from [Clipboard].
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
-    if (widget.readOnly) {
-      return;
-    }
-    final TextSelection selection = textEditingValue.selection;
-    if (!selection.isValid) {
+    if (!_allowPaste) {
       return;
     }
     // Snapshot the input before using `await`.
@@ -2426,16 +2435,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (data == null) {
       return;
     }
+    _pasteText(cause, data.text!);
+  }
+
+  void _pasteText(SelectionChangedCause cause, String text) {
+    if (!_allowPaste) {
+      return;
+    }
 
     // After the paste, the cursor should be collapsed and located after the
     // pasted content.
+    final TextSelection selection = textEditingValue.selection;
     final int lastSelectionIndex = math.max(selection.baseOffset, selection.extentOffset);
     final TextEditingValue collapsedTextEditingValue = textEditingValue.copyWith(
       selection: TextSelection.collapsed(offset: lastSelectionIndex),
     );
 
     userUpdateTextEditingValue(
-      collapsedTextEditingValue.replaced(selection, data.text!),
+      collapsedTextEditingValue.replaced(selection, text),
       cause,
     );
     if (cause == SelectionChangedCause.toolbar) {
@@ -2789,7 +2806,35 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onLiveTextInput: liveTextInputEnabled
           ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
           : null,
-    );
+    )..addAll(_textProcessingActionButtonItems);
+  }
+
+  List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final TextSelection selection = textEditingValue.selection;
+    if (widget.obscureText || !selection.isValid || selection.isCollapsed) {
+      return buttonItems;
+    }
+
+    for (final ProcessTextAction action in _processTextActions) {
+      buttonItems.add(ContextMenuButtonItem(
+        label: action.label,
+        onPressed: () async {
+          final String selectedText = selection.textInside(textEditingValue.text);
+          if (selectedText.isNotEmpty) {
+            final String? processedText = await _processTextService.processTextAction(action.id, selectedText, widget.readOnly);
+            // If an activity does not return a modified version, just hide the toolbar.
+            // Otherwise use the result to replace the selected text.
+            if (processedText != null && _allowPaste) {
+              _pasteText(SelectionChangedCause.toolbar, processedText);
+            } else {
+              hideToolbar();
+            }
+          }
+        },
+      ));
+    }
+    return buttonItems;
   }
 
   // State lifecycle:
@@ -2804,6 +2849,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.addListener(_onEditableScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+    _initProcessTextActions();
+  }
+
+  /// Query the engine to initialize the list of text processing actions to show
+  /// in the text selection toolbar.
+  Future<void> _initProcessTextActions() async {
+    _processTextActions.clear();
+    _processTextActions.addAll(await _processTextService.queryTextActions());
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -3112,7 +3165,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
-  Rect? _startCaretRect;
+  Offset? _startCaretCenter;
 
   // The most recent text position as determined by the location of the floating
   // cursor.
@@ -3147,15 +3200,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // we cache the position.
         _pointOffsetOrigin = point.offset;
 
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
-        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        final Offset startCaretCenter;
+        final TextPosition currentTextPosition;
+        final bool shouldResetOrigin;
+        // Only non-null when starting a floating cursor via long press.
+        if (point.startLocation != null) {
+          shouldResetOrigin = false;
+          (startCaretCenter, currentTextPosition) = point.startLocation!;
+        } else {
+          shouldResetOrigin = true;
+          currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
+          startCaretCenter = renderEditable.getLocalRectForCaret(currentTextPosition).center;
+        }
 
-        _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
+        _startCaretCenter = startCaretCenter;
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(_startCaretCenter! - _floatingCursorOffset, shouldResetOrigin: shouldResetOrigin);
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.Update:
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
-        final Offset rawCursorOffset = _startCaretRect!.center + centeredPoint - _floatingCursorOffset;
+        final Offset rawCursorOffset = _startCaretCenter! + centeredPoint - _floatingCursorOffset;
 
         _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
         _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
@@ -3195,7 +3259,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
         _handleSelectionChanged(TextSelection.fromPosition(_lastTextPosition!), SelectionChangedCause.forcePress);
       }
-      _startCaretRect = null;
+      _startCaretCenter = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
       _lastBoundedOffset = null;
@@ -3589,7 +3653,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
-    if (!widget.controller.isSelectionWithinTextBounds(selection)) {
+    if (!widget.controller._isSelectionWithinTextBounds(selection)) {
       return;
     }
 
@@ -4257,7 +4321,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Toggles the visibility of the toolbar.
   void toggleToolbar([bool hideHandles = true]) {
     final TextSelectionOverlay selectionOverlay = _selectionOverlay ??= _createSelectionOverlay();
-
     if (selectionOverlay.toolbarIsVisible) {
       hideToolbar(hideHandles);
     } else {
@@ -4692,6 +4755,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateSelection(UpdateSelectionIntent intent) {
+    assert(
+      intent.newSelection.start <= intent.currentTextEditingValue.text.length,
+      'invalid selection: ${intent.newSelection}: it must not exceed the current text length ${intent.currentTextEditingValue.text.length}',
+    );
+    assert(
+      intent.newSelection.end <= intent.currentTextEditingValue.text.length,
+      'invalid selection: ${intent.newSelection}: it must not exceed the current text length ${intent.currentTextEditingValue.text.length}',
+    );
+
     bringIntoView(intent.newSelection.extent);
     userUpdateTextEditingValue(
       intent.currentTextEditingValue.copyWith(selection: intent.newSelection),
@@ -4880,48 +4952,50 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             _openInputConnection();
                             _updateSelectionRects(force: true);
                           },
-                          child: _Editable(
-                            key: _editableKey,
-                            startHandleLayerLink: _startHandleLayerLink,
-                            endHandleLayerLink: _endHandleLayerLink,
-                            inlineSpan: buildTextSpan(),
-                            value: _value,
-                            cursorColor: _cursorColor,
-                            backgroundCursorColor: widget.backgroundCursorColor,
-                            showCursor: _cursorVisibilityNotifier,
-                            forceLine: widget.forceLine,
-                            readOnly: widget.readOnly,
-                            hasFocus: _hasFocus,
-                            maxLines: widget.maxLines,
-                            minLines: widget.minLines,
-                            expands: widget.expands,
-                            strutStyle: widget.strutStyle,
-                            selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                : widget.selectionColor,
-                            textScaler: effectiveTextScaler,
-                            textAlign: widget.textAlign,
-                            textDirection: _textDirection,
-                            locale: widget.locale,
-                            textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                            textWidthBasis: widget.textWidthBasis,
-                            obscuringCharacter: widget.obscuringCharacter,
-                            obscureText: widget.obscureText,
-                            offset: offset,
-                            rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                            cursorWidth: widget.cursorWidth,
-                            cursorHeight: widget.cursorHeight,
-                            cursorRadius: widget.cursorRadius,
-                            cursorOffset: widget.cursorOffset ?? Offset.zero,
-                            selectionHeightStyle: widget.selectionHeightStyle,
-                            selectionWidthStyle: widget.selectionWidthStyle,
-                            paintCursorAboveText: widget.paintCursorAboveText,
-                            enableInteractiveSelection: widget._userSelectionEnabled,
-                            textSelectionDelegate: this,
-                            devicePixelRatio: _devicePixelRatio,
-                            promptRectRange: _currentPromptRectRange,
-                            promptRectColor: widget.autocorrectionTextRectColor,
-                            clipBehavior: widget.clipBehavior,
+                          child: SizeChangedLayoutNotifier(
+                            child: _Editable(
+                              key: _editableKey,
+                              startHandleLayerLink: _startHandleLayerLink,
+                              endHandleLayerLink: _endHandleLayerLink,
+                              inlineSpan: buildTextSpan(),
+                              value: _value,
+                              cursorColor: _cursorColor,
+                              backgroundCursorColor: widget.backgroundCursorColor,
+                              showCursor: _cursorVisibilityNotifier,
+                              forceLine: widget.forceLine,
+                              readOnly: widget.readOnly,
+                              hasFocus: _hasFocus,
+                              maxLines: widget.maxLines,
+                              minLines: widget.minLines,
+                              expands: widget.expands,
+                              strutStyle: widget.strutStyle,
+                              selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                  ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                  : widget.selectionColor,
+                              textScaler: effectiveTextScaler,
+                              textAlign: widget.textAlign,
+                              textDirection: _textDirection,
+                              locale: widget.locale,
+                              textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                              textWidthBasis: widget.textWidthBasis,
+                              obscuringCharacter: widget.obscuringCharacter,
+                              obscureText: widget.obscureText,
+                              offset: offset,
+                              rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                              cursorWidth: widget.cursorWidth,
+                              cursorHeight: widget.cursorHeight,
+                              cursorRadius: widget.cursorRadius,
+                              cursorOffset: widget.cursorOffset ?? Offset.zero,
+                              selectionHeightStyle: widget.selectionHeightStyle,
+                              selectionWidthStyle: widget.selectionWidthStyle,
+                              paintCursorAboveText: widget.paintCursorAboveText,
+                              enableInteractiveSelection: widget._userSelectionEnabled,
+                              textSelectionDelegate: this,
+                              devicePixelRatio: _devicePixelRatio,
+                              promptRectRange: _currentPromptRectRange,
+                              promptRectColor: widget.autocorrectionTextRectColor,
+                              clipBehavior: widget.clipBehavior,
+                            ),
                           ),
                         ),
                       ),
@@ -5331,11 +5405,7 @@ class _ScribblePlaceholder extends WidgetSpan {
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
-    builder.addPlaceholder(
-      size.width * textScaler.textScaleFactor,
-      size.height * textScaler.textScaleFactor,
-      alignment,
-    );
+    builder.addPlaceholder(size.width, size.height, alignment);
     if (hasStyle) {
       builder.pop();
     }
@@ -5595,7 +5665,7 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
       : intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
     final TextPosition newExtent = shouldMove
       ? currentRun.current
-      : intent.forward ? TextPosition(offset: state._value.text.length) : const TextPosition(offset: 0);
+      : intent.forward ? TextPosition(offset: value.text.length) : const TextPosition(offset: 0);
     final TextSelection newSelection = collapseSelection
       ? TextSelection.fromPosition(newExtent)
       : value.selection.extendTo(newExtent);
