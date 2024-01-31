@@ -34,6 +34,13 @@ import 'theme_data.dart';
 /// the alignments are reversed.
 ///
 /// Defaults to [IconAlignment.start].
+///
+/// {@tool dartpad}
+/// This sample demonstrates the usage of iconAlignment.
+///
+/// ** See code in examples/api/lib/material/button_style_button/button_style_button.icon_alignment.0.dart **
+/// {@end-tool}
+///
 /// {@endtemplate}
 enum IconAlignment {
   /// The icon is placed at the start of the button.
