@@ -37,6 +37,7 @@ import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
+import 'size_changed_layout_notifier.dart';
 import 'spell_check.dart';
 import 'tap_region.dart';
 import 'text.dart';
@@ -1093,6 +1094,11 @@ class EditableText extends StatefulWidget {
   /// while rendering the floating cursor.
   ///
   /// Typically this would be set to [CupertinoColors.inactiveGray].
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}
@@ -4317,7 +4323,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Toggles the visibility of the toolbar.
   void toggleToolbar([bool hideHandles = true]) {
     final TextSelectionOverlay selectionOverlay = _selectionOverlay ??= _createSelectionOverlay();
-
     if (selectionOverlay.toolbarIsVisible) {
       hideToolbar(hideHandles);
     } else {
@@ -4949,48 +4954,50 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             _openInputConnection();
                             _updateSelectionRects(force: true);
                           },
-                          child: _Editable(
-                            key: _editableKey,
-                            startHandleLayerLink: _startHandleLayerLink,
-                            endHandleLayerLink: _endHandleLayerLink,
-                            inlineSpan: buildTextSpan(),
-                            value: _value,
-                            cursorColor: _cursorColor,
-                            backgroundCursorColor: widget.backgroundCursorColor,
-                            showCursor: _cursorVisibilityNotifier,
-                            forceLine: widget.forceLine,
-                            readOnly: widget.readOnly,
-                            hasFocus: _hasFocus,
-                            maxLines: widget.maxLines,
-                            minLines: widget.minLines,
-                            expands: widget.expands,
-                            strutStyle: widget.strutStyle,
-                            selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                : widget.selectionColor,
-                            textScaler: effectiveTextScaler,
-                            textAlign: widget.textAlign,
-                            textDirection: _textDirection,
-                            locale: widget.locale,
-                            textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                            textWidthBasis: widget.textWidthBasis,
-                            obscuringCharacter: widget.obscuringCharacter,
-                            obscureText: widget.obscureText,
-                            offset: offset,
-                            rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                            cursorWidth: widget.cursorWidth,
-                            cursorHeight: widget.cursorHeight,
-                            cursorRadius: widget.cursorRadius,
-                            cursorOffset: widget.cursorOffset ?? Offset.zero,
-                            selectionHeightStyle: widget.selectionHeightStyle,
-                            selectionWidthStyle: widget.selectionWidthStyle,
-                            paintCursorAboveText: widget.paintCursorAboveText,
-                            enableInteractiveSelection: widget._userSelectionEnabled,
-                            textSelectionDelegate: this,
-                            devicePixelRatio: _devicePixelRatio,
-                            promptRectRange: _currentPromptRectRange,
-                            promptRectColor: widget.autocorrectionTextRectColor,
-                            clipBehavior: widget.clipBehavior,
+                          child: SizeChangedLayoutNotifier(
+                            child: _Editable(
+                              key: _editableKey,
+                              startHandleLayerLink: _startHandleLayerLink,
+                              endHandleLayerLink: _endHandleLayerLink,
+                              inlineSpan: buildTextSpan(),
+                              value: _value,
+                              cursorColor: _cursorColor,
+                              backgroundCursorColor: widget.backgroundCursorColor,
+                              showCursor: _cursorVisibilityNotifier,
+                              forceLine: widget.forceLine,
+                              readOnly: widget.readOnly,
+                              hasFocus: _hasFocus,
+                              maxLines: widget.maxLines,
+                              minLines: widget.minLines,
+                              expands: widget.expands,
+                              strutStyle: widget.strutStyle,
+                              selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                  ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                  : widget.selectionColor,
+                              textScaler: effectiveTextScaler,
+                              textAlign: widget.textAlign,
+                              textDirection: _textDirection,
+                              locale: widget.locale,
+                              textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                              textWidthBasis: widget.textWidthBasis,
+                              obscuringCharacter: widget.obscuringCharacter,
+                              obscureText: widget.obscureText,
+                              offset: offset,
+                              rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                              cursorWidth: widget.cursorWidth,
+                              cursorHeight: widget.cursorHeight,
+                              cursorRadius: widget.cursorRadius,
+                              cursorOffset: widget.cursorOffset ?? Offset.zero,
+                              selectionHeightStyle: widget.selectionHeightStyle,
+                              selectionWidthStyle: widget.selectionWidthStyle,
+                              paintCursorAboveText: widget.paintCursorAboveText,
+                              enableInteractiveSelection: widget._userSelectionEnabled,
+                              textSelectionDelegate: this,
+                              devicePixelRatio: _devicePixelRatio,
+                              promptRectRange: _currentPromptRectRange,
+                              promptRectColor: widget.autocorrectionTextRectColor,
+                              clipBehavior: widget.clipBehavior,
+                            ),
                           ),
                         ),
                       ),
@@ -5400,11 +5407,7 @@ class _ScribblePlaceholder extends WidgetSpan {
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
-    builder.addPlaceholder(
-      size.width * textScaler.textScaleFactor,
-      size.height * textScaler.textScaleFactor,
-      alignment,
-    );
+    builder.addPlaceholder(size.width, size.height, alignment);
     if (hasStyle) {
       builder.pop();
     }

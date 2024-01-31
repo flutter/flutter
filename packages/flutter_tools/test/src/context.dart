@@ -125,9 +125,16 @@ void testUsingContext(
           Analytics: () => NoOpAnalytics(),
         },
         body: () {
-          return runZonedGuarded<Future<dynamic>>(() {
+          // To catch all errors thrown by the test, even uncaught async errors, we use a zone.
+          //
+          // Zones introduce their own event loop, so we do not await futures created inside
+          // the zone from outside the zone. Instead, we create a Completer outside the zone,
+          // and have the test complete it when the test ends (in success or failure), and we
+          // await that.
+          final Completer<void> completer = Completer<void>();
+          runZonedGuarded<Future<dynamic>>(() async {
             try {
-              return context.run<dynamic>(
+              return await context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
                 // instantiation may reference items already stored on the context.
                 overrides: overrides,
@@ -141,18 +148,26 @@ void testUsingContext(
                   return await testMethod();
                 },
               );
-            // This catch rethrows, so doesn't need to catch only Exception.
-            } catch (error) { // ignore: avoid_catches_without_on_clauses
-              _printBufferedErrors(context);
-              rethrow;
+            } finally {
+              // We do not need a catch { ... } block because the error zone
+              // will catch all errors and send them to the completer below.
+              //
+              // See https://github.com/flutter/flutter/pull/141821/files#r1462288131.
+              if (!completer.isCompleted) {
+                completer.complete();
+              }
             }
           }, (Object error, StackTrace stackTrace) {
             // When things fail, it's ok to print to the console!
             print(error); // ignore: avoid_print
             print(stackTrace); // ignore: avoid_print
             _printBufferedErrors(context);
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
             throw error; //ignore: only_throw_errors
           });
+          return completer.future;
         },
       );
     }, overrides: <Type, Generator>{

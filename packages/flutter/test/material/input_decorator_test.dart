@@ -170,7 +170,7 @@ void main() {
 
 void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator input/label text layout',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     // The label appears above the input text
@@ -996,7 +996,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
         // Entering text happens in the center as well.
         await tester.enterText(find.byType(InputDecorator), text);
-        expect(tester.getTopLeft(find.text(text)).dy, 291.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 292.0);
         controller.clear();
         focusNode.unfocus();
 
@@ -1004,13 +1004,13 @@ void runAllTests({ required bool useMaterial3 }) {
         // that's where the hint is.
         await tester.pumpWidget(buildFrame(true));
         await tester.pumpAndSettle();
-        expect(tester.getTopLeft(find.text('label')).dy, 291.0);
+        expect(tester.getTopLeft(find.text('label')).dy, 292.0);
         expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
         expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
 
         // Entering text still happens in the center.
         await tester.enterText(find.byType(InputDecorator), text);
-        expect(tester.getTopLeft(find.text(text)).dy, 291.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 292.0);
         controller.clear();
         focusNode.unfocus();
       });
@@ -2313,17 +2313,17 @@ void runAllTests({ required bool useMaterial3 }) {
     //    0 - bottom prefix/suffix padding
     //   16 - bottom padding
     // When a border is present, the input text and prefix/suffix are centered
-    // within the input. Here, that will be content of height 106, including 2
-    // extra pixels of space, centered within an input of height 145. That gives
-    // 19 pixels of space on each side of the content, so the prefix is
-    // positioned at 19, and the text is at 19+100-15=104.
+    // within the input. Here, that will be content of height 106, centered
+    // within an input of height 145. That gives 20 pixels of space on each side
+    // of the content, so the prefix is positioned at 19, and the text is at
+    // 20+100-15=105.
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
     expect(tester.getSize(find.byType(InputDecorator)).height, 145);
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 104);
-    expect(tester.getTopLeft(find.byKey(pKey)).dy, 19.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 105);
+    expect(tester.getTopLeft(find.byKey(pKey)).dy, 20.0);
 
     // layout is a row: [prefix text suffix]
     expect(tester.getTopLeft(find.byKey(pKey)).dx, 12.0);
@@ -2890,7 +2890,7 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // Below the top aligned case.
-        expect(tester.getTopLeft(find.text(text)).dy, 289.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 290.0);
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -3040,8 +3040,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // In the middle of the expanded InputDecorator.
-        expect(tester.getTopLeft(find.text(text)).dy, 331.5);
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 246.5);
+        expect(tester.getTopLeft(find.text(text)).dy, 332.5);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 247.5);
       });
 
       testWidgets('InputDecorator tall prefix with border align top', (WidgetTester tester) async {
@@ -3138,8 +3138,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // Between the top and center examples.
-        expect(tester.getTopLeft(find.text(text)).dy, 354.75);
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 269.75);
+        expect(tester.getTopLeft(find.text(text)).dy, 355.65);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 270.65);
       });
     });
 
@@ -3237,8 +3237,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 19.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 35.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 20.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 36.0);
         expect(getBorderBottom(tester), 56.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3255,8 +3255,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 19.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 35.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 20.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 36.0);
         expect(getBorderBottom(tester), 56.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3276,8 +3276,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
         expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3297,8 +3297,8 @@ void runAllTests({ required bool useMaterial3 }) {
           ),
         );
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
-        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
         expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3319,8 +3319,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 120.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 51.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 67.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 52.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 68.0);
         expect(getBorderBottom(tester), 120.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3407,8 +3407,8 @@ void runAllTests({ required bool useMaterial3 }) {
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
         // Baseline is on the center of the 600px high input.
-        expect(tester.getTopLeft(find.text('text')).dy, 291.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 307.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 292.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 308.0);
         expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3455,8 +3455,8 @@ void runAllTests({ required bool useMaterial3 }) {
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
         // Same position as the center example above.
-        expect(tester.getTopLeft(find.text('text')).dy, 291.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 307.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 292.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 308.0);
         expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -6570,8 +6570,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
             ),
           ),
         ),
-        null,
-        EnginePhase.layout,
+        phase: EnginePhase.layout,
       );
     } finally {
       FlutterError.onError = oldHandler;
@@ -7022,5 +7021,42 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
         ),
       reason: 'clamp is expected',
     );
+  });
+
+  testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              labelText: 'label',
+            ),
+          ),
+        ),
+      ),
+    );
+    final TextStyle beforeStyle = getLabelStyle(tester);
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getLabelStyle(tester).height, beforeStyle.height);
+  });
+
+  test('InputDecorationTheme.copyWith keeps original iconColor.', () async {
+    const InputDecorationTheme original = InputDecorationTheme(iconColor: Color(0xDEADBEEF));
+    expect(original.iconColor, const Color(0xDEADBEEF));
+    expect(original.fillColor, isNot(const Color(0xDEADCAFE)));
+    final InputDecorationTheme copy1 = original.copyWith(fillColor: const Color(0xDEADCAFE));
+    expect(copy1.iconColor, const Color(0xDEADBEEF));
+    expect(copy1.fillColor, const Color(0xDEADCAFE));
+    final InputDecorationTheme copy2 = original.copyWith(iconColor: const Color(0xDEADCAFE));
+    expect(copy2.iconColor, const Color(0xDEADCAFE));
+    expect(copy2.fillColor, isNot(const Color(0xDEADCAFE)));
   });
 }

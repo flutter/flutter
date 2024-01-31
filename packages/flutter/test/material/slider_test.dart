@@ -834,7 +834,7 @@ void main() {
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return MediaQuery(
-                  data: MediaQueryData(textScaleFactor: textScaleFactor),
+                  data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
                   child: Material(
                     child: Theme(
                       data: Theme.of(context).copyWith(

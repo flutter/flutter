@@ -1203,10 +1203,9 @@ void main() {
                 ),
                 home: Builder(
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        textScaleFactor: textScaleFactor,
-                      ),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: Directionality(
                         textDirection: textDirection,
                         child: Scaffold(
@@ -1339,10 +1338,9 @@ void main() {
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Builder(
           builder: (BuildContext context) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaleFactor: 2,
-              ),
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: 2,
+              maxScaleFactor: 2,
               child: Scaffold(
                 body: Center(
                   child: FilledButton(

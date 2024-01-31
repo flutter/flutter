@@ -112,30 +112,6 @@ const String _kFlutterPluginsDependenciesKey = 'dependencies';
 const String _kFlutterPluginsHasNativeBuildKey = 'native_build';
 const String _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
 
-/// Filters [plugins] to those supported by [platformKey].
-List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
-  final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
-    return p.platforms.containsKey(platformKey);
-  });
-
-  final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
-  final List<Map<String, Object>> pluginInfo = <Map<String, Object>>[];
-  for (final Plugin plugin in platformPlugins) {
-    // This is guaranteed to be non-null due to the `where` filter above.
-    final PluginPlatform platformPlugin = plugin.platforms[platformKey]!;
-    pluginInfo.add(<String, Object>{
-      _kFlutterPluginsNameKey: plugin.name,
-      _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
-      if (platformPlugin is DarwinPlugin && (platformPlugin as DarwinPlugin).sharedDarwinSource)
-        _kFlutterPluginsSharedDarwinSource: (platformPlugin as DarwinPlugin).sharedDarwinSource,
-      if (platformPlugin is NativeOrDartPlugin)
-        _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).hasMethodChannel() || (platformPlugin as NativeOrDartPlugin).hasFfi(),
-      _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
-    });
-  }
-  return pluginInfo;
-}
-
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
 /// file looks something like this (order of keys is not guaranteed):
@@ -190,20 +166,19 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
     return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
   }
 
-  final String iosKey = project.ios.pluginConfigKey;
-  final String androidKey = project.android.pluginConfigKey;
-  final String macosKey = project.macos.pluginConfigKey;
-  final String linuxKey = project.linux.pluginConfigKey;
-  final String windowsKey = project.windows.pluginConfigKey;
-  final String webKey = project.web.pluginConfigKey;
+  final Iterable<String> platformKeys = <String>[
+    project.ios.pluginConfigKey,
+    project.android.pluginConfigKey,
+    project.macos.pluginConfigKey,
+    project.linux.pluginConfigKey,
+    project.windows.pluginConfigKey,
+    project.web.pluginConfigKey,
+  ];
 
   final Map<String, Object> pluginsMap = <String, Object>{};
-  pluginsMap[iosKey] = _filterPluginsByPlatform(plugins, iosKey);
-  pluginsMap[androidKey] = _filterPluginsByPlatform(plugins, androidKey);
-  pluginsMap[macosKey] = _filterPluginsByPlatform(plugins, macosKey);
-  pluginsMap[linuxKey] = _filterPluginsByPlatform(plugins, linuxKey);
-  pluginsMap[windowsKey] = _filterPluginsByPlatform(plugins, windowsKey);
-  pluginsMap[webKey] = _filterPluginsByPlatform(plugins, webKey);
+  for (final String platformKey in platformKeys) {
+    pluginsMap[platformKey] = _createPluginMapOfPlatform(plugins, platformKey);
+  }
 
   final Map<String, Object> result = <String, Object> {};
 
@@ -227,6 +202,33 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
 
   return pluginsChanged;
+}
+
+/// Creates a map representation of the [plugins] for those supported by [platformKey].
+List<Map<String, Object>> _createPluginMapOfPlatform(
+  List<Plugin> plugins,
+  String platformKey,
+) {
+  final Iterable<Plugin> resolvedPlatformPlugins = plugins.where((Plugin p) {
+    return p.platforms.containsKey(platformKey);
+  });
+
+  final Set<String> pluginNames = resolvedPlatformPlugins.map((Plugin plugin) => plugin.name).toSet();
+  final List<Map<String, Object>> pluginInfo = <Map<String, Object>>[];
+  for (final Plugin plugin in resolvedPlatformPlugins) {
+    // This is guaranteed to be non-null due to the `where` filter above.
+    final PluginPlatform platformPlugin = plugin.platforms[platformKey]!;
+    pluginInfo.add(<String, Object>{
+      _kFlutterPluginsNameKey: plugin.name,
+      _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
+      if (platformPlugin is DarwinPlugin && (platformPlugin as DarwinPlugin).sharedDarwinSource)
+        _kFlutterPluginsSharedDarwinSource: (platformPlugin as DarwinPlugin).sharedDarwinSource,
+      if (platformPlugin is NativeOrDartPlugin)
+        _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).hasMethodChannel() || (platformPlugin as NativeOrDartPlugin).hasFfi(),
+      _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
+    });
+  }
+  return pluginInfo;
 }
 
 List<Object?> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {

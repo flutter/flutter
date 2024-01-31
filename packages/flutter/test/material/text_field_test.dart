@@ -6535,6 +6535,55 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Can scroll multiline input when disabled', (WidgetTester tester) async {
+    final Key textFieldKey = UniqueKey();
+    final TextEditingController controller = _textEditingController(
+      text: kMoreThanFourLines,
+    );
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          key: textFieldKey,
+          controller: controller,
+          ignorePointers: false,
+          enabled: false,
+          style: const TextStyle(color: Colors.black, fontSize: 34.0),
+          maxLines: 2,
+        ),
+      ),
+    );
+
+    RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
+    final RenderBox inputBox = findInputBox();
+
+    // Check that the last line of text is not displayed.
+    final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+    expect(firstPos.dx, fourthPos.dx);
+    expect(firstPos.dy, lessThan(fourthPos.dy));
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
+
+    final TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
+    await tester.pump();
+    await gesture.moveBy(const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Now the first line is scrolled up, and the fourth line is visible.
+    final Offset finalFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    final Offset finalFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
+
+    expect(finalFirstPos.dy, lessThan(firstPos.dy));
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(finalFirstPos)), isFalse);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(finalFourthPos)), isTrue);
+  });
+
   testWidgets('Disabled text field does not have tap action', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -8854,7 +8903,7 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 4.0),
+            data: const MediaQueryData(textScaler: TextScaler.linear(4.0)),
             child: Center(
               child: TextField(
                 decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),
@@ -9242,6 +9291,49 @@ void main() {
     editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.color, isNull);
   });
+
+  testWidgets('selection handles color respects Theme', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/74890.
+    const Color expectedSelectionHandleColor = Color.fromARGB(255, 10, 200, 255);
+
+    final TextEditingController controller = TextEditingController(text: 'Some text.');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          textSelectionTheme: const TextSelectionThemeData(
+            selectionHandleColor: Colors.red,
+          ),
+        ),
+        home: Material(
+          child: Theme(
+            data: ThemeData(
+              textSelectionTheme: const TextSelectionThemeData(
+                selectionHandleColor: expectedSelectionHandleColor,
+              ),
+            ),
+            child: TextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPressAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+    expect(boxes.length, 2);
+
+    for (final RenderBox box in boxes) {
+      expect(box, paints..path(color: expectedSelectionHandleColor));
+    }
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
+  );
 
   testWidgets('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
@@ -14964,6 +15056,31 @@ void main() {
     await tester.pumpAndSettle(); // label animation.
     // The label will always float above the content.
     expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/140607.
+  testWidgets('TextFields can inherit errorStyle color from InputDecorationTheme.', (WidgetTester tester) async {
+    Widget textFieldBuilder() {
+      return MaterialApp(
+        theme: ThemeData(
+          inputDecorationTheme: const InputDecorationTheme(
+            errorStyle: TextStyle(color: Colors.green),
+          ),
+        ),
+        home: const Scaffold(
+          body: TextField(
+            decoration: InputDecoration(
+              errorText: 'error',
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(textFieldBuilder());
+    await tester.pumpAndSettle();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.cursorColor, Colors.green);
   });
 
   group('MaxLengthEnforcement', () {

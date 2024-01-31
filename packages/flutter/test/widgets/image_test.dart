@@ -97,8 +97,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -119,8 +118,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -139,8 +137,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -162,8 +159,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -179,8 +175,7 @@ void main() {
         image: imageProvider1,
         excludeFromSemantics: true,
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -199,8 +194,7 @@ void main() {
         image: imageProvider2,
         excludeFromSemantics: true,
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -217,8 +211,7 @@ void main() {
         image: imageProvider1,
         excludeFromSemantics: true,
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -238,8 +231,7 @@ void main() {
         excludeFromSemantics: true,
         image: imageProvider2,
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -806,7 +798,7 @@ void main() {
   });
 
   testWidgets('Precache',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
@@ -831,7 +823,7 @@ void main() {
   });
 
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
@@ -927,8 +919,7 @@ void main() {
                 image: imageProvider1,
             ),
         ),
-        null,
-        EnginePhase.layout,
+        phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
@@ -951,8 +942,7 @@ void main() {
               image: imageProvider2,
             ),
         ),
-        null,
-        EnginePhase.layout,
+        phase: EnginePhase.layout,
     );
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -965,10 +955,10 @@ void main() {
     final Image image2 = Image(image: _TestImageProvider()..complete(image10x10.clone()), width: 20.0, excludeFromSemantics: true);
 
     final Column column = Column(children: <Widget>[image1, image2]);
-    await tester.pumpWidget(column, null, EnginePhase.layout);
+    await tester.pumpWidget(column, phase:EnginePhase.layout);
 
     final Column columnSwapped = Column(children: <Widget>[image2, image1]);
-    await tester.pumpWidget(columnSwapped, null, EnginePhase.layout);
+    await tester.pumpWidget(columnSwapped, phase: EnginePhase.layout);
 
     final List<RenderImage> renderObjects = tester.renderObjectList<RenderImage>(find.byType(Image)).toList();
     expect(renderObjects, hasLength(2));
@@ -1031,7 +1021,7 @@ void main() {
   });
 
   testWidgets('Image invokes frameBuilder with correct frameNumber argument',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
@@ -1092,14 +1082,18 @@ void main() {
     expect(lastFrame, isNull);
     expect(lastFrameWasSync, isFalse);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+
+    final ImageInfo info = ImageInfo(image: image10x10);
+    addTearDown(info.dispose);
+    streamCompleter.setData(imageInfo: info);
     await tester.pump();
+
     expect(lastFrame, 0);
     expect(lastFrameWasSync, isFalse);
   });
 
   testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=true',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(ImageInfo(image: image10x10.clone()));
@@ -1160,7 +1154,7 @@ void main() {
   });
 
   testWidgets('Image state handles enabling and disabling of tickers',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
@@ -1271,8 +1265,12 @@ void main() {
     expect(chunkEvents.length, 3);
     expect(find.text('loading 30 / 100'), findsOneWidget);
     expect(find.byType(RawImage), findsNothing);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+
+    final ImageInfo info = ImageInfo(image: image10x10);
+    addTearDown(info.dispose);
+    streamCompleter.setData(imageInfo: info);
     await tester.pump();
+
     expect(chunkEvents.length, 4);
     expect(find.byType(Text), findsNothing);
     expect(find.byType(RawImage), findsOneWidget);
@@ -1292,7 +1290,9 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+    final ImageInfo info = ImageInfo(image: image10x10);
+    addTearDown(info.dispose);
+    streamCompleter.setData(imageInfo: info);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
@@ -1420,8 +1420,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     // only listener from resolveStreamForKey is left.
@@ -1454,8 +1453,7 @@ void main() {
           excludeFromSemantics: true,
         ),
       ),
-      null,
-      EnginePhase.layout,
+      phase: EnginePhase.layout,
     );
 
     // only listener from resolveStreamForKey is left.
@@ -1567,7 +1565,7 @@ void main() {
   });
 
   testWidgets('precacheImage does not hold weak ref for more than a frame',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     imageCache.maximumSize = 0;
@@ -1621,7 +1619,7 @@ void main() {
   });
 
   testWidgets('precacheImage allows time to take over weak reference',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
@@ -1675,7 +1673,7 @@ void main() {
   });
 
   testWidgets('evict an image during precache',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     // This test checks that the live image tracking does not hold on to a
@@ -1792,7 +1790,7 @@ void main() {
 
   testWidgets(
     'Rotated images',
-    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
     experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
     (WidgetTester tester) async {
       await testRotatedImage(tester, true);
@@ -1803,7 +1801,7 @@ void main() {
 
   testWidgets(
     'Image opacity',
-    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
     experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
     (WidgetTester tester) async {
       final Key key = UniqueKey();
@@ -1854,7 +1852,7 @@ void main() {
   );
 
   testWidgets('Reports image size when painted',
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
@@ -1966,7 +1964,7 @@ void main() {
   });
 
   testWidgets('Load a good image after a bad image was loaded should not call errorBuilder',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final UniqueKey errorKey = UniqueKey();

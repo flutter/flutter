@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show ValueListenable, defaultTargetPlatform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1781,6 +1781,51 @@ void main() {
       );
     });
   });
+
+  testWidgets('Context menus', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'You make wine from sour grapes',
+    );
+    addTearDown(controller.dispose);
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: focusNode,
+            backgroundCursorColor: Colors.white,
+            cursorColor: Colors.white,
+            style: const TextStyle(),
+            contextMenuBuilder: (
+              BuildContext context,
+              EditableTextState editableTextState,
+            ) {
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final Offset position = textOffsetToPosition(tester, 0);
+    expect(find.byType(Placeholder), findsNothing);
+    await tester.tapAt(position, buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    expect(find.byType(Placeholder), findsOneWidget);
+  }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {

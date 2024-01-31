@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,16 +18,15 @@ import 'feedback_tester.dart';
 Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  TextScaler textScaler = TextScaler.noScaling,
+  ThemeData? theme,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    theme: theme,
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Material(child: child),
       ),
     ),
@@ -37,13 +37,11 @@ Future<void> pumpCheckmarkChip(
   WidgetTester tester, {
   required Widget chip,
   Color? themeColor,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     wrapForChip(
-      useMaterial3: useMaterial3,
-      brightness: brightness,
+      theme: theme,
       child: Builder(
         builder: (BuildContext context) {
           final ChipThemeData chipTheme = ChipTheme.of(context);
@@ -127,6 +125,14 @@ DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
       of: find.text(labelText),
       matching: find.byType(DefaultTextStyle),
     ).first,
+  );
+}
+
+// Finds any container of a tooltip.
+Finder findTooltipContainer(String tooltipText) {
+  return find.ancestor(
+    of: find.text(tooltipText),
+    matching: find.byType(Container),
   );
 }
 
@@ -263,7 +269,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurfaceVariant.value,
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -398,7 +404,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, 'filter chip').style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurfaceVariant.value,
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -699,7 +705,7 @@ void main() {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      useMaterial3: false,
+      theme: ThemeData(useMaterial3: false),
     );
 
     expectCheckmarkColor(find.byType(FilterChip), Colors.black.withAlpha(0xde));
@@ -710,7 +716,7 @@ void main() {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      useMaterial3: theme.useMaterial3,
+      theme: theme,
     );
 
     expectCheckmarkColor(
@@ -723,8 +729,7 @@ void main() {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      brightness: Brightness.dark,
-      useMaterial3: false,
+      theme: ThemeData.dark(useMaterial3: false),
     );
 
     expectCheckmarkColor(
@@ -738,8 +743,7 @@ void main() {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
-      brightness: theme.brightness,
-      useMaterial3: theme.useMaterial3,
+      theme: theme,
     );
 
     expectCheckmarkColor(
@@ -824,8 +828,11 @@ void main() {
   });
 
   testWidgets('FilterChip uses provided iconTheme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+
     Widget buildChip({ IconThemeData? iconTheme }) {
       return MaterialApp(
+        theme: theme,
         home: Material(
           child: FilterChip(
             iconTheme: iconTheme,
@@ -840,7 +847,7 @@ void main() {
     // Test default icon theme.
     await tester.pumpWidget(buildChip());
 
-    expect(getIconData(tester).color, ThemeData().iconTheme.color);
+    expect(getIconData(tester).color, theme.colorScheme.primary);
 
     // Test provided icon theme.
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
@@ -871,7 +878,7 @@ void main() {
 
     // Test the delete button icon.
     expect(tester.getSize(find.byIcon(Icons.clear)), const Size(18.0, 18.0));
-    expect(getIconData(tester).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconData(tester).color, theme.colorScheme.onSurfaceVariant);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -897,7 +904,7 @@ void main() {
 
     // Test the delete button icon.
     expect(tester.getSize(find.byIcon(Icons.clear)), const Size(18.0, 18.0));
-    expect(getIconData(tester).color, theme.colorScheme.onSecondaryContainer);
+    expect(getIconData(tester).color, theme.colorScheme.onSurfaceVariant);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - FilterChip supports delete button', (WidgetTester tester) async {
@@ -1040,7 +1047,7 @@ void main() {
     feedback.dispose();
   });
 
-  testWidgets('Delete button is visible FilterChip is disabled', (WidgetTester tester) async {
+  testWidgets('Delete button is visible on disabled FilterChip', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         child: FilterChip(
@@ -1053,5 +1060,114 @@ void main() {
 
     // Delete button should be visible.
     expectLater(find.byType(RawChip), matchesGoldenFile('filter_chip.disabled.delete_button.png'));
+  });
+
+  testWidgets('Delete button tooltip is not shown on disabled FilterChip', (WidgetTester tester) async {
+    Widget buildChip({ bool enabled = true }) {
+      return wrapForChip(
+        child: FilterChip(
+          onSelected: enabled ? (bool value) { } : null,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      );
+    }
+
+    // Test enabled chip.
+    await tester.pumpWidget(buildChip());
+
+    final Offset deleteButtonLocation = tester.getCenter(find.byType(Icon));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(deleteButtonLocation);
+    await tester.pump();
+
+    // Delete button tooltip should be visible.
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+
+    // Test disabled chip.
+    await tester.pumpWidget(buildChip(enabled: false));
+    await tester.pump();
+
+    // Delete button tooltip should not be visible.
+    expect(findTooltipContainer('Delete'), findsNothing);
+  });
+
+  testWidgets('Material3 - Default FilterChip icon colors', (WidgetTester tester) async {
+    const IconData flatAvatar = Icons.favorite;
+    const IconData flatDeleteIcon = Icons.delete;
+    const IconData elevatedAvatar = Icons.house;
+    const IconData elevatedDeleteIcon = Icons.clear_all;
+    final ThemeData theme = ThemeData();
+
+    Widget buildChips({ required bool selected }) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              FilterChip(
+                avatar: const Icon(flatAvatar),
+                deleteIcon: const Icon(flatDeleteIcon),
+                onSelected: (bool valueChanged) { },
+                label: const Text('FilterChip'),
+                selected: selected,
+                onDeleted: () { },
+              ),
+              FilterChip.elevated(
+                avatar: const Icon(elevatedAvatar),
+                deleteIcon: const Icon(elevatedDeleteIcon),
+                onSelected: (bool valueChanged) { },
+                label: const Text('Elevated FilterChip'),
+                selected: selected,
+                onDeleted: () { },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Color getIconColor(WidgetTester tester, IconData icon) {
+      return tester.firstWidget<IconTheme>(find.ancestor(
+        of: find.byIcon(icon),
+        matching: find.byType(IconTheme),
+      )).data.color!;
+    }
+
+    // Test unselected state.
+    await tester.pumpWidget(buildChips(selected: false));
+    // Check the flat chip icon colors.
+    expect(getIconColor(tester, flatAvatar), theme.colorScheme.primary);
+    expect(
+      getIconColor(tester, flatDeleteIcon),
+      theme.colorScheme.onSurfaceVariant,
+    );
+    // Check the elevated chip icon colors.
+    expect(getIconColor(tester, elevatedAvatar), theme.colorScheme.primary);
+    expect(
+      getIconColor(tester, elevatedDeleteIcon),
+      theme.colorScheme.onSurfaceVariant,
+    );
+
+    // Test selected state.
+    await tester.pumpWidget(buildChips(selected: true));
+    // Check the flat chip icon colors.
+    expect(
+      getIconColor(tester, flatAvatar),
+      theme.colorScheme.onSecondaryContainer,
+    );
+    expect(
+      getIconColor(tester, flatDeleteIcon),
+      theme.colorScheme.onSecondaryContainer,
+    );
+    // Check the elevated chip icon colors.
+    expect(
+      getIconColor(tester, elevatedAvatar),
+      theme.colorScheme.onSecondaryContainer,
+    );
+    expect(
+      getIconColor(tester, elevatedDeleteIcon),
+      theme.colorScheme.onSecondaryContainer,
+    );
   });
 }

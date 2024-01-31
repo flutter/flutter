@@ -2348,7 +2348,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     // Constrain the textScaleFactor to prevent layout issues. Since only some
     // parts of the time picker scale up with textScaleFactor, we cap the factor
     // to 1.1 as that provides enough space to reasonably fit all the content.
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.1).textScaleFactor;
+    //
+    // 14 is a common font size used to compute the effective text scale.
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.1).scale(fontSizeToScale) / fontSizeToScale;
 
     final Size timePickerSize;
     switch (_entryMode.value) {

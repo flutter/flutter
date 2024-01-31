@@ -615,8 +615,9 @@ void main() {
         data: ThemeData(useMaterial3: false),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.25),
+          child: MediaQuery.withClampedTextScaling(
+            minScaleFactor: 1.25,
+            maxScaleFactor: 1.25,
             child: Center(
               child: TextButton(
                 onPressed: () { },
@@ -639,8 +640,9 @@ void main() {
         data: ThemeData(useMaterial3: false),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 3.0),
+          child: MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: Center(
               child: TextButton(
                 onPressed: () { },
@@ -1082,10 +1084,9 @@ void main() {
                 ),
                 home: Builder(
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        textScaleFactor: textScaleFactor,
-                      ),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: Directionality(
                         textDirection: textDirection,
                         child: Scaffold(
@@ -1224,10 +1225,9 @@ void main() {
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Builder(
           builder: (BuildContext context) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaleFactor: 2,
-              ),
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: 2,
+              maxScaleFactor: 2,
               child: Scaffold(
                 body: Center(
                   child: TextButton(
