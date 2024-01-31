@@ -44,13 +44,18 @@ class CanvasKitRenderer implements Renderer {
   DomElement? _sceneHost;
   DomElement? get sceneHost => _sceneHost;
 
-  final Rasterizer _rasterizer = _createRasterizer();
+  Rasterizer _rasterizer = _createRasterizer();
 
   static Rasterizer _createRasterizer() {
     if (isSafari || isFirefox) {
       return MultiSurfaceRasterizer();
     }
     return OffscreenCanvasRasterizer();
+  }
+
+  /// Override the rasterizer with the given [_rasterizer]. Used in tests.
+  void debugOverrideRasterizer(Rasterizer testRasterizer) {
+    _rasterizer = testRasterizer;
   }
 
   set resourceCacheMaxBytes(int bytes) =>
@@ -404,8 +409,47 @@ class CanvasKitRenderer implements Renderer {
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
     CkParagraphBuilder(style);
 
+  // TODO(harryterkelsen): Merge this logic with the async logic in
+  // [EngineScene], https://github.com/flutter/flutter/issues/142072.
   @override
   Future<void> renderScene(ui.Scene scene, ui.FlutterView view) async {
+    assert(_rasterizers.containsKey(view.viewId),
+        "Unable to render to a view which hasn't been registered");
+    final ViewRasterizer rasterizer = _rasterizers[view.viewId]!;
+    final RenderQueue renderQueue = rasterizer.queue;
+    if (renderQueue.current != null) {
+      // If a scene is already queued up, drop it and queue this one up instead
+      // so that the scene view always displays the most recently requested scene.
+      renderQueue.next?.completer.complete();
+      final Completer<void> completer = Completer<void>();
+      renderQueue.next = (scene: scene, completer: completer);
+      return completer.future;
+    }
+    final Completer<void> completer = Completer<void>();
+    renderQueue.current = (scene: scene, completer: completer);
+    unawaited(_kickRenderLoop(rasterizer));
+    return completer.future;
+  }
+
+  Future<void> _kickRenderLoop(ViewRasterizer rasterizer) async {
+    final RenderQueue renderQueue = rasterizer.queue;
+    final RenderRequest current = renderQueue.current!;
+    try {
+      await _renderScene(current.scene, rasterizer);
+      current.completer.complete();
+    } catch (error, stackTrace) {
+      current.completer.completeError(error, stackTrace);
+    }
+    renderQueue.current = renderQueue.next;
+    renderQueue.next = null;
+    if (renderQueue.current == null) {
+      return;
+    } else {
+      return _kickRenderLoop(rasterizer);
+    }
+  }
+
+  Future<void> _renderScene(ui.Scene scene, ViewRasterizer rasterizer) async {
     // "Build finish" and "raster start" happen back-to-back because we
     // render on the same thread, so there's no overhead from hopping to
     // another thread.
@@ -415,10 +459,6 @@ class CanvasKitRenderer implements Renderer {
     // here are CanvasKit-only.
     frameTimingsOnBuildFinish();
     frameTimingsOnRasterStart();
-
-    assert(_rasterizers.containsKey(view.viewId),
-        "Unable to render to a view which hasn't been registered");
-    final ViewRasterizer rasterizer = _rasterizers[view.viewId]!;
 
     await rasterizer.draw((scene as LayerScene).layerTree);
     frameTimingsOnRasterFinish();
