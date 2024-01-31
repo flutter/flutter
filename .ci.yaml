@@ -3180,7 +3180,7 @@ targets:
 
   - name: Mac_x64 build_tests_1_4
     recipe: flutter/flutter_drone
-    presubmit: false
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3199,7 +3199,7 @@ targets:
 
   - name: Mac_x64 build_tests_2_4
     recipe: flutter/flutter_drone
-    presubmit: false
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3218,7 +3218,7 @@ targets:
 
   - name: Mac_x64 build_tests_3_4
     recipe: flutter/flutter_drone
-    presubmit: false
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3237,7 +3237,7 @@ targets:
 
   - name: Mac_x64 build_tests_4_4
     recipe: flutter/flutter_drone
-    presubmit: false
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
