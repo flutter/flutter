@@ -4737,7 +4737,6 @@ targets:
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       device_os: iOS-16|iOS-17
