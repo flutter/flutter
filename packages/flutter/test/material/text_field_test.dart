@@ -9297,6 +9297,7 @@ void main() {
     const Color expectedSelectionHandleColor = Color.fromARGB(255, 10, 200, 255);
 
     final TextEditingController controller = TextEditingController(text: 'Some text.');
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(

@@ -2616,6 +2616,7 @@ void main() {
                     child: const Text('Set focus to null'),
                     onPressed: () {
                       setState((){
+                        buttonFocusNode?.dispose();
                         buttonFocusNode = null;
                       });
                     },

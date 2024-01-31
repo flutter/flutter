@@ -1935,6 +1935,7 @@ void main() {
 
   testWidgets('DropdownMenu.focusNode can focus text input field', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(MaterialApp(
