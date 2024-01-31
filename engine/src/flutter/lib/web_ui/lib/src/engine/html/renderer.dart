@@ -36,9 +36,6 @@ class HtmlRenderer implements Renderer {
   }
 
   @override
-  void reset(FlutterViewEmbedder embedder) {}
-
-  @override
   ui.Paint createPaint() => SurfacePaint();
 
   @override

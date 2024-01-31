@@ -463,6 +463,39 @@ Future<void> testMain() async {
     await expectLater(completer.future, completes);
   });
 
+  test('sets global html attributes', () {
+    final DomElement host = createDomHTMLDivElement();
+    final EngineFlutterView view = EngineFlutterView(dispatcher, host);
+
+    expect(host.getAttribute('flt-renderer'), 'html (requested explicitly)');
+    expect(host.getAttribute('flt-build-mode'), 'debug');
+
+    view.dispose();
+  });
+
+  test('in full-page mode, Flutter window replaces viewport meta tags', () {
+    final DomHTMLMetaElement existingMeta = createDomHTMLMetaElement()
+      ..name = 'viewport'
+      ..content = 'foo=bar';
+    domDocument.head!.append(existingMeta);
+    expect(existingMeta.isConnected, isTrue);
+
+    final EngineFlutterWindow implicitView = EngineFlutterView.implicit(dispatcher, null);
+    // The existing viewport meta tag should've been removed.
+    expect(existingMeta.isConnected, isFalse);
+    // And a new one should've been added.
+    final DomHTMLMetaElement? newMeta = domDocument.head!.querySelector('meta[name="viewport"]') as DomHTMLMetaElement?;
+    expect(newMeta, isNotNull);
+    newMeta!;
+    expect(newMeta.getAttribute('flt-viewport'), isNotNull);
+    expect(newMeta.name, 'viewport');
+    expect(newMeta.content, contains('width=device-width'));
+    expect(newMeta.content, contains('initial-scale=1.0'));
+    expect(newMeta.content, contains('maximum-scale=1.0'));
+    expect(newMeta.content, contains('user-scalable=no'));
+    implicitView.dispose();
+  });
+
   test('auto-view-id', () {
     final DomElement host = createDomHTMLDivElement();
     final EngineFlutterView implicit1 = EngineFlutterView.implicit(dispatcher, host);

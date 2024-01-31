@@ -6,9 +6,9 @@ import 'package:ui/ui.dart' as ui;
 
 import '../color_filter.dart';
 import '../dom.dart';
-import '../embedder.dart';
 import '../util.dart';
 import '../vector_math.dart';
+import 'resource_manager.dart';
 import 'shaders/shader.dart';
 import 'surface.dart';
 import 'surface_stats.dart';
@@ -60,7 +60,7 @@ class PersistedImageFilter extends PersistedContainerSurface
   @override
   void discard() {
     super.discard();
-    flutterViewEmbedder.removeResource(_svgFilter);
+    ResourceManager.instance.removeResource(_svgFilter);
     _svgFilter = null;
     _childContainer = null;
   }
@@ -92,7 +92,7 @@ class PersistedImageFilter extends PersistedContainerSurface
     } else {
       backendFilter = filter as EngineImageFilter;
     }
-    flutterViewEmbedder.removeResource(_svgFilter);
+    ResourceManager.instance.removeResource(_svgFilter);
     _svgFilter = null;
     if (backendFilter is ModeHtmlColorFilter) {
       _svgFilter = backendFilter.makeSvgFilter(rootElement);

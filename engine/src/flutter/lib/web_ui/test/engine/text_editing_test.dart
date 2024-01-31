@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
-import 'package:ui/src/engine.dart' show flutterViewEmbedder;
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/raw_keyboard.dart';
@@ -85,8 +84,6 @@ Future<void> testMain() async {
       editingStrategy = GloballyPositionedTextEditingStrategy(testTextEditing);
       testTextEditing.debugTextEditingStrategyOverride = editingStrategy;
       testTextEditing.configuration = singlelineConfig;
-      // Ensure the glass-pane and its shadow root exist.
-      flutterViewEmbedder.reset();
     });
 
     test('Creates element when enabled and removes it when disabled', () {
