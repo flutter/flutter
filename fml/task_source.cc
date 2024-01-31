@@ -28,7 +28,7 @@ void TaskSource::RegisterTask(const DelayedTask& task) {
     case TaskSourceGrade::kUnspecified:
       primary_task_queue_.push(task);
       break;
-    case TaskSourceGrade::kDartMicroTasks:
+    case TaskSourceGrade::kDartEventLoop:
       secondary_task_queue_.push(task);
       break;
   }
@@ -42,7 +42,7 @@ void TaskSource::PopTask(TaskSourceGrade grade) {
     case TaskSourceGrade::kUnspecified:
       primary_task_queue_.pop();
       break;
-    case TaskSourceGrade::kDartMicroTasks:
+    case TaskSourceGrade::kDartEventLoop:
       secondary_task_queue_.pop();
       break;
   }

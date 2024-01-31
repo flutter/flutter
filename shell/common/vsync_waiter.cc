@@ -112,7 +112,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
   if (callback) {
     const uint64_t flow_identifier = fml::tracing::TraceNonce();
     if (pause_secondary_tasks) {
-      PauseDartMicroTasks();
+      PauseDartEventLoopTasks();
     }
 
     // The base trace ensures that flows have a root to begin from if one does
@@ -142,7 +142,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
           callback(std::move(frame_timings_recorder));
           TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
           if (pause_secondary_tasks) {
-            ResumeDartMicroTasks(ui_task_queue_id);
+            ResumeDartEventLoopTasks(ui_task_queue_id);
           }
         });
   }
@@ -152,13 +152,13 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
   }
 }
 
-void VsyncWaiter::PauseDartMicroTasks() {
+void VsyncWaiter::PauseDartEventLoopTasks() {
   auto ui_task_queue_id = task_runners_.GetUITaskRunner()->GetTaskQueueId();
   auto task_queues = fml::MessageLoopTaskQueues::GetInstance();
   task_queues->PauseSecondarySource(ui_task_queue_id);
 }
 
-void VsyncWaiter::ResumeDartMicroTasks(fml::TaskQueueId ui_task_queue_id) {
+void VsyncWaiter::ResumeDartEventLoopTasks(fml::TaskQueueId ui_task_queue_id) {
   auto task_queues = fml::MessageLoopTaskQueues::GetInstance();
   task_queues->ResumeSecondarySource(ui_task_queue_id);
 }

@@ -17,8 +17,8 @@ enum class TaskSourceGrade {
   /// interaction.
   kUserInteraction,
   /// This `TaskSourceGrade` indicates that a task corresponds to servicing a
-  /// dart micro task. These aren't critical to user interaction.
-  kDartMicroTasks,
+  /// dart event loop task. These aren't critical to user interaction.
+  kDartEventLoop,
   /// The absence of a specialized `TaskSourceGrade`.
   kUnspecified,
 };
