@@ -508,7 +508,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     switch (_controller.status) {
       case AnimationStatus.dismissed when withDelay.inMicroseconds > 0:
-        _timer ??= Timer(withDelay, show);
+        _timer?.cancel();
+        _timer = Timer(withDelay, show);
       // If the tooltip is already fading in or fully visible, skip the
       // animation and show the tooltip immediately.
       case AnimationStatus.dismissed:
