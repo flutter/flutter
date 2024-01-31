@@ -976,8 +976,9 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(
       FlutterOptions.kAndroidSkipBuildDependencyValidation,
-      help: 'Whether to skip version checking for the Android build time '
-          'dependencies (Java, Gradle, AGP, etc.).',
+      help: 'Whether to skip version checking for Java, Gradle, '
+          'the Android Gradle Plugin (AGP), and the Kotlin Gradle Plugin (KGP)'
+          ' during Android builds.',
     );
     argParser.addMultiOption(
       FlutterOptions.kAndroidProjectArgs,

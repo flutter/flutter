@@ -35,6 +35,11 @@ class FlutterDependencyCheckerPlugin : Plugin<Project> {
 
 class DependencyVersionChecker {
     companion object {
+        const val GRADLE_NAME : String = "Gradle"
+        const val JAVA_NAME : String = "Java"
+        const val AGP_NAME : String = "Android Gradle Plugin"
+        const val KGP_NAME : String = "Kotlin"
+
         // The following versions define our support policy for Gradle, Java, AGP, and KGP.
         // All "error" versions are currently set to 0 as this policy is new. They will be increased
         // to match the current values of the "warn" versions in the next release.
@@ -162,7 +167,7 @@ class DependencyVersionChecker {
             if (version < errorGradleVersion) {
                 throw GradleException(
                     getErrorMessage(
-                        "Gradle",
+                        GRADLE_NAME,
                         version.toString(),
                         errorGradleVersion.toString()
                     )
@@ -171,7 +176,7 @@ class DependencyVersionChecker {
             else if (version < warnGradleVersion) {
                 project.logger.error(
                     getWarnMessage(
-                        "Gradle",
+                        GRADLE_NAME,
                         version.toString(),
                         warnGradleVersion.toString()
                     )
@@ -183,7 +188,7 @@ class DependencyVersionChecker {
             if (version < errorJavaVersion) {
                 throw GradleException(
                     getErrorMessage(
-                        "Java",
+                        JAVA_NAME,
                         version.toString(),
                         errorJavaVersion.toString()
                     )
@@ -192,7 +197,7 @@ class DependencyVersionChecker {
             else if (version < warnJavaVersion) {
                 project.logger.error(
                     getWarnMessage(
-                        "Java",
+                        JAVA_NAME,
                         version.toString(),
                         warnJavaVersion.toString()
                     )
@@ -204,7 +209,7 @@ class DependencyVersionChecker {
             if (version < errorAGPVersion) {
                 throw GradleException(
                     getErrorMessage(
-                        "AGP",
+                        AGP_NAME,
                         version.toString(),
                         errorAGPVersion.toString()
                     )
@@ -213,7 +218,7 @@ class DependencyVersionChecker {
             else if (version < warnAGPVersion) {
                 project.logger.error(
                     getWarnMessage(
-                        "AGP",
+                        AGP_NAME,
                         version.toString(),
                         warnAGPVersion.toString()
                     )
@@ -225,7 +230,7 @@ class DependencyVersionChecker {
             if (version < errorKGPVersion) {
                 throw GradleException(
                     getErrorMessage(
-                        "Kotlin",
+                        KGP_NAME,
                         version.toString(),
                         errorKGPVersion.toString()
                     )
@@ -234,7 +239,7 @@ class DependencyVersionChecker {
             else if (version < warnKGPVersion) {
                 project.logger.error(
                     getWarnMessage(
-                        "Kotlin",
+                        KGP_NAME,
                         version.toString(),
                         warnKGPVersion.toString()
                     )
