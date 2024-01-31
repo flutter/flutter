@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -802,40 +803,27 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _dragEnd(_DragInfo item) {
-    // No changes required if last child is being inserted into the last position.
-    if ((_insertIndex! + 1 == _items.length) && _reverse) {
-      final RenderBox lastItemRenderBox =  _items[_items.length - 1]!.context.findRenderObject()! as RenderBox;
-      final Offset lastItemOffset =  lastItemRenderBox.localToGlobal(Offset.zero);
-
-      // When drag starts, the corresponding element is removed from
-      // the list, and moves inside of [ReorderableListState.CustomScrollView],
-      // which gives [CustomScrollView] a variable height.
-      //
-      // So when the element is moved, delta would change accordingly,
-      // and since it's the last element,
-      // we animate it back to it's position and add it back to the list.
-      final double delta = item.itemSize.height;
-
-      setState(() {
-        _finalDropPosition = Offset(lastItemOffset.dx, lastItemOffset.dy  - delta);
-      });
-      return;
-    }
     setState(() {
       if (_insertIndex == item.index) {
-        _finalDropPosition = _itemOffsetAt(_insertIndex! + (_reverse ? 1 : 0));
-      } else if (_insertIndex! < widget.itemCount - 1) {
-        // Find the location of the item we want to insert before
-        _finalDropPosition = _itemOffsetAt(_insertIndex!);
-      } else {
-        // Inserting into the last spot on the list. If it's the only spot, put
-        // it back where it was. Otherwise, grab the second to last and move
-        // down by the gap.
-        final int itemIndex = _items.length > 1 ? _insertIndex! - 1 : _insertIndex!;
-        if (_reverse) {
-          _finalDropPosition = _itemOffsetAt(itemIndex) - _extentOffset(item.itemExtent, _scrollDirection);
+        // Although it's at its original position, the original position has been replaced by a zero-size box
+        // So when reversed, it should offset its own extent
+        _finalDropPosition = _reverse ? _itemOffsetAt(_insertIndex!) - _extentOffset(item.itemExtent, _scrollDirection) : _itemOffsetAt(_insertIndex!);
+      } else if (_reverse) {
+        if (_insertIndex! >= _items.length) {
+          // Drop at the starting position of the last element and offset its own extent
+          _finalDropPosition = _itemOffsetAt(_items.length - 1) - _extentOffset(item.itemExtent, _scrollDirection);
         } else {
-          _finalDropPosition = _itemOffsetAt(itemIndex) + _extentOffset(item.itemExtent, _scrollDirection);
+          // Drop at the end of the current element occupying the insert position
+          _finalDropPosition = _itemOffsetAt(_insertIndex!) + _extentOffset(_itemExtentAt(_insertIndex!), _scrollDirection);
+        }
+      } else {
+        if (_insertIndex! == 0) {
+          // Drop at the starting position of the first element and offset its own extent
+          _finalDropPosition = _itemOffsetAt(0) - _extentOffset(item.itemExtent, _scrollDirection);
+        } else {
+          // Drop at the end of the previous element occupying the insert position
+          final int atIndex = _insertIndex! - 1;
+          _finalDropPosition = _itemOffsetAt(atIndex) + _extentOffset(_itemExtentAt(atIndex), _scrollDirection);
         }
       }
     });
@@ -975,8 +963,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   Offset _itemOffsetAt(int index) {
-    final RenderBox itemRenderBox =  _items[index]!.context.findRenderObject()! as RenderBox;
-    return itemRenderBox.localToGlobal(Offset.zero);
+    return _items[index]!.targetGeometry().topLeft;
+  }
+
+  double _itemExtentAt(int index) {
+    return _sizeExtent(_items[index]!.targetGeometry().size, _scrollDirection);
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
@@ -1349,6 +1340,15 @@ class _DragInfo extends Drag {
     this.proxyDecorator,
     required this.tickerProvider,
   }) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_DragInfo',
+        object: this,
+      );
+    }
     final RenderBox itemRenderBox = item.context.findRenderObject()! as RenderBox;
     listState = item._listState;
     index = item.index;
@@ -1381,6 +1381,9 @@ class _DragInfo extends Drag {
   AnimationController? _proxyAnimation;
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _proxyAnimation?.dispose();
   }
 

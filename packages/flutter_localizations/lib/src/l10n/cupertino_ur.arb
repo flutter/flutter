@@ -26,5 +26,6 @@
   "menuDismissLabel": "مینو برخاست کریں",
   "lookUpButtonLabel": "تفصیل دیکھیں",
   "searchWebButtonLabel": "ویب تلاش کریں",
-  "shareButtonLabel": "اشتراک کریں..."
+  "shareButtonLabel": "اشتراک کریں...",
+  "clearButtonLabel": "Clear"
 }

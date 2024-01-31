@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Placeholder', (WidgetTester tester) async {
+  testWidgets('Placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(800.0, 600.0));
     await tester.pumpWidget(const Center(child: Placeholder()));
@@ -20,21 +19,21 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(200.0, 300.0));
   });
 
-  testWidgetsWithLeakTracking('Placeholder color', (WidgetTester tester) async {
+  testWidgets('Placeholder color', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(color: const Color(0xFF455A64)));
     await tester.pumpWidget(const Placeholder(color: Color(0xFF00FF00)));
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(color: const Color(0xFF00FF00)));
   });
 
-  testWidgetsWithLeakTracking('Placeholder stroke width', (WidgetTester tester) async {
+  testWidgets('Placeholder stroke width', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 2.0));
     await tester.pumpWidget(const Placeholder(strokeWidth: 10.0));
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 10.0));
   });
 
-   testWidgetsWithLeakTracking('Placeholder child widget', (WidgetTester tester) async {
+   testWidgets('Placeholder child widget', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(find.text('Label'), findsNothing);
     await tester.pumpWidget(const MaterialApp(home: Placeholder(child: Text('Label'))));

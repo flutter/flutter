@@ -11,7 +11,6 @@ import 'package:flutter/src/widgets/media_query.dart';
 import 'package:flutter/src/widgets/scroll_view.dart';
 import 'package:flutter/src/widgets/sliver_layout_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
@@ -26,7 +25,7 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Moving a global key from another LayoutBuilder at layout time', (WidgetTester tester) async {
+  testWidgets('Moving a global key from another LayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey = GlobalKey();
 
     await tester.pumpWidget(Row(
@@ -72,7 +71,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('Moving a global key from another SliverLayoutBuilder at layout time', (WidgetTester tester) async {
+  testWidgets('Moving a global key from another SliverLayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey1 = GlobalKey();
     final GlobalKey victimKey2 = GlobalKey();
 
@@ -129,7 +128,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder does not layout twice', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder does not layout twice', (WidgetTester tester) async {
     // This widget marks itself dirty when the closest MediaQuery changes.
     final _LayoutCount widget = _LayoutCount();
     late StateSetter setState;

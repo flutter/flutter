@@ -310,7 +310,7 @@ void main() {
     expect(columnWidth.flex(<RenderBox>[]), flexValue);
   });
 
-  test('TableRows with differents constraints, but vertically with intrisicHeight', () {
+  test('TableRows with different constraints, but vertically with intrinsicHeight', () {
     const BoxConstraints firstConstraints = BoxConstraints.tightFor(width: 100, height: 100);
     const BoxConstraints secondConstraints = BoxConstraints.tightFor(width: 200, height: 200);
 

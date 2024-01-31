@@ -14,15 +14,37 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+final String gradlewExecutable =
+    Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
+final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
+
+/// Combines several TaskFunctions with trivial success value into one.
+TaskFunction combine(List<TaskFunction> tasks) {
+  return () async {
+    for (final TaskFunction task in tasks) {
+      final TaskResult result = await task();
+      if (result.failed) {
+        return result;
+      }
+    }
+    return TaskResult.success(null);
+  };
+}
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
-Future<void> main() async {
-  await task(() async {
+class ModuleTest {
+  ModuleTest(
+    this.buildTarget, {
+    this.gradleVersion = '7.6.3',
+  });
 
+  final String buildTarget;
+  final String gradleVersion;
+
+  Future<TaskResult> call() async {
+    section('Running: $buildTarget');
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
@@ -110,43 +132,6 @@ Future<void> main() async {
       });
 
       // TODO(dacoharkes): Implement Add2app. https://github.com/flutter/flutter/issues/129757
-      section('Check native assets error');
-
-      await inDirectory(Directory(path.join(projectDir.path, '.android')),
-          () async {
-        final StringBuffer stderr = StringBuffer();
-        final int exitCode = await exec(
-          gradlewExecutable,
-          <String>['flutter:assembleDebug'],
-          environment: <String, String>{'JAVA_HOME': javaHome},
-          canFail: true,
-          stderr: stderr,
-        );
-        const String errorString =
-            'Native assets are not yet supported in Android add2app.';
-        if (!stderr.toString().contains(errorString) || exitCode == 0) {
-          throw TaskResult.failure(
-              '''
-Expected to find `$errorString` in stderr and nonZero exit code.
-$stderr
-exitCode: $exitCode
-''');
-        }
-      });
-
-      section('Remove FFI package');
-
-      content = content.replaceFirst(
-        '  $ffiPackageName:$platformLineSep    path: ..${Platform.pathSeparator}$ffiPackageName$platformLineSep',
-        '',
-      );
-      await pubspec.writeAsString(content, flush: true);
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'packages',
-          options: <String>['get'],
-        );
-      });
 
       section('Build Flutter module library archive');
 
@@ -253,11 +238,25 @@ exitCode: $exitCode
         hostApp,
       );
       copy(
-        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
+        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper',
+            'gradle-wrapper.jar')),
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
-      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
+      // Modify gradle version to passed in version.
+      // This is somehow the wrong file.
+      final File gradleWrapperProperties = File(path.join(
+          hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'));
+      String propertyContent = await gradleWrapperProperties.readAsString();
+      propertyContent = propertyContent.replaceFirst(
+        'REPLACEME',
+        gradleVersion,
+      );
+      section(propertyContent);
+      await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
+
+      final File analyticsOutputFile =
+          File(path.join(tempDir.path, 'analytics.log'));
 
       section('Build debug host APK');
 
@@ -295,6 +294,8 @@ exitCode: $exitCode
         ...flutterAssets,
         ...debugAssets,
         ...baseApkFiles,
+        'lib/arm64-v8a/lib$ffiPackageName.so',
+        'lib/armeabi-v7a/lib$ffiPackageName.so',
       ], await getFilesInApk(debugHostApk));
 
       section('Check debug AndroidManifest.xml');
@@ -326,9 +327,8 @@ exitCode: $exitCode
         'app',
         'build',
         'intermediates',
-        'merged_assets',
+        'assets',
         'debug',
-        'out',
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -374,8 +374,10 @@ exitCode: $exitCode
       checkCollectionContains<String>(<String>[
         ...flutterAssets,
         ...baseApkFiles,
+        'lib/arm64-v8a/lib$ffiPackageName.so',
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
+        'lib/armeabi-v7a/lib$ffiPackageName.so',
         'lib/armeabi-v7a/libapp.so',
         'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(releaseHostApk));
@@ -416,9 +418,8 @@ exitCode: $exitCode
         'app',
         'build',
         'intermediates',
-        'merged_assets',
+        'assets',
         'release',
-        'out',
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -442,5 +443,13 @@ exitCode: $exitCode
     } finally {
       rmTree(tempDir);
     }
-  });
+  }
+}
+
+Future<void> main() async {
+  await task(combine(<TaskFunction>[
+    // ignore: avoid_redundant_argument_values
+    ModuleTest('module-gradle-7.6', gradleVersion: '7.6.3').call,
+    ModuleTest('module-gradle-7.6', gradleVersion: '7.6-rc-2').call,
+  ]));
 }

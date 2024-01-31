@@ -19,7 +19,7 @@ import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart' show ProcessResultMatcher, fileSystem, platform;
@@ -230,7 +230,7 @@ void main() {
         // Overrides the build to output static libraries.
         final String buildDotDartContentsNew = buildDotDartContents.replaceFirst(
           'final buildConfig = await BuildConfig.fromArgs(args);',
-          r'''
+          '''
   final buildConfig = await BuildConfig.fromArgs([
     '-D${LinkModePreference.configKey}=${LinkModePreference.static}',
     ...args,
@@ -292,18 +292,48 @@ void main() {
 void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   final Directory appBundle = appDirectory.childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app');
   expect(appBundle, exists);
-  final Directory dylibsFolder = appBundle.childDirectory('Contents/Frameworks');
-  expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(OS.macOS.dylibFileName(packageName));
-  expect(dylib, exists);
+  final Directory frameworksFolder =
+      appBundle.childDirectory('Contents/Frameworks');
+  expect(frameworksFolder, exists);
+
+  // MyFramework.framework/
+  //   MyFramework  -> Versions/Current/MyFramework
+  //   Resources    -> Versions/Current/Resources
+  //   Versions/
+  //     A/
+  //       MyFramework
+  //       Resources/
+  //         Info.plist
+  //     Current  -> A
+  final String frameworkName = packageName.substring(0, 15);
+  final Directory frameworkDir =
+      frameworksFolder.childDirectory('$frameworkName.framework');
+  final Directory versionsDir = frameworkDir.childDirectory('Versions');
+  final Directory versionADir = versionsDir.childDirectory('A');
+  final Directory resourcesDir = versionADir.childDirectory('Resources');
+  expect(resourcesDir, exists);
+  final File dylibFile = versionADir.childFile(frameworkName);
+  expect(dylibFile, exists);
+  final Link currentLink = versionsDir.childLink('Current');
+  expect(currentLink, exists);
+  expect(currentLink.resolveSymbolicLinksSync(), versionADir.path);
+  final Link resourcesLink = frameworkDir.childLink('Resources');
+  expect(resourcesLink, exists);
+  expect(resourcesLink.resolveSymbolicLinksSync(), resourcesDir.path);
+  final Link dylibLink = frameworkDir.childLink(frameworkName);
+  expect(dylibLink, exists);
+  expect(dylibLink.resolveSymbolicLinksSync(), dylibFile.path);
 }
 
 void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   final Directory appBundle = appDirectory.childDirectory('build/ios/${buildMode.upperCaseFirst()}-iphoneos/Runner.app');
   expect(appBundle, exists);
-  final Directory dylibsFolder = appBundle.childDirectory('Frameworks');
-  expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(OS.iOS.dylibFileName(packageName));
+  final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
+  expect(frameworksFolder, exists);
+  final String frameworkName = packageName.substring(0, 15);
+  final File dylib = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile(frameworkName);
   expect(dylib, exists);
 }
 
@@ -379,7 +409,10 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
   final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
-  final File dylib = frameworksFolder.childFile(OS.macOS.dylibFileName(packageName));
+  final String frameworkName = packageName.substring(0, 15);
+  final File dylib = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile(frameworkName);
   expect(dylib, exists);
 }
 

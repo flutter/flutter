@@ -49,6 +49,9 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   bool isSupported() => _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync() && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
   }

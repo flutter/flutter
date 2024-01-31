@@ -4,13 +4,12 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'restoration.dart';
 
 void main() {
   group('UnmanagedRestorationScope', () {
-    testWidgetsWithLeakTracking('makes bucket available to descendants', (WidgetTester tester) async {
+    testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
       final RestorationBucket bucket1 = RestorationBucket.empty(
         restorationId: 'foo',
         debugOwner: 'owner',
@@ -43,7 +42,7 @@ void main() {
       expect(state.bucket, bucket2);
     });
 
-    testWidgetsWithLeakTracking('null bucket disables restoration', (WidgetTester tester) async {
+    testWidgets('null bucket disables restoration', (WidgetTester tester) async {
       await tester.pumpWidget(
         const UnmanagedRestorationScope(
           child: BucketSpy(),
@@ -55,7 +54,7 @@ void main() {
   });
 
   group('RestorationScope', () {
-    testWidgetsWithLeakTracking('asserts when none is found', (WidgetTester tester) async {
+    testWidgets('asserts when none is found', (WidgetTester tester) async {
       late BuildContext capturedContext;
       await tester.pumpWidget(WidgetsApp(
         color: const Color(0xD0FF0000),
@@ -101,7 +100,7 @@ void main() {
       expect(RestorationScope.of(capturedContext), scope.bucket);
     });
 
-    testWidgetsWithLeakTracking('makes bucket available to descendants', (WidgetTester tester) async {
+    testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
       const String id = 'hello world 1234';
       final MockRestorationManager manager = MockRestorationManager();
       addTearDown(manager.dispose);
@@ -126,7 +125,7 @@ void main() {
       expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey(id), isTrue);
     });
 
-    testWidgetsWithLeakTracking('bucket for descendants contains data claimed from parent', (WidgetTester tester) async {
+    testWidgets('bucket for descendants contains data claimed from parent', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
       addTearDown(manager.dispose);
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
@@ -148,7 +147,7 @@ void main() {
       expect(state.bucket!.read<int>('foo'), 22);
     });
 
-    testWidgetsWithLeakTracking('renames existing bucket when new ID is provided', (WidgetTester tester) async {
+    testWidgets('renames existing bucket when new ID is provided', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
       addTearDown(manager.dispose);
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
@@ -188,7 +187,7 @@ void main() {
       expect(state.bucket, same(bucket));
     });
 
-    testWidgetsWithLeakTracking('Disposing a scope removes its data', (WidgetTester tester) async {
+    testWidgets('Disposing a scope removes its data', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
       addTearDown(manager.dispose);
       final Map<String, dynamic> rawData = _createRawDataSet();
@@ -219,7 +218,7 @@ void main() {
       expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isFalse);
     });
 
-    testWidgetsWithLeakTracking('no bucket for descendants when id is null', (WidgetTester tester) async {
+    testWidgets('no bucket for descendants when id is null', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
       addTearDown(manager.dispose);
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
@@ -265,7 +264,7 @@ void main() {
       expect(state.bucket, isNull);
     });
 
-    testWidgetsWithLeakTracking('no bucket for descendants when scope is null', (WidgetTester tester) async {
+    testWidgets('no bucket for descendants when scope is null', (WidgetTester tester) async {
       final Key scopeKey = GlobalKey();
 
       await tester.pumpWidget(
@@ -310,7 +309,7 @@ void main() {
       expect(state.bucket, isNull);
     });
 
-    testWidgetsWithLeakTracking('no bucket for descendants when scope and id are null', (WidgetTester tester) async {
+    testWidgets('no bucket for descendants when scope and id are null', (WidgetTester tester) async {
       await tester.pumpWidget(
         const RestorationScope(
           restorationId: null,
@@ -321,7 +320,7 @@ void main() {
       expect(state.bucket, isNull);
     });
 
-    testWidgetsWithLeakTracking('moving scope moves its data', (WidgetTester tester) async {
+    testWidgets('moving scope moves its data', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
       addTearDown(manager.dispose);
       final Map<String, dynamic> rawData = <String, dynamic>{};

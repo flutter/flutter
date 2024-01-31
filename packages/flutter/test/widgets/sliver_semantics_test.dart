@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -20,7 +19,7 @@ void main() {
 }
 
 void _tests() {
-  testWidgetsWithLeakTracking('excludeFromScrollable works correctly', (WidgetTester tester) async {
+  testWidgets('excludeFromScrollable works correctly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const double appBarExpandedHeight = 200.0;
@@ -283,7 +282,7 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Offscreen sliver are hidden in semantics tree', (WidgetTester tester) async {
+  testWidgets('Offscreen sliver are hidden in semantics tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const double containerHeight = 200.0;
@@ -376,7 +375,7 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SemanticsNodes of Slivers are in paint order', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes of Slivers are in paint order', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> slivers = List<Widget>.generate(5, (int i) {
@@ -456,7 +455,7 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
@@ -568,7 +567,7 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Slivers fully covered by another overlapping sliver are hidden', (WidgetTester tester) async {
+  testWidgets('Slivers fully covered by another overlapping sliver are hidden', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
@@ -680,7 +679,7 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded (reverse)', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded (reverse)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
@@ -795,7 +794,7 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Slivers fully covered by another overlapping sliver are hidden (reverse)', (WidgetTester tester) async {
+  testWidgets('Slivers fully covered by another overlapping sliver are hidden (reverse)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
@@ -910,7 +909,7 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Slivers fully covered by another overlapping sliver are hidden (with center sliver)', (WidgetTester tester) async {
+  testWidgets('Slivers fully covered by another overlapping sliver are hidden (with center sliver)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
