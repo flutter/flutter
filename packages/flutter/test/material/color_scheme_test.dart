@@ -431,7 +431,7 @@ void main() {
     final ImageProvider image = MemoryImage(blueSquareBytes);
 
     final ColorScheme scheme =
-    await ColorScheme.fromImageProvider(provider: image);
+        await ColorScheme.fromImageProvider(provider: image);
 
     expect(scheme.brightness, Brightness.light);
     expect(scheme.primary, const Color(0xff4040f3));
@@ -465,7 +465,7 @@ void main() {
     expect(scheme.inversePrimary, const Color(0xffc0c1ff));
     expect(scheme.surfaceTint, const Color(0xff4040f3));
   }, skip: isBrowser, // [intended] uses dart:typed_data.
-  );
+);
 
   test('can generate a dark scheme from an imageProvider', () async {
     final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
@@ -514,8 +514,8 @@ void main() {
 
     expect(() async => ColorScheme.fromImageProvider(provider: image), throwsA(
       isA<Exception>().having((Exception e) => e.toString(),
-          'Timeout occurred trying to load image', contains('TimeoutException')),
-    ),
+        'Timeout occurred trying to load image', contains('TimeoutException')),
+      ),
     );
   });
 

@@ -41,7 +41,7 @@ import 'theme_data.dart';
 /// '-Dim' color roles, such as [primaryFixed] and [primaryFixedDim]. Fixed roles
 /// are appropriate to use in places where Container roles are normally used,
 /// but they stay the same color between light and dark themes. The '-Dim' roles
-/// provides a stronger, more emphasized color with the same fixed behavior.
+/// provide a stronger, more emphasized color with the same fixed behavior.
 ///
 /// The remaining colors of the scheme are composed of neutral colors used for
 /// backgrounds and surfaces, as well as specific colors for errors, dividers
