@@ -13,22 +13,17 @@ import 'embedding_strategy.dart';
 /// This strategy takes over the <body> element, modifies the viewport meta-tag,
 /// and ensures that the root Flutter view covers the whole screen.
 class FullPageEmbeddingStrategy implements EmbeddingStrategy {
-  @override
-  DomEventTarget get globalEventTarget => domWindow;
-
-  @override
-  void initialize({
-    Map<String, String>? hostElementAttributes,
-  }) {
-    // ignore:avoid_function_literals_in_foreach_calls
-    hostElementAttributes?.entries.forEach((MapEntry<String, String> entry) {
-      _setHostAttribute(entry.key, entry.value);
-    });
-    _setHostAttribute('flt-embedding', 'full-page');
-
+  FullPageEmbeddingStrategy() {
+    hostElement.setAttribute('flt-embedding', 'full-page');
     _applyViewportMeta();
     _setHostStyles();
   }
+
+  @override
+  final DomElement hostElement = domDocument.body!;
+
+  @override
+  DomEventTarget get globalEventTarget => domWindow;
 
   @override
   void attachViewRoot(DomElement rootElement) {
@@ -40,42 +35,29 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
       ..bottom = '0'
       ..left = '0';
 
-    domDocument.body!.append(rootElement);
+    hostElement.append(rootElement);
 
     registerElementForCleanup(rootElement);
   }
 
-  @override
-  void attachResourcesHost(DomElement resourceHost, {DomElement? nextTo}) {
-    domDocument.body!.insertBefore(resourceHost, nextTo);
-
-    registerElementForCleanup(resourceHost);
-  }
-
-  void _setHostAttribute(String name, String value) {
-    domDocument.body!.setAttribute(name, value);
-  }
-
   // Sets the global styles for a flutter app.
   void _setHostStyles() {
-    final DomHTMLBodyElement bodyElement = domDocument.body!;
+    setElementStyle(hostElement, 'position', 'fixed');
+    setElementStyle(hostElement, 'top', '0');
+    setElementStyle(hostElement, 'right', '0');
+    setElementStyle(hostElement, 'bottom', '0');
+    setElementStyle(hostElement, 'left', '0');
+    setElementStyle(hostElement, 'overflow', 'hidden');
+    setElementStyle(hostElement, 'padding', '0');
+    setElementStyle(hostElement, 'margin', '0');
 
-    setElementStyle(bodyElement, 'position', 'fixed');
-    setElementStyle(bodyElement, 'top', '0');
-    setElementStyle(bodyElement, 'right', '0');
-    setElementStyle(bodyElement, 'bottom', '0');
-    setElementStyle(bodyElement, 'left', '0');
-    setElementStyle(bodyElement, 'overflow', 'hidden');
-    setElementStyle(bodyElement, 'padding', '0');
-    setElementStyle(bodyElement, 'margin', '0');
-
-    setElementStyle(bodyElement, 'user-select', 'none');
-    setElementStyle(bodyElement, '-webkit-user-select', 'none');
+    setElementStyle(hostElement, 'user-select', 'none');
+    setElementStyle(hostElement, '-webkit-user-select', 'none');
 
     // This is required to prevent the browser from doing any native touch
     // handling. If this is not done, the browser doesn't report 'pointermove'
     // events properly.
-    setElementStyle(bodyElement, 'touch-action', 'none');
+    setElementStyle(hostElement, 'touch-action', 'none');
   }
 
   // Sets a meta viewport tag appropriate for Flutter Web in full screen.

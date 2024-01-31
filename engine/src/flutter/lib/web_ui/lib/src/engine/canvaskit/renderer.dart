@@ -97,11 +97,6 @@ class CanvasKitRenderer implements Renderer {
   }
 
   @override
-  void reset(FlutterViewEmbedder embedder) {
-    // No work required.
-  }
-
-  @override
   ui.Paint createPaint() => CkPaint();
 
   @override

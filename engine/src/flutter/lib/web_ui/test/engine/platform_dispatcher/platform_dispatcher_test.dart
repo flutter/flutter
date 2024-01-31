@@ -10,12 +10,16 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../../common/test_initialization.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  ensureFlutterViewEmbedderInitialized();
+  setUpAll(() async {
+    await bootstrapAndRunApp(withImplicitView: true);
+  });
 
   group('PlatformDispatcher', () {
     test('reports at least one display', () {

@@ -30,15 +30,6 @@ void doTests() {
     });
 
     test('Prepares target environment', () {
-      strategy.initialize(
-        hostElementAttributes: <String, String>{
-          'key-for-testing': 'value-for-testing',
-        },
-      );
-
-      expect(target.getAttribute('key-for-testing'), 'value-for-testing',
-          reason:
-              'Should add attributes as key=value into target element.');
       expect(target.getAttribute('flt-embedding'), 'custom-element',
           reason:
               'Should identify itself as a specific key=value into the target element.');
@@ -50,7 +41,6 @@ void doTests() {
       target = createDomElement('this-is-the-target');
       domDocument.body!.append(target);
       strategy = CustomElementEmbeddingStrategy(target);
-      strategy.initialize();
     });
 
     tearDown(() {
@@ -86,40 +76,6 @@ void doTests() {
           reason: 'Should take 100% of the available height');
       expect(styleAfter.overflow, 'hidden',
           reason: 'Should hide the occasional oversized canvas elements.');
-    });
-  });
-
-  group('attachResourcesHost', () {
-    late DomElement glassPane;
-
-    setUp(() {
-      target = createDomElement('this-is-the-target');
-      glassPane = createDomElement('woah-a-glasspane');
-      domDocument.body!.append(target);
-      strategy = CustomElementEmbeddingStrategy(target);
-      strategy.initialize();
-      strategy.attachViewRoot(glassPane);
-    });
-
-    tearDown(() {
-      target.remove();
-    });
-
-    test(
-        'Should attach resources host into target (body), `nextTo` other element',
-        () async {
-      final DomElement resources = createDomElement('resources-host-element');
-
-      expect(resources.isConnected, isFalse);
-
-      strategy.attachResourcesHost(resources, nextTo: glassPane);
-
-      expect(resources.isConnected, isTrue,
-          reason: 'Should inject resources host somewhere in the document.');
-      expect(resources.parent, target,
-          reason: 'Should inject the resources into the target element');
-      expect(resources.nextSibling, glassPane,
-          reason: 'Should be injected `nextTo` the passed element.');
     });
   });
 }

@@ -45,7 +45,6 @@ abstract class Renderer {
   FlutterFontCollection get fontCollection;
 
   FutureOr<void> initialize();
-  void reset(FlutterViewEmbedder embedder);
 
   ui.Paint createPaint();
 

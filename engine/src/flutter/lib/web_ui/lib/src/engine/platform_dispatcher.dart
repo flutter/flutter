@@ -935,7 +935,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     configuration = configuration.copyWith(locales: const <ui.Locale>[]);
   }
 
-  // Called by FlutterViewEmbedder when browser languages change.
+  // Called by `_onLocaleChangedSubscription` when browser languages change.
   void updateLocales() {
     configuration = configuration.copyWith(locales: parseBrowserLanguages());
   }

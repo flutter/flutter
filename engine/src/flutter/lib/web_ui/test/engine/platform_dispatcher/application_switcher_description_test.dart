@@ -13,8 +13,6 @@ void main() {
 }
 
 Future<void> testMain() async {
-  ensureFlutterViewEmbedderInitialized();
-
   String? getCssThemeColor() {
     final DomHTMLMetaElement? theme =
         domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;

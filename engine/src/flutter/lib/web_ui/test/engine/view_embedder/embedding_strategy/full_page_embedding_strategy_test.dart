@@ -15,13 +15,9 @@ void main() {
 }
 
 void doTests() {
-  late FullPageEmbeddingStrategy strategy;
-  late DomElement target;
-
   group('initialize', () {
-    setUp(() {
-      strategy = FullPageEmbeddingStrategy();
-      target = domDocument.body!;
+    test('Prepares target environment', () {
+      final DomElement target = domDocument.body!;
       final DomHTMLMetaElement meta = createDomHTMLMetaElement();
       meta
         ..id = 'my_viewport_meta_for_testing'
@@ -29,23 +25,15 @@ void doTests() {
         ..content = 'width=device-width, initial-scale=1.0, '
             'maximum-scale=1.0, user-scalable=no';
       domDocument.head!.append(meta);
-    });
 
-    test('Prepares target environment', () {
       DomElement? userMeta =
           domDocument.querySelector('#my_viewport_meta_for_testing');
 
       expect(userMeta, isNotNull);
 
-      strategy.initialize(
-        hostElementAttributes: <String, String>{
-          'key-for-testing': 'value-for-testing',
-        },
-      );
+      // ignore: unused_local_variable
+      final FullPageEmbeddingStrategy strategy = FullPageEmbeddingStrategy();
 
-      expect(target.getAttribute('key-for-testing'), 'value-for-testing',
-          reason:
-              'Should add attributes as key=value into target element.');
       expect(target.getAttribute('flt-embedding'), 'full-page',
           reason:
               'Should identify itself as a specific key=value into the target element.');
@@ -65,12 +53,9 @@ void doTests() {
   });
 
   group('attachViewRoot', () {
-    setUp(() {
-      strategy = FullPageEmbeddingStrategy();
-      strategy.initialize();
-    });
-
     test('Should attach glasspane into embedder target (body)', () async {
+      final FullPageEmbeddingStrategy strategy = FullPageEmbeddingStrategy();
+
       final DomElement glassPane = createDomElement('some-tag-for-tests');
       final DomCSSStyleDeclaration style = glassPane.style;
 
@@ -101,33 +86,6 @@ void doTests() {
           reason: 'Should cover the whole viewport.');
       expect(styleAfter.left, '0px',
           reason: 'Should cover the whole viewport.');
-    });
-  });
-
-  group('attachResourcesHost', () {
-    late DomElement glassPane;
-    setUp(() {
-      glassPane = createDomElement('some-tag-for-tests');
-      strategy = FullPageEmbeddingStrategy();
-      strategy.initialize();
-      strategy.attachViewRoot(glassPane);
-    });
-
-    test(
-        'Should attach resources host into target (body), `nextTo` other element',
-        () async {
-      final DomElement resources = createDomElement('resources-host-element');
-
-      expect(resources.isConnected, isFalse);
-
-      strategy.attachResourcesHost(resources, nextTo: glassPane);
-
-      expect(resources.isConnected, isTrue,
-          reason: 'Should inject resources host somewhere in the document.');
-      expect(resources.parent, domDocument.body,
-          reason: 'Should inject resources host into the <body>');
-      expect(resources.nextSibling, glassPane,
-          reason: 'Should be injected `nextTo` the passed element.');
     });
   });
 }

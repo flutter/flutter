@@ -259,7 +259,7 @@ class TextField extends PrimaryRoleManager {
 
     // On iOS, even though the semantic text field is transparent, the cursor
     // and text highlighting are still visible. The cursor and text selection
-    // are made invisible by CSS in [FlutterViewEmbedder.reset].
+    // are made invisible by CSS in [StyleManager.attachGlobalStyles].
     // But there's one more case where iOS highlights text. That's when there's
     // and autocorrect suggestion. To disable that, we have to do the following:
     activeEditableElement

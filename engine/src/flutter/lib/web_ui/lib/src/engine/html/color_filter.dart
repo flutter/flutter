@@ -7,11 +7,11 @@ import 'package:ui/ui.dart' as ui;
 import '../../engine/color_filter.dart';
 import '../browser_detection.dart';
 import '../dom.dart';
-import '../embedder.dart';
 import '../svg.dart';
 import '../util.dart';
 import 'bitmap_canvas.dart';
 import 'path_to_svg_clip.dart';
+import 'resource_manager.dart';
 import 'shaders/shader.dart';
 import 'surface.dart';
 
@@ -51,7 +51,7 @@ class PersistedColorFilter extends PersistedContainerSurface
   @override
   void discard() {
     super.discard();
-    flutterViewEmbedder.removeResource(_filterElement);
+    ResourceManager.instance.removeResource(_filterElement);
     _filterElement = null;
     // Do not detach the child container from the root. It is permanently
     // attached. The elements are reused together and are detached from the DOM
@@ -71,7 +71,7 @@ class PersistedColorFilter extends PersistedContainerSurface
 
   @override
   void apply() {
-    flutterViewEmbedder.removeResource(_filterElement);
+    ResourceManager.instance.removeResource(_filterElement);
     _filterElement = null;
     final EngineHtmlColorFilter? engineValue = createHtmlColorFilter(filter as EngineColorFilter);
     if (engineValue == null) {

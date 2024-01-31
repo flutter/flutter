@@ -11,8 +11,10 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
 import 'browser_detection.dart';
+import 'configuration.dart';
 import 'display.dart';
 import 'dom.dart';
+import 'initialization.dart';
 import 'mouse/context_menu.dart';
 import 'mouse/cursor.dart';
 import 'navigation/history.dart';
@@ -24,6 +26,7 @@ import 'text_editing/text_editing.dart';
 import 'util.dart';
 import 'view_embedder/dom_manager.dart';
 import 'view_embedder/embedding_strategy/embedding_strategy.dart';
+import 'view_embedder/global_html_attributes.dart';
 import 'view_embedder/style_manager.dart';
 
 typedef _HandleMessageCallBack = Future<bool> Function();
@@ -64,6 +67,12 @@ base class EngineFlutterView implements ui.FlutterView {
     embeddingStrategy.attachViewRoot(dom.rootElement);
     pointerBinding = PointerBinding(this);
     _resizeSubscription = onResize.listen(_didResize);
+    _globalHtmlAttributes.applyAttributes(
+      viewId: viewId,
+      autoDetectRenderer: FlutterConfiguration.flutterWebAutoDetect,
+      rendererTag: renderer.rendererTag,
+      buildMode: buildMode,
+    );
     registerHotRestartListener(dispose);
   }
 
@@ -123,11 +132,16 @@ base class EngineFlutterView implements ui.FlutterView {
   late final AccessibilityAnnouncements accessibilityAnnouncements =
       AccessibilityAnnouncements(hostElement: dom.announcementsHost);
 
+  late final GlobalHtmlAttributes _globalHtmlAttributes = GlobalHtmlAttributes(
+    rootElement: dom.rootElement,
+    hostElement: embeddingStrategy.hostElement,
+  );
+
   late final MouseCursor mouseCursor = MouseCursor(dom.rootElement);
 
   late final ContextMenu contextMenu = ContextMenu(dom.rootElement);
 
-  late final DomManager dom = DomManager(viewId: viewId, devicePixelRatio: devicePixelRatio);
+  late final DomManager dom = DomManager(devicePixelRatio: devicePixelRatio);
 
   late final PointerBinding pointerBinding;
 
