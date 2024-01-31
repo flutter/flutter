@@ -756,6 +756,34 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+
+    testUsingContext('generates correct gradle command for Unix-like environment', () async {
+      await lockFileDepMissingHandler.handler(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        line: '',
+      );
+      expect(testLogger.statusText, contains('./gradlew'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('generates correct gradle command for Windows environment', () async {
+      await lockFileDepMissingHandler.handler(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+      line: '',
+    );
+      expect(testLogger.statusText, contains(r'.\gradlew.bat'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('windows'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    }, testOn: 'windows');
   });
 
   group('Incompatible Kotlin version', () {
