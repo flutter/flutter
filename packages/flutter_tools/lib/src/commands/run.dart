@@ -337,7 +337,6 @@ class RunCommand extends RunCommandBase {
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
-    addMultidexOption();
     addIgnoreDeprecationOption();
     argParser
       ..addFlag('await-first-frame-when-tracing',
@@ -640,7 +639,6 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6 ?? false,
-        multidexEnabled: boolArg('multidex'),
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
       );
@@ -670,7 +668,6 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       ipv6: ipv6 ?? false,
       stayResident: stayResident,
-      multidexEnabled: boolArg('multidex'),
     );
   }
 
@@ -715,7 +712,6 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6 ?? false,
-          multidexEnabled: boolArg('multidex'),
           userIdentifier: userIdentifier,
           enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         );
