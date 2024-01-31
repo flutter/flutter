@@ -55,180 +55,6 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  group('Material 2', () {
-    // These tests are only relevant for Material 2. Once Material 2
-    // support is deprecated and the APIs are removed, these tests
-    // can be deleted.
-
-    testWidgets('Material2 - SliverAppBar.medium defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
-      const double collapsedAppBarHeight = 64;
-      const double expandedAppBarHeight = 112;
-
-      await tester.pumpWidget(MaterialApp(
-        theme: theme,
-        home: Scaffold(
-          body: CustomScrollView(
-            primary: true,
-            slivers: <Widget>[
-              const SliverAppBar.medium(
-                title: Text('AppBar Title'),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 1200,
-                  color: Colors.orange[400],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ));
-
-      final ScrollController controller = primaryScrollController(tester);
-      // There are two widgets for the title. The first title is a larger version
-      // that is shown at the bottom when the app bar is expanded. It scrolls under
-      // the main row until it is completely hidden and then the first title is
-      // faded in. The last is the title on the mainrow with the icons. It is
-      // transparent when the app bar is expanded, and opaque when it is collapsed.
-      final Finder expandedTitle = find.text('AppBar Title').first;
-      final Finder expandedTitleClip = find.ancestor(
-        of: expandedTitle,
-        matching: find.byType(ClipRect),
-      );
-      final Finder collapsedTitle = find.text('AppBar Title').last;
-      final Finder collapsedTitleOpacity = find.ancestor(
-        of: collapsedTitle,
-        matching: find.byType(AnimatedOpacity),
-      );
-
-      // Default, fully expanded app bar.
-      expect(controller.offset, 0);
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), expandedAppBarHeight);
-      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
-      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
-
-      // Test the expanded title is positioned correctly.
-      final Offset titleOffset = tester.getBottomLeft(expandedTitle);
-      expect(titleOffset, const Offset(16.0, 92.0));
-
-      // Test the expanded title default color.
-      expect(
-        tester.renderObject<RenderParagraph>(expandedTitle).text.style!.color,
-        theme.colorScheme.onPrimary,
-      );
-
-      // Scroll the expanded app bar partially out of view.
-      controller.jumpTo(45);
-      await tester.pump();
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), expandedAppBarHeight - 45);
-      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
-      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
-
-      // Scroll so that it is completely collapsed.
-      controller.jumpTo(600);
-      await tester.pump();
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), collapsedAppBarHeight);
-      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
-      expect(tester.getSize(expandedTitleClip).height, 0);
-
-      // Scroll back to fully expanded.
-      controller.jumpTo(0);
-      await tester.pumpAndSettle();
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), expandedAppBarHeight);
-      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
-      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
-    });
-
-    testWidgets('Material2 - SliverAppBar.large defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
-      const double collapsedAppBarHeight = 64;
-      const double expandedAppBarHeight = 152;
-
-      await tester.pumpWidget(MaterialApp(
-        theme: theme,
-        home: Scaffold(
-          body: CustomScrollView(
-            primary: true,
-            slivers: <Widget>[
-              const SliverAppBar.large(
-                title: Text('AppBar Title'),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 1200,
-                  color: Colors.orange[400],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ));
-
-      final ScrollController controller = primaryScrollController(tester);
-      // There are two widgets for the title. The first title is a larger version
-      // that is shown at the bottom when the app bar is expanded. It scrolls under
-      // the main row until it is completely hidden and then the first title is
-      // faded in. The last is the title on the mainrow with the icons. It is
-      // transparent when the app bar is expanded, and opaque when it is collapsed.
-      final Finder expandedTitle = find.text('AppBar Title').first;
-      final Finder expandedTitleClip = find.ancestor(
-        of: expandedTitle,
-        matching: find.byType(ClipRect),
-      );
-      final Finder collapsedTitle = find.text('AppBar Title').last;
-      final Finder collapsedTitleOpacity = find.ancestor(
-        of: collapsedTitle,
-        matching: find.byType(AnimatedOpacity),
-      );
-
-      // Default, fully expanded app bar.
-      expect(controller.offset, 0);
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), expandedAppBarHeight);
-      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
-      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
-
-      // Test the expanded title is positioned correctly.
-      final Offset titleOffset = tester.getBottomLeft(expandedTitle);
-      expect(titleOffset, const Offset(16.0, 124.0));
-
-      // Test the expanded title default color.
-      expect(
-        tester.renderObject<RenderParagraph>(expandedTitle).text.style!.color,
-        theme.colorScheme.onPrimary,
-      );
-
-      // Scroll the expanded app bar partially out of view.
-      controller.jumpTo(45);
-      await tester.pump();
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), expandedAppBarHeight - 45);
-      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
-      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
-
-      // Scroll so that it is completely collapsed.
-      controller.jumpTo(600);
-      await tester.pump();
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), collapsedAppBarHeight);
-      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
-      expect(tester.getSize(expandedTitleClip).height, 0);
-
-      // Scroll back to fully expanded.
-      controller.jumpTo(0);
-      await tester.pumpAndSettle();
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), expandedAppBarHeight);
-      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
-      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
-    });
-  });
-
   testWidgets(
     'SliverAppBar large & medium title respects automaticallyImplyLeading',
     (WidgetTester tester) async {
@@ -2442,5 +2268,179 @@ void main() {
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
+  });
+
+  group('Material 2', () {
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    testWidgets('Material2 - SliverAppBar.medium defaults', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      const double collapsedAppBarHeight = 64;
+      const double expandedAppBarHeight = 112;
+
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              const SliverAppBar.medium(
+                title: Text('AppBar Title'),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200,
+                  color: Colors.orange[400],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      final ScrollController controller = primaryScrollController(tester);
+      // There are two widgets for the title. The first title is a larger version
+      // that is shown at the bottom when the app bar is expanded. It scrolls under
+      // the main row until it is completely hidden and then the first title is
+      // faded in. The last is the title on the mainrow with the icons. It is
+      // transparent when the app bar is expanded, and opaque when it is collapsed.
+      final Finder expandedTitle = find.text('AppBar Title').first;
+      final Finder expandedTitleClip = find.ancestor(
+        of: expandedTitle,
+        matching: find.byType(ClipRect),
+      );
+      final Finder collapsedTitle = find.text('AppBar Title').last;
+      final Finder collapsedTitleOpacity = find.ancestor(
+        of: collapsedTitle,
+        matching: find.byType(AnimatedOpacity),
+      );
+
+      // Default, fully expanded app bar.
+      expect(controller.offset, 0);
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+
+      // Test the expanded title is positioned correctly.
+      final Offset titleOffset = tester.getBottomLeft(expandedTitle);
+      expect(titleOffset, const Offset(16.0, 92.0));
+
+      // Test the expanded title default color.
+      expect(
+        tester.renderObject<RenderParagraph>(expandedTitle).text.style!.color,
+        theme.colorScheme.onPrimary,
+      );
+
+      // Scroll the expanded app bar partially out of view.
+      controller.jumpTo(45);
+      await tester.pump();
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), expandedAppBarHeight - 45);
+      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
+
+      // Scroll so that it is completely collapsed.
+      controller.jumpTo(600);
+      await tester.pump();
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), collapsedAppBarHeight);
+      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
+      expect(tester.getSize(expandedTitleClip).height, 0);
+
+      // Scroll back to fully expanded.
+      controller.jumpTo(0);
+      await tester.pumpAndSettle();
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+    });
+
+    testWidgets('Material2 - SliverAppBar.large defaults', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      const double collapsedAppBarHeight = 64;
+      const double expandedAppBarHeight = 152;
+
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              const SliverAppBar.large(
+                title: Text('AppBar Title'),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200,
+                  color: Colors.orange[400],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      final ScrollController controller = primaryScrollController(tester);
+      // There are two widgets for the title. The first title is a larger version
+      // that is shown at the bottom when the app bar is expanded. It scrolls under
+      // the main row until it is completely hidden and then the first title is
+      // faded in. The last is the title on the mainrow with the icons. It is
+      // transparent when the app bar is expanded, and opaque when it is collapsed.
+      final Finder expandedTitle = find.text('AppBar Title').first;
+      final Finder expandedTitleClip = find.ancestor(
+        of: expandedTitle,
+        matching: find.byType(ClipRect),
+      );
+      final Finder collapsedTitle = find.text('AppBar Title').last;
+      final Finder collapsedTitleOpacity = find.ancestor(
+        of: collapsedTitle,
+        matching: find.byType(AnimatedOpacity),
+      );
+
+      // Default, fully expanded app bar.
+      expect(controller.offset, 0);
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+
+      // Test the expanded title is positioned correctly.
+      final Offset titleOffset = tester.getBottomLeft(expandedTitle);
+      expect(titleOffset, const Offset(16.0, 124.0));
+
+      // Test the expanded title default color.
+      expect(
+        tester.renderObject<RenderParagraph>(expandedTitle).text.style!.color,
+        theme.colorScheme.onPrimary,
+      );
+
+      // Scroll the expanded app bar partially out of view.
+      controller.jumpTo(45);
+      await tester.pump();
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), expandedAppBarHeight - 45);
+      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
+
+      // Scroll so that it is completely collapsed.
+      controller.jumpTo(600);
+      await tester.pump();
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), collapsedAppBarHeight);
+      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
+      expect(tester.getSize(expandedTitleClip).height, 0);
+
+      // Scroll back to fully expanded.
+      controller.jumpTo(0);
+      await tester.pumpAndSettle();
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+      expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+    });
   });
 }

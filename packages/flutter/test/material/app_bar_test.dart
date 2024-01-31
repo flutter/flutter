@@ -498,26 +498,6 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - AppBar drawer icon has default color', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.from(
-      colorScheme: const ColorScheme.light(),
-      useMaterial3: false,
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: themeData,
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Howdy!'),
-          ),
-          drawer: const Drawer(),
-        ),
-      ),
-    );
-
-    expect(_iconStyle(tester, Icons.menu)?.color, themeData.colorScheme.onPrimary);
-  });
-
   testWidgets('Material3 - AppBar drawer icon has default color', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(),
@@ -595,26 +575,6 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.from(
-      colorScheme: const ColorScheme.light(),
-      useMaterial3: false,
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: themeData,
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Howdy!'),
-          ),
-          endDrawer: const Drawer(),
-        ),
-      ),
-    );
-
-    expect(_iconStyle(tester, Icons.menu)?.color, themeData.colorScheme.onPrimary);
-  });
-
   testWidgets('Material3 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(),
@@ -671,64 +631,6 @@ void main() {
     );
 
     expect(_iconStyle(tester, Icons.menu)?.color, color);
-  });
-
-  testWidgets('Material2 - leading widget extends to edge and is square', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(
-      platform: TargetPlatform.android,
-      useMaterial3: false,
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: themeData,
-        home: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
-            title: const Text('X'),
-          ),
-          drawer: const Column(), // Doesn't really matter. Triggers a hamburger regardless.
-        ),
-      ),
-    );
-
-    // Default IconButton has a size of (56x56).
-    final Finder hamburger = find.byType(IconButton);
-    expect(tester.getTopLeft(hamburger), Offset.zero);
-    expect(tester.getSize(hamburger), const Size(56.0, 56.0));
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: themeData,
-        home: Scaffold(
-          appBar: AppBar(
-            leading: Container(),
-            title: const Text('X'),
-          ),
-        ),
-      ),
-    );
-
-    // Default leading widget has a size of (56x56).
-    final Finder leadingBox = find.byType(Container);
-    expect(tester.getTopLeft(leadingBox), Offset.zero);
-    expect(tester.getSize(leadingBox), const Size(56.0, 56.0));
-
-    // The custom leading widget should still be 56x56 even if its size is smaller.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: themeData,
-        home: Scaffold(
-          appBar: AppBar(
-            leading: const SizedBox(height: 36, width: 36,),
-            title: const Text('X'),
-          ), // Doesn't really matter. Triggers a hamburger regardless.
-        ),
-      ),
-    );
-
-    final Finder leading = find.byType(SizedBox);
-    expect(tester.getTopLeft(leading), Offset.zero);
-    expect(tester.getSize(leading), const Size(56.0, 56.0));
   });
 
   testWidgets('Material3 - leading widget extends to edge and is square', (WidgetTester tester) async {
@@ -789,46 +691,6 @@ void main() {
     expect(tester.getSize(leading), const Size(56.0, 56.0));
   });
 
-  testWidgets('Material2 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
-      platform: TargetPlatform.android,
-      useMaterial3: false,
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('X'),
-            actions: const <Widget> [
-              IconButton(
-                icon: Icon(Icons.share),
-                onPressed: null,
-                tooltip: 'Share',
-                iconSize: 20.0,
-              ),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: null,
-                tooltip: 'Add',
-                iconSize: 60.0,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
-    expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
-    // It's still the size it was plus the 2 * 8dp padding from IconButton.
-    expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
-
-    final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
-    // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
-    expect(tester.getSize(shareButton), const Size(48.0, 56.0));
-  });
-
   testWidgets('Material3 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
@@ -867,30 +729,6 @@ void main() {
     final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
     expect(tester.getSize(shareButton), const Size(48.0, 48.0));
-  });
-
-  testWidgets('Material2 - AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
-    Widget buildAppBar([double? elevation]) {
-      return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
-          appBar: AppBar(title: const Text('Title'), elevation: elevation),
-        ),
-      );
-    }
-
-    Material getMaterial() => tester.widget<Material>(find.descendant(
-      of: find.byType(AppBar),
-      matching: find.byType(Material),
-    ));
-
-    // Default elevation should be used for the material.
-    await tester.pumpWidget(buildAppBar());
-    expect(getMaterial().elevation, 4);
-
-    // AppBar should use the specified elevation.
-    await tester.pumpWidget(buildAppBar(8.0));
-    expect(getMaterial().elevation, 8.0);
   });
 
   testWidgets('Material3 - AppBar uses the specified elevation or defaults to 0', (WidgetTester tester) async {
@@ -1307,53 +1145,6 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/58665
-    final Key key = UniqueKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        // Test was designed against InkSplash so need to make sure that is used.
-        theme: ThemeData(
-          useMaterial3: false,
-          splashFactory: InkSplash.splashFactory
-        ),
-        home: Center(
-          child: AppBar(
-            title: const Text('Abc'),
-            actions: <Widget>[
-              IconButton(
-                key: key,
-                icon: const Icon(Icons.add_circle),
-                tooltip: 'First button',
-                onPressed: () {},
-              ),
-            ],
-            flexibleSpace: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: const Alignment(-0.04, 1.0),
-                  colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    final RenderObject painter = tester.renderObject(
-      find.descendant(
-        of: find.descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(Stack),
-        ),
-        matching: find.byType(Material),
-      ),
-    );
-    await tester.tap(find.byKey(key));
-    expect(painter, paints..save()..translate()..save()..translate()..circle(x: 24.0, y: 28.0));
-  });
-
   testWidgets('Material3 - AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/58665
     final Key key = UniqueKey();
@@ -1622,24 +1413,6 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Material2 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
-    final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
-    await tester.pumpWidget(MaterialApp(
-      theme: darkTheme,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('test'),
-        ),
-      ),
-    ));
-
-    expect(darkTheme.colorScheme.brightness, Brightness.dark);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.light,
-    ));
-  });
-
   testWidgets('Material3 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
@@ -1656,26 +1429,6 @@ void main() {
       statusBarColor: Colors.transparent,
       statusBarBrightness: Brightness.dark,
       statusBarIconBrightness: Brightness.light,
-    ));
-  });
-
-  testWidgets('Material2 - AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue, useMaterial3: false);
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: lightTheme,
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('test'),
-          ),
-        ),
-      ),
-    );
-
-    expect(lightTheme.colorScheme.brightness, Brightness.light);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
     ));
   });
 
@@ -1698,57 +1451,6 @@ void main() {
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.dark,
     ));
-  });
-
-  testWidgets('Material2 - Default system bar brightness based on AppBar background color brightness.', (WidgetTester tester) async {
-    Widget buildAppBar(ThemeData theme) {
-      return MaterialApp(
-        theme: theme,
-        home: Scaffold(
-          appBar: AppBar(title: const Text('Title')),
-        ),
-      );
-    }
-
-    // Using a light theme.
-    {
-      await tester.pumpWidget(buildAppBar(ThemeData(useMaterial3: false)));
-      final Material appBarMaterial = tester.widget<Material>(
-        find.descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(Material),
-        ),
-      );
-      final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
-      final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
-        ? Brightness.dark
-        : Brightness.light;
-
-      expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
-        statusBarBrightness: appBarBrightness,
-        statusBarIconBrightness: onAppBarBrightness,
-      ));
-    }
-
-    // Using a dark theme.
-    {
-      await tester.pumpWidget(buildAppBar(ThemeData.dark(useMaterial3: false)));
-      final Material appBarMaterial = tester.widget<Material>(
-        find.descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(Material),
-        ),
-      );
-      final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
-      final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
-          ? Brightness.dark
-          : Brightness.light;
-
-      expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
-        statusBarBrightness: appBarBrightness,
-        statusBarIconBrightness: onAppBarBrightness,
-      ));
-    }
   });
 
   testWidgets('Material3 - Default system bar brightness based on AppBar background color brightness.', (WidgetTester tester) async {
@@ -1802,25 +1504,6 @@ void main() {
         statusBarIconBrightness: onAppBarBrightness,
       ));
     }
-  });
-
-  testWidgets('Material2 - Default status bar color', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        key: GlobalKey(),
-        theme: ThemeData.light().copyWith(
-          useMaterial3: false,
-          appBarTheme: const AppBarTheme(),
-        ),
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('title'),
-          ),
-        ),
-      ),
-    );
-
-    expect(SystemChrome.latestStyle!.statusBarColor, null);
   });
 
   testWidgets('Material3 - Default status bar color', (WidgetTester tester) async {
@@ -3132,6 +2815,325 @@ void main() {
         await tester.tap(buttonFinder, warnIfMissed:false);
         await tester.pump();
         expect(buttonWasPressed, isFalse);
+    });
+  });
+
+  group('Material 2', () {
+    testWidgets('Material2 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
+      final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
+      await tester.pumpWidget(MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('test'),
+          ),
+        ),
+      ));
+
+      expect(darkTheme.colorScheme.brightness, Brightness.dark);
+      expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+      ));
+    });
+
+    testWidgets('Material2 - AppBar drawer icon has default color', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: false,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Howdy!'),
+            ),
+            drawer: const Drawer(),
+          ),
+        ),
+      );
+
+      expect(_iconStyle(tester, Icons.menu)?.color, themeData.colorScheme.onPrimary);
+    });
+
+    testWidgets('Material2 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: false,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Howdy!'),
+            ),
+            endDrawer: const Drawer(),
+          ),
+        ),
+      );
+
+      expect(_iconStyle(tester, Icons.menu)?.color, themeData.colorScheme.onPrimary);
+    });
+
+    testWidgets('Material2 - leading widget extends to edge and is square', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        platform: TargetPlatform.android,
+        useMaterial3: false,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              title: const Text('X'),
+            ),
+            drawer: const Column(), // Doesn't really matter. Triggers a hamburger regardless.
+          ),
+        ),
+      );
+
+      // Default IconButton has a size of (56x56).
+      final Finder hamburger = find.byType(IconButton);
+      expect(tester.getTopLeft(hamburger), Offset.zero);
+      expect(tester.getSize(hamburger), const Size(56.0, 56.0));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              leading: Container(),
+              title: const Text('X'),
+            ),
+          ),
+        ),
+      );
+
+      // Default leading widget has a size of (56x56).
+      final Finder leadingBox = find.byType(Container);
+      expect(tester.getTopLeft(leadingBox), Offset.zero);
+      expect(tester.getSize(leadingBox), const Size(56.0, 56.0));
+
+      // The custom leading widget should still be 56x56 even if its size is smaller.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              leading: const SizedBox(height: 36, width: 36,),
+              title: const Text('X'),
+            ), // Doesn't really matter. Triggers a hamburger regardless.
+          ),
+        ),
+      );
+
+      final Finder leading = find.byType(SizedBox);
+      expect(tester.getTopLeft(leading), Offset.zero);
+      expect(tester.getSize(leading), const Size(56.0, 56.0));
+    });
+
+    testWidgets('Material2 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        platform: TargetPlatform.android,
+        useMaterial3: false,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('X'),
+              actions: const <Widget> [
+                IconButton(
+                  icon: Icon(Icons.share),
+                  onPressed: null,
+                  tooltip: 'Share',
+                  iconSize: 20.0,
+                ),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: null,
+                  tooltip: 'Add',
+                  iconSize: 60.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
+      expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
+      // It's still the size it was plus the 2 * 8dp padding from IconButton.
+      expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
+
+      final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
+      // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
+      expect(tester.getSize(shareButton), const Size(48.0, 56.0));
+    });
+
+    testWidgets('Material2 - AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
+      Widget buildAppBar([double? elevation]) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Title'), elevation: elevation),
+          ),
+        );
+      }
+
+      Material getMaterial() => tester.widget<Material>(find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      ));
+
+      // Default elevation should be used for the material.
+      await tester.pumpWidget(buildAppBar());
+      expect(getMaterial().elevation, 4);
+
+      // AppBar should use the specified elevation.
+      await tester.pumpWidget(buildAppBar(8.0));
+      expect(getMaterial().elevation, 8.0);
+    });
+
+    testWidgets('Material2 - AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/58665
+      final Key key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          // Test was designed against InkSplash so need to make sure that is used.
+          theme: ThemeData(
+              useMaterial3: false,
+              splashFactory: InkSplash.splashFactory
+          ),
+          home: Center(
+            child: AppBar(
+              title: const Text('Abc'),
+              actions: <Widget>[
+                IconButton(
+                  key: key,
+                  icon: const Icon(Icons.add_circle),
+                  tooltip: 'First button',
+                  onPressed: () {},
+                ),
+              ],
+              flexibleSpace: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: const Alignment(-0.04, 1.0),
+                    colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderObject painter = tester.renderObject(
+        find.descendant(
+          of: find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byType(Stack),
+          ),
+          matching: find.byType(Material),
+        ),
+      );
+      await tester.tap(find.byKey(key));
+      expect(painter, paints..save()..translate()..save()..translate()..circle(x: 24.0, y: 28.0));
+    });
+
+    testWidgets('Material2 - Default status bar color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          key: GlobalKey(),
+          theme: ThemeData.light().copyWith(
+            useMaterial3: false,
+            appBarTheme: const AppBarTheme(),
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('title'),
+            ),
+          ),
+        ),
+      );
+
+      expect(SystemChrome.latestStyle!.statusBarColor, null);
+    });
+
+    testWidgets('Material2 - AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
+      final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue, useMaterial3: false);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: lightTheme,
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('test'),
+            ),
+          ),
+        ),
+      );
+
+      expect(lightTheme.colorScheme.brightness, Brightness.light);
+      expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+      ));
+    });
+
+    testWidgets('Material2 - Default system bar brightness based on AppBar background color brightness.', (WidgetTester tester) async {
+      Widget buildAppBar(ThemeData theme) {
+        return MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Title')),
+          ),
+        );
+      }
+
+      // Using a light theme.
+          {
+        await tester.pumpWidget(buildAppBar(ThemeData(useMaterial3: false)));
+        final Material appBarMaterial = tester.widget<Material>(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byType(Material),
+          ),
+        );
+        final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
+        final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
+            ? Brightness.dark
+            : Brightness.light;
+
+        expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
+          statusBarBrightness: appBarBrightness,
+          statusBarIconBrightness: onAppBarBrightness,
+        ));
+      }
+
+      // Using a dark theme.
+          {
+        await tester.pumpWidget(buildAppBar(ThemeData.dark(useMaterial3: false)));
+        final Material appBarMaterial = tester.widget<Material>(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byType(Material),
+          ),
+        );
+        final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
+        final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
+            ? Brightness.dark
+            : Brightness.light;
+
+        expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
+          statusBarBrightness: appBarBrightness,
+          statusBarIconBrightness: onAppBarBrightness,
+        ));
+      }
     });
   });
 }
