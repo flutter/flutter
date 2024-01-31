@@ -100,23 +100,23 @@ class DependencyVersionChecker {
         // This approach is taken from AGP's own version checking plugin:
         // https://android.googlesource.com/platform/tools/base/+/1839aa23b8dc562005e2f0f0cc8e8b4c5caa37d0/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/agpVersionChecker.kt#58.
         fun getAGPVersion(project: Project): Version? {
-            const val AGP_PLUGIN_NAME : String = "com.android.base";
-            const val AGP_VERSION_FIELDNAME : String = "ANDROID_GRADLE_PLUGIN_VERSION"
+            val agpPluginName : String = "com.android.base";
+            val agpVersionFieldName : String = "ANDROID_GRADLE_PLUGIN_VERSION"
             var agpVersion: Version? = null
             try {
                 agpVersion = Version.fromString(
-                    project.plugins.getPlugin(AGP_PLUGIN_NAME)::class.java.classLoader.loadClass(
+                    project.plugins.getPlugin(agpPluginName)::class.java.classLoader.loadClass(
                         com.android.Version::class.java.name
-                    ).fields.find { it.name == AGP_VERSION_FIELDNAME }!!
+                    ).fields.find { it.name == agpVersionFieldName }!!
                         .get(null) as String
                 )
             } catch (ignored: ClassNotFoundException) {
                 // Use deprecated Version class as it exists in older AGP (com.android.Version) does
                 // not exist in those versions.
                 agpVersion = Version.fromString(
-                    project.plugins.getPlugin(AGP_PLUGIN_NAME)::class.java.classLoader.loadClass(
+                    project.plugins.getPlugin(agpPluginName)::class.java.classLoader.loadClass(
                         com.android.builder.model.Version::class.java.name
-                    ).fields.find { it.name == AGP_VERSION_FIELDNAME }!!
+                    ).fields.find { it.name == agpVersionFieldName }!!
                         .get(null) as String
                 )
             }
@@ -124,18 +124,18 @@ class DependencyVersionChecker {
         }
 
         fun getKGPVersion(project : Project) : Version? {
-            const val KOTLIN_VERSION_PROPERTY : String = "kotlin_version"
-            const val FIRST_KOTLIN_VERSION_FIELDNAME : String = "pluginVersion"
-            const val SECOND_KOTLIN_VERSION_FIELDNAME : String = "kotlinPluginVersion"
+            val kotlinVersionProperty : String = "kotlin_version"
+            val firstKotlinVersionFieldName : String = "pluginVersion"
+            val secondKotlinVersionFieldName : String = "kotlinPluginVersion"
             // This property corresponds to application of the Kotlin Gradle plugin in the
             // top-level build.gradle file.
-            if (project.hasProperty(KOTLIN_VERSION_PROPERTY)) {
-                return Version.fromString(project.properties.get(KOTLIN_VERSION_PROPERTY) as String)
+            if (project.hasProperty(kotlinVersionProperty)) {
+                return Version.fromString(project.properties.get(kotlinVersionProperty) as String)
             }
             val kotlinPlugin = project.getPlugins()
                 .findPlugin(KotlinAndroidPluginWrapper::class.java)
             val versionfield =
-                kotlinPlugin?.javaClass?.kotlin?.members?.first { it.name == FIRST_KOTLIN_VERSION_FIELDNAME || it.name == SECOND_KOTLIN_VERSION_FIELDNAME }
+                kotlinPlugin?.javaClass?.kotlin?.members?.first { it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName }
             val versionString = versionfield?.call(kotlinPlugin)
             if (versionString == null) {
                 return null
