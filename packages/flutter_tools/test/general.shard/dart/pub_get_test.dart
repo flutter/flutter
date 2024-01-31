@@ -396,7 +396,7 @@ void main() {
             'get',
             '--example',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem
                 .file('.dart_tool/package_config.json')
                 .createSync(recursive: true);
@@ -646,7 +646,7 @@ exit code: 66
           'get',
           '--example',
         ],
-        onRun: () {
+        onRun: (_) {
           throw const ProcessException(
             'bin/cache/dart-sdk/bin/dart',
             <String>[
@@ -842,7 +842,7 @@ exit code: 66
             'FLUTTER_ROOT': '',
             'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
           },
-          onRun: () {
+          onRun: (_) {
             fileSystem.currentDirectory
                 .childDirectory('.dart_tool')
                 .childFile('package_config.json')
@@ -908,7 +908,7 @@ exit code: 66
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
         },
-        onRun: () {
+        onRun: (_) {
           fileSystem.currentDirectory
               .childDirectory('.dart_tool')
               .childFile('package_config.json')
@@ -1155,7 +1155,7 @@ exit code: 66
             'get',
             '--example',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem
                 .file('.dart_tool/package_config.json')
                 .setLastModifiedSync(DateTime(2002));
@@ -1181,7 +1181,7 @@ exit code: 66
             'get',
             '--example',
           ],
-          onRun: () {
+          onRun: (_) {
             fileSystem.file('pubspec.yaml').setLastModifiedSync(DateTime(2002));
           }),
       const FakeCommand(

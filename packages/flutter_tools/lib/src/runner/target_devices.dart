@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../base/user_messages.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
@@ -151,7 +150,7 @@ class TargetDevices {
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
-      _logger.printError(userMessages.flutterNoDevelopmentDevice);
+      _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
       return null;
     }
 
@@ -215,7 +214,7 @@ class TargetDevices {
 
     _logger.printStatus(_deviceManager.hasSpecifiedAllDevices
         ? _noDevicesFoundMessage
-        : userMessages.flutterNoSupportedDevices);
+        : globals.userMessages.flutterNoSupportedDevices);
     await _printUnsupportedDevice(unsupportedDevices);
     return null;
   }
@@ -272,7 +271,7 @@ class TargetDevices {
         supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter(),
       );
 
-      _logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
+      _logger.printStatus(globals.userMessages.flutterSpecifyDeviceWithAllOption);
       _logger.printStatus('');
     }
 
@@ -336,7 +335,7 @@ class TargetDevices {
         '\n',
       );
       result.writeln();
-      result.writeln(userMessages.flutterMissPlatformProjects(
+      result.writeln(globals.userMessages.flutterMissPlatformProjects(
         Device.devicesPlatformTypes(unsupportedDevices),
       ));
       _logger.printStatus(result.toString(), newline: false);
@@ -461,7 +460,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
-      _logger.printError(userMessages.flutterNoDevelopmentDevice);
+      _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
       return null;
     }
 

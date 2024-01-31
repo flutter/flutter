@@ -393,7 +393,7 @@ class Checkbox extends StatefulWidget {
   final bool isError;
 
   /// {@template flutter.material.checkbox.semanticLabel}
-  /// The semantic label for the checkobox that will be announced by screen readers.
+  /// The semantic label for the checkbox that will be announced by screen readers.
   ///
   /// This is announced in accessibility modes (e.g TalkBack/VoiceOver).
   ///
@@ -508,13 +508,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final VisualDensity effectiveVisualDensity = widget.visualDensity
       ?? checkboxTheme.visualDensity
       ?? defaults.visualDensity!;
-    Size size;
-    switch (effectiveMaterialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-      case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-    }
+    Size size = switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded     => const Size(kMinInteractiveDimension,       kMinInteractiveDimension),
+      MaterialTapTargetSize.shrinkWrap => const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0),
+    };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {

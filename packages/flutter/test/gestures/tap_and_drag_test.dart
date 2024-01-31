@@ -39,6 +39,7 @@ void main() {
       ..onCancel = () {
         events.add('cancel');
       };
+    addTearDown(tapAndDrag.dispose);
   }
 
   void setUpTapAndHorizontalDragGestureRecognizer() {
@@ -63,6 +64,7 @@ void main() {
       ..onCancel = () {
         events.add('cancel');
       };
+    addTearDown(tapAndDrag.dispose);
   }
 
   setUp(() {
@@ -446,6 +448,7 @@ void main() {
       ..onTapCancel = () {
         events.add('tapscancel');
       };
+    addTearDown(taps.dispose);
 
     tapAndDrag.addPointer(down6);
     taps.addPointer(down6);
@@ -474,6 +477,7 @@ void main() {
       ..onCancel = () {
         events.add('pancancel');
       };
+    addTearDown(pans.dispose);
 
     final TestPointer pointer = TestPointer(5);
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
@@ -527,6 +531,7 @@ void main() {
       ..onCancel = () {
         events.add('verticalcancel');
       };
+    addTearDown(verticalDrag.dispose);
 
     final TestPointer pointer = TestPointer(5);
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
@@ -560,6 +565,7 @@ void main() {
       ..onCancel = () {
         events.add('verticalcancel');
       };
+    addTearDown(verticalDrag.dispose);
 
     final TestPointer pointer = TestPointer(5);
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
@@ -593,6 +599,7 @@ void main() {
       ..onCancel = () {
         events.add('verticalcancel');
       };
+    addTearDown(verticalDrag.dispose);
 
     final TestPointer pointer = TestPointer(5);
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
@@ -627,6 +634,7 @@ void main() {
       ..onCancel = () {
         events.add('verticalcancel');
       };
+    addTearDown(verticalDrag.dispose);
 
     final TestPointer pointer = TestPointer(5);
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
@@ -661,6 +669,7 @@ void main() {
       ..onLongPressCancel = () {
         events.add('longpresscancel');
       };
+    addTearDown(longpress.dispose);
 
     final TestPointer pointer = TestPointer(5);
     final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
@@ -707,6 +716,7 @@ void main() {
       ..onTapCancel = () {
         events.add('tapscancel');
       };
+    addTearDown(taps.dispose);
 
     final DoubleTapGestureRecognizer doubleTaps = DoubleTapGestureRecognizer()
       ..onDoubleTapDown = (TapDownDetails details) {
@@ -718,6 +728,7 @@ void main() {
       ..onDoubleTapCancel = () {
         events.add('doubletapcancel');
       };
+    addTearDown(doubleTaps.dispose);
 
     tapAndDrag.addPointer(down1);
     taps.addPointer(down1);
@@ -744,7 +755,7 @@ void main() {
       ..onTapCancel = () {
         events.add('tapscancel');
       };
-
+    addTearDown(taps.dispose);
     tapAndDrag.addPointer(down1);
     taps.addPointer(down1);
     tester.closeArena(1);
@@ -767,6 +778,7 @@ void main() {
       ..onTapCancel = () {
         events.add('tapscancel');
       };
+    addTearDown(taps.dispose);
 
     tapAndDrag.addPointer(down5);
     taps.addPointer(down5);
@@ -804,6 +816,7 @@ void main() {
       ..onCancel = () {
         events.add('pancancel');
       };
+    addTearDown(pans.dispose);
 
     tapAndDrag.addPointer(down5);
     pans.addPointer(down5);
@@ -864,6 +877,7 @@ void main() {
       ..onTapDown = (TapDragDownDetails details) {
         events.add('down#${details.consecutiveTapCount}');
       };
+    addTearDown(tapAndDrag.dispose);
 
     FlutterErrorDetails? errorDetails;
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;

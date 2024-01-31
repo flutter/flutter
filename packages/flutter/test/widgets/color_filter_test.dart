@@ -11,10 +11,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Color filter - red', (WidgetTester tester) async {
+  testWidgets('Color filter - red', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RepaintBoundary(
         child: ColorFiltered(
@@ -29,7 +28,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Color filter - sepia', (WidgetTester tester) async {
+  testWidgets('Color filter - sepia', (WidgetTester tester) async {
     const ColorFilter sepia = ColorFilter.matrix(<double>[
       0.39,  0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
@@ -66,7 +65,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Color filter - reuses its layer', (WidgetTester tester) async {
+  testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithColor(Color color) async {
       await tester.pumpWidget(
         RepaintBoundary(

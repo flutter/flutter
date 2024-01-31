@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
@@ -33,6 +32,7 @@ import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
@@ -100,7 +100,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<void> initialize({String? moduleFormat, bool? soundNullSafety}) async {}
+  Future<void> initialize(CompilerOptions options) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -287,9 +287,11 @@ class WebAssetServer implements AssetReader {
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        packageConfig.toPackageUri(
+          BuildSettings(
+            appEntrypoint: packageConfig.toPackageUri(
           globals.fs.file(entrypoint).absolute.uri,
-        ),
+            ),
+          ),
       ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
@@ -882,8 +884,8 @@ class WebDevFS implements DevFS {
         await writeBundle(
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
-          bundle.entryKinds,
           targetPlatform: TargetPlatform.web_javascript,
+          impellerStatus: ImpellerStatus.disabled,
         );
       }
     }

@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   TestSliverPersistentHeaderDelegate(this._maxExtent);
@@ -58,7 +57,7 @@ class TestScrollPhysics extends ClampingScrollPhysics {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Evil test of sliver features - 1', (WidgetTester tester) async {
+  testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();
     await tester.pumpWidget(
       MediaQuery(
@@ -185,7 +184,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
+  testWidgets('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         cacheExtent: 0.0,

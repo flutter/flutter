@@ -18,6 +18,7 @@
   "cutButtonLabel": "Ausschneiden",
   "copyButtonLabel": "Kopieren",
   "pasteButtonLabel": "Einsetzen",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Alle auswählen",
   "tabSemanticsLabel": "Tab $tabIndex von $tabCount",
   "modalBarrierDismissLabel": "Schließen",
