@@ -1932,6 +1932,45 @@ void main() {
 
     expect(find.byType(Scrollbar), findsOneWidget);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('DropdownMenu.focusNode can focus text input field', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: DropdownMenu<String>(
+          focusNode: focusNode,
+          dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+            DropdownMenuEntry<String>(
+              value: 'Yolk',
+              label: 'Yolk',
+            ),
+            DropdownMenuEntry<String>(
+              value: 'Eggbert',
+              label: 'Eggbert',
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+    // Test input border when not focused.
+    expect(box, paints..rrect(color: theme.colorScheme.outline));
+
+    focusNode.requestFocus();
+    await tester.pump();
+    // Advance input decorator animation.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    box = tester.renderObject(find.byType(InputDecorator));
+
+    // Test input border when focused.
+    expect(box, paints..rrect(color: theme.colorScheme.primary));
+  });
 }
 
 enum TestMenu {
