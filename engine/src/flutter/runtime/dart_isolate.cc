@@ -413,7 +413,7 @@ void DartIsolate::SetMessageHandlingTaskRunner(
           TRACE_EVENT0("flutter", "DartIsolate::HandleMessage");
           task();
         },
-        fml::TimePoint::Now(), fml::TaskSourceGrade::kDartMicroTasks);
+        fml::TimePoint::Now(), fml::TaskSourceGrade::kDartEventLoop);
 #endif
   });
 }
