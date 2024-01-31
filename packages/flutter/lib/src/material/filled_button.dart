@@ -112,7 +112,8 @@ class FilledButton extends ButtonStyleButton {
         child: label,
       );
     }
-    return _FilledButtonWithIcon( key: key,
+    return _FilledButtonWithIcon(
+      key: key,
       onPressed: onPressed,
       onLongPress: onLongPress,
       onHover: onHover,
