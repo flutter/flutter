@@ -4002,7 +4002,6 @@ targets:
 
   - name: Mac_arm64 tool_tests_commands
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
