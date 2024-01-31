@@ -1,4 +1,4 @@
-Signature: 3f47347151ed66e3729865c9e3c24e04
+Signature: bd507bde68391717cdda555e7b282c11
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9502,10 +9502,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/gm/imagedither.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/analysis/SkSLCheckSymbolTableCorrectness.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLSymbol.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinStructs.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/gm/imagedither.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/analysis/SkSLCheckSymbolTableCorrectness.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/ir/SkSLSymbol.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinStructs.cpp
