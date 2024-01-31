@@ -290,7 +290,7 @@ void main() {
         ]);
 
         expect(command.devices?.length, 1);
-        expect(command.devices?.first.id , 'fake_device');
+        expect(command.devices?.single.id, 'fake_device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
