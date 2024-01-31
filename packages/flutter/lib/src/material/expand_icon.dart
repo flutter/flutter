@@ -144,9 +144,15 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   /// Icon colors and opacities for [Brightness.dark] are based on the
   /// [Material Design dark theme specifications](https://material.io/design/color/dark-theme.html#ui-application)
   Color get _iconColor {
-    final Color? color = widget.isExpanded ? widget.expandedColor : widget.color;
+    if (widget.isExpanded && widget.expandedColor != null) {
+      return widget.expandedColor!;
+    }
 
-    return color ?? switch (Theme.of(context).brightness) {
+    if (widget.color != null) {
+      return widget.color!;
+    }
+
+    return switch (Theme.of(context).brightness) {
       Brightness.light => Colors.black54,
       Brightness.dark  => Colors.white60,
     };
