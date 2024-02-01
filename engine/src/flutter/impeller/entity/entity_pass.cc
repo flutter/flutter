@@ -79,6 +79,33 @@ void EntityPass::AddEntity(Entity entity) {
   elements_.emplace_back(std::move(entity));
 }
 
+void EntityPass::PushClip(Entity entity) {
+  elements_.emplace_back(std::move(entity));
+  active_clips_.emplace_back(elements_.size() - 1);
+}
+
+void EntityPass::PopClips(size_t num_clips, uint64_t depth) {
+  if (num_clips > active_clips_.size()) {
+    VALIDATION_LOG
+        << "Attempted to pop more clips than are currently active. Active: "
+        << active_clips_.size() << ", Popped: " << num_clips
+        << ", Depth: " << depth;
+  }
+
+  size_t max = std::min(num_clips, active_clips_.size());
+  for (size_t i = 0; i < max; i++) {
+    FML_DCHECK(active_clips_.back() < elements_.size());
+    Entity* element = std::get_if<Entity>(&elements_[active_clips_.back()]);
+    FML_DCHECK(element);
+    element->SetNewClipDepth(depth);
+    active_clips_.pop_back();
+  }
+}
+
+void EntityPass::PopAllClips(uint64_t depth) {
+  PopClips(active_clips_.size(), depth);
+}
+
 void EntityPass::SetElements(std::vector<Element> elements) {
   elements_ = std::move(elements);
 }
@@ -683,6 +710,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     Entity element_entity;
     Capture subpass_texture_capture =
         capture.CreateChild("Entity (Subpass texture)");
+    element_entity.SetNewClipDepth(subpass->new_clip_depth_);
     element_entity.SetCapture(subpass_texture_capture);
     element_entity.SetContents(std::move(offscreen_texture_contents));
     element_entity.SetClipDepth(subpass->clip_depth_);
@@ -856,6 +884,13 @@ bool EntityPass::OnRender(
     const std::optional<InlinePassContext::RenderPassResult>&
         collapsed_parent_pass) const {
   TRACE_EVENT0("impeller", "EntityPass::OnRender");
+
+  if (!active_clips_.empty()) {
+    VALIDATION_LOG << SPrintF(
+        "EntityPass (Depth=%d) contains one or more clips with an unresolved "
+        "depth value.",
+        pass_depth);
+  }
 
   InlinePassContext pass_context(renderer, pass_target,
                                  GetTotalPassReads(renderer), GetElementCount(),
@@ -1136,6 +1171,8 @@ std::unique_ptr<EntityPass> EntityPass::Clone() const {
 
   auto pass = std::make_unique<EntityPass>();
   pass->SetElements(std::move(new_elements));
+  pass->active_clips_.insert(pass->active_clips_.begin(), active_clips_.begin(),
+                             active_clips_.end());
   pass->backdrop_filter_reads_from_pass_texture_ =
       backdrop_filter_reads_from_pass_texture_;
   pass->advanced_blend_reads_from_pass_texture_ =
@@ -1143,6 +1180,7 @@ std::unique_ptr<EntityPass> EntityPass::Clone() const {
   pass->backdrop_filter_proc_ = backdrop_filter_proc_;
   pass->blend_mode_ = blend_mode_;
   pass->delegate_ = delegate_;
+  pass->new_clip_depth_ = new_clip_depth_;
   // Note: I tried also adding flood clip and bounds limit but one of the
   // two caused rendering in wonderous to break. It's 10:51 PM, and I'm
   // ready to move on.
@@ -1157,8 +1195,16 @@ void EntityPass::SetClipDepth(size_t clip_depth) {
   clip_depth_ = clip_depth;
 }
 
-size_t EntityPass::GetClipDepth() {
+size_t EntityPass::GetClipDepth() const {
   return clip_depth_;
+}
+
+void EntityPass::SetNewClipDepth(size_t clip_depth) {
+  new_clip_depth_ = clip_depth;
+}
+
+uint32_t EntityPass::GetNewClipDepth() const {
+  return new_clip_depth_;
 }
 
 void EntityPass::SetBlendMode(BlendMode blend_mode) {

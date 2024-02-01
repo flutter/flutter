@@ -4040,5 +4040,32 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
+  Canvas canvas;  // Depth 1 (base pass)
+  canvas.DrawRRect(Rect::MakeLTRB(0, 0, 100, 100), {10, 10}, {});  // Depth 2
+  canvas.ClipRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});    // Depth 4
+  canvas.SaveLayer({});                                            // Depth 3
+  canvas.DrawRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});    // Depth 4
+
+  auto picture = canvas.EndRecordingAsPicture();
+  std::array<uint32_t, 4> expected = {2, 4, 3, 4};
+  std::vector<uint32_t> actual;
+
+  picture.pass->IterateAllElements([&](EntityPass::Element& element) -> bool {
+    if (auto* subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+      actual.push_back(subpass->get()->GetNewClipDepth());
+    }
+    if (Entity* entity = std::get_if<Entity>(&element)) {
+      actual.push_back(entity->GetNewClipDepth());
+    }
+    return true;
+  });
+
+  ASSERT_EQ(actual.size(), expected.size());
+  for (size_t i = 0; i < expected.size(); i++) {
+    EXPECT_EQ(actual[i], expected[i]) << "Index: " << i;
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

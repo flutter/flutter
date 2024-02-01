@@ -76,6 +76,12 @@ class EntityPass {
   /// @brief Add an entity to the current entity pass.
   void AddEntity(Entity entity);
 
+  void PushClip(Entity entity);
+
+  void PopClips(size_t num_clips, uint64_t depth);
+
+  void PopAllClips(uint64_t depth);
+
   void SetElements(std::vector<Element> elements);
 
   //----------------------------------------------------------------------------
@@ -135,7 +141,11 @@ class EntityPass {
 
   void SetClipDepth(size_t clip_depth);
 
-  size_t GetClipDepth();
+  size_t GetClipDepth() const;
+
+  void SetNewClipDepth(size_t clip_depth);
+
+  uint32_t GetNewClipDepth() const;
 
   void SetBlendMode(BlendMode blend_mode);
 
@@ -297,9 +307,16 @@ class EntityPass {
   /// evaluated and recorded to an `EntityPassTarget` by the `OnRender` method.
   std::vector<Element> elements_;
 
+  /// The stack of currently active clips (during Aiks recording time). Each
+  /// entry is an index into the `elements_` list. The depth value of a clip is
+  /// the max of all the entities it affects, so assignment of the depth value
+  /// is deferred until clip restore or end of the EntityPass.
+  std::vector<size_t> active_clips_;
+
   EntityPass* superpass_ = nullptr;
   Matrix transform_;
   size_t clip_depth_ = 0u;
+  uint32_t new_clip_depth_ = 1u;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool flood_clip_ = false;
   bool enable_offscreen_debug_checkerboard_ = false;

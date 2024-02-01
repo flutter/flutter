@@ -154,12 +154,12 @@ struct TexImage2DData {
         // only use the stencil component.
         //
         // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+      case PixelFormat::kD24UnormS8Uint:
         internal_format = GL_DEPTH_STENCIL;
         external_format = GL_DEPTH_STENCIL;
         type = GL_UNSIGNED_INT_24_8;
         break;
       case PixelFormat::kUnknown:
-      case PixelFormat::kD24UnormS8Uint:
       case PixelFormat::kD32FloatS8UInt:
       case PixelFormat::kR8UNormInt:
       case PixelFormat::kR8G8UNormInt:

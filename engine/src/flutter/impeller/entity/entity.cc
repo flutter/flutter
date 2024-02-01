@@ -5,6 +5,7 @@
 #include "impeller/entity/entity.h"
 
 #include <algorithm>
+#include <limits>
 #include <optional>
 
 #include "impeller/base/validation.h"
@@ -46,6 +47,10 @@ Entity::Entity() = default;
 
 Entity::~Entity() = default;
 
+Entity::Entity(Entity&&) = default;
+
+Entity::Entity(const Entity&) = default;
+
 const Matrix& Entity::GetTransform() const {
   return transform_;
 }
@@ -86,12 +91,26 @@ const std::shared_ptr<Contents>& Entity::GetContents() const {
   return contents_;
 }
 
-void Entity::SetClipDepth(uint32_t depth) {
-  clip_depth_ = depth;
+void Entity::SetClipDepth(uint32_t clip_depth) {
+  clip_depth_ = clip_depth;
 }
 
 uint32_t Entity::GetClipDepth() const {
   return clip_depth_;
+}
+
+void Entity::SetNewClipDepth(uint32_t clip_depth) {
+  new_clip_depth_ = clip_depth;
+}
+
+uint32_t Entity::GetNewClipDepth() const {
+  return new_clip_depth_;
+}
+
+static const Scalar kDepthEpsilon = 1.0f / std::pow(2, 18);
+
+float Entity::GetShaderClipDepth() const {
+  return new_clip_depth_ * kDepthEpsilon;
 }
 
 void Entity::IncrementStencilDepth(uint32_t increment) {

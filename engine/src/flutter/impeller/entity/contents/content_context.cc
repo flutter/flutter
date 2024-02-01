@@ -160,8 +160,9 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
   if (maybe_depth.has_value()) {
     DepthAttachmentDescriptor depth = maybe_depth.value();
-    depth.depth_compare = CompareFunction::kAlways;
-    depth.depth_write_enabled = false;
+    depth.depth_write_enabled = depth_write_enabled;
+    depth.depth_compare = depth_compare;
+    desc.SetDepthStencilAttachmentDescriptor(depth);
   }
 
   desc.SetPrimitiveType(primitive_type);
