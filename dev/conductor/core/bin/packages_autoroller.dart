@@ -39,11 +39,6 @@ Future<void> run(
     help: 'Path to GitHub CLI client. If not provided, it is assumed `gh` is '
         'present on the PATH.',
   );
-  // TODO(fujino): delete after recipe has been migrated to stop passing this
-  parser.addOption(
-    'mirror-remote',
-    help: '(Deprecated) this is now a no-op. To change the account, edit this tool.',
-  );
   parser.addOption(
     kUpstreamRemote,
     help: 'The upstream git remote that the feature branch will be merged to.',
