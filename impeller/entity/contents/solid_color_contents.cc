@@ -69,6 +69,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   pass.SetStencilReference(entity.GetClipDepth());
 
   VS::FrameInfo frame_info;
+  frame_info.depth = entity.GetShaderClipDepth();
   frame_info.mvp = capture.AddMatrix("Transform", geometry_result.transform);
   frame_info.color = capture.AddColor("Color", GetColor()).Premultiply();
   VS::BindFrameInfo(pass,

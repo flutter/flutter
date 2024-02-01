@@ -142,6 +142,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   auto& host_buffer = renderer.GetTransientsBuffer();
 
   VS::FrameInfo frame_info;
+  frame_info.depth = entity.GetShaderClipDepth();
   frame_info.mvp = pass.GetOrthographicTransform() *
                    capture.AddMatrix("Transform", entity.GetTransform());
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();

@@ -33,8 +33,9 @@ struct CanvasStackEntry {
   // |cull_rect| is conservative screen-space bounds of the clipped output area
   std::optional<Rect> cull_rect;
   size_t clip_depth = 0u;
+  // The number of clips tracked for this canvas stack entry.
+  size_t num_clips = 0u;
   Entity::RenderingMode rendering_mode = Entity::RenderingMode::kDirect;
-  bool contains_clips = false;
 };
 
 enum class PointStyle {
@@ -181,6 +182,7 @@ class Canvas {
  private:
   std::unique_ptr<EntityPass> base_pass_;
   EntityPass* current_pass_ = nullptr;
+  uint64_t current_depth_ = 0u;
   std::deque<CanvasStackEntry> transform_stack_;
   std::optional<Rect> initial_cull_rect_;
 
@@ -191,6 +193,8 @@ class Canvas {
   EntityPass& GetCurrentPass();
 
   size_t GetClipDepth() const;
+
+  void AddEntityToCurrentPass(Entity entity);
 
   void ClipGeometry(const std::shared_ptr<Geometry>& geometry,
                     Entity::ClipOperation clip_op);

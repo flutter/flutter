@@ -288,11 +288,13 @@ struct PendingCommandBuffers {
 struct ContentContextOptions {
   SampleCount sample_count = SampleCount::kCount1;
   BlendMode blend_mode = BlendMode::kSourceOver;
+  CompareFunction depth_compare = CompareFunction::kAlways;
   CompareFunction stencil_compare = CompareFunction::kEqual;
   StencilOperation stencil_operation = StencilOperation::kKeep;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   PixelFormat color_attachment_pixel_format = PixelFormat::kUnknown;
   bool has_depth_stencil_attachments = true;
+  bool depth_write_enabled = false;
   bool wireframe = false;
   bool is_for_rrect_blur_clear = false;
 
@@ -301,6 +303,7 @@ struct ContentContextOptions {
       static_assert(sizeof(o.sample_count) == 1);
       static_assert(sizeof(o.blend_mode) == 1);
       static_assert(sizeof(o.sample_count) == 1);
+      static_assert(sizeof(o.depth_compare) == 1);
       static_assert(sizeof(o.stencil_compare) == 1);
       static_assert(sizeof(o.stencil_operation) == 1);
       static_assert(sizeof(o.primitive_type) == 1);
@@ -309,11 +312,13 @@ struct ContentContextOptions {
       return (o.is_for_rrect_blur_clear ? 1llu : 0llu) << 0 |
              (o.wireframe ? 1llu : 0llu) << 1 |
              (o.has_depth_stencil_attachments ? 1llu : 0llu) << 2 |
+             (o.depth_write_enabled ? 1llu : 0llu) << 3 |
              // enums
-             static_cast<uint64_t>(o.color_attachment_pixel_format) << 16 |
-             static_cast<uint64_t>(o.primitive_type) << 24 |
-             static_cast<uint64_t>(o.stencil_operation) << 32 |
-             static_cast<uint64_t>(o.stencil_compare) << 40 |
+             static_cast<uint64_t>(o.color_attachment_pixel_format) << 8 |
+             static_cast<uint64_t>(o.primitive_type) << 16 |
+             static_cast<uint64_t>(o.stencil_operation) << 24 |
+             static_cast<uint64_t>(o.stencil_compare) << 32 |
+             static_cast<uint64_t>(o.depth_compare) << 40 |
              static_cast<uint64_t>(o.blend_mode) << 48 |
              static_cast<uint64_t>(o.sample_count) << 56;
     }
@@ -324,6 +329,8 @@ struct ContentContextOptions {
                               const ContentContextOptions& rhs) const {
       return lhs.sample_count == rhs.sample_count &&
              lhs.blend_mode == rhs.blend_mode &&
+             lhs.depth_write_enabled == rhs.depth_write_enabled &&
+             lhs.depth_compare == rhs.depth_compare &&
              lhs.stencil_compare == rhs.stencil_compare &&
              lhs.stencil_operation == rhs.stencil_operation &&
              lhs.primitive_type == rhs.primitive_type &&
