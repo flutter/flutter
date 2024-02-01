@@ -168,9 +168,6 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   /// specified state.
   @override
   Color resolve(Set<MaterialState> states);
-
-  /// A constant whose value is [Colors.transparent] for all states.
-  static const MaterialStateColor transparent = _MaterialStateColorTransparent();
 }
 
 /// A [MaterialStateColor] created from a [MaterialPropertyResolver<Color>]
@@ -190,13 +187,6 @@ class _MaterialStateColor extends MaterialStateColor {
 
   @override
   Color resolve(Set<MaterialState> states) => _resolve(states);
-}
-
-class _MaterialStateColorTransparent extends MaterialStateColor {
-  const _MaterialStateColorTransparent() : super(0x00000000);
-
-  @override
-  Color resolve(Set<MaterialState> states) => const Color(0x00000000);
 }
 
 /// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
