@@ -66,11 +66,9 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testWithoutContext('NativeAssets throws error if missing target platform',
-      () async {
+  testWithoutContext('NativeAssets throws error if missing target platform', () async {
     iosEnvironment.defines.remove(kTargetPlatform);
-    expect(const NativeAssets().build(iosEnvironment),
-        throwsA(isA<MissingDefineException>()));
+    expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
@@ -92,8 +90,7 @@ void main() {
     await createPackageConfig(iosEnvironment);
 
     iosEnvironment.defines.remove(kSdkRoot);
-    expect(const NativeAssets().build(iosEnvironment),
-        throwsA(isA<MissingDefineException>()));
+    expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
   // The NativeAssets Target should _always_ be creating a yaml an d file.
@@ -106,14 +103,13 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         FeatureFlags: () => TestFeatureFlags(
-              isNativeAssetsEnabled: isNativeAssetsEnabled,
-            ),
+          isNativeAssetsEnabled: isNativeAssetsEnabled,
+        ),
       },
       () async {
         await createPackageConfig(iosEnvironment);
 
-        final NativeAssetsBuildRunner buildRunner =
-            FakeNativeAssetsBuildRunner();
+        final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
         await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
 
         expect(iosEnvironment.buildDir.childFile('native_assets.d'), exists);
@@ -133,11 +129,8 @@ void main() {
       await createPackageConfig(iosEnvironment);
 
       final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <Package>[
-          Package('foo', iosEnvironment.buildDir.uri)
-        ],
-        buildResult:
-            FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
+        packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.buildDir.uri)],
+        buildResult: FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
           native_assets_cli.Asset(
             id: 'package:foo/foo.dart',
             linkMode: native_assets_cli.LinkMode.dynamic,
@@ -152,10 +145,8 @@ void main() {
       );
       await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
 
-      final File nativeAssetsYaml =
-          iosEnvironment.buildDir.childFile('native_assets.yaml');
-      final File depsFile =
-          iosEnvironment.buildDir.childFile('native_assets.d');
+      final File nativeAssetsYaml = iosEnvironment.buildDir.childFile('native_assets.yaml');
+      final File depsFile = iosEnvironment.buildDir.childFile('native_assets.d');
       expect(depsFile, exists);
       // We don't care about the specific format, but it should contain the
       // yaml as the file depending on the source files that went in to the
