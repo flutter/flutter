@@ -607,7 +607,7 @@ void main() {
       MaterialApp(
         home: RefreshIndicator(
           onRefresh: () async {},
-          edgeOffset: kToolbarHeight,
+          edgeOffset: kM2ToolbarHeight,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
@@ -623,15 +623,15 @@ void main() {
 
     expect(
       tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).edgeOffset,
-      kToolbarHeight,
+      kM2ToolbarHeight,
     );
   });
 
   testWidgets('RefreshIndicator appears at edgeOffset', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: RefreshIndicator(
-        edgeOffset: kToolbarHeight,
-        displacement: kToolbarHeight,
+        edgeOffset: kM2ToolbarHeight,
+        displacement: kM2ToolbarHeight,
         onRefresh: () async {
           await Future<void>.delayed(const Duration(seconds: 1), () { });
         },
@@ -647,12 +647,12 @@ void main() {
       ),
     ));
 
-    await tester.fling(find.byType(ListView), const Offset(0.0, 2.0 * kToolbarHeight), 1000.0);
+    await tester.fling(find.byType(ListView), const Offset(0.0, 2.0 * kM2ToolbarHeight), 1000.0);
     await tester.pump(const Duration(seconds: 2));
 
     expect(
       tester.getTopLeft(find.byType(RefreshProgressIndicator)).dy,
-      greaterThanOrEqualTo(2.0 * kToolbarHeight),
+      greaterThanOrEqualTo(2.0 * kM2ToolbarHeight),
     );
   });
 

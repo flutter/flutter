@@ -875,7 +875,7 @@ void main() {
                   sliver: const SliverAppBar(
                     pinned: true,
                     expandedHeight: 200.0,
-                    collapsedHeight: 56.0,
+                    collapsedHeight: 64.0,
                     flexibleSpace: FlexibleSpaceBar(background: SizedBox()),
                   ),
                 ),

@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -1650,6 +1651,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
       right: false,
       child: Scaffold(
         appBar: AppBar(
+          toolbarHeight: kM2ToolbarHeight,
           iconTheme: iconTheme,
           actionsIconTheme: iconTheme,
           elevation: useMaterial3 ? 0 : null,

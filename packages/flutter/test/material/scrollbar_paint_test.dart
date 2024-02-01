@@ -105,17 +105,17 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 490.0),
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 482.0),
           color: const Color(0x00000000),
         )
         ..line(
           p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 490.0),
+          p2: const Offset(796.0, 482.0),
           strokeWidth: 1.0,
           color: const Color(0x00000000),
         )
         ..rect(
-          rect: const Rect.fromLTWH(796.0, 0.0, 4.0, (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)),
+          rect: const Rect.fromLTWH(796.0, 0.0, 4.0, (600.0 - 64 - 34 - 20) / 4000 * (600 - 64 - 34 - 20)),
           color: _kAndroidThumbIdleColor,
         ),
     );

@@ -19,7 +19,21 @@ import 'package:flutter/painting.dart';
 const double kMinInteractiveDimension = 48.0;
 
 /// The height of the toolbar component of the [AppBar].
+///
+/// This is deprecated and is replaced by [kM2ToolbarHeight].
+@Deprecated(
+    'Use kM2ToolbarHeight. '
+    'This feature was deprecated after v3.19.0-9.0.pre.'
+)
 const double kToolbarHeight = 56.0;
+
+/// The height of the toolbar component of the [AppBar] as specified in the
+/// second version of Material Design.
+const double kM2ToolbarHeight = 56.0;
+
+/// The height of the toolbar component of the [AppBar] as specified in the
+/// third version of Material Design.
+const double kM3ToolbarHeight = 64.0;
 
 /// The height of the bottom navigation bar.
 const double kBottomNavigationBarHeight = 56.0;

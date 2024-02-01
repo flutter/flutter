@@ -16,7 +16,7 @@ Widget buildSliverAppBarApp({
   double? collapsedHeight,
   double? expandedHeight,
   bool snap = false,
-  double toolbarHeight = kToolbarHeight,
+  double toolbarHeight = kM3ToolbarHeight,
 }) {
   return MaterialApp(
     home: Scaffold(
@@ -575,7 +575,7 @@ void main() {
     // trailing widget and title spacing should be respected.
     titleOffset = tester.getTopRight(collapsedTitle);
     iconButtonOffset = tester.getTopLeft(find.widgetWithIcon(IconButton, Icons.sort));
-    expect(titleOffset.dx, iconButtonOffset.dx - titleSpacing);
+    expect(titleOffset.dx, iconButtonOffset.dx);
 
     // Test custom title spacing, set to 0.0.
     await tester.pumpWidget(buildWidget(titleSpacing: 0.0));
@@ -668,7 +668,7 @@ void main() {
     // leading widget and title spacing should be respected.
     titleOffset = tester.getTopRight(collapsedTitle);
     iconButtonOffset = tester.getTopLeft(find.widgetWithIcon(IconButton, Icons.sort));
-    expect(titleOffset.dx, iconButtonOffset.dx - titleSpacing);
+    expect(titleOffset.dx, iconButtonOffset.dx);
 
     // Test custom title spacing, set to 0.0.
     await tester.pumpWidget(buildWidget(titleSpacing: 0.0));
@@ -701,7 +701,7 @@ void main() {
     'SliverAppBar.medium without the leading widget updates collapsed title padding',
     (WidgetTester tester) async {
       const String title = 'Medium SliverAppBar Title';
-      const double leadingPadding = 56.0;
+      const double leadingPadding = 64.0;
       const double titleSpacing = 16.0;
 
       Widget buildWidget({ bool showLeading = true }) {
@@ -763,7 +763,7 @@ void main() {
     'SliverAppBar.large without the leading widget updates collapsed title padding',
     (WidgetTester tester) async {
       const String title = 'Large SliverAppBar Title';
-      const double leadingPadding = 56.0;
+      const double leadingPadding = 64.0;
       const double titleSpacing = 16.0;
 
       Widget buildWidget({ bool showLeading = true }) {
@@ -822,7 +822,7 @@ void main() {
   });
 
   group('MaterialStateColor scrolledUnder', () {
-    const double collapsedHeight = kToolbarHeight;
+    const double collapsedHeight = kM3ToolbarHeight;
     const double expandedHeight = 200.0;
     const Color scrolledColor = Color(0xff00ff00);
     const Color defaultColor = Color(0xff0000ff);
@@ -1671,7 +1671,7 @@ void main() {
               slivers: <Widget>[
                 SliverAppBar(
                   leading: Placeholder(key: leadingKey),
-                  title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
+                  title: Placeholder(key: titleKey, fallbackHeight: kM2ToolbarHeight),
                   actions: <Widget>[ Placeholder(key: trailingKey) ],
                 ),
               ],
@@ -1681,8 +1681,8 @@ void main() {
       ),
     );
     expect(tester.getTopLeft(find.byType(AppBar)), Offset.zero);
-    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 64.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 104.0));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
   });
 
@@ -1717,9 +1717,9 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(AppBar)), const Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(leadingKey)), const Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(trailingKey)), const Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
+    expect(tester.getRect(find.byType(AppBar)), const Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 64.0));
+    expect(tester.getRect(find.byKey(leadingKey)), const Rect.fromLTRB(800.0 - 64.0, 100.0, 800.0, 100.0 + 64.0));
+    expect(tester.getRect(find.byKey(trailingKey)), const Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 64.0));
   });
 
   testWidgets('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
@@ -1737,7 +1737,7 @@ void main() {
               Text('Action 3'),
             ],
             bottom: const PreferredSize(
-              preferredSize: Size(0.0, kToolbarHeight),
+              preferredSize: Size(0.0, kM2ToolbarHeight),
               child: Text('Bottom'),
             ),
           ),
@@ -1822,7 +1822,7 @@ void main() {
                   Text('Action 3'),
                 ],
                 bottom: const PreferredSize(
-                  preferredSize: Size(0.0, kToolbarHeight),
+                  preferredSize: Size(0.0, kM2ToolbarHeight),
                   child: Text('Bottom'),
                 ),
               ),
@@ -2229,7 +2229,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar collapsedHeight', (WidgetTester tester) async {
-    const double collapsedHeight = 56.0;
+    const double collapsedHeight = 64.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(
       collapsedHeight: collapsedHeight,
@@ -2259,8 +2259,8 @@ void main() {
       ),
     ));
 
-    // By default toolbarHeight is 56.0.
-    expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
+    // By default toolbarHeight is 64.0.
+    expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 64));
   });
 
   testWidgets('SliverAppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {

@@ -401,13 +401,13 @@ void main() {
     await tester.drag(find.byType(NestedScrollView), const Offset(0, -500));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 64);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
     await tester.restartAndRestore();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 64);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
@@ -421,7 +421,7 @@ void main() {
 
     await tester.restoreFrom(data);
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 64);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
   });
