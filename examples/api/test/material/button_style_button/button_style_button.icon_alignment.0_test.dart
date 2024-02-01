@@ -7,207 +7,97 @@ import 'package:flutter_api_samples/material/button_style_button/button_style_bu
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ButtonStyleButton iconAlignment Example Test', (WidgetTester tester) async {
+  testWidgets('ButtonStyleButton.iconAlignment updates button icons alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ButtonStyleButtonIconAlignmentExampleApp(),
     );
 
-    expect(find.widgetWithText(AppBar, 'ButtonStyleButton iconAlignment Sample'), findsOneWidget);
-    expect(find.text('ElevatedButton.icon'), findsOneWidget);
-    expect(find.text('FilledButton.icon'), findsOneWidget);
-    expect(find.text('FilledButton.tonalIcon'), findsOneWidget);
-    expect(find.text('OutlinedButton.icon'), findsOneWidget);
-    expect(find.text('TextButton.icon'), findsOneWidget);
-    expect(find.byIcon(Icons.add), findsNWidgets(5));
+    Finder findButtonMaterial(String text) {
+      return find.ancestor(
+        of: find.text(text),
+        matching: find.byType(Material),
+      ).first;
+    }
 
-    final Finder iconAlignmentStartCc = find.widgetWithText(ChoiceChip, 'IconAlignment.start');
-    final Finder iconAlignmentEndCc = find.widgetWithText(ChoiceChip, 'IconAlignment.end');
-    await tester.tap(iconAlignmentStartCc);
-    await tester.pumpAndSettle();
-    expect(tester.widget<ChoiceChip>(iconAlignmentStartCc).selected, isTrue);
-    expect(tester.widget<ChoiceChip>(iconAlignmentEndCc).selected, isFalse);
-    await tester.tap(iconAlignmentEndCc);
-    await tester.pumpAndSettle();
-    expect(tester.widget<ChoiceChip>(iconAlignmentStartCc).selected, isFalse);
-    expect(tester.widget<ChoiceChip>(iconAlignmentEndCc).selected, isTrue);
+    void expectedLeftIconPosition({
+      required double iconOffset,
+      required double textButtonIconOffset,
+    }) {
+      expect(
+        tester.getTopLeft(findButtonMaterial('ElevatedButton')).dx,
+        tester.getTopLeft(find.byIcon(Icons.sunny)).dx - iconOffset,
+      );
+      expect(
+        tester.getTopLeft(findButtonMaterial('FilledButton')).dx,
+        tester.getTopLeft(find.byIcon(Icons.beach_access)).dx - iconOffset,
+      );
+      expect(
+        tester.getTopLeft(findButtonMaterial('FilledButton Tonal')).dx,
+        tester.getTopLeft(find.byIcon(Icons.cloud)).dx - iconOffset,
+      );
+      expect(
+        tester.getTopLeft(findButtonMaterial('OutlinedButton')).dx,
+        tester.getTopLeft(find.byIcon(Icons.light)).dx - iconOffset,
+      );
+      expect(
+        tester.getTopLeft(findButtonMaterial('TextButton')).dx,
+        tester.getTopLeft(find.byIcon(Icons.flight_takeoff)).dx - textButtonIconOffset,
+      );
+    }
 
-    final Finder textDirectionLtrCc = find.widgetWithText(ChoiceChip, 'TextDirection.ltr');
-    final Finder textDirectionRtlCc = find.widgetWithText(ChoiceChip, 'TextDirection.rtl');
-    await tester.tap(textDirectionLtrCc);
-    await tester.pumpAndSettle();
-    expect(tester.widget<ChoiceChip>(textDirectionLtrCc).selected, isTrue);
-    expect(tester.widget<ChoiceChip>(textDirectionRtlCc).selected, isFalse);
-    await tester.tap(textDirectionRtlCc);
-    await tester.pumpAndSettle();
-    expect(tester.widget<ChoiceChip>(textDirectionLtrCc).selected, isFalse);
-    expect(tester.widget<ChoiceChip>(textDirectionRtlCc).selected, isTrue);
+    void expectedRightIconPosition({
+      required double iconOffset,
+      required double textButtonIconOffset,
+    }) {
+      expect(
+        tester.getTopRight(findButtonMaterial('ElevatedButton')).dx,
+        tester.getTopRight(find.byIcon(Icons.sunny)).dx + iconOffset,
+      );
+      expect(
+        tester.getTopRight(findButtonMaterial('FilledButton')).dx,
+        tester.getTopRight(find.byIcon(Icons.beach_access)).dx + iconOffset,
+      );
+      expect(
+        tester.getTopRight(findButtonMaterial('FilledButton Tonal')).dx,
+        tester.getTopRight(find.byIcon(Icons.cloud)).dx + iconOffset,
+      );
+      expect(
+        tester.getTopRight(findButtonMaterial('OutlinedButton')).dx,
+        tester.getTopRight(find.byIcon(Icons.light)).dx + iconOffset,
+      );
+      expect(
+        tester.getTopRight(findButtonMaterial('TextButton')).dx,
+        tester.getTopRight(find.byIcon(Icons.flight_takeoff)).dx + textButtonIconOffset,
+      );
+    }
 
-    // IconAlignment.start & TextDirection.ltr
-    await tester.tap(iconAlignmentStartCc);
-    await tester.pumpAndSettle();
-    await tester.tap(textDirectionLtrCc);
-    await tester.pumpAndSettle();
-    expect(
-      tester.widget<ElevatedButton>(
-        find.byKey(const Key('ElevatedButton.icon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<FilledButton>(
-        find.byKey(const Key('FilledButton.icon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<FilledButton>(
-        find.byKey(const Key('FilledButton.tonalIcon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<OutlinedButton>(
-        find.byKey(const Key('OutlinedButton.icon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<TextButton>(
-        find.byKey(const Key('TextButton.icon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<Directionality>(
-        find.byKey(const Key('Directionality')),
-      ).textDirection,
-      TextDirection.ltr,
-    );
 
-    // IconAlignment.end & TextDirection.ltr
-    await tester.tap(iconAlignmentEndCc);
-    await tester.pumpAndSettle();
-    await tester.tap(textDirectionLtrCc);
-    await tester.pumpAndSettle();
-    expect(
-      tester.widget<ElevatedButton>(
-        find.byKey(const Key('ElevatedButton.icon')),
-      ).iconAlignment,
-      IconAlignment.end,
-    );
-    expect(
-      tester.widget<FilledButton>(
-        find.byKey(const Key('FilledButton.icon')),
-      ).iconAlignment,
-      IconAlignment.end,
-    );
-    // expect(
-    //   tester.widget<FilledButton>(
-    //     find.byKey(const Key('FilledButton.tonalIcon')),
-    //   ).iconAlignment,
-    //   IconAlignment.end,
-    // );
-    expect(
-      tester.widget<OutlinedButton>(
-        find.byKey(const Key('OutlinedButton.icon')),
-      ).iconAlignment,
-      IconAlignment.end,
-    );
-    expect(
-      tester.widget<TextButton>(
-        find.byKey(const Key('TextButton.icon')),
-      ).iconAlignment,
-      IconAlignment.end,
-    );
-    expect(
-      tester.widget<Directionality>(
-        find.byKey(const Key('Directionality')),
-      ).textDirection,
-      TextDirection.ltr,
-    );
+    // Test initial icon alignment in LTR.
+    expectedLeftIconPosition(iconOffset: 16, textButtonIconOffset: 12) ;
 
-    // IconAlignment.start & TextDirection.rtl
-    await tester.tap(iconAlignmentStartCc);
+    // Update icon alignment to end.
+    await tester.tap(find.text('end'));
     await tester.pumpAndSettle();
-    await tester.tap(textDirectionRtlCc);
-    await tester.pumpAndSettle();
-    expect(
-      tester.widget<ElevatedButton>(
-        find.byKey(const Key('ElevatedButton.icon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<FilledButton>(
-        find.byKey(const Key('FilledButton.icon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<FilledButton>(
-        find.byKey(const Key('FilledButton.tonalIcon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<OutlinedButton>(
-        find.byKey(const Key('OutlinedButton.icon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<TextButton>(
-        find.byKey(const Key('TextButton.icon')),
-      ).iconAlignment,
-      IconAlignment.start,
-    );
-    expect(
-      tester.widget<Directionality>(
-        find.byKey(const Key('Directionality')),
-      ).textDirection,
-      TextDirection.rtl,
-    );
 
-    // IconAlignment.end & TextDirection.rtl
-    await tester.tap(iconAlignmentEndCc);
+    // Test icon alignment end in LTR.
+    expectedRightIconPosition(iconOffset: 24, textButtonIconOffset: 16);
+
+    // Reset icon alignment to start.
+    await tester.tap(find.text('start'));
     await tester.pumpAndSettle();
-    await tester.tap(textDirectionRtlCc);
+
+    // Change text direction to RTL.
+    await tester.tap(find.text('RTL'));
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<ElevatedButton>(
-        find.byKey(const Key('ElevatedButton.icon')),
-      ).iconAlignment,
-      IconAlignment.end,
-    );
-    expect(
-      tester.widget<FilledButton>(
-        find.byKey(const Key('FilledButton.icon')),
-      ).iconAlignment,
-      IconAlignment.end,
-    );
-    // expect(
-    //   tester.widget<FilledButton>(
-    //     find.byKey(const Key('FilledButton.tonalIcon')),
-    //   ).iconAlignment,
-    //   IconAlignment.end,
-    // );
-    expect(
-      tester.widget<OutlinedButton>(
-        find.byKey(const Key('OutlinedButton.icon')),
-      ).iconAlignment,
-      IconAlignment.end,
-    );
-    expect(
-      tester.widget<TextButton>(
-        find.byKey(const Key('TextButton.icon')),
-      ).iconAlignment,
-      IconAlignment.end,
-    );
-    expect(
-      tester.widget<Directionality>(
-        find.byKey(const Key('Directionality')),
-      ).textDirection,
-      TextDirection.rtl,
-    );
+
+    // // Test icon alignment start in LTR.
+    expectedRightIconPosition(iconOffset: 16, textButtonIconOffset: 12) ;
+
+    // Update icon alignment to end.
+    await tester.tap(find.text('end'));
+    await tester.pumpAndSettle();
+
+    // Test icon alignment end in LTR.
+    expectedLeftIconPosition(iconOffset: 24, textButtonIconOffset: 16);
   });
 }

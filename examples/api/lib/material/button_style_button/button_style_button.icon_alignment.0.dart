@@ -16,7 +16,7 @@ class ButtonStyleButtonIconAlignmentExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('ButtonStyleButton iconAlignment Sample'),
+          title: const Text('ButtonStyleButton.iconAlignment'),
         ),
         body: const ButtonStyleButtonIconAlignmentExample(),
       ),
@@ -32,17 +32,16 @@ class ButtonStyleButtonIconAlignmentExample extends StatefulWidget {
 }
 
 class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButtonIconAlignmentExample> {
-  IconAlignment iconAlignment = IconAlignment.start;
-  TextDirection textDirection = TextDirection.ltr;
+  TextDirection _textDirection = TextDirection.ltr;
+  IconAlignment _iconAlignment = IconAlignment.start;
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      key: const Key('Directionality'),
-      textDirection: textDirection,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+    return SafeArea(
+      child: Directionality(
+        key: const Key('Directionality'),
+        textDirection: _textDirection,
+        child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -54,88 +53,63 @@ class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButto
                 alignment: MainAxisAlignment.center,
                 overflowAlignment: OverflowBarAlignment.center,
                 children: <Widget>[
-                  ...IconAlignment.values.map((IconAlignment e) {
-                    return ChoiceChip(
-                      label: Text(e.toString()),
-                      selected: iconAlignment == e,
-                      onSelected: (bool isSelected) {
-                        if (isSelected) {
-                          setState(() {
-                            iconAlignment = e;
-                          });
-                        }
-                      },
-                    );
-                  }),
-                ],
-              ),
-              const SizedBox(height: 30),
-              OverflowBar(
-                spacing: 10,
-                overflowSpacing: 20,
-                alignment: MainAxisAlignment.center,
-                overflowAlignment: OverflowBarAlignment.center,
-                children: <Widget>[
-                  ...TextDirection.values.map((TextDirection e) {
-                    return ChoiceChip(
-                      label: Text(e.toString()),
-                      selected: textDirection == e,
-                      onSelected: (bool isSelected) {
-                        if (isSelected) {
-                          setState(() {
-                            textDirection = e;
-                          });
-                        }
-                      },
-                    );
-                  }),
-                ],
-              ),
-              const Spacer(),
-              OverflowBar(
-                spacing: 10,
-                overflowSpacing: 20,
-                alignment: MainAxisAlignment.center,
-                overflowAlignment: OverflowBarAlignment.center,
-                children: <Widget>[
                   ElevatedButton.icon(
-                    key: const Key('ElevatedButton.icon'),
                     onPressed: () {},
-                    icon: const Icon(Icons.add),
-                    label: const Text('ElevatedButton.icon'),
-                    iconAlignment: iconAlignment,
+                    icon: const Icon(Icons.sunny),
+                    label: const Text('ElevatedButton'),
+                    iconAlignment: _iconAlignment,
                   ),
                   FilledButton.icon(
-                    key: const Key('FilledButton.icon'),
                     onPressed: () {},
-                    icon: const Icon(Icons.add),
-                    label: const Text('FilledButton.icon'),
-                    iconAlignment: iconAlignment,
+                  icon: const Icon(Icons.beach_access),
+                    label: const Text('FilledButton'),
+                    iconAlignment: _iconAlignment,
                   ),
                   FilledButton.tonalIcon(
-                    key: const Key('FilledButton.tonalIcon'),
                     onPressed: () {},
-                    icon: const Icon(Icons.add),
-                    label: const Text('FilledButton.tonalIcon'),
-                    iconAlignment: iconAlignment,
+                    icon: const Icon(Icons.cloud),
+                    label: const Text('FilledButton Tonal'),
+                    iconAlignment: _iconAlignment,
                   ),
                   OutlinedButton.icon(
-                    key: const Key('OutlinedButton.icon'),
                     onPressed: () {},
-                    icon: const Icon(Icons.add),
-                    label: const Text('OutlinedButton.icon'),
-                    iconAlignment: iconAlignment,
+                    icon: const Icon(Icons.light),
+                    label: const Text('OutlinedButton'),
+                    iconAlignment: _iconAlignment,
                   ),
                   TextButton.icon(
-                    key: const Key('TextButton.icon'),
                     onPressed: () {},
-                    icon: const Icon(Icons.add),
-                    label: const Text('TextButton.icon'),
-                    iconAlignment: iconAlignment,
+                    icon: const Icon(Icons.flight_takeoff),
+                    label: const Text('TextButton'),
+                    iconAlignment: _iconAlignment,
                   ),
                 ],
               ),
               const Spacer(),
+              const Text('Icon alignment'),
+              SegmentedButton<IconAlignment>(
+                onSelectionChanged: (Set<IconAlignment> value) {
+                  setState(() {
+                    _iconAlignment = value.first;
+                  });
+                },
+                selected: <IconAlignment>{ _iconAlignment },
+                segments: IconAlignment.values.map((IconAlignment iconAlignment) {
+                  return ButtonSegment<IconAlignment>(
+                    value: iconAlignment,
+                    label: Text(iconAlignment.name),
+                  );
+                }).toList(),
+              ),
+              SwitchListTile(
+                title: const Text('RTL'),
+                value: _textDirection == TextDirection.rtl,
+                onChanged: (bool value) {
+                  setState(() {
+                    _textDirection = value ? TextDirection.rtl : TextDirection.ltr;
+                  });
+                },
+              ),
             ],
           ),
         ),
