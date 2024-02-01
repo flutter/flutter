@@ -7,12 +7,19 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:meta/meta.dart';
 
 import '../painting/image_test_utils.dart';
 
 void main() {
 
   late ui.Image testImage;
+
+  ui.Image cloneImage() {
+    final ui.Image clone = testImage.clone();
+    addTearDown(clone.dispose);
+    return clone;
+  }
 
   setUpAll(() async {
     testImage = await createTestImage(width: 10, height: 10);
@@ -34,10 +41,7 @@ void main() {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position;
   }
 
-  testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
@@ -65,10 +69,7 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling',
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388  [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -105,10 +106,7 @@ void main() {
     expect(findPhysics<RecordingPhysics>(tester).velocities, <double>[0]);
   });
 
-  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly',
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -167,10 +165,7 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast',
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388  [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast', (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -241,7 +236,7 @@ void main() {
 
   testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed',
   // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  // experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
@@ -261,7 +256,7 @@ void main() {
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final TestImageProvider testImageProvider = TestImageProvider(cloneImage());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
@@ -313,10 +308,7 @@ void main() {
     expect(imageCache.currentSize, 0);
   });
 
-  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -331,7 +323,7 @@ void main() {
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final TestImageProvider testImageProvider = TestImageProvider(cloneImage());
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
@@ -367,7 +359,6 @@ void main() {
   });
 
   testWidgets('ScrollAwareImageProvider does not block LRU updates to image cache',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final int oldSize = imageCache.maximumSize;
