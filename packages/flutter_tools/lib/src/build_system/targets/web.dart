@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -38,6 +39,7 @@ const String kBaseHref = 'baseHref';
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
+@visibleForTesting
 List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
   final Set<String> dartDefinesSet = dartDefines.toSet();
   if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
@@ -120,7 +122,7 @@ abstract class Dart2WebTarget extends Target {
 
   WebCompilerConfig get compilerConfig;
 
-  Map<String, dynamic> get buildConfig;
+  Map<String, Object?> get buildConfig;
   List<String> get buildFiles;
 
   @override
@@ -244,7 +246,7 @@ class Dart2JSTarget extends Dart2WebTarget {
   }
 
   @override
-  Map<String, dynamic> get buildConfig => <String, dynamic>{
+  Map<String, Object?> get buildConfig => <String, Object?>{
     'compileTarget': 'dart2js',
     'renderer': compilerConfig.renderer.name,
     'mainJsPath': 'main.dart.js',
@@ -365,7 +367,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
   List<Source> get outputs => const <Source>[];
 
   @override
-  Map<String, dynamic> get buildConfig => <String, dynamic>{
+  Map<String, Object?> get buildConfig => <String, Object?>{
     'compileTarget': 'dart2wasm',
     'renderer': compilerConfig.renderer.name,
     'mainWasmPath': 'main.dart.wasm',
@@ -467,10 +469,10 @@ class WebReleaseBundle extends Target {
       // because it would need to be the hash for the entire bundle and not just the resource
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
-        final List<Map<String, dynamic>> buildDescriptions = compileTargets.map(
+        final List<Map<String, Object?>> buildDescriptions = compileTargets.map(
           (Dart2WebTarget target) => target.buildConfig
         ).toList();
-        final Map<String, dynamic> buildConfig = <String, dynamic>{
+        final Map<String, Object?> buildConfig = <String, Object?>{
           'engineRevision': globals.flutterVersion.engineRevision,
           'builds': buildDescriptions,
         };
