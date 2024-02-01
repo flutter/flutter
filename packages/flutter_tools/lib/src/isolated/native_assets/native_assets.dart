@@ -5,25 +5,27 @@
 // Logic for native assets shared between all host OSes.
 
 import 'package:logging/logging.dart' as logging;
-import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
-import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder show NativeAssetsBuildRunner;
+import 'package:native_assets_builder/native_assets_builder.dart'
+    as native_assets_builder show NativeAssetsBuildRunner;
+import 'package:native_assets_builder/native_assets_builder.dart'
+    hide NativeAssetsBuildRunner;
 import 'package:native_assets_cli/native_assets_cli_internal.dart';
 import 'package:package_config/package_config_types.dart';
 
+import '../../base/common.dart';
+import '../../base/file_system.dart';
+import '../../base/logger.dart';
+import '../../base/platform.dart';
+import '../../build_info.dart' as build_info;
+import '../../cache.dart';
+import '../../features.dart';
+import '../../globals.dart' as globals;
+import '../../resident_runner.dart';
 import 'android/native_assets.dart';
-import 'base/common.dart';
-import 'base/file_system.dart';
-import 'base/logger.dart';
-import 'base/platform.dart';
-import 'build_info.dart' as build_info;
-import 'cache.dart';
-import 'features.dart';
-import 'globals.dart' as globals;
 import 'ios/native_assets.dart';
 import 'linux/native_assets.dart';
 import 'macos/native_assets.dart';
 import 'macos/native_assets_host.dart';
-import 'resident_runner.dart';
 import 'windows/native_assets.dart';
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.

@@ -13,6 +13,7 @@ import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../isolated/native_assets/build_system/targets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -20,7 +21,6 @@ import 'assets.dart';
 import 'dart_plugin_registrant.dart';
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
-import 'native_assets.dart';
 import 'shader_compiler.dart';
 
 /// Copies the pre-built flutter bundle.

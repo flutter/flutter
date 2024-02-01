@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_builder/native_assets_builder.dart'
     as native_assets_builder;
 import 'package:native_assets_cli/native_assets_cli_internal.dart';

@@ -14,8 +14,8 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/native_assets.dart';
-import 'package:flutter_tools/src/windows/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode, Target;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'

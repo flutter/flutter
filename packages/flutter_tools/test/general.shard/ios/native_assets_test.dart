@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode, Target;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'

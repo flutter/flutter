@@ -6,23 +6,23 @@ import 'package:meta/meta.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart' show Asset;
 import 'package:package_config/package_config_types.dart';
 
-import '../../android/gradle_utils.dart';
+import '../../../../android/gradle_utils.dart';
+import '../../../../base/common.dart';
+import '../../../../base/file_system.dart';
+import '../../../../base/platform.dart';
+import '../../../../build_info.dart';
+import '../../../../build_system/build_system.dart';
+import '../../../../build_system/depfile.dart';
+import '../../../../build_system/exceptions.dart';
+import '../../../../build_system/targets/common.dart';
+import '../../../../dart/package_map.dart';
+import '../../../../macos/xcode.dart';
 import '../../android/native_assets.dart';
-import '../../base/common.dart';
-import '../../base/file_system.dart';
-import '../../base/platform.dart';
-import '../../build_info.dart';
-import '../../dart/package_map.dart';
 import '../../ios/native_assets.dart';
 import '../../linux/native_assets.dart';
 import '../../macos/native_assets.dart';
-import '../../macos/xcode.dart';
 import '../../native_assets.dart';
 import '../../windows/native_assets.dart';
-import '../build_system.dart';
-import '../depfile.dart';
-import '../exceptions.dart';
-import 'common.dart';
 
 /// Builds the right native assets for a Flutter app.
 ///
