@@ -283,7 +283,6 @@ class MenuAnchor extends StatefulWidget {
     properties.add(DiagnosticsProperty<MenuStyle?>('style', style));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior));
     properties.add(DiagnosticsProperty<Offset?>('alignmentOffset', alignmentOffset));
-    properties.add(StringProperty('child', child.toString()));
   }
 }
 
@@ -1041,11 +1040,8 @@ class MenuItemButton extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('enabled', value: onPressed != null, ifFalse: 'DISABLED'));
-    properties.add(DiagnosticsProperty<String>('child', child.toString()));
     properties.add(DiagnosticsProperty<ButtonStyle?>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<MenuSerializableShortcut?>('shortcut', shortcut, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget?>('leadingIcon', leadingIcon, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget?>('trailingIcon', trailingIcon, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode, defaultValue: null));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
     properties.add(DiagnosticsProperty<MaterialStatesController?>('statesController', statesController, defaultValue: null));
@@ -1075,7 +1071,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   @override
   void didUpdateWidget(MenuItemButton oldWidget) {
     if (widget.focusNode != oldWidget.focusNode) {
-      _focusNode.removeListener(_handleFocusChange);
+      (oldWidget.focusNode ?? _internalFocusNode)?.removeListener(_handleFocusChange);
       if (widget.focusNode != null) {
         _internalFocusNode?.dispose();
         _internalFocusNode = null;
@@ -1802,9 +1798,6 @@ class SubmenuButton extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Widget>('leadingIcon', leadingIcon, defaultValue: null));
-    properties.add(DiagnosticsProperty<String>('child', child.toString()));
-    properties.add(DiagnosticsProperty<Widget>('trailingIcon', trailingIcon, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Offset>('alignmentOffset', alignmentOffset));
@@ -3140,7 +3133,6 @@ class _MenuItemLabel extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('child', child.toString()));
     properties.add(DiagnosticsProperty<MenuSerializableShortcut>('shortcut', shortcut, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('hasSubmenu', hasSubmenu));
     properties.add(DiagnosticsProperty<bool>('showDecoration', showDecoration));

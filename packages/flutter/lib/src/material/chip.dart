@@ -1439,14 +1439,11 @@ class _ChipRenderWidget extends SlottedMultiChildRenderObjectWidget<_ChipSlot, R
 
   @override
   Widget? childForSlot(_ChipSlot slot) {
-    switch (slot) {
-      case _ChipSlot.label:
-        return theme.label;
-      case _ChipSlot.avatar:
-        return theme.avatar;
-      case _ChipSlot.deleteIcon:
-        return theme.deleteIcon;
-    }
+    return switch (slot) {
+      _ChipSlot.label      => theme.label,
+      _ChipSlot.avatar     => theme.avatar,
+      _ChipSlot.deleteIcon => theme.deleteIcon,
+    };
   }
 
   @override
@@ -1971,17 +1968,12 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   void _paintCheck(Canvas canvas, Offset origin, double size) {
-    Color? paintColor;
-    if (theme.checkmarkColor != null) {
-      paintColor = theme.checkmarkColor;
-    } else {
-      switch (theme.brightness) {
-        case Brightness.light:
-          paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
-        case Brightness.dark:
-          paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
-      }
-    }
+    Color? paintColor = theme.checkmarkColor ?? switch ((theme.brightness, theme.showAvatar)) {
+      (Brightness.light, true ) => Colors.white,
+      (Brightness.light, false) => Colors.black.withAlpha(_kCheckmarkAlpha),
+      (Brightness.dark,  true ) => Colors.black,
+      (Brightness.dark,  false) => Colors.white.withAlpha(_kCheckmarkAlpha),
+    };
 
     final ColorTween fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);
 
@@ -2260,12 +2252,10 @@ bool _hitIsOnDeleteIcon({
     deflatedSize.width * 0.499,
     math.min(labelPadding.resolve(textDirection).right + deleteButtonSize.width, 24.0 + deleteButtonSize.width / 2.0),
   );
-  switch (textDirection) {
-    case TextDirection.ltr:
-      return adjustedPosition.dx >= deflatedSize.width - accessibleDeleteButtonWidth;
-    case TextDirection.rtl:
-      return adjustedPosition.dx <= accessibleDeleteButtonWidth;
-  }
+  return switch (textDirection) {
+    TextDirection.ltr => adjustedPosition.dx >= deflatedSize.width - accessibleDeleteButtonWidth,
+    TextDirection.rtl => adjustedPosition.dx <= accessibleDeleteButtonWidth,
+  };
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chip
@@ -2289,7 +2279,11 @@ class _ChipDefaultsM3 extends ChipThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? _colors.onSurfaceVariant
+      : _colors.onSurface,
+  );
 
   @override
   MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
@@ -2304,7 +2298,9 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get checkmarkColor => null;
 
   @override
-  Color? get deleteIconColor => null;
+  Color? get deleteIconColor => isEnabled
+    ? _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
   BorderSide? get side => isEnabled
