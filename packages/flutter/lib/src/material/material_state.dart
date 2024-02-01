@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'input_border.dart';
@@ -47,6 +46,11 @@ import 'input_border.dart';
 ///    `MaterialStateProperty` which is used in APIs that need to accept either
 ///    a [TextStyle] or a [MaterialStateProperty<TextStyle>].
 /// {@endtemplate}
+@Deprecated(
+  'Use WidgetState instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialState = WidgetState;
 
 /// Signature for the function that returns a value of type `T` based on a given
@@ -55,7 +59,12 @@ typedef MaterialState = WidgetState;
 /// See also:
 ///
 ///  * [WidgetPropertyResolver], the non-Material form of `MaterialPropertyResolver`
-///    that is inherited by `MaterialPropertyResolver.
+///    that can be used interchangably with `MaterialPropertyResolver.
+@Deprecated(
+  'Use WidgetPropertyResolver instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 
 /// Defines a [Color] that is also a [MaterialStateProperty].
@@ -110,6 +119,11 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 ///
 ///  * [WidgetStateColor], the non-Material version that can be used
 ///    interchangably with `MaterialStateColor`.
+@Deprecated(
+  'Use WidgetStateColor instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialStateColor = WidgetStateColor;
 
 /// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
@@ -143,6 +157,11 @@ typedef MaterialStateColor = WidgetStateColor;
 ///  * [MouseCursor] for introduction on the mouse cursor system.
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
+@Deprecated(
+  'Use WidgetStateMouseCursor instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialStateMouseCursor = WidgetStateMouseCursor;
 
 /// Defines a [BorderSide] whose value depends on a set of [MaterialState]s
@@ -170,6 +189,11 @@ typedef MaterialStateMouseCursor = WidgetStateMouseCursor;
 ///
 ///  * [WidgetStateBorderSide], the non-Material version that can be used
 ///    interchangeably with `MaterialStateBorderSide`.
+@Deprecated(
+  'Use WidgetStateBorderSide instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialStateBorderSide = WidgetStateBorderSide;
 
 /// Defines an [OutlinedBorder] whose value depends on a set of [MaterialState]s
@@ -195,6 +219,11 @@ typedef MaterialStateBorderSide = WidgetStateBorderSide;
 ///  * [WidgetStateOutlinedBorder], the non-Material version that can be used
 ///    interchangeably with `MaterialStateOutlinedBorder`.
 ///  * [ShapeBorder] the base class for shape outlines.
+@Deprecated(
+  'Use WidgetStateOutlinedBorder instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialStateOutlinedBorder = WidgetStateOutlinedBorder;
 
 /// Defines a [TextStyle] that is also a [MaterialStateProperty].
@@ -227,6 +256,11 @@ typedef MaterialStateOutlinedBorder = WidgetStateOutlinedBorder;
 ///
 ///  * [WidgetStateTextStyle], the non-Material version that can be used
 ///    interchangeably with `MaterialStateTextStyle`.
+@Deprecated(
+  'Use WidgetStateTextStyle instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialStateTextStyle = WidgetStateTextStyle;
 
 /// Defines a [OutlineInputBorder] that is also a [MaterialStateProperty].
@@ -390,25 +424,26 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///  * [WidgetStateProperty], the non-Material version that can be used
 ///    interchangeably with `MaterialStateProperty`.
 /// {@macro flutter.material.MaterialStateProperty.implementations}
+@Deprecated(
+  'Use WidgetStateProperty instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialStateProperty<T> = WidgetStateProperty<T>;
 
 /// Convenience class for creating a [MaterialStateProperty] that
 /// resolves to the given value for all states.
-class MaterialStatePropertyAll<T> extends WidgetStatePropertyAll<T>{
-
-  /// Constructs a [MaterialStateProperty] that always resolves to the given
-  /// value.
-  const MaterialStatePropertyAll(super.value);
-
-  @override
-  String toString() {
-    if (value is double) {
-      return 'MaterialStatePropertyAll(${debugFormatDouble(value as double)})';
-    } else {
-      return 'MaterialStatePropertyAll($value)';
-    }
-  }
-}
+///
+/// See also:
+///
+///  * [WidgetStatePropertyAll], the non-Material version that can be used
+///    interchangeably with `MaterialStatePropertyAll`.
+@Deprecated(
+  'Use WidgetStatePropertyAll instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
+typedef MaterialStatePropertyAll<T> = WidgetStatePropertyAll<T>;
 
 /// Manages a set of [MaterialState]s and notifies listeners of changes.
 ///
@@ -434,4 +469,9 @@ class MaterialStatePropertyAll<T> extends WidgetStatePropertyAll<T>{
 ///
 ///  * [WidgetStatesController], the non-Material version that can be used
 ///    interchangeably with `MaterialStatesController`.
+@Deprecated(
+  'Use WidgetStatesController instead. '
+  'Deprecated to make code available outside of Material. '
+  'This feature was deprecated after [beta version at time of deprecation].'
+)
 typedef MaterialStatesController = WidgetStatesController;
