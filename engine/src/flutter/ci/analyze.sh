@@ -48,7 +48,6 @@ echo ""
 
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/ci"
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/flutter_frontend_server"
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/impeller/golden_tests_harvester"
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/impeller/tessellator/dart"
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/gpu"
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/ui"
