@@ -999,9 +999,6 @@ class StartupTest {
             '--verbose',
             '--profile',
             '--trace-startup',
-            // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-            if (device is IosDevice)
-              '--verbose-system-logs',
             '--target=$target',
             '-d',
             device.deviceId,
