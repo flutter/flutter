@@ -158,7 +158,7 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   auto pipeline_options = OptionsFromPassAndEntity(pass, entity);
   if (!stencil_enabled_) {
-    pipeline_options.stencil_compare = CompareFunction::kAlways;
+    pipeline_options.stencil_mode = ContentContextOptions::StencilMode::kIgnore;
   }
   pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
 

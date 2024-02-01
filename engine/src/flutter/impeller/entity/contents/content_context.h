@@ -286,11 +286,41 @@ struct PendingCommandBuffers {
 /// Flutter application may easily require building hundreds of PSOs in total,
 /// but they shouldn't require e.g. 10s of thousands.
 struct ContentContextOptions {
+  enum class StencilMode : uint8_t {
+    // Operations used for stencil-then-cover
+
+    /// Turn the stencil test off. Used when drawing without stencil-then-cover.
+    kIgnore,
+    /// Overwrite the stencil content to the ref value. Used for resetting the
+    /// stencil buffer after a stencil-then-cover operation.
+    kSetToRef,
+    /// Draw the stencil for the nonzero fill path rule.
+    kNonZeroWrite,
+    /// Draw the stencil for the evenoff fill path rule.
+    kEvenOddWrite,
+    /// Used for draw calls which fill in the stenciled area. Intended to be
+    /// used after `kNonZeroWrite` or `kEvenOddWrite` is used to set up the
+    /// stencil buffer.
+    kCoverCompare,
+
+    // Operations to control the legacy clip implementation, which forms a
+    // heightmap on the stencil buffer.
+
+    /// Slice the clip heightmap to a new maximum height.
+    kLegacyClipRestore,
+    /// Increment the stencil heightmap.
+    kLegacyClipIncrement,
+    /// Decrement the stencil heightmap (used for difference clipping only).
+    kLegacyClipDecrement,
+    /// Used for applying clips to all non-clip draw calls.
+    kLegacyClipCompare,
+  };
+
   SampleCount sample_count = SampleCount::kCount1;
   BlendMode blend_mode = BlendMode::kSourceOver;
   CompareFunction depth_compare = CompareFunction::kAlways;
-  CompareFunction stencil_compare = CompareFunction::kEqual;
-  StencilOperation stencil_operation = StencilOperation::kKeep;
+  StencilMode stencil_mode =
+      ContentContextOptions::StencilMode::kLegacyClipCompare;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   PixelFormat color_attachment_pixel_format = PixelFormat::kUnknown;
   bool has_depth_stencil_attachments = true;
@@ -304,8 +334,7 @@ struct ContentContextOptions {
       static_assert(sizeof(o.blend_mode) == 1);
       static_assert(sizeof(o.sample_count) == 1);
       static_assert(sizeof(o.depth_compare) == 1);
-      static_assert(sizeof(o.stencil_compare) == 1);
-      static_assert(sizeof(o.stencil_operation) == 1);
+      static_assert(sizeof(o.stencil_mode) == 1);
       static_assert(sizeof(o.primitive_type) == 1);
       static_assert(sizeof(o.color_attachment_pixel_format) == 1);
 
@@ -316,11 +345,10 @@ struct ContentContextOptions {
              // enums
              static_cast<uint64_t>(o.color_attachment_pixel_format) << 8 |
              static_cast<uint64_t>(o.primitive_type) << 16 |
-             static_cast<uint64_t>(o.stencil_operation) << 24 |
-             static_cast<uint64_t>(o.stencil_compare) << 32 |
-             static_cast<uint64_t>(o.depth_compare) << 40 |
-             static_cast<uint64_t>(o.blend_mode) << 48 |
-             static_cast<uint64_t>(o.sample_count) << 56;
+             static_cast<uint64_t>(o.stencil_mode) << 24 |
+             static_cast<uint64_t>(o.depth_compare) << 32 |
+             static_cast<uint64_t>(o.blend_mode) << 40 |
+             static_cast<uint64_t>(o.sample_count) << 48;
     }
   };
 
@@ -331,8 +359,7 @@ struct ContentContextOptions {
              lhs.blend_mode == rhs.blend_mode &&
              lhs.depth_write_enabled == rhs.depth_write_enabled &&
              lhs.depth_compare == rhs.depth_compare &&
-             lhs.stencil_compare == rhs.stencil_compare &&
-             lhs.stencil_operation == rhs.stencil_operation &&
+             lhs.stencil_mode == rhs.stencil_mode &&
              lhs.primitive_type == rhs.primitive_type &&
              lhs.color_attachment_pixel_format ==
                  rhs.color_attachment_pixel_format &&

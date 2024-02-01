@@ -153,10 +153,61 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
          "has_depth_stencil_attachments="
       << has_depth_stencil_attachments;
   if (maybe_stencil.has_value()) {
-    StencilAttachmentDescriptor stencil = maybe_stencil.value();
-    stencil.stencil_compare = stencil_compare;
-    stencil.depth_stencil_pass = stencil_operation;
-    desc.SetStencilAttachmentDescriptors(stencil);
+    StencilAttachmentDescriptor front_stencil = maybe_stencil.value();
+    StencilAttachmentDescriptor back_stencil = front_stencil;
+
+    switch (stencil_mode) {
+      case StencilMode::kIgnore:
+        front_stencil.stencil_compare = CompareFunction::kAlways;
+        front_stencil.depth_stencil_pass = StencilOperation::kKeep;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+      case StencilMode::kSetToRef:
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kKeep;
+        front_stencil.stencil_failure = StencilOperation::kSetToReferenceValue;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+      case StencilMode::kNonZeroWrite:
+        front_stencil.stencil_compare = CompareFunction::kAlways;
+        front_stencil.depth_stencil_pass = StencilOperation::kIncrementWrap;
+        back_stencil.stencil_compare = CompareFunction::kAlways;
+        back_stencil.depth_stencil_pass = StencilOperation::kDecrementWrap;
+        desc.SetStencilAttachmentDescriptors(front_stencil, back_stencil);
+        break;
+      case StencilMode::kEvenOddWrite:
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kIncrementWrap;
+        front_stencil.stencil_failure = StencilOperation::kDecrementWrap;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+      case StencilMode::kCoverCompare:
+        front_stencil.stencil_compare = CompareFunction::kNotEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kKeep;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+      case StencilMode::kLegacyClipRestore:
+        front_stencil.stencil_compare = CompareFunction::kLess;
+        front_stencil.depth_stencil_pass =
+            StencilOperation::kSetToReferenceValue;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+      case StencilMode::kLegacyClipIncrement:
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kIncrementClamp;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+      case StencilMode::kLegacyClipDecrement:
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kDecrementClamp;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+      case StencilMode::kLegacyClipCompare:
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kKeep;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+    }
   }
   if (maybe_depth.has_value()) {
     DepthAttachmentDescriptor depth = maybe_depth.value();
