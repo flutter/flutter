@@ -123,8 +123,4 @@ impeller_component("vulkan") {
     "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     "//third_party/vulkan_memory_allocator",
   ]
-
-  if (impeller_enable_vulkan_validation_layers) {
-    defines = [ "IMPELLER_ENABLE_VULKAN_VALIDATION_LAYERS" ]
-  }
 }
