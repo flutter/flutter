@@ -333,10 +333,42 @@ void main() {
     }
   });
 
-  test('rounding hack disabled', () {
+  test('can set disableRoundingHack to false in tests', () {
+    bool assertsEnabled = false;
+    assert(() {
+      assertsEnabled = true;
+      return true;
+    }());
+    if (!assertsEnabled){
+      return;
+    }
     const double fontSize = 1.25;
     const String text = '12345';
     assert((fontSize * text.length).truncate() != fontSize * text.length);
+    // ignore: deprecated_member_use
+    final bool roundingHackWasDisabled = ParagraphBuilder.shouldDisableRoundingHack;
+    if (roundingHackWasDisabled) {
+      ParagraphBuilder.setDisableRoundingHack(false);
+    }
+    // ignore: deprecated_member_use
+    assert(!ParagraphBuilder.shouldDisableRoundingHack);
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize));
+    builder.addText(text);
+    final Paragraph paragraph = builder.build()
+      ..layout(const ParagraphConstraints(width: text.length * fontSize));
+    expect(paragraph.computeLineMetrics().length, greaterThan(1));
+
+    if (roundingHackWasDisabled) {
+      ParagraphBuilder.setDisableRoundingHack(true);
+    }
+  });
+
+  test('rounding hack disabled by default', () {
+    const double fontSize = 1.25;
+    const String text = '12345';
+    assert((fontSize * text.length).truncate() != fontSize * text.length);
+    // ignore: deprecated_member_use
+    expect(ParagraphBuilder.shouldDisableRoundingHack, isTrue);
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize));
     builder.addText(text);
     final Paragraph paragraph = builder.build()
