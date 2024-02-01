@@ -22,7 +22,6 @@ ENGINE_DIR = os.path.join(SRC_ROOT, 'flutter')
 ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'ci'),
     os.path.join(ENGINE_DIR, 'flutter_frontend_server'),
-    os.path.join(ENGINE_DIR, 'impeller', 'golden_tests_harvester'),
     os.path.join(ENGINE_DIR, 'impeller', 'tessellator', 'dart'),
     os.path.join(ENGINE_DIR, 'shell', 'vmservice'),
     os.path.join(ENGINE_DIR, 'testing', 'android_background_image'),
@@ -40,6 +39,7 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'tools', 'const_finder'),
     os.path.join(ENGINE_DIR, 'tools', 'gen_web_locale_keymap'),
     os.path.join(ENGINE_DIR, 'tools', 'githooks'),
+    os.path.join(ENGINE_DIR, 'tools', 'golden_tests_harvester'),
     os.path.join(ENGINE_DIR, 'tools', 'header_guard_check'),
     os.path.join(ENGINE_DIR, 'tools', 'licenses'),
     os.path.join(ENGINE_DIR, 'tools', 'path_ops', 'dart'),

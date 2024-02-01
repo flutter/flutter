@@ -1110,7 +1110,7 @@ def run_impeller_golden_tests(build_dir: str):
         'Cannot find the "impeller_golden_tests" executable in "%s". You may need to build it.'
         % (build_dir)
     )
-  harvester_path: Path = Path(SCRIPT_DIR).parent.joinpath('impeller').joinpath(
+  harvester_path: Path = Path(SCRIPT_DIR).parent.joinpath('tools').joinpath(
       'golden_tests_harvester'
   )
   with tempfile.TemporaryDirectory(prefix='impeller_golden') as temp_dir:
