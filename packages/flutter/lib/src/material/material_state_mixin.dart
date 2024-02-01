@@ -56,7 +56,7 @@ import 'material_state.dart';
 @Deprecated(
   'Use WidgetStateMixin instead. '
   'Moved to the Widgets layer to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// Managed set of active [MaterialState] values; designed to be passed to
