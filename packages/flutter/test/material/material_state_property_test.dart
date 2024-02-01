@@ -45,10 +45,10 @@ void main() {
 
   test('toString formats correctly', () {
     const MaterialStateProperty<Color?> colorProperty = MaterialStatePropertyAll<Color?>(Color(0xFFFFFFFF));
-    expect(colorProperty.toString(), equals('MaterialStatePropertyAll(Color(0xffffffff))'));
+    expect(colorProperty.toString(), equals('WidgetStatePropertyAll(Color(0xffffffff))'));
 
     const MaterialStateProperty<double?> doubleProperty = MaterialStatePropertyAll<double?>(33 + 1/3);
-    expect(doubleProperty.toString(), equals('MaterialStatePropertyAll(33.3)'));
+    expect(doubleProperty.toString(), equals('WidgetStatePropertyAll(33.3)'));
   });
 
   test("Can interpolate between two MaterialStateProperty's", () {
