@@ -25,7 +25,4 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'leak_tracker_flutter_testing': '3.0.2', // https://github.com/flutter/devtools/issues/3951
   'path_provider_android':
       '2.2.1', // https://github.com/flutter/flutter/issues/140796
-  'test_api': '0.6.1', // https://github.com/flutter/flutter/issues/140169
-  'test_core': '0.5.9', // https://github.com/flutter/flutter/issues/140169
-  'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
 };
