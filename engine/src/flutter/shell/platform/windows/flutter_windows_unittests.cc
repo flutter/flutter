@@ -11,6 +11,7 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/windows/egl/manager.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/testing/windows_test_config_builder.h"
@@ -21,6 +22,20 @@
 
 namespace flutter {
 namespace testing {
+
+namespace {
+
+// An EGL manager that initializes EGL but fails to create surfaces.
+class HalfBrokenEGLManager : public egl::Manager {
+ public:
+  HalfBrokenEGLManager() : egl::Manager(/*enable_impeller = */ false) {}
+
+  bool CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {
+    return false;
+  }
+};
+
+}  // namespace
 
 // Verify that we can fetch a texture registrar.
 // Prevent regression: https://github.com/flutter/flutter/issues/86617
@@ -294,6 +309,25 @@ TEST_F(WindowsTest, GetGraphicsAdapter) {
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
+}
+
+// Verify the app does not crash if EGL initializes successfully but
+// the rendering surface cannot be created.
+TEST_F(WindowsTest, SurfaceOptional) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.InitializeEngine()};
+  EngineModifier modifier{
+      reinterpret_cast<FlutterWindowsEngine*>(engine.get())};
+
+  auto egl_manager = std::make_unique<HalfBrokenEGLManager>();
+  ASSERT_TRUE(egl_manager->IsValid());
+  modifier.SetEGLManager(std::move(egl_manager));
+
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(0, 0, engine.release())};
+
+  ASSERT_NE(controller, nullptr);
 }
 
 }  // namespace testing
