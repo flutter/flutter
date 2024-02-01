@@ -766,7 +766,10 @@ class _CupertinoBackGestureController<T> {
     if (!isCurrent) {
       // If the page has already been navigated away from, then the animation
       // direction depends on whether or not it's still in the navigation stack,
-      // regardless of velocity or drag position.
+      // regardless of velocity or drag position. For example, if a route is
+      // being slowly dragged back by just a few pixels, but then a programmatic
+      // pop occurs, the route should still be animated off the screen.
+      // See https://github.com/flutter/flutter/issues/141268.
       animateForward = getIsActive();
     } else if (velocity.abs() >= _kMinFlingVelocity) {
       // If the user releases the page before mid screen with sufficient velocity,
