@@ -493,7 +493,6 @@ static FlKeyEvent* fl_key_event_new_by_mock(bool is_press,
   event->time = 0;
   event->state = state;
   event->keyval = keyval;
-  event->string = nullptr;
   event->group = group;
   event->keycode = keycode;
   FlKeyEvent* origin_event = fl_key_event_clone_information_only(event);
