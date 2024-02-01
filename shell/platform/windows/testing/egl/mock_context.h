@@ -18,6 +18,7 @@ class MockContext : public flutter::egl::Context {
  public:
   MockContext() : Context(EGL_NO_DISPLAY, EGL_NO_CONTEXT) {}
 
+  MOCK_METHOD(bool, MakeCurrent, (), (const, override));
   MOCK_METHOD(bool, ClearCurrent, (), (const, override));
 
  private:

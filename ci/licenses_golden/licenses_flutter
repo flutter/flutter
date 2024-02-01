@@ -7252,6 +7252,10 @@ ORIGIN: ../../../flutter/shell/platform/windows/egl/manager.cc + ../../../flutte
 ORIGIN: ../../../flutter/shell/platform/windows/egl/manager.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/egl/proc_table.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/egl/proc_table.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/surface.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/surface.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/window_surface.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/egl/window_surface.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/event_watcher.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/event_watcher.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/external_texture.h + ../../../flutter/LICENSE
@@ -10137,6 +10141,10 @@ FILE: ../../../flutter/shell/platform/windows/egl/manager.cc
 FILE: ../../../flutter/shell/platform/windows/egl/manager.h
 FILE: ../../../flutter/shell/platform/windows/egl/proc_table.cc
 FILE: ../../../flutter/shell/platform/windows/egl/proc_table.h
+FILE: ../../../flutter/shell/platform/windows/egl/surface.cc
+FILE: ../../../flutter/shell/platform/windows/egl/surface.h
+FILE: ../../../flutter/shell/platform/windows/egl/window_surface.cc
+FILE: ../../../flutter/shell/platform/windows/egl/window_surface.h
 FILE: ../../../flutter/shell/platform/windows/event_watcher.cc
 FILE: ../../../flutter/shell/platform/windows/event_watcher.h
 FILE: ../../../flutter/shell/platform/windows/external_texture.h

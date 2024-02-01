@@ -14,7 +14,7 @@ namespace egl {
 
 // An EGL context to interact with OpenGL.
 //
-// This enables automatic eror logging and mocking.
+// This enables automatic error logging and mocking.
 //
 // Flutter Windows uses this to create render and resource contexts.
 class Context {
