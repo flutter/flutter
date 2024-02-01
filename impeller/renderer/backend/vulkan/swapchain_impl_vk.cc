@@ -145,17 +145,18 @@ static std::optional<vk::Queue> ChoosePresentQueue(
 std::shared_ptr<SwapchainImplVK> SwapchainImplVK::Create(
     const std::shared_ptr<Context>& context,
     vk::UniqueSurfaceKHR surface,
-    vk::SwapchainKHR old_swapchain,
-    vk::SurfaceTransformFlagBitsKHR last_transform) {
+    const ISize& size,
+    bool enable_msaa,
+    vk::SwapchainKHR old_swapchain) {
   return std::shared_ptr<SwapchainImplVK>(new SwapchainImplVK(
-      context, std::move(surface), old_swapchain, last_transform));
+      context, std::move(surface), size, enable_msaa, old_swapchain));
 }
 
-SwapchainImplVK::SwapchainImplVK(
-    const std::shared_ptr<Context>& context,
-    vk::UniqueSurfaceKHR surface,
-    vk::SwapchainKHR old_swapchain,
-    vk::SurfaceTransformFlagBitsKHR last_transform) {
+SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
+                                 vk::UniqueSurfaceKHR surface,
+                                 const ISize& size,
+                                 bool enable_msaa,
+                                 vk::SwapchainKHR old_swapchain) {
   if (!context) {
     VALIDATION_LOG << "Cannot create a swapchain without a context.";
     return;
@@ -209,10 +210,10 @@ SwapchainImplVK::SwapchainImplVK(
   swapchain_info.imageColorSpace = format.value().colorSpace;
   swapchain_info.presentMode = vk::PresentModeKHR::eFifo;
   swapchain_info.imageExtent = vk::Extent2D{
-      std::clamp(surface_caps.currentExtent.width,
+      std::clamp(static_cast<uint32_t>(size.width),
                  surface_caps.minImageExtent.width,
                  surface_caps.maxImageExtent.width),
-      std::clamp(surface_caps.currentExtent.height,
+      std::clamp(static_cast<uint32_t>(size.height),
                  surface_caps.minImageExtent.height,
                  surface_caps.maxImageExtent.height),
   };
@@ -304,12 +305,17 @@ SwapchainImplVK::SwapchainImplVK(
   images_ = std::move(swapchain_images);
   synchronizers_ = std::move(synchronizers);
   current_frame_ = synchronizers_.size() - 1u;
+  size_ = size;
+  enable_msaa_ = enable_msaa;
   is_valid_ = true;
-  transform_if_changed_discard_swapchain_ = last_transform;
 }
 
 SwapchainImplVK::~SwapchainImplVK() {
   DestroySwapchain();
+}
+
+const ISize& SwapchainImplVK::GetSize() const {
+  return size_;
 }
 
 bool SwapchainImplVK::IsValid() const {
@@ -337,10 +343,6 @@ vk::Format SwapchainImplVK::GetSurfaceFormat() const {
   return surface_format_;
 }
 
-vk::SurfaceTransformFlagBitsKHR SwapchainImplVK::GetLastTransform() const {
-  return transform_if_changed_discard_swapchain_;
-}
-
 std::shared_ptr<Context> SwapchainImplVK::GetContext() const {
   return context_.lock();
 }
@@ -363,26 +365,6 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
   if (!sync->WaitForFence(context.GetDevice())) {
     VALIDATION_LOG << "Could not wait for fence.";
     return SwapchainImplVK::AcquireResult{};
-  }
-
-  //----------------------------------------------------------------------------
-  /// Poll to see if the orientation has changed.
-  ///
-  /// https://developer.android.com/games/optimize/vulkan-prerotation#using_polling
-  current_transform_poll_count_++;
-  if (current_transform_poll_count_ >= kPollFramesForOrientation) {
-    current_transform_poll_count_ = 0u;
-    auto [caps_result, caps] =
-        context.GetPhysicalDevice().getSurfaceCapabilitiesKHR(*surface_);
-    if (caps_result != vk::Result::eSuccess) {
-      VALIDATION_LOG << "Could not get surface capabilities: "
-                     << vk::to_string(caps_result);
-      return SwapchainImplVK::AcquireResult{};
-    }
-    if (caps.currentTransform != transform_if_changed_discard_swapchain_) {
-      transform_if_changed_discard_swapchain_ = caps.currentTransform;
-      return AcquireResult{true /* out of date */};
-    }
   }
 
   //----------------------------------------------------------------------------
@@ -430,7 +412,8 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
           return false;
         }
         return swapchain->Present(image, image_index);
-      }  // swap callback
+      },            // swap callback
+      enable_msaa_  //
       )};
 }
 

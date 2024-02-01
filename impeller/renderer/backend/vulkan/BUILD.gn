@@ -19,6 +19,7 @@ impeller_component("vulkan_unittests") {
     "test/mock_vulkan.cc",
     "test/mock_vulkan.h",
     "test/mock_vulkan_unittests.cc",
+    "test/swapchain_unittests.cc",
   ]
   deps = [
     ":vulkan",

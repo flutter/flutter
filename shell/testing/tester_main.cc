@@ -111,7 +111,8 @@ bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
 
   impeller::vk::UniqueSurfaceKHR surface{vk_surface, context->GetInstance()};
   surface_context = context->CreateSurfaceContext();
-  if (!surface_context->SetWindowSurface(std::move(surface))) {
+  if (!surface_context->SetWindowSurface(std::move(surface),
+                                         impeller::ISize{1, 1})) {
     VALIDATION_LOG << "Could not set up surface for context.";
     return false;
   }
