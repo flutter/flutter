@@ -12,22 +12,34 @@ namespace impeller {
 
 std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     const std::shared_ptr<Context>& context,
-    vk::UniqueSurfaceKHR surface) {
-  auto impl = SwapchainImplVK::Create(context, std::move(surface));
+    vk::UniqueSurfaceKHR surface,
+    const ISize& size,
+    bool enable_msaa) {
+  auto impl =
+      SwapchainImplVK::Create(context, std::move(surface), size, enable_msaa);
   if (!impl || !impl->IsValid()) {
     VALIDATION_LOG << "Failed to create SwapchainVK implementation.";
     return nullptr;
   }
-  return std::shared_ptr<SwapchainVK>(new SwapchainVK(std::move(impl)));
+  return std::shared_ptr<SwapchainVK>(
+      new SwapchainVK(std::move(impl), size, enable_msaa));
 }
 
-SwapchainVK::SwapchainVK(std::shared_ptr<SwapchainImplVK> impl)
-    : impl_(std::move(impl)) {}
+SwapchainVK::SwapchainVK(std::shared_ptr<SwapchainImplVK> impl,
+                         const ISize& size,
+                         bool enable_msaa)
+    : impl_(std::move(impl)), size_(size), enable_msaa_(enable_msaa) {}
 
 SwapchainVK::~SwapchainVK() = default;
 
 bool SwapchainVK::IsValid() const {
   return impl_ ? impl_->IsValid() : false;
+}
+
+void SwapchainVK::UpdateSurfaceSize(const ISize& size) {
+  // Update the size of the swapchain. On the next acquired drawable,
+  // the sizes may no longer match, forcing the swapchain to be recreated.
+  size_ = size;
 }
 
 std::unique_ptr<Surface> SwapchainVK::AcquireNextDrawable() {
@@ -38,7 +50,7 @@ std::unique_ptr<Surface> SwapchainVK::AcquireNextDrawable() {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
   auto result = impl_->AcquireNextDrawable();
-  if (!result.out_of_date) {
+  if (!result.out_of_date && size_ == impl_->GetSize()) {
     return std::move(result.surface);
   }
 
@@ -49,10 +61,11 @@ std::unique_ptr<Surface> SwapchainVK::AcquireNextDrawable() {
   auto context = impl_->GetContext();
   auto [surface, old_swapchain] = impl_->DestroySwapchain();
 
-  auto new_impl = SwapchainImplVK::Create(context,                   //
-                                          std::move(surface),        //
-                                          *old_swapchain,            //
-                                          impl_->GetLastTransform()  //
+  auto new_impl = SwapchainImplVK::Create(context,             //
+                                          std::move(surface),  //
+                                          size_,               //
+                                          enable_msaa_,        //
+                                          *old_swapchain       //
   );
   if (!new_impl || !new_impl->IsValid()) {
     VALIDATION_LOG << "Could not update swapchain.";

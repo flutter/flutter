@@ -85,6 +85,11 @@ PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
     return;
   }
 
+  int width = 0;
+  int height = 0;
+  ::glfwGetWindowSize(window, &width, &height);
+  size_ = ISize{width, height};
+
   handle_.reset(window);
 
   ContextVK::Settings context_settings;
@@ -125,7 +130,7 @@ PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
 
   vk::UniqueSurfaceKHR surface{vk_surface, context_vk->GetInstance()};
   auto context = context_vk->CreateSurfaceContext();
-  if (!context->SetWindowSurface(std::move(surface))) {
+  if (!context->SetWindowSurface(std::move(surface), size_)) {
     VALIDATION_LOG << "Could not set up surface for context.";
     return;
   }
@@ -150,6 +155,14 @@ std::unique_ptr<Surface> PlaygroundImplVK::AcquireSurfaceFrame(
     std::shared_ptr<Context> context) {
   SurfaceContextVK* surface_context_vk =
       reinterpret_cast<SurfaceContextVK*>(context_.get());
+
+  int width = 0;
+  int height = 0;
+  ::glfwGetWindowSize(reinterpret_cast<GLFWwindow*>(handle_.get()), &width,
+                      &height);
+  size_ = ISize{width, height};
+  surface_context_vk->UpdateSurfaceSize(ISize{width, height});
+
   return surface_context_vk->AcquireNextSurface();
 }
 

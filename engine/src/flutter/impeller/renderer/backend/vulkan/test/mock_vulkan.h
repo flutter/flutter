@@ -94,6 +94,9 @@ class MockVulkanContextBuilder {
   std::vector<std::string> instance_layers_;
 };
 
+/// @brief Override the image size returned by all swapchain images.
+void SetSwapchainImageSize(ISize size);
+
 }  // namespace testing
 }  // namespace impeller
 
