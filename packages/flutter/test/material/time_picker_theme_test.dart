@@ -98,8 +98,8 @@ void main() {
 
     expect(description, equalsIgnoringHashCodes(<String>[
       'backgroundColor: Color(0xfffffff0)',
-      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff1)))',
-      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff2)))',
+      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xfffffff1)))',
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xfffffff2)))',
       'dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3))',
       'dayPeriodColor: Color(0x00000000)',
       'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff5)), BorderRadius.zero)',
