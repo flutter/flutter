@@ -14,9 +14,7 @@ enum CompileTarget {
 sealed class WebCompilerConfig {
   const WebCompilerConfig({required this.renderer});
 
-  /// Returns `true` if `this` represents configuration for the Wasm compiler.
-  ///
-  /// Otherwise, `false`–represents the JavaScript compiler.
+  /// Returns which target this compiler outputs (js or wasm)
   CompileTarget get compileTarget;
   final WebRendererMode renderer;
 
