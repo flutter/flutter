@@ -19,7 +19,15 @@ import 'package:test/test.dart';
 
 void main() {
   final TokenLogger logger = tokenLogger;
+  // Required init with empty at least once to init late fields.
+  // Then we can use the `clear` method.
   logger.init(allTokens: <String, dynamic>{}, versionMap: <String, List<String>>{});
+
+  setUp(() {
+    // Cleanup the global token logger before each test, to not be tied to a particular
+    // test order.
+    logger.clear();
+  });
 
   test('Templates will append to the end of a file', () {
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
