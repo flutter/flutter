@@ -41,10 +41,6 @@ typedef struct _FlKeyEvent {
   int state;
   // Keyboard group.
   guint8 group;
-  // String, null-terminated.
-  //
-  // Can be nullptr.
-  const char* string;
   // An opaque pointer to the original event.
   //
   // This is used when dispatching.  For native events, this is #GdkEvent
