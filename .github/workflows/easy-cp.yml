@@ -73,8 +73,7 @@ jobs:
         run: |
           echo $PR_URL
           NEW_PR_NUMBER="${PR_URL##*/}"
-          SUCCESS_MSG="Hello @${{ github.actor }}! Looks like you attached the cp label and successfully created a cherry pick pr.<br>"
-          SUCCESS_MSG+="Please fill in the information in PR description above, and a release engineer will review this request."
+          SUCCESS_MSG=" @${{ github.actor }} please fill out the PR description above, afterwards the release team will review this request."
           gh pr comment $NEW_PR_NUMBER -R flutter/flutter -b "${SUCCESS_MSG}"
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
