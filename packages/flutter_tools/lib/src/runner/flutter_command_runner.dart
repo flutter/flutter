@@ -168,7 +168,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     );
     argParser.addOption(
       FlutterGlobalOptions.kDebugLogsDirectoryFlag,
-      help: 'Path to a directory for ',
+      help: 'Path to a directory where logs for debugging may be added.',
       hide: !verboseHelp,
     );
   }
