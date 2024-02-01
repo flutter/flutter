@@ -25,8 +25,7 @@ bool CheckerboardContents::Render(const ContentContext& renderer,
 
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kSourceOver;
-  options.stencil_compare = CompareFunction::kAlways;  // Ignore all clips.
-  options.stencil_operation = StencilOperation::kKeep;
+  options.stencil_mode = ContentContextOptions::StencilMode::kIgnore;
   options.primitive_type = PrimitiveType::kTriangleStrip;
 
   VertexBufferBuilder<typename VS::PerVertexData> vtx_builder;
