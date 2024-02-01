@@ -43,6 +43,9 @@ FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 
 ENCODING = 'UTF-8'
 
+# This number must be updated when adding new golden tests to impeller.
+_NUM_EXPECTED_GENERATED_IMPELLER_GOLDEN_FILES = 566
+
 logger = logging.getLogger(__name__)
 logger_handler = logging.StreamHandler()
 
@@ -1115,6 +1118,15 @@ def run_impeller_golden_tests(build_dir: str):
   )
   with tempfile.TemporaryDirectory(prefix='impeller_golden') as temp_dir:
     run_cmd([tests_path, '--working_dir=%s' % temp_dir], cwd=build_dir)
+    num_generated_files = len(os.listdir(temp_dir))
+    if num_generated_files != _NUM_EXPECTED_GENERATED_IMPELLER_GOLDEN_FILES:
+      raise Exception(
+          '`impeller_golden_tests` was expected to generate '
+          f'{_NUM_EXPECTED_GENERATED_IMPELLER_GOLDEN_FILES} files, '
+          f'{num_generated_files} were generated. If this is expected, update '
+          '_NUM_EXPECTED_GENERATED_IMPELLER_GOLDEN_FILES.'
+      )
+
     with DirectoryChange(harvester_path):
       run_cmd(['dart', 'pub', 'get'])
       bin_path = Path('.').joinpath('bin'
