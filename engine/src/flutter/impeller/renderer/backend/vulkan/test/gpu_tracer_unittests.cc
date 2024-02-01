@@ -15,8 +15,25 @@ namespace impeller {
 namespace testing {
 
 #ifdef IMPELLER_DEBUG
+TEST(GPUTracerVK, CanBeDisabled) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_gpu_tracing = false;
+          })
+          .Build();
+  auto tracer = context->GetGPUTracer();
+
+  ASSERT_FALSE(tracer->IsEnabled());
+}
+
 TEST(GPUTracerVK, CanTraceCmdBuffer) {
-  auto const context = MockVulkanContextBuilder().Build();
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_gpu_tracing = true;
+          })
+          .Build();
   auto tracer = context->GetGPUTracer();
 
   ASSERT_TRUE(tracer->IsEnabled());
@@ -48,7 +65,12 @@ TEST(GPUTracerVK, CanTraceCmdBuffer) {
 }
 
 TEST(GPUTracerVK, DoesNotTraceOutsideOfFrameWorkload) {
-  auto const context = MockVulkanContextBuilder().Build();
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_gpu_tracing = true;
+          })
+          .Build();
   auto tracer = context->GetGPUTracer();
 
   ASSERT_TRUE(tracer->IsEnabled());
@@ -78,7 +100,12 @@ TEST(GPUTracerVK, DoesNotTraceOutsideOfFrameWorkload) {
 // This cmd buffer starts when there is a frame but finishes when there is none.
 // This should result in the same recorded work.
 TEST(GPUTracerVK, TracesWithPartialFrameOverlap) {
-  auto const context = MockVulkanContextBuilder().Build();
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_gpu_tracing = true;
+          })
+          .Build();
   auto tracer = context->GetGPUTracer();
 
   ASSERT_TRUE(tracer->IsEnabled());

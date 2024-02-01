@@ -74,7 +74,8 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     bool enable_impeller,
     const std::optional<std::string>& impeller_backend,
     bool enable_vulkan_validation,
-    bool enable_opengl_gpu_tracing) {
+    bool enable_opengl_gpu_tracing,
+    bool enable_vulkan_gpu_tracing) {
   if (use_software_rendering) {
     FML_DCHECK(!enable_impeller);
     return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
@@ -119,10 +120,10 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
             enable_opengl_gpu_tracing);
       case AndroidRenderingAPI::kVulkan:
         return std::make_unique<AndroidContextVulkanImpeller>(
-            enable_vulkan_validation);
+            enable_vulkan_validation, enable_vulkan_gpu_tracing);
       case AndroidRenderingAPI::kAutoselect: {
         auto vulkan_backend = std::make_unique<AndroidContextVulkanImpeller>(
-            enable_vulkan_validation);
+            enable_vulkan_validation, enable_vulkan_gpu_tracing);
         if (!vulkan_backend->IsValid()) {
           return std::make_unique<AndroidContextGLImpeller>(
               std::make_unique<impeller::egl::Display>(),
@@ -159,7 +160,8 @@ PlatformViewAndroid::PlatformViewAndroid(
               delegate.OnPlatformViewGetSettings().enable_impeller,
               delegate.OnPlatformViewGetSettings().impeller_backend,
               delegate.OnPlatformViewGetSettings().enable_vulkan_validation,
-              delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing)) {
+              delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
+              delegate.OnPlatformViewGetSettings().enable_vulkan_gpu_tracing)) {
 }
 
 PlatformViewAndroid::PlatformViewAndroid(

@@ -22,8 +22,12 @@ namespace impeller {
 
 static constexpr uint32_t kPoolSize = 128u;
 
-GPUTracerVK::GPUTracerVK(std::weak_ptr<ContextVK> context)
+GPUTracerVK::GPUTracerVK(std::weak_ptr<ContextVK> context,
+                         bool enable_gpu_tracing)
     : context_(std::move(context)) {
+  if (!enable_gpu_tracing) {
+    return;
+  }
   timestamp_period_ = context_.lock()
                           ->GetDeviceHolder()
                           ->GetPhysicalDevice()

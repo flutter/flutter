@@ -18,9 +18,14 @@ class GPUProbe;
 
 /// @brief A class that uses timestamp queries to record the approximate GPU
 /// execution time.
+///
+/// To enable, add the following metadata to the application's Android manifest:
+///   <meta-data
+///       android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"
+///       android:value="false" />
 class GPUTracerVK : public std::enable_shared_from_this<GPUTracerVK> {
  public:
-  explicit GPUTracerVK(std::weak_ptr<ContextVK> context);
+  GPUTracerVK(std::weak_ptr<ContextVK> context, bool enable_gpu_tracing);
 
   ~GPUTracerVK() = default;
 
