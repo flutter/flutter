@@ -36,10 +36,48 @@ class FlutterDependencyCheckerPlugin : Plugin<Project> {
 
 class DependencyVersionChecker {
     companion object {
-        const val GRADLE_NAME : String = "Gradle"
-        const val JAVA_NAME : String = "Java"
-        const val AGP_NAME : String = "Android Gradle Plugin"
-        const val KGP_NAME : String = "Kotlin"
+        private const val GRADLE_NAME : String = "Gradle"
+        private const val JAVA_NAME : String = "Java"
+        private const val AGP_NAME : String = "Android Gradle Plugin"
+        private const val KGP_NAME : String = "Kotlin"
+
+        // The following messages represent best effort guesses at where a Flutter developer should
+        // look to upgrade a dependency that is below the corresponding threshold. Developers can
+        // change some of these locations, so they are not guaranteed to be accurate.
+        private fun getPotentialGradleFix(projectDirectory : String) : String {
+            return "Your project's gradle version is typically " +
+                    "defined in the gradle wrapper file. By default, this can be found at " +
+                    "$projectDirectory/gradle/wrapper/gradle-wrapper.properties. \n" +
+                    "For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html."
+        }
+
+        // The potential java fix does not make use of the project directory,
+        // so it left as a constant.
+        private const val POTENTIAL_JAVA_FIX : String = "The Java version used by Flutter can be " +
+                "set with `flutter config --jdk-dir=<path>`. \nFor more information about how Flutter " +
+                "chooses which version of Java to use, see the --jdk-dir section of the " +
+                "output of `flutter config -h`."
+
+        private fun getPotentialAGPFix(projectDirectory : String) : String {
+            return "Your project's AGP version is typically " +
+                    "defined the plugins block of the `settings.gradle` file " +
+                    "($projectDirectory/settings.gradle), by a plugin with the id of " +
+                    "com.android.application. \nIf you don't see a plugins block, your project " +
+                    "was likely created with an older template version. In this case it is most " +
+                    "likely defined in the top-level build.gradle file " +
+                    "($projectDirectory/build.gradle) by the following line in the dependencies" +
+                    " block of the buildscript: \"classpath 'com.android.tools.build:gradle:<version>'\"."
+        }
+
+        private fun getPotentialKGPFix(projectDirectory : String) : String {
+            return "Your project's KGP version is typically " +
+                    "defined the plugins block of the `settings.gradle` file " +
+                    "($projectDirectory/settings.gradle), by a plugin with the id of " +
+                    "org.jetbrains.kotlin.android. \nIf you don't see a plugins block, your project " +
+                    "was likely created with an older template version, in which case it is most " +
+                    "likely defined in the top-level build.gradle file " +
+                    "($projectDirectory/build.gradle) by the ext.kotlin_version property."
+        }
 
         // The following versions define our support policy for Gradle, Java, AGP, and KGP.
         // All "error" versions are currently set to 0 as this policy is new. They will be increased
@@ -151,104 +189,107 @@ class DependencyVersionChecker {
 
         private fun getErrorMessage(dependencyName : String,
                                     versionString : String,
-                                    errorVersion : String) : String {
+                                    errorVersion : String,
+                                    potentialFix : String) : String {
             return "Error: Your project's $dependencyName version ($versionString) is lower " +
                     "than Flutter's minimum supported version of $errorVersion. Please upgrade " +
                     "your $dependencyName version. \nAlternatively, use the flag " +
-                    "\"--android-skip-build-dependency-validation\" to bypass this check."
+                    "\"--android-skip-build-dependency-validation\" to bypass this check.\n\n" +
+                    "Potential fix: $potentialFix"
         }
 
         private fun getWarnMessage(dependencyName : String,
                                    versionString : String,
-                                   warnVersion : String) : String {
+                                   warnVersion : String,
+                                   potentialFix : String) : String {
             return "Warning: Flutter support for your project's $dependencyName version " +
                     "($versionString) will soon be dropped. Please upgrade your $dependencyName " +
                     "version to a version of at least $warnVersion soon." +
                     "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
-                    " to bypass this check."
+                    " to bypass this check.\n\n Potential fix: $potentialFix"
         }
 
         fun checkGradleVersion(version : Version, project : Project) {
             if (version < errorGradleVersion) {
-                throw GradleException(
-                    getErrorMessage(
-                        GRADLE_NAME,
-                        version.toString(),
-                        errorGradleVersion.toString()
-                    )
+                val errorMessage : String = getErrorMessage(
+                    GRADLE_NAME,
+                    version.toString(),
+                    errorGradleVersion.toString(),
+                    getPotentialGradleFix(project.getRootDir().getPath())
                 )
+                throw GradleException(errorMessage)
             }
             else if (version < warnGradleVersion) {
-                project.logger.error(
-                    getWarnMessage(
-                        GRADLE_NAME,
-                        version.toString(),
-                        warnGradleVersion.toString()
-                    )
+                val warnMessage : String = getWarnMessage(
+                    GRADLE_NAME,
+                    version.toString(),
+                    warnGradleVersion.toString(),
+                    getPotentialGradleFix(project.getRootDir().getPath())
                 )
+                project.logger.error(warnMessage)
             }
         }
 
         fun checkJavaVersion(version : JavaVersion, project : Project) {
             if (version < errorJavaVersion) {
-                throw GradleException(
-                    getErrorMessage(
-                        JAVA_NAME,
-                        version.toString(),
-                        errorJavaVersion.toString()
-                    )
+                val errorMessage : String = getErrorMessage(
+                    JAVA_NAME,
+                    version.toString(),
+                    errorJavaVersion.toString(),
+                    POTENTIAL_JAVA_FIX
                 )
+                throw GradleException(errorMessage)
             }
             else if (version < warnJavaVersion) {
-                project.logger.error(
-                    getWarnMessage(
-                        JAVA_NAME,
-                        version.toString(),
-                        warnJavaVersion.toString()
-                    )
+                val warnMessage : String = getWarnMessage(
+                    JAVA_NAME,
+                    version.toString(),
+                    warnJavaVersion.toString(),
+                    POTENTIAL_JAVA_FIX
                 )
+                project.logger.error(warnMessage)
             }
         }
 
         fun checkAGPVersion(version : Version, project : Project) {
             if (version < errorAGPVersion) {
-                throw GradleException(
-                    getErrorMessage(
-                        AGP_NAME,
-                        version.toString(),
-                        errorAGPVersion.toString()
-                    )
+                val errorMessage : String = getErrorMessage(
+                    AGP_NAME,
+                    version.toString(),
+                    errorAGPVersion.toString(),
+                    getPotentialAGPFix(project.getRootDir().getPath())
                 )
+                throw GradleException(errorMessage)
             }
             else if (version < warnAGPVersion) {
-                project.logger.error(
-                    getWarnMessage(
-                        AGP_NAME,
-                        version.toString(),
-                        warnAGPVersion.toString()
-                    )
+                val warnMessage : String = getWarnMessage(
+                    AGP_NAME,
+                    version.toString(),
+                    warnAGPVersion.toString(),
+                    getPotentialAGPFix(project.getRootDir().getPath())
                 )
+                project.logger.error(warnMessage)
             }
         }
 
         fun checkKGPVersion(version : Version, project : Project) {
             if (version < errorKGPVersion) {
-                throw GradleException(
-                    getErrorMessage(
-                        KGP_NAME,
-                        version.toString(),
-                        errorKGPVersion.toString()
-                    )
+                val errorMessage : String = getErrorMessage(
+                    KGP_NAME,
+                    version.toString(),
+                    errorKGPVersion.toString(),
+                    getPotentialKGPFix(project.getRootDir().getPath())
                 )
+                throw GradleException(errorMessage)
             }
             else if (version < warnKGPVersion) {
-                project.logger.error(
-                    getWarnMessage(
-                        KGP_NAME,
-                        version.toString(),
-                        warnKGPVersion.toString()
-                    )
+                val warnMessage : String = getWarnMessage(
+                    KGP_NAME,
+                    version.toString(),
+                    warnKGPVersion.toString(),
+                    getPotentialKGPFix(project.getRootDir().getPath())
                 )
+                project.logger.error(warnMessage)
             }
         }
     }
