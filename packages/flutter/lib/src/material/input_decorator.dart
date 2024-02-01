@@ -4542,9 +4542,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   @override
   Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     return switch ((Theme.of(context).brightness, states.contains(MaterialState.disabled))) {
-      (Brightness.dark,  true ) => const Color(0x0DFFFFFF), //  5% white
-      (Brightness.dark,  false) => const Color(0x1AFFFFFF), // 10% white
-      (Brightness.light, true ) => const Color(0x05000000), //  2% black
+      (Brightness.dark, true)   => const Color(0x0DFFFFFF), //  5% white
+      (Brightness.dark, false)  => const Color(0x1AFFFFFF), // 10% white
+      (Brightness.light, true)  => const Color(0x05000000), //  2% black
       (Brightness.light, false) => const Color(0x0A000000), //  4% black
     };
   });

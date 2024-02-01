@@ -1877,8 +1877,8 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     menuPaddingOffset += switch ((orientation, Directionality.of(context))) {
       (Axis.horizontal, TextDirection.rtl) => Offset(menuPadding.right, 0),
       (Axis.horizontal, TextDirection.ltr) => Offset(-menuPadding.left, 0),
-      (Axis.vertical,   TextDirection.rtl) => Offset(0, -menuPadding.top),
-      (Axis.vertical,   TextDirection.ltr) => Offset(0, -menuPadding.top),
+      (Axis.vertical, TextDirection.rtl)   => Offset(0, -menuPadding.top),
+      (Axis.vertical, TextDirection.ltr)   => Offset(0, -menuPadding.top),
     };
 
     return MenuAnchor(
