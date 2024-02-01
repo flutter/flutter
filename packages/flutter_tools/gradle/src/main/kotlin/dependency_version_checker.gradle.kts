@@ -144,7 +144,7 @@ class DependencyVersionChecker {
             if (versionString == null) {
                 return null
             } else {
-                return Version.fromString(versionfield!!.call(kotlinPlugin) as String)
+                return Version.fromString(versionString!! as String)
             }
         }
 
