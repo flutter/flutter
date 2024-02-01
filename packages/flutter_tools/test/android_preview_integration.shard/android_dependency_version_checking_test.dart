@@ -106,7 +106,8 @@ void main() {
       '--debug',
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
-    expect(result.stderr, contains('Please upgrade your AGP version'));
+    expect(result.stderr, contains('Please upgrade your Android Gradle '
+        'Plugin version'));
   });
 
   testUsingContext(
