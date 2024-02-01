@@ -166,6 +166,9 @@ abstract class WidgetStateColor extends Color implements WidgetStateProperty<Col
   /// state.
   @override
   Color resolve(Set<WidgetState> states);
+
+  /// A constant whose value is transparent for all states.
+  static const WidgetStateColor transparent = _WidgetStateColorTransparent();
 }
 
 /// A [WidgetStateColor] created from a [WidgetPropertyResolver<Color>]
@@ -185,6 +188,13 @@ class _WidgetStateColor extends WidgetStateColor {
 
   @override
   Color resolve(Set<WidgetState> states) => _resolve(states);
+}
+
+class _WidgetStateColorTransparent extends WidgetStateColor {
+  const _WidgetStateColorTransparent() : super(0x00000000);
+
+  @override
+  Color resolve(Set<WidgetState> states) => const Color(0x00000000);
 }
 
 /// Defines a [MouseCursor] whose value depends on a set of [WidgetState]s which
