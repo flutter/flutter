@@ -62,7 +62,7 @@ void main() {
 
     // Check panel 3 tile position.
     Offset tilePosition = tester.getBottomLeft(find.widgetWithText(ListTile, 'Panel 3'));
-    expect(tilePosition.dy, 656.0);
+    expect(tilePosition.dy, 664.0);
 
     // Scroll up.
     await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -300));
@@ -70,6 +70,6 @@ void main() {
 
     // Verify panel 3 tile position is updated after scrolling.
     tilePosition = tester.getBottomLeft(find.widgetWithText(ListTile, 'Panel 3'));
-    expect(tilePosition.dy, 376.0);
+    expect(tilePosition.dy, 384.0);
   });
 }

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('FractionallySizedBox sizes DecoratedBox', (WidgetTester tester) async {
-    const double appBarHeight = 56.0;
+    const double appBarHeight = 64.0;
     const double widthFactor = 0.5;
     const double heightFactor = 0.5;
 

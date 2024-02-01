@@ -14,11 +14,11 @@ void main() {
 
     expect(find.byType(SingleChildScrollView), findsOneWidget);
 
-    expect(tester.getTopLeft(find.text('Row 5')), const Offset(66.0, 366.0));
+    expect(tester.getTopLeft(find.text('Row 5')), const Offset(66.0, 374.0));
 
     await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -200.0));
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.text('Row 5')), const Offset(66.0, 186.0));
+    expect(tester.getTopLeft(find.text('Row 5')), const Offset(66.0, 194.0));
   });
 }
