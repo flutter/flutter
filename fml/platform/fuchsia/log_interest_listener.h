@@ -34,4 +34,4 @@ class LogInterestListener {
 
 }  // namespace fml
 
-#endif  // FLUTTER_FML_PLATFORM_FUCHSIA_LOG_STATE_H_
+#endif  // FLUTTER_FML_PLATFORM_FUCHSIA_LOG_INTEREST_LISTENER_H_
