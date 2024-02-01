@@ -1883,9 +1883,9 @@ Future<void> verifySignatures(
     wrongEntitlementBinaries.forEach(print);
   }
 
-  if (unsignedFiles.isNotEmpty) {
-    print('Found ${unsignedFiles.length} unexpected files in the cache:');
-    unsignedFiles.forEach(print);
+  if (unexpectedFiles.isNotEmpty) {
+    print('Found ${unexpectedFiles.length} unexpected files in the cache:');
+    unexpectedFiles.forEach(print);
   }
 
   // Finally, exit on any invalid state
@@ -1900,7 +1900,7 @@ Future<void> verifySignatures(
     );
   }
 
-  if (unsignedFiles.isNotEmpty) {
+  if (unexpectedFiles.isNotEmpty) {
     throw Exception('Test failed because unexpected files found in the cache.');
   }
   print('Verified that files are codesigned and have expected entitlements.');
