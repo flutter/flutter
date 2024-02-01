@@ -406,7 +406,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/drag_target/draggable.0_test.dart',
   'examples/api/test/widgets/shared_app_data/shared_app_data.1_test.dart',
   'examples/api/test/widgets/shared_app_data/shared_app_data.0_test.dart',
-  'examples/api/test/widgets/form/form.0_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view_state.0_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.2_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.1_test.dart',
