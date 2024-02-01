@@ -127,6 +127,84 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('FilledButton.icon produces the correct widgets if icon is null', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    final Key iconButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: FilledButton.icon(
+            key: iconButtonKey,
+            onPressed: () { },
+            icon: const Icon(Icons.add),
+            label: const Text('label'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(find.text('label'), findsOneWidget);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: FilledButton.icon(
+            key: iconButtonKey,
+            onPressed: () { },
+            // No icon specified.
+            label: const Text('label'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.add), findsNothing);
+    expect(find.text('label'), findsOneWidget);
+  });
+
+  testWidgets('FilledButton.tonalIcon produces the correct widgets if icon is null', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    final Key iconButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: FilledButton.tonalIcon(
+            key: iconButtonKey,
+            onPressed: () { },
+            icon: const Icon(Icons.add),
+            label: const Text('label'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(find.text('label'), findsOneWidget);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: FilledButton.tonalIcon(
+            key: iconButtonKey,
+            onPressed: () { },
+            // No icon specified.
+            label: const Text('label'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.add), findsNothing);
+    expect(find.text('label'), findsOneWidget);
+  });
+
   testWidgets('FilledButton.tonal, FilledButton.tonalIcon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
