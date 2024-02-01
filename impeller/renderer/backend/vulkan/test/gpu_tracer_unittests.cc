@@ -27,6 +27,22 @@ TEST(GPUTracerVK, CanBeDisabled) {
   ASSERT_FALSE(tracer->IsEnabled());
 }
 
+TEST(GPUTracerVK, DisabledFrameCycle) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_gpu_tracing = false;
+          })
+          .Build();
+  auto tracer = context->GetGPUTracer();
+
+  // Check that a repeated frame start/end cycle does not fail any assertions.
+  for (int i = 0; i < 2; i++) {
+    tracer->MarkFrameStart();
+    tracer->MarkFrameEnd();
+  }
+}
+
 TEST(GPUTracerVK, CanTraceCmdBuffer) {
   auto const context =
       MockVulkanContextBuilder()
