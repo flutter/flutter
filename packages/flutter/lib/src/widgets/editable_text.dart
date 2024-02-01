@@ -3782,17 +3782,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return;
       }
 
-      final Rect deviceRect = _calculateDeviceRect();
-      final bool selectionVisibleInEditable = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
-      final Rect selectionBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), _dataWhenToolbarShowScheduled!.selectionBounds);
-      final bool selectionOverlapsWithDeviceRect = !selectionBounds.hasNaN && deviceRect.overlaps(selectionBounds);
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        if (!mounted) {
+          return;
+        }
+        final Rect deviceRect = _calculateDeviceRect();
+        final bool selectionVisibleInEditable = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
+        final Rect selectionBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), _dataWhenToolbarShowScheduled!.selectionBounds);
+        final bool selectionOverlapsWithDeviceRect = !selectionBounds.hasNaN && deviceRect.overlaps(selectionBounds);
 
-      if (selectionVisibleInEditable
-         && selectionOverlapsWithDeviceRect
-         && _selectionInViewport(_dataWhenToolbarShowScheduled!.selectionBounds)) {
-        showToolbar();
-        _dataWhenToolbarShowScheduled = null;
-      }
+        if (selectionVisibleInEditable
+          && selectionOverlapsWithDeviceRect
+          && _selectionInViewport(_dataWhenToolbarShowScheduled!.selectionBounds)) {
+          showToolbar();
+          _dataWhenToolbarShowScheduled = null;
+        }
+      }, debugLabel: 'EditableText.scheduleToolbar');
     }
   }
 
