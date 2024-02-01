@@ -2639,6 +2639,7 @@ targets:
 
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/142756
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
