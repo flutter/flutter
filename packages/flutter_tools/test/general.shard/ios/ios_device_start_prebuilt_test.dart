@@ -995,7 +995,6 @@ void main() {
           platform: FakePlatform(
             operatingSystem: 'macos',
             environment: <String, String>{
-              'FLUTTER_LOGS_DIR': pathToFlutterLogs,
               'HOME': pathToHome,
             },
           ),
@@ -1019,7 +1018,11 @@ void main() {
         await FakeAsync().run((FakeAsync time) {
           final Future<LaunchResult> futureLaunchResult = device.startApp(iosApp,
             prebuiltApplication: true,
-            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, usingCISystem: true),
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo.debug,
+              usingCISystem: true,
+              debugLogsDirectoryPath: pathToFlutterLogs,
+            ),
             platformArgs: <String, dynamic>{},
           );
           futureLaunchResult.then((LaunchResult launchResult) {
