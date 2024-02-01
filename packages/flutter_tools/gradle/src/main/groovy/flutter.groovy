@@ -328,8 +328,10 @@ class FlutterPlugin implements Plugin<Project> {
                 && project.getProperty("skipDependencyChecks");
         if (!shouldSkipDependencyChecks) {
             try {
-                project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
-                        "gradle", "src", "main", "kotlin", "dependency_version_checker.gradle.kts")
+                final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
+                        "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
+                        "dependency_version_checker.gradle.kts")
+                project.apply from: dependencyCheckerPluginPath
             } catch (Exception ignored) {
                 project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
                         "AGP, and KGP versions. Skipping dependency version checking. Error was: "
