@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FML_PLATFORM_FUCHSIA_LOG_CONNECTION_H_
-#define FLUTTER_FML_PLATFORM_FUCHSIA_LOG_CONNECTION_H_
+#ifndef FLUTTER_FML_PLATFORM_FUCHSIA_LOG_STATE_H_
+#define FLUTTER_FML_PLATFORM_FUCHSIA_LOG_STATE_H_
 
 #include <fidl/fuchsia.logger/cpp/fidl.h>
 #include <lib/fidl/cpp/wire/internal/transport_channel.h>
@@ -52,4 +52,4 @@ class LogState {
 
 }  // namespace fml
 
-#endif  // FLUTTER_FML_PLATFORM_FUCHSIA_LOG_CONNECTION_H_
+#endif  // FLUTTER_FML_PLATFORM_FUCHSIA_LOG_STATE_H_
