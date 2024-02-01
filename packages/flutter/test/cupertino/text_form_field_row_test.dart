@@ -475,7 +475,7 @@ void main() {
     expect(suffixText.data, 'Suffix');
   });
 
-  testWidgetsWithLeakTracking('Passes textDirection to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textDirection to underlying CupertinoTextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
