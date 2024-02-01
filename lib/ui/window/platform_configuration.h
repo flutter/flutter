@@ -557,7 +557,10 @@ class PlatformConfigurationNativeApi {
 
   static void ScheduleFrame();
 
-  static void Render(Scene* scene, double width, double height);
+  static void Render(int64_t view_id,
+                     Scene* scene,
+                     double width,
+                     double height);
 
   static void UpdateSemantics(SemanticsUpdate* update);
 
