@@ -264,6 +264,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
+        debugLogsDirectoryPath: debugLogsDirectoryPath,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -319,6 +320,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
+        debugLogsDirectoryPath: debugLogsDirectoryPath,
       );
     }
   }
