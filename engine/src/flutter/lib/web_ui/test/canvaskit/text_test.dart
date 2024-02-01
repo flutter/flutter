@@ -204,9 +204,7 @@ void testMain() {
       expect(bottomRight?.writingDirection, ui.TextDirection.ltr);
     });
 
-    test('rounding hack disabled by default', () {
-      expect(ui.ParagraphBuilder.shouldDisableRoundingHack, isTrue);
-
+    test('rounding hack disabled', () {
       const double fontSize = 1.25;
       const String text = '12345';
       assert((fontSize * text.length).truncate() != fontSize * text.length);
@@ -224,32 +222,6 @@ void testMain() {
         case final List<ui.LineMetrics> metrics:
           expect(metrics, hasLength(1));
       }
-    });
-
-    test('setDisableRoundinghHack to false works in tests', () {
-      bool assertsEnabled = false;
-      assert(() {
-        assertsEnabled = true;
-        return true;
-      }());
-      if (!assertsEnabled){
-        return;
-      }
-
-      if (ui.ParagraphBuilder.shouldDisableRoundingHack) {
-        ui.ParagraphBuilder.setDisableRoundingHack(false);
-        addTearDown(() => ui.ParagraphBuilder.setDisableRoundingHack(true));
-      }
-
-      assert(!ui.ParagraphBuilder.shouldDisableRoundingHack);
-      const double fontSize = 1.25;
-      const String text = '12345';
-      assert((fontSize * text.length).truncate() != fontSize * text.length);
-      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'));
-      builder.addText(text);
-      final ui.Paragraph paragraph = builder.build()
-        ..layout(const ui.ParagraphConstraints(width: text.length * fontSize));
-      expect(paragraph.computeLineMetrics().length, greaterThan(1));
     });
 
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
