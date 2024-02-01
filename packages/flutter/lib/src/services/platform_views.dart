@@ -26,6 +26,8 @@ typedef PointTransformer = Offset Function(Offset position);
 /// The [PlatformViewsRegistry] responsible for generating unique identifiers for platform views.
 final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._instance();
 
+typedef IntCallback = void Function(int);
+
 /// A registry responsible for generating unique identifier for platform views.
 ///
 /// A Flutter application has a single [PlatformViewsRegistry] which can be accesses
@@ -78,6 +80,17 @@ class PlatformViewsService {
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
+      case 'tabOut':
+        print('Handing tabOut: ${call.arguments} - ${call.arguments.runtimeType}');
+        final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+        print('${args["id"].runtimeType}');
+        final int id = args['id'] as int;
+        print('Id = $id');
+        final int reason = args['reason'] as int;
+        print('Received TABOUT with $id : $reason');
+        if (_tabOutCallbacks.containsKey(id)) {
+          _tabOutCallbacks[id]!(reason);
+        }
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
     }
@@ -88,6 +101,9 @@ class PlatformViewsService {
   ///
   /// The callbacks are invoked when the platform view asks to be focused.
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
+
+  /// Callbacks for platform views tabbing out in a direction.
+  final Map<int, IntCallback> _tabOutCallbacks = <int, IntCallback>{};
 
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
@@ -296,7 +312,8 @@ class PlatformViewsService {
   static Future<Win32ViewController> initWin32View({
     required int id,
     required String viewType,
-    VoidCallback? onFocus
+    VoidCallback? onFocus,
+    IntCallback? onTabOut,
   }) async {
     // TODO(schectman): send message
     final Map<String, dynamic> args = <String, dynamic>{
@@ -307,13 +324,17 @@ class PlatformViewsService {
     if (onFocus != null) {
       _instance._focusCallbacks[id] = onFocus;
     }
+    if (onTabOut != null) {
+      _instance._tabOutCallbacks[id] = onTabOut;
+    }
     return Win32ViewController._(id);
   }
 
-  static Future<void> focusWin32View({required int id, required bool focus}) async {
+  static Future<void> focusWin32View({required int id, required bool focus, int dir = 0}) async {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
       'focus': focus,
+      'dir': dir,
     };
     await SystemChannels.platform_views.invokeMethod('focus', args);
   }
@@ -1418,8 +1439,8 @@ class Win32ViewController {
 
   final int id;
 
-  Future<void> focus(bool focus) async {
-    await PlatformViewsService.focusWin32View(id: id, focus: focus);
+  Future<void> focus(bool focus, int dir) async {
+    await PlatformViewsService.focusWin32View(id: id, focus: focus, dir: dir);
   }
 }
 

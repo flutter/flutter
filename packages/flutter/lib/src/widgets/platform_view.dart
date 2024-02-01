@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import '_html_element_view_io.dart' if (dart.library.js_util) '_html_element_view_web.dart';
 import 'basic.dart';
@@ -619,7 +620,9 @@ class _AndroidViewState extends State<AndroidView> {
 class _WindowsViewState extends State<Win32View> {
   bool _initialized = false;
   Win32ViewController? _controller;
-  late FocusNode _node;
+  late FocusNode _node, _before, _after;
+  bool _inner_focus = false;
+  bool _tabbing_out = false; // True only when in the process of moving focus away from the PV with keyboard nav.
 
   void _initializeOnce() {
     if (_initialized) {
@@ -648,9 +651,23 @@ class _WindowsViewState extends State<Win32View> {
   Future<void> _createNewWin32View() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
     _node = FocusNode(debugLabel: 'Windows view: $id');
+    _before = FocusNode(debugLabel: 'Capture forward navigation');
+    _after = FocusNode(debugLabel: 'Capture backwards navigation');
     final Win32ViewController controller = await PlatformViewsService.initWin32View(id: id, viewType: widget.viewType, onFocus: () {
+      _inner_focus = true;
       _node.requestFocus();
       print('Node $id stole focus');
+    }, onTabOut: (int reason) {
+      if (reason == 0) {
+        return;
+      }
+      _tabbing_out = true;
+      _inner_focus = true;
+      if (reason == 1) {
+        _after.requestFocus();
+      } else if (reason == 2) {
+        _before.requestFocus();
+      }
     });
     setState(() {
       _controller = controller;
@@ -665,15 +682,65 @@ class _WindowsViewState extends State<Win32View> {
     }
     return Semantics(
       label: 'Platform view placeholder',
-      child: Focus(
-        focusNode: _node,
-        onFocusChange: (focus) {
-          if (focus) {
-            controller.focus(focus);
-          }
-        },
-        child: _Win32View(controller: controller)
-        ),
+      child: Stack(
+        children: [
+          Focus(
+            focusNode: _before,
+            onFocusChange: (focus) {
+              _tabbing_out = false;
+              if (!focus) {
+                print("Lost focus before");
+                return;
+              }
+              if (_inner_focus) {
+                print('Skipping back past platform view');
+                _inner_focus = false;
+                _before.previousFocus();
+                return;
+              }
+              print('Transferring to platform view from behind');
+              _inner_focus = true;
+              controller.focus(true, 1);
+            },
+            child: Container(),
+          ),
+          Focus(
+            focusNode: _node,
+            onFocusChange: (focus) {
+              if (focus) {
+                print('Gained interior focus');
+                controller.focus(true, 0);
+              } else {
+                print('Lost interior focus, tab=$_tabbing_out');
+                if (!_tabbing_out) {
+                  _inner_focus = false;
+                }
+              }
+            },
+            child: _Win32View(controller: controller)
+          ),
+          Focus(
+            focusNode: _after,
+            onFocusChange: (focus) {
+              _tabbing_out = false;
+              if (!focus) {
+                print("Lost focus after");
+                return;
+              }
+              if (_inner_focus) {
+                print('Skipping ahead past platform view');
+                _inner_focus = false;
+                _after.nextFocus();
+                return;
+              }
+              print('Transferring to platform view from ahead');
+              _inner_focus = true;
+              controller.focus(true, 2);
+            },
+            child: Container(),
+          ),
+        ]
+      ),
     );
   }
 }
