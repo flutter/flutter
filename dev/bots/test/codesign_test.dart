@@ -76,8 +76,8 @@ void main() async {
     });
   });
 
-  group('findBinaryPaths', () {
-    test('All files found', () async {
+  group('find paths', () {
+    test('All binary files found', () async {
       final List<FakeCommand> commandList = <FakeCommand>[];
       final FakeCommand findCmd = FakeCommand(
         command: const <String>[
@@ -119,7 +119,26 @@ void main() async {
       final ProcessManager processManager = FakeProcessManager.list(commandList);
       final List<String> foundFiles = await findBinaryPaths('$flutterRoot/bin/cache', processManager: processManager);
       expect(foundFiles, <String>[]);
-  });
+    });
+
+    test('All xcframeworks files found', () async {
+      final List<FakeCommand> commandList = <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'find',
+            '$flutterRoot/bin/cache',
+            '-type',
+            'd',
+            '-name',
+            '*xcframework',
+          ],
+          stdout: allXcframeworksStdout,
+        )
+      ];
+      final ProcessManager processManager = FakeProcessManager.list(commandList);
+      final List<String> foundFiles = await findXcframeworksPaths('$flutterRoot/bin/cache', processManager: processManager);
+      expect(foundFiles, allExpectedXcframeworks);
+    });
 
   group('isBinary', () {
     test('isTrue', () async {
