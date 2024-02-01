@@ -158,8 +158,6 @@ class Canvas {
       const Size& corner_radii,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
-  void DrawPicture(const Picture& picture);
-
   void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                      Point position,
                      const Paint& paint);

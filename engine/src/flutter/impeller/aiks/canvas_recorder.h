@@ -45,7 +45,6 @@ enum CanvasRecorderOp : uint16_t {
   kClipRect,
   kClipOval,
   kClipRRect,
-  kDrawPicture,
   kDrawTextFrame,
   kDrawVertices,
   kDrawAtlas,
@@ -278,11 +277,6 @@ class CanvasRecorder {
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(ClipRRect), rect,
                                corner_radii, clip_op);
-  }
-
-  void DrawPicture(const Picture& picture) {
-    return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(DrawPicture),
-                               picture);
   }
 
   void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,

@@ -620,35 +620,6 @@ void Canvas::DrawPoints(std::vector<Point> points,
   AddEntityToCurrentPass(std::move(entity));
 }
 
-void Canvas::DrawPicture(const Picture& picture) {
-  if (!picture.pass) {
-    return;
-  }
-
-  // Clone the base pass and account for the CTM updates.
-  auto pass = picture.pass->Clone();
-
-  pass->IterateAllElements([&](auto& element) -> bool {
-    if (auto entity = std::get_if<Entity>(&element)) {
-      entity->IncrementStencilDepth(GetClipDepth());
-      entity->SetTransform(GetCurrentTransform() * entity->GetTransform());
-      return true;
-    }
-
-    if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      subpass->get()->SetClipDepth(subpass->get()->GetClipDepth() +
-                                   GetClipDepth());
-      return true;
-    }
-
-    FML_UNREACHABLE();
-  });
-
-  GetCurrentPass().AddSubpassInline(std::move(pass));
-
-  RestoreClip();
-}
-
 void Canvas::DrawImage(const std::shared_ptr<Image>& image,
                        Point offset,
                        const Paint& paint,

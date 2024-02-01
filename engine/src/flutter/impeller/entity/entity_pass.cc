@@ -1153,40 +1153,6 @@ size_t EntityPass::GetElementCount() const {
   return elements_.size();
 }
 
-std::unique_ptr<EntityPass> EntityPass::Clone() const {
-  std::vector<Element> new_elements;
-  new_elements.reserve(elements_.size());
-
-  for (const auto& element : elements_) {
-    if (auto entity = std::get_if<Entity>(&element)) {
-      new_elements.push_back(entity->Clone());
-      continue;
-    }
-    if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      new_elements.push_back(subpass->get()->Clone());
-      continue;
-    }
-    FML_UNREACHABLE();
-  }
-
-  auto pass = std::make_unique<EntityPass>();
-  pass->SetElements(std::move(new_elements));
-  pass->active_clips_.insert(pass->active_clips_.begin(), active_clips_.begin(),
-                             active_clips_.end());
-  pass->backdrop_filter_reads_from_pass_texture_ =
-      backdrop_filter_reads_from_pass_texture_;
-  pass->advanced_blend_reads_from_pass_texture_ =
-      advanced_blend_reads_from_pass_texture_;
-  pass->backdrop_filter_proc_ = backdrop_filter_proc_;
-  pass->blend_mode_ = blend_mode_;
-  pass->delegate_ = delegate_;
-  pass->new_clip_depth_ = new_clip_depth_;
-  // Note: I tried also adding flood clip and bounds limit but one of the
-  // two caused rendering in wonderous to break. It's 10:51 PM, and I'm
-  // ready to move on.
-  return pass;
-}
-
 void EntityPass::SetTransform(Matrix transform) {
   transform_ = transform;
 }

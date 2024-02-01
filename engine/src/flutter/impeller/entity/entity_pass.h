@@ -71,8 +71,6 @@ class EntityPass {
 
   size_t GetSubpassesDepth() const;
 
-  std::unique_ptr<EntityPass> Clone() const;
-
   /// @brief Add an entity to the current entity pass.
   void AddEntity(Entity entity);
 
