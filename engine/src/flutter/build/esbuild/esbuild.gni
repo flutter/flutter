@@ -21,7 +21,9 @@ template("esbuild") {
       esbuild,
       invoker.entry_point,
     ]
-    outputs = [ invoker.output_bundle ]
+    output_filename = get_path_info(invoker.entry_point, "file")
+    output_path = "${invoker.output_bundle}/$output_filename"
+    outputs = [ output_path ]
     absolute_output = rebase_path(invoker.output_bundle)
     args = [ rebase_path(esbuild, root_build_dir) ]
     if (defined(invoker.bundle) && invoker.bundle) {
@@ -32,7 +34,7 @@ template("esbuild") {
     }
     if (defined(invoker.sourcemap) && invoker.sourcemap) {
       args += [ "--sourcemap" ]
-      outputs += [ invoker.output_bundle + ".map" ]
+      outputs += [ output_path + ".map" ]
     }
     args += [
       "--outdir=$absolute_output",
