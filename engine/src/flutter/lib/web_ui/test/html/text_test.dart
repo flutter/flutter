@@ -200,7 +200,12 @@ Future<void> testMain() async {
     expect(bottomRight?.graphemeClusterLayoutBounds, const Rect.fromLTWH(0.0, 0.0, 10.0, 10.0));
   }, skip: domIntl.v8BreakIterator == null); // Intended: Intl.v8breakiterator is needed for correctly breaking grapheme clusters.
 
-  test('disable rounding hack', () {
+  test('Can disable rounding hack', () {
+    if (!ParagraphBuilder.shouldDisableRoundingHack) {
+      ParagraphBuilder.setDisableRoundingHack(true);
+      addTearDown(() => ParagraphBuilder.setDisableRoundingHack(false));
+    }
+    assert(ParagraphBuilder.shouldDisableRoundingHack);
     const double fontSize = 1;
     const String text = '12345';
     const double letterSpacing = 0.25;

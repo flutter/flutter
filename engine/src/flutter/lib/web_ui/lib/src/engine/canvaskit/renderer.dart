@@ -379,6 +379,7 @@ class CanvasKitRenderer implements Renderer {
     strutStyle: strutStyle,
     ellipsis: ellipsis,
     locale: locale,
+    applyRoundingHack: !ui.ParagraphBuilder.shouldDisableRoundingHack,
   );
 
   @override

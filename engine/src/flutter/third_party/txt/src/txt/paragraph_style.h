@@ -95,6 +95,14 @@ class ParagraphStyle {
   std::u16string ellipsis;
   std::string locale;
 
+  // Temporary flag that indicates whether the Paragraph should report its
+  // metrics with rounding hacks applied.
+  //
+  // This flag currently defaults to true and will be flipped to false once the
+  // migration is complete.
+  // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/31707
+  bool apply_rounding_hack = true;
+
   TextStyle GetTextStyle() const;
 
   bool unlimited_lines() const;

@@ -777,6 +777,21 @@ Future<void> testMain() async {
     expect(paragraph.longestLine, 50.0);
   });
 
+  test('$CanvasParagraph.width should be a whole integer when shouldDisableRoundingHack is false', () {
+    if (ui.ParagraphBuilder.shouldDisableRoundingHack) {
+      ui.ParagraphBuilder.setDisableRoundingHack(false);
+      addTearDown(() => ui.ParagraphBuilder.setDisableRoundingHack(true));
+    }
+    // The paragraph width is only rounded to a whole integer if
+    // shouldDisableRoundingHack is false.
+    assert(!ui.ParagraphBuilder.shouldDisableRoundingHack);
+    final ui.Paragraph paragraph = plain(ahemStyle, 'abc');
+    paragraph.layout(const ui.ParagraphConstraints(width: 30.8));
+
+    expect(paragraph.width, 30);
+    expect(paragraph.height, 10);
+  });
+
   test('Render after dispose', () async {
     final ui.Paragraph paragraph = plain(ahemStyle, 'abc');
     paragraph.layout(const ui.ParagraphConstraints(width: 30.8));
