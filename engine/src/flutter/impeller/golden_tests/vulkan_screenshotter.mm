@@ -74,8 +74,8 @@ std::unique_ptr<Screenshot> ReadTexture(
   CGImagePtr image(CGBitmapContextCreateImage(context.get()), &CGImageRelease);
   FML_CHECK(image);
 
-  // TODO(tbd): Perform the flip at the blit stage to avoid this slow
-  // copy.
+  // TODO(https://github.com/flutter/flutter/issues/142641): Perform the flip at
+  // the blit stage to avoid this slow copy.
   if (texture->GetYCoordScale() == -1) {
     CGContextPtr flipped_context(
         CGBitmapContextCreate(
