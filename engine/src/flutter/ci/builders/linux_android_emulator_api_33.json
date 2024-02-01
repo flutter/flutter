@@ -32,7 +32,11 @@
                     "test_dependencies": [
                         {
                             "dependency": "android_virtual_device",
-                            "version": "33"
+                            "version": "android_33_google_apis_x64.textpb"
+                        },
+                        {
+                            "dependency": "avd_cipd_version",
+                            "version": "build_id:8759428741582061553"
                         }
                     ],
                     "contexts": [
@@ -52,7 +56,11 @@
                     "test_dependencies": [
                         {
                             "dependency": "android_virtual_device",
-                            "version": "33"
+                            "version": "android_33_google_apis_x64.textpb"
+                        },
+                        {
+                            "dependency": "avd_cipd_version",
+                            "version": "build_id:8759428741582061553"
                         }
                     ],
                     "contexts": [
