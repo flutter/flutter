@@ -140,7 +140,6 @@ std::string_view CanvasRecorderOpToString(CanvasRecorderOp op) {
     FLT_CANVAS_RECORDER_OP_TO_STRING(kClipRect);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kClipOval);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kClipRRect);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPicture);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawTextFrame);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawVertices);
     FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawAtlas);

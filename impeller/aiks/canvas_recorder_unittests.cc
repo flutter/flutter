@@ -227,12 +227,6 @@ TEST(CanvasRecorder, ClipRRect) {
   ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kClipRRect);
 }
 
-TEST(CanvasRecorder, DrawPicture) {
-  CanvasRecorder<Serializer> recorder;
-  recorder.DrawPicture({});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawPicture);
-}
-
 TEST(CanvasRecorder, DrawTextFrame) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawTextFrame({}, {}, {});
