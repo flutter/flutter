@@ -2,7 +2,7 @@
 
 This is the executable that will generate the golden image results that can then
 be sent to Skia Gold vial the
-[golden_tests_harvester]("../golden_tests_harvester").
+[golden_tests_harvester]("../../tools/golden_tests_harvester").
 
 Running these tests should happen from
 [//flutter/testing/run_tests.py](../../testing/run_tests.py). That will do all

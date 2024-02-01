@@ -5327,9 +5327,6 @@ ORIGIN: ../../../flutter/impeller/golden_tests/vulkan_screenshotter.h + ../../..
 ORIGIN: ../../../flutter/impeller/golden_tests/vulkan_screenshotter.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/working_directory.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/working_directory.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/golden_tests_harvester/bin/golden_tests_harvester.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/golden_tests_harvester/lib/golden_tests_harvester.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/golden_tests_harvester/lib/logger.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/image/compressed_image.cc + ../../../flutter/LICENSE
@@ -8185,9 +8182,6 @@ FILE: ../../../flutter/impeller/golden_tests/vulkan_screenshotter.h
 FILE: ../../../flutter/impeller/golden_tests/vulkan_screenshotter.mm
 FILE: ../../../flutter/impeller/golden_tests/working_directory.cc
 FILE: ../../../flutter/impeller/golden_tests/working_directory.h
-FILE: ../../../flutter/impeller/golden_tests_harvester/bin/golden_tests_harvester.dart
-FILE: ../../../flutter/impeller/golden_tests_harvester/lib/golden_tests_harvester.dart
-FILE: ../../../flutter/impeller/golden_tests_harvester/lib/logger.dart
 FILE: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.cc
 FILE: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.h
 FILE: ../../../flutter/impeller/image/compressed_image.cc

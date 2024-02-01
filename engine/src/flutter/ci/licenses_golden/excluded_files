@@ -166,13 +166,6 @@
 ../../../flutter/impeller/geometry/size_unittests.cc
 ../../../flutter/impeller/geometry/trig_unittests.cc
 ../../../flutter/impeller/golden_tests/README.md
-../../../flutter/impeller/golden_tests_harvester/.dart_tool
-../../../flutter/impeller/golden_tests_harvester/.gitignore
-../../../flutter/impeller/golden_tests_harvester/README.md
-../../../flutter/impeller/golden_tests_harvester/analysis_options.yaml
-../../../flutter/impeller/golden_tests_harvester/pubspec.lock
-../../../flutter/impeller/golden_tests_harvester/pubspec.yaml
-../../../flutter/impeller/golden_tests_harvester/test
 ../../../flutter/impeller/image/README.md
 ../../../flutter/impeller/playground
 ../../../flutter/impeller/renderer/backend/gles/test
