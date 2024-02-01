@@ -1262,6 +1262,7 @@ void main() {
       '--skia-deterministic-rendering',
       '--enable-embedder-api',
       '--ci',
+      '--debug-logs-dir=path/to/logs'
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -1281,6 +1282,7 @@ void main() {
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
     expect(options.usingCISystem, true);
+    expect(options.debugLogsDirectoryPath, 'path/to/logs');
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),

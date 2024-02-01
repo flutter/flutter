@@ -377,6 +377,8 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether flutter is being run from our CI.
   bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
 
+  String? get debugLogsDirectoryPath => stringArg(FlutterGlobalOptions.kDebugLogsDirectoryFlag, global: true);
+
   /// The value of the `--filesystem-scheme` argument.
   ///
   /// This can be overridden by some of its subclasses.

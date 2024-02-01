@@ -364,6 +364,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
+      debugLogsDirectoryPath: debugLogsDirectoryPath,
     );
 
     String? testAssetDirectory;

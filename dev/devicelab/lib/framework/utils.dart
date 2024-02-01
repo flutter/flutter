@@ -469,6 +469,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   final String? localEngineHost = localEngineHostFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
   final String? localWebSdk = localWebSdkFromEnv;
+  final bool pubOrPackagesCommand = command.startsWith('packages') || command.startsWith('pub');
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
@@ -489,7 +490,9 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     // Use CI flag when running devicelab tests, except for `packages`/`pub` commands.
     // `packages`/`pub` commands effectively runs the `pub` tool, which does not have
     // the same allowed args.
-    if (!command.startsWith('packages') && !command.startsWith('pub')) '--ci',
+    if (!pubOrPackagesCommand) '--ci',
+    if (!pubOrPackagesCommand && hostAgent.dumpDirectory != null)
+      '--debug-logs-dir=${hostAgent.dumpDirectory!.path}'
   ];
 }
 

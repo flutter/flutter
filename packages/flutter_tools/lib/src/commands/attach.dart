@@ -525,6 +525,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       devToolsServerAddress: devToolsServerAddress,
       serveObservatory: serveObservatory,
       usingCISystem: usingCISystem,
+      debugLogsDirectoryPath: debugLogsDirectoryPath,
     );
 
     return buildInfo.isDebug
