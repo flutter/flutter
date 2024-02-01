@@ -326,6 +326,24 @@ Future<int> main(List<String> args) async {
         expect(headerFile.fix(engineRoot: p.dirname(file.path)), isFalse);
       });
     });
+
+    test('is OK with windows-style CRLF file with a valid header guard', () {
+      final String input = <String>[
+        '#ifndef FLUTTER_FOO_H_',
+        '#define FLUTTER_FOO_H_',
+        '',
+        '// ...',
+        '',
+        '#endif  // FLUTTER_FOO_H_',
+      ].join('\r\n');
+      withTestFile('foo.h', input, (io.File file) {
+        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        expect(headerFile.pragmaOnce, isNull);
+        expect(headerFile.guard!.ifndefValue, 'FLUTTER_FOO_H_');
+        expect(headerFile.guard!.defineValue, 'FLUTTER_FOO_H_');
+        expect(headerFile.guard!.endifValue, 'FLUTTER_FOO_H_');
+      });
+    });
   });
 
   return 0;
