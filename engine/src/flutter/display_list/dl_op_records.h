@@ -277,7 +277,7 @@ struct SetRuntimeEffectColorSourceOp : DLOp {
 struct SetSceneColorSourceOp : DLOp {
   static const auto kType = DisplayListOpType::kSetSceneColorSource;
 
-  SetSceneColorSourceOp(const DlSceneColorSource* source)
+  explicit SetSceneColorSourceOp(const DlSceneColorSource* source)
       : source(source->scene_node(), source->camera_matrix()) {}
 
   const DlSceneColorSource source;
