@@ -207,7 +207,10 @@ Scalar GaussianBlurFilterContents::CalculateScale(Scalar sigma) {
   if (sigma <= 4) {
     return 1.0;
   }
-  return 4.0 / sigma;
+  Scalar result = 4.0 / sigma;
+  // Round to the nearest 1/(2^n) to get the best quality down scaling.
+  Scalar rounded = pow(2.0f, round(log2(result)));
+  return rounded;
 };
 
 std::optional<Rect> GaussianBlurFilterContents::GetFilterSourceCoverage(
