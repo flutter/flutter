@@ -20,9 +20,9 @@ import 'package:native_assets_cli/native_assets_cli_internal.dart'
     as native_assets_cli;
 import 'package:package_config/package_config_types.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/fakes.dart';
+import '../../../src/common.dart';
+import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -50,9 +50,10 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  testUsingContext('dry run with no package config', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
+  testUsingContext('dry run with no package config',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+      }, () async {
     expect(
       await dryRunNativeAssetsIOS(
         projectUri: projectUri,
@@ -89,10 +90,12 @@ void main() {
     );
   });
 
-  testUsingContext('dry run with assets but not enabled', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+  testUsingContext('dry run with assets but not enabled',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+      }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -106,7 +109,8 @@ void main() {
         ),
       ),
       throwsToolExit(
-        message: 'Package(s) bar require the native assets feature to be enabled. '
+        message:
+            'Package(s) bar require the native assets feature to be enabled. '
             'Enable using `flutter config --enable-native-assets`.',
       ),
     );
@@ -116,7 +120,8 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsIOS(
@@ -162,7 +167,8 @@ void main() {
   });
 
   testUsingContext('build with assets but not enabled', () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -180,7 +186,8 @@ void main() {
         ),
       ),
       throwsToolExit(
-        message: 'Package(s) bar require the native assets feature to be enabled. '
+        message:
+            'Package(s) bar require the native assets feature to be enabled. '
             'Enable using `flutter config --enable-native-assets`.',
       ),
     );
@@ -190,7 +197,8 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     await buildNativeAssetsIOS(
@@ -215,41 +223,42 @@ void main() {
   testUsingContext('build with assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.list(
-      <FakeCommand>[
-        const FakeCommand(
-          command: <Pattern>[
-            'lipo',
-            '-create',
-            '-output',
-            '/build/native_assets/ios/bar.framework/bar',
-            'libbar.dylib',
+          <FakeCommand>[
+            const FakeCommand(
+              command: <Pattern>[
+                'lipo',
+                '-create',
+                '-output',
+                '/build/native_assets/ios/bar.framework/bar',
+                'libbar.dylib',
+              ],
+            ),
+            const FakeCommand(
+              command: <Pattern>[
+                'install_name_tool',
+                '-id',
+                '@rpath/bar.framework/bar',
+                '/build/native_assets/ios/bar.framework/bar'
+              ],
+            ),
+            const FakeCommand(
+              command: <Pattern>[
+                'codesign',
+                '--force',
+                '--sign',
+                '-',
+                '--timestamp=none',
+                '/build/native_assets/ios/bar.framework',
+              ],
+            ),
           ],
         ),
-        const FakeCommand(
-          command: <Pattern>[
-            'install_name_tool',
-            '-id',
-            '@rpath/bar.framework/bar',
-            '/build/native_assets/ios/bar.framework/bar'
-          ],
-        ),
-        const FakeCommand(
-          command: <Pattern>[
-            'codesign',
-            '--force',
-            '--sign',
-            '-',
-            '--timestamp=none',
-            '/build/native_assets/ios/bar.framework',
-          ],
-        ),
-      ],
-    ),
   }, () async {
     if (const LocalPlatform().isWindows) {
       return; // Backslashes in commands, but we will never run these commands on Windows.
     }
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     await buildNativeAssetsIOS(

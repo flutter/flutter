@@ -41,12 +41,12 @@ import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../src/common.dart';
-import '../src/context.dart';
-import '../src/fake_vm_services.dart';
-import '../src/fakes.dart';
-import '../src/testbed.dart';
-import 'isolated/fake_native_assets_build_runner.dart';
+import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
+import '../../src/fakes.dart';
+import '../../src/testbed.dart';
+import 'fake_native_assets_build_runner.dart';
 
 final vm_service.Event fakeUnpausedEvent = vm_service.Event(
   kind: vm_service.EventKind.kResume,
