@@ -14,7 +14,7 @@ namespace flutter {
 
 class AndroidContextVulkanImpeller : public AndroidContext {
  public:
-  explicit AndroidContextVulkanImpeller(bool enable_validation);
+  AndroidContextVulkanImpeller(bool enable_validation, bool enable_gpu_tracing);
 
   ~AndroidContextVulkanImpeller();
 

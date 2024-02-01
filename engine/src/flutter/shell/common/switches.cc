@@ -468,6 +468,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
       command_line.HasOption(FlagForSwitch(Switch::EnableVulkanValidation));
   settings.enable_opengl_gpu_tracing =
       command_line.HasOption(FlagForSwitch(Switch::EnableOpenGLGPUTracing));
+  settings.enable_vulkan_gpu_tracing =
+      command_line.HasOption(FlagForSwitch(Switch::EnableVulkanGPUTracing));
 
   settings.enable_embedder_api =
       command_line.HasOption(FlagForSwitch(Switch::EnableEmbedderAPI));
