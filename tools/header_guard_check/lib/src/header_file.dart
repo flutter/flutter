@@ -36,6 +36,36 @@ final class HeaderFile {
     );
   }
 
+  static ({
+    int start,
+    int end,
+    String line,
+  }) _getLine(SourceFile sourceFile, int index) {
+    final int start = sourceFile.getOffset(index);
+    int end = index == sourceFile.lines - 1
+        ? sourceFile.length
+        : sourceFile.getOffset(index + 1) - 1;
+    String line = sourceFile.getText(start, end);
+
+    // On Windows, it's common for files to have CRLF line endings, and for
+    // developers to use git's `core.autocrlf` setting to convert them to LF
+    // line endings.
+    //
+    // However, our scripts expect LF line endings, so we need to remove the
+    // CR characters from the line endings when computing the line so that
+    // properly formatted files are not considered malformed.
+    if (line.isNotEmpty && sourceFile.getText(end - 1, end) == '\r') {
+      end--;
+      line = line.substring(0, line.length - 1);
+    }
+
+    return (
+      start: start,
+      end: end,
+      line: line,
+    );
+  }
+
   /// Parses the header guard of the given [sourceFile].
   static HeaderGuardSpans? _parseGuard(SourceFile sourceFile) {
     SourceSpan? ifndefSpan;
@@ -44,11 +74,7 @@ final class HeaderFile {
 
     // Iterate over the lines in the file.
     for (int i = 0; i < sourceFile.lines; i++) {
-      final int start = sourceFile.getOffset(i);
-      final int end = i == sourceFile.lines - 1
-          ? sourceFile.length
-          : sourceFile.getOffset(i + 1) - 1;
-      final String line = sourceFile.getText(start, end);
+      final (:int start, :int end, :String line) = _getLine(sourceFile, i);
 
       // Check if the line is a header guard directive.
       if (line.startsWith('#ifndef')) {
@@ -70,11 +96,7 @@ final class HeaderFile {
 
     // Now iterate backwards to find the (last) #endif directive.
     for (int i = sourceFile.lines - 1; i > 0; i--) {
-      final int start = sourceFile.getOffset(i);
-      final int end = i == sourceFile.lines - 1
-          ? sourceFile.length
-          : sourceFile.getOffset(i + 1) - 1;
-      final String line = sourceFile.getText(start, end);
+      final (:int start, :int end, :String line) = _getLine(sourceFile, i);
 
       // Check if the line is a header guard directive.
       if (line.startsWith('#endif')) {
@@ -94,11 +116,7 @@ final class HeaderFile {
   static SourceSpan? _parsePragmaOnce(SourceFile sourceFile) {
     // Iterate over the lines in the file.
     for (int i = 0; i < sourceFile.lines; i++) {
-      final int start = sourceFile.getOffset(i);
-      final int end = i == sourceFile.lines - 1
-          ? sourceFile.length
-          : sourceFile.getOffset(i + 1) - 1;
-      final String line = sourceFile.getText(start, end);
+      final (:int start, :int end, :String line) = _getLine(sourceFile, i);
 
       // Check if the line is a header guard directive.
       if (line.startsWith('#pragma once')) {
