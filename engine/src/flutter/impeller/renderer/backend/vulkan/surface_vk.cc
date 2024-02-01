@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/swapchain_image_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/surface.h"
@@ -13,30 +14,33 @@ namespace impeller {
 std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
     const std::shared_ptr<Context>& context,
     std::shared_ptr<SwapchainImageVK>& swapchain_image,
-    SwapCallback swap_callback) {
+    SwapCallback swap_callback,
+    bool enable_msaa) {
   if (!context || !swapchain_image || !swap_callback) {
     return nullptr;
   }
 
-  TextureDescriptor msaa_tex_desc;
-  msaa_tex_desc.storage_mode = StorageMode::kDeviceTransient;
-  msaa_tex_desc.type = TextureType::kTexture2DMultisample;
-  msaa_tex_desc.sample_count = SampleCount::kCount4;
-  msaa_tex_desc.format = swapchain_image->GetPixelFormat();
-  msaa_tex_desc.size = swapchain_image->GetSize();
-  msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
-
   std::shared_ptr<Texture> msaa_tex;
-  if (!swapchain_image->HasMSAATexture()) {
-    msaa_tex = context->GetResourceAllocator()->CreateTexture(msaa_tex_desc);
-    msaa_tex->SetLabel("ImpellerOnscreenColorMSAA");
-    if (!msaa_tex) {
-      VALIDATION_LOG << "Could not allocate MSAA color texture.";
-      return nullptr;
+  if (enable_msaa) {
+    TextureDescriptor msaa_tex_desc;
+    msaa_tex_desc.storage_mode = StorageMode::kDeviceTransient;
+    msaa_tex_desc.type = TextureType::kTexture2DMultisample;
+    msaa_tex_desc.sample_count = SampleCount::kCount4;
+    msaa_tex_desc.format = swapchain_image->GetPixelFormat();
+    msaa_tex_desc.size = swapchain_image->GetSize();
+    msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+
+    if (!swapchain_image->HasMSAATexture()) {
+      msaa_tex = context->GetResourceAllocator()->CreateTexture(msaa_tex_desc);
+      msaa_tex->SetLabel("ImpellerOnscreenColorMSAA");
+      if (!msaa_tex) {
+        VALIDATION_LOG << "Could not allocate MSAA color texture.";
+        return nullptr;
+      }
+      swapchain_image->SetMSAATexture(msaa_tex);
+    } else {
+      msaa_tex = swapchain_image->GetMSAATexture();
     }
-    swapchain_image->SetMSAATexture(msaa_tex);
-  } else {
-    msaa_tex = swapchain_image->GetMSAATexture();
   }
 
   TextureDescriptor resolve_tex_desc;
@@ -60,11 +64,16 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
   resolve_tex->SetLabel("ImpellerOnscreenResolve");
 
   ColorAttachment color0;
-  color0.texture = msaa_tex;
   color0.clear_color = Color::DarkSlateGray();
   color0.load_action = LoadAction::kClear;
-  color0.store_action = StoreAction::kMultisampleResolve;
-  color0.resolve_texture = resolve_tex;
+  if (enable_msaa) {
+    color0.texture = msaa_tex;
+    color0.store_action = StoreAction::kMultisampleResolve;
+    color0.resolve_texture = resolve_tex;
+  } else {
+    color0.texture = resolve_tex;
+    color0.store_action = StoreAction::kStore;
+  }
 
   RenderTarget render_target_desc;
   render_target_desc.SetColorAttachment(color0, 0u);

@@ -76,6 +76,9 @@ bool GPUTracerVK::IsEnabled() const {
 }
 
 void GPUTracerVK::MarkFrameStart() {
+  if (!enabled_) {
+    return;
+  }
   FML_DCHECK(!in_frame_);
   in_frame_ = true;
   raster_thread_id_ = std::this_thread::get_id();

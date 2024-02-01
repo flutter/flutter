@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "flutter/fml/macros.h"
+#include "impeller/geometry/size.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/surface.h"
@@ -26,7 +26,9 @@ class SwapchainVK {
  public:
   static std::shared_ptr<SwapchainVK> Create(
       const std::shared_ptr<Context>& context,
-      vk::UniqueSurfaceKHR surface);
+      vk::UniqueSurfaceKHR surface,
+      const ISize& size,
+      bool enable_msaa = true);
 
   ~SwapchainVK();
 
@@ -36,10 +38,18 @@ class SwapchainVK {
 
   vk::Format GetSurfaceFormat() const;
 
+  /// @brief Mark the current swapchain configuration as dirty, forcing it to be
+  ///        recreated on the next frame.
+  void UpdateSurfaceSize(const ISize& size);
+
  private:
   std::shared_ptr<SwapchainImplVK> impl_;
+  ISize size_;
+  const bool enable_msaa_;
 
-  explicit SwapchainVK(std::shared_ptr<SwapchainImplVK> impl);
+  SwapchainVK(std::shared_ptr<SwapchainImplVK> impl,
+              const ISize& size,
+              bool enable_msaa);
 
   SwapchainVK(const SwapchainVK&) = delete;
 

@@ -27,6 +27,7 @@ class PlaygroundImplVK final : public PlaygroundImpl {
   static void DestroyWindowHandle(WindowHandle handle);
   using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
   UniqueHandle handle_;
+  ISize size_ = {1, 1};
 
   // A global Vulkan instance which ensures that the Vulkan library will remain
   // loaded throughout the lifetime of the process.

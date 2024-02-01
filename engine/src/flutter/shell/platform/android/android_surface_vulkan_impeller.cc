@@ -56,6 +56,8 @@ std::unique_ptr<Surface> AndroidSurfaceVulkanImpeller::CreateGPUSurface(
 }
 
 bool AndroidSurfaceVulkanImpeller::OnScreenSurfaceResize(const SkISize& size) {
+  surface_context_vk_->UpdateSurfaceSize(
+      impeller::ISize{size.width(), size.height()});
   return true;
 }
 
@@ -79,8 +81,9 @@ bool AndroidSurfaceVulkanImpeller::SetNativeWindow(
       FML_LOG(ERROR) << "Could not create a vulkan surface.";
       return false;
     }
-
-    return surface_context_vk_->SetWindowSurface(std::move(surface));
+    auto size = native_window_->GetSize();
+    return surface_context_vk_->SetWindowSurface(
+        std::move(surface), impeller::ISize{size.width(), size.height()});
   }
 
   native_window_ = nullptr;

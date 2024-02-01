@@ -72,9 +72,14 @@ class SurfaceContextVK : public Context,
   // |Context|
   void SetSyncPresentation(bool value) override;
 
-  [[nodiscard]] bool SetWindowSurface(vk::UniqueSurfaceKHR surface);
+  [[nodiscard]] bool SetWindowSurface(vk::UniqueSurfaceKHR surface,
+                                      const ISize& size);
 
   std::unique_ptr<Surface> AcquireNextSurface();
+
+  /// @brief Mark the current swapchain configuration as dirty, forcing it to be
+  ///        recreated on the next frame.
+  void UpdateSurfaceSize(const ISize& size) const;
 
 #ifdef FML_OS_ANDROID
   vk::UniqueSurfaceKHR CreateAndroidSurface(ANativeWindow* window) const;

@@ -21,7 +21,8 @@ class SurfaceVK final : public Surface {
   static std::unique_ptr<SurfaceVK> WrapSwapchainImage(
       const std::shared_ptr<Context>& context,
       std::shared_ptr<SwapchainImageVK>& swapchain_image,
-      SwapCallback swap_callback);
+      SwapCallback swap_callback,
+      bool enable_msaa = true);
 
   // |Surface|
   ~SurfaceVK() override;
