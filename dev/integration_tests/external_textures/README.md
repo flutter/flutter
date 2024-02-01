@@ -36,7 +36,7 @@ flutter drive lib/frame_rate_main.dart --driver test_driver/frame_rate_test.dart
 > On CI, the test cases are run within our [device lab](../../devicelab/README.md).
 >
 > See [`devicelab/lib/tasks/integration_tests.dart`](../../devicelab/lib/tasks/integration_tests.dart)
-> and search for `createExternalTexturesIntegrationTest`.
+> and search for `createExternalUiFrameRateIntegrationTest`.
 >
 > The actual tests are run by task runners:
 >

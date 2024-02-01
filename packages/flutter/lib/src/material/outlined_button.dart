@@ -85,7 +85,9 @@ class OutlinedButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
-  factory OutlinedButton.icon({
+  ///
+  /// If [icon] is null, will create an [OutlinedButton] instead.
+ factory OutlinedButton.icon({
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
@@ -94,9 +96,35 @@ class OutlinedButton extends ButtonStyleButton {
     bool? autofocus,
     Clip? clipBehavior,
     MaterialStatesController? statesController,
-    required Widget icon,
+    Widget? icon,
     required Widget label,
-  }) = _OutlinedButtonWithIcon;
+  }) {
+    if (icon == null) {
+      return OutlinedButton(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: label,
+      );
+    }
+    return _OutlinedButtonWithIcon(
+      key: key,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      style: style,
+      focusNode: focusNode,
+      autofocus: autofocus ?? false,
+      clipBehavior: clipBehavior ?? Clip.none,
+      statesController: statesController,
+      icon: icon,
+      label: label,
+    );
+  }
 
   /// A static convenience method that constructs an outlined button
   /// [ButtonStyle] given simple values.

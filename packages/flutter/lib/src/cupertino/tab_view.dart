@@ -197,7 +197,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
         if (!_isActive) {
           return;
         }
-        _navigatorKey.currentState!.pop();
+        _navigatorKey.currentState!.maybePop();
       },
       child: child,
     );

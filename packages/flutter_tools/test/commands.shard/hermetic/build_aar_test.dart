@@ -111,7 +111,7 @@ flutter:
           ...List<RegExp>.filled(5, RegExp(r'-P[a-zA-Z-]+=.*')),
           'assembleAar$buildMode',
         ],
-        onRun: () => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
+        onRun: (_) => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
       )),
     ]);
 
