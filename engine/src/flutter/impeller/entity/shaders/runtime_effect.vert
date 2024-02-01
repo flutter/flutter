@@ -6,6 +6,7 @@
 
 uniform FrameInfo {
   mat4 mvp;
+  float depth;
 }
 frame_info;
 
@@ -16,6 +17,6 @@ in vec2 position;
 out vec2 _fragCoord;
 
 void main() {
-  gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
+  gl_Position = frame_info.mvp * vec4(position, frame_info.depth, 1.0);
   _fragCoord = position;
 }

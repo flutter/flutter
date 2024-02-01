@@ -98,6 +98,7 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   }
 
   VS::FrameInfo frame_info;
+  frame_info.depth = entity.GetShaderClipDepth();
   frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform() *
                    Matrix::MakeTranslation(positive_rect.GetOrigin());
 

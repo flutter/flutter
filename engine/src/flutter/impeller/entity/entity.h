@@ -71,7 +71,7 @@ class Entity {
 
   ~Entity();
 
-  Entity(Entity&&) = default;
+  Entity(Entity&&);
 
   /// @brief  Get the global transform matrix for this Entity.
   const Matrix& GetTransform() const;
@@ -96,6 +96,12 @@ class Entity {
 
   uint32_t GetClipDepth() const;
 
+  void SetNewClipDepth(uint32_t clip_depth);
+
+  uint32_t GetNewClipDepth() const;
+
+  float GetShaderClipDepth() const;
+
   void SetBlendMode(BlendMode blend_mode);
 
   BlendMode GetBlendMode() const;
@@ -119,12 +125,13 @@ class Entity {
   Entity Clone() const;
 
  private:
-  Entity(const Entity&) = default;
+  Entity(const Entity&);
 
   Matrix transform_;
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   uint32_t clip_depth_ = 0u;
+  uint32_t new_clip_depth_ = 0u;
   mutable Capture capture_;
 };
 

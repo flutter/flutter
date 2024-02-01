@@ -138,6 +138,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
           src_sampler_descriptor);
   FS::BindTextureSamplerSrc(pass, src_snapshot->texture, src_sampler);
 
+  frame_info.depth = entity.GetShaderClipDepth();
   frame_info.mvp = pass.GetOrthographicTransform() * src_snapshot->transform;
   frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
