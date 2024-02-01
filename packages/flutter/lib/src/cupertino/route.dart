@@ -755,32 +755,23 @@ class _CupertinoBackGestureController<T> {
   /// The drag gesture has ended with a horizontal motion of
   /// [fractionalVelocity] as a fraction of screen width per second.
   void dragEnd(double velocity) {
-    if (!getIsCurrent()) {
-      if (getIsActive()) {
-        // If the route is not current but is still active, complete the
-        // animation, as if the user has ended the back gesture without going
-        // back.
-        controller.value = 1.0;
-      } else {
-        // If the route is not current and not active, then reset the animation,
-        // as if the user has successfully dragged to go back.
-        controller.reset();
-      }
-      navigator.didStopUserGesture();
-      return;
-    }
-
     // Fling in the appropriate direction.
     //
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
     const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
+    final bool isCurrent = getIsCurrent();
     final bool animateForward;
 
-    // If the user releases the page before mid screen with sufficient velocity,
-    // or after mid screen, we should animate the page out. Otherwise, the page
-    // should be animated back in.
-    if (velocity.abs() >= _kMinFlingVelocity) {
+    if (!isCurrent) {
+      // If the page has already been navigated away from, then the animation
+      // direction depends on whether or not it's still in the navigation stack,
+      // regardless of velocity or drag position.
+      animateForward = getIsActive();
+    } else if (velocity.abs() >= _kMinFlingVelocity) {
+      // If the user releases the page before mid screen with sufficient velocity,
+      // or after mid screen, we should animate the page out. Otherwise, the page
+      // should be animated back in.
       animateForward = velocity <= 0;
     } else {
       animateForward = controller.value > 0.5;
@@ -796,8 +787,10 @@ class _CupertinoBackGestureController<T> {
       );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
-      // This route is destined to pop at this point. Reuse navigator's pop.
-      navigator.pop();
+      if (isCurrent) {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        navigator.pop();
+      }
 
       // The popping may have finished inline if already at the target destination.
       if (controller.isAnimating) {
