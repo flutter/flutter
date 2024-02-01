@@ -965,6 +965,7 @@ class DebuggingOptions {
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
+    this.debugLogsDirectoryPath,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -991,6 +992,7 @@ class DebuggingOptions {
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
       this.usingCISystem = false,
+      this.debugLogsDirectoryPath,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -1073,6 +1075,7 @@ class DebuggingOptions {
     required this.enableDartProfiling,
     required this.enableEmbedderApi,
     required this.usingCISystem,
+    required this.debugLogsDirectoryPath,
   });
 
   final bool debuggingEnabled;
@@ -1116,6 +1119,7 @@ class DebuggingOptions {
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
   final bool usingCISystem;
+  final String? debugLogsDirectoryPath;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1266,6 +1270,7 @@ class DebuggingOptions {
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
+    'debugLogsDirectoryPath': debugLogsDirectoryPath,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1322,6 +1327,7 @@ class DebuggingOptions {
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
       enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
       usingCISystem: (json['usingCISystem'] as bool?) ?? false,
+      debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
     );
 }
 

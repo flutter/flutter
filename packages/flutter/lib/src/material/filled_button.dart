@@ -202,22 +202,18 @@ class FilledButton extends ButtonStyleButton {
   /// A static convenience method that constructs a filled button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [foregroundColor] and [disabledForegroundColor] colors are used
-  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
-  /// a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
-  ///
-  /// If [overlayColor] is specified and its value is [Colors.transparent]
-  /// then the pressed/focused/hovered highlights are effectively defeated.
-  /// Otherwise a [MaterialStateProperty] with the same opacities as the
-  /// default is created.
-  ///
-  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  /// The [foregroundColor], and [disabledForegroundColor] colors are used to create a
+  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value. The
+  /// [backgroundColor] and [disabledBackgroundColor] are used to create a
+  /// [MaterialStateProperty] [ButtonStyle.backgroundColor] value.
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
   /// value, [elevation] + 2 is used when the button is hovered
   /// or focused, and elevation + 6 is used when the button is pressed.
+  ///
+  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
   /// All of the other parameters are either used directly or used to
   /// create a [MaterialStateProperty] with a single value for all
@@ -254,9 +250,6 @@ class FilledButton extends ButtonStyleButton {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
-    Color? iconColor,
-    Color? disabledIconColor,
-    Color? overlayColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -273,36 +266,29 @@ class FilledButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
-    ButtonLayerBuilder? backgroundBuilder,
-    ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColorProp = switch ((foregroundColor, disabledForegroundColor)) {
-      (null, null) => null,
-      (_, _) => _FilledButtonDefaultColor(foregroundColor, disabledForegroundColor),
-    };
-    final MaterialStateProperty<Color?>? backgroundColorProp = switch ((backgroundColor, disabledBackgroundColor)) {
-      (null, null) => null,
-      (_, _) => _FilledButtonDefaultColor(backgroundColor, disabledBackgroundColor),
-    };
-    final MaterialStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {
-      (null, null) => null,
-      (_, _) => _FilledButtonDefaultColor(iconColor, disabledIconColor),
-    };
-    final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
-      (null, null) => null,
-      (_, final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
-      (_, _) => _FilledButtonDefaultOverlay((overlayColor ?? foregroundColor)!),
-    };
+    final MaterialStateProperty<Color?>? backgroundColorProp =
+      (backgroundColor == null && disabledBackgroundColor == null)
+        ? null
+        : _FilledButtonDefaultColor(backgroundColor, disabledBackgroundColor);
+    final Color? foreground = foregroundColor;
+    final Color? disabledForeground = disabledForegroundColor;
+    final MaterialStateProperty<Color?>? foregroundColorProp =
+      (foreground == null && disabledForeground == null)
+        ? null
+        : _FilledButtonDefaultColor(foreground, disabledForeground);
+    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
+      ? null
+      : _FilledButtonDefaultOverlay(foreground);
     final MaterialStateProperty<MouseCursor?> mouseCursor = _FilledButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
       backgroundColor: backgroundColorProp,
       foregroundColor: foregroundColorProp,
-      overlayColor: overlayColorProp,
+      overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
-      iconColor: iconColorProp,
       elevation: ButtonStyleButton.allOrNull(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -317,8 +303,6 @@ class FilledButton extends ButtonStyleButton {
       enableFeedback: enableFeedback,
       alignment: alignment,
       splashFactory: splashFactory,
-      backgroundBuilder: backgroundBuilder,
-      foregroundBuilder: foregroundBuilder,
     );
   }
 
@@ -441,12 +425,10 @@ class FilledButton extends ButtonStyleButton {
   /// [padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    switch (_variant) {
-      case _FilledButtonVariant.filled:
-        return _FilledButtonDefaultsM3(context);
-      case _FilledButtonVariant.tonal:
-        return _FilledTonalButtonDefaultsM3(context);
-    }
+    return switch (_variant) {
+      _FilledButtonVariant.filled => _FilledButtonDefaultsM3(context),
+      _FilledButtonVariant.tonal  => _FilledTonalButtonDefaultsM3(context),
+    };
   }
 
   /// Returns the [FilledButtonThemeData.style] of the closest
@@ -533,13 +515,14 @@ class _FilledButtonWithIcon extends FilledButton {
     super.style,
     super.focusNode,
     bool? autofocus,
-    super.clipBehavior,
+    Clip? clipBehavior,
     super.statesController,
     required Widget icon,
     required Widget label,
   }) : super(
          autofocus: autofocus ?? false,
-         child: _FilledButtonWithIconChild(icon: icon, label: label, buttonStyle: style)
+         clipBehavior: clipBehavior ?? Clip.none,
+         child: _FilledButtonWithIconChild(icon: icon, label: label, buttonStyle: style),
       );
 
   _FilledButtonWithIcon.tonal({
@@ -551,13 +534,14 @@ class _FilledButtonWithIcon extends FilledButton {
     super.style,
     super.focusNode,
     bool? autofocus,
-    super.clipBehavior,
+    Clip? clipBehavior,
     super.statesController,
     required Widget icon,
     required Widget label,
   }) : super.tonal(
          autofocus: autofocus ?? false,
-         child: _FilledButtonWithIconChild(icon: icon, label: label, buttonStyle: style)
+         clipBehavior: clipBehavior ?? Clip.none,
+         child: _FilledButtonWithIconChild(icon: icon, label: label, buttonStyle: style),
        );
 
   @override
