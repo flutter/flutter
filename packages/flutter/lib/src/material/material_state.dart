@@ -48,8 +48,8 @@ import 'input_border.dart';
 /// {@endtemplate}
 @Deprecated(
   'Use WidgetState instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after [beta version at time of deprecation].'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialState = WidgetState;
 
@@ -62,8 +62,8 @@ typedef MaterialState = WidgetState;
 ///    that can be used interchangably with `MaterialPropertyResolver.
 @Deprecated(
   'Use WidgetPropertyResolver instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after [beta version at time of deprecation].'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 
@@ -121,8 +121,8 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 ///    interchangably with `MaterialStateColor`.
 @Deprecated(
   'Use WidgetStateColor instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialStateColor = WidgetStateColor;
 
@@ -159,8 +159,8 @@ typedef MaterialStateColor = WidgetStateColor;
 ///    native platforms.
 @Deprecated(
   'Use WidgetStateMouseCursor instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialStateMouseCursor = WidgetStateMouseCursor;
 
@@ -191,8 +191,8 @@ typedef MaterialStateMouseCursor = WidgetStateMouseCursor;
 ///    interchangeably with `MaterialStateBorderSide`.
 @Deprecated(
   'Use WidgetStateBorderSide instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialStateBorderSide = WidgetStateBorderSide;
 
@@ -221,8 +221,8 @@ typedef MaterialStateBorderSide = WidgetStateBorderSide;
 ///  * [ShapeBorder] the base class for shape outlines.
 @Deprecated(
   'Use WidgetStateOutlinedBorder instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialStateOutlinedBorder = WidgetStateOutlinedBorder;
 
@@ -258,8 +258,8 @@ typedef MaterialStateOutlinedBorder = WidgetStateOutlinedBorder;
 ///    interchangeably with `MaterialStateTextStyle`.
 @Deprecated(
   'Use WidgetStateTextStyle instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialStateTextStyle = WidgetStateTextStyle;
 
@@ -426,8 +426,8 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 /// {@macro flutter.material.MaterialStateProperty.implementations}
 @Deprecated(
   'Use WidgetStateProperty instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialStateProperty<T> = WidgetStateProperty<T>;
 
@@ -440,8 +440,8 @@ typedef MaterialStateProperty<T> = WidgetStateProperty<T>;
 ///    interchangeably with `MaterialStatePropertyAll`.
 @Deprecated(
   'Use WidgetStatePropertyAll instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialStatePropertyAll<T> = WidgetStatePropertyAll<T>;
 
@@ -471,7 +471,7 @@ typedef MaterialStatePropertyAll<T> = WidgetStatePropertyAll<T>;
 ///    interchangeably with `MaterialStatesController`.
 @Deprecated(
   'Use WidgetStatesController instead. '
-  'Deprecated to make code available outside of Material. '
-  'This feature was deprecated after 3.19.0-0.3.pre.'
+  'Moved to the Widgets layer to make code available outside of Material. '
+  'This feature was deprecated after v3.19.0-0.3.pre.'
 )
 typedef MaterialStatesController = WidgetStatesController;
