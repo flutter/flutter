@@ -232,6 +232,9 @@ struct Settings {
   // Some devices claim to support the required APIs but crash on their usage.
   bool enable_opengl_gpu_tracing = false;
 
+  // Enable GPU tracing in Vulkan backends.
+  bool enable_vulkan_gpu_tracing = false;
+
   // Data set by platform-specific embedders for use in font initialization.
   uint32_t font_initialization_data = 0;
 
