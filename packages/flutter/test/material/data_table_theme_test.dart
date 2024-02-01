@@ -116,8 +116,8 @@ void main() {
     expect(description[9], 'columnSpacing: 4.0');
     expect(description[10], 'dividerThickness: 5.0');
     expect(description[11], 'checkboxHorizontalMargin: 6.0');
-    expect(description[12], 'headingCellCursor: MaterialStatePropertyAll(SystemMouseCursor(grab))');
-    expect(description[13], 'dataRowCursor: MaterialStatePropertyAll(SystemMouseCursor(forbidden))');
+    expect(description[12], 'headingCellCursor: WidgetStatePropertyAll(SystemMouseCursor(grab))');
+    expect(description[13], 'dataRowCursor: WidgetStatePropertyAll(SystemMouseCursor(forbidden))');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
