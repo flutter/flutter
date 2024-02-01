@@ -247,6 +247,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
     return _CupertinoBackGestureController<T>(
       navigator: route.navigator!,
+      getIsCurrent: () => route.isCurrent,
+      getIsActive: () => route.isActive,
       controller: route.controller!, // protected access
     );
   }
@@ -294,6 +296,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
           enabledCallback: () => _isPopGestureEnabled<T>(route),
           onStartPopGesture: () => _startPopGesture<T>(route),
           getIsCurrent: () => route.isCurrent,
+          getIsActive: () => route.isActive,
           child: child,
         ),
       );
@@ -597,6 +600,7 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
+    required this.getIsActive,
     required this.getIsCurrent,
   });
 
@@ -606,6 +610,7 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
 
   final ValueGetter<_CupertinoBackGestureController<T>> onStartPopGesture;
 
+  final ValueGetter<bool> getIsActive;
   final ValueGetter<bool> getIsCurrent;
 
   @override
@@ -658,13 +663,6 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_backGestureController != null);
-    // TODO(justinmc): Why can't I drag to go back on page 3 after this?
-    print('justin _handleDragEnd. ${widget.getIsCurrent()}');
-    if (!widget.getIsCurrent()) {
-      _backGestureController?.dragEnd(0.0);
-      _backGestureController = null;
-      return;
-    }
     _backGestureController!.dragEnd(_convertToLogical(details.velocity.pixelsPerSecond.dx / context.size!.width));
     _backGestureController = null;
   }
@@ -737,12 +735,16 @@ class _CupertinoBackGestureController<T> {
   _CupertinoBackGestureController({
     required this.navigator,
     required this.controller,
+    required this.getIsActive,
+    required this.getIsCurrent,
   }) {
     navigator.didStartUserGesture();
   }
 
   final AnimationController controller;
   final NavigatorState navigator;
+  final ValueGetter<bool> getIsActive;
+  final ValueGetter<bool> getIsCurrent;
 
   /// The drag gesture has changed by [fractionalDelta]. The total range of the
   /// drag should be 0.0 to 1.0.
@@ -753,6 +755,21 @@ class _CupertinoBackGestureController<T> {
   /// The drag gesture has ended with a horizontal motion of
   /// [fractionalVelocity] as a fraction of screen width per second.
   void dragEnd(double velocity) {
+    if (!getIsCurrent()) {
+      if (getIsActive()) {
+        // If the route is not current but is still active, complete the
+        // animation, as if the user has ended the back gesture without going
+        // back.
+        controller.value = 1.0;
+      } else {
+        // If the route is not current and not active, then reset the animation,
+        // as if the user has successfully dragged to go back.
+        controller.reset();
+      }
+      navigator.didStopUserGesture();
+      return;
+    }
+
     // Fling in the appropriate direction.
     //
     // This curve has been determined through rigorously eyeballing native iOS
