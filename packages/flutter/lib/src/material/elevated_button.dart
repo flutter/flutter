@@ -80,6 +80,8 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
+  ///
+  /// If [icon] is null, will create an [ElevatedButton] instead.
   factory ElevatedButton.icon({
     Key? key,
     required VoidCallback? onPressed,
@@ -91,9 +93,39 @@ class ElevatedButton extends ButtonStyleButton {
     bool? autofocus,
     Clip? clipBehavior,
     MaterialStatesController? statesController,
-    required Widget icon,
+    Widget? icon,
     required Widget label,
-  }) = _ElevatedButtonWithIcon;
+  }) {
+    if (icon == null) {
+      return ElevatedButton(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: label,
+      );
+    }
+    return _ElevatedButtonWithIcon(
+      key: key,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      style: style,
+      focusNode: focusNode,
+      autofocus: autofocus ?? false,
+      clipBehavior: clipBehavior ?? Clip.none,
+      statesController: statesController,
+      icon: icon,
+      label: label,
+    );
+  }
 
   /// A static convenience method that constructs an elevated button
   /// [ButtonStyle] given simple values.

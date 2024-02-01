@@ -155,7 +155,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurface.value,
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -229,7 +229,7 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurface.value,
     );
 
     Material chipMaterial = getMaterial(tester);

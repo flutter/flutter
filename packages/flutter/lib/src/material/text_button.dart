@@ -104,9 +104,38 @@ class TextButton extends ButtonStyleButton {
     bool? autofocus,
     Clip? clipBehavior,
     MaterialStatesController? statesController,
-    required Widget icon,
+    Widget? icon,
     required Widget label,
-  }) = _TextButtonWithIcon;
+  }) {
+     if (icon == null) {
+      return TextButton(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: label,
+      );
+    }
+    return _TextButtonWithIcon( key: key,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      style: style,
+      focusNode: focusNode,
+      autofocus: autofocus ?? false,
+      clipBehavior: clipBehavior ?? Clip.none,
+      statesController: statesController,
+      icon: icon,
+      label: label,
+    );
+  }
 
   /// A static convenience method that constructs a text button
   /// [ButtonStyle] given simple values.

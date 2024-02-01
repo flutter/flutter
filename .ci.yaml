@@ -4000,7 +4000,6 @@ targets:
 
   - name: Mac_arm64 tool_tests_commands
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -4237,7 +4236,6 @@ targets:
 
   - name: Mac_arm64_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5097,6 +5095,7 @@ targets:
     bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
+      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -5182,6 +5181,7 @@ targets:
     bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
+      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
