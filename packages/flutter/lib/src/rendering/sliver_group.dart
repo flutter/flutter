@@ -284,9 +284,21 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
       offset += child.geometry!.scrollExtent;
       child = childAfter(child);
     }
+
+    final double paintExtent = calculatePaintOffset(
+      constraints,
+      from: math.min(constraints.scrollOffset, 0),
+      to: totalScrollExtent,
+    );
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: math.min(constraints.scrollOffset, 0),
+      to: totalScrollExtent,
+    );
     geometry = SliverGeometry(
       scrollExtent: totalScrollExtent,
-      paintExtent: calculatePaintOffset(constraints, from: 0, to: totalScrollExtent),
+      paintExtent: paintExtent,
+      cacheExtent: cacheExtent,
       maxPaintExtent: maxPaintExtent,
       hasVisualOverflow: totalScrollExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );

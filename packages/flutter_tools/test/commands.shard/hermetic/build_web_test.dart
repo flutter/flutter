@@ -346,6 +346,28 @@ void main() {
     ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
+
+  testUsingContext('Rejects --base-href value that does not start with /', () async {
+    final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+
+    await expectLater(
+      runner.run(<String>[
+        'build',
+        'web',
+        '--no-pub',
+        '--base-href=i_dont_start_with_a_forward_slash',
+      ]),
+      throwsToolExit(
+        message: 'Received a --base-href value of "i_dont_start_with_a_forward_slash"\n'
+          '--base-href should start and end with /',
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
 }
 
 void setupFileSystemForEndToEndTest(FileSystem fileSystem) {

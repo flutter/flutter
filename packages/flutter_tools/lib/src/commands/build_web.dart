@@ -192,7 +192,10 @@ class BuildWebCommand extends BuildSubCommand {
     }
     final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
-      throwToolExit('base-href should start and end with /');
+      throwToolExit(
+        'Received a --base-href value of "$baseHref"\n'
+        '--base-href should start and end with /',
+      );
     }
     if (!flutterProject.web.existsSync()) {
       throwToolExit('Missing index.html.');
