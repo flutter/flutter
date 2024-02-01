@@ -13,7 +13,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/terminal.dart';
-import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -257,10 +256,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         wrapColumn = int.parse(topLevelResults[FlutterGlobalOptions.kWrapColumnOption] as String);
         if (wrapColumn < 0) {
-          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
+          throwToolExit(globals.userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
         }
       } on FormatException {
-        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
+        throwToolExit(globals.userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
       }
     }
 
