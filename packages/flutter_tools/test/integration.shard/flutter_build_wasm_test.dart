@@ -51,7 +51,7 @@ void main() {
     final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
       exampleAppDir.path,
       'build',
-      'web_wasm',
+      'web',
     ));
     for (final String filename in const <String>[
       'flutter.js',

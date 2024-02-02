@@ -69,7 +69,7 @@ class WebTestCompiler {
     }
 
     final String platformDillPath = _fileSystem.path.join(
-      getWebPlatformBinariesDirectory(_artifacts, buildInfo.webRenderer).path,
+      _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
       platformDillName
     );
 
