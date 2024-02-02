@@ -217,37 +217,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
-  @override
-  ui.ViewFocusChangeCallback? get onViewFocusChange => _onViewFocusChange;
-  ui.ViewFocusChangeCallback? _onViewFocusChange;
-  Zone? _onViewFocusChangeZone;
-  @override
-  set onViewFocusChange(ui.ViewFocusChangeCallback? callback) {
-    _onViewFocusChange = callback;
-    _onViewFocusChangeZone = Zone.current;
-  }
-
-  // Engine code should use this method instead of the callback directly.
-  // Otherwise zones won't work properly.
-  void invokeOnViewFocusChange(ui.ViewFocusEvent viewFocusEvent) {
-    invoke1<ui.ViewFocusEvent>(
-      _onViewFocusChange,
-      _onViewFocusChangeZone,
-      viewFocusEvent,
-    );
-  }
-
-
-  @override
-  void requestViewFocusChange({
-    required int viewId,
-    required ui.ViewFocusState state,
-    required ui.ViewFocusDirection direction,
-  }) {
-    // TODO(tugorez): implement this method. At the moment will be a no op call.
-  }
-
-
   /// A set of views which have rendered in the current `onBeginFrame` or
   /// `onDrawFrame` scope.
   Set<ui.FlutterView>? _viewsRenderedInCurrentFrame;
