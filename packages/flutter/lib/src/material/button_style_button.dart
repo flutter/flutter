@@ -89,8 +89,10 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
-  final Clip clipBehavior;
+  /// Defaults to [Clip.none] unless [ButtonStyle.backgroundBuilder] or
+  /// [ButtonStyle.foregroundBuilder] is specified. In those
+  /// cases the default is [Clip.antiAlias].
+  final Clip? clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -318,6 +320,11 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
+    final ButtonLayerBuilder? resolvedBackgroundBuilder = effectiveValue((ButtonStyle? style) => style?.backgroundBuilder);
+    final ButtonLayerBuilder? resolvedForegroundBuilder = effectiveValue((ButtonStyle? style) => style?.foregroundBuilder);
+
+    final Clip effectiveClipBehavior = widget.clipBehavior
+      ?? ((resolvedBackgroundBuilder ?? resolvedForegroundBuilder) != null ? Clip.antiAlias : Clip.none);
 
     BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -384,6 +391,21 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     elevation = resolvedElevation;
     backgroundColor = resolvedBackgroundColor;
 
+    Widget effectiveChild = Padding(
+      padding: padding,
+      child: Align(
+        alignment: resolvedAlignment!,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: resolvedForegroundBuilder != null
+          ? resolvedForegroundBuilder(context, statesController.value, widget.child)
+          : widget.child,
+      ),
+    );
+    if (resolvedBackgroundBuilder != null) {
+      effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
+    }
+
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
       child: Material(
@@ -395,7 +417,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         surfaceTintColor: resolvedSurfaceTintColor,
         type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: resolvedAnimationDuration,
-        clipBehavior: widget.clipBehavior,
+        clipBehavior: effectiveClipBehavior,
         child: InkWell(
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
@@ -413,15 +435,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           statesController: statesController,
           child: IconTheme.merge(
             data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
-            child: Padding(
-              padding: padding,
-              child: Align(
-                alignment: resolvedAlignment!,
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: widget.child,
-              ),
-            ),
+            child: effectiveChild,
           ),
         ),
       ),
