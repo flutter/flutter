@@ -52,7 +52,7 @@ class _NoOpTarget extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[];
-  
+
   @override
   Future<void> build(Environment environment) async {}
 }

@@ -8,7 +8,6 @@ import '../../build_info.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
-import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'desktop.dart';

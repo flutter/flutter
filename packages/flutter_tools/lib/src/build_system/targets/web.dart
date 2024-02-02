@@ -26,7 +26,6 @@ import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
-import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'localizations.dart';
 
