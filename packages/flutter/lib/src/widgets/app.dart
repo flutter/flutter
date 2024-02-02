@@ -1210,15 +1210,7 @@ class WidgetsApp extends StatefulWidget {
     _debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
-  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = () {
-    final ValueNotifier<bool> result = ValueNotifier<bool>(false);
-    // This object is never disposed by design. Communicating disposal event
-    // to exempt the object from memory allocation tracking.
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: result);
-    }
-    return result;
-  }();
+  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///
