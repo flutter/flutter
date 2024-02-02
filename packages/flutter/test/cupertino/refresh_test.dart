@@ -15,7 +15,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   late FakeBuilder mockHelper;
   // `uiTestGroup` is treated as a test helper, so it is not tracked by default.
-  LeakTesting.settings = LeakTesting.settings.withTracked(createdByTestHelpers: true);
+  LeakTesting.settings = LeakTesting.settings.withIgnored(testHelperExceptions: <RegExp>[RegExp('uiTestGroup')]);
 
   setUp(() {
     mockHelper = FakeBuilder();
@@ -39,7 +39,7 @@ void main() {
   void uiTestGroup() {
     testWidgets("doesn't invoke anything without user interaction",
     // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-    // experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+    experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
     (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
