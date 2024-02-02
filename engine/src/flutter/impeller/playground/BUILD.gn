@@ -15,6 +15,10 @@ impeller_component("playground") {
     "switches.h",
     "widgets.cc",
     "widgets.h",
+
+    # Swiftshader is Vulkan backend specific but the utilities are not.
+    "backend/vulkan/swiftshader_utilities.cc",
+    "backend/vulkan/swiftshader_utilities.h",
   ]
 
   deps = [ "../renderer/backend" ]

@@ -20,6 +20,12 @@ struct PlaygroundSwitches {
   // rendered in the playground.
   std::optional<std::chrono::milliseconds> timeout;
   bool enable_vulkan_validation = false;
+  //----------------------------------------------------------------------------
+  /// Seek a SwiftShader library in known locations and use it when running
+  /// Vulkan. It is a fatal error to provide this option and not have the test
+  /// find a SwiftShader implementation.
+  ///
+  bool use_swiftshader = false;
   bool use_angle = false;
 
   PlaygroundSwitches();
