@@ -855,6 +855,59 @@ void main() {
       )
     );
   });
+
+  testWidgets('SegmentedButton expands to fill the available width when isExpanded is true', (WidgetTester tester) async {
+  await tester.pumpWidget(MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: SegmentedButton<int>(
+          segments: const <ButtonSegment<int>>[
+            ButtonSegment<int>(value: 1, label: Text('Segment 1')),
+            ButtonSegment<int>(value: 2, label: Text('Segment 2')),
+          ],
+          selected: const <int>{1},
+          isExpanded: true,
+        ),
+      ),
+    ),
+  ));
+
+  // Get the width of the SegmentedButton.
+  final RenderBox box = tester.renderObject(find.byType(SegmentedButton<int>));
+  final double segmentedButtonWidth = box.size.width;
+
+  // Get the width of the parent widget.
+  final double screenWidth = tester.getSize(find.byType(Scaffold)).width;
+
+  // The width of the SegmentedButton must be equal to the width of the parent widget.
+  expect(segmentedButtonWidth, equals(screenWidth));
+});
+
+testWidgets('SegmentedButton does not expand when isExpanded is false', (WidgetTester tester) async {
+  await tester.pumpWidget(MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: SegmentedButton<int>(
+          segments: const <ButtonSegment<int>>[
+            ButtonSegment<int>(value: 1, label: Text('Segment 1')),
+            ButtonSegment<int>(value: 2, label: Text('Segment 2')),
+          ],
+          selected: const <int>{1},
+        ),
+      ),
+    ),
+  ));
+
+  // Get the width of the SegmentedButton.
+  final RenderBox box = tester.renderObject(find.byType(SegmentedButton<int>));
+  final double segmentedButtonWidth = box.size.width;
+
+  // Get the width of the parent widget.
+  final double screenWidth = tester.getSize(find.byType(Scaffold)).width;
+
+  // The width of the SegmentedButton must be less than the width of the parent widget.
+  expect(segmentedButtonWidth, lessThan(screenWidth));
+});
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};

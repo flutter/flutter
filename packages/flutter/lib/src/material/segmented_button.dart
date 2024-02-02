@@ -130,6 +130,7 @@ class SegmentedButton<T> extends StatefulWidget {
     this.onSelectionChanged,
     this.multiSelectionEnabled = false,
     this.emptySelectionAllowed = false,
+    this.isExpanded = false,
     this.style,
     this.showSelectedIcon = true,
     this.selectedIcon,
@@ -189,6 +190,16 @@ class SegmentedButton<T> extends StatefulWidget {
   /// the user taps on the only selected segment it will not be deselected, and
   /// [onSelectionChanged] will not be called.
   final bool emptySelectionAllowed;
+
+  /// Determines whether the segmented button should expand to fill
+  /// the available space.
+  /// If true, the segmented button expands to fill its parent's
+  /// horizontal space, evenly dividing this space among its segments.
+  ///
+  /// If false (default), the button's size is based on the intrinsic
+  /// sizes of its segments, maintaining their natural width. Ideal for
+  /// maintaining consistent segment sizes regardless of the container size.
+  final bool isExpanded;
 
   /// A static convenience method that constructs a segmented button
   /// [ButtonStyle] given simple values.
@@ -545,6 +556,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
           enabledBorder: _enabled ? enabledBorder : disabledBorder,
           disabledBorder: disabledBorder,
           direction: direction,
+          isExpanded: widget.isExpanded,
           children: buttons,
         ),
       ),
@@ -588,6 +600,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
     required this.disabledBorder,
     required this.direction,
     required this.tapTargetVerticalPadding,
+    required this.isExpanded,
     required super.children,
   }) : assert(children.length == segments.length);
 
@@ -596,6 +609,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   final OutlinedBorder disabledBorder;
   final TextDirection direction;
   final double tapTargetVerticalPadding;
+  final bool isExpanded;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -605,6 +619,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
       disabledBorder: disabledBorder,
       textDirection: direction,
       tapTargetVerticalPadding: tapTargetVerticalPadding,
+      isExpanded: isExpanded,
     );
   }
 
@@ -633,11 +648,13 @@ class _RenderSegmentedButton<T> extends RenderBox with
     required OutlinedBorder disabledBorder,
     required TextDirection textDirection,
     required double tapTargetVerticalPadding,
+    required bool isExpanded,
   }) : _segments = segments,
        _enabledBorder = enabledBorder,
        _disabledBorder = disabledBorder,
        _textDirection = textDirection,
-       _tapTargetVerticalPadding = tapTargetVerticalPadding;
+       _tapTargetVerticalPadding = tapTargetVerticalPadding,
+       _isExpanded = isExpanded;
 
   List<ButtonSegment<T>> get segments => _segments;
   List<ButtonSegment<T>> _segments;
@@ -686,6 +703,16 @@ class _RenderSegmentedButton<T> extends RenderBox with
       return;
     }
     _tapTargetVerticalPadding = value;
+    markNeedsLayout();
+  }
+
+  bool get isExpanded => _isExpanded;
+  bool _isExpanded;
+  set isExpanded(bool value) {
+    if (value == _isExpanded) {
+      return;
+    }
+    _isExpanded = value;
     markNeedsLayout();
   }
 
@@ -770,7 +797,7 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   Size _calculateChildSize(BoxConstraints constraints) {
     double maxHeight = 0;
-    double childWidth = constraints.minWidth / childCount;
+    double childWidth = _isExpanded ? constraints.maxWidth : constraints.minWidth / childCount;
     RenderBox? child = firstChild;
     while (child != null) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
