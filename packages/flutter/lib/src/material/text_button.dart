@@ -214,10 +214,12 @@ class TextButton extends ButtonStyleButton {
     };
     final MaterialStateProperty<Color?>? backgroundColorProp = switch ((backgroundColor, disabledBackgroundColor)) {
       (null, null) => null,
+      (_, null) => MaterialStatePropertyAll<Color?>(backgroundColor),
       (_, _) => _TextButtonDefaultColor(backgroundColor, disabledBackgroundColor),
     };
     final MaterialStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {
       (null, null) => null,
+      (_, null) => MaterialStatePropertyAll<Color?>(iconColor),
       (_, _) => _TextButtonDefaultColor(iconColor, disabledIconColor),
     };
     final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
