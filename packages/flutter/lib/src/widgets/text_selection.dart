@@ -1509,13 +1509,7 @@ class SelectionOverlay {
   /// {@endtemplate}
   void hide() {
     _magnifierController.hide();
-    if (_handles != null) {
-      _handles!.start.remove();
-      _handles!.start.dispose();
-      _handles!.end.remove();
-      _handles!.end.dispose();
-      _handles = null;
-    }
+    hideHandles();
     if (_toolbar != null || _contextMenuController.isShown || _spellCheckToolbarController.isShown) {
       hideToolbar();
     }
