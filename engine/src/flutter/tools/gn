@@ -792,8 +792,6 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_enable_fontmgr_custom_directory'] = False
   gn_args['skia_enable_fontmgr_custom_embedded'] = True
   gn_args['skia_enable_fontmgr_custom_empty'] = True
-  gn_args['skia_fontmgr_factory'
-         ] = '//flutter/skia:fontmgr_custom_empty_factory'
   gn_args['skia_enable_skshaper'] = True
   gn_args['skia_enable_skparagraph'] = True
   gn_args['skia_canvaskit_force_tracing'] = False
