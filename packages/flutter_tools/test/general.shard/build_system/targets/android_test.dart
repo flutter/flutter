@@ -535,6 +535,7 @@ void main() {
     processManager.addCommands(<FakeCommand>[
       const FakeCommand(command: <String>[
         'HostArtifact.impellerc',
+        '--sksl',
         '--runtime-stage-gles',
         '--runtime-stage-vulkan',
         '--iplr',
