@@ -227,7 +227,7 @@ platform_properties:
         ]
       os: Mac-13
       cpu: x86
-      device_os: iOS-16
+      device_os: iOS-16|iOS-17
       $flutter/osx_sdk : >-
         {
           "sdk_version": "15a240d"
@@ -245,7 +245,7 @@ platform_properties:
         ]
       os: Mac-13
       cpu: x86
-      device_os: iOS-16
+      device_os: iOS-16|iOS-17
       $flutter/osx_sdk : >-
         {
           "sdk_version": "15a240d"
@@ -263,7 +263,7 @@ platform_properties:
         ]
       os: Mac-13
       cpu: arm64
-      device_os: iOS-16
+      device_os: iOS-16|iOS-17
       $flutter/osx_sdk : >-
         {
           "sdk_version": "15a240d"
@@ -4239,7 +4239,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
@@ -4338,7 +4337,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios_xcode_debug
@@ -4367,7 +4365,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up_xcode_debug
@@ -4427,7 +4424,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
@@ -4437,7 +4433,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
@@ -4456,7 +4451,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver_xcode_debug
@@ -4583,7 +4577,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios_xcode_debug
@@ -4733,7 +4726,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
@@ -4744,7 +4736,6 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
@@ -4797,7 +4788,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-16","os=Mac-13", "cpu=x86"]
+        ["device_os=iOS-16|iOS-17","os=Mac-13", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
