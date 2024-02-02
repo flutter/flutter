@@ -98,7 +98,11 @@ template("aiks_unittests_component") {
     testonly = true
     if (defined(invoker.defines)) {
       defines = invoker.defines
+    } else {
+      defines = []
     }
+    defines += [ "_USE_MATH_DEFINES" ]
+
     sources = predefined_sources + additional_sources
     deps = [
       ":aiks",

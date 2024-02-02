@@ -209,7 +209,10 @@ Scalar GaussianBlurFilterContents::CalculateScale(Scalar sigma) {
   }
   Scalar result = 4.0 / sigma;
   // Round to the nearest 1/(2^n) to get the best quality down scaling.
-  Scalar rounded = pow(2.0f, round(log2(result)));
+  Scalar exponent = round(log2f(result));
+  // Don't scale down below 1/16th to preserve signal.
+  exponent = std::max(-4.0f, exponent);
+  Scalar rounded = powf(2.0f, exponent);
   return rounded;
 };
 
@@ -454,8 +457,8 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
   KernelPipeline::FragmentShader::KernelSamples result;
   result.sample_count =
       ((2 * parameters.blur_radius) / parameters.step_size) + 1;
-  // 32 comes from kernel.glsl.
-  FML_CHECK(result.sample_count < 32);
+  // 48 comes from kernel.glsl.
+  FML_CHECK(result.sample_count < 48);
 
   // Chop off the last samples if the radius >= 3 where they account for < 1.56%
   // of the result.
