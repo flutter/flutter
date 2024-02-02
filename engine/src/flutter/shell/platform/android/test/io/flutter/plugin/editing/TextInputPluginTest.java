@@ -1,6 +1,7 @@
 package io.flutter.plugin.editing;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
@@ -1176,8 +1177,8 @@ public class TextInputPluginTest {
 
   @SuppressWarnings("deprecation")
   // DartExecutor.send is deprecated.
-  @Test
-  public void inputConnection_createsActionFromEnter() throws JSONException {
+  private void verifyInputConnection(TextInputChannel.TextInputType textInputType)
+      throws JSONException {
     TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
     FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
     View testView = new View(ctx);
@@ -1194,7 +1195,7 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(textInputType, false, false),
             null,
             null,
             null,
@@ -1230,6 +1231,16 @@ public class TextInputPluginTest {
         bufferCaptor.getValue(),
         "TextInputClient.performAction",
         new String[] {"0", "TextInputAction.done"});
+  }
+
+  @Test
+  public void inputConnection_createsActionFromEnter() throws JSONException {
+    verifyInputConnection(TextInputChannel.TextInputType.TEXT);
+  }
+
+  @Test
+  public void inputConnection_respondsToKeyEvents_textInputTypeNone() throws JSONException {
+    verifyInputConnection(TextInputChannel.TextInputType.NONE);
   }
 
   @SuppressWarnings("deprecation") // InputMethodSubtype
@@ -1310,7 +1321,7 @@ public class TextInputPluginTest {
     InputConnection connection =
         textInputPlugin.createInputConnection(
             testView, mock(KeyboardManager.class), new EditorInfo());
-    assertEquals(connection, null);
+    assertNotNull(connection);
   }
 
   @Test
