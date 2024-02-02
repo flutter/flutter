@@ -2701,6 +2701,7 @@ targets:
 
   # Pixel 7 Pro, Impeller (OpenGL)
   - name: Linux_pixel_7pro new_gallery_opengles_impeller__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/142770
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
