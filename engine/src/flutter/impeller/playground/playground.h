@@ -121,10 +121,7 @@ class Playground {
   void SetWindowSize(ISize size);
 
  private:
-  struct GLFWInitializer;
-
   fml::TimeDelta start_time_;
-  std::unique_ptr<GLFWInitializer> glfw_initializer_;
   std::unique_ptr<PlaygroundImpl> impl_;
   std::shared_ptr<Context> context_;
   std::unique_ptr<Renderer> renderer_;

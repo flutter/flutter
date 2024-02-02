@@ -19,6 +19,7 @@ PlaygroundSwitches::PlaygroundSwitches(const fml::CommandLine& args) {
     enable_playground = true;
   }
   enable_vulkan_validation = args.HasOption("enable_vulkan_validation");
+  use_swiftshader = args.HasOption("use_swiftshader");
 }
 
 }  // namespace impeller
