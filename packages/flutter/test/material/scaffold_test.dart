@@ -2868,6 +2868,166 @@ void main() {
       expect(tester.takeException(), isNull);
   });
 
+   testWidgets('ScaffoldMessenger showSnackBar default animatiom', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('I am a snack bar.'),
+                    showCloseIcon: true,
+                  ),
+                );
+              },
+              child: const Text('Show SnackBar'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    // Tap the button to show the SnackBar.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 125)); // Advance the animation by 125ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(576.7, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 125)); // Advance the animation by 125ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(566, 0.1));
+
+    // Tap the close button to dismiss the SnackBar.
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 125)); // Advance the animation by 125ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(576.7, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 125)); // Advance the animation by 125ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(614, 0.1));
+  });
+
+  testWidgets('ScaffoldMessenger showSnackBar animation can be customized', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('I am a snack bar.'),
+                    showCloseIcon: true,
+                  ),
+                  snackBarAnimationStyle: AnimationStyle(
+                    duration: const Duration(milliseconds: 1200),
+                    reverseDuration: const Duration(milliseconds: 600),
+                  ),
+                );
+              },
+              child: const Text('Show SnackBar'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    // Tap the button to show the SnackBar.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300)); // Advance the animation by 300ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(602.6, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 300)); // Advance the animation by 300ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(576.7, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 600)); // Advance the animation by 600ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(566, 0.1));
+
+    // Tap the close button to dismiss the SnackBar.
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300)); // Advance the animation by 300ns.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(576.7, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 300)); // Advance the animation by 300ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(614, 0.1));
+  });
+
+  testWidgets('Updated snackBarAnimationStyle updates snack bar animation', (WidgetTester tester) async {
+    Widget buildSnackBar(AnimationStyle snackBarAnimationStyle) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('I am a snack bar.'),
+                      showCloseIcon: true,
+                    ),
+                    snackBarAnimationStyle: snackBarAnimationStyle,
+                  );
+                },
+                child: const Text('Show SnackBar'),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Test custom animation style.
+    await tester.pumpWidget(buildSnackBar(AnimationStyle(
+      duration: const Duration(milliseconds: 800),
+      reverseDuration: const Duration(milliseconds: 400),
+    )));
+
+    // Tap the button to show the SnackBar.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400)); // Advance the animation by 400ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(576.7, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 400)); // Advance the animation by 400ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(566, 0.1));
+
+    // Tap the close button to dismiss the SnackBar.
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400)); // Advance the animation by 400ms.
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(614, 0.1));
+
+    // Test no animation style.
+    await tester.pumpWidget(buildSnackBar(AnimationStyle.noAnimation));
+    await tester.pumpAndSettle();
+
+    // Tap the button to show the SnackBar.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('I am a snack bar.')).dy, closeTo(566, 0.1));
+
+    // Tap the close button to dismiss the SnackBar.
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+
+    expect(find.text('I am a snack bar.'), findsNothing);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
