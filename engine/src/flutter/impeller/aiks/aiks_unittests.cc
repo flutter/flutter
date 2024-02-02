@@ -3968,5 +3968,61 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
   }
 }
 
+// This addresses a bug where tiny blurs could result in mip maps that beyond
+// the limits for the textures used for blurring.
+// See also: b/323402168
+TEST_P(AiksTest, GaussianBlurSolidColorTinyMipMap) {
+  for (int32_t i = 1; i < 5; ++i) {
+    Canvas canvas;
+    Scalar fi = i;
+    canvas.DrawPath(
+        PathBuilder{}
+            .MoveTo({100, 100})
+            .LineTo({100.f + fi, 100.f + fi})
+            .TakePath(),
+        {.color = Color::Chartreuse(),
+         .image_filter = ImageFilter::MakeBlur(
+             Sigma(0.1), Sigma(0.1), FilterContents::BlurStyle::kNormal,
+             Entity::TileMode::kClamp)});
+
+    Picture picture = canvas.EndRecordingAsPicture();
+    std::shared_ptr<RenderTargetCache> cache =
+        std::make_shared<RenderTargetCache>(
+            GetContext()->GetResourceAllocator());
+    AiksContext aiks_context(GetContext(), nullptr, cache);
+    std::shared_ptr<Image> image = picture.ToImage(aiks_context, {1024, 768});
+    EXPECT_TRUE(image) << " length " << i;
+  }
+}
+
+// This addresses a bug where tiny blurs could result in mip maps that beyond
+// the limits for the textures used for blurring.
+// See also: b/323402168
+TEST_P(AiksTest, GaussianBlurBackdropTinyMipMap) {
+  for (int32_t i = 0; i < 5; ++i) {
+    Canvas canvas;
+    ISize clip_size = ISize(i, i);
+    canvas.ClipRect(
+        Rect::MakeXYWH(400, 400, clip_size.width, clip_size.height));
+    canvas.DrawCircle(
+        {400, 400}, 200,
+        {
+            .color = Color::Green(),
+            .image_filter = ImageFilter::MakeBlur(
+                Sigma(0.1), Sigma(0.1), FilterContents::BlurStyle::kNormal,
+                Entity::TileMode::kDecal),
+        });
+    canvas.Restore();
+
+    Picture picture = canvas.EndRecordingAsPicture();
+    std::shared_ptr<RenderTargetCache> cache =
+        std::make_shared<RenderTargetCache>(
+            GetContext()->GetResourceAllocator());
+    AiksContext aiks_context(GetContext(), nullptr, cache);
+    std::shared_ptr<Image> image = picture.ToImage(aiks_context, {1024, 768});
+    EXPECT_TRUE(image) << " clip rect " << i;
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
