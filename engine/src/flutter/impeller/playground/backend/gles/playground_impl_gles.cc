@@ -76,19 +76,12 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
   ::glfwDefaultWindowHints();
 
 #if FML_OS_MACOSX
-  if (use_angle_) {
-    ::glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
-    ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-    ::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    ::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  } else {
-    ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
-  }
-#else   // FML_OS_MACOSX
+  FML_CHECK(use_angle_) << "Must use Angle on macOS for OpenGL ES.";
+  ::glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif  // FML_OS_MACOSX
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-#endif  // FML_OS_MACOSX
   ::glfwWindowHint(GLFW_RED_BITS, 8);
   ::glfwWindowHint(GLFW_GREEN_BITS, 8);
   ::glfwWindowHint(GLFW_BLUE_BITS, 8);
