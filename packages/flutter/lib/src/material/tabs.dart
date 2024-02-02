@@ -557,7 +557,7 @@ class _IndicatorPainter extends CustomPainter {
 
     _currentRect = switch (indicatorSize) {
       TabBarIndicatorSize.label => _applyStretchEffect(_currentRect!),
-      // Do nothing
+      // Do nothing.
       TabBarIndicatorSize.tab => _currentRect,
     };
 
@@ -588,10 +588,10 @@ class _IndicatorPainter extends CustomPainter {
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
 
-    // The progress of the animation from 0 to 1
+    // The progress of the animation from 0 to 1.
     late double tabChangeProgress;
 
-    // If we are changing tabs via index, we want to map the progress between 0 and 1
+    // If we are changing tabs via index, we want to map the progress between 0 and 1.
     if (controller.indexIsChanging) {
       double progressLeft = (index - value).abs();
       final int tabsDelta = (controller.index - controller.previousIndex).abs();
@@ -600,16 +600,16 @@ class _IndicatorPainter extends CustomPainter {
       }
       tabChangeProgress = 1 - clampDouble(progressLeft, 0.0, 1.0);
     } else {
-      // Otherwise, the progress is how close we are to the current tab
+      // Otherwise, the progress is how close we are to the current tab.
       tabChangeProgress = (index - value).abs();
     }
 
-    // If the animation has finished, there is no need to apply the stretch effect
+    // If the animation has finished, there is no need to apply the stretch effect.
     if (tabChangeProgress == 1.0) {
       return rect;
     }
 
-    // The maximum amount of extra width to add to the indicator
+    // The maximum amount of extra width to add to the indicator.
     final double stretchSize = rect.width;
 
     final double inflationPerSide = stretchSize * _stretchAnimation.transform(tabChangeProgress) / 2;

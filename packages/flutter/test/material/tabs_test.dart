@@ -2590,9 +2590,7 @@ void main() {
 
     void expectIndicatorAttrs(RenderBox tabBarBox, {required double offset, required double width}) {
       const double indicatorWeight = 3.0;
-
       final double centerX = offset * tabWidth + tabWidth / 2;
-
       final RRect rrect = RRect.fromLTRBAndCorners(
         centerX - width / 2,
         tabBarBox.size.height - indicatorWeight,
@@ -2602,22 +2600,18 @@ void main() {
         topRight: const Radius.circular(3.0),
       );
 
-      expect(
-        tabBarBox,
-        paints
-          ..rrect(rrect: rrect),
-      );
+      expect(tabBarBox, paints..rrect(rrect: rrect));
     }
 
-    // Idle at tab 0
+    // Idle at tab 0.
     expectIndicatorAttrs(tabBarBox, offset: 0.0, width: indicatorWidth);
 
-    // Peak stretch at 20 %
+    // Peak stretch at 20%.
     controller.offset = 0.2;
     await tester.pump();
     expectIndicatorAttrs(tabBarBox, offset: 0.2, width: indicatorWidth * 2);
 
-    // Idle at tab 1
+    // Idle at tab 1.
     controller.offset = 1;
     await tester.pump();
     expectIndicatorAttrs(tabBarBox, offset: 1, width: indicatorWidth);
