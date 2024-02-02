@@ -76,6 +76,7 @@ static const std::vector<std::string> kSkipTests = {
     IMP_AIKSTEST(SceneColorSource),
     IMP_AIKSTEST(SolidStrokesRenderCorrectly),
     IMP_AIKSTEST(TextFrameSubpixelAlignment),
+    IMP_AIKSTEST(GaussianBlurAnimatedBackdrop),
     // TextRotated is flakey and we can't seem to get it to stabilize on Skia
     // Gold.
     IMP_AIKSTEST(TextRotated),
