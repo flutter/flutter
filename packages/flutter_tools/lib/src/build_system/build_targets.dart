@@ -14,7 +14,7 @@ abstract class BuildTargets {
   Target get releaseCopyFlutterBundle;
   Target get generateLocalizationsTarget;
   Target get dartPluginRegistrantTarget;
-  Target webServiceWorker(FileSystem fileSystem, WebRendererMode webRenderer, {required bool isWasm});
+  Target webServiceWorker(FileSystem fileSystem, WebRendererMode webRenderer);
 }
 
 /// BuildTargets that return NoOpTarget for every action.
@@ -34,7 +34,7 @@ class NoOpBuildTargets extends BuildTargets {
   Target get dartPluginRegistrantTarget => const _NoOpTarget();
 
   @override
-  Target webServiceWorker(FileSystem fileSystem, WebRendererMode webRenderer, {required bool isWasm}) => const _NoOpTarget();
+  Target webServiceWorker(FileSystem fileSystem, WebRendererMode webRenderer) => const _NoOpTarget();
 }
 
 /// A [Target] that does nothing.

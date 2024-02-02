@@ -27,6 +27,6 @@ class BuildTargetsImpl extends BuildTargets {
   Target get dartPluginRegistrantTarget => const DartPluginRegistrantTarget();
 
   @override
-  Target webServiceWorker(FileSystem fileSystem, WebRendererMode webRenderer, {required bool isWasm}) =>
-      WebServiceWorker(fileSystem, webRenderer, isWasm: isWasm);
+  Target webServiceWorker(FileSystem fileSystem, WebRendererMode webRenderer) =>
+      WebServiceWorker(fileSystem, webRenderer);
 }
