@@ -524,7 +524,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// overall theme's brightness is [Brightness.light], and [ColorScheme.onSurface]
   /// if the overall theme's brightness is [Brightness.dark].
   /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
-  /// then [AppBar] uses the overall theme's [ColorScheme.onSurface]
+  /// then [AppBar] uses the overall theme's [ColorScheme.onSurface].
   ///
   /// This color is used to configure [DefaultTextStyle] that contains
   /// the toolbar's children, and the default [IconTheme] widgets that
