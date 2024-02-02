@@ -1707,6 +1707,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
       );
 
       await pub.get(
