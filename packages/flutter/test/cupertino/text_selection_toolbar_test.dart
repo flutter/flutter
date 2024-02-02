@@ -274,10 +274,10 @@ void main() {
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('correctly sizes large toolbar buttons', (WidgetTester tester) async {
-    final firstBoxKey = GlobalKey();
-    final secondBoxKey = GlobalKey();
-    final thirdBoxKey = GlobalKey();
-    final fourthBoxKey = GlobalKey();
+    final GlobalKey firstBoxKey = GlobalKey();
+    final GlobalKey secondBoxKey = GlobalKey();
+    final GlobalKey thirdBoxKey = GlobalKey();
+    final GlobalKey fourthBoxKey = GlobalKey();
 
     await tester.pumpWidget(
       CupertinoApp(
