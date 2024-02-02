@@ -201,6 +201,7 @@ targets:
       - os=Linux
     dimensions:
       kvm: "1"
+    bringup: true
     # TODO(https://github.com/flutter/flutter/issues/138559): Re-enable/delete.
     # runIfNot:
     #   - lib/web_ui/**
