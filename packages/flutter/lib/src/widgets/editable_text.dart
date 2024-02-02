@@ -12,6 +12,10 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/gestures/force_press.dart';
+import 'package:flutter/src/gestures/long_press.dart';
+import 'package:flutter/src/gestures/tap.dart';
+import 'package:flutter/src/gestures/tap_and_drag.dart';
 
 import 'actions.dart';
 import 'autofill.dart';
@@ -544,6 +548,165 @@ class _DiscreteKeyFrameSimulation extends Simulation {
   }
 }
 
+/// Only handle global settings - e.g. whether flutter should paint, handle pointer events, etc
+/// Things that are settings "per" text field shouldn't be accounted for here  
+abstract class TextEditingPlugin {
+  /// docs
+  TextInputConnection? textInputConnection;
+
+  /// docs
+  bool get preventFlutterPaint;
+
+  /// docs
+  bool get disableFlutterPointerEventHandling;
+
+  /// docs
+  Widget editableBuilder(Editable editable, EditableTextState editableText);
+  
+  /// docs 
+  void show();
+  
+  /// docs 
+  void requestAutofill();
+  
+  /// docs 
+  void updateConfig(TextInputConfiguration configuration);
+  
+  /// docs 
+  void setEditingState(TextEditingValue value);
+  
+  /// docs 
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform);
+  
+  /// docs 
+  void setComposingRect(Rect rect);
+  
+  /// docs 
+  void setCaretRect(Rect rect);
+  
+  /// docs 
+  void setSelectionRects(List<SelectionRect> selectionRects);
+  
+  /// docs 
+  void setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+  });
+  
+  /// docs 
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  });
+  
+  /// docs 
+  void close();
+  
+  /// docs 
+  void connectionClosedReceived();
+}
+
+/*
+  Todo:
+
+  1. See if gesture code can be contained within editable text 
+  2. See if we can bypass TextInputConnection -> TextInput -> TextInputControl for native text editing
+  3. Get Justin's feedback on document.  
+  4. First, get plugin idea on the document - global config of text editing.  
+  -- Package devs, 3rd party, other teams, etc.  
+
+*/
+
+/// Wrapper over textInputConnection that implements TextEditingPlugin
+class DefaultTextEditingPlugin extends TextEditingPlugin {
+  @override
+  bool get preventFlutterPaint => false;
+
+  @override
+  bool get disableFlutterPointerEventHandling => false;
+
+  @override
+  Widget editableBuilder(Editable editable, EditableTextState editableText) {
+    return editable;
+  }
+
+  @override
+  void show() {
+    textInputConnection?.show();
+  }
+
+  @override
+  void requestAutofill() {
+    textInputConnection?.requestAutofill();
+  }
+
+  @override
+  void updateConfig(TextInputConfiguration configuration) {
+    textInputConnection?.updateConfig(configuration);
+  }
+
+  @override
+  void setEditingState(TextEditingValue value) {
+    textInputConnection?.setEditingState(value);
+  }
+
+  @override
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    textInputConnection?.setEditableSizeAndTransform(editableBoxSize, transform);
+  }
+
+  @override
+  void setComposingRect(Rect rect) {
+    textInputConnection?.setComposingRect(rect);
+  }
+
+  @override
+  void setCaretRect(Rect rect) {
+    textInputConnection?.setCaretRect(rect);
+  }
+
+  @override
+  void setSelectionRects(List<SelectionRect> selectionRects) {
+    textInputConnection?.setSelectionRects(selectionRects);
+  }
+  
+  @override
+  void setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+  }){
+    textInputConnection?.setStyle(fontFamily: fontFamily, fontSize: fontSize, fontWeight: fontWeight, textDirection: textDirection, textAlign: textAlign);
+  }
+
+  @override
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    textInputConnection?.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
+  }
+
+  @override
+  void close() {
+    textInputConnection?.close();
+
+    textInputConnection = null;
+  }
+
+  @override
+  void connectionClosedReceived() {
+    textInputConnection?.connectionClosedReceived();
+
+    textInputConnection = null;
+  }
+}
+
 /// A basic text input field.
 ///
 /// This widget interacts with the [TextInput] service to let the user edit the
@@ -866,6 +1029,9 @@ class EditableText extends StatefulWidget {
            : inputFormatters,
        showCursor = showCursor ?? !readOnly;
 
+  /// docs - initialize this with a default plugin
+  static TextEditingPlugin textEditingPlugin = DefaultTextEditingPlugin();
+  
   /// Controls the text being edited.
   final TextEditingController controller;
 
@@ -2114,6 +2280,7 @@ class EditableText extends StatefulWidget {
 
 /// State for a [EditableText].
 class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient implements AutofillClient {
+  final TextEditingPlugin _textEditingPlugin = EditableText.textEditingPlugin;
   Timer? _cursorTimer;
   AnimationController get _cursorBlinkOpacityController {
     return _backingCursorBlinkOpacityController ??= AnimationController(
@@ -2150,6 +2317,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;
   ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
+  ScrollController get scrollController => _scrollController;
 
   final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
@@ -2332,8 +2500,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextEditingValue get _textEditingValueforTextLayoutMetrics {
     final Widget? editableWidget =_editableKey.currentContext?.widget;
-    if (editableWidget is! _Editable) {
-      throw StateError('_Editable must be mounted.');
+    if (editableWidget is! Editable) {
+      throw StateError('Editable must be mounted.');
     }
     return editableWidget.value;
   }
@@ -2895,13 +3063,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (kIsWeb && _hasInputConnection) {
       if (oldWidget.readOnly != widget.readOnly) {
-        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+        _textEditingPlugin.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
     }
 
     if (_hasInputConnection) {
       if (oldWidget.obscureText != widget.obscureText) {
-        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+        _textEditingPlugin.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
     }
 
@@ -2912,7 +3080,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
           : widget.style;
       if (_hasInputConnection) {
-        _textInputConnection!.setStyle(
+        _textEditingPlugin.setStyle(
           fontFamily: _style.fontFamily,
           fontSize: _style.fontSize,
           fontWeight: _style.fontWeight,
@@ -3308,7 +3476,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (localValue == _lastKnownRemoteTextEditingValue) {
       return;
     }
-    _textInputConnection!.setEditingState(localValue);
+    _textEditingPlugin.setEditingState(localValue);
     _lastKnownRemoteTextEditingValue = localValue;
   }
 
@@ -3398,10 +3566,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
+
+      _textEditingPlugin.textInputConnection = _textInputConnection;
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
       print('calling show in _openInputConnection when _hasInputConnection is false');
-      _textInputConnection!
+      _textEditingPlugin
         ..setStyle(
           fontFamily: _style.fontFamily,
           fontSize: _style.fontSize,
@@ -3416,23 +3586,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           final double scrollOffset = _scrollController.offset;
           final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
           final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
-          _textInputConnection!.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
+          _textEditingPlugin.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
         }
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
         // the platform text input plugin.
-        _textInputConnection!.requestAutofill();
+        _textEditingPlugin.requestAutofill();
       }
       _lastKnownRemoteTextEditingValue = localValue;
     } else {
       print('calling show in _openInputConnection when _hasInputConnection is true');
-      _textInputConnection!.show();
+      _textEditingPlugin.show();
     }
   }
 
   void _closeInputConnectionIfNeeded() {
     if (_hasInputConnection) {
-      _textInputConnection!.close();
+      _textEditingPlugin.close();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
       _scribbleCacheKey = null;
@@ -3467,7 +3637,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection || !_shouldCreateInputConnection) {
       return;
     }
-    _textInputConnection!.close();
+    _textEditingPlugin.close();
     _textInputConnection = null;
     _lastKnownRemoteTextEditingValue = null;
 
@@ -3475,8 +3645,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextInputConnection newConnection = currentAutofillScope?.attach(this, textInputConfiguration)
       ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
+    _textEditingPlugin.textInputConnection = _textInputConnection;
 
-    newConnection
+    _textEditingPlugin
       ..show()
       ..setStyle(
         fontFamily: _style.fontFamily,
@@ -3491,7 +3662,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final double scrollOffset = _scrollController.offset;
       final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
       final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
-      _textInputConnection!.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
+      _textEditingPlugin.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
     }
     _lastKnownRemoteTextEditingValue = _value;
   }
@@ -3508,7 +3679,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void connectionClosed() {
     if (_hasInputConnection) {
-      _textInputConnection!.connectionClosedReceived();
+      _textEditingPlugin.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
       widget.focusNode.unfocus();
@@ -3564,7 +3735,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final double scrollOffset = _scrollController.offset;
       final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
       final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
-      _textInputConnection!.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
+      _textEditingPlugin.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
     }
     _selectionOverlay?.updateForScroll();
     _scribbleCacheKey = null;
@@ -4057,7 +4228,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _updateSizeAndTransform() {
     final Size size = renderEditable.size;
     final Matrix4 transform = renderEditable.getTransformTo(null);
-    _textInputConnection!.setEditableSizeAndTransform(size, transform);
+    _textEditingPlugin.setEditableSizeAndTransform(size, transform);
   }
 
   void _schedulePeriodicPostFrameCallbacks([Duration? duration]) {
@@ -4141,7 +4312,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       graphemeStart = graphemeEnd;
     }
-    _textInputConnection!.setSelectionRects(rects);
+    _textEditingPlugin.setSelectionRects(rects);
   }
 
   // Sends the current composing rect to the embedder's text input plugin.
@@ -4161,7 +4332,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final int offset = composingRange.isValid ? composingRange.start : 0;
       composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
     }
-    _textInputConnection!.setComposingRect(composingRect);
+    _textEditingPlugin.setComposingRect(composingRect);
   }
 
   // Sends the current caret rect to the embedder's text input plugin.
@@ -4183,7 +4354,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     final TextPosition currentTextPosition = TextPosition(offset: selection.start);
     final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-    _textInputConnection!.setCaretRect(caretRect);
+    _textEditingPlugin.setCaretRect(caretRect);
   }
 
   TextDirection get _textDirection => widget.textDirection ?? Directionality.of(context);
@@ -4889,134 +5060,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             _openInputConnection();
                             _updateSelectionRects(force: true);
                           },
-                          child: kIsWeb ? (
-                            Stack(
-                              children: <Widget>[
-                              Positioned.fill(
-                                child: EditableWeb(
-                                  textStyle: inlineSpan.style,
-                                  textEditingValue: _value.text,
-                                  cursorColor: _cursorColor,
-                                  showCursor: EditableText.debugDeterministicCursor
-                                      ? ValueNotifier<bool>(widget.showCursor)
-                                      : _cursorVisibilityNotifier,
-                                  forceLine: widget.forceLine,
-                                  hasFocus: _hasFocus,
-                                  maxLines: widget.maxLines,
-                                  minLines: widget.minLines,
-                                  expands: widget.expands,
-                                  selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                      ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                      : widget.selectionColor,
-                                  textScaler: effectiveTextScaler,
-                                  textAlign: widget.textAlign,
-                                  textDirection: _textDirection,
-                                  locale: widget.locale,
-                                  offset: offset,
-                                  rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                                  devicePixelRatio: _devicePixelRatio,
-                                  clipBehavior: widget.clipBehavior,
-                                  requestKeyboard: requestKeyboard,
-                                  clientId: clientId, // to register 
-                                  performAction: performAction,
-                                  // Have to use _effectiveAutofillClient.textInputConfiguration as it is the most accurate.
-                                  // autofillHints always end up empty [] because of the way props are being passed from EditableText wrappers like TextField()
-                                  // Instead, it exists in the autofillClient  
-                                  textInputConfiguration: _effectiveAutofillClient.textInputConfiguration,
-                                  currentAutofillScope: currentAutofillScope,
-                                  scrollTop: widget.keyboardType == TextInputType.multiline ? _scrollController.offset : 0,
-                                  scrollLeft: widget.keyboardType == TextInputType.multiline ? _scrollController.offset : 0,
-                                ),
-                              ),
-                              _Editable(
-                              key: _editableKey,
-                              startHandleLayerLink: _startHandleLayerLink,
-                              endHandleLayerLink: _endHandleLayerLink,
-                              inlineSpan: inlineSpan,
-                              value: _value,
-                              cursorColor: _cursorColor,
-                              backgroundCursorColor: widget.backgroundCursorColor,
-                              showCursor: EditableText.debugDeterministicCursor
-                                  ? ValueNotifier<bool>(widget.showCursor)
-                                  : _cursorVisibilityNotifier,
-                              forceLine: widget.forceLine,
-                              readOnly: widget.readOnly,
-                              hasFocus: _hasFocus,
-                              maxLines: widget.maxLines,
-                              minLines: widget.minLines,
-                              expands: widget.expands,
-                              strutStyle: widget.strutStyle,
-                              selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                  ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                  : widget.selectionColor,
-                              textScaler: effectiveTextScaler,
-                              textAlign: widget.textAlign,
-                              textDirection: _textDirection,
-                              locale: widget.locale,
-                              textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                              textWidthBasis: widget.textWidthBasis,
-                              obscuringCharacter: widget.obscuringCharacter,
-                              obscureText: widget.obscureText,
-                              offset: offset,
-                              rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                              cursorWidth: widget.cursorWidth,
-                              cursorHeight: widget.cursorHeight,
-                              cursorRadius: widget.cursorRadius,
-                              cursorOffset: widget.cursorOffset ?? Offset.zero,
-                              selectionHeightStyle: widget.selectionHeightStyle,
-                              selectionWidthStyle: widget.selectionWidthStyle,
-                              paintCursorAboveText: widget.paintCursorAboveText,
-                              enableInteractiveSelection: widget._userSelectionEnabled,
-                              textSelectionDelegate: this,
-                              devicePixelRatio: _devicePixelRatio,
-                              promptRectRange: _currentPromptRectRange,
-                              promptRectColor: widget.autocorrectionTextRectColor,
-                              clipBehavior: widget.clipBehavior,
-                              ),
-                            ],
-                          )) : _Editable(
-                            key: _editableKey,
-                            startHandleLayerLink: _startHandleLayerLink,
-                            endHandleLayerLink: _endHandleLayerLink,
-                            inlineSpan: inlineSpan,
-                            value: _value,
-                            cursorColor: _cursorColor,
-                            backgroundCursorColor: widget.backgroundCursorColor,
-                            showCursor: _cursorVisibilityNotifier,
-                            forceLine: widget.forceLine,
-                            readOnly: widget.readOnly,
-                            hasFocus: _hasFocus,
-                            maxLines: widget.maxLines,
-                            minLines: widget.minLines,
-                            expands: widget.expands,
-                            strutStyle: widget.strutStyle,
-                            selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                : widget.selectionColor,
-                            textScaler: effectiveTextScaler,
-                            textAlign: widget.textAlign,
-                            textDirection: _textDirection,
-                            locale: widget.locale,
-                            textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                            textWidthBasis: widget.textWidthBasis,
-                            obscuringCharacter: widget.obscuringCharacter,
-                            obscureText: widget.obscureText,
-                            offset: offset,
-                            rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                            cursorWidth: widget.cursorWidth,
-                            cursorHeight: widget.cursorHeight,
-                            cursorRadius: widget.cursorRadius,
-                            cursorOffset: widget.cursorOffset ?? Offset.zero,
-                            selectionHeightStyle: widget.selectionHeightStyle,
-                            selectionWidthStyle: widget.selectionWidthStyle,
-                            paintCursorAboveText: widget.paintCursorAboveText,
-                            enableInteractiveSelection: widget._userSelectionEnabled,
-                            textSelectionDelegate: this,
-                            devicePixelRatio: _devicePixelRatio,
-                            promptRectRange: _currentPromptRectRange,
-                            promptRectColor: widget.autocorrectionTextRectColor,
-                            clipBehavior: widget.clipBehavior,
-                          ),
+                          child: buildEditable(offset: offset, inlineSpan: inlineSpan, effectiveTextScaler: effectiveTextScaler)
                         ),
                       ),
                     );
@@ -5029,6 +5073,89 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ),
     );
   }
+
+  /// Build an editable based on conditions.
+  Widget buildEditable({ required ViewportOffset offset, required InlineSpan inlineSpan, required TextScaler effectiveTextScaler }) {
+    // base _editable
+    Widget editable = Editable(
+      key: _editableKey,
+      startHandleLayerLink: _startHandleLayerLink,
+      endHandleLayerLink: _endHandleLayerLink,
+      inlineSpan: inlineSpan,
+      value: _value,
+      cursorColor: _cursorColor,
+      backgroundCursorColor: widget.backgroundCursorColor,
+      showCursor: EditableText.debugDeterministicCursor
+          ? ValueNotifier<bool>(widget.showCursor)
+          : _cursorVisibilityNotifier,
+      forceLine: widget.forceLine,
+      readOnly: widget.readOnly,
+      hasFocus: _hasFocus,
+      maxLines: widget.maxLines,
+      minLines: widget.minLines,
+      expands: widget.expands,
+      strutStyle: widget.strutStyle,
+      selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+          ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+          : widget.selectionColor,
+      textScaler: effectiveTextScaler,
+      textAlign: widget.textAlign,
+      textDirection: _textDirection,
+      locale: widget.locale,
+      textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+      textWidthBasis: widget.textWidthBasis,
+      obscuringCharacter: widget.obscuringCharacter,
+      obscureText: widget.obscureText,
+      offset: offset,
+      rendererIgnoresPointer: widget.rendererIgnoresPointer,
+      cursorWidth: widget.cursorWidth,
+      cursorHeight: widget.cursorHeight,
+      cursorRadius: widget.cursorRadius,
+      cursorOffset: widget.cursorOffset ?? Offset.zero,
+      selectionHeightStyle: widget.selectionHeightStyle,
+      selectionWidthStyle: widget.selectionWidthStyle,
+      paintCursorAboveText: widget.paintCursorAboveText,
+      enableInteractiveSelection: widget._userSelectionEnabled,
+      textSelectionDelegate: this,
+      devicePixelRatio: _devicePixelRatio,
+      promptRectRange: _currentPromptRectRange,
+      promptRectColor: widget.autocorrectionTextRectColor,
+      clipBehavior: widget.clipBehavior,
+      preventFlutterPaint: _textEditingPlugin.preventFlutterPaint,
+      );
+
+      // Customize via plugin settings, pass editable and editableText instance
+      // to ensure builder has everything it needs to create a text input
+      editable = _textEditingPlugin.editableBuilder(editable as Editable, this);
+
+      // Prevent flutter handling pointer events if we need to.
+      if(_textEditingPlugin.disableFlutterPointerEventHandling) {
+        editable = TextSelectionGestureDetector(
+          onTapTrackStart: () {},
+          onTapTrackReset: () {},
+          onTapDown: (TapDragDownDetails a) {},
+          onForcePressStart: (ForcePressDetails a) {},
+          onForcePressEnd: (ForcePressDetails a) {},
+          onSecondaryTap: () {},
+          onSecondaryTapDown: (TapDownDetails a) {},
+          onSingleTapUp: (TapDragUpDetails a) {},
+          onSingleTapCancel: () {},
+          onUserTap: () {},
+          onSingleLongTapStart: (LongPressStartDetails a) {},
+          onSingleLongTapMoveUpdate: (LongPressMoveUpdateDetails a) {},
+          onSingleLongTapEnd: (LongPressEndDetails a) {},
+          onDoubleTapDown: (TapDragDownDetails a) {},
+          onTripleTapDown: (TapDragDownDetails a) {},
+          onDragSelectionStart: (TapDragStartDetails a) {},
+          onDragSelectionUpdate: (TapDragUpdateDetails a) {},
+          onDragSelectionEnd: (TapDragEndDetails a) {},
+          behavior: HitTestBehavior.opaque,
+          child: editable,
+        );
+      }
+
+      return editable;
+    }
 
   /// Builds [TextSpan] from current editing value.
   ///
@@ -5099,8 +5226,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 }
 
-class _Editable extends MultiChildRenderObjectWidget {
-  _Editable({
+class Editable extends MultiChildRenderObjectWidget {
+  Editable({
     super.key,
     required this.inlineSpan,
     required this.value,
@@ -5140,6 +5267,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
+    this.preventFlutterPaint = false
   }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
 
   final InlineSpan inlineSpan;
@@ -5180,6 +5308,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextRange? promptRectRange;
   final Color? promptRectColor;
   final Clip clipBehavior;
+  final bool preventFlutterPaint;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -5222,6 +5351,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       promptRectRange: promptRectRange,
       promptRectColor: promptRectColor,
       clipBehavior: clipBehavior,
+      preventFlutterPaint: preventFlutterPaint
     );
   }
 
@@ -5265,7 +5395,8 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..paintCursorAboveText = paintCursorAboveText
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
-      ..setPromptRectRange(promptRectRange);
+      ..setPromptRectRange(promptRectRange)
+      ..preventFlutterPaint = preventFlutterPaint;
   }
 }
 

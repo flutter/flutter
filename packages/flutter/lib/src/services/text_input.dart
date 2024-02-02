@@ -1338,6 +1338,9 @@ class TextInputConnection {
 
   final TextInputClient _client;
 
+  /// getter for client associated with this connection.
+  TextInputClient get client => _client;
+  
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
 
@@ -1621,13 +1624,13 @@ class TextInput {
   static final TextInput _instance = TextInput._();
 
   static void _addInputControl(TextInputControl control) {
-    if (control != (kIsWeb ? WebTextInputControl.instance : _PlatformTextInputControl.instance)) {
+    if (control != _PlatformTextInputControl.instance) {
       _instance._inputControls.add(control);
     }
   }
 
   static void _removeInputControl(TextInputControl control) {
-    if (control != (kIsWeb ? WebTextInputControl.instance : _PlatformTextInputControl.instance)) {
+    if (control != _PlatformTextInputControl.instance) {
       _instance._inputControls.remove(control);
     }
   }
@@ -1669,12 +1672,12 @@ class TextInput {
   /// * [TextInput.setInputControl], a method to set a custom input
   ///   control, or to remove the visual input control.
   static void restorePlatformInputControl() {
-    setInputControl(kIsWeb ? WebTextInputControl.instance : _PlatformTextInputControl.instance);
+    setInputControl(_PlatformTextInputControl.instance);
   }
 
-  TextInputControl? _currentControl = kIsWeb ? WebTextInputControl.instance : _PlatformTextInputControl.instance;
+  TextInputControl? _currentControl = _PlatformTextInputControl.instance;
   final Set<TextInputControl> _inputControls = <TextInputControl>{
-    if (kIsWeb) WebTextInputControl.instance else _PlatformTextInputControl.instance,
+    _PlatformTextInputControl.instance,
   };
 
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[

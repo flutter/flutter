@@ -85,8 +85,7 @@ class _EditableWebState extends State<EditableWeb> {
 
   @override
   void dispose() {
-    WebTextInputControl.instance.deregisterInstance(widget.clientId);
-
+    (EditableText.textEditingPlugin as NativeWebTextEditingPlugin).deregisterInstance(widget.clientId);
     super.dispose();
   }
 
@@ -662,7 +661,7 @@ class _EditableWebState extends State<EditableWeb> {
     _inputEl = inputEl;
 
     // register instance via clientId.
-    WebTextInputControl.instance.registerInstance(widget.clientId, this);
+    (EditableText.textEditingPlugin as NativeWebTextEditingPlugin).registerInstance(widget.clientId, this);
   }
 
   /* Incoming methods (back to framework)
@@ -744,11 +743,31 @@ class _EditableWebState extends State<EditableWeb> {
   }
 }
 
-class WebTextInputControl with TextInputControl {
-  WebTextInputControl._();
+bool isInput(html.HtmlElement el) {
+  return el.tagName.toUpperCase() == 'INPUT';
+}
 
-  /// The shared instance of [WebTextInputControl].
-  static final WebTextInputControl instance = WebTextInputControl._();
+bool isTextArea(html.HtmlElement el) {
+  return el.tagName.toUpperCase() == 'TEXTAREA';
+}
+
+class NativeWebTextEditingPlugin extends TextEditingPlugin {
+  /// docs
+  TextInputConnection? _textInputConnection;
+
+  // docs
+  @override
+  TextInputConnection? get textInputConnection => _textInputConnection;
+
+  @override
+  set textInputConnection(TextInputConnection? value) {
+    // this will be the attach hook
+    if(value != null) {
+      _attach(value.client.clientId);
+    }
+
+    _textInputConnection = value;
+  }
 
   Map<int, _EditableWebState> editableWebMap = <int, _EditableWebState>{};
   html.HtmlElement? _currentInputElement;
@@ -774,11 +793,10 @@ class WebTextInputControl with TextInputControl {
   }
 
   // TODO: We should set the configuration here.
-  @override
-  void attach(TextInputClient client, TextInputConfiguration configuration) {
+  void _attach(int clientId) {
     // set currentInputElement by grabbing it from the map. This is why we have to register
     // the id of the TextInputClient (editabletext) above, because we need that id in attach.
-    _currentEditableWebInstance = editableWebMap[client.clientId];
+    _currentEditableWebInstance = editableWebMap[clientId];
     _currentInputElement = _currentEditableWebInstance!._inputEl;
 
     // Add selectionchange listener. attach() seems like the best place to put this
@@ -789,8 +807,7 @@ class WebTextInputControl with TextInputControl {
     html.document.addEventListener('selectionchange', handleChangeRef);
   }
 
-  @override
-  void detach(TextInputClient client) {
+  void _detach() {
     // Blur here since order goes detach -> hide.
     _currentInputElement!.blur();
 
@@ -801,6 +818,61 @@ class WebTextInputControl with TextInputControl {
     _currentEditableWebInstance = null;
     _currentInputElement = null;
   }
+
+  @override
+  bool get preventFlutterPaint => true;
+
+  @override
+  bool get disableFlutterPointerEventHandling => true;
+
+  @override
+  Widget editableBuilder(Editable editable, EditableTextState editableText) {
+    return Stack(
+        children: <Widget>[
+        Positioned.fill(
+          child: EditableWeb(
+            textStyle: editable.inlineSpan.style,
+            textEditingValue: editableText.textEditingValue.text,
+            cursorColor: editable.cursorColor!,
+            showCursor: editable.showCursor,
+            forceLine: editable.forceLine,
+            hasFocus: editable.hasFocus,
+            maxLines: editable.maxLines,
+            minLines: editable.minLines,
+            expands: editable.expands,
+            selectionColor: editable.selectionColor,
+            textScaler: editable.textScaler,
+            textAlign: editable.textAlign,
+            textDirection: editable.textDirection,
+            locale: editable.locale,
+            offset: editable.offset,
+            rendererIgnoresPointer: editable.rendererIgnoresPointer,
+            devicePixelRatio: editable.devicePixelRatio,
+            clipBehavior: editable.clipBehavior,
+            requestKeyboard: editableText.requestKeyboard,
+            clientId: editableText.clientId, // to register 
+            performAction: editableText.performAction,
+            // Have to use _effectiveAutofillClient.textInputConfiguration as it is the most accurate.
+            // autofillHints always end up empty [] because of the way props are being passed from EditableText wrappers like TextField()
+            // Instead, it exists in the autofillClient  
+            textInputConfiguration: editableText.textInputConfiguration,
+            currentAutofillScope: editableText.currentAutofillScope,
+            scrollTop: editableText.widget.keyboardType == TextInputType.multiline ? editableText.scrollController.offset : 0,
+            scrollLeft: editableText.widget.keyboardType == TextInputType.multiline ? editableText.scrollController.offset : 0,
+          ),
+        ),
+        editable
+      ],
+    );
+  }
+
+  @override
+  void show() {
+    _currentInputElement!.focus();
+  }
+
+  @override
+  void requestAutofill() {}
 
   // Currently, we directly set the visual appearance of our textfield by props
   // directly passed into EditableWeb. Should we use this instead?
@@ -845,25 +917,7 @@ class WebTextInputControl with TextInputControl {
       element.setSelectionRange(minOffset, maxOffset);
     }
 
-    
-
     _currentEditableWebInstance!.lastEditingState = lastEditingState;
-  }
-
-  @override
-  void show() {
-    _currentInputElement!.focus();
-  }
-
-  @override
-  void hide() {
-    // We need to check if this is null because detach is called before hide.
-    // In detach, we blur and reset the _currentInputElement.
-    // This blur call is for instances where we blur to hide keyboard without
-    // detaching the connection (if such a circumstance exists).
-    if (_currentInputElement != null) {
-      _currentInputElement!.blur();
-    }
   }
 
   @override
@@ -877,9 +931,7 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void setSelectionRects(List<SelectionRect> selectionRects) {}
-
-  // Currently, we directly set the style of our textfield by props
-  // directly passed into EditableWeb. Should we use this instead?
+  
   @override
   void setStyle({
     required String? fontFamily,
@@ -887,7 +939,7 @@ class WebTextInputControl with TextInputControl {
     required FontWeight? fontWeight,
     required TextDirection textDirection,
     required TextAlign textAlign,
-  }) {}
+  }){}
 
   @override
   void setScrollState({
@@ -898,18 +950,14 @@ class WebTextInputControl with TextInputControl {
     _currentInputElement!.scrollLeft = scrollLeft.toInt();
   }
 
-  // no-op
   @override
-  void requestAutofill() {}
+  void close() {
+    _detach();
+    textInputConnection = null;
+  }
 
   @override
-  void finishAutofillContext({bool shouldSave = true}) {}
-}
-
-bool isInput(html.HtmlElement el) {
-  return el.tagName.toUpperCase() == 'INPUT';
-}
-
-bool isTextArea(html.HtmlElement el) {
-  return el.tagName.toUpperCase() == 'TEXTAREA';
+  void connectionClosedReceived() {
+    textInputConnection = null;
+  }
 }
