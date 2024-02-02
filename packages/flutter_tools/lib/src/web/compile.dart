@@ -13,7 +13,6 @@ import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -27,6 +26,15 @@ import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
 export 'compiler_config.dart';
+
+/// Whether the application has web plugins.
+const String kHasWebPlugins = 'HasWebPlugins';
+
+/// Base href to set in index.html in flutter build command
+const String kBaseHref = 'baseHref';
+
+/// The caching strategy to use for service worker generation.
+const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
 class WebBuilder {
   WebBuilder({
@@ -81,7 +89,7 @@ class WebBuilder {
     final Stopwatch sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-          WebServiceWorker(_fileSystem, compilerConfigs),
+          globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs),
           Environment(
             projectDir: _fileSystem.currentDirectory,
             outputDir: outputDirectory,

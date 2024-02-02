@@ -307,6 +307,7 @@ class PackagesGetCommand extends FlutterCommand {
         await generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: globals.buildSystem,
+          buildTargets: globals.buildTargets,
         );
       } else if (rootProject.directory.childFile('l10n.yaml').existsSync()) {
         final Environment environment = Environment(

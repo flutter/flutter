@@ -92,7 +92,7 @@ class SceneImporter {
   /// See [Target.inputs].
   static const List<Source> inputs = <Source>[
     Source.pattern(
-        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/scene_importer.dart'),
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/tools/scene_importer.dart'),
     Source.hostArtifact(HostArtifact.scenec),
   ];
 

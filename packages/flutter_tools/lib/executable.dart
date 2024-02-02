@@ -11,6 +11,7 @@ import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
 import 'src/base/user_messages.dart';
+import 'src/build_system/build_targets.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
@@ -47,6 +48,7 @@ import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
+import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/pre_run_validator.dart';
@@ -110,6 +112,7 @@ Future<void> main(List<String> args) async {
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
+      BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,

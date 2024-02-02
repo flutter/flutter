@@ -29,15 +29,6 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'localizations.dart';
 
-/// Whether the application has web plugins.
-const String kHasWebPlugins = 'HasWebPlugins';
-
-/// Base href to set in index.html in flutter build command
-const String kBaseHref = 'baseHref';
-
-/// The caching strategy to use for service worker generation.
-const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
-
 @visibleForTesting
 List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
   final Set<String> dartDefinesSet = dartDefines.toSet();
