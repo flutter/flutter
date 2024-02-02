@@ -2207,8 +2207,7 @@ void main() {
 
     testWidgets(
       'didUpdate bottomSheet while a previous bottom sheet is still displayed',
-      // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-      experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+      experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaks by design because of exception
       (WidgetTester tester) async {
         final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
         const Key buttonKey = Key('button');
