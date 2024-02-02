@@ -122,6 +122,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// will only track the latest active (accepted by this recognizer) pointer, which
   /// appears to be only one finger dragging.
   ///
+  /// If set to [MultitouchDragStrategy.maxAllPointers], all active pointers will
+  /// be tracked together and the scrolling offset is the max of the offsets of
+  /// all active pointers
+  ///
   /// If set to [MultitouchDragStrategy.sumAllPointers],
   /// all active pointers will be tracked together and the scrolling offset
   /// is the sum of the offsets of all active pointers
@@ -515,20 +519,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return localDelta;
     }
 
-    final double dx = _resolveDelta(
-      isX: true,
-      pointer: pointer,
-      positive: localDelta.dx > 0.0,
-      axis: _DragDirection.horizontal,
-      localDelta: localDelta,
-    );
-    final double dy = _resolveDelta(
-      isX: false,
-      pointer: pointer,
-      positive: localDelta.dy > 0.0,
-      axis: _DragDirection.vertical,
-      localDelta: localDelta,
-    );
+    final double dx = _resolveDelta(pointer: pointer, axis: _DragDirection.horizontal, localDelta: localDelta);
+    final double dy = _resolveDelta(pointer: pointer, axis: _DragDirection.vertical, localDelta: localDelta);
 
     assert(dx.abs() <= localDelta.dx.abs());
     assert(dy.abs() <= localDelta.dy.abs());
@@ -537,21 +529,20 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   double _resolveDelta({
-    required bool isX,
     required int pointer,
-    required bool positive,
     required _DragDirection axis,
     required Offset localDelta,
   }) {
+    final bool positive = axis == _DragDirection.horizontal ? localDelta.dx > 0 : localDelta.dy > 0;
+    final double delta = axis == _DragDirection.horizontal ? localDelta.dx : localDelta.dy;
     final int? maxSumDeltaPointer = _getMaxSumDeltaPointer(positive: positive, axis: axis);
     assert(maxSumDeltaPointer != null);
 
     if (maxSumDeltaPointer == pointer) {
-      return isX ? localDelta.dx : localDelta.dy;
+      return delta;
     } else {
       final double maxSumDelta = _getSumDelta(pointer: maxSumDeltaPointer!, positive: positive, axis: axis);
       final double curPointerSumDelta = _getSumDelta(pointer: pointer, positive: positive, axis: axis);
-      final double delta = isX ? localDelta.dx : localDelta.dy;
       if (positive) {
         if (curPointerSumDelta + delta > maxSumDelta) {
           return curPointerSumDelta + delta - maxSumDelta;
