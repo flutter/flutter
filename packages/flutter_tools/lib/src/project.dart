@@ -455,8 +455,8 @@ class AndroidProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
-  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace[\\s]+[\'"](.+)[\'"]');
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
 
