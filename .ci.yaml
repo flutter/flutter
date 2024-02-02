@@ -44,7 +44,9 @@ platform_properties:
         ]
       device_type: none
       os: Windows-10
-
+# The current android emulator config names can be found here:
+# https://chromium.googlesource.com/chromium/src.git/+/HEAD/tools/android/avd/proto
+# You may use those names for the android_virtual_device version.
 targets:
   - name: Linux linux_android_emulator_tests
     enabled_branches:
