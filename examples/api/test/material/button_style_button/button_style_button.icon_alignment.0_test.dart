@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('ButtonStyleButton.iconAlignment updates button icons alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.ButtonStyleButtonIconAlignmentExampleApp(),
+      const example.ButtonStyleButtonIconAlignmentApp(),
     );
 
     Finder findButtonMaterial(String text) {
@@ -71,7 +71,6 @@ void main() {
       );
     }
 
-
     // Test initial icon alignment in LTR.
     expectedLeftIconPosition(iconOffset: 16, textButtonIconOffset: 12) ;
 
@@ -90,7 +89,7 @@ void main() {
     await tester.tap(find.text('RTL'));
     await tester.pumpAndSettle();
 
-    // // Test icon alignment start in LTR.
+    // Test icon alignment start in LTR.
     expectedRightIconPosition(iconOffset: 16, textButtonIconOffset: 12) ;
 
     // Update icon alignment to end.

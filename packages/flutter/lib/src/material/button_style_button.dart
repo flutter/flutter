@@ -22,11 +22,11 @@ import 'theme_data.dart';
 
 /// {@template flutter.material.ButtonStyleButton.iconAlignment}
 /// Determines the alignment of the icon within the widgets such as:
-///   - [TextButton.icon],
 ///   - [ElevatedButton.icon],
-///   - [OutlinedButton.icon],
 ///   - [FilledButton.icon],
 ///   - [FilledButton.tonalIcon].
+///   - [OutlinedButton.icon],
+///   - [TextButton.icon],
 ///
 /// The effect of `iconAlignment` depends on [TextDirection]. If textDirection is
 /// [TextDirection.ltr] then [IconAlignment.start] and [IconAlignment.end] align the

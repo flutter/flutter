@@ -6,19 +6,18 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for using [ButtonStyleButton.iconAlignment] parameter.
 
-void main() => runApp(const ButtonStyleButtonIconAlignmentExampleApp());
+void main() {
+  runApp(const ButtonStyleButtonIconAlignmentApp());
+}
 
-class ButtonStyleButtonIconAlignmentExampleApp extends StatelessWidget {
-  const ButtonStyleButtonIconAlignmentExampleApp({super.key});
+class ButtonStyleButtonIconAlignmentApp extends StatelessWidget {
+  const ButtonStyleButtonIconAlignmentApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('ButtonStyleButton.iconAlignment'),
-        ),
-        body: const ButtonStyleButtonIconAlignmentExample(),
+        body: ButtonStyleButtonIconAlignmentExample(),
       ),
     );
   }
@@ -86,30 +85,59 @@ class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButto
                 ],
               ),
               const Spacer(),
-              const Text('Icon alignment'),
-              SegmentedButton<IconAlignment>(
-                onSelectionChanged: (Set<IconAlignment> value) {
-                  setState(() {
-                    _iconAlignment = value.first;
-                  });
-                },
-                selected: <IconAlignment>{ _iconAlignment },
-                segments: IconAlignment.values.map((IconAlignment iconAlignment) {
-                  return ButtonSegment<IconAlignment>(
-                    value: iconAlignment,
-                    label: Text(iconAlignment.name),
-                  );
-                }).toList(),
+              OverflowBar(
+                alignment: MainAxisAlignment.spaceEvenly,
+                overflowAlignment: OverflowBarAlignment.center,
+                spacing: 10,
+                overflowSpacing: 10,
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      const Text('Icon alignment'),
+                      const SizedBox(height: 10),
+                      SegmentedButton<IconAlignment>(
+                        onSelectionChanged: (Set<IconAlignment> value) {
+                          setState(() {
+                            _iconAlignment = value.first;
+                          });
+                        },
+                        selected: <IconAlignment>{ _iconAlignment },
+                        segments: IconAlignment.values.map((IconAlignment iconAlignment) {
+                          return ButtonSegment<IconAlignment>(
+                            value: iconAlignment,
+                            label: Text(iconAlignment.name),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: <Widget>[
+                      const Text('Text direction'),
+                      const SizedBox(height: 10),
+                      SegmentedButton<TextDirection>(
+                        onSelectionChanged: (Set<TextDirection> value) {
+                          setState(() {
+                            _textDirection = value.first;
+                          });
+                        },
+                        selected: <TextDirection>{ _textDirection },
+                        segments: const <ButtonSegment<TextDirection>>[
+                          ButtonSegment<TextDirection>(
+                            value: TextDirection.ltr,
+                            label: Text('RTL'),
+                          ),
+                          ButtonSegment<TextDirection>(
+                            value: TextDirection.rtl,
+                            label: Text('LTR'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              SwitchListTile(
-                title: const Text('RTL'),
-                value: _textDirection == TextDirection.rtl,
-                onChanged: (bool value) {
-                  setState(() {
-                    _textDirection = value ? TextDirection.rtl : TextDirection.ltr;
-                  });
-                },
-              ),
+              const Spacer(),
             ],
           ),
         ),
