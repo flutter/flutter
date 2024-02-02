@@ -741,12 +741,10 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       x = position.left;
     } else {
       // Menu button is equidistant from both edges, so grow in reading direction.
-      switch (textDirection) {
-        case TextDirection.rtl:
-          x = size.width - position.right - childSize.width;
-        case TextDirection.ltr:
-          x = position.left;
-      }
+      x = switch (textDirection) {
+        TextDirection.rtl => size.width - position.right - childSize.width,
+        TextDirection.ltr => position.left,
+      };
     }
     final Offset wantedPosition = Offset(x, y);
     final Offset originCenter = position.toRect(Offset.zero & size).center;
@@ -1406,12 +1404,10 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   bool get _canRequestFocus {
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    switch (mode) {
-      case NavigationMode.traditional:
-        return widget.enabled;
-      case NavigationMode.directional:
-        return true;
-    }
+    return switch (mode) {
+      NavigationMode.traditional => widget.enabled,
+      NavigationMode.directional => true,
+    };
   }
 
   @override

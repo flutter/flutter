@@ -454,12 +454,10 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
       ?? radioTheme.visualDensity
       ?? defaults.visualDensity!;
     Size size;
-    switch (effectiveMaterialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-      case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-    }
+    Size size = switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded     => const Size(kMinInteractiveDimension,       kMinInteractiveDimension),
+      MaterialTapTargetSize.shrinkWrap => const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0),
+    };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
