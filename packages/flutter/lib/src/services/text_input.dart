@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
@@ -14,7 +13,6 @@ import 'dart:ui' show
   TextDirection;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/widgets/editable_web.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
