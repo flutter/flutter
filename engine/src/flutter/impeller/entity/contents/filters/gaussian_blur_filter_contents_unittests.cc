@@ -197,7 +197,8 @@ TEST(GaussianBlurFilterContentsTest, CalculateSigmaValues) {
   EXPECT_EQ(GaussianBlurFilterContents::CalculateScale(3.0f), 1);
   EXPECT_EQ(GaussianBlurFilterContents::CalculateScale(4.0f), 1);
   EXPECT_EQ(GaussianBlurFilterContents::CalculateScale(16.0f), 0.25);
-  EXPECT_EQ(GaussianBlurFilterContents::CalculateScale(1024.0f), 4.f / 1024.f);
+  // Downsample clamped to 1/16th.
+  EXPECT_EQ(GaussianBlurFilterContents::CalculateScale(1024.0f), 0.0625);
 }
 
 TEST_P(GaussianBlurFilterContentsTest, RenderCoverageMatchesGetCoverage) {
