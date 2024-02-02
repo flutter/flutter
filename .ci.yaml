@@ -2759,6 +2759,7 @@ targets:
       task_name: platform_channels_benchmarks
 
   - name: Linux_pixel_7pro platform_channels_benchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/142768
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
