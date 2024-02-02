@@ -2930,11 +2930,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (_selectionOverlay != null
-        && (widget.contextMenuBuilder != oldWidget.contextMenuBuilder
-            || widget.selectionControls != oldWidget.selectionControls
-            || widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped
-            || widget.dragStartBehavior != oldWidget.dragStartBehavior
-            || widget.magnifierConfiguration != oldWidget.magnifierConfiguration)) {
+        && (widget.contextMenuBuilder != oldWidget.contextMenuBuilder ||
+            widget.selectionControls != oldWidget.selectionControls ||
+            widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped ||
+            widget.dragStartBehavior != oldWidget.dragStartBehavior ||
+            widget.magnifierConfiguration != oldWidget.magnifierConfiguration)) {
       final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
       final bool shouldShowHandles = _selectionOverlay!.handlesVisible;
       _selectionOverlay!.dispose();
