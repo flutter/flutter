@@ -35,6 +35,9 @@ platform_properties:
       os: Ubuntu
       cores: "8"
       device_type: none
+  # The current android emulator config names can be found here:
+  # https://chromium.googlesource.com/chromium/src.git/+/HEAD/tools/android/avd/proto
+  # You may use those names for the android_virtual_device version.
   linux_android_emu:
     properties:
       contexts: >-
