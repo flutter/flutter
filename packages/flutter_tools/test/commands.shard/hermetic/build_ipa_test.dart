@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
@@ -78,6 +79,7 @@ void main() {
   late FakePlistUtils plistUtils;
   late BufferLogger logger;
   late Artifacts artifacts;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -94,6 +96,10 @@ void main() {
       processManager: fakeProcessManager,
     );
     plistUtils = FakePlistUtils();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -131,7 +137,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -149,7 +155,11 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, int exitCode = 0, void Function()? onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler({
+    bool verbose = false,
+    int exitCode = 0,
+    void Function(List<String> args)? onRun,
+  }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -180,6 +190,7 @@ void main() {
   FakeCommand exportArchiveCommand({
     String exportOptionsPlist =  '/ExportOptions.plist',
     File? cachePlist,
+    bool deleteExportOptionsPlist = false,
   }) {
     return FakeCommand(
       command: <String>[
@@ -195,11 +206,14 @@ void main() {
         '-exportOptionsPlist',
         exportOptionsPlist,
       ],
-      onRun: () {
+      onRun: (_) {
         // exportOptionsPlist will be cleaned up within the command.
         // Save it somewhere else so test expectations can be run on it.
         if (cachePlist != null) {
           cachePlist.writeAsStringSync(fileSystem.file(_exportOptionsPlist).readAsStringSync());
+        }
+        if (deleteExportOptionsPlist) {
+          fileSystem.file(_exportOptionsPlist).deleteSync();
         }
       }
     );
@@ -369,6 +383,75 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
+  testUsingContext('ipa build reports method from --export-method when used', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'ad-hoc', '--no-pub']
+    );
+
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building ad-hoc IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build reports method from --export-options-plist when used', () async {
+    final File exportOptions = fileSystem.file('/ExportOptions.plist')
+      ..createSync();
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[exportOptions.path] = <String,String>{
+      'CFBundleIdentifier': 'io.flutter.someProject',
+      'method': 'enterprise'
+    };
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: exportOptions.path),
+    ]);
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--export-options-plist', exportOptions.path, '--no-pub']
+    );
+
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building enterprise IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
+  });
+
   testUsingContext('ipa build reports when IPA fails', () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
@@ -410,6 +493,40 @@ void main() {
     expect(logger.statusText, contains('Building App Store IPA'));
     expect(logger.errorText, contains('Encountered error while creating the IPA:'));
     expect(logger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build ignores deletion failure if generatedExportPlist does not exist', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(
+        exportOptionsPlist: _exportOptionsPlist,
+        cachePlist: cachedExportOptionsPlist,
+        deleteExportOptionsPlist: true,
+      ),
+    ]);
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub']
+    );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -727,7 +844,7 @@ void main() {
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -756,6 +873,9 @@ void main() {
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
     expect(fakeProcessManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'ios')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,
@@ -763,6 +883,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -819,7 +940,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(),
@@ -853,7 +974,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
@@ -888,7 +1009,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
@@ -903,7 +1024,7 @@ void main() {
     expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
     expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-    expect(logger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+    expect(logger.warningText, isNot(contains('but the range of supported deployment target versions')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -957,7 +1078,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
@@ -989,7 +1110,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1042,7 +1163,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1055,7 +1176,7 @@ void main() {
       'CFBundleDisplayName': 'Awesome Gallery',
       // Will not use CFBundleName since CFBundleDisplayName is present.
       'CFBundleName': 'Awesome Gallery 2',
-      'MinimumOSVersion': '11.0',
+      'MinimumOSVersion': '17.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
     };
@@ -1079,7 +1200,7 @@ void main() {
         '    • Version Number: 12.34.56\n'
         '    • Build Number: 666\n'
         '    • Display Name: Awesome Gallery\n'
-        '    • Deployment Target: 11.0\n'
+        '    • Deployment Target: 17.0\n'
         '    • Bundle Identifier: io.flutter.someProject\n'
       )
     );
@@ -1101,7 +1222,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1113,7 +1234,7 @@ void main() {
       'CFBundleIdentifier': 'io.flutter.someProject',
       // Will use CFBundleName since CFBundleDisplayName is absent.
       'CFBundleName': 'Awesome Gallery',
-      'MinimumOSVersion': '11.0',
+      'MinimumOSVersion': '17.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
     };
@@ -1137,7 +1258,7 @@ void main() {
         '    • Version Number: 12.34.56\n'
         '    • Build Number: 666\n'
         '    • Display Name: Awesome Gallery\n'
-        '    • Deployment Target: 11.0\n'
+        '    • Deployment Target: 17.0\n'
         '    • Bundle Identifier: io.flutter.someProject\n'
       ),
     );
@@ -1160,7 +1281,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1203,7 +1324,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1249,7 +1370,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -1331,7 +1452,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1411,7 +1532,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1473,7 +1594,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1536,7 +1657,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1598,7 +1719,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         // Uses unknown format version 123.
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1670,7 +1791,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         // The following json contains examples of:
         // - invalid size
         // - invalid scale
@@ -1775,7 +1896,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1856,7 +1977,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''

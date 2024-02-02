@@ -39,7 +39,7 @@ body:
 
         Note: Please do not upload screenshots of text. Instead, use code blocks or the above mentioned ways to upload your code sample.
       value: |
-        <details><summary>Code sample</summary>
+        <details open><summary>Code sample</summary>
 
         ```dart
         [Paste your code here]
@@ -90,7 +90,7 @@ body:
 
         Note: Please do not upload screenshots of text. Instead, use code blocks or the above mentioned ways to upload logs.
       value: |
-        <details><summary>Logs</summary>
+        <details open><summary>Logs</summary>
 
         ```console
         [Paste your logs here]
@@ -103,7 +103,7 @@ body:
       description: |
         Finally, paste the output of running `flutter doctor -v` here, with your device plugged in.
       value: |
-        <details><summary>Doctor output</summary>
+        <details open><summary>Doctor output</summary>
 
         ```console
         [Paste your output here]

@@ -7,11 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('TextStyle', () {
-    test('getTextSyle is backward compatible', () {
+    test('getTextStyle is backward compatible', () {
       expect(
         const TextStyle(fontSize: 14).getTextStyle(textScaleFactor: 2.0).toString(),
         contains('fontSize: 28'),
@@ -65,7 +64,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
+    testWidgets('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -104,7 +103,7 @@ void main() {
       expect(insideTextScaler, const TextScaler.linear(4.0));
     });
 
-    testWidgetsWithLeakTracking('textScaleFactor overriding backward compatibility', (WidgetTester tester) async {
+    testWidgets('textScaleFactor overriding backward compatibility', (WidgetTester tester) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -184,7 +183,7 @@ void main() {
   });
 
   group('Widgets backward compatibility', () {
-    testWidgetsWithLeakTracking('RichText', (WidgetTester tester) async {
+    testWidgets('RichText', (WidgetTester tester) async {
       await tester.pumpWidget(
         RichText(
           textDirection: TextDirection.ltr,
@@ -200,7 +199,7 @@ void main() {
       expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).textScaleFactor, 2.0);
     });
 
-    testWidgetsWithLeakTracking('Text', (WidgetTester tester) async {
+    testWidgets('Text', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Text(
           'text',
@@ -215,7 +214,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('EditableText', (WidgetTester tester) async {
+    testWidgets('EditableText', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
@@ -33,6 +32,7 @@ import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
@@ -100,7 +100,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<void> initialize({String? moduleFormat, bool? soundNullSafety}) async {}
+  Future<void> initialize(CompilerOptions options) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -117,8 +117,9 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._nullSafetyMode,
-  ) : basePath = _getIndexHtml().getBaseHref();
+    this._nullSafetyMode, {
+    required this.webRenderer,
+  }) : basePath = _getIndexHtml().getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -177,6 +178,7 @@ class WebAssetServer implements AssetReader {
     ExpressionCompiler? expressionCompiler,
     Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
+    required WebRendererMode webRenderer,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
@@ -225,6 +227,7 @@ class WebAssetServer implements AssetReader {
       modules,
       digests,
       nullSafetyMode,
+      webRenderer: webRenderer,
     );
     if (testMode) {
       return server;
@@ -287,9 +290,11 @@ class WebAssetServer implements AssetReader {
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        packageConfig.toPackageUri(
+          BuildSettings(
+            appEntrypoint: packageConfig.toPackageUri(
           globals.fs.file(entrypoint).absolute.uri,
-        ),
+            ),
+          ),
       ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
@@ -502,16 +507,29 @@ class WebAssetServer implements AssetReader {
   }
 
   /// Determines what rendering backed to use.
-  WebRendererMode webRenderer = WebRendererMode.html;
+  final WebRendererMode webRenderer;
 
   shelf.Response _serveIndex() {
 
     final IndexHtml indexHtml = _getIndexHtml();
 
+    final Map<String, dynamic> buildConfig = <String, dynamic>{
+      'engineRevision': globals.flutterVersion.engineRevision,
+      'builds': <dynamic>[
+        <String, dynamic>{
+          'compileTarget': 'dartdevc',
+          'renderer': webRenderer.name,
+          'mainJsPath': 'main.dart.js',
+        },
+      ],
+    };
+    final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
+
     indexHtml.applySubstitutions(
       // Currently, we don't support --base-href for the "run" command.
       baseHref: '/',
       serviceWorkerVersion: null,
+      buildConfig: buildConfigString,
     );
 
     final Map<String, String> headers = <String, String>{
@@ -661,6 +679,7 @@ class WebDevFS implements DevFS {
     required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.nullSafetyMode,
+    required this.webRenderer,
     this.testMode = false,
   }) : _port = port;
 
@@ -684,6 +703,7 @@ class WebDevFS implements DevFS {
   final NullSafetyMode nullSafetyMode;
   final String? tlsCertPath;
   final String? tlsCertKeyPath;
+  final WebRendererMode webRenderer;
 
   late WebAssetServer webAssetServer;
 
@@ -783,15 +803,11 @@ class WebDevFS implements DevFS {
       expressionCompiler,
       extraHeaders,
       nullSafetyMode,
+      webRenderer: webRenderer,
       testMode: testMode,
     );
 
     final int selectedPort = webAssetServer.selectedPort;
-    if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
-      webAssetServer.webRenderer = WebRendererMode.auto;
-    } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
-      webAssetServer.webRenderer = WebRendererMode.canvaskit;
-    }
     String url = '$hostname:$selectedPort';
     if (hostname == 'any') {
       url ='localhost:$selectedPort';
@@ -882,8 +898,8 @@ class WebDevFS implements DevFS {
         await writeBundle(
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
-          bundle.entryKinds,
           targetPlatform: TargetPlatform.web_javascript,
+          impellerStatus: ImpellerStatus.disabled,
         );
       }
     }

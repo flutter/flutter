@@ -144,5 +144,6 @@
   "menuDismissLabel": "მენიუს უარყოფა",
   "lookUpButtonLabel": "აიხედეთ ზემოთ",
   "searchWebButtonLabel": "ვებში ძიება",
-  "shareButtonLabel": "გაზიარება..."
+  "shareButtonLabel": "გაზიარება...",
+  "clearButtonTooltip": "Clear text"
 }

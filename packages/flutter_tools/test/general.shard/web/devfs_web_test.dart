@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
@@ -67,13 +66,14 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
+        webRenderer: WebRendererMode.canvaskit,
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
         fileSystem: globals.fs,
-        flutterRoot: null, // ignore: avoid_redundant_argument_values
+        flutterRoot: null,
         platform: FakePlatform(),
-        webBuildDirectory: null, // ignore: avoid_redundant_argument_values
+        webBuildDirectory: null,
       );
     }, overrides: <Type, Generator>{
       Logger: () => logger,
@@ -292,6 +292,7 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.unsound,
+      webRenderer: WebRendererMode.canvaskit,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -311,6 +312,7 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.unsound,
+      webRenderer: WebRendererMode.canvaskit,
     );
 
     // Defaults to "/" when there's no base element.
@@ -332,6 +334,7 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
+        webRenderer: WebRendererMode.canvaskit,
       ),
       throwsToolExit(),
     );
@@ -352,6 +355,7 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
+        webRenderer: WebRendererMode.canvaskit,
       ),
       throwsToolExit(),
     );
@@ -665,7 +669,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -681,10 +685,11 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
+      webRenderer: WebRendererMode.html,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -746,13 +751,6 @@ void main() {
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
-    // Toggle CanvasKit
-    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.html);
-    webDevFS.webAssetServer.webRenderer = WebRendererMode.canvaskit;
-
-    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
-    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
-
     // Generated entrypoint.
     expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
       contains('GENERATED'));
@@ -782,7 +780,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -797,10 +795,11 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
+      webRenderer: WebRendererMode.html,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -862,11 +861,6 @@ void main() {
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
-    // Toggle CanvasKit
-    webDevFS.webAssetServer.webRenderer = WebRendererMode.canvaskit;
-    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
-    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
-
     // Generated entrypoint.
     expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
       contains('GENERATED'));
@@ -914,6 +908,7 @@ void main() {
         extraHeaders: const <String, String>{},
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
+        webRenderer: WebRendererMode.canvaskit,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -960,7 +955,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -969,12 +964,13 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
+      webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -998,7 +994,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1016,10 +1012,11 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
+      webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1044,7 +1041,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1062,10 +1059,11 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
+      webRenderer: WebRendererMode.auto,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1098,7 +1096,7 @@ void main() {
       tlsCertPath: dummyCertPath,
       tlsCertKeyPath: dummyCertKeyPath,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1109,10 +1107,11 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
+      webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1149,7 +1148,9 @@ void main() {
       null,
       const <String, String>{},
       NullSafetyMode.unsound,
-      testMode: true);
+      webRenderer: WebRendererMode.canvaskit,
+      testMode: true
+    );
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
@@ -1181,7 +1182,9 @@ void main() {
         extraHeaderKey: extraHeaderValue,
       },
       NullSafetyMode.unsound,
-      testMode: true);
+      webRenderer: WebRendererMode.canvaskit,
+      testMode: true
+    );
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
 
@@ -1216,6 +1219,7 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.sound,
+      webRenderer: WebRendererMode.canvaskit,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1243,7 +1247,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1254,10 +1258,11 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
+      webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1309,10 +1314,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

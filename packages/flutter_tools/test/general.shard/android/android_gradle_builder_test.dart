@@ -117,7 +117,6 @@ void main() {
                 String? line,
                 FlutterProject? project,
                 bool? usesAndroidX,
-                bool? multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -145,11 +144,21 @@ void main() {
 
       expect(
         fakeAnalytics.sentEvents,
-        unorderedEquals(<Event>[
+        containsAll(<Event>[
           Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'),
           Event.flutterBuildInfo(label: 'gradle-random-event-label-failure', buildType: 'gradle'),
         ]),
       );
+
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'gradle',
+        ),
+        true,
+      );
+
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });
@@ -302,7 +311,6 @@ void main() {
                 String? line,
                 FlutterProject? project,
                 bool? usesAndroidX,
-                bool? multidexEnabled
               }) async {
                 return GradleBuildStatus.retry;
               },
@@ -328,7 +336,7 @@ void main() {
       ));
       expect(testUsage.events, hasLength(4));
 
-      expect(fakeAnalytics.sentEvents, hasLength(4));
+      expect(fakeAnalytics.sentEvents, hasLength(7));
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
           label: 'gradle-random-event-label-failure',
@@ -405,7 +413,6 @@ void main() {
                 String? line,
                 FlutterProject? project,
                 bool? usesAndroidX,
-                bool? multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -431,7 +438,7 @@ void main() {
       ));
       expect(testUsage.events, hasLength(2));
 
-      expect(fakeAnalytics.sentEvents, hasLength(2));
+      expect(fakeAnalytics.sentEvents, hasLength(3));
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
           label: 'gradle-random-event-label-failure',
@@ -469,7 +476,7 @@ void main() {
           'assembleRelease',
         ],
         exitCode: 1,
-        onRun: () {
+        onRun: (_) {
           throw const ProcessException('', <String>[], 'Unrecognized');
         }
       ));
@@ -593,7 +600,6 @@ void main() {
               String? line,
               FlutterProject? project,
               bool? usesAndroidX,
-                bool? multidexEnabled
             }) async {
               return GradleBuildStatus.retry;
             },
@@ -878,8 +884,18 @@ BuildVariant: paidProfile
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       );
       expect(actual, <String>['freeDebug', 'paidDebug', 'freeRelease', 'paidRelease', 'freeProfile', 'paidProfile']);
+
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'print',
+          variableName: 'android build variants',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
@@ -941,10 +957,20 @@ Gradle Crashed
         'freeDebug',
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       );
+
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'outputs',
+          variableName: 'app link settings',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
@@ -1010,8 +1036,18 @@ Gradle Crashed
         isFalse,
       );
       expect(processManager, hasNoRemainingExpectations);
+
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'gradle-aar',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('Verbose mode for AARs includes Gradle stacktrace and sets debug log level', () async {

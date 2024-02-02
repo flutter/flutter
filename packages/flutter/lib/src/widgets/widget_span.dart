@@ -10,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-const double _kEngineDefaultFontSize = 14.0;
-
 // Examples can assume:
 // late WidgetSpan myWidgetSpan;
 
@@ -100,7 +98,7 @@ class WidgetSpan extends PlaceholderSpan {
     final List<Widget> widgets = <Widget>[];
     // _kEngineDefaultFontSize is the default font size to use when none of the
     // ancestor spans specifies one.
-    final List<double> fontSizeStack = <double>[_kEngineDefaultFontSize];
+    final List<double> fontSizeStack = <double>[kDefaultFontSize];
     int index = 0;
     // This assumes an InlineSpan tree's logical order is equivalent to preorder.
     bool visitSubtree(InlineSpan span) {

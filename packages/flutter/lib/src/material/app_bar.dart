@@ -277,8 +277,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.automaticallyImplyLeading}
   /// Controls whether we should try to imply the leading widget if null.
   ///
-  /// If true and [leading] is null, automatically try to deduce what the leading
-  /// widget should be. If false and [leading] is null, leading space is given to [title].
+  /// If true and [AppBar.leading] is null, automatically try to deduce what the leading
+  /// widget should be. If false and [AppBar.leading] is null, leading space is given to [AppBar.title].
   /// If leading widget is not null, this parameter has no effect.
   /// {@endtemplate}
   final bool automaticallyImplyLeading;
@@ -642,9 +642,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double? toolbarHeight;
 
   /// {@template flutter.material.appbar.leadingWidth}
-  /// Defines the width of [leading] widget.
+  /// Defines the width of [AppBar.leading] widget.
   ///
-  /// By default, the value of [leadingWidth] is 56.0.
+  /// By default, the value of [AppBar.leadingWidth] is 56.0.
   /// {@endtemplate}
   final double? leadingWidth;
 

@@ -185,6 +185,7 @@ class Tooltip extends StatefulWidget {
     this.textAlign,
     this.waitDuration,
     this.showDuration,
+    this.exitDuration,
     this.enableTapToDismiss = true,
     this.triggerMode,
     this.enableFeedback,
@@ -301,12 +302,27 @@ class Tooltip extends StatefulWidget {
 
   /// The length of time that the tooltip will be shown after a long press is
   /// released (if triggerMode is [TooltipTriggerMode.longPress]) or a tap is
-  /// released (if triggerMode is [TooltipTriggerMode.tap]) or mouse pointer
-  /// exits the widget.
+  /// released (if triggerMode is [TooltipTriggerMode.tap]). This property
+  /// does not affect mouse pointer devices.
   ///
-  /// Defaults to 1.5 seconds for long press and tap released or 0.1 seconds
-  /// for mouse pointer exits the widget.
+  /// Defaults to 1.5 seconds for long press and tap released
+  ///
+  /// See also:
+  ///
+  ///  * [exitDuration], which allows configuring the time until a pointer
+  /// disappears when hovering.
   final Duration? showDuration;
+
+  /// The length of time that a pointer must have stopped hovering over a
+  /// tooltip's widget before the tooltip will be hidden.
+  ///
+  /// Defaults to 100 milliseconds.
+  ///
+  /// See also:
+  ///
+  ///  * [showDuration], which allows configuring the length of time that a
+  /// tooltip will be visible after touch events are released.
+  final Duration? exitDuration;
 
   /// Whether the tooltip can be dismissed by tap.
   ///
@@ -388,6 +404,7 @@ class Tooltip extends StatefulWidget {
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
     properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -405,7 +422,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
-  static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
+  static const Duration _defaultHoverExitDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
   static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.longPress;
@@ -419,7 +436,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late TooltipThemeData _tooltipTheme;
 
   Duration get _showDuration => widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration;
-  Duration get _hoverShowDuration => widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultHoverShowDuration;
+  Duration get _hoverExitDuration => widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultHoverExitDuration;
   Duration get _waitDuration => widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration;
   TooltipTriggerMode get _triggerMode => widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode;
   bool get _enableFeedback => widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
@@ -491,7 +508,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     switch (_controller.status) {
       case AnimationStatus.dismissed when withDelay.inMicroseconds > 0:
-        _timer ??= Timer(withDelay, show);
+        _timer?.cancel();
+        _timer = Timer(withDelay, show);
       // If the tooltip is already fading in or fully visible, skip the
       // animation and show the tooltip immediately.
       case AnimationStatus.dismissed:
@@ -512,7 +530,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _timer?.cancel();
     _timer = null;
     // Use _backingController instead of _controller to prevent the lazy getter
-    // from instaniating an AnimationController unnecessarily.
+    // from instantiating an AnimationController unnecessarily.
     switch (_backingController?.status) {
       case null:
       case AnimationStatus.reverse:
@@ -639,7 +657,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    both the delete icon tooltip and the chip tooltip at the same time.
   // 2. Hovered tooltips are dismissed when:
   //    i. [dismissAllToolTips] is called, even these tooltips are still hovered
-  //    ii. a unrecognized PointerDownEvent occured withint the application
+  //    ii. a unrecognized PointerDownEvent occurred within the application
   //    (even these tooltips are still hovered),
   //    iii. The last hovering device leaves the tooltip.
   void _handleMouseEnter(PointerEnterEvent event) {
@@ -648,19 +666,18 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // tooltip is the first to be hit in the widget tree's hit testing order.
     // See also _ExclusiveMouseRegion for the exact behavior.
     _activeHoveringPointerDevices.add(event.device);
-    final List<TooltipState> openedTooltips = Tooltip._openedTooltips.toList();
-    bool otherTooltipsDismissed = false;
-    for (final TooltipState tooltip in openedTooltips) {
+    // Dismiss other open tooltips unless they're kept visible by other mice.
+    // The mouse tracker implementation always dispatches all `onExit` events
+    // before dispatching any `onEnter` events, so `event.device` must have
+    // already been removed from _activeHoveringPointerDevices of the tooltips
+    // that are no longer being hovered over.
+    final List<TooltipState> tooltipsToDismiss = Tooltip._openedTooltips
+      .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty).toList();
+    for (final TooltipState tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
-      final Set<int> hoveringDevices = tooltip._activeHoveringPointerDevices;
-      final bool shouldDismiss = tooltip != this
-                              && (hoveringDevices.length == 1 && hoveringDevices.single == event.device);
-      if (shouldDismiss) {
-        otherTooltipsDismissed = true;
-        tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
-      }
+      tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
     }
-    _scheduleShowTooltip(withDelay: otherTooltipsDismissed ? Duration.zero : _waitDuration);
+    _scheduleShowTooltip(withDelay: tooltipsToDismiss.isNotEmpty ? Duration.zero : _waitDuration);
   }
 
   void _handleMouseExit(PointerExitEvent event) {
@@ -669,7 +686,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
     _activeHoveringPointerDevices.remove(event.device);
     if (_activeHoveringPointerDevices.isEmpty) {
-      _scheduleDismissTooltip(withDelay: _hoverShowDuration);
+      _scheduleDismissTooltip(withDelay: _hoverExitDuration);
     }
   }
 

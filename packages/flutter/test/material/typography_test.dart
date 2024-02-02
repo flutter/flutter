@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('Typography is defined for all target platforms', () {
@@ -37,11 +36,11 @@ void main() {
 
   // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
   final Matcher isSanFranciscoDisplayFont = predicate((TextStyle s) {
-    return s.fontFamily == '.SF UI Display';
+    return s.fontFamily == 'CupertinoSystemDisplay';
   }, 'Uses SF Display font');
 
   final Matcher isSanFranciscoTextFont = predicate((TextStyle s) {
-    return s.fontFamily == '.SF UI Text';
+    return s.fontFamily == 'CupertinoSystemText';
   }, 'Uses SF Text font');
 
   final Matcher isMacOSSanFranciscoMetaFont = predicate((TextStyle s) {
@@ -90,7 +89,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Typography implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,

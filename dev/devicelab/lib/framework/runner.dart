@@ -171,7 +171,8 @@ Future<TaskResult> runTask(
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync()) {
-    throw 'Executable Dart file not found: $taskExecutable';
+    print('Executable Dart file not found: $taskExecutable');
+    exit(1);
   }
 
   if (useEmulator) {
@@ -288,7 +289,13 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       return ConnectionResult(client, isolate);
     } catch (error) {
       if (stopwatch.elapsed > const Duration(seconds: 10)) {
-        print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
+        print(
+          'VM service still not ready. It is possible the target has failed.\n'
+          'Latest connection error:\n'
+          '  $error\n'
+          'Continuing to retry...\n',
+        );
+        stopwatch.reset();
       }
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }

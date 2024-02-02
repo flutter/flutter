@@ -107,7 +107,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.text,
     this.icon,
-    this.iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.iconMargin,
     this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
@@ -132,7 +132,10 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   ///
   /// Only useful when used in combination with [icon], and either one of
   /// [text] or [child] is non-null.
-  final EdgeInsetsGeometry iconMargin;
+  ///
+  /// Defaults to 2 pixels of bottom margin. If [ThemeData.useMaterial3] is false,
+  /// then defaults to 10 pixels of bottom margin.
+  final EdgeInsetsGeometry? iconMargin;
 
   /// The height of the [Tab].
   ///
@@ -159,11 +162,15 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       label = icon!;
     } else {
       calculatedHeight = _kTextAndIconTabHeight;
+      final EdgeInsetsGeometry effectiveIconMargin = iconMargin ??
+        (Theme.of(context).useMaterial3
+          ? _TabsPrimaryDefaultsM3.iconMargin
+          : _TabsDefaultsM2.iconMargin);
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            margin: iconMargin,
+            margin: effectiveIconMargin,
             child: icon,
           ),
           _buildLabelText(),
@@ -184,7 +191,6 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('text', text, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
   }
 
   @override
@@ -437,6 +443,15 @@ class _IndicatorPainter extends CustomPainter {
     this.dividerHeight,
     required this.showDivider,
   }) : super(repaint: controller.animation) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_IndicatorPainter',
+        object: this,
+      );
+    }
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
     }
@@ -466,6 +481,9 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _painter?.dispose();
   }
 
@@ -531,8 +549,8 @@ class _IndicatorPainter extends CustomPainter {
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
     final bool ltr = index > value;
-    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex); // ignore_clamp_double_lint
-    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex); // ignore_clamp_double_lint
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex);
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex);
     final Rect fromRect = indicatorRect(size, from);
     final Rect toRect = indicatorRect(size, to);
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
@@ -731,7 +749,7 @@ class _TabBarScrollController extends ScrollController {
 ///  * [TabBar.secondary], for a secondary tab bar.
 ///  * [TabBarView], which displays page views that correspond to each tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+///  * https://m3.material.io/components/tabs/overview, the Material 3
 ///     tab bar specification.
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design primary tab bar.
@@ -797,7 +815,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [TabBar], for a primary tab bar.
   ///  * [TabBarView], which displays page views that correspond to each tab.
   ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-  ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+  ///  * https://m3.material.io/components/tabs/overview, the Material 3
   ///     tab bar specification.
   const TabBar.secondary({
     super.key,
@@ -1025,7 +1043,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// tabs with only icon or text, this padding is vertically
   /// adjusted to provide uniform padding to all tabs.
   ///
-  /// If this property is null, then kTabLabelPadding is used.
+  /// If this property is null, then [kTabLabelPadding] is used.
   final EdgeInsetsGeometry? labelPadding;
 
   /// Defines the ink response focus, hover, and splash colors.
@@ -1693,17 +1711,26 @@ class _TabBarState extends State<TabBar> {
           TabAlignment.start || TabAlignment.startOffset || TabAlignment.fill => AlignmentDirectional.centerStart,
         };
 
-        tabBar = CustomPaint(
-          painter: _DividerPainter(
-            dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
-            dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
-          ),
-          child: Align(
-            heightFactor: 1.0,
-            alignment: effectiveAlignment,
-            child: tabBar,
-          ),
+        final Color dividerColor = widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!;
+        final double dividerHeight = widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!;
+        final bool showDivider = dividerColor != Colors.transparent && dividerHeight > 0;
+
+        tabBar = Align(
+          heightFactor: 1.0,
+          widthFactor: showDivider ? null : 1.0,
+          alignment: effectiveAlignment,
+          child: tabBar,
         );
+
+        if (showDivider) {
+          tabBar = CustomPaint(
+            painter: _DividerPainter(
+              dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
+              dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
+            ),
+            child: tabBar,
+          );
+        }
       }
     } else if (widget.padding != null) {
       tabBar = Padding(
@@ -1851,12 +1878,14 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    // TODO(chunhtai): https://github.com/flutter/flutter/issues/134253
-    _pageController?.dispose();
-    _pageController = PageController(
-      initialPage: _currentIndex!,
-      viewportFraction: widget.viewportFraction,
-    );
+    if (_pageController == null) {
+      _pageController = PageController(
+        initialPage: _currentIndex!,
+        viewportFraction: widget.viewportFraction,
+      );
+    } else {
+      _pageController!.jumpToPage(_currentIndex!);
+    }
   }
 
   @override
@@ -2243,6 +2272,8 @@ class _TabsDefaultsM2 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
+
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 10);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Tabs
@@ -2317,6 +2348,11 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 
   static double indicatorWeight = 3.0;
+
+  // TODO(davidmartos96): This value doesn't currently exist in
+  // https://m3.material.io/components/tabs/specs
+  // Update this when the token is available.
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
 class _TabsSecondaryDefaultsM3 extends TabBarTheme {

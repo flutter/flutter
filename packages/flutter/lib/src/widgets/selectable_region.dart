@@ -267,9 +267,29 @@ class SelectableRegion extends StatefulWidget {
     required final SelectionGeometry selectionGeometry,
     required final VoidCallback onCopy,
     required final VoidCallback onSelectAll,
+    required final VoidCallback? onShare,
   }) {
     final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
+    final bool platformCanShare = switch (defaultTargetPlatform) {
+      TargetPlatform.android
+        => selectionGeometry.status == SelectionStatus.uncollapsed,
+      TargetPlatform.macOS
+      || TargetPlatform.fuchsia
+      || TargetPlatform.linux
+      || TargetPlatform.windows
+        => false,
+      // TODO(bleroux): the share button should be shown on iOS but the share
+      // functionality requires some changes on the engine side because, on iPad,
+      // it needs an anchor for the popup.
+      // See: https://github.com/flutter/flutter/issues/141775.
+      TargetPlatform.iOS
+        => false,
+    };
+    final bool canShare = onShare != null && platformCanShare;
+
+    // On Android, the share button is before the select all button.
+    final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
 
     // Determine which buttons will appear so that the order and total number is
     // known. A button's position in the menu can slightly affect its
@@ -280,10 +300,20 @@ class SelectableRegion extends StatefulWidget {
           onPressed: onCopy,
           type: ContextMenuButtonType.copy,
         ),
+      if (canShare && showShareBeforeSelectAll)
+        ContextMenuButtonItem(
+          onPressed: onShare,
+          type: ContextMenuButtonType.share,
+        ),
       if (canSelectAll)
         ContextMenuButtonItem(
           onPressed: onSelectAll,
           type: ContextMenuButtonType.selectAll,
+        ),
+      if (canShare && !showShareBeforeSelectAll)
+        ContextMenuButtonItem(
+          onPressed: onShare,
+          type: ContextMenuButtonType.share,
         ),
     ];
   }
@@ -331,6 +361,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @visibleForTesting
   SelectionOverlay? get selectionOverlay => _selectionOverlay;
 
+  /// The text processing service used to retrieve the native text processing actions.
+  final ProcessTextService _processTextService = DefaultProcessTextService();
+
+  /// The list of native text processing actions provided by the engine.
+  final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
+
   @override
   void initState() {
     super.initState();
@@ -359,6 +395,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
+    _initProcessTextActions();
+  }
+
+  /// Query the engine to initialize the list of text processing actions to show
+  /// in the text selection toolbar.
+  Future<void> _initProcessTextActions() async {
+    _processTextActions.clear();
+    _processTextActions.addAll(await _processTextService.queryTextActions());
   }
 
   @override
@@ -1075,6 +1119,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
+  Future<void> _share() async {
+    final SelectedContent? data = _selectable?.getSelectedContent();
+    if (data == null) {
+      return;
+    }
+    await SystemChannels.platform.invokeMethod('Share.invoke', data.plainText);
+  }
+
   /// {@macro flutter.widgets.EditableText.getAnchors}
   ///
   /// See also:
@@ -1177,7 +1229,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       onCopy: () {
         _copy();
 
-        // In Android copy should clear the selection.
+        // On Android copy should clear the selection.
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -1203,7 +1255,45 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             hideToolbar();
         }
       },
-    );
+      onShare: () {
+        _share();
+
+        // On Android, share should clear the selection.
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            _clearSelection();
+          case TargetPlatform.iOS:
+            hideToolbar(false);
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            hideToolbar();
+        }
+      },
+    )..addAll(_textProcessingActionButtonItems);
+  }
+
+  List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final SelectedContent? data = _selectable?.getSelectedContent();
+    if (data == null) {
+      return buttonItems;
+    }
+
+    for (final ProcessTextAction action in _processTextActions) {
+      buttonItems.add(ContextMenuButtonItem(
+        label: action.label,
+        onPressed: () async {
+          final String selectedText = data.plainText;
+          if (selectedText.isNotEmpty) {
+            await _processTextService.processTextAction(action.id, selectedText, true);
+            hideToolbar();
+          }
+        },
+      ));
+    }
+    return buttonItems;
   }
 
   /// The line height at the start of the current selection.
@@ -1817,6 +1907,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     _updateHandleLayersAndOwners();
   }
 
+  Rect _getBoundingBox(Selectable selectable) {
+    Rect result = selectable.boundingBoxes.first;
+    for (int index = 1; index < selectable.boundingBoxes.length; index += 1) {
+      result = result.expandToInclude(selectable.boundingBoxes[index]);
+    }
+    return result;
+  }
+
   /// The compare function this delegate used for determining the selection
   /// order of the selectables.
   ///
@@ -1827,11 +1925,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   int _compareScreenOrder(Selectable a, Selectable b) {
     final Rect rectA = MatrixUtils.transformRect(
       a.getTransformTo(null),
-      Rect.fromLTWH(0, 0, a.size.width, a.size.height),
+      _getBoundingBox(a),
     );
     final Rect rectB = MatrixUtils.transformRect(
       b.getTransformTo(null),
-      Rect.fromLTWH(0, 0, b.size.width, b.size.height),
+      _getBoundingBox(b),
     );
     final int result = _compareVertically(rectA, rectB);
     if (result != 0) {
@@ -1846,6 +1944,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Returns positive if a is lower, negative if a is higher, 0 if their
   /// order can't be determine solely by their vertical position.
   static int _compareVertically(Rect a, Rect b) {
+    // The rectangles overlap so defer to horizontal comparison.
     if ((a.top - b.top < _kSelectableVerticalComparingThreshold && a.bottom - b.bottom > - _kSelectableVerticalComparingThreshold) ||
         (b.top - a.top < _kSelectableVerticalComparingThreshold && b.bottom - a.bottom > - _kSelectableVerticalComparingThreshold)) {
       return 0;
@@ -1863,19 +1962,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   static int _compareHorizontally(Rect a, Rect b) {
     // a encloses b.
     if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
-      // b ends before a.
-      if (a.right - b.right > precisionErrorTolerance) {
-        return 1;
-      }
       return -1;
     }
-
     // b encloses a.
     if (b.left - a.left < precisionErrorTolerance && b.right - a.right > - precisionErrorTolerance) {
-      // a ends before b.
-      if (b.right - a.right > precisionErrorTolerance) {
-        return -1;
-      }
       return 1;
     }
     if ((a.left - b.left).abs() > precisionErrorTolerance) {
@@ -2140,10 +2230,17 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     SelectionResult? lastSelectionResult;
     for (int index = 0; index < selectables.length; index += 1) {
-      final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
-      final Matrix4 transform = selectables[index].getTransformTo(null);
-      final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-      if (globalRect.contains(event.globalPosition)) {
+      bool globalRectsContainsPosition = false;
+      if (selectables[index].boundingBoxes.isNotEmpty) {
+        for (final Rect rect in selectables[index].boundingBoxes) {
+          final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
+          if (globalRect.contains(event.globalPosition)) {
+            globalRectsContainsPosition = true;
+            break;
+          }
+        }
+      }
+      if (globalRectsContainsPosition) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
@@ -2286,12 +2383,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    final bool selectionWillbeInProgress = event is! ClearSelectionEvent;
-    if (!_selectionInProgress && selectionWillbeInProgress) {
+    final bool selectionWillBeInProgress = event is! ClearSelectionEvent;
+    if (!_selectionInProgress && selectionWillBeInProgress) {
       // Sort the selectable every time a selection start.
       selectables.sort(compareOrder);
     }
-    _selectionInProgress = selectionWillbeInProgress;
+    _selectionInProgress = selectionWillBeInProgress;
     _isHandlingSelectionEvent = true;
     late SelectionResult result;
     switch (event.type) {

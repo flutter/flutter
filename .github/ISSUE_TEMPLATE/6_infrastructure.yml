@@ -13,12 +13,10 @@ body:
         It looks like you found an issue with our Infrastructure services.
         Please complete the form below so that we can help to resolve your
         issue as quickly as possible.
-  - type: checkboxes
+  - type: markdown
     attributes:
-      label: Is there an existing issue for this?
-      options:
-      - label: I have searched the [existing infra issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-infra)
-        required: true
+      value: |
+        Before filling the form fields, please ensure that you have searched the [existing infra issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-infra)
   - type: dropdown
     attributes:
       label: Type of Request

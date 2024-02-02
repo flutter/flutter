@@ -109,28 +109,17 @@ Future<void> _setAppVersion(int version) async {
 }
 
 String _testTypeToIndexFile(ServiceWorkerTestType type) {
-  late String indexFile;
-  switch (type) {
-    case ServiceWorkerTestType.blockedServiceWorkers:
-      indexFile = 'index_with_blocked_service_workers.html';
-    case ServiceWorkerTestType.withFlutterJs:
-      indexFile = 'index_with_flutterjs.html';
-    case ServiceWorkerTestType.withoutFlutterJs:
-      indexFile = 'index_without_flutterjs.html';
-    case ServiceWorkerTestType.withFlutterJsShort:
-      indexFile = 'index_with_flutterjs_short.html';
-    case ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent:
-      indexFile = 'index_with_flutterjs_entrypoint_loaded.html';
-    case ServiceWorkerTestType.withFlutterJsTrustedTypesOn:
-      indexFile = 'index_with_flutterjs_el_tt_on.html';
-    case ServiceWorkerTestType.withFlutterJsNonceOn:
-      indexFile = 'index_with_flutterjs_el_nonce.html';
-    case ServiceWorkerTestType.withFlutterJsCustomServiceWorkerVersion:
-      indexFile = 'index_with_flutterjs_custom_sw_version.html';
-    case ServiceWorkerTestType.generatedEntrypoint:
-      indexFile = 'generated_entrypoint.html';
-  }
-  return indexFile;
+  return switch (type) {
+    ServiceWorkerTestType.blockedServiceWorkers                   => 'index_with_blocked_service_workers.html',
+    ServiceWorkerTestType.withFlutterJs                           => 'index_with_flutterjs.html',
+    ServiceWorkerTestType.withoutFlutterJs                        => 'index_without_flutterjs.html',
+    ServiceWorkerTestType.withFlutterJsShort                      => 'index_with_flutterjs_short.html',
+    ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent      => 'index_with_flutterjs_entrypoint_loaded.html',
+    ServiceWorkerTestType.withFlutterJsTrustedTypesOn             => 'index_with_flutterjs_el_tt_on.html',
+    ServiceWorkerTestType.withFlutterJsNonceOn                    => 'index_with_flutterjs_el_nonce.html',
+    ServiceWorkerTestType.withFlutterJsCustomServiceWorkerVersion => 'index_with_flutterjs_custom_sw_version.html',
+    ServiceWorkerTestType.generatedEntrypoint                     => 'generated_entrypoint.html',
+  };
 }
 
 Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType testType, required String target }) async {

@@ -425,6 +425,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// actual current wall-clock time.
   Clock get clock;
 
+  @override
+  SamplingClock? get debugSamplingClock => _TestSamplingClock(clock);
+
   /// Triggers a frame sequence (build/layout/paint/etc),
   /// then flushes microtasks.
   ///
@@ -556,8 +559,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     final FlutterView view = renderView.flutterView;
     if (_surfaceSize != null && view == platformDispatcher.implicitView) {
+      final BoxConstraints constraints = BoxConstraints.tight(_surfaceSize!);
       return ViewConfiguration(
-        size: _surfaceSize!,
+        logicalConstraints: constraints,
+        physicalConstraints: constraints * view.devicePixelRatio,
         devicePixelRatio: view.devicePixelRatio,
       );
     }
@@ -1156,27 +1161,31 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     _announcements = <CapturedAccessibilityAnnouncement>[];
 
+  // ignore: deprecated_member_use
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
 
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
-    // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
     RawKeyboard.instance.clearKeysPressed();
     // ignore: invalid_use_of_visible_for_testing_member
     HardwareKeyboard.instance.clearState();
-    // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
     keyEventManager.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
     // ignore: invalid_use_of_visible_for_testing_member
-    ServicesBinding.instance.resetLifecycleState();
+    ServicesBinding.instance.resetInternalState();
   }
 }
 
-/// A variant of [TestWidgetsFlutterBinding] for executing tests in
-/// the `flutter test` environment.
+/// A variant of [TestWidgetsFlutterBinding] for executing tests typically
+/// the `flutter test` environment, unless it is an integration test.
+///
+/// When doing integration test, [LiveTestWidgetsFlutterBinding] is utilized
+/// instead.
 ///
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
@@ -1626,9 +1635,9 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   benchmarkLive,
 }
 
-/// A variant of [TestWidgetsFlutterBinding] for executing tests in
-/// the `flutter run` environment, on a device. This is intended to
-/// allow interactive test development.
+/// A variant of [TestWidgetsFlutterBinding] for executing tests
+/// on a device, typically via `flutter run`, or via integration tests.
+/// This is intended to allow interactive test development.
 ///
 /// This is not the way to run a remote-control test. To run a test on
 /// a device from a development computer, see the [flutter_driver]
@@ -1828,7 +1837,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     final Map<int, _LiveTestPointerRecord>? pointerIdToRecord = _renderViewToPointerIdToPointerRecord[renderView];
     if (pointerIdToRecord != null && pointerIdToRecord.isNotEmpty) {
-      final double radius = renderView.configuration.size.shortestSide * 0.05;
+      final double radius = renderView.size.shortestSide * 0.05;
       final Path path = Path()
         ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
         ..moveTo(0.0, -radius * 2.0)
@@ -2112,9 +2121,14 @@ class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size and view.
   ///
   /// The [size] defaults to 800x600.
-  TestViewConfiguration.fromView({required ui.FlutterView view, super.size = _kDefaultTestViewportSize})
+  TestViewConfiguration.fromView({required ui.FlutterView view, Size size = _kDefaultTestViewportSize})
       : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
-        super(devicePixelRatio: view.devicePixelRatio);
+        _physicalSize = view.physicalSize,
+        super(
+          devicePixelRatio: view.devicePixelRatio,
+          logicalConstraints: BoxConstraints.tight(size),
+          physicalConstraints: BoxConstraints.tight(size) * view.devicePixelRatio,
+      );
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
@@ -2145,8 +2159,25 @@ class TestViewConfiguration extends ViewConfiguration {
   @override
   Matrix4 toMatrix() => _paintMatrix.clone();
 
+  final Size _physicalSize;
+
+  @override
+  Size toPhysicalSize(Size logicalSize) => _physicalSize;
+
   @override
   String toString() => 'TestViewConfiguration';
+}
+
+class _TestSamplingClock implements SamplingClock {
+  _TestSamplingClock(this._clock);
+
+  @override
+  DateTime now() => _clock.now();
+
+  @override
+  Stopwatch stopwatch() => _clock.stopwatch();
+
+  final Clock _clock;
 }
 
 const int _kPointerDecay = -2;

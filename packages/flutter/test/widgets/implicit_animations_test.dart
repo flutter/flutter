@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class MockOnEndFunction {
   int called = 0;
@@ -25,7 +24,7 @@ void main() {
     mockOnEndFunction = MockOnEndFunction();
   });
 
-  testWidgetsWithLeakTracking('BoxConstraintsTween control test', (WidgetTester tester) async {
+  testWidgets('BoxConstraintsTween control test', (WidgetTester tester) async {
     final BoxConstraintsTween tween = BoxConstraintsTween(
       begin: BoxConstraints.tight(const Size(20.0, 50.0)),
       end: BoxConstraints.tight(const Size(10.0, 30.0)),
@@ -37,7 +36,7 @@ void main() {
     expect(result.maxHeight, 45.0);
   });
 
-  testWidgetsWithLeakTracking('DecorationTween control test', (WidgetTester tester) async {
+  testWidgets('DecorationTween control test', (WidgetTester tester) async {
     final DecorationTween tween = DecorationTween(
       begin: const BoxDecoration(color: Color(0xFF00FF00)),
       end: const BoxDecoration(color: Color(0xFFFFFF00)),
@@ -46,7 +45,7 @@ void main() {
     expect(result.color, const Color(0xFF3FFF00));
   });
 
-  testWidgetsWithLeakTracking('EdgeInsetsTween control test', (WidgetTester tester) async {
+  testWidgets('EdgeInsetsTween control test', (WidgetTester tester) async {
     final EdgeInsetsTween tween = EdgeInsetsTween(
       begin: const EdgeInsets.symmetric(vertical: 50.0),
       end: const EdgeInsets.only(top: 10.0, bottom: 30.0),
@@ -58,7 +57,7 @@ void main() {
     expect(result.bottom, 45.0);
   });
 
-  testWidgetsWithLeakTracking('Matrix4Tween control test', (WidgetTester tester) async {
+  testWidgets('Matrix4Tween control test', (WidgetTester tester) async {
     final Matrix4Tween tween = Matrix4Tween(
       begin: Matrix4.translationValues(10.0, 20.0, 30.0),
       end: Matrix4.translationValues(14.0, 24.0, 34.0),
@@ -67,7 +66,7 @@ void main() {
     expect(result, equals(Matrix4.translationValues(11.0, 21.0, 31.0)));
   });
 
-  testWidgetsWithLeakTracking('AnimatedContainer onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -90,7 +89,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedPadding onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedPadding onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -113,7 +112,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedAlign onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -136,7 +135,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositioned onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -159,7 +158,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositionedDirectional onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -182,7 +181,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-   testWidgetsWithLeakTracking('AnimatedSlide onEnd callback test', (WidgetTester tester) async {
+   testWidgets('AnimatedSlide onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -204,7 +203,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedSlide transition test', (WidgetTester tester) async {
+  testWidgets('AnimatedSlide transition test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         switchKey: switchKey,
@@ -242,7 +241,7 @@ void main() {
     expect(state.builds, equals(2));
   });
 
-  testWidgetsWithLeakTracking('AnimatedScale onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedScale onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -264,7 +263,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedScale transition test', (WidgetTester tester) async {
+  testWidgets('AnimatedScale transition test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         switchKey: switchKey,
@@ -302,7 +301,7 @@ void main() {
     expect(state.builds, equals(2));
   });
 
-  testWidgetsWithLeakTracking('AnimatedRotation onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedRotation onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -324,7 +323,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedRotation transition test', (WidgetTester tester) async {
+  testWidgets('AnimatedRotation transition test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         switchKey: switchKey,
@@ -362,7 +361,7 @@ void main() {
     expect(state.builds, equals(2));
   });
 
-  testWidgetsWithLeakTracking('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -384,7 +383,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedOpacity transition test', (WidgetTester tester) async {
+  testWidgets('AnimatedOpacity transition test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         switchKey: switchKey,
@@ -422,7 +421,7 @@ void main() {
     expect(state.builds, equals(2));
   });
 
-  testWidgetsWithLeakTracking('AnimatedFractionallySizedBox onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedFractionallySizedBox onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -444,7 +443,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
+  testWidgets('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(TestAnimatedWidget(
       callback: mockOnEndFunction.handler,
       switchKey: switchKey,
@@ -465,7 +464,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('SliverAnimatedOpacity transition test', (WidgetTester tester) async {
+  testWidgets('SliverAnimatedOpacity transition test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         switchKey: switchKey,
@@ -503,7 +502,7 @@ void main() {
     expect(state.builds, equals(2));
   });
 
-  testWidgetsWithLeakTracking('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -526,7 +525,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -549,7 +548,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('TweenAnimationBuilder onEnd callback test', (WidgetTester tester) async {
+  testWidgets('TweenAnimationBuilder onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -572,7 +571,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -595,7 +594,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgetsWithLeakTracking('Ensure CurvedAnimations are disposed on widget change',
+  testWidgets('Ensure CurvedAnimations are disposed on widget change',
       (WidgetTester tester) async {
     final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
         GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();

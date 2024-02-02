@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -52,10 +51,6 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 void main() {
-  tearDown(() {
-    MacOSDesignedForIPadDevices.allowDiscovery = false;
-  });
-
   group('attach', () {
     late StreamLogger logger;
     late FileSystem testFileSystem;
@@ -162,6 +157,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -225,6 +221,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
         Signals: () => FakeSignals(),
       });
@@ -294,6 +291,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
         ProcessManager: () => FakeProcessManager.empty(),
       });
@@ -363,6 +361,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -433,6 +432,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -507,6 +507,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -581,6 +582,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -1060,7 +1062,6 @@ void main() {
       expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
       expect(testLogger.statusText, contains('yy2'));
-      expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -1201,6 +1202,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     bool ipv6 = false,
     FlutterProject? flutterProject,
     Analytics? analytics,
+    String? nativeAssetsYamlFile,
   }) {
     if (_artifactTester != null) {
       for (final FlutterDevice device in devices) {
@@ -1392,9 +1394,6 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   FakeAndroidDevice({required this.id});
 
@@ -1466,9 +1465,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get ephemeral => true;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     DevicePortForwarder? portForwarder,

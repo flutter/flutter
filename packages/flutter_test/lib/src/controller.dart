@@ -24,6 +24,23 @@ const double kDragSlopDefault = 20.0;
 
 const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 
+// Finds the end index (exclusive) of the span at `startIndex`, or `endIndex` if
+// there are no other spans between `startIndex` and `endIndex`.
+// The InlineSpan protocol doesn't expose the length of the span so we'll
+// have to iterate through the whole range.
+(InlineSpan, int)? _findEndOfSpan(InlineSpan rootSpan, int startIndex, int endIndex) {
+  assert(endIndex > startIndex);
+  final InlineSpan? subspan = rootSpan.getSpanForPosition(TextPosition(offset: startIndex));
+  if (subspan == null) {
+    return null;
+  }
+  int i = startIndex + 1;
+  while (i < endIndex && rootSpan.getSpanForPosition(TextPosition(offset: i)) == subspan) {
+    i += 1;
+  }
+  return (subspan, i);
+}
+
 // Examples can assume:
 // typedef MyWidget = Placeholder;
 
@@ -987,14 +1004,66 @@ abstract class WidgetController {
   /// For example, a test that verifies that tapping a disabled button does not
   /// trigger the button would set `warnIfMissed` to false, because the button
   /// would ignore the tap.
-  Future<void> tap(finders.FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
-    return tapAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'), pointer: pointer, buttons: buttons);
+  Future<void> tap(
+    finders.FinderBase<Element> finder, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    bool warnIfMissed = true,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+  }) {
+    return tapAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'), pointer: pointer, buttons: buttons, kind: kind);
+  }
+
+  /// Dispatch a pointer down / pointer up sequence at a hit-testable
+  /// [InlineSpan] (typically a [TextSpan]) within the given text range.
+  ///
+  /// This method performs a more spatially precise tap action on a piece of
+  /// static text, than the widget-based [tap] method.
+  ///
+  /// The given [Finder] must find one and only one matching substring, and the
+  /// substring must be hit-testable (meaning, it must not be off-screen, or be
+  /// obscured by other widgets, or in a disabled widget). Otherwise this method
+  /// throws a [FlutterError].
+  ///
+  /// If the target substring contains more than one hit-testable [InlineSpan]s,
+  /// [tapOnText] taps on one of them, but does not guarantee which.
+  ///
+  /// The `pointer` and `button` arguments specify [PointerEvent.pointer] and
+  /// [PointerEvent.buttons] of the tap event.
+  Future<void> tapOnText(finders.FinderBase<finders.TextRangeContext> textRangeFinder, {int? pointer, int buttons = kPrimaryButton }) {
+    final Iterable<finders.TextRangeContext> ranges = textRangeFinder.evaluate();
+    if (ranges.isEmpty) {
+      throw FlutterError(textRangeFinder.toString());
+    }
+    if (ranges.length > 1) {
+      throw FlutterError(
+        '$textRangeFinder. The "tapOnText" method needs a single non-empty TextRange.',
+      );
+    }
+    final Offset? tapLocation = _findHitTestableOffsetIn(ranges.single);
+    if (tapLocation == null) {
+      final finders.TextRangeContext found = textRangeFinder.evaluate().single;
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Finder specifies a TextRange that can not receive pointer events.'),
+          ErrorDescription('The finder used was: ${textRangeFinder.toString(describeSelf: true)}'),
+          ErrorDescription('Found a matching substring in a static text widget, within ${found.textRange}.'),
+          ErrorDescription('But the "tapOnText" method could not find a hit-testable Offset with in that text range.'),
+          found.renderObject.toDiagnosticsNode(name: 'The RenderBox of that static text widget was', style: DiagnosticsTreeStyle.shallow),
+        ]
+      );
+    }
+    return tapAt(tapLocation, pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
-  Future<void> tapAt(Offset location, {int? pointer, int buttons = kPrimaryButton}) {
+  Future<void> tapAt(
+    Offset location, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+  }) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
+      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons, kind: kind);
       await gesture.up();
     });
   }
@@ -1012,9 +1081,20 @@ abstract class WidgetController {
   ///  * [tap], which presses and releases a pointer at the given location.
   ///  * [longPress], which presses and releases a pointer with a gap in
   ///    between long enough to trigger the long-press gesture.
-  Future<TestGesture> press(finders.FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
+  Future<TestGesture> press(
+    finders.FinderBase<Element> finder, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    bool warnIfMissed = true,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+  }) {
     return TestAsyncUtils.guard<TestGesture>(() {
-      return startGesture(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'), pointer: pointer, buttons: buttons);
+      return startGesture(
+        getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'),
+        pointer: pointer,
+        buttons: buttons,
+        kind: kind,
+      );
     });
   }
 
@@ -1030,15 +1110,31 @@ abstract class WidgetController {
   /// later verify that long-pressing the same location (using the same finder)
   /// has no effect (since the widget is now obscured), setting `warnIfMissed`
   /// to false on that second call.
-  Future<void> longPress(finders.FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
-    return longPressAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'), pointer: pointer, buttons: buttons);
+  Future<void> longPress(
+    finders.FinderBase<Element> finder, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    bool warnIfMissed = true,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+  }) {
+    return longPressAt(
+      getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'),
+      pointer: pointer,
+      buttons: buttons,
+      kind: kind,
+    );
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
-  Future<void> longPressAt(Offset location, {int? pointer, int buttons = kPrimaryButton}) {
+  Future<void> longPressAt(
+    Offset location, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+  }) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
+      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons, kind: kind);
       await pump(kLongPressTimeout + kPressTimeout);
       await gesture.up();
     });
@@ -1724,6 +1820,45 @@ abstract class WidgetController {
   /// in the documentation for the [flutter_test] library.
   static bool hitTestWarningShouldBeFatal = false;
 
+  /// Finds one hit-testable Offset in the given `textRangeContext`'s render
+  /// object.
+  Offset? _findHitTestableOffsetIn(finders.TextRangeContext textRangeContext) {
+    TestAsyncUtils.guardSync();
+    final TextRange range = textRangeContext.textRange;
+    assert(range.isNormalized);
+    assert(range.isValid);
+    final Offset renderParagraphPaintOffset = textRangeContext.renderObject.localToGlobal(Offset.zero);
+    assert(renderParagraphPaintOffset.isFinite);
+
+    int spanStart = range.start;
+    while (spanStart < range.end) {
+      switch (_findEndOfSpan(textRangeContext.renderObject.text, spanStart, range.end)) {
+        case (final HitTestTarget target, final int endIndex):
+          // Uses BoxHeightStyle.tight in getBoxesForSelection to make sure the
+          // returned boxes don't extend outside of the hit-testable region.
+          final Iterable<Offset> testOffsets = textRangeContext.renderObject
+            .getBoxesForSelection(TextSelection(baseOffset: spanStart, extentOffset: endIndex))
+            // Try hit-testing the center of each TextBox.
+            .map((TextBox textBox) => textBox.toRect().center);
+
+          for (final Offset localOffset in testOffsets) {
+            final HitTestResult result = HitTestResult();
+            final Offset globalOffset = localOffset + renderParagraphPaintOffset;
+            binding.hitTestInView(result, globalOffset, textRangeContext.view.view.viewId);
+            if (result.path.any((HitTestEntry entry) => entry.target == target)) {
+              return globalOffset;
+            }
+          }
+          spanStart = endIndex;
+        case (_, final int endIndex):
+          spanStart = endIndex;
+        case null:
+          break;
+      }
+    }
+    return null;
+  }
+
   Offset _getElementPoint(finders.FinderBase<Element> finder, Offset Function(Size size) sizeToPoint, { required bool warnIfMissed, required String callee }) {
     TestAsyncUtils.guardSync();
     final Iterable<Element> elements = finder.evaluate();
@@ -1753,17 +1888,10 @@ abstract class WidgetController {
       final FlutterView view = _viewOf(finder);
       final HitTestResult result = HitTestResult();
       binding.hitTestInView(result, location, view.viewId);
-      bool found = false;
-      for (final HitTestEntry entry in result.path) {
-        if (entry.target == box) {
-          found = true;
-          break;
-        }
-      }
+      final bool found = result.path.any((HitTestEntry entry) => entry.target == box);
       if (!found) {
         final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
-        bool outOfBounds = false;
-        outOfBounds = !(Offset.zero & renderView.size).contains(location);
+        final bool outOfBounds = !(Offset.zero & renderView.size).contains(location);
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),
@@ -1820,9 +1948,6 @@ abstract class WidgetController {
   /// simulated event. If not specified, it uses a default derived from the
   /// logical `key`.
   ///
-  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
-  ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
   /// This method sends both the key down and the key up events, to simulate a
@@ -1865,9 +1990,6 @@ abstract class WidgetController {
   /// simulated event. If not specified, it uses a default derived from the
   /// logical `key`.
   ///
-  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
-  ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
   /// Returns true if the key event was handled by the framework.
@@ -1900,9 +2022,6 @@ abstract class WidgetController {
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
   /// keyboard layout for the corresponding logical `key`.
-  ///
-  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -1937,10 +2056,6 @@ abstract class WidgetController {
   /// Specify the `character` for the event to override what is included in the
   /// simulated event. If not specified, it uses a default derived from the
   /// logical `key`.
-  ///
-  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [debugKeyEventSimulatorTransitModeOverride]. If through [RawKeyEvent],
-  /// this method is equivalent to [sendKeyDownEvent].
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///

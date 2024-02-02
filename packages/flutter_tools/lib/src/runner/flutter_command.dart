@@ -15,7 +15,6 @@ import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
 import '../base/os.dart';
-import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -150,6 +149,7 @@ abstract final class FlutterOptions {
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
+  static const String kNativeAssetsYamlFile = 'native-assets-yaml-file';
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
@@ -366,6 +366,9 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
+  /// Indicates if the current command running has a terminal attached.
+  bool get hasTerminal => globals.stdio.hasTerminal;
+
   /// Path to the Dart's package config file.
   ///
   /// This can be overridden by some of its subclasses.
@@ -373,6 +376,8 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Whether flutter is being run from our CI.
   bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
+
+  String? get debugLogsDirectoryPath => stringArg(FlutterGlobalOptions.kDebugLogsDirectoryFlag, global: true);
 
   /// The value of the `--filesystem-scheme` argument.
   ///
@@ -1004,12 +1009,11 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addMultidexOption({ bool hide = false }) {
-    argParser.addFlag('multidex',
-      defaultsTo: true,
-      help: 'When enabled, indicates that the app should be built with multidex support. This '
-            'flag adds the dependencies for multidex when the minimum android sdk is 20 or '
-            'below. For android sdk versions 21 and above, multidex support is native.',
+  void usesNativeAssetsOption({ required bool hide }) {
+    argParser.addOption(FlutterOptions.kNativeAssetsYamlFile,
+      help: 'Initializes the resident compiler with a custom native assets '
+      'yaml file instead of the default cached location.',
+      hide: hide,
     );
   }
 
@@ -1138,16 +1142,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addImpellerForceGLFlag({required bool verboseHelp}) {
-    argParser.addFlag('impeller-force-gl',
-        hide: !verboseHelp,
-        help: 'On platforms that support OpenGL Rendering using Impeller, force '
-              'rendering using OpenGL over other APIs. If Impeller is not '
-              'enabled or the platform does not support OpenGL ES, this flag '
-              'does nothing.',
-    );
-  }
-
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-embedder-api',
         hide: !verboseHelp,
@@ -1269,13 +1263,7 @@ abstract class FlutterCommand extends Command<void> {
       : null;
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
-    List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
-
-    WebRendererMode webRenderer = WebRendererMode.auto;
-    if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-      webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
-      dartDefines = updateDartDefines(dartDefines, webRenderer);
-    }
+    final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
       final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
@@ -1323,7 +1311,6 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines: dartDefines,
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
-      webRenderer: webRenderer,
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
@@ -1359,6 +1346,14 @@ abstract class FlutterCommand extends Command<void> {
   /// Additional usage values to be sent with the usage ping.
   Future<CustomDimensions> get usageValues async => const CustomDimensions();
 
+  /// Additional usage values to be sent with the usage ping for
+  /// package:unified_analytics.
+  ///
+  /// Implementations of [FlutterCommand] can override this getter in order
+  /// to add additional parameters in the [Event.commandUsageValues] constructor.
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async =>
+    Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
+
   /// Runs this command.
   ///
   /// Rather than overriding this method, subclasses should override
@@ -1388,7 +1383,7 @@ abstract class FlutterCommand extends Command<void> {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
           final DateTime endTime = globals.systemClock.now();
-          globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
+          globals.printTrace(globals.userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           if (commandPath != null) {
             _sendPostUsage(
               commandPath,
@@ -1553,19 +1548,6 @@ abstract class FlutterCommand extends Command<void> {
     return jsonEncode(propertyMap);
   }
 
-  /// Updates dart-defines based on [webRenderer].
-  @visibleForTesting
-  static List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
-    final Set<String> dartDefinesSet = dartDefines.toSet();
-    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
-        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
-    }
-    dartDefinesSet.addAll(webRenderer.dartDefines);
-    return dartDefinesSet.toList();
-  }
-
-
   Map<String, String> extractWebHeaders() {
     final Map<String, String> webHeaders = <String, String>{};
 
@@ -1621,6 +1603,7 @@ abstract class FlutterCommand extends Command<void> {
       commandPath: commandPath,
       result: commandResult.toString(),
       maxRss: maxRss,
+      commandHasTerminal: hasTerminal,
     ));
 
     // Send timing.
@@ -1633,16 +1616,26 @@ abstract class FlutterCommand extends Command<void> {
     final String label = labels
         .where((String? label) => label != null && !_isBlank(label))
         .join('-');
+
+    // If the command provides its own end time, use it. Otherwise report
+    // the duration of the entire execution.
+    final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(startTime);
     globals.flutterUsage.sendTiming(
       'flutter',
       name,
-      // If the command provides its own end time, use it. Otherwise report
-      // the duration of the entire execution.
-      (commandResult.endTimeOverride ?? endTime).difference(startTime),
+      elapsedDuration,
       // Report in the form of `success-[parameter1-parameter2]`, all of which
       // can be null if the command doesn't provide a FlutterCommandResult.
       label: label == '' ? null : label,
     );
+    analytics.send(Event.timing(
+      workflow: 'flutter',
+      variableName: name,
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+      // Report in the form of `success-[parameter1-parameter2]`, all of which
+      // can be null if the command doesn't provide a FlutterCommandResult.
+      label: label == '' ? null : label,
+    ));
   }
 
   /// Perform validation then call [runCommand] to execute the command.
@@ -1706,6 +1699,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         processManager: globals.processManager,
         platform: globals.platform,
         usage: globals.flutterUsage,
+        analytics: analytics,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );
@@ -1736,9 +1730,17 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     setupApplicationPackages();
 
     if (commandPath != null) {
+      // Until the GA4 migration is complete, we will continue to send to the GA3 instance
+      // as well as GA4. Once migration is complete, we will only make a call for GA4 values
+      final List<Object> pairOfUsageValues = await Future.wait<Object>(<Future<Object>>[
+        usageValues,
+        unifiedAnalyticsUsageValues(commandPath),
+      ]);
+
       Usage.command(commandPath, parameters: CustomDimensions(
-        commandHasTerminal: globals.stdio.hasTerminal,
-      ).merge(await usageValues));
+        commandHasTerminal: hasTerminal,
+      ).merge(pairOfUsageValues[0] as CustomDimensions));
+      analytics.send(pairOfUsageValues[1] as Event);
     }
 
     return runCommand();
@@ -1795,7 +1797,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       return null;
     }
     if (deviceList.length > 1) {
-      globals.printStatus(userMessages.flutterSpecifyDevice);
+      globals.printStatus(globals.userMessages.flutterSpecifyDevice);
       deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
@@ -1814,7 +1816,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       // until one can be found.
       final String? path = findProjectRoot(globals.fs, globals.fs.currentDirectory.path);
       if (path == null) {
-        throwToolExit(userMessages.flutterNoPubspec);
+        throwToolExit(globals.userMessages.flutterNoPubspec);
       }
       if (path != globals.fs.currentDirectory.path) {
         globals.fs.currentDirectory = path;
@@ -1825,7 +1827,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!globals.fs.isFileSync(targetPath)) {
-        throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
+        throw ToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
       }
     }
   }
@@ -1932,6 +1934,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       }
       return null;
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
       if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }

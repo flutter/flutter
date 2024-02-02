@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestRoute extends PageRouteBuilder<void> {
   TestRoute(Widget child) : super(
@@ -27,7 +26,7 @@ class IconTextBox extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('InheritedTheme.captureAll()', (WidgetTester tester) async {
+  testWidgets('InheritedTheme.captureAll()', (WidgetTester tester) async {
     const double fontSize = 32;
     const double iconSize = 48;
     const Color textColor = Color(0xFF00FF00);
@@ -147,7 +146,7 @@ void main() {
     expect(getIconStyle().fontSize, iconSize);
   });
 
-  testWidgetsWithLeakTracking('InheritedTheme.captureAll() multiple IconTheme ancestors', (WidgetTester tester) async {
+  testWidgets('InheritedTheme.captureAll() multiple IconTheme ancestors', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/39087
 
     const Color outerColor = Color(0xFF0000FF);
@@ -207,7 +206,7 @@ void main() {
     expect(getIconStyle(icon2).fontSize, iconSize);
   });
 
-  testWidgetsWithLeakTracking('InheritedTheme.captureAll() multiple DefaultTextStyle ancestors', (WidgetTester tester) async {
+  testWidgets('InheritedTheme.captureAll() multiple DefaultTextStyle ancestors', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/39087
 
     const Color textColor = Color(0xFF00FF00);

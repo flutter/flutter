@@ -164,7 +164,8 @@ class Card extends StatelessWidget {
   ///
   /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
   /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
-  /// with a circular corner radius of 4.0.
+  /// with a circular corner radius of 12.0 and if [ThemeData.useMaterial3] is
+  /// false, then the circular corner radius will be 4.0.
   final ShapeBorder? shape;
 
   /// Whether to paint the [shape] border in front of the [child].

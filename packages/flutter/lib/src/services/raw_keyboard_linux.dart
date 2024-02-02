@@ -10,9 +10,11 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for Linux.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
 ///
 /// Different window toolkit implementations can map to different key codes. This class
 /// will use the correct mapping depending on the [keyHelper] provided.
@@ -20,8 +22,16 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataLinux extends RawKeyEventData {
   /// Creates a key event data structure specific for Linux.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataLinux({
     required this.keyHelper,
     this.unicodeScalarValues = 0,
@@ -170,8 +180,19 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 /// Given that there might be multiple window toolkit implementations (GLFW,
 /// GTK, QT, etc), this creates a common interface for each of the
 /// different toolkits.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
+@Deprecated(
+  'No longer supported. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 abstract class KeyHelper {
   /// Create a KeyHelper implementation depending on the given toolkit.
+  @Deprecated(
+    'No longer supported. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   factory KeyHelper(String toolkit) {
     if (toolkit == 'glfw') {
       return GLFWKeyHelper();
@@ -189,10 +210,18 @@ abstract class KeyHelper {
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
+  @Deprecated(
+    'No longer supported. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   KeyboardSide getModifierSide(ModifierKey key);
 
   /// Returns true if the given [ModifierKey] was pressed at the time of this
   /// event.
+  @Deprecated(
+    'No longer supported. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown});
 
   /// The numpad key from the specific key code mapping.
@@ -206,6 +235,13 @@ abstract class KeyHelper {
 }
 
 /// Helper class that uses GLFW-specific key mappings.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
+@Deprecated(
+  'No longer supported. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class GLFWKeyHelper implements KeyHelper {
   /// This mask is used to check the [RawKeyEventDataLinux.modifiers] field to
   /// test whether the CAPS LOCK modifier key is on.
@@ -343,6 +379,13 @@ class GLFWKeyHelper implements KeyHelper {
 }
 
 /// Helper class that uses GTK-specific key mappings.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
+@Deprecated(
+  'No longer supported. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class GtkKeyHelper implements KeyHelper {
   /// This mask is used to check the [RawKeyEventDataLinux.modifiers] field to
   /// test whether one of the SHIFT modifier keys is pressed.

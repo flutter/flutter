@@ -7,7 +7,6 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Leaf extends StatefulWidget {
   const Leaf({
@@ -55,7 +54,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
+  testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -103,7 +102,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
+  testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -150,7 +149,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('KeepAlive with GridView', (WidgetTester tester) async {
+  testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -199,7 +198,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('KeepAlive render tree description', (WidgetTester tester) async {
+  testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -218,7 +217,8 @@ void main() {
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
-      ' │ configuration: Size(800.0, 600.0) at 3.0x (in logical pixels)\n'
+      ' │ configuration: BoxConstraints(w=800.0, h=600.0) at 3.0x (in\n'
+      ' │   logical pixels)\n'
       ' │\n'
       ' └─child: RenderRepaintBoundary#00000\n'
       '   │ needs compositing\n'
@@ -392,7 +392,8 @@ void main() {
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
-      ' │ configuration: Size(800.0, 600.0) at 3.0x (in logical pixels)\n'
+      ' │ configuration: BoxConstraints(w=800.0, h=600.0) at 3.0x (in\n'
+      ' │   logical pixels)\n'
       ' │\n'
       ' └─child: RenderRepaintBoundary#00000\n'
       '   │ needs compositing\n'

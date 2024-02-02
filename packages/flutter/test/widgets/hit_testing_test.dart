@@ -6,17 +6,16 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('toString control test', (WidgetTester tester) async {
+  testWidgets('toString control test', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: Text('Hello', textDirection: TextDirection.ltr)));
     final HitTestResult result = tester.hitTestOnBinding(Offset.zero);
     expect(result, hasOneLineDescription);
     expect(result.path.first, hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('A mouse click should only cause one hit test', (WidgetTester tester) async {
+  testWidgets('A mouse click should only cause one hit test', (WidgetTester tester) async {
     int hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
@@ -32,7 +31,7 @@ void main() {
     expect(hitCount, 1);
   });
 
-  testWidgetsWithLeakTracking('Non-mouse events should not cause movement hit tests', (WidgetTester tester) async {
+  testWidgets('Non-mouse events should not cause movement hit tests', (WidgetTester tester) async {
     int hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(

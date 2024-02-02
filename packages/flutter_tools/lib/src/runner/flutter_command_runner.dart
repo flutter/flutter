@@ -6,13 +6,13 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/terminal.dart';
-import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -44,6 +44,7 @@ abstract final class FlutterGlobalOptions {
   static const String kVersionFlag = 'version';
   static const String kWrapColumnOption = 'wrap-column';
   static const String kWrapFlag = 'wrap';
+  static const String kDebugLogsDirectoryFlag = 'debug-logs-dir';
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
@@ -164,6 +165,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       help: 'Enable a set of CI-specific test debug settings.',
       hide: !verboseHelp,
     );
+    argParser.addOption(
+      FlutterGlobalOptions.kDebugLogsDirectoryFlag,
+      help: 'Path to a directory where logs for debugging may be added.',
+      hide: !verboseHelp,
+    );
   }
 
   @override
@@ -250,10 +256,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         wrapColumn = int.parse(topLevelResults[FlutterGlobalOptions.kWrapColumnOption] as String);
         if (wrapColumn < 0) {
-          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
+          throwToolExit(globals.userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
         }
       } on FormatException {
-        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
+        throwToolExit(globals.userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
       }
     }
 
@@ -329,6 +335,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
           globals.flutterUsage.sendCommand(FlutterGlobalOptions.kVersionFlag);
+          globals.analytics.send(Event.flutterCommandResult(
+            commandPath: 'version',
+            result: 'success',
+            commandHasTerminal: globals.stdio.hasTerminal,
+          ));
           final FlutterVersion version = globals.flutterVersion.fetchTagsAndGetVersion(
             clock: globals.systemClock,
           );

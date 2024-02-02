@@ -626,6 +626,16 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   @override
   void dispose() {
     _recognizer.dispose();
+
+    // If this is disposed during a drag, call navigator.didStopUserGesture.
+    if (_backGestureController != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_backGestureController?.navigator.mounted ?? false) {
+          _backGestureController?.navigator.didStopUserGesture();
+        }
+        _backGestureController = null;
+      });
+    }
     super.dispose();
   }
 
@@ -663,12 +673,10 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 
   double _convertToLogical(double value) {
-    switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        return -value;
-      case TextDirection.ltr:
-        return value;
-    }
+    return switch (Directionality.of(context)) {
+      TextDirection.rtl => -value,
+      TextDirection.ltr =>  value,
+    };
   }
 
   @override

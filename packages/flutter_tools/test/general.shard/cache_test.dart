@@ -615,7 +615,7 @@ void main() {
       expect(artifacts.getBinaryDirs(), <List<String>>[
         <String>['darwin-x64', 'darwin-arm64/font-subset.zip'],
         <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
-        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 windows hosts are not supported now
+        <String>['windows-arm64', 'windows-arm64/font-subset.zip'],
       ]);
   });
 
@@ -1289,7 +1289,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool reinitialized = false;
 
   @override
-  void reinitialize() {
+  void reinitialize({FileSystem? fileSystem}) {
     reinitialized = true;
   }
 }

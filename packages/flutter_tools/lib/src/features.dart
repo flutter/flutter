@@ -156,12 +156,14 @@ const Feature flutterWebWasm = Feature(
   ),
 );
 
+const String kCliAnimationsFeatureName = 'cli-animations';
+
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
 const Feature cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
-  configSetting: 'cli-animations',
+  configSetting: kCliAnimationsFeatureName,
 );
 
 /// Enable native assets compilation and bundling.

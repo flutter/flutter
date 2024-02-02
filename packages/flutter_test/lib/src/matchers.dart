@@ -624,6 +624,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [containsSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
+  String? identifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -701,6 +702,7 @@ Matcher matchesSemantics({
   List<Matcher>? children,
 }) {
   return _MatchesSemanticsData(
+    identifier: identifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -808,6 +810,7 @@ Matcher matchesSemantics({
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [matchesSemantics], a similar matcher with default values for flags and actions.
 Matcher containsSemantics({
+  String? identifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -885,6 +888,7 @@ Matcher containsSemantics({
   List<Matcher>? children,
 }) {
   return _MatchesSemanticsData(
+    identifier: identifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -1477,8 +1481,6 @@ double _matrix3Distance(Matrix3 a, Matrix3 b) {
 }
 
 double _sizeDistance(Size a, Size b) {
-  // TODO(a14n): remove ignore when lint is updated, https://github.com/dart-lang/linter/issues/1843
-  // ignore: unnecessary_parenthesis
   final Offset delta = (b - a) as Offset;
   return delta.distance;
 }
@@ -2207,6 +2209,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
 
 class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
+    required this.identifier,
     required this.label,
     required this.attributedLabel,
     required this.hint,
@@ -2344,6 +2347,7 @@ class _MatchesSemanticsData extends Matcher {
                 onLongPressHint: onLongPressHint,
               );
 
+  final String? identifier;
   final String? label;
   final AttributedString? attributedLabel;
   final String? hint;
