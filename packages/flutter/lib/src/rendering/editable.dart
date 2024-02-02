@@ -2590,7 +2590,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     defaultApplyPaintTransform(child, transform);
   }
 
-  final bool _preventFlutterPaint;
+  /// docs
+  bool get preventFlutterPaint => _preventFlutterPaint;
+  bool _preventFlutterPaint;
+  set preventFlutterPaint(bool value) {
+    _preventFlutterPaint = value;
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
