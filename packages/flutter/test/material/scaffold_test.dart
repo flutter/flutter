@@ -53,7 +53,10 @@ void main() {
     expect(controller.position.pixels, 100.0);
   });
 
-  testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
+  testWidgets('Scaffold drawer callback test',
+  // TODO(polina-c): exempt singletons, https://github.com/dart-lang/leak_tracker/issues/218 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     bool isDrawerOpen = false;
     bool isEndDrawerOpen = false;
 
