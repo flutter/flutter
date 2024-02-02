@@ -5,6 +5,7 @@
 part of ui;
 
 typedef VoidCallback = void Function();
+typedef ViewFocusChangeCallback = void Function(ViewFocusEvent viewFocusEvent);
 typedef FrameCallback = void Function(Duration duration);
 typedef TimingsCallback = void Function(List<FrameTiming> timings);
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
@@ -39,6 +40,15 @@ abstract class PlatformDispatcher {
 
   VoidCallback? get onMetricsChanged;
   set onMetricsChanged(VoidCallback? callback);
+
+  ViewFocusChangeCallback? get onViewFocusChange;
+  set onViewFocusChange(ViewFocusChangeCallback? callback);
+
+  void requestViewFocusChange({
+    required int viewId,
+    required ViewFocusState state,
+    required ViewFocusDirection direction,
+  });
 
   FrameCallback? get onBeginFrame;
   set onBeginFrame(FrameCallback? callback);
@@ -548,4 +558,34 @@ class SemanticsActionEvent {
 
   @override
   String toString() => 'SemanticsActionEvent($type, view: $viewId, node: $nodeId)';
+}
+
+final class ViewFocusEvent {
+  const ViewFocusEvent({
+    required this.viewId,
+    required this.state,
+    required this.direction,
+  });
+
+  final int viewId;
+
+  final ViewFocusState state;
+
+  final ViewFocusDirection direction;
+
+  @override
+  String toString() {
+    return 'ViewFocusEvent(viewId: $viewId, state: $state, direction: $direction)';
+  }
+}
+
+enum ViewFocusState {
+  unfocused,
+  focused,
+}
+
+enum ViewFocusDirection {
+  undefined,
+  forward,
+  backwards,
 }
