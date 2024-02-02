@@ -17,7 +17,10 @@ import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 
 void main() {
-  testWidgets('CircleAvatar with dark background color', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with dark background color',
+  // TODO(polina-c): exempt singletons, https://github.com/dart-lang/leak_tracker/issues/218 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -95,12 +98,11 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final ErrorImageProvider errorImage = ErrorImageProvider();
     bool caughtForegroundImageError = false;
+
     await tester.pumpWidget(
       wrap(
         child: RepaintBoundary(
