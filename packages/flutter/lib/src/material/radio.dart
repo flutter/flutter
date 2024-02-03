@@ -453,7 +453,6 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
     final VisualDensity effectiveVisualDensity = widget.visualDensity
       ?? radioTheme.visualDensity
       ?? defaults.visualDensity!;
-    Size size;
     Size size = switch (effectiveMaterialTapTargetSize) {
       MaterialTapTargetSize.padded     => const Size(kMinInteractiveDimension,       kMinInteractiveDimension),
       MaterialTapTargetSize.shrinkWrap => const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0),
