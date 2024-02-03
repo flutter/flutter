@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
+
 import 'assertions.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
@@ -61,7 +63,10 @@ class ObjectCreated extends ObjectEvent {
     required this.library,
     required this.className,
     required super.object,
-  });
+  }) : isExemptFromDisposal = _exemptionFromDisposal > 0;
+
+  /// If more then zero, created objects are exempt from disposal.
+  static int _exemptionFromDisposal = 0;
 
   /// Name of the instrumented library.
   ///
@@ -72,6 +77,11 @@ class ObjectCreated extends ObjectEvent {
   /// Name of the instrumented class.
   final String className;
 
+  /// If true, the object is not expected too be disposed.
+  ///
+  /// For example, the object is a singleton.
+  final bool isExemptFromDisposal;
+
   @override
   Map<Object, Map<String, Object>> toMap() {
     return <Object, Map<String, Object>>{object: <String, Object>{
@@ -81,6 +91,8 @@ class ObjectCreated extends ObjectEvent {
     }};
   }
 }
+
+typedef ObjectBuilderCallback<T> = T Function();
 
 /// An event that describes disposal of an object.
 class ObjectDisposed extends ObjectEvent {
@@ -271,7 +283,10 @@ class FlutterMemoryAllocations {
 
   /// Create [ObjectCreated] and invoke [dispatchObjectEvent] if there are listeners.
   ///
-  /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
+  /// This method is more efficient than [dispatchObjectEvent] if the event
+  /// object is not created yet.
+  /// If invoked in `builder` for [exemptFromDisposal],
+  /// [ObjectCreated.isExemptFromDisposal] will be set to true.
   void dispatchObjectCreated({
     required String library,
     required String className,
@@ -295,6 +310,26 @@ class FlutterMemoryAllocations {
       return;
     }
     dispatchObjectEvent(ObjectDisposed(object: object));
+  }
+
+  /// Create an object with exemption from disposal.
+  ///
+  /// All objects created by [builder] will be exempt from disposal.
+  ///
+  /// The method is useful for creating singletons:
+  ///
+  /// ```dart
+  /// static final MySingleton singleton = FlutterMemoryAllocations.instance.exemptFromDisposal(() {
+  ///  return MySingleton();
+  /// });
+  /// ```
+  T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder ){
+    ObjectCreated._exemptionFromDisposal ++;
+    try {
+      return builder();
+    } finally {
+      ObjectCreated._exemptionFromDisposal --;
+    }
   }
 
   void _subscribeToSdkObjects() {
