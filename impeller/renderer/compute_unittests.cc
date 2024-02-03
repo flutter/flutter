@@ -495,7 +495,8 @@ TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
 
   // Intentionally making the grid size zero in one dimension. No GPU will
   // tolerate this.
-  ASSERT_FALSE(pass->Compute(ISize(0, 1)).ok());
+  EXPECT_FALSE(pass->Compute(ISize(0, 1)).ok());
+  pass->EncodeCommands();
 }
 
 }  // namespace testing
