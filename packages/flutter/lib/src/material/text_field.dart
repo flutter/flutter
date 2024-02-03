@@ -1086,10 +1086,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _canRequestFocus {
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    return switch (mode) {
-      NavigationMode.traditional => widget.canRequestFocus && _isEnabled,
-      NavigationMode.directional => true,
-    };
+    switch (mode) {
+      case NavigationMode.traditional:
+        return widget.canRequestFocus && _isEnabled;
+      case NavigationMode.directional:
+        return true;
+    }
   }
 
   @override
