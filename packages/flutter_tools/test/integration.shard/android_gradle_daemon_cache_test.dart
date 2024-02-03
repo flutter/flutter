@@ -59,7 +59,7 @@ void main() {
     gradleProperties.writeAsStringSync(r'''
 org.gradle.daemon=true
 ''', mode: FileMode.append);
-    
+
     // TODO(gustl22): Override with in 'gradle.properties' has no effect, set GRADLE_OPTS instead,
     //  see https://github.com/gradle/gradle/issues/19501
     final Map<String, String> envVars = <String, String>{
