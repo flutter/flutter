@@ -1134,7 +1134,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     final (String text, TextPainter labelPainter) = switch (thumb) {
       Thumb.start => (labels.start, _startLabelPainter),
-      Thumb.end   => (labels.end,     _endLabelPainter),
+      Thumb.end   => (labels.end, _endLabelPainter),
     };
 
     labelPainter
