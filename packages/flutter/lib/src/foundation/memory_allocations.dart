@@ -4,8 +4,6 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
-
 import 'assertions.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
