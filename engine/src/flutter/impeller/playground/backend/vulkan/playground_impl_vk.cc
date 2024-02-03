@@ -158,8 +158,8 @@ std::unique_ptr<Surface> PlaygroundImplVK::AcquireSurfaceFrame(
 
   int width = 0;
   int height = 0;
-  ::glfwGetWindowSize(reinterpret_cast<GLFWwindow*>(handle_.get()), &width,
-                      &height);
+  ::glfwGetFramebufferSize(reinterpret_cast<GLFWwindow*>(handle_.get()), &width,
+                           &height);
   size_ = ISize{width, height};
   surface_context_vk->UpdateSurfaceSize(ISize{width, height});
 
