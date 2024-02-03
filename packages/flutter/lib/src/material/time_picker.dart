@@ -840,7 +840,8 @@ class _RenderInputPadding extends RenderShiftedBox {
       return false;
     }
 
-    final Offset newPosition = child!.size.center(Offset.zero) + switch (orientation) {
+    Offset newPosition = child!.size.center(Offset.zero);
+    newPosition += switch (orientation) {
       Orientation.portrait  when position.dy > newPosition.dy => const Offset(0, 1),
       Orientation.landscape when position.dx > newPosition.dx => const Offset(1, 0),
       Orientation.portrait  => const Offset(0, -1),
