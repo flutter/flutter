@@ -57,6 +57,9 @@ typedef ObjectEventListener = void Function(ObjectEvent event);
 /// An event that describes creation of an object.
 class ObjectCreated extends ObjectEvent {
   /// Creates an instance of [ObjectCreated].
+  ///
+  /// If invoked in `builder` for [FlutterMemoryAllocations.exemptFromDisposal],
+  /// [isExemptFromDisposal] will be set to true.
   ObjectCreated({
     required this.library,
     required this.className,
@@ -281,10 +284,11 @@ class FlutterMemoryAllocations {
 
   /// Create [ObjectCreated] and invoke [dispatchObjectEvent] if there are listeners.
   ///
-  /// This method is more efficient than [dispatchObjectEvent] if the event
-  /// object is not created yet.
   /// If invoked in `builder` for [exemptFromDisposal],
   /// [ObjectCreated.isExemptFromDisposal] will be set to true.
+  ///
+  /// This method is more efficient than [dispatchObjectEvent] if the event
+  /// object is not created yet.
   void dispatchObjectCreated({
     required String library,
     required String className,
