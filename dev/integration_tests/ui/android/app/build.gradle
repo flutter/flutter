@@ -5,7 +5,7 @@
 plugins {
     id "com.android.application"
     id "dev.flutter.flutter-gradle-plugin"
-    id "kotlin-android"
+    id "org.jetbrains.kotlin.android"
 }
 
 android {
