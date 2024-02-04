@@ -4015,7 +4015,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _stopCursorBlink({ bool resetCharTicks = true }) {
     // If the cursor is animating, stop the animation, and we always
-    // want the cursor to be visible when the floating cursor is enabled
+    // want the cursor to be visible when the floating cursor is enabled.
     _cursorBlinkOpacityController.value = renderEditable.floatingCursorOn ? 1.0 : 0.0;
     _cursorTimer?.cancel();
     _cursorTimer = null;
