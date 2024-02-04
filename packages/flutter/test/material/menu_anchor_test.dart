@@ -2356,7 +2356,6 @@ void main() {
         description,
         equalsIgnoringHashCodes(
           <String>[
-            'child: Text("Menu 0")',
             'focusNode: null',
             'menuStyle: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: MaterialStatePropertyAll(20.0), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
@@ -2598,6 +2597,58 @@ void main() {
           Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)
         ]),
       );
+    });
+
+    testWidgets('tapping MenuItemButton with null focus node', (WidgetTester tester) async {
+
+      FocusNode? buttonFocusNode = FocusNode();
+
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MenuAnchor(
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    focusNode: buttonFocusNode,
+                    closeOnActivate: false,
+                    child: const Text('Set focus to null'),
+                    onPressed: () {
+                      setState((){
+                        buttonFocusNode?.dispose();
+                        buttonFocusNode = null;
+                      });
+                    },
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return TextButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('OPEN MENU'),
+                  );
+                },
+              );
+            }
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('OPEN MENU'));
+      await tester.pump();
+
+      expect(find.text('Set focus to null'), findsOneWidget);
+
+      await tester.tap(find.text('Set focus to null'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('constrained menus show up in the right place in RTL', (WidgetTester tester) async {
@@ -3355,47 +3406,41 @@ void main() {
                       TestSemantics(
                         id: 3,
                         rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasExpandedState,
+                              SemanticsFlag.isExpanded,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'ABC',
+                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                          ),
+                          TestSemantics(
+                            id: 6,
+                            rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
                             children: <TestSemantics>[
                               TestSemantics(
-                                id: 5,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.isFocused,
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isEnabled,
-                                  SemanticsFlag.isFocusable,
-                                  SemanticsFlag.hasExpandedState,
-                                  SemanticsFlag.isExpanded,
-                                ],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
-                                label: 'ABC',
-                                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                              ),
-                              TestSemantics(
                                 id: 7,
-                                rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
+                                rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                                 children: <TestSemantics>[
                                   TestSemantics(
                                     id: 8,
+                                    label: 'Item 0',
                                     rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                                    children: <TestSemantics>[
-                                      TestSemantics(
-                                        id: 9,
-                                        label: 'Item 0',
-                                        rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                        flags: <SemanticsFlag>[
-                                          SemanticsFlag.hasEnabledState,
-                                          SemanticsFlag.isEnabled,
-                                          SemanticsFlag.isFocusable,
-                                        ],
-                                        actions: <SemanticsAction>[SemanticsAction.tap],
-                                      ),
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.hasEnabledState,
+                                      SemanticsFlag.isEnabled,
+                                      SemanticsFlag.isFocusable,
                                     ],
+                                    actions: <SemanticsAction>[SemanticsAction.tap],
                                   ),
                                 ],
                               ),
@@ -3432,26 +3477,20 @@ void main() {
                       TestSemantics(
                         id: 3,
                         rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                id: 5,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasExpandedState,
-                                  SemanticsFlag.isFocused,
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isEnabled,
-                                  SemanticsFlag.isFocusable,
-                                ],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
-                                label: 'ABC',
-                                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                              ),
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasExpandedState,
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
                             ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'ABC',
+                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                           ),
                         ],
                       ),

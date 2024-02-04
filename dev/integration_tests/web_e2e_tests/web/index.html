@@ -5,14 +5,17 @@ found in the LICENSE file. -->
 <html>
     <head>
         <title>Web Integration Tests</title>
-        <script>
-          // Use the local CanvasKit bundle instead of the CDN to reduce test flakiness.
-          window.flutterConfiguration = {
-            canvasKitBaseUrl: "/canvaskit/"
-          };
-        </script>
+        <script src="flutter.js"></script>
     </head>
     <body>
-        <script src="main.dart.js"></script>
+      <script>
+        {{flutter_build_config}}
+        _flutter.loader.load({
+          config: {
+            // Use the local CanvasKit bundle instead of the CDN to reduce test flakiness.
+            canvasKitBaseUrl: "/canvaskit/",
+          },
+        });
+      </script>
     </body>
 </html>

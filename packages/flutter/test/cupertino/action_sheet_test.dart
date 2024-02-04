@@ -960,80 +960,62 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
-                  id: 2,
                   children: <TestSemantics>[
                     TestSemantics(
-                      id: 6,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
+                      ],
+                      label: 'Alert',
                       children: <TestSemantics>[
                         TestSemantics(
-                          id: 7,
                           flags: <SemanticsFlag>[
-                            SemanticsFlag.scopesRoute,
-                            SemanticsFlag.namesRoute
+                            SemanticsFlag.hasImplicitScrolling,
                           ],
-                          label: 'Alert',
-                          textDirection: TextDirection.ltr,
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 8,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasImplicitScrolling
-                              ],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 9,
-                                  label: 'The title',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 10,
-                                  label: 'The message',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
+                              label: 'The title',
                             ),
                             TestSemantics(
-                              id: 11,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasImplicitScrolling
-                              ],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 12,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.tap
-                                  ],
-                                  label: 'One',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 13,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.tap
-                                  ],
-                                  label: 'Two',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
-                            ),
-                            TestSemantics(
-                              id: 14,
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
-                              label: 'Cancel',
-                              textDirection: TextDirection.ltr,
+                              label: 'The message',
                             ),
                           ],
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasImplicitScrolling,
+                          ],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                              ],
+                              label: 'One',
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                              ],
+                              label: 'Two',
+                            ),
+                          ],
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                          ],
+                          label: 'Cancel',
                         ),
                       ],
                     ),

@@ -364,6 +364,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
+      debugLogsDirectoryPath: debugLogsDirectoryPath,
     );
 
     String? testAssetDirectory;
@@ -583,14 +584,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
-        assetBundle.entryKinds,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
       );
     }
   }
 
-  bool _needRebuild(Map<String, DevFSContent> entries) {
+  bool _needRebuild(Map<String, AssetBundleEntry> entries) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
     // schema of the contents of the asset manifest file and the user does not
     // perform a `flutter clean` after upgrading.

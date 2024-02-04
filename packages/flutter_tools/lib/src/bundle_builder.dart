@@ -12,9 +12,8 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
-import 'build_system/targets/common.dart';
-import 'build_system/targets/scene_importer.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
@@ -78,8 +77,8 @@ class BundleBuilder {
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug
-        ? const CopyFlutterBundle()
-        : const ReleaseCopyFlutterBundle();
+        ? globals.buildTargets.copyFlutterBundle
+        : globals.buildTargets.releaseCopyFlutterBundle;
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
@@ -137,8 +136,7 @@ Future<AssetBundle?> buildAssets({
 
 Future<void> writeBundle(
   Directory bundleDir,
-  Map<String, DevFSContent> assetEntries,
-  Map<String, AssetKind> entryKinds, {
+  Map<String, AssetBundleEntry> assetEntries, {
   Logger? loggerOverride,
   required TargetPlatform targetPlatform,
   required ImpellerStatus impellerStatus,
@@ -170,15 +168,10 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
-  ShaderTarget shaderTarget = ShaderTarget.sksl;
-  if (targetPlatform == TargetPlatform.tester && impellerStatus == ImpellerStatus.enabled) {
-    shaderTarget = ShaderTarget.impellerSwiftShader;
-  }
-
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
-    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+    assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource resource = await pool.request();
       try {
         // This will result in strange looking files, for example files with `/`
@@ -187,13 +180,12 @@ Future<void> writeBundle(
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
-        final AssetKind assetKind = entryKinds[entry.key] ?? AssetKind.regular;
         file.parent.createSync(recursive: true);
-        final DevFSContent devFSContent = entry.value;
+        final DevFSContent devFSContent = entry.value.content;
         if (devFSContent is DevFSFileContent) {
           final File input = devFSContent.file as File;
           bool doCopy = true;
-          switch (assetKind) {
+          switch (entry.value.kind) {
             case AssetKind.regular:
               break;
             case AssetKind.font:
@@ -202,8 +194,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
-                target: shaderTarget,
-                json: targetPlatform == TargetPlatform.web_javascript,
+                targetPlatform: targetPlatform,
               );
             case AssetKind.model:
               doCopy = !await sceneImporter.importScene(

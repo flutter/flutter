@@ -296,7 +296,7 @@ void main() {
       expect(result.passed, false);
       expect(
         result.reason,
-        'SemanticsNode#5(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
+        'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
         'label: "this is a test", textDirection: ltr):\n'
         'Expected contrast ratio of at least 4.5 but found 1.17 for a font '
         'size of 14.0.\n'
@@ -328,7 +328,7 @@ void main() {
       expect(result.passed, false);
       expect(
         result.reason,
-        'SemanticsNode#5(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
+        'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
         'label: "this is a test", textDirection: ltr):\n'
         'Expected contrast ratio of at least 4.5 but found 1.19 for a font '
         'size of 14.0.\n'
@@ -715,7 +715,7 @@ void main() {
       expect(result.passed, false);
       expect(
         result.reason,
-        'SemanticsNode#5(Rect.fromLTRB(376.0, 276.5, 424.0, 323.5), '
+        'SemanticsNode#4(Rect.fromLTRB(376.0, 276.5, 424.0, 323.5), '
         'actions: [tap]): expected tap '
         'target size of at least Size(48.0, 48.0), '
         'but found Size(48.0, 47.0)\n'

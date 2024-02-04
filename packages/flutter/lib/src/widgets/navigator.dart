@@ -2919,7 +2919,7 @@ class _RouteEntry extends RouteTransitionRecord {
            initialState == _RouteLifecycle.pushReplace ||
            initialState == _RouteLifecycle.replace,
          ),
-        currentState = initialState {
+         currentState = initialState {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
@@ -5569,17 +5569,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                 includeSemantics: false,
                 child: UnmanagedRestorationScope(
                   bucket: bucket,
-                  // Generating a semantics node here fixes an issue where widgets rendered
-                  // before Navigator mistakenly get their semantics node dropped.
-                  // See: https://github.com/flutter/flutter/pull/138446
-                  child: Semantics(
-                    explicitChildNodes: true,
-                    container: true,
-                    child: Overlay(
-                      key: _overlayKey,
-                      clipBehavior: widget.clipBehavior,
-                      initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
-                    ),
+                  child: Overlay(
+                    key: _overlayKey,
+                    clipBehavior: widget.clipBehavior,
+                    initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
                   ),
                 ),
               ),

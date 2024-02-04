@@ -19,8 +19,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -2130,10 +2130,10 @@ flutter:
       vmServiceUris: Stream<Uri>.value(testUri),
     );
     final Completer<void> done = Completer<void>();
-    await runZonedGuarded(
+    unawaited(runZonedGuarded(
       () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
       (_, __) => done.complete(),
-    );
+    ));
     await done.future;
     expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
   }, overrides: <Type, Generator>{
@@ -2164,10 +2164,10 @@ flutter:
       vmServiceUris: Stream<Uri>.value(testUri),
     );
     final Completer<void>done = Completer<void>();
-    await runZonedGuarded(
+    unawaited(runZonedGuarded(
       () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
       (_, __) => done.complete(),
-    );
+    ));
     await done.future;
     expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInMessage'));
   }, overrides: <Type, Generator>{
@@ -2455,12 +2455,14 @@ flutter:
           targetPlatform: TargetPlatform.darwin,
           sdkNameAndVersion: 'Macos',
         );
+        final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
         final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
           ..testUri = testUri
           ..vmServiceHost = (() => fakeVmServiceHost)
           ..device = device
           .._devFS = devFS
-          ..targetPlatform = TargetPlatform.darwin;
+          ..targetPlatform = TargetPlatform.darwin
+          ..generator = residentCompiler;
 
         fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
           listViews,
@@ -2508,6 +2510,67 @@ flutter:
         expect(buildRunner.dryRunInvocations, 1);
         expect(buildRunner.hasPackageConfigInvocations, 1);
         expect(buildRunner.packagesWithNativeAssetsInvocations, 1);
+
+        expect(residentCompiler.recompileCalled, true);
+        expect(residentCompiler.receivedNativeAssetsYaml.toString(), endsWith('native_assets/macos/native_assets.yaml'));
+      }),
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+      });
+
+  testUsingContext(
+      'use the nativeAssetsYamlFile when provided',
+      () => testbed.run(() async {
+        final FakeDevice device = FakeDevice(
+          targetPlatform: TargetPlatform.darwin,
+          sdkNameAndVersion: 'Macos',
+        );
+        final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
+        final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+          ..testUri = testUri
+          ..vmServiceHost = (() => fakeVmServiceHost)
+          ..device = device
+          .._devFS = devFS
+          ..targetPlatform = TargetPlatform.darwin
+          ..generator = residentCompiler;
+
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+          listViews,
+          listViews,
+        ]);
+        globals.fs
+            .file(globals.fs.path.join('lib', 'main.dart'))
+            .createSync(recursive: true);
+        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
+        residentRunner = HotRunner(
+          <FlutterDevice>[
+            flutterDevice,
+          ],
+          stayResident: false,
+          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
+            BuildMode.debug,
+            '',
+            treeShakeIcons: false,
+            trackWidgetCreation: true,
+          )),
+          target: 'main.dart',
+          devtoolsHandler: createNoOpHandler,
+          buildRunner: buildRunner,
+          analytics: fakeAnalytics,
+          nativeAssetsYamlFile: 'foo.yaml',
+        );
+
+        final int? result = await residentRunner.run();
+        expect(result, 0);
+
+        expect(buildRunner.buildInvocations, 0);
+        expect(buildRunner.dryRunInvocations, 0);
+        expect(buildRunner.hasPackageConfigInvocations, 0);
+        expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
+
+        expect(residentCompiler.recompileCalled, true);
+        expect(residentCompiler.receivedNativeAssetsYaml, globals.fs.path.toUri('foo.yaml'));
       }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
@@ -2700,6 +2763,8 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   CompilerOutput? nextOutput;
   bool didSuppressErrors = false;
+  Uri? receivedNativeAssetsYaml;
+  bool recompileCalled = false;
 
   @override
   Future<CompilerOutput?> recompile(
@@ -2714,6 +2779,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
   }) async {
+    recompileCalled = true;
+    receivedNativeAssetsYaml = nativeAssetsYaml;
     didSuppressErrors = suppressErrors;
     return nextOutput ?? const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
@@ -2890,10 +2957,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

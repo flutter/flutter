@@ -525,20 +525,15 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 5,
-                            flags: <SemanticsFlag>[SemanticsFlag.isTextField,
-                              SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
-                            actions: <SemanticsAction>[SemanticsAction.tap,
-                              SemanticsAction.didGainAccessibilityFocus,],
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        flags: <SemanticsFlag>[SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
+                        actions: <SemanticsAction>[SemanticsAction.tap,
+                          SemanticsAction.didGainAccessibilityFocus,],
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -553,7 +548,7 @@ void main() {
     ));
 
     expect(focusNode.hasFocus, isFalse);
-    semanticsOwner.performAction(5, SemanticsAction.didGainAccessibilityFocus);
+    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
     semantics.dispose();
@@ -624,6 +619,48 @@ void main() {
         const Size(200, 31), // 31 is the height of the default font (17) + decoration (12).
       );
     },
+  );
+
+  testWidgets('selection handles color respects CupertinoTheme', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/74890.
+    const Color expectedSelectionHandleColor = Color.fromARGB(255, 10, 200, 255);
+
+    final TextEditingController controller = TextEditingController(text: 'Some text.');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          primaryColor: Colors.red,
+        ),
+        home: Center(
+          child: CupertinoTheme(
+            data: const CupertinoThemeData(
+              primaryColor: expectedSelectionHandleColor,
+            ),
+            child: CupertinoTextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+    expect(boxes.length, 2);
+
+    for (final RenderBox box in boxes) {
+      expect(box, paints..path(color: expectedSelectionHandleColor));
+    }
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(

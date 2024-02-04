@@ -691,24 +691,20 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                  ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.scopesRoute,
+                      tooltip: 'Add Photo',
+                      actions: <SemanticsAction>[
+                        SemanticsAction.tap,
                       ],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          tooltip: 'Add Photo',
-                          actions: <SemanticsAction>[
-                            SemanticsAction.tap,
-                          ],
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isButton,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                          ],
-                        ),
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasEnabledState,
+                        SemanticsFlag.isButton,
+                        SemanticsFlag.isEnabled,
+                        SemanticsFlag.isFocusable,
                       ],
                     ),
                   ],
