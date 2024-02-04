@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "fml/macros.h"
-#include "fml/thread_local.h"
 #include "impeller/base/thread_safety.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
 #include "third_party/swiftshader/include/vulkan/vulkan_core.h"
@@ -105,7 +104,7 @@ class MockDevice final {
 
 void noop() {}
 
-FML_THREAD_LOCAL std::vector<std::string> g_instance_extensions;
+static thread_local std::vector<std::string> g_instance_extensions;
 
 VkResult vkEnumerateInstanceExtensionProperties(
     const char* pLayerName,
@@ -125,7 +124,7 @@ VkResult vkEnumerateInstanceExtensionProperties(
   return VK_SUCCESS;
 }
 
-FML_THREAD_LOCAL std::vector<std::string> g_instance_layers;
+static thread_local std::vector<std::string> g_instance_layers;
 
 VkResult vkEnumerateInstanceLayerProperties(uint32_t* pPropertyCount,
                                             VkLayerProperties* pProperties) {
