@@ -4920,8 +4920,6 @@ ORIGIN: ../../../flutter/fml/task_source.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/task_source_grade.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/thread.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/thread.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/fml/thread_local.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/fml/thread_local.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/time/chrono_timestamp_provider.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/time/chrono_timestamp_provider.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/time/time_delta.h + ../../../flutter/LICENSE
@@ -7779,8 +7777,6 @@ FILE: ../../../flutter/fml/task_source.h
 FILE: ../../../flutter/fml/task_source_grade.h
 FILE: ../../../flutter/fml/thread.cc
 FILE: ../../../flutter/fml/thread.h
-FILE: ../../../flutter/fml/thread_local.cc
-FILE: ../../../flutter/fml/thread_local.h
 FILE: ../../../flutter/fml/time/chrono_timestamp_provider.cc
 FILE: ../../../flutter/fml/time/chrono_timestamp_provider.h
 FILE: ../../../flutter/fml/time/time_delta.h

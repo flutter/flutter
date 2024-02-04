@@ -4,17 +4,17 @@
 
 #include "flutter/fml/message_loop.h"
 
+#include <memory>
 #include <utility>
 
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/task_runner.h"
-#include "flutter/fml/thread_local.h"
 
 namespace fml {
 
-FML_THREAD_LOCAL ThreadLocalUniquePtr<MessageLoop> tls_message_loop;
+static thread_local std::unique_ptr<MessageLoop> tls_message_loop;
 
 MessageLoop& MessageLoop::GetCurrent() {
   auto* loop = tls_message_loop.get();
