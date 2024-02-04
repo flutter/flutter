@@ -620,15 +620,6 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   Offset? _finalDropPosition;
   MultiDragGestureRecognizer? _recognizer;
   int? _recognizerPointer;
-  // To implement the gap for the dragged item, we replace the dragged item
-  // with a zero sized box, and then translate all of the later items down
-  // by the size of the dragged item. This allows us to keep the order of the
-  // list, while still being able to animate the gap between the items. However
-  // for the first frame of the drag, the item has not yet been replaced, so
-  // the calculation for the gap is off by the size of the gap. This flag is
-  // used to determine if the transition to the zero sized box has completed,
-  // so the gap calculation can compensate for it.
-  bool _dragStartTransitionComplete = false;
 
   EdgeDraggingAutoScroller? _autoScroller;
 
@@ -733,7 +724,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   void _registerItem(_ReorderableItemState item) {
     if (_dragInfo != null && _items[item.index] != item) {
-      item.updateForGap(_dragInfo!.index, _dragInfo!.itemExtent, false, _reverse);
+      item.updateForGap(_dragInfo!.index, _dragInfo!.index, _dragInfo!.itemExtent, false, _reverse);
     }
     _items[item.index] = item;
     if (item.index == _dragInfo?.index) {
@@ -755,10 +746,6 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     item.dragging = true;
     widget.onReorderStart?.call(_dragIndex!);
     item.rebuild();
-    _dragStartTransitionComplete = false;
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-      _dragStartTransitionComplete = true;
-    }, debugLabel: 'SliverReorderableList.completeDragStartTransition');
 
     _insertIndex = item.index;
     _dragInfo = _DragInfo(
@@ -783,7 +770,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       if (childItem == item || !childItem.mounted) {
         continue;
       }
-      childItem.updateForGap(_insertIndex!, _dragInfo!.itemExtent, false, _reverse);
+      childItem.updateForGap(_insertIndex!, _insertIndex!, _dragInfo!.itemExtent, false, _reverse);
     }
     return _dragInfo;
   }
@@ -805,9 +792,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   void _dragEnd(_DragInfo item) {
     setState(() {
       if (_insertIndex == item.index) {
-        // Although it's at its original position, the original position has been replaced by a zero-size box
-        // So when reversed, it should offset its own extent
-        _finalDropPosition = _reverse ? _itemOffsetAt(_insertIndex!) - _extentOffset(item.itemExtent, _scrollDirection) : _itemOffsetAt(_insertIndex!);
+        _finalDropPosition =  _itemOffsetAt(_insertIndex!);
       } else if (_reverse) {
         if (_insertIndex! >= _items.length) {
           // Drop at the starting position of the last element and offset its own extent
@@ -890,14 +875,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         continue;
       }
 
-      Rect geometry = item.targetGeometry();
-      if (!_dragStartTransitionComplete && _dragIndex! <= item.index) {
-        // Transition is not complete, so each item after the dragged item is still
-        // in its normal location and not moved up for the zero sized box that will
-        // replace the dragged item.
-        final Offset transitionOffset = _extentOffset(_reverse ? -gapExtent : gapExtent, _scrollDirection);
-        geometry = (geometry.topLeft - transitionOffset) & geometry.size;
-      }
+      final Rect geometry = item.targetGeometry();
       final double itemStart = _scrollDirection == Axis.vertical ? geometry.top : geometry.left;
       final double itemExtent = _scrollDirection == Axis.vertical ? geometry.height : geometry.width;
       final double itemEnd = itemStart + itemExtent;
@@ -952,7 +930,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         if (item.index == _dragIndex! || !item.mounted) {
           continue;
         }
-        item.updateForGap(newIndex, gapExtent, true, _reverse);
+        item.updateForGap(_dragIndex!, newIndex, gapExtent, true, _reverse);
       }
     }
   }
@@ -1052,10 +1030,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     assert(debugCheckHasOverlay(context));
     final SliverChildBuilderDelegate childrenDelegate = SliverChildBuilderDelegate(
       _itemBuilder,
-      // When dragging, the dragged item is still in the list but has been replaced
-      // by a zero height SizedBox, so that the gap can move around. To make the
-      // list extent stable we add a dummy entry to the end.
-      childCount: widget.itemCount + (_dragInfo != null ? 1 : 0),
+      childCount: widget.itemCount,
       findChildIndexCallback: widget.findChildIndexCallback,
     );
     if (widget.itemExtent != null) {
@@ -1140,7 +1115,8 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   @override
   Widget build(BuildContext context) {
     if (_dragging) {
-      return const SizedBox();
+      final Size size = _extentSize(_listState._dragInfo!.itemExtent, _listState._scrollDirection);
+      return SizedBox(width: size.width, height: size.height);
     }
     _listState._registerItem(this);
     return Transform(
@@ -1163,10 +1139,15 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     return _targetOffset;
   }
 
-  void updateForGap(int gapIndex, double gapExtent, bool animate, bool reverse) {
-    final Offset newTargetOffset = (gapIndex <= index)
-        ? _extentOffset(reverse ? -gapExtent : gapExtent, _listState._scrollDirection)
-        : Offset.zero;
+  void updateForGap(int dragIndex, int gapIndex, double gapExtent, bool animate, bool reverse) {
+    late final Offset newTargetOffset;
+    if (gapIndex < dragIndex && index < dragIndex && index >= gapIndex) {
+      newTargetOffset = _extentOffset(reverse ? -gapExtent : gapExtent, _listState._scrollDirection);
+    } else if (gapIndex > dragIndex && index > dragIndex && index < gapIndex) {
+      newTargetOffset = _extentOffset(reverse ? gapExtent : -gapExtent, _listState._scrollDirection);
+    } else {
+      newTargetOffset = Offset.zero;
+    }
     if (newTargetOffset != _targetOffset) {
       _targetOffset = newTargetOffset;
       if (animate) {
@@ -1505,6 +1486,15 @@ double _sizeExtent(Size size, Axis scrollDirection) {
       return size.width;
     case Axis.vertical:
       return size.height;
+  }
+}
+
+Size _extentSize(double extent, Axis scrollDirection) {
+  switch (scrollDirection) {
+    case Axis.horizontal:
+      return Size(extent, 0);
+    case Axis.vertical:
+      return Size(0, extent);
   }
 }
 
