@@ -93,6 +93,7 @@ class ObjectCreated extends ObjectEvent {
   }
 }
 
+/// Callback for creating an object of type [T].
 typedef ObjectBuilderCallback<T> = T Function();
 
 /// An event that describes disposal of an object.
