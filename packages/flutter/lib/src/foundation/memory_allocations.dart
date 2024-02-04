@@ -322,8 +322,8 @@ class FlutterMemoryAllocations {
   /// The method is useful for creating singletons:
   ///
   /// ```dart
-  /// static final MySingleton singleton = FlutterMemoryAllocations.instance.exemptFromDisposal(() {
-  ///  return MySingleton();
+  /// final ValueNotifier<bool> mySingleton = FlutterMemoryAllocations.instance.exemptFromDisposal(() {
+  ///   return ValueNotifier<bool>(false);
   /// });
   /// ```
   T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder ){
