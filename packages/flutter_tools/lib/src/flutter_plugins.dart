@@ -1237,7 +1237,9 @@ bool hasPlugins(FlutterProject project) {
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
 // TODO(stuartmorgan): Expand implementation to apply to all implementations,
-// not just Dart-only, per the federated plugin spec.
+//  not just Dart-only, per the federated plugin spec.
+// TODO(gustl22): The flag [throwOnPluginPubspecError] is currently only used
+//  for testing dart plugins as the logic is not working correctly.
 List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   bool throwOnPluginPubspecError = true,
@@ -1424,7 +1426,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   PackageConfig packageConfig,
   String currentMainUri,
   File mainFile, {
-  bool throwOnPluginPubspecError = true,
+  bool throwOnPluginPubspecError = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
