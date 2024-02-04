@@ -8,7 +8,6 @@
 #include <optional>
 #include <utility>
 
-#include "fml/thread_local.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 
@@ -130,7 +129,7 @@ void CommandPoolVK::Destroy() {
 // Associates a resource with a thread and context.
 using CommandPoolMap =
     std::unordered_map<uint64_t, std::shared_ptr<CommandPoolVK>>;
-FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<CommandPoolMap> tls_command_pool_map;
+static thread_local std::unique_ptr<CommandPoolMap> tls_command_pool_map;
 
 // Map each context to a list of all thread-local command pools associated
 // with that context.

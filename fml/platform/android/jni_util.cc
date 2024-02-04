@@ -6,11 +6,11 @@
 
 #include <sys/prctl.h>
 
+#include <memory>
 #include <string>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/string_conversion.h"
-#include "flutter/fml/thread_local.h"
 
 namespace fml {
 namespace jni {
@@ -24,7 +24,7 @@ struct JNIDetach {
 };
 
 // Thread-local object that will detach from JNI during thread shutdown;
-FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<JNIDetach> tls_jni_detach;
+static thread_local std::unique_ptr<JNIDetach> tls_jni_detach;
 
 void InitJavaVM(JavaVM* vm) {
   FML_DCHECK(g_jvm == nullptr);

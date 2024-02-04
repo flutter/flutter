@@ -4,12 +4,10 @@
 
 #include "gl_context_switch_test.h"
 
-#include "flutter/fml/thread_local.h"
-
 namespace flutter {
 namespace testing {
 
-FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<int> current_context;
+static thread_local std::unique_ptr<int> current_context;
 
 TestSwitchableGLContext::TestSwitchableGLContext(int context)
     : context_(context){};

@@ -116,7 +116,6 @@
 ../../../flutter/fml/synchronization/sync_switch_unittest.cc
 ../../../flutter/fml/synchronization/waitable_event_unittest.cc
 ../../../flutter/fml/task_source_unittests.cc
-../../../flutter/fml/thread_local_unittests.cc
 ../../../flutter/fml/thread_unittests.cc
 ../../../flutter/fml/time/time_delta_unittest.cc
 ../../../flutter/fml/time/time_point_unittest.cc
