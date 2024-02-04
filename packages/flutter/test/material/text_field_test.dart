@@ -9292,6 +9292,50 @@ void main() {
     expect(editableText.style.color, isNull);
   });
 
+  testWidgets('selection handles color respects Theme', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/74890.
+    const Color expectedSelectionHandleColor = Color.fromARGB(255, 10, 200, 255);
+
+    final TextEditingController controller = TextEditingController(text: 'Some text.');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          textSelectionTheme: const TextSelectionThemeData(
+            selectionHandleColor: Colors.red,
+          ),
+        ),
+        home: Material(
+          child: Theme(
+            data: ThemeData(
+              textSelectionTheme: const TextSelectionThemeData(
+                selectionHandleColor: expectedSelectionHandleColor,
+              ),
+            ),
+            child: TextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPressAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+    expect(boxes.length, 2);
+
+    for (final RenderBox box in boxes) {
+      expect(box, paints..path(color: expectedSelectionHandleColor));
+    }
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
+  );
+
   testWidgets('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
