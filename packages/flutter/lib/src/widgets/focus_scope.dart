@@ -671,6 +671,13 @@ class _FocusState extends State<Focus> {
     Widget child = widget.child;
     if (widget.includeSemantics) {
       child = Semantics(
+        onDidGainAccessibilityFocus: () {
+          // Automatically request the focus for a focusable widget when it
+          // receives accessibility focus.
+          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
+            focusNode.requestFocus();
+          }
+        },
         focusable: _couldRequestFocus,
         focused: _hadPrimaryFocus,
         child: widget.child,
