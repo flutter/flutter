@@ -3771,9 +3771,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                           .map((TextBox box) => box.toRect())
                                           .reduce((Rect result, Rect rect) => result.expandToInclude(rect));
       _dataWhenToolbarShowScheduled = (value: _value, selectionBounds: selectionBounds);
-      if (_dataWhenToolbarShowScheduled != null) {
-        _selectionOverlay?.hideToolbar();
-      }
+      _selectionOverlay?.hideToolbar();
     } else if (notification is ScrollEndNotification) {
       if (_dataWhenToolbarShowScheduled == null) {
         return;
