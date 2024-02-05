@@ -575,8 +575,9 @@ void main() {
       TestApp(
         textDirection: TextDirection.ltr,
         child: Builder(
-          builder: (BuildContext context) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          builder: (BuildContext context) => MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: Material(
               child: Center(
                 child: DropdownButtonFormField<String>(

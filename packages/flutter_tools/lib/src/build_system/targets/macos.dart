@@ -18,7 +18,6 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
 ///
@@ -439,7 +438,6 @@ abstract class MacOSBundleFlutterAssets extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.darwin,
-      shaderTarget: ShaderTarget.sksl,
       flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
