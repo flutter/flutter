@@ -296,7 +296,7 @@ void main() {
       expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
 
       // Start a press on the child.
-      await tester.startGesture(childRect.center);
+      final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
 
       Finder findBuilderDecoyChild() {
@@ -317,6 +317,11 @@ void main() {
       final Container decoyLaterContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final BoxDecoration? decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
       expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.circular(0))));
+
+      // Finish gesture to release resources.
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgets('Hovering over Cupertino context menu updates cursor to clickable on Web', (WidgetTester tester) async {

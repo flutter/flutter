@@ -94,11 +94,15 @@ void main() {
     }) {
       final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       return CupertinoApp(
         home: EditableText(
           key: key,
           controller: controller,
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           style: const TextStyle(),
           cursorColor: const Color.fromARGB(0, 0, 0, 0),
           backgroundCursorColor: const Color.fromARGB(0, 0, 0, 0),
@@ -193,6 +197,7 @@ void main() {
 
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
         home: Directionality(
             textDirection: TextDirection.ltr,
@@ -254,6 +259,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
         home: Directionality(
             textDirection: TextDirection.ltr,
@@ -362,6 +368,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
         home: Directionality(
             textDirection: TextDirection.ltr,
@@ -502,6 +509,7 @@ void main() {
 
     testWidgets('Handles very long locale strings', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(CupertinoApp(
         locale: const Locale('en', 'us'),
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
@@ -615,6 +623,7 @@ void main() {
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
         final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
+        addTearDown(controller.dispose);
         await tester.pumpWidget(CupertinoApp(
           home: Directionality(
               textDirection: TextDirection.ltr,
@@ -671,8 +680,8 @@ void main() {
         final Offset textFieldOffset =
             tester.getTopLeft(find.byType(CupertinoTextField));
 
-        // 7.0 + 45.0 + 8.0 - 8.0 = _kToolbarArrowSize + _kToolbarHeight + _kToolbarContentDistance - padding
-        expect(selectionOffset.dy + 7.0 + 45.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
+        // 7.0 + 44.0 + 8.0 - 8.0 = _kToolbarArrowSize + text_button_height + _kToolbarContentDistance - padding
+        expect(selectionOffset.dy + 7.0 + 44.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
       },
       skip: isBrowser, // [intended] the selection menu isn't required by web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -924,7 +933,8 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('iOS selection handles scaling falls back to preferredLineHeight when the current frame does not match the previous', (WidgetTester tester) async {
+  testWidgets(
+    'iOS selection handles scaling falls back to preferredLineHeight when the current frame does not match the previous', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

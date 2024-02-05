@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
@@ -146,7 +147,7 @@ class RenderListWheelViewport
     implements RenderAbstractViewport {
   /// Creates a [RenderListWheelViewport] which renders children on a wheel.
   ///
-  /// All arguments must not be null. Optional arguments have reasonable defaults.
+  /// Optional arguments have reasonable defaults.
   RenderListWheelViewport({
     required this.childManager,
     required ViewportOffset offset,
@@ -220,8 +221,6 @@ class RenderListWheelViewport
   /// viewport uses to select which part of its content to display. As the user
   /// scrolls the viewport, this value changes, which changes the content that
   /// is displayed.
-  ///
-  /// Must not be null.
   ViewportOffset get offset => _offset;
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
@@ -264,7 +263,7 @@ class RenderListWheelViewport
   ///
   /// Defaults to an arbitrary but aesthetically reasonable number of 2.0.
   ///
-  /// Must not be null and must be positive.
+  /// Must be a positive number.
   /// {@endtemplate}
   double get diameterRatio => _diameterRatio;
   double _diameterRatio;
@@ -293,7 +292,7 @@ class RenderListWheelViewport
   /// A larger number brings the vanishing point closer and a smaller number
   /// pushes the vanishing point further.
   ///
-  /// Must not be null and must be positive.
+  /// Must be a positive number.
   /// {@endtemplate}
   double get perspective => _perspective;
   double _perspective;
@@ -402,7 +401,7 @@ class RenderListWheelViewport
   /// The size of the children along the main axis. Children [RenderBox]es will
   /// be given the [BoxConstraints] of this exact size.
   ///
-  /// Must not be null and must be positive.
+  /// Must be a positive number.
   /// {@endtemplate}
   double get itemExtent => _itemExtent;
   double _itemExtent;
@@ -432,7 +431,7 @@ class RenderListWheelViewport
   /// Changing this value will change the number of children built and shown
   /// inside the wheel.
   ///
-  /// Must not be null and must be positive.
+  /// Must be a positive number.
   /// {@endtemplate}
   ///
   /// Defaults to 1.
@@ -454,9 +453,9 @@ class RenderListWheelViewport
   /// If false, every child will be painted. However the [Scrollable] is still
   /// the size of the viewport and detects gestures inside only.
   ///
-  /// Defaults to false. Must not be null. Cannot be true if [clipBehavior]
-  /// is not [Clip.none] since children outside the viewport will be clipped, and
-  /// therefore cannot render children outside the viewport.
+  /// Defaults to false. Cannot be true if [clipBehavior] is not [Clip.none]
+  /// since children outside the viewport will be clipped, and therefore cannot
+  /// render children outside the viewport.
   /// {@endtemplate}
   bool get renderChildrenOutsideViewport => _renderChildrenOutsideViewport;
   bool _renderChildrenOutsideViewport;
@@ -475,7 +474,7 @@ class RenderListWheelViewport
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -617,7 +616,8 @@ class RenderListWheelViewport
   bool get sizedByParent => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -824,9 +824,10 @@ class RenderListWheelViewport
   @override
   void dispose() {
     _clipRectLayer.layer = null;
+    _childOpacityLayerHandler.layer = null;
     super.dispose();
   }
-
+  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
     // The magnifier cannot be turned off if the opacity is less than 1.0.
@@ -837,7 +838,7 @@ class RenderListWheelViewport
 
     // In order to reduce the number of opacity layers, we first paint all
     // partially opaque children, then finally paint the fully opaque children.
-    context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
+    _childOpacityLayerHandler.layer = context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
       _paintAllChildren(context, offset, center: false);
     });
     _paintAllChildren(context, offset, center: true);
@@ -878,7 +879,7 @@ class RenderListWheelViewport
     // renderChildrenOutsideViewport is true. Otherwise, only children within
     // suitable angles (via _first/lastVisibleLayoutOffset) reach the paint
     // phase.
-    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0) {
+    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0 || angle.isNaN) {
       return;
     }
 
@@ -907,10 +908,10 @@ class RenderListWheelViewport
   // differently if it intersects with the magnifier.
   //
   // `center` controls how items that partially intersect the center magnifier
-  // are rendered. If `center` is false, items are only painted cynlindrically.
+  // are rendered. If `center` is false, items are only painted cylindrically.
   // If `center` is true, only the clipped magnifier items are painted.
   // If `center` is null, partially intersecting items are painted both as the
-  // magnifier and cynlidrical item, while non-intersecting items are painted
+  // magnifier and cylindrical item, while non-intersecting items are painted
   // only cylindrically.
   //
   // This property is used to lift the opacity that would be applied to each
@@ -1123,11 +1124,15 @@ class RenderListWheelViewport
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    Axis? axis, // Unused, only Axis.vertical supported by this viewport.
+  }) {
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.
-
     rect ??= target.paintBounds;
 
     // `child` will be the last RenderObject before the viewport when walking up from `target`.

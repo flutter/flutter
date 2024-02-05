@@ -424,6 +424,7 @@ class ListTile extends StatelessWidget {
   /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
+  /// {@template flutter.material.ListTile.dense}
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
@@ -431,6 +432,7 @@ class ListTile extends StatelessWidget {
   /// Dense list tiles default to a smaller height.
   ///
   /// It is not recommended to set [dense] to true when [ThemeData.useMaterial3] is true.
+  /// {@endtemplate}
   final bool? dense;
 
   /// Defines how compact the list tile's layout will be.
@@ -801,8 +803,7 @@ class ListTile extends StatelessWidget {
       subtitleStyle = subtitleTextStyle
         ?? tileTheme.subtitleTextStyle
         ?? defaults.subtitleTextStyle!;
-      final Color? subtitleColor = effectiveColor
-        ?? (theme.useMaterial3 ? null : theme.textTheme.bodySmall!.color);
+      final Color? subtitleColor = effectiveColor;
       subtitleStyle = subtitleStyle.copyWith(
         color: subtitleColor,
         fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
@@ -896,10 +897,6 @@ class ListTile extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Widget>('leading', leading, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('title', title, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('subtitle', subtitle, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('trailing', trailing, defaultValue: null));
     properties.add(FlagProperty('isThreeLine', value: isThreeLine, ifTrue:'THREE_LINE', ifFalse: 'TWO_LINE', showName: true, defaultValue: false));
     properties.add(FlagProperty('dense', value: dense, ifTrue: 'true', ifFalse: 'false', showName: true));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
@@ -1005,16 +1002,12 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
 
   @override
   Widget? childForSlot(_ListTileSlot slot) {
-    switch (slot) {
-      case _ListTileSlot.leading:
-        return leading;
-      case _ListTileSlot.title:
-        return title;
-      case _ListTileSlot.subtitle:
-        return subtitle;
-      case _ListTileSlot.trailing:
-        return trailing;
-    }
+    return switch (slot) {
+      _ListTileSlot.leading  => leading,
+      _ListTileSlot.title    => title,
+      _ListTileSlot.subtitle => subtitle,
+      _ListTileSlot.trailing => trailing,
+    };
   }
 
   @override
@@ -1524,16 +1517,15 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 
   @override
   TextStyle? get titleTextStyle {
-    switch (style!) {
-      case ListTileStyle.drawer:
-        return _textTheme.bodyLarge;
-      case ListTileStyle.list:
-        return _textTheme.titleMedium;
-    }
+    return switch (style!) {
+      ListTileStyle.drawer => _textTheme.bodyLarge,
+      ListTileStyle.list   => _textTheme.titleMedium,
+    };
   }
 
   @override
-  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!
+    .copyWith(color: _textTheme.bodySmall!.color);
 
   @override
   TextStyle? get leadingAndTrailingTextStyle => _textTheme.bodyMedium;

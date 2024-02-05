@@ -17,6 +17,7 @@ import 'theme.dart';
 
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
+const double _kMaxContentTextScaleFactor = 1.5;
 
 /// Specify how a [MaterialBanner] was closed.
 ///
@@ -93,9 +94,8 @@ enum MaterialBannerClosedReason {
 class MaterialBanner extends StatefulWidget {
   /// Creates a [MaterialBanner].
   ///
-  /// The [actions], [content], and [forceActionsBelow] must be non-null.
-  /// The [actions].length must be greater than 0. The [elevation] must be null or
-  /// non-negative.
+  /// The length of the [actions] list must not be empty. The [elevation] must
+  /// be null or non-negative.
   const MaterialBanner({
     super.key,
     required this.content,
@@ -319,7 +319,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
-    final Widget buttonBar = Container(
+    final Widget actionsBar = Container(
       alignment: AlignmentDirectional.centerEnd,
       constraints: const BoxConstraints(minHeight: 52.0),
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -366,21 +366,31 @@ class _MaterialBannerState extends State<MaterialBanner> {
                       padding: leadingPadding,
                       child: widget.leading,
                     ),
-                  Expanded(
-                    child: DefaultTextStyle(
-                      style: textStyle!,
-                      child: widget.content,
+                  MediaQuery.withClampedTextScaling(
+                    // Set maximum text scale factor to _kMaxContentTextScaleFactor for the
+                    // content to keep the visual hierarchy the same even with larger font
+                    // sizes.
+                    maxScaleFactor: _kMaxContentTextScaleFactor,
+                    child: Expanded(
+                      child: DefaultTextStyle(
+                        style: textStyle!,
+                        child: widget.content,
+                      ),
                     ),
                   ),
                   if (isSingleRow)
-                    buttonBar,
+                    MediaQuery.withClampedTextScaling(
+                      // Set maximum text scale factor to _kMaxContentTextScaleFactor for the
+                      // actionsBar to keep the visual hierarchy the same even with larger font
+                      // sizes.
+                      maxScaleFactor: _kMaxContentTextScaleFactor,
+                      child: actionsBar,
+                    ),
                 ],
               ),
             ),
-            if (!isSingleRow)
-              buttonBar,
-            if (elevation == 0)
-              Divider(height: 0, color: dividerColor),
+            if (!isSingleRow) actionsBar,
+            if (elevation == 0) Divider(height: 0, color: dividerColor),
           ],
         ),
       ),

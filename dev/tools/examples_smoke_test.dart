@@ -17,21 +17,21 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-FileSystem filesystem = const LocalFileSystem();
-ProcessManager processManager = const LocalProcessManager();
-Platform platform = const LocalPlatform();
+const FileSystem _kFilesystem = LocalFileSystem();
+const ProcessManager _kProcessManager = LocalProcessManager();
+const Platform _kPlatform = LocalPlatform();
 
 FutureOr<dynamic> main() async {
-  if (!platform.isLinux && !platform.isWindows && !platform.isMacOS) {
+  if (!_kPlatform.isLinux && !_kPlatform.isWindows && !_kPlatform.isMacOS) {
     stderr.writeln('Example smoke tests are only designed to run on desktop platforms');
     exitCode = 4;
     return;
   }
-  final Directory flutterDir = filesystem.directory(
+  final Directory flutterDir = _kFilesystem.directory(
     path.absolute(
       path.dirname(
         path.dirname(
-          path.dirname(platform.script.toFilePath()),
+          path.dirname(_kPlatform.script.toFilePath()),
         ),
       ),
     ),
@@ -63,16 +63,16 @@ Future<void> runSmokeTests({
   required Directory apiDir,
 }) async {
   final File flutterExe =
-      flutterDir.childDirectory('bin').childFile(platform.isWindows ? 'flutter.bat' : 'flutter');
+      flutterDir.childDirectory('bin').childFile(_kPlatform.isWindows ? 'flutter.bat' : 'flutter');
   final List<String> cmd = <String>[
     // If we're in a container with no X display, then use the virtual framebuffer.
-    if (platform.isLinux &&
-        (platform.environment['DISPLAY'] == null ||
-         platform.environment['DISPLAY']!.isEmpty)) '/usr/bin/xvfb-run',
+    if (_kPlatform.isLinux &&
+        (_kPlatform.environment['DISPLAY'] == null ||
+         _kPlatform.environment['DISPLAY']!.isEmpty)) '/usr/bin/xvfb-run',
     flutterExe.absolute.path,
     'test',
     '--reporter=expanded',
-    '--device-id=${platform.operatingSystem}',
+    '--device-id=${_kPlatform.operatingSystem}',
     integrationTest.absolute.path,
   ];
   await runCommand(cmd, workingDirectory: apiDir);
@@ -112,7 +112,7 @@ Future<File> generateTest(Directory apiDir) async {
     .trim()
     .split('\n');
   final Iterable<File> examples = gitFiles.map<File>((String examplePath) {
-    return filesystem.file(path.join(examplesLibDir.absolute.path, examplePath));
+    return _kFilesystem.file(path.join(examplesLibDir.absolute.path, examplePath));
   });
 
   // Collect the examples, and import them all as separate symbols.
@@ -202,7 +202,7 @@ Future<String> runCommand(
   }
 
   try {
-    process = await processManager.start(
+    process = await _kProcessManager.start(
       cmd,
       workingDirectory: workingDirectory.absolute.path,
       environment: environment,

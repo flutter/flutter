@@ -29,6 +29,7 @@ class _NoSplashFactory extends InteractiveInkFeatureFactory {
       controller: controller,
       referenceBox: referenceBox,
       color: color,
+      onRemoved: onRemoved,
     );
   }
 }
@@ -63,5 +64,17 @@ class NoSplash extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
+  }
+
+  @override
+  void confirm() {
+    super.confirm();
+    dispose();
+  }
+
+  @override
+  void cancel() {
+    super.cancel();
+    dispose();
   }
 }

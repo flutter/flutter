@@ -70,7 +70,7 @@ const double _kMaxTextScaleFactor = 1.3;
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a calendar month grid)
 /// or [DatePickerEntryMode.input] (a text input field) mode.
-/// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+/// It defaults to [DatePickerEntryMode.calendar].
 ///
 /// {@template flutter.material.date_picker.switchToInputEntryModeIcon}
 /// An optional [switchToInputEntryModeIcon] argument can be used to
@@ -117,7 +117,6 @@ const double _kMaxTextScaleFactor = 1.3;
 /// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
 /// [useRootNavigator] and [routeSettings] arguments are passed to [showDialog],
 /// the documentation for which discusses how it is used.
-/// [context], [barrierDismissible] and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -417,6 +416,14 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
 
   @override
+  void dispose() {
+    _selectedDate.dispose();
+    _entryMode.dispose();
+    _autovalidateMode.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -543,6 +550,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         spacing: 8,
         children: <Widget>[
           TextButton(
+            style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
             onPressed: _handleCancel,
             child: Text(widget.cancelText ?? (
               useMaterial3
@@ -551,6 +559,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
             )),
           ),
           TextButton(
+            style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
             onPressed: _handleOk,
             child: Text(widget.confirmText ?? localizations.okButtonLabel),
           ),
@@ -650,7 +659,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).textScaleFactor;
+    // 14 is a common font size used to compute the effective text scale.
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     final DialogTheme dialogTheme = theme.dialogTheme;
     return Dialog(
@@ -674,7 +685,12 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           // Constrain the textScaleFactor to the largest supported value to prevent
           // layout issues.
           maxScaleFactor: _kMaxTextScaleFactor,
-          child: Builder(builder: (BuildContext context) {
+          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
+            // Make sure the portrait dialog can fit the contents comfortably when
+            // resized from the landscape dialog.
+            final bool isFullyPortrait = constraints.maxHeight >= math.min(dialogSize.height, portraitDialogSize.height);
+
             switch (orientation) {
               case Orientation.portrait:
                 return Column(
@@ -683,8 +699,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   children: <Widget>[
                     header,
                     if (useMaterial3) Divider(height: 0, color: datePickerTheme.dividerColor),
-                    Expanded(child: picker),
-                    actions,
+                    if (isFullyPortrait) ...<Widget>[
+                      Expanded(child: picker),
+                      actions,
+                    ],
                   ],
                 );
               case Orientation.landscape:
@@ -926,7 +944,7 @@ class _DatePickerHeader extends StatelessWidget {
 /// before or on `initialDateRange.end`.
 ///
 /// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
-/// allowable date. Both must be non-null.
+/// allowable date.
 ///
 /// If an initial date range is provided, `initialDateRange.start`
 /// and `initialDateRange.end` must both fall between or on [firstDate] and
@@ -940,7 +958,7 @@ class _DatePickerHeader extends StatelessWidget {
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a scrollable calendar month
 /// grid) or [DatePickerEntryMode.input] (two text input fields) mode.
-/// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+/// It defaults to [DatePickerEntryMode.calendar].
 ///
 /// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
 ///
@@ -979,7 +997,6 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
 /// [useRootNavigator] and [routeSettings] arguments are passed to [showDialog],
 /// the documentation for which discusses how it is used.
-/// [context], [barrierDismissible] and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -1220,7 +1237,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// scrollable calendar month grid) or [DatePickerEntryMode.input] (two text
   /// input fields) mode.
   ///
-  /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+  /// It defaults to [DatePickerEntryMode.calendar].
   final DatePickerEntryMode initialEntryMode;
 
   /// The label on the cancel button for the text input mode.
@@ -1336,6 +1353,15 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
     registerForRestoration(_selectedStart, 'selected_start');
     registerForRestoration(_selectedEnd, 'selected_end');
     registerForRestoration(_autoValidate, 'autovalidate');
+  }
+
+  @override
+  void dispose() {
+    _entryMode.dispose();
+    _selectedStart.dispose();
+    _selectedEnd.dispose();
+    _autoValidate.dispose();
+    super.dispose();
   }
 
   void _handleOk() {
@@ -2353,143 +2379,32 @@ class _MonthItemState extends State<_MonthItem> {
   }
 
   Widget _buildDayItem(BuildContext context, DateTime dayToBuild, int firstDayOffset, int daysInMonth) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final TextTheme textTheme = theme.textTheme;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
-    final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
-    final TextDirection textDirection = Directionality.of(context);
-    final Color highlightColor = _highlightColor(context);
     final int day = dayToBuild.day;
 
     final bool isDisabled = dayToBuild.isAfter(widget.lastDate) || dayToBuild.isBefore(widget.firstDate);
-
-    BoxDecoration? decoration;
-    TextStyle? itemStyle = textTheme.bodyMedium;
-
     final bool isRangeSelected = widget.selectedDateStart != null && widget.selectedDateEnd != null;
     final bool isSelectedDayStart = widget.selectedDateStart != null && dayToBuild.isAtSameMomentAs(widget.selectedDateStart!);
     final bool isSelectedDayEnd = widget.selectedDateEnd != null && dayToBuild.isAtSameMomentAs(widget.selectedDateEnd!);
     final bool isInRange = isRangeSelected &&
       dayToBuild.isAfter(widget.selectedDateStart!) &&
       dayToBuild.isBefore(widget.selectedDateEnd!);
+    final bool isOneDayRange = isRangeSelected && widget.selectedDateStart == widget.selectedDateEnd;
+    final bool isToday = DateUtils.isSameDay(widget.currentDate, dayToBuild);
 
-    T? effectiveValue<T>(T? Function(DatePickerThemeData? theme) getProperty) {
-      return getProperty(datePickerTheme) ?? getProperty(defaults);
-    }
-
-    T? resolve<T>(MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty, Set<MaterialState> states) {
-      return effectiveValue(
-        (DatePickerThemeData? theme) {
-          return getProperty(theme)?.resolve(states);
-        },
-      );
-    }
-
-    final Set<MaterialState> states = <MaterialState>{
-      if (isDisabled) MaterialState.disabled,
-      if (isSelectedDayStart || isSelectedDayEnd) MaterialState.selected,
-    };
-
-    final Color? dayForegroundColor = resolve<Color?>((DatePickerThemeData? theme) => theme?.dayForegroundColor, states);
-    final Color? dayBackgroundColor = resolve<Color?>((DatePickerThemeData? theme) => theme?.dayBackgroundColor, states);
-    final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) => effectiveValue(
-        (DatePickerThemeData? theme) =>
-          isInRange
-            ? theme?.rangeSelectionOverlayColor?.resolve(states)
-             : theme?.dayOverlayColor?.resolve(states),
-      )
+    return _DayItem(
+      day: dayToBuild,
+      focusNode: _dayFocusNodes[day - 1],
+      onChanged: widget.onChanged,
+      onFocusChange: _dayFocusChanged,
+      highlightColor: _highlightColor(context),
+      isDisabled: isDisabled,
+      isRangeSelected: isRangeSelected,
+      isSelectedDayStart: isSelectedDayStart,
+      isSelectedDayEnd: isSelectedDayEnd,
+      isInRange: isInRange,
+      isOneDayRange: isOneDayRange,
+      isToday: isToday,
     );
-
-    _HighlightPainter? highlightPainter;
-
-    if (isSelectedDayStart || isSelectedDayEnd) {
-      // The selected start and end dates gets a circle background
-      // highlight, and a contrasting text color.
-      itemStyle = textTheme.bodyMedium?.apply(color: dayForegroundColor);
-      decoration = BoxDecoration(
-        color: dayBackgroundColor,
-        shape: BoxShape.circle,
-      );
-
-      if (isRangeSelected && widget.selectedDateStart != widget.selectedDateEnd) {
-        final _HighlightPainterStyle style = isSelectedDayStart
-          ? _HighlightPainterStyle.highlightTrailing
-          : _HighlightPainterStyle.highlightLeading;
-        highlightPainter = _HighlightPainter(
-          color: highlightColor,
-          style: style,
-          textDirection: textDirection,
-        );
-      }
-    } else if (isInRange) {
-      // The days within the range get a light background highlight.
-      highlightPainter = _HighlightPainter(
-        color: highlightColor,
-        style: _HighlightPainterStyle.highlightAll,
-        textDirection: textDirection,
-      );
-    } else if (isDisabled) {
-      itemStyle = textTheme.bodyMedium?.apply(color: colorScheme.onSurface.withOpacity(0.38));
-    } else if (DateUtils.isSameDay(widget.currentDate, dayToBuild)) {
-      // The current day gets a different text color and a circle stroke
-      // border.
-      itemStyle = textTheme.bodyMedium?.apply(color: colorScheme.primary);
-      decoration = BoxDecoration(
-        border: Border.all(color: colorScheme.primary),
-        shape: BoxShape.circle,
-      );
-    }
-
-    // We want the day of month to be spoken first irrespective of the
-    // locale-specific preferences or TextDirection. This is because
-    // an accessibility user is more likely to be interested in the
-    // day of month before the rest of the date, as they are looking
-    // for the day of month. To do that we prepend day of month to the
-    // formatted full date.
-    final String semanticLabelSuffix = DateUtils.isSameDay(widget.currentDate, dayToBuild) ? ', ${localizations.currentDateLabel}' : '';
-    String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}$semanticLabelSuffix';
-    if (isSelectedDayStart) {
-      semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
-    } else if (isSelectedDayEnd) {
-      semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
-    }
-
-    Widget dayWidget = Container(
-      decoration: decoration,
-      child: Center(
-        child: Semantics(
-          label: semanticLabel,
-          selected: isSelectedDayStart || isSelectedDayEnd,
-          child: ExcludeSemantics(
-            child: Text(localizations.formatDecimal(day), style: itemStyle),
-          ),
-        ),
-      ),
-    );
-
-    if (highlightPainter != null) {
-      dayWidget = CustomPaint(
-        painter: highlightPainter,
-        child: dayWidget,
-      );
-    }
-
-    if (!isDisabled) {
-      dayWidget = InkResponse(
-        focusNode: _dayFocusNodes[day - 1],
-        onTap: () => widget.onChanged(dayToBuild),
-        radius: _monthItemRowHeight / 2 + 4,
-        statesController: MaterialStatesController(states),
-        overlayColor: dayOverlayColor,
-        onFocusChange: _dayFocusChanged,
-        child: dayWidget,
-      );
-    }
-
-    return dayWidget;
   }
 
   Widget _buildEdgeContainer(BuildContext context, bool isHighlighted) {
@@ -2600,6 +2515,194 @@ class _MonthItemState extends State<_MonthItem> {
         const SizedBox(height: _monthItemFooterHeight),
       ],
     );
+  }
+}
+
+class _DayItem extends StatefulWidget {
+  const _DayItem({
+    required this.day,
+    required this.focusNode,
+    required this.onChanged,
+    required this.onFocusChange,
+    required this.highlightColor,
+    required this.isDisabled,
+    required this.isRangeSelected,
+    required this.isSelectedDayStart,
+    required this.isSelectedDayEnd,
+    required this.isInRange,
+    required this.isOneDayRange,
+    required this.isToday,
+  });
+
+  final DateTime day;
+
+  final FocusNode focusNode;
+
+  final ValueChanged<DateTime> onChanged;
+
+  final ValueChanged<bool> onFocusChange;
+
+  final Color highlightColor;
+
+  final bool isDisabled;
+
+  final bool isRangeSelected;
+
+  final bool isSelectedDayStart;
+
+  final bool isSelectedDayEnd;
+
+  final bool isInRange;
+
+  final bool isOneDayRange;
+
+  final bool isToday;
+
+  @override
+  State<_DayItem> createState() => _DayItemState();
+}
+
+class _DayItemState extends State<_DayItem> {
+  final MaterialStatesController _statesController = MaterialStatesController();
+
+  @override
+  void dispose() {
+    _statesController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TextTheme textTheme = theme.textTheme;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
+    final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
+    final TextDirection textDirection = Directionality.of(context);
+    final Color highlightColor = widget.highlightColor;
+
+    BoxDecoration? decoration;
+    TextStyle? itemStyle = textTheme.bodyMedium;
+
+    T? effectiveValue<T>(T? Function(DatePickerThemeData? theme) getProperty) {
+      return getProperty(datePickerTheme) ?? getProperty(defaults);
+    }
+
+    T? resolve<T>(MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty, Set<MaterialState> states) {
+      return effectiveValue(
+        (DatePickerThemeData? theme) {
+          return getProperty(theme)?.resolve(states);
+        },
+      );
+    }
+
+    final Set<MaterialState> states = <MaterialState>{
+      if (widget.isDisabled) MaterialState.disabled,
+      if (widget.isSelectedDayStart || widget.isSelectedDayEnd) MaterialState.selected,
+    };
+
+    _statesController.value = states;
+
+    final Color? dayForegroundColor = resolve<Color?>((DatePickerThemeData? theme) => theme?.dayForegroundColor, states);
+    final Color? dayBackgroundColor = resolve<Color?>((DatePickerThemeData? theme) => theme?.dayBackgroundColor, states);
+    final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+      (Set<MaterialState> states) => effectiveValue(
+        (DatePickerThemeData? theme) => widget.isInRange
+          ? theme?.rangeSelectionOverlayColor?.resolve(states)
+          : theme?.dayOverlayColor?.resolve(states),
+      )
+    );
+
+    _HighlightPainter? highlightPainter;
+
+    if (widget.isSelectedDayStart || widget.isSelectedDayEnd) {
+      // The selected start and end dates gets a circle background
+      // highlight, and a contrasting text color.
+      itemStyle = textTheme.bodyMedium?.apply(color: dayForegroundColor);
+      decoration = BoxDecoration(
+        color: dayBackgroundColor,
+        shape: BoxShape.circle,
+      );
+
+      if (widget.isRangeSelected && !widget.isOneDayRange) {
+        final _HighlightPainterStyle style = widget.isSelectedDayStart
+          ? _HighlightPainterStyle.highlightTrailing
+          : _HighlightPainterStyle.highlightLeading;
+        highlightPainter = _HighlightPainter(
+          color: highlightColor,
+          style: style,
+          textDirection: textDirection,
+        );
+      }
+    } else if (widget.isInRange) {
+      // The days within the range get a light background highlight.
+      highlightPainter = _HighlightPainter(
+        color: highlightColor,
+        style: _HighlightPainterStyle.highlightAll,
+        textDirection: textDirection,
+      );
+    } else if (widget.isDisabled) {
+      itemStyle = textTheme.bodyMedium?.apply(color: colorScheme.onSurface.withOpacity(0.38));
+    } else if (widget.isToday) {
+      // The current day gets a different text color and a circle stroke
+      // border.
+      itemStyle = textTheme.bodyMedium?.apply(color: colorScheme.primary);
+      decoration = BoxDecoration(
+        border: Border.all(color: colorScheme.primary),
+        shape: BoxShape.circle,
+      );
+    }
+
+    final String dayText = localizations.formatDecimal(widget.day.day);
+
+    // We want the day of month to be spoken first irrespective of the
+    // locale-specific preferences or TextDirection. This is because
+    // an accessibility user is more likely to be interested in the
+    // day of month before the rest of the date, as they are looking
+    // for the day of month. To do that we prepend day of month to the
+    // formatted full date.
+    final String semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
+    String semanticLabel = '$dayText, ${localizations.formatFullDate(widget.day)}$semanticLabelSuffix';
+    if (widget.isSelectedDayStart) {
+      semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
+    } else if (widget.isSelectedDayEnd) {
+      semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
+    }
+
+    Widget dayWidget = Container(
+      decoration: decoration,
+      child: Center(
+        child: Semantics(
+          label: semanticLabel,
+          selected: widget.isSelectedDayStart || widget.isSelectedDayEnd,
+          child: ExcludeSemantics(
+            child: Text(dayText, style: itemStyle),
+          ),
+        ),
+      ),
+    );
+
+    if (highlightPainter != null) {
+      dayWidget = CustomPaint(
+        painter: highlightPainter,
+        child: dayWidget,
+      );
+    }
+
+    if (!widget.isDisabled) {
+      dayWidget = InkResponse(
+        focusNode: widget.focusNode,
+        onTap: () => widget.onChanged(widget.day),
+        radius: _monthItemRowHeight / 2 + 4,
+        statesController: _statesController,
+        overlayColor: dayOverlayColor,
+        onFocusChange: widget.onFocusChange,
+        child: dayWidget,
+      );
+    }
+
+    return dayWidget;
   }
 }
 
@@ -2773,16 +2876,31 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       ),
     );
 
+    // 14 is a common font size used to compute the effective text scale.
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
+    final Size dialogSize = (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2) * textScaleFactor;
     switch (orientation) {
       case Orientation.portrait:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            header,
-            Expanded(child: picker),
-            actions,
-          ],
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
+            // Make sure the portrait dialog can fit the contents comfortably when
+            // resized from the landscape dialog.
+            final bool isFullyPortrait = constraints.maxHeight >= math.min(dialogSize.height, portraitDialogSize.height);
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                header,
+                if (isFullyPortrait) ...<Widget>[
+                  Expanded(child: picker),
+                  actions,
+                ],
+              ],
+            );
+          }
         );
 
       case Orientation.landscape:

@@ -428,7 +428,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
-typedef _SizeChangeCallback<Size> = void Function(Size);
+typedef _SizeChangeCallback<Size> = void Function(Size size);
 
 class _DragHandle extends StatelessWidget {
   const _DragHandle({
@@ -440,7 +440,7 @@ class _DragHandle extends StatelessWidget {
   });
 
   final VoidCallback? onSemanticsTap;
-  final Function(bool) handleHover;
+  final ValueChanged<bool> handleHover;
   final Set<MaterialState> materialState;
   final Color? dragHandleColor;
   final Size? dragHandleSize;
@@ -792,8 +792,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// dragged up and down and dismissed by swiping downwards.
 ///
 /// The [useSafeArea] parameter specifies whether the sheet will avoid system
-/// intrusions on the top, left, and right. If false, no SafeArea is added
-/// and the top padding is consumed using [MediaQuery.removePadding].
+/// intrusions on the top, left, and right. If false, no [SafeArea] is added;
+/// and [MediaQuery.removePadding] is applied to the top,
+/// so that system intrusions at the top will not be avoided by a [SafeArea]
+/// inside the bottom sheet either.
 /// Defaults to false.
 ///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
@@ -979,8 +981,14 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// If true, a [SafeArea] is inserted to keep the bottom sheet away from
   /// system intrusions at the top, left, and right sides of the screen.
   ///
-  /// If false, the bottom sheet isn't exposed to the top padding of the
-  /// MediaQuery.
+  /// If false, the bottom sheet will extend through any system intrusions
+  /// at the top, left, and right.
+  ///
+  /// If false, then moreover [MediaQuery.removePadding] will be used
+  /// to remove top padding, so that a [SafeArea] widget inside the bottom
+  /// sheet will have no effect at the top edge. If this is undesired, consider
+  /// setting [useSafeArea] to true. Alternatively, wrap the [SafeArea] in a
+  /// [MediaQuery] that restates an ambient [MediaQueryData] from outside [builder].
   ///
   /// In either case, the bottom sheet extends all the way to the bottom of
   /// the screen, including any system intrusions.
@@ -1004,6 +1012,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final String? barrierOnTapHint;
 
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
+
+  @override
+  void dispose() {
+    _clipDetailsNotifier.dispose();
+    super.dispose();
+  }
 
   /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
   /// the barrier for this [ModalBottomSheetRoute] should be clipped.
@@ -1057,7 +1071,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
           return _ModalBottomSheet<T>(
             route: this,
             backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor ?? defaults.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? defaults.modalElevation ?? sheetTheme.elevation,
+            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation ?? defaults.modalElevation,
             shape: shape,
             clipBehavior: clipBehavior,
             constraints: constraints,
@@ -1127,8 +1141,6 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// curve specified with the [curve] argument, after the finger is released. In
 /// such a case, the value of [startingPoint] would be the progress of the
 /// animation at the time when the finger was released.
-///
-/// The [startingPoint] and [curve] arguments must not be null.
 class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   /// Creates a suspended curve.
   const _BottomSheetSuspendedCurve(
@@ -1312,7 +1324,7 @@ Future<T?> showModalBottomSheet<T>({
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].
 ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
 ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
-PersistentBottomSheetController<T> showBottomSheet<T>({
+PersistentBottomSheetController showBottomSheet({
   required BuildContext context,
   required WidgetBuilder builder,
   Color? backgroundColor,
@@ -1321,11 +1333,12 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   Clip? clipBehavior,
   BoxConstraints? constraints,
   bool? enableDrag,
+  bool? showDragHandle,
   AnimationController? transitionAnimationController,
 }) {
   assert(debugCheckHasScaffold(context));
 
-  return Scaffold.of(context).showBottomSheet<T>(
+  return Scaffold.of(context).showBottomSheet(
     builder,
     backgroundColor: backgroundColor,
     elevation: elevation,
@@ -1333,6 +1346,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     clipBehavior: clipBehavior,
     constraints: constraints,
     enableDrag: enableDrag,
+    showDragHandle: showDragHandle,
     transitionAnimationController: transitionAnimationController,
   );
 }

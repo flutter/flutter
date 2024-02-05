@@ -575,8 +575,9 @@ void main() {
       TestApp(
         textDirection: TextDirection.ltr,
         child: Builder(
-          builder: (BuildContext context) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          builder: (BuildContext context) => MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: Material(
               child: Center(
                 child: DropdownButtonFormField<String>(
@@ -1141,6 +1142,7 @@ void main() {
     const BorderRadius enabledBorder = BorderRadius.all(Radius.circular(9.0));
 
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const String errorText = 'This is an error';
     bool showError = false;
@@ -1228,5 +1230,53 @@ void main() {
 
     inkWell = tester.widget<InkWell>(find.byType(InkWell));
     expect(inkWell.borderRadius, errorBorderRadius);
+  });
+
+  testWidgets('DropdownButtonFormField onChanged is called when the form is reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123009.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String? value;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Form(
+            key: formKey,
+            child: DropdownButtonFormField<String>(
+              key: stateKey,
+              value: 'One',
+              items: <String>['One', 'Two', 'Free', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (String? newValue) {
+                value = newValue;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initial value is 'One'.
+    expect(value, isNull);
+    expect(stateKey.currentState!.value, equals('One'));
+
+    // Select 'Two'.
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Two').last);
+    await tester.pumpAndSettle();
+    expect(value, equals('Two'));
+    expect(stateKey.currentState!.value, equals('Two'));
+
+    // Should be back to 'One' when the form is reset.
+    formKey.currentState!.reset();
+    expect(value, equals('One'));
+    expect(stateKey.currentState!.value, equals('One'));
   });
 }

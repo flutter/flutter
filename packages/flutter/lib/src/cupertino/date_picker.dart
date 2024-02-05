@@ -237,17 +237,16 @@ class CupertinoDatePicker extends StatefulWidget {
   /// to [CupertinoDatePickerMode.dateAndTime].
   ///
   /// [onDateTimeChanged] is the callback called when the selected date or time
-  /// changes and must not be null. When in [CupertinoDatePickerMode.time] mode,
-  /// the year, month and day will be the same as [initialDateTime]. When in
+  /// changes. When in [CupertinoDatePickerMode.time] mode, the year, month and
+  /// day will be the same as [initialDateTime]. When in
   /// [CupertinoDatePickerMode.date] mode, this callback will always report the
   /// start time of the currently selected day. When in
   /// [CupertinoDatePickerMode.monthYear] mode, the day and time will be the
   /// start time of the first day of the month.
   ///
   /// [initialDateTime] is the initial date time of the picker. Defaults to the
-  /// present date and time and must not be null. The present must conform to
-  /// the intervals set in [minimumDate], [maximumDate], [minimumYear], and
-  /// [maximumYear].
+  /// present date and time. The present must conform to the intervals set in
+  /// [minimumDate], [maximumDate], [minimumYear], and [maximumYear].
   ///
   /// [minimumDate] is the minimum selectable [DateTime] of the picker. When set
   /// to null, the picker does not limit the minimum [DateTime] the user can pick.
@@ -262,7 +261,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// maximum time the user can pick if it's set to a date later than that.
   ///
   /// [minimumYear] is the minimum year that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.date] mode. Defaults to 1 and must not be null.
+  /// [CupertinoDatePickerMode.date] mode. Defaults to 1.
   ///
   /// [maximumYear] is the maximum year that the picker can be scrolled to in
   /// [CupertinoDatePickerMode.date] mode. Null if there's no limit.
@@ -331,14 +330,14 @@ class CupertinoDatePicker extends StatefulWidget {
     );
   }
 
-  /// The mode of the date picker as one of [CupertinoDatePickerMode].
-  /// Defaults to [CupertinoDatePickerMode.dateAndTime]. Cannot be null and
-  /// value cannot change after initial build.
+  /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
+  /// to [CupertinoDatePickerMode.dateAndTime]. Value cannot change after
+  /// initial build.
   final CupertinoDatePickerMode mode;
 
   /// The initial date and/or time of the picker. Defaults to the present date
-  /// and time and must not be null. The present must conform to the intervals
-  /// set in [minimumDate], [maximumDate], [minimumYear], and [maximumYear].
+  /// and time. The present must conform to the intervals set in [minimumDate],
+  /// [maximumDate], [minimumYear], and [maximumYear].
   ///
   /// Changing this value after the initial build will not affect the currently
   /// selected date time.
@@ -375,7 +374,7 @@ class CupertinoDatePicker extends StatefulWidget {
   final DateTime? maximumDate;
 
   /// Minimum year that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.date] mode. Defaults to 1 and must not be null.
+  /// [CupertinoDatePickerMode.date] mode. Defaults to 1.
   final int minimumYear;
 
   /// Maximum year that the picker can be scrolled to in
@@ -399,8 +398,6 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Callback called when the selected date and/or time changes. If the new
   /// selected [DateTime] is not valid, or is not in the [minimumDate] through
   /// [maximumDate] range, this callback will not be called.
-  ///
-  /// Must not be null.
   final ValueChanged<DateTime> onDateTimeChanged;
 
   /// Background color of date picker.
@@ -1010,7 +1007,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         final int position = minCheck ? positionDouble.ceil() : positionDouble.floor();
         _animateColumnControllerToItem(minuteController, position);
       }
-    });
+    }, debugLabel: 'DatePicker.scrollToDate');
   }
 
   @override
@@ -1404,7 +1401,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       if (selectedDay != newDate.day) {
         _animateColumnControllerToItem(dayController, newDate.day - 1);
       }
-    });
+    }, debugLabel: 'DatePicker.scrollToDate');
   }
 
   @override
@@ -1728,7 +1725,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
       if (selectedMonth != newDate.month) {
         _animateColumnControllerToItem(monthController, newDate.month - 1);
       }
-    });
+    }, debugLabel: 'DatePicker.scrollToDate');
   }
 
   @override
@@ -1760,25 +1757,8 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
     double totalColumnWidths = 3 * _kDatePickerPadSize;
 
     for (int i = 0; i < columnWidths.length; i++) {
-      late final double offAxisFraction;
-      switch (i) {
-        case 0:
-          offAxisFraction = -0.3 * textDirectionFactor;
-        default:
-          offAxisFraction = 0.5 * textDirectionFactor;
-      }
-
-      EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
-      if (textDirectionFactor == -1) {
-        padding = const EdgeInsets.only(left: _kDatePickerPadSize);
-      }
-
-      Widget selectionOverlay = _centerSelectionOverlay;
-      if (i == 0) {
-        selectionOverlay = _startSelectionOverlay;
-      } else if (i == columnWidths.length - 1) {
-        selectionOverlay = _endSelectionOverlay;
-      }
+      final (bool first, bool last) = (i == 0, i == columnWidths.length - 1);
+      final double offAxisFraction = textDirectionFactor * (first ? -0.3 : 0.5);
 
       totalColumnWidths += columnWidths[i] + (2 * _kDatePickerPadSize);
 
@@ -1788,18 +1768,24 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
           offAxisFraction,
           (BuildContext context, Widget? child) {
             return Container(
-              alignment: i == columnWidths.length - 1
-                  ? alignCenterLeft
-                  : alignCenterRight,
-              padding: i == 0 ? null : padding,
+              alignment: last ? alignCenterLeft : alignCenterRight,
+              padding: switch (textDirectionFactor) {
+                _ when first => null,
+                -1 => const EdgeInsets.only(left: _kDatePickerPadSize),
+                _  => const EdgeInsets.only(right: _kDatePickerPadSize),
+              },
               child: Container(
-                alignment: i == 0 ? alignCenterLeft : alignCenterRight,
+                alignment: first ? alignCenterLeft : alignCenterRight,
                 width: columnWidths[i] + _kDatePickerPadSize,
                 child: child,
               ),
             );
           },
-          selectionOverlay,
+          switch (last) {
+            _ when first => _startSelectionOverlay,
+            false => _centerSelectionOverlay,
+            true  => _endSelectionOverlay,
+          },
         ),
       ));
     }
@@ -1890,7 +1876,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// defaults to [CupertinoTimerPickerMode.hms].
   ///
   /// [onTimerDurationChanged] is the callback called when the selected duration
-  /// changes and must not be null.
+  /// changes.
   ///
   /// [initialTimerDuration] defaults to 0 second and is limited from 0 second
   /// to 23 hours 59 minutes 59 seconds.
@@ -1940,7 +1926,7 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// Defines how the timer picker should be positioned within its parent.
   ///
-  /// This property must not be null. It defaults to [Alignment.center].
+  /// Defaults to [Alignment.center].
   final AlignmentGeometry alignment;
 
   /// Background color of timer picker.
@@ -1961,12 +1947,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   late TextDirection textDirection;
   late CupertinoLocalizations localizations;
   int get textDirectionFactor {
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return 1;
-      case TextDirection.rtl:
-        return -1;
-    }
+    return switch (textDirection) {
+      TextDirection.ltr =>  1,
+      TextDirection.rtl => -1,
+    };
   }
 
   // The currently selected values of the picker.
@@ -1992,6 +1976,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   late double totalWidth;
   late double pickerColumnWidth;
+
+  FixedExtentScrollController? _hourScrollController;
+  FixedExtentScrollController? _minuteScrollController;
+  FixedExtentScrollController? _secondScrollController;
 
   @override
   void initState() {
@@ -2022,6 +2010,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   void dispose() {
     PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     textPainter.dispose();
+
+    _hourScrollController?.dispose();
+    _minuteScrollController?.dispose();
+    _secondScrollController?.dispose();
     super.dispose();
   }
 
@@ -2167,8 +2159,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
+    _hourScrollController ??= FixedExtentScrollController(
+        initialItem: selectedHour!
+    );
     return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedHour!),
+      scrollController: _hourScrollController,
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(additionalPadding.start, 0),
       itemExtent: widget.itemExtent,
@@ -2226,10 +2221,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
+    _minuteScrollController ??= FixedExtentScrollController(
+      initialItem: selectedMinute ~/ widget.minuteInterval,
+    );
     return CupertinoPicker(
-      scrollController: FixedExtentScrollController(
-        initialItem: selectedMinute ~/ widget.minuteInterval,
-      ),
+      scrollController: _minuteScrollController,
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(
           additionalPadding.start,
@@ -2292,10 +2288,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildSecondPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
+    _secondScrollController ??= FixedExtentScrollController(
+      initialItem: selectedSecond! ~/ widget.secondInterval,
+    );
     return CupertinoPicker(
-      scrollController: FixedExtentScrollController(
-        initialItem: selectedSecond! ~/ widget.secondInterval,
-      ),
+      scrollController: _secondScrollController,
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(
           additionalPadding.start,

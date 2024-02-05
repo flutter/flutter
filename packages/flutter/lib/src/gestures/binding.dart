@@ -36,7 +36,13 @@ class SamplingClock {
   DateTime now() => DateTime.now();
 
   /// Returns a new stopwatch that uses the current time as reported by `this`.
-  Stopwatch stopwatch() => Stopwatch();
+  ///
+  /// See also:
+  ///
+  ///   * [GestureBinding.debugSamplingClock], which is used in tests and
+  ///     debug builds to observe [FakeAsync].
+  Stopwatch stopwatch() => Stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)
+  // Ignore context: This is replaced by debugSampling clock in the test binding.
 }
 
 // Class that handles resampling of touch events for multiple pointer
@@ -59,7 +65,8 @@ class _Resampler {
   Duration _frameTime = Duration.zero;
 
   // Time since `_frameTime` was updated.
-  Stopwatch _frameTimeAge = Stopwatch();
+  Stopwatch _frameTimeAge = Stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)
+  // Ignore context: This is tested safely outside of FakeAsync.
 
   // Last sample time and time stamp of last event.
   //
@@ -175,7 +182,7 @@ class _Resampler {
         _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
         // Trigger an immediate sample time change.
         _onSampleTimeChanged();
-      });
+      }, debugLabel: 'Resampler.startTimer');
     }
   }
 
@@ -366,7 +373,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
     if (resamplingEnabled) {
       _resampler.addOrDispatch(event);
-      _resampler.sample(samplingOffset, _samplingClock);
+      _resampler.sample(samplingOffset, samplingClock);
       return;
     }
 
@@ -505,16 +512,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _hitTests.clear();
   }
 
-  /// Overrides the sampling clock for debugging and testing.
-  ///
-  /// This value is ignored in non-debug builds.
-  @protected
-  SamplingClock? get debugSamplingClock => null;
-
   void _handleSampleTimeChanged() {
     if (!locked) {
       if (resamplingEnabled) {
-        _resampler.sample(samplingOffset, _samplingClock);
+        _resampler.sample(samplingOffset, samplingClock);
       }
       else {
         _resampler.stop();
@@ -522,7 +523,18 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
-  SamplingClock get _samplingClock {
+  /// Overrides the sampling clock for debugging and testing.
+  ///
+  /// This value is ignored in non-debug builds.
+  @protected
+  SamplingClock? get debugSamplingClock => null;
+
+  /// Provides access to the current [DateTime] and `StopWatch` objects for
+  /// sampling.
+  ///
+  /// Overridden by [debugSamplingClock] for debug builds and testing. Using
+  /// this object under test will maintain synchronization with [FakeAsync].
+  SamplingClock get samplingClock {
     SamplingClock value = SamplingClock();
     assert(() {
       final SamplingClock? debugValue = debugSamplingClock;

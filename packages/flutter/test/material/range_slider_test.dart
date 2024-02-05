@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
   testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
@@ -1657,7 +1659,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: const MediaQueryData(textScaleFactor: 2.0),
+                data: const MediaQueryData(textScaler: TextScaler.linear(2)),
                 child: Material(
                   child: Center(
                     child: Theme(
@@ -2540,7 +2542,7 @@ void main() {
     );
   });
 
-   testWidgets('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+  testWidgets('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/128433
 
     int startFired = 0;
@@ -2580,4 +2582,66 @@ void main() {
     expect(startFired, equals(1));
     expect(endFired, equals(1));
   });
+
+  testWidgets('RangeSlider in a ListView does not throw an exception', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126648
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: ListView(
+              children: <Widget>[
+                const SizedBox(
+                  height: 600,
+                  child: Placeholder(),
+                ),
+                RangeSlider(
+                  values: const RangeValues(40, 80),
+                  max: 100,
+                  onChanged: (RangeValues newValue) { },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // No exception should be thrown.
+    expect(tester.takeException(), null);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/141953.
+  testWidgets('Semantic nodes do not throw an error after clearSemantics', (WidgetTester tester) async {
+    SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RangeSlider(
+            values: const RangeValues(40, 80),
+            max: 100,
+            onChanged: (RangeValues newValue) { },
+          ),
+        ),
+      ),
+    );
+
+    // Dispose the semantics to trigger clearSemantics.
+    semantics.dispose();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    // Initialize the semantics again.
+    semantics = SemanticsTester(tester);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    semantics.dispose();
+  }, semanticsEnabled: false);
 }

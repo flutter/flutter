@@ -28,7 +28,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.a11y_assessments"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {

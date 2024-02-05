@@ -15,8 +15,8 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
-import 'build_system/targets/scene_importer.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
@@ -618,10 +618,10 @@ class DevFS {
       // are in the same location in DevFS and the iOS simulator.
       final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       final String assetDirectory = getAssetBuildDirectory();
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
+      bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
-        if (!content.isModified || bundleFirstUpload) {
+        if (!entry.content.isModified || bundleFirstUpload) {
           return;
         }
         // Modified shaders must be recompiled per-target platform.
@@ -635,9 +635,9 @@ class DevFS {
           didUpdateFontManifest = true;
         }
 
-        switch (bundle.entryKinds[archivePath]) {
+        switch (bundle.entries[archivePath]?.kind) {
           case AssetKind.shader:
-            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
+            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
               if (content == null) {
@@ -654,7 +654,7 @@ class DevFS {
             if (sceneImporter == null) {
               break;
             }
-            final Future<DevFSContent?> pending = sceneImporter.reimportScene(content);
+            final Future<DevFSContent?> pending = sceneImporter.reimportScene(entry.content);
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
               if (content == null) {
@@ -670,8 +670,8 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            dirtyEntries[deviceUri] = content;
-            syncedBytes += content.size;
+            dirtyEntries[deviceUri] = entry.content;
+            syncedBytes += entry.content.size;
             if (!bundleFirstUpload) {
               assetPathsToEvict.add(archivePath);
             }

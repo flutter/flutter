@@ -46,7 +46,7 @@ class BenchImageDecoding extends RawRecorder {
     }
     for (final String imageUrl in _imageUrls) {
       final Future<JSAny?> fetchFuture = web.window.fetch(imageUrl.toJS).toDart;
-      final web.Body image = (await fetchFuture)! as web.Body;
+      final web.Response image = (await fetchFuture)! as web.Response;
       final Future<JSAny?> imageFuture = image.arrayBuffer().toDart;
       final JSArrayBuffer imageBuffer = (await imageFuture)! as JSArrayBuffer;
       _imageData.add(imageBuffer.toDart.asUint8List());

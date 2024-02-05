@@ -202,8 +202,6 @@ class CupertinoSlider extends StatefulWidget {
 
   /// The color to use for the thumb of the slider.
   ///
-  /// Thumb color must not be null.
-  ///
   /// Defaults to [CupertinoColors.white].
   final Color thumbColor;
 
@@ -452,13 +450,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   double get _trackLeft => _kPadding;
   double get _trackRight => size.width - _kPadding;
   double get _thumbCenter {
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - _value;
-      case TextDirection.ltr:
-        visualPosition = _value;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - _value,
+      TextDirection.ltr => _value,
+    };
     return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
   }
 
@@ -470,12 +465,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     if (isInteractive) {
       final double extent = math.max(_kPadding, size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
       final double valueDelta = details.primaryDelta! / extent;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          _currentDragValue -= valueDelta;
-        case TextDirection.ltr:
-          _currentDragValue += valueDelta;
-      }
+      _currentDragValue += switch (textDirection) {
+        TextDirection.rtl => -valueDelta,
+        TextDirection.ltr =>  valueDelta,
+      };
       onChanged!(_discretizedCurrentDragValue);
     }
   }
@@ -599,4 +592,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   @override
   bool get validForMouseTracker => false;
+
+  @override
+  void dispose() {
+    _drag.dispose();
+    _position.dispose();
+    super.dispose();
+  }
 }

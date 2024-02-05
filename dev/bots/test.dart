@@ -52,13 +52,16 @@ import 'dart:core' as system show print;
 import 'dart:core' hide print;
 import 'dart:io' as system show exit;
 import 'dart:io' hide exit;
+import 'dart:io' as io;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
 import 'browser.dart';
 import 'run_command.dart';
@@ -157,31 +160,11 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
 
     // These tests are broken and need to be fixed.
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
-    'test/painting/decoration_test.dart',
-    'test/material/text_selection_theme_test.dart',
-    'test/material/date_picker_test.dart',
-    'test/rendering/layers_test.dart',
-    'test/painting/text_style_test.dart',
-    'test/widgets/image_test.dart',
-    'test/cupertino/colors_test.dart',
-    'test/cupertino/slider_test.dart',
     'test/material/text_field_test.dart',
-    'test/rendering/proxy_box_test.dart',
-    'test/widgets/app_overrides_test.dart',
-    'test/material/calendar_date_picker_test.dart',
-    'test/material/ink_paint_test.dart',
-    'test/rendering/editable_test.dart',
-    'test/cupertino/dialog_test.dart',
-    'test/widgets/shape_decoration_test.dart',
-    'test/material/time_picker_theme_test.dart',
-    'test/cupertino/picker_test.dart',
-    'test/material/chip_theme_test.dart',
-    'test/cupertino/nav_bar_test.dart',
     'test/widgets/performance_overlay_test.dart',
     'test/widgets/html_element_view_test.dart',
     'test/cupertino/scaffold_test.dart',
     'test/rendering/platform_view_test.dart',
-    'test/cupertino/context_menu_action_test.dart',
   ],
 };
 
@@ -253,6 +236,7 @@ Future<void> main(List<String> args) async {
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
+      'android_preview_tool_integration_tests': _runAndroidPreviewIntegrationToolTests,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': _runWebHtmlUnitTests,
@@ -262,6 +246,12 @@ Future<void> main(List<String> args) async {
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
+      'realm_checker': _runRealmCheckerTest,
+      'customer_testing': _runCustomerTesting,
+      'analyze': _runAnalyze,
+      'fuchsia_precache': _runFuchsiaPrecache,
+      'docs': _runDocs,
+      'verify_binaries_codesigned': _runVerifyCodesigned,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
@@ -460,6 +450,20 @@ Future<void> _runToolHostCrossArchTests() {
 
 Future<void> _runIntegrationToolTests() async {
   final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
+      .listSync(recursive: true).whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
+
+  await _runDartTest(
+    _toolsPath,
+    forceSingleCore: true,
+    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    collectMetrics: true,
+  );
+}
+
+Future<void> _runAndroidPreviewIntegrationToolTests() async {
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'android_preview_integration.shard'))
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
@@ -810,6 +814,15 @@ Future<void> _runFrameworkTests() async {
     );
   }
 
+  Future<void> runImpeller() async {
+    printProgress('${green}Running packages/flutter tests $reset in Impeller$reset');
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--enable-impeller'],
+    );
+  }
+
+
   Future<void> runLibraries() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false)
@@ -841,9 +854,12 @@ Future<void> _runFrameworkTests() async {
         workingDirectory: path.join(flutterRoot, 'examples', 'api'),
       );
     }
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
+    for (final FileSystemEntity entity in Directory(path.join(flutterRoot, 'examples')).listSync()) {
+      if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
+        continue;
+      }
+      await _runFlutterTest(entity.path);
+    }
   }
 
   Future<void> runTracingTests() async {
@@ -976,6 +992,7 @@ Future<void> _runFrameworkTests() async {
     await runFixTests('flutter');
     await runFixTests('flutter_test');
     await runFixTests('integration_test');
+    await runFixTests('flutter_driver');
     await runPrivateTests();
   }
 
@@ -994,6 +1011,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
@@ -1004,6 +1022,23 @@ Future<void> _runFrameworkTests() async {
       // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
       '--exclude-tags=web',
     ]);
+    // Run java unit tests for integration_test
+    //
+    // Generate Gradle wrapper if it doesn't exist.
+    Process.runSync(
+      flutter,
+      <String>['build', 'apk', '--config-only'],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
+    await runCommand(
+      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew$bat'),
+      <String>[
+        ':integration_test:testDebugUnitTest',
+        '--tests',
+        'dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest',
+      ],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
@@ -1037,6 +1072,7 @@ Future<void> _runFrameworkTests() async {
     'libraries': runLibraries,
     'slow': runSlow,
     'misc': runMisc,
+    'impeller': runImpeller,
   });
 }
 
@@ -1163,6 +1199,8 @@ Future<void> _runWebLongRunningTests() async {
         driver: path.join('test_driver', 'integration_test.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
+        expectWriteResponseFile: true,
+        expectResponseFileContent: 'null',
       ),
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
@@ -1170,6 +1208,20 @@ Future<void> _runWebLongRunningTests() async {
         driver: path.join('test_driver', 'extended_integration_test.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
+        expectWriteResponseFile: true,
+        expectResponseFileContent: '''
+{
+  "screenshots": [
+    {
+      "screenshotName": "platform_name",
+      "bytes": []
+    },
+    {
+      "screenshotName": "platform_name_2",
+      "bytes": []
+    }
+  ]
+}''',
       ),
     ],
 
@@ -1225,6 +1277,7 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent),
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn),
+    () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsNonceOn),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
@@ -1232,6 +1285,7 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn),
     () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
     () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
+    () => runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: true),
     () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
@@ -1302,6 +1356,8 @@ Future<void> _runFlutterDriverWebTest({
   String? driver,
   bool expectFailure = false,
   bool silenceBrowserOutput = false,
+  bool expectWriteResponseFile = false,
+  String expectResponseFileContent = '',
 }) async {
   printProgress('${green}Running integration tests $target in $buildMode mode.$reset');
   await runCommand(
@@ -1309,6 +1365,11 @@ Future<void> _runFlutterDriverWebTest({
     <String>[ 'clean' ],
     workingDirectory: testAppDirectory,
   );
+  final String responseFile =
+      path.join(testAppDirectory, 'build', 'integration_response_data.json');
+  if (File(responseFile).existsSync()) {
+    File(responseFile).deleteSync();
+  }
   await runCommand(
     flutter,
     <String>[
@@ -1337,6 +1398,20 @@ Future<void> _runFlutterDriverWebTest({
       return false;
     },
   );
+  if (expectWriteResponseFile) {
+    if (!File(responseFile).existsSync()) {
+      foundError(<String>[
+        '$bold${red}Command did not write the response file but expected response file written.$reset',
+      ]);
+    } else {
+      final String response = File(responseFile).readAsStringSync();
+      if (response != expectResponseFileContent) {
+        foundError(<String>[
+          '$bold${red}Command write the response file with $response but expected response file with $expectResponseFileContent.$reset',
+        ]);
+      }
+    }
+  }
 }
 
 // Compiles a sample web app and checks that its JS doesn't contain certain
@@ -1486,6 +1561,459 @@ Future<void> _runFlutterPackagesTests() async {
   });
 }
 
+// Runs customer_testing.
+Future<void> _runCustomerTesting() async {
+  printProgress('${green}Running customer testing$reset');
+  await runCommand(
+    'git',
+    <String>[
+      'fetch',
+      'origin',
+      'master',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  await runCommand(
+    'git',
+    <String>[
+      'branch',
+      '-f',
+      'master',
+      'origin/master',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  final Map<String, String> env = Platform.environment;
+  final String? revision = env['REVISION'];
+  if (revision != null) {
+    await runCommand(
+      'git',
+      <String>[
+        'checkout',
+        revision,
+      ],
+      workingDirectory: flutterRoot,
+    );
+  }
+  final String winScript = path.join(flutterRoot, 'dev', 'customer_testing', 'ci.bat');
+  await runCommand(
+    Platform.isWindows? winScript: './ci.sh',
+    <String>[],
+    workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
+  );
+}
+
+// Runs analysis tests.
+Future<void> _runAnalyze() async {
+  printProgress('${green}Running analysis testing$reset');
+  await runCommand(
+    'dart',
+    <String>[
+      '--enable-asserts',
+      path.join(flutterRoot, 'dev', 'bots', 'analyze.dart'),
+    ],
+    workingDirectory: flutterRoot,
+  );
+}
+
+// Runs flutter_precache.
+Future<void> _runFuchsiaPrecache() async {
+  printProgress('${green}Running flutter precache tests$reset');
+  await runCommand(
+    'flutter',
+    <String>[
+      'config',
+      '--enable-fuchsia',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  await runCommand(
+    'flutter',
+    <String>[
+      'precache',
+      '--flutter_runner',
+      '--fuchsia',
+      '--no-android',
+      '--no-ios',
+      '--force',
+    ],
+    workingDirectory: flutterRoot,
+  );
+}
+
+// Runs docs.
+Future<void> _runDocs() async {
+  printProgress('${green}Running flutter doc tests$reset');
+  await runCommand(
+    './dev/bots/docs.sh',
+    <String>[
+      '--output',
+      'dev/docs/api_docs.zip',
+      '--keep-staging',
+      '--staging-dir',
+      'dev/docs',
+    ],
+    workingDirectory: flutterRoot,
+  );
+}
+
+// Verifies binaries are codesigned.
+Future<void> _runVerifyCodesigned() async {
+  printProgress('${green}Running binaries codesign verification$reset');
+  await runCommand(
+    'flutter',
+    <String>[
+      'precache',
+      '--android',
+      '--ios',
+      '--macos'
+    ],
+    workingDirectory: flutterRoot,
+  );
+
+  await verifyExist(flutterRoot);
+  await verifySignatures(flutterRoot);
+}
+
+const List<String> expectedEntitlements = <String>[
+  'com.apple.security.cs.allow-jit',
+  'com.apple.security.cs.allow-unsigned-executable-memory',
+  'com.apple.security.cs.allow-dyld-environment-variables',
+  'com.apple.security.network.client',
+  'com.apple.security.network.server',
+  'com.apple.security.cs.disable-library-validation',
+];
+
+/// Binaries that are expected to be codesigned and have entitlements.
+///
+/// This list should be kept in sync with the actual contents of Flutter's
+/// cache.
+List<String> binariesWithEntitlements(String flutterRoot) {
+  return <String> [
+    'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-arm-release/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-arm64-profile/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-arm64-release/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-x64-profile/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-x64-release/darwin-x64/gen_snapshot',
+    'artifacts/engine/darwin-x64-profile/gen_snapshot',
+    'artifacts/engine/darwin-x64-profile/gen_snapshot_arm64',
+    'artifacts/engine/darwin-x64-profile/gen_snapshot_x64',
+    'artifacts/engine/darwin-x64-release/gen_snapshot',
+    'artifacts/engine/darwin-x64-release/gen_snapshot_arm64',
+    'artifacts/engine/darwin-x64-release/gen_snapshot_x64',
+    'artifacts/engine/darwin-x64/flutter_tester',
+    'artifacts/engine/darwin-x64/gen_snapshot',
+    'artifacts/engine/darwin-x64/gen_snapshot_arm64',
+    'artifacts/engine/darwin-x64/gen_snapshot_x64',
+    'artifacts/engine/ios-profile/gen_snapshot_arm64',
+    'artifacts/engine/ios-release/gen_snapshot_arm64',
+    'artifacts/engine/ios/gen_snapshot_arm64',
+    'artifacts/libimobiledevice/idevicescreenshot',
+    'artifacts/libimobiledevice/idevicesyslog',
+    'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
+    'artifacts/libplist/libplist-2.0.3.dylib',
+    'artifacts/openssl/libcrypto.1.1.dylib',
+    'artifacts/openssl/libssl.1.1.dylib',
+    'artifacts/usbmuxd/iproxy',
+    'artifacts/usbmuxd/libusbmuxd-2.0.6.dylib',
+    'dart-sdk/bin/dart',
+    'dart-sdk/bin/dartaotruntime',
+    'dart-sdk/bin/utils/gen_snapshot',
+    'dart-sdk/bin/utils/wasm-opt',
+  ]
+  .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+}
+
+/// Binaries that are only expected to be codesigned.
+///
+/// This list should be kept in sync with the actual contents of Flutter's
+/// cache.
+List<String> binariesWithoutEntitlements(String flutterRoot) {
+  return <String>[
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64/font-subset',
+    'artifacts/engine/darwin-x64/impellerc',
+    'artifacts/engine/darwin-x64/libpath_ops.dylib',
+    'artifacts/engine/darwin-x64/libtessellator.dylib',
+    'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/ios-deploy/ios-deploy',
+  ]
+  .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+}
+
+/// xcframeworks that are expected to be codesigned.
+///
+/// This list should be kept in sync with the actual contents of Flutter's
+/// cache.
+List<String> signedXcframeworks(String flutterRoot) {
+  return <String>[
+    'artifacts/engine/ios-profile/Flutter.xcframework',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework',
+    'artifacts/engine/ios-release/Flutter.xcframework',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework',
+    'artifacts/engine/ios/Flutter.xcframework',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework',
+  ]
+  .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+}
+
+/// Verify the existence of all expected binaries in cache.
+///
+/// This function ignores code signatures and entitlements, and is intended to
+/// be run on every commit. It should throw if either new binaries are added
+/// to the cache or expected binaries removed. In either case, this class'
+/// [binariesWithEntitlements] or [binariesWithoutEntitlements] lists should
+/// be updated accordingly.
+Future<void> verifyExist(
+  String flutterRoot,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
+}) async {
+  final Set<String> foundFiles = <String>{};
+  final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
+
+  for (final String binaryPath
+      in await findBinaryPaths(cacheDirectory, processManager: processManager)) {
+    if (binariesWithEntitlements(flutterRoot).contains(binaryPath)) {
+      foundFiles.add(binaryPath);
+    } else if (binariesWithoutEntitlements(flutterRoot).contains(binaryPath)) {
+      foundFiles.add(binaryPath);
+    } else {
+      throw Exception(
+          'Found unexpected binary in cache: $binaryPath');
+    }
+  }
+
+  final List<String> allExpectedFiles = binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
+  if (foundFiles.length < allExpectedFiles.length) {
+    final List<String> unfoundFiles = allExpectedFiles
+        .where(
+          (String file) => !foundFiles.contains(file),
+        )
+        .toList();
+    print(
+      'Expected binaries not found in cache:\n\n${unfoundFiles.join('\n')}\n\n'
+      'If this commit is removing binaries from the cache, this test should be fixed by\n'
+      'removing the relevant entry from either the "binariesWithEntitlements" or\n'
+      '"binariesWithoutEntitlements" getters in dev/tools/lib/codesign.dart.',
+    );
+    throw Exception('Did not find all expected binaries!');
+  }
+
+  print('All expected binaries present.');
+}
+
+/// Verify code signatures and entitlements of all binaries in the cache.
+Future<void> verifySignatures(
+  String flutterRoot,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()}
+) async {
+  final List<String> unsignedFiles = <String>[];
+  final List<String> wrongEntitlementBinaries = <String>[];
+  final List<String> unexpectedFiles = <String>[];
+  final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
+
+  final List<String> binariesAndXcframeworks =
+      (await findBinaryPaths(cacheDirectory, processManager: processManager)) + (await findXcframeworksPaths(cacheDirectory, processManager: processManager));
+
+  for (final String pathToCheck in binariesAndXcframeworks) {
+    bool verifySignature = false;
+    bool verifyEntitlements = false;
+    if (binariesWithEntitlements(flutterRoot).contains(pathToCheck)) {
+      verifySignature = true;
+      verifyEntitlements = true;
+    }
+    if (binariesWithoutEntitlements(flutterRoot).contains(pathToCheck)) {
+      verifySignature = true;
+    }
+    if (signedXcframeworks(flutterRoot).contains(pathToCheck)) {
+      verifySignature = true;
+    }
+    if (!verifySignature && !verifyEntitlements) {
+      unexpectedFiles.add(pathToCheck);
+      print('Unexpected binary or xcframework $pathToCheck found in cache!');
+      continue;
+    }
+    print('Verifying the code signature of $pathToCheck');
+    final io.ProcessResult codeSignResult = await processManager.run(
+      <String>[
+        'codesign',
+        '-vvv',
+        pathToCheck,
+      ],
+    );
+    if (codeSignResult.exitCode != 0) {
+      unsignedFiles.add(pathToCheck);
+      print(
+        'File "$pathToCheck" does not appear to be codesigned.\n'
+        'The `codesign` command failed with exit code ${codeSignResult.exitCode}:\n'
+        '${codeSignResult.stderr}\n',
+      );
+      continue;
+    }
+    if (verifyEntitlements) {
+      print('Verifying entitlements of $pathToCheck');
+      if (!(await hasExpectedEntitlements(pathToCheck, flutterRoot, processManager: processManager))) {
+        wrongEntitlementBinaries.add(pathToCheck);
+      }
+    }
+  }
+
+  // First print all deviations from expectations
+  if (unsignedFiles.isNotEmpty) {
+    print('Found ${unsignedFiles.length} unsigned files:');
+    unsignedFiles.forEach(print);
+  }
+
+  if (wrongEntitlementBinaries.isNotEmpty) {
+    print('Found ${wrongEntitlementBinaries.length} files with unexpected entitlements:');
+    wrongEntitlementBinaries.forEach(print);
+  }
+
+  if (unexpectedFiles.isNotEmpty) {
+    print('Found ${unexpectedFiles.length} unexpected files in the cache:');
+    unexpectedFiles.forEach(print);
+  }
+
+  // Finally, exit on any invalid state
+  if (unsignedFiles.isNotEmpty) {
+    throw Exception('Test failed because unsigned files detected.');
+  }
+
+  if (wrongEntitlementBinaries.isNotEmpty) {
+    throw Exception(
+      'Test failed because files found with the wrong entitlements:\n'
+      '${wrongEntitlementBinaries.join('\n')}',
+    );
+  }
+
+  if (unexpectedFiles.isNotEmpty) {
+    throw Exception('Test failed because unexpected files found in the cache.');
+  }
+  print('Verified that files are codesigned and have expected entitlements.');
+}
+
+/// Find every binary file in the given [rootDirectory].
+Future<List<String>> findBinaryPaths(
+  String rootDirectory,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
+}) async {
+  final List<String> allBinaryPaths = <String>[];
+  final io.ProcessResult result = await processManager.run(
+    <String>[
+      'find',
+      rootDirectory,
+      '-type',
+      'f',
+    ],
+  );
+  final List<String> allFiles = (result.stdout as String)
+      .split('\n')
+      .where((String s) => s.isNotEmpty)
+      .toList();
+
+  await Future.forEach(allFiles, (String filePath) async {
+    if (await isBinary(filePath, processManager: processManager)) {
+      allBinaryPaths.add(filePath);
+      print('Found: $filePath\n');
+    }
+  });
+  return allBinaryPaths;
+}
+
+/// Find every xcframework in the given [rootDirectory].
+Future<List<String>> findXcframeworksPaths(
+    String rootDirectory,
+    {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
+    }) async {
+  final io.ProcessResult result = await processManager.run(
+    <String>[
+      'find',
+      rootDirectory,
+      '-type',
+      'd',
+      '-name',
+      '*xcframework',
+    ],
+  );
+  final List<String> allXcframeworkPaths = LineSplitter.split(result.stdout as String)
+      .where((String s) => s.isNotEmpty)
+      .toList();
+  for (final String path in allXcframeworkPaths) {
+    print('Found: $path\n');
+  }
+  return allXcframeworkPaths;
+}
+
+/// Check mime-type of file at [filePath] to determine if it is binary.
+Future<bool> isBinary(
+  String filePath,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()}
+) async {
+  final io.ProcessResult result = await processManager.run(
+    <String>[
+      'file',
+      '--mime-type',
+      '-b', // is binary
+      filePath,
+    ],
+  );
+  return (result.stdout as String).contains('application/x-mach-binary');
+}
+
+/// Check if the binary has the expected entitlements.
+Future<bool> hasExpectedEntitlements(
+  String binaryPath,
+  String flutterRoot,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()}
+) async {
+  final io.ProcessResult entitlementResult = await processManager.run(
+    <String>[
+      'codesign',
+      '--display',
+      '--entitlements',
+      ':-',
+      binaryPath,
+    ],
+  );
+
+  if (entitlementResult.exitCode != 0) {
+    print(
+      'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
+      '${entitlementResult.stderr}\n',
+    );
+    return false;
+  }
+
+  bool passes = true;
+  final String output = entitlementResult.stdout as String;
+  for (final String entitlement in expectedEntitlements) {
+    final bool entitlementExpected =
+        binariesWithEntitlements(flutterRoot).contains(binaryPath);
+    if (output.contains(entitlement) != entitlementExpected) {
+      print(
+        'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} '
+        'entitlement $entitlement.',
+      );
+      passes = false;
+    }
+  }
+  return passes;
+}
+
 /// Runs the skp_generator from the flutter/tests repo.
 ///
 /// See also the customer_tests shard.
@@ -1510,6 +2038,13 @@ Future<void> _runSkpGeneratorTests() async {
     <String>[ ],
     workingDirectory: path.join(checkout.path, 'skp_generator'),
   );
+}
+
+Future<void> _runRealmCheckerTest() async {
+  final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
+  if (engineRealm.isNotEmpty) {
+    foundError(<String>['The checked-in engine.realm file must be empty.']);
+  }
 }
 
 // The `chromedriver` process created by this test.

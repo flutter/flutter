@@ -27,6 +27,9 @@ import 'restoration_properties.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
+// Duration for delay before refocusing in android so that the focus won't be interrupted.
+const Duration _kAndroidRefocusingDelayDuration = Duration(milliseconds: 300);
+
 // Examples can assume:
 // typedef MyAppHome = Placeholder;
 // typedef MyHomePage = Placeholder;
@@ -140,7 +143,15 @@ abstract class Route<T> {
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
-  Route({ RouteSettings? settings }) : _settings = settings ?? const RouteSettings();
+  Route({ RouteSettings? settings }) : _settings = settings ?? const RouteSettings() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$Route<$T>',
+        object: this,
+      );
+    }
+  }
 
   /// The navigator that the route is in, if any.
   NavigatorState? get navigator => _navigator;
@@ -364,6 +375,8 @@ abstract class Route<T> {
   Future<T?> get popped => _popCompleter.future;
   final Completer<T?> _popCompleter = Completer<T?>();
 
+  final Completer<T?> _disposeCompleter = Completer<T?>();
+
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
   /// return false, otherwise return true (by returning the value of calling
@@ -503,6 +516,10 @@ abstract class Route<T> {
   void dispose() {
     _navigator = null;
     _restorationScopeId.dispose();
+    _disposeCompleter.complete();
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
   }
 
   /// Whether this route is the top-most route on the navigator.
@@ -602,8 +619,6 @@ class RouteSettings {
 ///    history.
 abstract class Page<T> extends RouteSettings {
   /// Creates a page and initializes [key] for subclasses.
-  ///
-  /// The [arguments] argument must not be null.
   const Page({
     this.key,
     super.name,
@@ -1135,9 +1150,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// The default value of [Navigator.routeTraversalEdgeBehavior].
 ///
 /// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
-const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
-  ? TraversalEdgeBehavior.leaveFlutterView
-  : TraversalEdgeBehavior.closedLoop;
+const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = TraversalEdgeBehavior.parentScope;
 
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
@@ -1440,9 +1453,6 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
-  /// The [onGenerateRoute], [pages], [onGenerateInitialRoutes],
-  /// [transitionDelegate], [observers] arguments must not be null.
-  ///
   /// If the [pages] is not empty, the [onPopPage] must not be null.
   const Navigator({
     super.key,
@@ -1509,7 +1519,7 @@ class Navigator extends StatefulWidget {
   /// The delegate used for deciding how routes transition in or off the screen
   /// during the [pages] updates.
   ///
-  /// Defaults to [DefaultTransitionDelegate] if not specified, cannot be null.
+  /// Defaults to [DefaultTransitionDelegate].
   final TransitionDelegate<dynamic> transitionDelegate;
 
   /// The name of the first route to show.
@@ -1641,7 +1651,7 @@ class Navigator extends StatefulWidget {
   /// In cases where clipping is not desired, consider setting this property to
   /// [Clip.none].
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// Whether or not the navigator and it's new topmost route should request focus
@@ -2781,6 +2791,9 @@ class Navigator extends StatefulWidget {
           );
           return true;
         }());
+        for (final Route<dynamic>? route in result) {
+          route?.dispose();
+        }
         result.clear();
       }
     } else if (initialRouteName != Navigator.defaultRouteName) {
@@ -2906,12 +2919,26 @@ class _RouteEntry extends RouteTransitionRecord {
            initialState == _RouteLifecycle.pushReplace ||
            initialState == _RouteLifecycle.replace,
          ),
-         currentState = initialState;
+         currentState = initialState {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_RouteEntry',
+        object: this,
+      );
+    }
+  }
 
   @override
   final Route<dynamic> route;
   final _RestorationInformation? restorationInformation;
   final bool pageBased;
+
+  /// The limit this route entry will attempt to pop in the case of route being
+  /// remove as a result of a page update.
+  static const int kDebugPopAttemptLimit = 100;
 
   static final Route<dynamic> notAnnounced = _NotAnnounced();
 
@@ -2919,6 +2946,7 @@ class _RouteEntry extends RouteTransitionRecord {
   Route<dynamic>? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
   WeakReference<Route<dynamic>> lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(notAnnounced); // last argument to Route.didPopNext
   Route<dynamic>? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
+  int? lastFocusNode; // The last focused semantic node for the route entry.
 
   /// Restoration ID to be used for the encapsulating route when restoration is
   /// enabled for it or null if restoration cannot be enabled for it.
@@ -3007,6 +3035,24 @@ class _RouteEntry extends RouteTransitionRecord {
   void handleDidPopNext(Route<dynamic> poppedRoute) {
     route.didPopNext(poppedRoute);
     lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(poppedRoute);
+    if (lastFocusNode != null) {
+      // Move focus back to the last focused node.
+      poppedRoute._disposeCompleter.future.then((dynamic result) async {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+            // In the Android platform, we have to wait for the system refocus to complete before
+            // sending the refocus message. Otherwise, the refocus message will be ignored.
+            // TODO(hangyujin): update this logic if Android provide a better way to do so.
+            final int? reFocusNode = lastFocusNode;
+            await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
+            SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: reFocusNode));
+          case TargetPlatform.iOS:
+            SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: lastFocusNode));
+          case _:
+            break ;
+        }
+      });
+    }
   }
 
   /// Process the to-be-popped route.
@@ -3114,6 +3160,11 @@ class _RouteEntry extends RouteTransitionRecord {
   /// before disposing.
   void forcedDispose() {
     assert(currentState.index < _RouteLifecycle.disposed.index);
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     currentState = _RouteLifecycle.disposed;
     route.dispose();
   }
@@ -3254,6 +3305,20 @@ class _RouteEntry extends RouteTransitionRecord {
       'This route cannot be marked for pop. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition out.',
     );
+    // Remove state that prevents a pop, e.g. LocalHistoryEntry[s].
+    int attempt = 0;
+    while (route.willHandlePopInternally) {
+      assert(
+        () {
+          attempt += 1;
+          return attempt < kDebugPopAttemptLimit;
+        }(),
+        'Attempted to pop $route $kDebugPopAttemptLimit times, but still failed',
+      );
+      final bool popResult = route.didPop(result);
+      assert(!popResult);
+
+    }
     pop<dynamic>(result);
     _isWaitingForExitingDecision = false;
   }
@@ -3355,6 +3420,13 @@ typedef _IndexWhereCallback = bool Function(_RouteEntry element);
 /// Acts as a ChangeNotifier and notifies after its List of _RouteEntries is
 /// mutated.
 class _History extends Iterable<_RouteEntry> with ChangeNotifier {
+  /// Creates an instance of [_History].
+  _History() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   final List<_RouteEntry> _value = <_RouteEntry>[];
 
   int indexWhere(_IndexWhereCallback test, [int start = 0]) {
@@ -3433,13 +3505,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
   final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
 
-  /// The [FocusScopeNode] for the [FocusScope] that encloses the topmost navigator.
-  @Deprecated(
-    'Use focusNode.enclosingScope! instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.'
-  )
-  FocusScopeNode get focusScopeNode => focusNode.enclosingScope!;
-
   /// The [FocusNode] for the [Focus] that encloses the routes.
   final FocusNode focusNode = FocusNode(debugLabel: 'Navigator');
 
@@ -3477,7 +3542,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             return;
           }
           notification.dispatch(context);
-        });
+        }, debugLabel: 'Navigator.dispatchNotification');
     }
   }
 
@@ -3529,7 +3594,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       SystemNavigator.selectSingleEntryHistory();
     }
 
+    ServicesBinding.instance.accessibilityFocus.addListener(_recordLastFocus);
     _history.addListener(_handleHistoryChanged);
+  }
+
+  // Record the last focused node in route entry.
+  void _recordLastFocus(){
+    final _RouteEntry? entry = _history.where(_RouteEntry.isPresentPredicate).lastOrNull;
+    entry?.lastFocusNode = ServicesBinding.instance.accessibilityFocus.value;
   }
 
   // Use [_nextPagelessRestorationScopeId] to get the next id.
@@ -3684,7 +3756,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                   );
                 }
               }
-            });
+            }, debugLabel: 'Navigator.checkHeroControllerOwnership');
           }
           return true;
         }());
@@ -3824,6 +3896,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _rawNextPagelessRestorationScopeId.dispose();
     _serializableHistory.dispose();
     userGestureInProgressNotifier.dispose();
+    ServicesBinding.instance.accessibilityFocus.removeListener(_recordLastFocus);
     _history.removeListener(_handleHistoryChanged);
     _history.dispose();
     super.dispose();
@@ -5213,6 +5286,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(entry.route._popCompleter.isCompleted);
         entry.currentState = _RouteLifecycle.pop;
       }
+      entry.route.onPopInvoked(true);
     } else {
       entry.pop<T>(result);
       assert (entry.currentState == _RouteLifecycle.pop);
@@ -5436,7 +5510,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   /// Gets first route entry satisfying the predicate, or null if not found.
-  _RouteEntry? _firstRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+  _RouteEntry? _firstRouteEntryWhereOrNull(_RouteEntryPredicate test) {
     for (final _RouteEntry element in _history) {
       if (test(element)) {
         return element;
@@ -5446,7 +5520,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   /// Gets last route entry satisfying the predicate, or null if not found.
-  _RouteEntry? _lastRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+  _RouteEntry? _lastRouteEntryWhereOrNull(_RouteEntryPredicate test) {
     _RouteEntry? result;
     for (final _RouteEntry element in _history) {
       if (test(element)) {
@@ -5870,8 +5944,6 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// {@end-tool}
 class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   /// Creates a [RestorableRouteFuture].
-  ///
-  /// The [onPresent] and [navigatorFinder] arguments must not be null.
   RestorableRouteFuture({
     this.navigatorFinder = _defaultNavigatorFinder,
     required this.onPresent,

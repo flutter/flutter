@@ -310,16 +310,24 @@ class StartContext extends Context {
     }
 
     final String engineHead = await engine.reverseParse('HEAD');
-    state.engine = pb.Repository(
-      candidateBranch: candidateBranch,
-      workingBranch: workingBranchName,
-      startingGitHead: engineHead,
-      currentGitHead: engineHead,
-      checkoutPath: (await engine.checkoutDirectory).path,
-      dartRevision: dartRevision,
-      upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
-      mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote!.url),
+    state.engine = (pb.Repository.create()
+      ..candidateBranch = candidateBranch
+      ..workingBranch = workingBranchName
+      ..startingGitHead = engineHead
+      ..currentGitHead = engineHead
+      ..checkoutPath = (await engine.checkoutDirectory).path
+      ..upstream = (pb.Remote.create()
+        ..name = 'upstream'
+        ..url = engine.upstreamRemote.url
+      )
+      ..mirror = (pb.Remote.create()
+        ..name = 'mirror'
+        ..url = engine.mirrorRemote!.url
+      )
     );
+    if (dartRevision != null && dartRevision!.isNotEmpty) {
+      state.engine.dartRevision = dartRevision!;
+    }
 
     await framework.newBranch(workingBranchName);
 
@@ -362,14 +370,20 @@ class StartContext extends Context {
 
     state.releaseVersion = nextVersion.toString();
 
-    state.framework = pb.Repository(
-      candidateBranch: candidateBranch,
-      workingBranch: workingBranchName,
-      startingGitHead: frameworkHead,
-      currentGitHead: frameworkHead,
-      checkoutPath: (await framework.checkoutDirectory).path,
-      upstream: pb.Remote(name: 'upstream', url: framework.upstreamRemote.url),
-      mirror: pb.Remote(name: 'mirror', url: framework.mirrorRemote!.url),
+    state.framework = (pb.Repository.create()
+      ..candidateBranch = candidateBranch
+      ..workingBranch = workingBranchName
+      ..startingGitHead = frameworkHead
+      ..currentGitHead = frameworkHead
+      ..checkoutPath = (await framework.checkoutDirectory).path
+      ..upstream = (pb.Remote.create()
+        ..name = 'upstream'
+        ..url = framework.upstreamRemote.url
+      )
+      ..mirror = (pb.Remote.create()
+        ..name = 'mirror'
+        ..url = framework.mirrorRemote!.url
+      )
     );
 
     state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;

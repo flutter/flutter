@@ -56,6 +56,9 @@ void main() {
       expect(localizations.expandedHint, isNotNull);
       expect(localizations.refreshIndicatorSemanticLabel, isNotNull);
 
+      // Regression test for https://github.com/flutter/flutter/issues/136090
+      expect(localizations.remainingTextFieldCharacterCount(0), isNot(contains('TBD')));
+
       expect(localizations.remainingTextFieldCharacterCount(0), isNotNull);
       expect(localizations.remainingTextFieldCharacterCount(1), isNotNull);
       expect(localizations.remainingTextFieldCharacterCount(10), isNotNull);
@@ -532,9 +535,27 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/110451.
   testWidgets('Finnish translation for tab label', (WidgetTester tester) async {
     const Locale locale = Locale('fi');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationFi>());
     expect(localizations.tabLabel(tabIndex: 1, tabCount: 2), 'Välilehti 1 kautta 2');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/138728.
+  testWidgets('Share button label on Material', (WidgetTester tester) async {
+    const Locale locale = Locale('en');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations.shareButtonLabel, 'Share');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/141764
+  testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
+    const Locale locale = Locale('zh');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations.lookUpButtonLabel, '查询');
   });
 }

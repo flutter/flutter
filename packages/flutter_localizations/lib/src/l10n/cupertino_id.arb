@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Telusuri",
   "noSpellCheckReplacementsLabel": "Penggantian Tidak Ditemukan",
   "menuDismissLabel": "Tutup menu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Cari",
+  "searchWebButtonLabel": "Telusuri di Web",
+  "shareButtonLabel": "Bagikan...",
+  "clearButtonLabel": "Clear"
 }

@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
@@ -25,6 +26,7 @@ Widget buildInputDecorator({
   bool isFocused = false,
   bool isHovering = false,
   bool useMaterial3 = false,
+  bool useIntrinsicWidth = false,
   TextStyle? baseStyle,
   TextAlignVertical? textAlignVertical,
   VisualDensity? visualDensity,
@@ -33,6 +35,21 @@ Widget buildInputDecorator({
     style: TextStyle(fontSize: 16.0),
   ),
 }) {
+  Widget widget = InputDecorator(
+    expands: expands,
+    decoration: decoration,
+    isEmpty: isEmpty,
+    isFocused: isFocused,
+    isHovering: isHovering,
+    baseStyle: baseStyle,
+    textAlignVertical: textAlignVertical,
+    child: child,
+  );
+
+  if (useIntrinsicWidth) {
+    widget = IntrinsicWidth(child: widget);
+  }
+
   return MaterialApp(
     theme: ThemeData(useMaterial3: false),
     home: Material(
@@ -49,16 +66,7 @@ Widget buildInputDecorator({
               alignment: Alignment.topLeft,
               child: Directionality(
                 textDirection: textDirection,
-                child: InputDecorator(
-                  expands: expands,
-                  decoration: decoration,
-                  isEmpty: isEmpty,
-                  isFocused: isFocused,
-                  isHovering: isHovering,
-                  baseStyle: baseStyle,
-                  textAlignVertical: textAlignVertical,
-                  child: child,
-                ),
+                child: widget,
               ),
             ),
           );
@@ -161,7 +169,10 @@ void main() {
 }
 
 void runAllTests({ required bool useMaterial3 }) {
-  testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
+  testWidgets('InputDecorator input/label text layout',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     // The label appears above the input text
     await tester.pumpWidget(
       buildInputDecorator(
@@ -788,6 +799,8 @@ void runAllTests({ required bool useMaterial3 }) {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
         final TextEditingController controller = TextEditingController();
+        addTearDown(() { focusNode.dispose(); controller.dispose();});
+
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
             theme: ThemeData(useMaterial3: false),
@@ -839,6 +852,7 @@ void runAllTests({ required bool useMaterial3 }) {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
         final TextEditingController controller = TextEditingController();
+        addTearDown(() { focusNode.dispose(); controller.dispose();});
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
             theme: ThemeData(useMaterial3: false),
@@ -890,7 +904,10 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('multiline TextField', (WidgetTester tester) async {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         final TextEditingController controller = TextEditingController();
+        addTearDown(controller.dispose);
+
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
             theme: ThemeData(useMaterial3: false),
@@ -942,7 +959,10 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('multiline TextField with outline border', (WidgetTester tester) async {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         final TextEditingController controller = TextEditingController();
+        addTearDown(controller.dispose);
+
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
             theme: ThemeData(useMaterial3: false),
@@ -976,7 +996,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
         // Entering text happens in the center as well.
         await tester.enterText(find.byType(InputDecorator), text);
-        expect(tester.getTopLeft(find.text(text)).dy, 291.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 292.0);
         controller.clear();
         focusNode.unfocus();
 
@@ -984,13 +1004,13 @@ void runAllTests({ required bool useMaterial3 }) {
         // that's where the hint is.
         await tester.pumpWidget(buildFrame(true));
         await tester.pumpAndSettle();
-        expect(tester.getTopLeft(find.text('label')).dy, 291.0);
+        expect(tester.getTopLeft(find.text('label')).dy, 292.0);
         expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
         expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
 
         // Entering text still happens in the center.
         await tester.enterText(find.byType(InputDecorator), text);
-        expect(tester.getTopLeft(find.text(text)).dy, 291.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 292.0);
         controller.clear();
         focusNode.unfocus();
       });
@@ -1079,14 +1099,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
     }
 
     await tester.pumpAndSettle();
@@ -1113,14 +1133,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
     }
 
     await tester.pumpAndSettle();
@@ -1198,6 +1218,219 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 2.0);
+  });
+
+  testWidgets('InputDecorator default hint animation duration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint is not visible (opacity 0.0).
+    expect(getOpacity(tester, 'hint'), 0.0);
+
+    // Focus to show the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        isFocused: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's default duration is 20ms.
+    {
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      expect(getOpacity(tester, 'hint'), 1.0);
+    }
+
+    // Unfocus to hide the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's default duration is 20ms.
+    {
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
+      await tester.pump(const Duration(milliseconds: 9));
+      expect(getOpacity(tester, 'hint'), 0.0);
+    }
+  });
+
+  testWidgets('InputDecorator custom hint animation duration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+      ),
+    );
+
+    // The hint is not visible (opacity 0.0).
+    expect(getOpacity(tester, 'hint'), 0.0);
+
+    // Focus to show the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        isFocused: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is set to 120ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getOpacity(tester, 'hint'), 1.0);
+    }
+
+    // Unfocus to hide the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's default duration is 20ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getOpacity(tester, 'hint'), 0.0);
+    }
+  });
+
+  testWidgets('InputDecorator custom hint animation duration from theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        inputDecorationTheme: const InputDecorationTheme(
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint is not visible (opacity 0.0).
+    expect(getOpacity(tester, 'hint'), 0.0);
+
+    // Focus to show the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        inputDecorationTheme: const InputDecorationTheme(
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+        isEmpty: true,
+        isFocused: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is set to 120ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getOpacity(tester, 'hint'), 1.0);
+    }
+
+    // Unfocus to hide the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        inputDecorationTheme: const InputDecorationTheme(
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's duration is set to 160ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getOpacity(tester, 'hint'), 0.0);
+    }
   });
 
   testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
@@ -1658,6 +1891,105 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(find.text('errorText'), findsOneWidget);
   });
 
+  testWidgets('InputDecoration shows error border for errorText and error widget', (WidgetTester tester) async {
+    const InputBorder errorBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red, width: 1.5),
+    );
+    const InputBorder focusedErrorBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.teal, width: 5.0),
+    );
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isFocused: true,
+        decoration: const InputDecoration(
+          errorText: 'error',
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), focusedErrorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          errorText: 'error',
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), errorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          errorText: 'error',
+          enabled: false,
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), errorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isFocused: true,
+        decoration: const InputDecoration(
+          error: Text('error'),
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), focusedErrorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          error: Text('error'),
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), errorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          error: Text('error'),
+          enabled: false,
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), errorBorder);
+  });
+
   testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1817,6 +2149,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecoration default floatingLabelStyle resolves hovered/focused states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -1980,17 +2313,17 @@ void runAllTests({ required bool useMaterial3 }) {
     //    0 - bottom prefix/suffix padding
     //   16 - bottom padding
     // When a border is present, the input text and prefix/suffix are centered
-    // within the input. Here, that will be content of height 106, including 2
-    // extra pixels of space, centered within an input of height 145. That gives
-    // 19 pixels of space on each side of the content, so the prefix is
-    // positioned at 19, and the text is at 19+100-15=104.
+    // within the input. Here, that will be content of height 106, centered
+    // within an input of height 145. That gives 20 pixels of space on each side
+    // of the content, so the prefix is positioned at 19, and the text is at
+    // 20+100-15=105.
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
     expect(tester.getSize(find.byType(InputDecorator)).height, 145);
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 104);
-    expect(tester.getTopLeft(find.byKey(pKey)).dy, 19.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 105);
+    expect(tester.getTopLeft(find.byKey(pKey)).dy, 20.0);
 
     // layout is a row: [prefix text suffix]
     expect(tester.getTopLeft(find.byKey(pKey)).dx, 12.0);
@@ -2136,14 +2469,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
     }
 
     await tester.pumpAndSettle();
@@ -2171,14 +2504,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
     }
 
     await tester.pumpAndSettle();
@@ -2233,14 +2566,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
     }
 
     await tester.pumpAndSettle();
@@ -2268,14 +2601,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
     }
 
     await tester.pumpAndSettle();
@@ -2557,7 +2890,7 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // Below the top aligned case.
-        expect(tester.getTopLeft(find.text(text)).dy, 289.0);
+        expect(tester.getTopLeft(find.text(text)).dy, 290.0);
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -2707,8 +3040,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // In the middle of the expanded InputDecorator.
-        expect(tester.getTopLeft(find.text(text)).dy, 331.5);
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 246.5);
+        expect(tester.getTopLeft(find.text(text)).dy, 332.5);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 247.5);
       });
 
       testWidgets('InputDecorator tall prefix with border align top', (WidgetTester tester) async {
@@ -2805,8 +3138,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         // Between the top and center examples.
-        expect(tester.getTopLeft(find.text(text)).dy, 354.75);
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 269.75);
+        expect(tester.getTopLeft(find.text(text)).dy, 355.65);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 270.65);
       });
     });
 
@@ -2904,8 +3237,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 19.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 35.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 20.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 36.0);
         expect(getBorderBottom(tester), 56.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -2922,8 +3255,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 19.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 35.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 20.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 36.0);
         expect(getBorderBottom(tester), 56.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -2943,8 +3276,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
         expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -2964,8 +3297,8 @@ void runAllTests({ required bool useMaterial3 }) {
           ),
         );
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
-        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
         expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -2986,8 +3319,8 @@ void runAllTests({ required bool useMaterial3 }) {
         );
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 120.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 51.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 67.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 52.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 68.0);
         expect(getBorderBottom(tester), 120.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3074,8 +3407,8 @@ void runAllTests({ required bool useMaterial3 }) {
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
         // Baseline is on the center of the 600px high input.
-        expect(tester.getTopLeft(find.text('text')).dy, 291.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 307.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 292.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 308.0);
         expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -3122,8 +3455,8 @@ void runAllTests({ required bool useMaterial3 }) {
 
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
         // Same position as the center example above.
-        expect(tester.getTopLeft(find.text('text')).dy, 291.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 307.0);
+        expect(tester.getTopLeft(find.text('text')).dy, 292.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 308.0);
         expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
@@ -4677,14 +5010,15 @@ void runAllTests({ required bool useMaterial3 }) {
     final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
     // Fill is the border's outer path, a rounded rectangle
-    expect(box, paints..path(
+    expect(box, paints
+    ..drrect(
       style: PaintingStyle.fill,
-      color: const Color(0xFF00FF00),
-      includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
-      excludes: <Offset>[
-        const Offset(1.0, 56.0 - 6.0), // bottom left
-        const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
-      ],
+      inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.5,
+          bottomRight: const Radius.elliptical(12.0, 11.5),
+          bottomLeft: const Radius.elliptical(12.0, 11.5)),
+      outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.5,
+          bottomRight: const Radius.elliptical(12.0, 12.5),
+          bottomLeft: const Radius.elliptical(12.0, 12.5)),
     ));
   });
 
@@ -5779,7 +6113,10 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     final Typography typography = Typography.material2018();
 
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
     // The dense theme uses ideographic baselines
     Widget buildFrame(bool alignLabelWithHint) {
       return MaterialApp(
@@ -6140,6 +6477,8 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
   });
 
   testWidgets('A vertically constrained TextField still positions its text inside of itself', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'A');
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -6147,7 +6486,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
             width: 200,
             height: 28,
             child: TextField(
-              controller: TextEditingController(text: 'A'),
+              controller: controller,
             ),
           ),
         ),
@@ -6231,8 +6570,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
             ),
           ),
         ),
-        null,
-        EnginePhase.layout,
+        phase: EnginePhase.layout,
       );
     } finally {
       FlutterError.onError = oldHandler;
@@ -6268,6 +6606,9 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
   });
 
   testWidgets('min intrinsic height for TextField with prefix icon', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'input');
+    addTearDown(controller.dispose);
+
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -6278,7 +6619,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
               child: Column(
                 children: <Widget>[
                   TextField(
-                    controller: TextEditingController(text: 'input'),
+                    controller: controller,
                     maxLines: null,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.search),
@@ -6296,6 +6637,9 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
   });
 
   testWidgets('min intrinsic height for TextField with suffix icon', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'input');
+    addTearDown(controller.dispose);
+
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -6306,7 +6650,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
               child: Column(
                 children: <Widget>[
                   TextField(
-                    controller: TextEditingController(text: 'input'),
+                    controller: controller,
                     maxLines: null,
                     decoration: const InputDecoration(
                       suffixIcon: Icon(Icons.search),
@@ -6324,6 +6668,9 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
   });
 
   testWidgets('min intrinsic height for TextField with prefix', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'input');
+    addTearDown(controller.dispose);
+
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -6334,7 +6681,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
               child: Column(
                 children: <Widget>[
                   TextField(
-                    controller: TextEditingController(text: 'input'),
+                    controller: controller,
                     maxLines: null,
                     decoration: const InputDecoration(
                       prefix: Text('prefix'),
@@ -6352,6 +6699,9 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
   });
 
   testWidgets('min intrinsic height for TextField with suffix', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'input');
+    addTearDown(controller.dispose);
+
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -6362,7 +6712,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
               child: Column(
                 children: <Widget>[
                   TextField(
-                    controller: TextEditingController(text: 'input'),
+                    controller: controller,
                     maxLines: null,
                     decoration: const InputDecoration(
                       suffix: Text('suffix'),
@@ -6380,6 +6730,9 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
   });
 
   testWidgets('min intrinsic height for TextField with icon', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'input');
+    addTearDown(controller.dispose);
+
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -6390,7 +6743,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
               child: Column(
                 children: <Widget>[
                   TextField(
-                    controller: TextEditingController(text: 'input'),
+                    controller: controller,
                     maxLines: null,
                     decoration: const InputDecoration(
                       icon: Icon(Icons.search),
@@ -6546,6 +6899,48 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     expect(decoratorRight, lessThanOrEqualTo(prefixRight));
   });
 
+  testWidgets('intrinsic width with prefixIcon/suffixIcon', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/137937
+    for (final TextDirection direction in TextDirection.values) {
+      Future<Size> measureText(InputDecoration decoration) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            useMaterial3: useMaterial3,
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            decoration: decoration,
+            useIntrinsicWidth: true,
+            textDirection: direction,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('text'), findsOneWidget);
+
+        return tester.renderObject<RenderBox>(find.text('text')).size;
+      }
+
+      const EdgeInsetsGeometry padding = EdgeInsetsDirectional.only(end: 24, start: 12);
+
+      final Size textSizeWithoutIcons = await measureText(const InputDecoration(
+        contentPadding: padding,
+      ));
+
+      final Size textSizeWithPrefixIcon = await measureText(const InputDecoration(
+        contentPadding: padding,
+        prefixIcon: Focus(child: Icon(Icons.search)),
+      ));
+
+      final Size textSizeWithSuffixIcon = await measureText(const InputDecoration(
+        contentPadding: padding,
+        suffixIcon: Focus(child: Icon(Icons.search)),
+      ));
+
+      expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcons.width), reason: 'text width is different with prefixIcon and $direction');
+      expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcons.width), reason: 'text width is different with prefixIcon and $direction');
+    }
+  });
+
   testWidgets('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/129611
     const InputDecoration decoration = InputDecoration(
@@ -6569,5 +6964,99 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
 
     expect(find.byType(InputDecorator), findsOneWidget);
     expect(tester.renderObject<RenderBox>(find.text('COUNTER')).size, Size.zero);
+  });
+
+  group('isCollapsed parameter works with themeData', () {
+    test('parameter is provided in InputDecorationTheme', () {
+      final InputDecoration decoration = const InputDecoration(
+        hintText: 'Hello, Flutter!',
+      ).applyDefaults(const InputDecorationTheme(
+          isCollapsed: true,
+      ));
+
+      expect(decoration.isCollapsed, true);
+    });
+
+    test('parameter is provided in InputDecoration', () {
+      final InputDecoration decoration = const InputDecoration(
+        isCollapsed: true,
+        hintText: 'Hello, Flutter!',
+      ).applyDefaults(const InputDecorationTheme());
+
+      expect(decoration.isCollapsed, true);
+    });
+  });
+
+  testWidgets('UnderlineInputBorder clips top border to prevent anti-aliasing glitches', (WidgetTester tester) async {
+    const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
+    const UnderlineInputBorder border = UnderlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    );
+    expect(
+      (Canvas canvas) => border.paint(canvas, canvasRect),
+      paints
+        ..drrect(
+          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.5,
+                bottomRight: const Radius.elliptical(12.0, 12.5),
+                bottomLeft: const Radius.elliptical(12.0, 12.5)),
+          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.5,
+                bottomRight: const Radius.elliptical(12.0, 11.5),
+                bottomLeft: const Radius.elliptical(12.0, 11.5)),
+        ),
+    );
+
+    const UnderlineInputBorder border2 = UnderlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(60.0)),
+    );
+    expect(
+      (Canvas canvas) => border2.paint(canvas, canvasRect),
+      paints
+        ..drrect(
+          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.5,
+                bottomRight: const Radius.elliptical(50.0, 50.5),
+                bottomLeft: const Radius.elliptical(50.0, 50.5)),
+          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.5,
+                bottomRight: const Radius.elliptical(50.0, 49.5),
+                bottomLeft: const Radius.elliptical(50.0, 49.5)),
+        ),
+      reason: 'clamp is expected',
+    );
+  });
+
+  testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              labelText: 'label',
+            ),
+          ),
+        ),
+      ),
+    );
+    final TextStyle beforeStyle = getLabelStyle(tester);
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getLabelStyle(tester).height, beforeStyle.height);
+  });
+
+  test('InputDecorationTheme.copyWith keeps original iconColor.', () async {
+    const InputDecorationTheme original = InputDecorationTheme(iconColor: Color(0xDEADBEEF));
+    expect(original.iconColor, const Color(0xDEADBEEF));
+    expect(original.fillColor, isNot(const Color(0xDEADCAFE)));
+    final InputDecorationTheme copy1 = original.copyWith(fillColor: const Color(0xDEADCAFE));
+    expect(copy1.iconColor, const Color(0xDEADBEEF));
+    expect(copy1.fillColor, const Color(0xDEADCAFE));
+    final InputDecorationTheme copy2 = original.copyWith(iconColor: const Color(0xDEADCAFE));
+    expect(copy2.iconColor, const Color(0xDEADCAFE));
+    expect(copy2.fillColor, isNot(const Color(0xDEADCAFE)));
   });
 }

@@ -367,10 +367,8 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
     videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
   );
 
-  // TODO(sigurdm): This should not be stored here.
-  static const String beeUri = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
-  final VideoPlayerController beeController = VideoPlayerController.network(
-    beeUri,
+  final VideoPlayerController beeController = VideoPlayerController.networkUrl(
+    Uri.parse('https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'),
     videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
   );
 

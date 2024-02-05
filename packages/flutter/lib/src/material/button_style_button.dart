@@ -89,8 +89,10 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
-  final Clip clipBehavior;
+  /// Defaults to [Clip.none] unless [ButtonStyle.backgroundBuilder] or
+  /// [ButtonStyle.foregroundBuilder] is specified. In those
+  /// cases the default is [Clip.antiAlias].
+  final Clip? clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -170,24 +172,34 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// A convenience method for subclasses.
   static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
 
-  /// Returns an interpolated value based on the [textScaleFactor] parameter:
+  /// A convenience method used by subclasses in the framework, that returns an
+  /// interpolated value based on the [fontSizeMultiplier] parameter:
   ///
   ///  * 0 - 1 [geometry1x]
-  ///  * 1 - 2 lerp([geometry1x], [geometry2x], [textScaleFactor] - 1)
-  ///  * 2 - 3 lerp([geometry2x], [geometry3x], [textScaleFactor] - 2)
+  ///  * 1 - 2 lerp([geometry1x], [geometry2x], [fontSizeMultiplier] - 1)
+  ///  * 2 - 3 lerp([geometry2x], [geometry3x], [fontSizeMultiplier] - 2)
   ///  * otherwise [geometry3x]
   ///
-  /// A convenience method for subclasses.
+  /// This method is used by the framework for estimating the default paddings to
+  /// use on a button with a text label, when the system text scaling setting
+  /// changes. It's usually supplied with empirical [geometry1x], [geometry2x],
+  /// [geometry3x] values adjusted for different system text scaling values, when
+  /// the unscaled font size is set to 14.0 (the default [TextTheme.labelLarge]
+  /// value).
+  ///
+  /// The `fontSizeMultiplier` argument, for historical reasons, is the default
+  /// font size specified in the [ButtonStyle], scaled by the ambient font
+  /// scaler, then divided by 14.0 (the default font size used in buttons).
   static EdgeInsetsGeometry scaledPadding(
     EdgeInsetsGeometry geometry1x,
     EdgeInsetsGeometry geometry2x,
     EdgeInsetsGeometry geometry3x,
-    double textScaleFactor,
+    double fontSizeMultiplier,
   ) {
-    return switch (textScaleFactor) {
+    return switch (fontSizeMultiplier) {
       <= 1 => geometry1x,
-      < 2  => EdgeInsetsGeometry.lerp(geometry1x, geometry2x, textScaleFactor - 1)!,
-      < 3  => EdgeInsetsGeometry.lerp(geometry2x, geometry3x, textScaleFactor - 2)!,
+      < 2  => EdgeInsetsGeometry.lerp(geometry1x, geometry2x, fontSizeMultiplier - 1)!,
+      < 3  => EdgeInsetsGeometry.lerp(geometry2x, geometry3x, fontSizeMultiplier - 2)!,
       _    => geometry3x,
     };
   }
@@ -308,6 +320,11 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
+    final ButtonLayerBuilder? resolvedBackgroundBuilder = effectiveValue((ButtonStyle? style) => style?.backgroundBuilder);
+    final ButtonLayerBuilder? resolvedForegroundBuilder = effectiveValue((ButtonStyle? style) => style?.foregroundBuilder);
+
+    final Clip effectiveClipBehavior = widget.clipBehavior
+      ?? ((resolvedBackgroundBuilder ?? resolvedForegroundBuilder) != null ? Clip.antiAlias : Clip.none);
 
     BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -341,7 +358,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry padding = resolvedPadding!
       .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
-      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     // If an opaque button's background is becoming translucent while its
     // elevation is changing, change the elevation first. Material implicitly
@@ -374,6 +391,21 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     elevation = resolvedElevation;
     backgroundColor = resolvedBackgroundColor;
 
+    Widget effectiveChild = Padding(
+      padding: padding,
+      child: Align(
+        alignment: resolvedAlignment!,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: resolvedForegroundBuilder != null
+          ? resolvedForegroundBuilder(context, statesController.value, widget.child)
+          : widget.child,
+      ),
+    );
+    if (resolvedBackgroundBuilder != null) {
+      effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
+    }
+
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
       child: Material(
@@ -385,7 +417,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         surfaceTintColor: resolvedSurfaceTintColor,
         type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: resolvedAnimationDuration,
-        clipBehavior: widget.clipBehavior,
+        clipBehavior: effectiveClipBehavior,
         child: InkWell(
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
@@ -403,15 +435,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           statesController: statesController,
           child: IconTheme.merge(
             data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
-            child: Padding(
-              padding: padding,
-              child: Align(
-                alignment: resolvedAlignment!,
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: widget.child,
-              ),
-            ),
+            child: effectiveChild,
           ),
         ),
       ),

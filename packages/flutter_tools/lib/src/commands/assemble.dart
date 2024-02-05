@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -72,10 +73,14 @@ List<Target> _kDefaultTargets = <Target>[
   const ProfileIosApplicationBundle(),
   const ReleaseIosApplicationBundle(),
   // Windows targets
-  const UnpackWindows(),
-  const DebugBundleWindowsAssets(),
-  const ProfileBundleWindowsAssets(),
-  const ReleaseBundleWindowsAssets(),
+  const UnpackWindows(TargetPlatform.windows_x64),
+  const UnpackWindows(TargetPlatform.windows_arm64),
+  const DebugBundleWindowsAssets(TargetPlatform.windows_x64),
+  const DebugBundleWindowsAssets(TargetPlatform.windows_arm64),
+  const ProfileBundleWindowsAssets(TargetPlatform.windows_x64),
+  const ProfileBundleWindowsAssets(TargetPlatform.windows_arm64),
+  const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64),
+  const ReleaseBundleWindowsAssets(TargetPlatform.windows_arm64),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -126,6 +131,8 @@ class AssembleCommand extends FlutterCommand {
 
   final BuildSystem _buildSystem;
 
+  late final FlutterProject _flutterProject = FlutterProject.current();
+
   @override
   String get description => 'Assemble and build Flutter resources.';
 
@@ -136,18 +143,18 @@ class AssembleCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<CustomDimensions> get usageValues async {
-    final FlutterProject flutterProject = FlutterProject.current();
-    try {
-      return CustomDimensions(
-        commandBuildBundleTargetPlatform: _environment.defines[kTargetPlatform],
-        commandBuildBundleIsModule: flutterProject.isModule,
-      );
-    } on Exception {
-      // We've failed to send usage.
-    }
-    return const CustomDimensions();
-  }
+  Future<CustomDimensions> get usageValues async => CustomDimensions(
+    commandBuildBundleTargetPlatform: _environment.defines[kTargetPlatform],
+    commandBuildBundleIsModule: _flutterProject.isModule,
+  );
+
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
+    workflow: commandPath,
+    commandHasTerminal: hasTerminal,
+    buildBundleTargetPlatform: _environment.defines[kTargetPlatform],
+    buildBundleIsModule: _flutterProject.isModule,
+  );
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -208,22 +215,21 @@ class AssembleCommand extends FlutterCommand {
 
   /// The environmental configuration for a build invocation.
   Environment _createEnvironment() {
-    final FlutterProject flutterProject = FlutterProject.current();
     String? output = stringArg('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
     // If path is relative, make it absolute from flutter project.
     if (globals.fs.path.isRelative(output)) {
-      output = globals.fs.path.join(flutterProject.directory.path, output);
+      output = globals.fs.path.join(_flutterProject.directory.path, output);
     }
     final Artifacts artifacts = globals.artifacts!;
     final Environment result = Environment(
       outputDir: globals.fs.directory(output),
-      buildDir: flutterProject.directory
+      buildDir: _flutterProject.directory
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build'),
-      projectDir: flutterProject.directory,
+      projectDir: _flutterProject.directory,
       defines: _parseDefines(stringsArg('define')),
       inputs: _parseDefines(stringsArg('input')),
       cacheDir: globals.cache.getRoot(),
@@ -233,6 +239,7 @@ class AssembleCommand extends FlutterCommand {
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       platform: globals.platform,
       engineVersion: artifacts.isLocalEngine
         ? null
@@ -260,12 +267,12 @@ class AssembleCommand extends FlutterCommand {
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
-    if (dartDefines.isNotEmpty){
+    if (dartDefines.isNotEmpty) {
       results[kDartDefines] = dartDefines.join(',');
     }
 
     results[kDeferredComponents] = 'false';
-    if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
+    if (_flutterProject.manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
     }
     if (argumentResults.wasParsed(FlutterOptions.kExtraFrontEndOptions)) {
@@ -296,7 +303,7 @@ class AssembleCommand extends FlutterCommand {
         "Try re-running 'flutter build ios' or the appropriate build command."
       );
     }
-    if (FlutterProject.current().manifest.deferredComponents != null
+    if (_flutterProject.manifest.deferredComponents != null
         && decodedDefines.contains('validate-deferred-components=true')
         && deferredTargets.isNotEmpty
         && !isDebug()) {

@@ -656,12 +656,10 @@ mixin FabStartOffsetX on StandardFabLocation {
   /// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    switch (scaffoldGeometry.textDirection) {
-      case TextDirection.rtl:
-        return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
-      case TextDirection.ltr:
-        return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
-    }
+    return switch (scaffoldGeometry.textDirection) {
+      TextDirection.rtl => StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment),
+      TextDirection.ltr => StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment),
+    };
   }
 }
 
@@ -679,12 +677,10 @@ mixin FabEndOffsetX on StandardFabLocation {
   /// Calculates x-offset for end-aligned [FloatingActionButtonLocation]s.
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    switch (scaffoldGeometry.textDirection) {
-      case TextDirection.rtl:
-        return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
-      case TextDirection.ltr:
-        return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
-    }
+    return switch (scaffoldGeometry.textDirection) {
+      TextDirection.rtl => StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment),
+      TextDirection.ltr => StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment),
+    };
   }
 }
 
@@ -1004,8 +1000,8 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
 class _AnimationSwap<T> extends CompoundAnimation<T> {
   /// Creates an [_AnimationSwap].
   ///
-  /// Both arguments must be non-null. Either can be an [_AnimationSwap] itself
-  /// to combine multiple animations.
+  /// Either argument can be an [_AnimationSwap] itself to combine multiple
+  /// animations.
   _AnimationSwap(Animation<T> first, Animation<T> next, this.parent, this.swapThreshold) : super(first: first, next: next);
 
   final Animation<double> parent;

@@ -157,7 +157,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 
   Future<void> saveRecordedEvents(ByteData data, BuildContext context) async {
     if (await channel.invokeMethod<bool>('getStoragePermission') != true) {
-      if (mounted) {
+      if (context.mounted) {
         showMessage(context, 'External storage permissions are required to save events');
       }
       return;
@@ -167,12 +167,12 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       // This test only runs on Android so we can assume path separator is '/'.
       final File file = File('${outDir.path}/$kEventsFileName');
       await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes), flush: true);
-      if (!mounted) {
+      if (!context.mounted) {
         return;
       }
       showMessage(context, 'Saved original events to ${file.path}');
     } catch (e) {
-      if (!mounted) {
+      if (!context.mounted) {
         return;
       }
       showMessage(context, 'Failed saving $e');

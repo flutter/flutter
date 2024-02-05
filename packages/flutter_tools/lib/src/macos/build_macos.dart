@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -27,9 +29,27 @@ import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 /// Filter out xcodebuild logging unrelated to macOS builds:
 /// ```
 /// xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
+///
 /// note: Using new build system
+///
+/// xcodebuild[61115:1017566] [MT] DVTAssertions: Warning in /System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot11/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/IDEFrameworks/IDEFrameworks-22267/IDEFoundation/Provisioning/Capabilities Infrastructure/IDECapabilityQuerySelection.swift:103
+/// Details:  createItemModels creation requirements should not create capability item model for a capability item model that already exists.
+/// Function: createItemModels(for:itemModelSource:)
+/// Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
+/// Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+
 /// ```
-final RegExp _filteredOutput = RegExp(r'^((?!Requested but did not find extension point with identifier|note\:).)*$');
+final RegExp _filteredOutput = RegExp(
+  r'^((?!'
+  r'Requested but did not find extension point with identifier|'
+  r'note\:|'
+  r'\[MT\] DVTAssertions: Warning in /System/Volumes/Data/SWE/|'
+  r'Details\:  createItemModels|'
+  r'Function\: createItemModels|'
+  r'Thread\:   <_NSMainThread\:|'
+  r'Please file a bug at https\://feedbackassistant\.apple\.'
+  r').)*$'
+  );
 
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
@@ -53,6 +73,7 @@ Future<void> buildMacOS({
       flutterProject.macos,
       globals.logger,
       globals.flutterUsage,
+      globals.analytics,
     ),
     MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
     XcodeProjectObjectVersionMigration(flutterProject.macos, globals.logger),
@@ -140,46 +161,77 @@ Future<void> buildMacOS({
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = DarwinArch.x86_64.name;
-    final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('snapshot.$arch.json');
-    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('trace.$arch.json');
+  await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
+  final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'xcode-macos', elapsedDuration);
+  globals.analytics.send(Event.timing(
+    workflow: 'build',
+    variableName: 'xcode-macos',
+    elapsedMilliseconds: elapsedDuration.inMilliseconds,
+  ));
+}
 
-    // This analysis is only supported for release builds.
-    // Attempt to guess the correct .app by picking the first one.
-    final Directory candidateDirectory = globals.fs.directory(
-      globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
-    );
-    final Directory appDirectory = candidateDirectory.listSync()
-      .whereType<Directory>()
-      .firstWhere((Directory directory) {
-      return globals.fs.path.extension(directory.path) == '.app';
-    });
-    final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
-      aotSnapshot: aotSnapshot,
-      precompilerTrace: precompilerTrace,
-      outputDirectory: appDirectory,
-      type: 'macos',
-      excludePath: 'Versions', // Avoid double counting caused by symlinks
-    );
-    final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs
-        .directory(globals.fsUtils.homeDirPath)
-        .childDirectory('.flutter-devtools'), 'macos-code-size-analysis', 'json',
-    )..writeAsStringSync(jsonEncode(output));
-    // This message is used as a sentinel in analyze_apk_size_test.dart
-    globals.printStatus(
-      'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
-    );
-
-    // DevTools expects a file path relative to the .flutter-devtools/ dir.
-    final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
-    globals.printStatus(
-      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-      'dart devtools --appSizeBase=$relativeAppSizePath'
-    );
+/// Performs a size analysis of the AOT snapshot and writes to an analysis file, if configured.
+///
+/// Size analysis will be run for release builds where the --analyze-size
+/// option has been specified. By default, size analysis JSON output is written
+/// to ~/.flutter-devtools/macos-code-size-analysis_NN.json.
+Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnalyzer) async {
+  // Bail out if the size analysis option was not specified.
+  if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
+    return;
   }
-  globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+  final File? aotSnapshot = DarwinArch.values.map<File?>((DarwinArch arch) {
+    return globals.fs.directory(buildInfo.codeSizeDirectory).childFile('snapshot.${arch.name}.json');
+    // Pick the first if there are multiple for simplicity
+  }).firstWhere(
+    (File? file) => file!.existsSync(),
+    orElse: () => null,
+  );
+  if (aotSnapshot == null) {
+    throw StateError('No code size snapshot file (snapshot.<ARCH>.json) found in ${buildInfo.codeSizeDirectory}');
+  }
+  final File? precompilerTrace = DarwinArch.values.map<File?>((DarwinArch arch) {
+    return globals.fs.directory(buildInfo.codeSizeDirectory).childFile('trace.${arch.name}.json');
+  }).firstWhere(
+    (File? file) => file!.existsSync(),
+    orElse: () => null,
+  );
+  if (precompilerTrace == null) {
+    throw StateError('No precompiler trace file (trace.<ARCH>.json) found in ${buildInfo.codeSizeDirectory}');
+  }
+
+  // This analysis is only supported for release builds.
+  // Attempt to guess the correct .app by picking the first one.
+  final Directory candidateDirectory = globals.fs.directory(
+    globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
+  );
+  final Directory appDirectory = candidateDirectory.listSync()
+    .whereType<Directory>()
+    .firstWhere((Directory directory) {
+    return globals.fs.path.extension(directory.path) == '.app';
+  });
+  final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
+    aotSnapshot: aotSnapshot,
+    precompilerTrace: precompilerTrace,
+    outputDirectory: appDirectory,
+    type: 'macos',
+    excludePath: 'Versions', // Avoid double counting caused by symlinks
+  );
+  final File outputFile = globals.fsUtils.getUniqueFile(
+    globals.fs
+      .directory(globals.fsUtils.homeDirPath)
+      .childDirectory('.flutter-devtools'), 'macos-code-size-analysis', 'json',
+  )..writeAsStringSync(jsonEncode(output));
+  // This message is used as a sentinel in analyze_apk_size_test.dart
+  globals.printStatus(
+    'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
+  );
+
+  // DevTools expects a file path relative to the .flutter-devtools/ dir.
+  final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+  globals.printStatus(
+    '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+    'dart devtools --appSizeBase=$relativeAppSizePath'
+  );
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
@@ -120,6 +121,9 @@ class FlutterProject {
 
   /// The location of this project.
   final Directory directory;
+
+  /// The location of the build folder.
+  Directory get buildDirectory => directory.childDirectory('build');
 
   /// The manifest of this project.
   final FlutterManifest manifest;
@@ -325,7 +329,14 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
-  Future<void> regeneratePlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
+  ///
+  /// If [allowedPlugins] is non-null, all plugins with method channels in the
+  /// project's pubspec.yaml will be validated to be in that set, or else a
+  /// [ToolExit] will be thrown.
+  Future<void> regeneratePlatformSpecificTooling({
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    Iterable<String>? allowedPlugins,
+  }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
@@ -336,6 +347,7 @@ class FlutterProject {
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
+      allowedPlugins: allowedPlugins,
     );
   }
 
@@ -349,6 +361,7 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    Iterable<String>? allowedPlugins,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
@@ -379,6 +392,7 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
+      allowedPlugins: allowedPlugins,
     );
   }
 
@@ -441,10 +455,14 @@ class AndroidProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
-  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace[\\s]+[\'"](.+)[\'"]');
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
+
+  /// Pattern used to find the assignment of the "group" property in Gradle.
+  /// Expected example: `group "dev.flutter.plugin"`
+  /// Regex is used in both Groovy and Kotlin Gradle files.
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
@@ -487,13 +505,14 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// Outputs app link related settings into a json file.
   ///
-  /// The file is stored in
-  /// `<project>/build/app/app-link-settings-<variant>.json`.
-  Future<void> outputsAppLinkSettings({required String variant}) async {
+  /// The return future resolves to the path of the json file.
+  ///
+  /// The future resolves to null if it fails to retrieve app link settings.
+  Future<String> outputsAppLinkSettings({required String variant}) async {
     if (!existsSync() || androidBuilder == null) {
-      return;
+      throwToolExit('Target directory $hostAppGradleRoot is not an Android project');
     }
-    await androidBuilder!.outputsAppLinkSettings(variant, project: parent);
+    return androidBuilder!.outputsAppLinkSettings(variant, project: parent);
   }
 
   bool _computeSupportedVersion() {
@@ -537,10 +556,54 @@ class AndroidProject extends FlutterProjectPlatform {
     return imperativeMatch || declarativeMatch;
   }
 
+  /// Gets top-level Gradle build file.
+  /// See https://developer.android.com/build#top-level.
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
+  File get hostAppGradleFile {
+    final File buildGroovy = hostAppGradleRoot.childFile('build.gradle');
+    final File buildKotlin = hostAppGradleRoot.childFile('build.gradle.kts');
+
+    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
+      return buildGroovy;
+    }
+
+    if (buildKotlin.existsSync()) {
+      return buildKotlin;
+    }
+
+    // TODO(bartekpacia): An exception should be thrown when neither
+    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // Groovy file. See #141180.
+    return buildGroovy;
+  }
+
   /// Gets the module-level build.gradle file.
   /// See https://developer.android.com/build#module-level.
-  File get appGradleFile => hostAppGradleRoot.childDirectory('app')
-      .childFile('build.gradle');
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
+  File get appGradleFile {
+    final Directory appDir = hostAppGradleRoot.childDirectory('app');
+    final File buildGroovy = appDir.childFile('build.gradle');
+    final File buildKotlin = appDir.childFile('build.gradle.kts');
+
+    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
+      return buildGroovy;
+    }
+
+    if (buildKotlin.existsSync()) {
+      return buildKotlin;
+    }
+
+    // TODO(bartekpacia): An exception should be thrown when neither
+    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // Groovy file. See #141180.
+    return buildGroovy;
+  }
 
   File get appManifestFile {
     if (isUsingGradle) {
@@ -570,7 +633,7 @@ class AndroidProject extends FlutterProjectPlatform {
   ///
   /// This is expected to be called from
   /// flutter_tools/lib/src/project_validator.dart.
-  Future<ProjectValidatorResult> validateJavaGradleAgpVersions() async {
+  Future<ProjectValidatorResult> validateJavaAndGradleAgpVersions() async {
     // Constructing ProjectValidatorResult happens here and not in
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
@@ -596,7 +659,7 @@ class AndroidProject extends FlutterProjectPlatform {
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
-    final String? javaVersion = _versionToParsableString(globals.java?.version);
+    final String? javaVersion = versionToParsableString(globals.java?.version);
 
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
@@ -604,15 +667,20 @@ class AndroidProject extends FlutterProjectPlatform {
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
         gradleV: gradleVersion, agpV: agpVersion);
 
-    final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger,
-        javaV: javaVersion, gradleV: gradleVersion);
+    final bool compatibleJavaGradle = gradle.validateJavaAndGradle(
+        globals.logger,
+        javaV: javaVersion,
+        gradleV: gradleVersion);
 
     // Begin description formatting.
     if (!compatibleGradleAgp) {
+      final String gradleDescription = agpVersion != null
+          ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
+          : '';
       description = '''
 Incompatible Gradle/AGP versions. \n
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
-Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
+$gradleDescription\n
 See the link below for more information:
 $gradleAgpCompatUrl
 ''';
@@ -632,7 +700,7 @@ $javaGradleCompatUrl
   }
 
   bool get isUsingGradle {
-    return hostAppGradleRoot.childFile('build.gradle').existsSync();
+    return hostAppGradleFile.existsSync();
   }
 
   String? get applicationId {
@@ -651,13 +719,12 @@ $javaGradleCompatUrl
   }
 
   String? get group {
-    final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _groupPattern)?.group(1);
+    return firstMatchInFile(hostAppGradleFile, _groupPattern)?.group(1);
   }
 
   /// The build directory where the Android artifacts are placed.
   Directory get buildDirectory {
-    return parent.directory.childDirectory('build');
+    return parent.buildDirectory;
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
@@ -719,9 +786,9 @@ $javaGradleCompatUrl
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
         'agpVersion': gradle.templateAndroidGradlePluginVersion,
+        'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,
         'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
         'gradleVersion': gradle.templateDefaultGradleVersion,
-        'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
         'compileSdkVersion': gradle.compileSdkVersion,
         'minSdkVersion': gradle.minSdkVersion,
         'ndkVersion': gradle.ndkVersion,
@@ -758,8 +825,19 @@ The detected reason was:
 ''');
     if (deprecationBehavior == DeprecationBehavior.ignore) {
       BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      globals.analytics.send(
+        Event.flutterBuildInfo(
+        label: 'deprecated-v1-android-embedding-ignored',
+        buildType: 'gradle',
+      ));
+
     } else { // DeprecationBehavior.exit
-      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      globals.analytics.send(
+        Event.flutterBuildInfo(
+        label: 'deprecated-v1-android-embedding-failed',
+        buildType: 'gradle',
+      ));
+
       throwToolExit(
         'Build failed due to use of deprecated Android v1 embedding.',
         exitCode: 1,
@@ -920,7 +998,7 @@ class CompatibilityResult {
 }
 
 /// Converts a [Version] to a string that can be parsed by [Version.parse].
-String? _versionToParsableString(Version? version) {
+String? versionToParsableString(Version? version) {
   if (version == null) {
     return null;
   }

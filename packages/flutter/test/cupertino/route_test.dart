@@ -377,6 +377,272 @@ void main() {
     );
   });
 
+  testWidgets('Back swipe less than halfway is interrupted by route pop', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it less than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(100.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically pop and observe that Page 2 was popped as if there were
+    // no back gesture.
+    Navigator.pop<void>(scaffoldKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets('Back swipe more than halfway is interrupted by route pop', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it more than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(500.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically pop and observe that Page 2 was popped as if there were
+    // no back gesture.
+    Navigator.pop<void>(scaffoldKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets('Back swipe less than halfway is interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it less than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(100.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically push and observe that Page 3 was pushed as if there were
+    // no back gesture.
+    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Center(child: Text('Page 3')),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+  });
+
+  testWidgets('Back swipe more than halfway is interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it more than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(500.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically push and observe that Page 3 was pushed as if there were
+    // no back gesture.
+    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Center(child: Text('Page 3')),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+  });
+
   testWidgets('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -755,6 +1021,40 @@ void main() {
     await tester.pump();
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(300));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/137033.
+  testWidgets('Update pages during a drag gesture will not stuck', (WidgetTester tester) async {
+
+    await tester.pumpWidget(const _TestPageUpdate());
+
+    // Tap this button will update the pages in two seconds.
+    await tester.tap(find.text('Update Pages'));
+    await tester.pump();
+
+    // Start swiping.
+    final TestGesture swipeGesture = await tester.startGesture(const Offset(5, 100));
+    await swipeGesture.moveBy(const Offset(100, 0));
+    await tester.pump();
+
+    expect(
+      tester.stateList<NavigatorState>(find.byType(Navigator)).last.userGestureInProgress,
+      true,
+    );
+
+    // Wait for pages to update.
+    await tester.pump(const Duration(seconds: 3));
+
+    // Verify pages are updated.
+    expect(
+      find.text('New page'),
+      findsOneWidget,
+    );
+    // Verify `userGestureInProgress` is set to false.
+    expect(
+      tester.stateList<NavigatorState>(find.byType(Navigator)).last.userGestureInProgress,
+      false,
+    );
   });
 
   testWidgets('Pop gesture snapping is not linear', (WidgetTester tester) async {
@@ -2246,6 +2546,68 @@ Widget buildNavigator({
 }
 
 
+// A test target to updating pages in navigator.
+//
+// It contains 3 routes:
+//
+//  * The initial route, 'home'.
+//  * The 'old' route, displays a button showing 'Update pages'. Tap the button
+//    will update pages.
+//  * The 'new' route, displays the new page.
+class _TestPageUpdate extends StatefulWidget {
+  const _TestPageUpdate();
+
+  @override
+  State<StatefulWidget> createState() => _TestPageUpdateState();
+}
+class _TestPageUpdateState extends State<_TestPageUpdate> {
+  bool updatePages = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final GlobalKey<State<StatefulWidget>> navKey = GlobalKey();
+    return MaterialApp(
+      home: Navigator(
+        key: navKey,
+        pages: updatePages
+            ? <Page<dynamic>>[
+                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
+                const CupertinoPage<dynamic>(name: '/home/new', child: Text('New page')),
+              ]
+            : <Page<dynamic>>[
+                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
+                CupertinoPage<dynamic>(name: '/home/old', child: buildMainPage()),
+              ],
+        onPopPage: (_, __) {
+          return false;
+        },
+      ),
+    );
+  }
+
+  Widget buildMainPage() {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('Main'),
+            ElevatedButton(
+              onPressed: () {
+                Future<void>.delayed(const Duration(seconds: 2), () {
+                  setState(() {
+                    updatePages = true;
+                  });
+                });
+              },
+              child: const Text('Update Pages'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 // A test target for post-route cancel events.
 //
 // It contains 2 routes:

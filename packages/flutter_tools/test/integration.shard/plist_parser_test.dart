@@ -123,7 +123,7 @@ void main() {
     expect(logger.statusText, contains('Property List error: Unexpected character \x01 at line 1 / '
       'JSON error: JSON text did not start with array or object and option to allow fragments not '
       'set. around line 1, column 0.\n'));
-    expect(logger.errorText, 'ProcessException: The command failed\n'
+    expect(logger.errorText, 'ProcessException: The command failed with exit code 1\n'
               '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n');
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
@@ -185,7 +185,7 @@ void main() {
     expect(logger.statusText, contains('foo.plist: Property List error: Unexpected character \x01 '
       'at line 1 / JSON error: JSON text did not start with array or object and option to allow '
       'fragments not set. around line 1, column 0.\n'));
-    expect(logger.errorText, equals('ProcessException: The command failed\n'
+    expect(logger.errorText, equals('ProcessException: The command failed with exit code 1\n'
       '  Command: /usr/bin/plutil -replace CFBundleIdentifier -string dev.flutter.fake foo.plist\n'));
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 

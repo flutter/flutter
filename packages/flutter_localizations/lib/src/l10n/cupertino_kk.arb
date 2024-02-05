@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Іздеу",
   "noSpellCheckReplacementsLabel": "Ауыстыратын ешнәрсе табылмады.",
   "menuDismissLabel": "Мәзірді жабу",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Іздеу",
+  "searchWebButtonLabel": "Интернеттен іздеу",
+  "shareButtonLabel": "Бөлісу…",
+  "clearButtonLabel": "Clear"
 }

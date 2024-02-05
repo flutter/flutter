@@ -5,8 +5,6 @@
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
-///
-/// If not injected, a default implementation is provided.
 FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 
 /// The interface used to determine if a particular [Feature] is enabled.
@@ -50,6 +48,12 @@ abstract class FeatureFlags {
   /// Whether animations are used in the command line interface.
   bool get isCliAnimationEnabled => true;
 
+  /// Whether native assets compilation and bundling is enabled.
+  bool get isNativeAssetsEnabled => false;
+
+  /// Whether native assets compilation and bundling is enabled.
+  bool get isPreviewDeviceEnabled => true;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -68,6 +72,8 @@ const List<Feature> allFeatures = <Feature>[
   flutterCustomDevicesFeature,
   flutterWebWasm,
   cliAnimation,
+  nativeAssets,
+  previewDevice,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -150,12 +156,37 @@ const Feature flutterWebWasm = Feature(
   ),
 );
 
+const String kCliAnimationsFeatureName = 'cli-animations';
+
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
 const Feature cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
-  configSetting: 'cli-animations',
+  configSetting: kCliAnimationsFeatureName,
+);
+
+/// Enable native assets compilation and bundling.
+const Feature nativeAssets = Feature(
+  name: 'native assets compilation and bundling',
+  configSetting: 'enable-native-assets',
+  environmentOverride: 'FLUTTER_NATIVE_ASSETS',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
+/// Enable Flutter preview prebuilt device.
+const Feature previewDevice = Feature(
+  name: 'Flutter preview prebuilt device',
+  configSetting: 'enable-flutter-preview',
+  environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

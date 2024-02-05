@@ -23,7 +23,7 @@ import 'theme.dart';
 // Apple Design Resources(https://developer.apple.com/design/resources/).
 // However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
-  fontFamily: '.SF UI Display',
+  fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -33,7 +33,7 @@ const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -43,7 +43,7 @@ const TextStyle _kCupertinoDialogContentStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 16.8,
   fontWeight: FontWeight.w400,
@@ -52,15 +52,15 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
-  fontSize: 20.0,
+  fontSize: 17.0,
   fontWeight: FontWeight.w400,
   textBaseline: TextBaseline.alphabetic,
 );
 
 const TextStyle _kActionSheetContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -71,7 +71,7 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 // Generic constants shared between Dialog and ActionSheet.
 const double _kBlurAmount = 20.0;
 const double _kCornerRadius = 14.0;
-const double _kDividerThickness = 1.0;
+const double _kDividerThickness = 0.3;
 
 // Dialog specific constants.
 // iOS dialogs have a normal display width and another display width that is
@@ -87,8 +87,8 @@ const double _kDialogMinButtonFontSize = 10.0;
 const double _kActionSheetEdgeHorizontalPadding = 8.0;
 const double _kActionSheetCancelButtonPadding = 8.0;
 const double _kActionSheetEdgeVerticalPadding = 10.0;
-const double _kActionSheetContentHorizontalPadding = 40.0;
-const double _kActionSheetContentVerticalPadding = 14.0;
+const double _kActionSheetContentHorizontalPadding = 16.0;
+const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
@@ -149,8 +149,9 @@ const double _kMaxRegularTextScaleFactor = 1.4;
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
 bool _isInAccessibilityMode(BuildContext context) {
-  final double? factor = MediaQuery.maybeTextScalerOf(context)?.textScaleFactor;
-  return factor != null && factor > _kMaxRegularTextScaleFactor;
+  const double defaultFontSize = 14.0;
+  final double? scaledFontSize = MediaQuery.maybeTextScalerOf(context)?.scale(defaultFontSize);
+  return scaledFontSize != null && scaledFontSize > defaultFontSize * _kMaxRegularTextScaleFactor;
 }
 
 /// An iOS-style alert dialog.
@@ -188,10 +189,8 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///  * [CupertinoDialogAction], which is an iOS-style dialog button.
 ///  * [AlertDialog], a Material Design alert dialog.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-class CupertinoAlertDialog extends StatelessWidget {
+class CupertinoAlertDialog extends StatefulWidget {
   /// Creates an iOS-style alert dialog.
-  ///
-  /// The [actions] must not be null.
   const CupertinoAlertDialog({
     super.key,
     this.title,
@@ -233,9 +232,6 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when there are many actions.
   final ScrollController? scrollController;
 
-  ScrollController get _effectiveScrollController =>
-    scrollController ?? ScrollController();
-
   /// A scroll controller that can be used to control the scrolling of the
   /// actions in the dialog.
   ///
@@ -247,37 +243,50 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when it is long.
   final ScrollController? actionScrollController;
 
-  ScrollController get _effectiveActionScrollController =>
-    actionScrollController ?? ScrollController();
-
   /// {@macro flutter.material.dialog.insetAnimationDuration}
   final Duration insetAnimationDuration;
 
   /// {@macro flutter.material.dialog.insetAnimationCurve}
   final Curve insetAnimationCurve;
 
+  @override
+  State<CupertinoAlertDialog> createState() => _CupertinoAlertDialogState();
+}
+
+class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
+  ScrollController? _backupScrollController;
+
+  ScrollController? _backupActionScrollController;
+
+  ScrollController get _effectiveScrollController =>
+    widget.scrollController ?? (_backupScrollController ??= ScrollController());
+
+  ScrollController get _effectiveActionScrollController =>
+    widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
+
   Widget _buildContent(BuildContext context) {
-    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
+    const double defaultFontSize = 14.0;
+    final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
     final List<Widget> children = <Widget>[
-      if (title != null || content != null)
+      if (widget.title != null || widget.content != null)
         Flexible(
           flex: 3,
           child: _CupertinoAlertContentSection(
-            title: title,
-            message: content,
+            title: widget.title,
+            message: widget.content,
             scrollController: _effectiveScrollController,
             titlePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
-              bottom: content == null ? _kDialogEdgePadding : 1.0,
-              top: _kDialogEdgePadding * textScaleFactor,
+              bottom: widget.content == null ? _kDialogEdgePadding : 1.0,
+              top: _kDialogEdgePadding * effectiveTextScaleFactor,
             ),
             messagePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
-              bottom: _kDialogEdgePadding * textScaleFactor,
-              top: title == null ? _kDialogEdgePadding : 1.0,
+              bottom: _kDialogEdgePadding * effectiveTextScaleFactor,
+              top: widget.title == null ? _kDialogEdgePadding : 1.0,
             ),
             titleTextStyle: _kCupertinoDialogTitleStyle.copyWith(
               color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
@@ -303,10 +312,10 @@ class CupertinoAlertDialog extends StatelessWidget {
     Widget actionSection = Container(
       height: 0.0,
     );
-    if (actions.isNotEmpty) {
+    if (widget.actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
-        children: actions,
+        children: widget.actions,
       );
     }
 
@@ -330,8 +339,8 @@ class CupertinoAlertDialog extends StatelessWidget {
               return AnimatedPadding(
                 padding: MediaQuery.viewInsetsOf(context) +
                     const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-                duration: insetAnimationDuration,
-                curve: insetAnimationCurve,
+                duration: widget.insetAnimationDuration,
+                curve: widget.insetAnimationCurve,
                 child: MediaQuery.removeViewInsets(
                   removeLeft: true,
                   removeTop: true,
@@ -367,6 +376,13 @@ class CupertinoAlertDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _backupScrollController?.dispose();
+    _backupActionScrollController?.dispose();
+    super.dispose();
   }
 }
 
@@ -458,7 +474,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 ///
 ///  * [CupertinoActionSheetAction], which is an iOS-style action sheet button.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
-class CupertinoActionSheet extends StatelessWidget {
+class CupertinoActionSheet extends StatefulWidget {
   /// Creates an iOS-style action sheet.
   ///
   /// An action sheet must have a non-null value for at least one of the
@@ -504,17 +520,11 @@ class CupertinoActionSheet extends StatelessWidget {
   /// short.
   final ScrollController? messageScrollController;
 
-  ScrollController get _effectiveMessageScrollController =>
-    messageScrollController ?? ScrollController();
-
   /// A scroll controller that can be used to control the scrolling of the
   /// [actions] in the action sheet.
   ///
   /// This attribute is typically not needed.
   final ScrollController? actionScrollController;
-
-  ScrollController get _effectiveActionScrollController =>
-    actionScrollController ?? ScrollController();
 
   /// The optional cancel button that is grouped separately from the other
   /// actions.
@@ -522,32 +532,54 @@ class CupertinoActionSheet extends StatelessWidget {
   /// Typically this is an [CupertinoActionSheetAction] widget.
   final Widget? cancelButton;
 
+  @override
+  State<CupertinoActionSheet> createState() => _CupertinoActionSheetState();
+}
+
+class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
+  ScrollController? _backupMessageScrollController;
+
+  ScrollController? _backupActionScrollController;
+
+  ScrollController get _effectiveMessageScrollController =>
+    widget.messageScrollController ?? (_backupMessageScrollController ??= ScrollController());
+
+  ScrollController get _effectiveActionScrollController =>
+    widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
+
+  @override
+  void dispose() {
+    _backupMessageScrollController?.dispose();
+    _backupActionScrollController?.dispose();
+    super.dispose();
+  }
+
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
-    if (title != null || message != null) {
+    if (widget.title != null || widget.message != null) {
       final Widget titleSection = _CupertinoAlertContentSection(
-        title: title,
-        message: message,
+        title: widget.title,
+        message: widget.message,
         scrollController: _effectiveMessageScrollController,
-        titlePadding: const EdgeInsets.only(
+        titlePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: _kActionSheetContentVerticalPadding,
+          bottom: widget.message == null ? _kActionSheetContentVerticalPadding : 0.0,
           top: _kActionSheetContentVerticalPadding,
         ),
         messagePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: title == null ? _kActionSheetContentVerticalPadding : 22.0,
-          top: title == null ? _kActionSheetContentVerticalPadding : 0.0,
+          bottom: _kActionSheetContentVerticalPadding,
+          top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
-        titleTextStyle: message == null
+        titleTextStyle: widget.message == null
             ? _kActionSheetContentStyle
             : _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
-        messageTextStyle: title == null
+        messageTextStyle: widget.title == null
             ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
             : _kActionSheetContentStyle,
-        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 8.0),
+        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       );
       content.add(Flexible(child: titleSection));
     }
@@ -563,26 +595,26 @@ class CupertinoActionSheet extends StatelessWidget {
   }
 
   Widget _buildActions() {
-    if (actions == null || actions!.isEmpty) {
+    if (widget.actions == null || widget.actions!.isEmpty) {
       return Container(
         height: 0.0,
       );
     }
     return _CupertinoAlertActionSection(
       scrollController: _effectiveActionScrollController,
-      hasCancelButton: cancelButton != null,
+      hasCancelButton: widget.cancelButton != null,
       isActionSheet: true,
-      children: actions!,
+      children: widget.actions!,
     );
   }
 
   Widget _buildCancelButton() {
-    final double cancelPadding = (actions != null || message != null || title != null)
+    final double cancelPadding = (widget.actions != null || widget.message != null || widget.title != null)
         ? _kActionSheetCancelButtonPadding : 0.0;
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
       child: _CupertinoActionSheetCancelButton(
-        child: cancelButton,
+        child: widget.cancelButton,
       ),
     );
   }
@@ -605,7 +637,7 @@ class CupertinoActionSheet extends StatelessWidget {
           ),
         ),
       ),
-      if (cancelButton != null) _buildCancelButton(),
+      if (widget.cancelButton != null) _buildCancelButton(),
     ];
 
     final Orientation orientation = MediaQuery.orientationOf(context);
@@ -654,8 +686,6 @@ class CupertinoActionSheet extends StatelessWidget {
 ///    more choices related to the current context.
 class CupertinoActionSheetAction extends StatelessWidget {
   /// Creates an action for an iOS-style action sheet.
-  ///
-  /// The [child] and [onPressed] arguments must not be null.
   const CupertinoActionSheetAction({
     super.key,
     required this.onPressed,
@@ -665,8 +695,6 @@ class CupertinoActionSheetAction extends StatelessWidget {
   });
 
   /// The callback that is called when the button is tapped.
-  ///
-  /// This attribute must not be null.
   final VoidCallback onPressed;
 
   /// Whether this action is the default choice in the action sheet.
@@ -793,7 +821,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoDialog(
-      dividerThickness: _kDividerThickness / MediaQuery.devicePixelRatioOf(context),
+      dividerThickness: _kDividerThickness,
       isInAccessibilityMode: _isInAccessibilityMode(context) && !isActionSheet,
       dividerColor: CupertinoDynamicColor.resolve(dividerColor, context),
       isActionSheet: isActionSheet,
@@ -1457,7 +1485,6 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < children.length; i += 1) {
@@ -1474,7 +1501,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
         controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
-          dividerThickness: _kDividerThickness / devicePixelRatio,
+          dividerThickness: _kDividerThickness,
           hasCancelButton: hasCancelButton,
           isActionSheet: isActionSheet,
         ),
@@ -1561,8 +1588,7 @@ class _ActionButtonParentDataWidget
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass =>
-      _CupertinoDialogActionsRenderWidget;
+  Type get debugTypicalAncestorWidgetClass => _CupertinoDialogActionsRenderWidget;
 }
 
 // ParentData applied to individual action buttons that report whether or not
@@ -1601,14 +1627,14 @@ class CupertinoDialogAction extends StatelessWidget {
   /// but more than one action can have this attribute set to true in the same
   /// [CupertinoAlertDialog].
   ///
-  /// This parameters defaults to false and cannot be null.
+  /// This parameters defaults to false.
   final bool isDefaultAction;
 
   /// Whether this action destroys an object.
   ///
   /// For example, an action that deletes an email is destructive.
   ///
-  /// Defaults to false and cannot be null.
+  /// Defaults to false.
   final bool isDestructiveAction;
 
   /// [TextStyle] to apply to any text that appears in this button.
@@ -1629,10 +1655,6 @@ class CupertinoDialogAction extends StatelessWidget {
   /// value.
   bool get enabled => onPressed != null;
 
-  double _calculatePadding(BuildContext context) {
-    return 8.0 * MediaQuery.textScalerOf(context).textScaleFactor;
-  }
-
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
   //
@@ -1641,6 +1663,7 @@ class CupertinoDialogAction extends StatelessWidget {
     required BuildContext context,
     required TextStyle textStyle,
     required Widget content,
+    required double padding,
   }) {
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double dialogWidth = isInAccessibilityMode
@@ -1651,7 +1674,6 @@ class CupertinoDialogAction extends StatelessWidget {
     // buttons. This ratio information is used to automatically scale down action
     // button text to fit the available space.
     final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) / _kDialogMinButtonFontSize;
-    final double padding = _calculatePadding(context);
 
     return IntrinsicHeight(
       child: SizedBox(
@@ -1700,8 +1722,7 @@ class CupertinoDialogAction extends StatelessWidget {
         isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
-    );
-    style = style.merge(textStyle);
+    ).merge(textStyle);
 
     if (isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
@@ -1710,7 +1731,10 @@ class CupertinoDialogAction extends StatelessWidget {
     if (!enabled) {
       style = style.copyWith(color: style.color!.withOpacity(0.5));
     }
-
+    final double fontSize = style.fontSize ?? kDefaultFontSize;
+    final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double padding = 8.0 * effectiveTextScale;
     // Apply a sizing policy to the action button's content based on whether or
     // not the device is in accessibility mode.
     // TODO(mattcarroll): The following logic is not entirely correct. It is also
@@ -1726,6 +1750,7 @@ class CupertinoDialogAction extends StatelessWidget {
             context: context,
             textStyle: style,
             content: child,
+            padding: padding,
           );
 
     return MouseRegion(
@@ -1740,7 +1765,7 @@ class CupertinoDialogAction extends StatelessWidget {
           ),
           child: Container(
             alignment: Alignment.center,
-            padding: EdgeInsets.all(_calculatePadding(context)),
+            padding: EdgeInsets.all(padding),
             child: sizedContent,
           ),
         ),

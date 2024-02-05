@@ -2269,16 +2269,16 @@ void main() {
       'three',
     ];
     String? item = items[0];
-    late MediaQueryData mediaQuery;
+    late double textScale;
 
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             builder: (BuildContext context, Widget? child) {
-              mediaQuery = MediaQuery.of(context);
+              textScale = MediaQuery.of(context).textScaler.scale(14) / 14;
               return MediaQuery(
-                data: mediaQuery,
+                data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
                 child: child!,
               );
             },
@@ -2292,9 +2292,7 @@ void main() {
                 onChanged: (String? newItem) {
                   setState(() {
                     item = newItem;
-                    mediaQuery = mediaQuery.copyWith(
-                      textScaleFactor: mediaQuery.textScaleFactor + 0.1,
-                    );
+                    textScale += 0.1;
                   });
                 },
               ),
@@ -2389,6 +2387,8 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true, useMaterial3: false));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -2403,6 +2403,8 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -2416,6 +2418,8 @@ void main() {
   testWidgets("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, focusNode: focusNode, autofocus: true, focusColor: const Color(0xff00ff00)));
     await tester.pump(); // Pump a frame for autofocus to take effect (although it shouldn't).
     expect(focusNode.hasPrimaryFocus, isFalse);
@@ -2424,6 +2428,7 @@ void main() {
 
   testWidgets('DropdownButton is activated with the enter key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {
@@ -2520,6 +2525,7 @@ void main() {
 
   testWidgets('DropdownButton is activated with the space key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {
@@ -2575,6 +2581,7 @@ void main() {
 
   testWidgets('Selected element is focused when dropdown is opened', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2635,6 +2642,7 @@ void main() {
 
   testWidgets('Selected element is correctly focused with dropdown that more items than fit on the screen', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(50, (int index) => index);
 
@@ -2698,6 +2706,7 @@ void main() {
 
   testWidgets("Having a focused element doesn't interrupt scroll when flung by touch", (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
 
@@ -2773,6 +2782,7 @@ void main() {
 
   testWidgets('DropdownButton onTap callback can request focus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton')..addListener(() { });
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
 
@@ -2821,6 +2831,7 @@ void main() {
 
   testWidgets('DropdownButton changes selected item with arrow keys', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {

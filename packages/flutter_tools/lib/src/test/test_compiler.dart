@@ -10,12 +10,18 @@ import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
+import '../base/os.dart' show HostPlatform;
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../linux/native_assets.dart';
+import '../macos/native_assets.dart';
+import '../native_assets.dart';
 import '../project.dart';
+import '../windows/native_assets.dart';
 import 'test_time_recorder.dart';
 
 /// A request to the [TestCompiler] for recompilation.
@@ -118,6 +124,7 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       dartDefines: buildInfo.dartDefines,
       packagesPath: buildInfo.packagesPath,
+      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
@@ -163,6 +170,58 @@ class TestCompiler {
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
       }
 
+      Uri? nativeAssetsYaml;
+      if (!buildInfo.buildNativeAssets) {
+        nativeAssetsYaml = null;
+      } else {
+        final Uri projectUri = FlutterProject.current().directory.uri;
+        final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
+          projectUri,
+          buildInfo.packageConfig,
+          globals.fs,
+          globals.logger,
+        );
+        if (globals.platform.isMacOS) {
+          (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
+            buildMode: buildInfo.mode,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else if (globals.platform.isLinux) {
+          (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+            buildMode: buildInfo.mode,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else if (globals.platform.isWindows) {
+          final TargetPlatform targetPlatform;
+          if (globals.os.hostPlatform == HostPlatform.windows_x64) {
+            targetPlatform = TargetPlatform.windows_x64;
+          } else {
+            targetPlatform = TargetPlatform.windows_arm64;
+          }
+          (nativeAssetsYaml, _) = await buildNativeAssetsWindows(
+            buildMode: buildInfo.mode,
+            targetPlatform: targetPlatform,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else {
+          await ensureNoNativeAssetsOrOsIsSupported(
+            projectUri,
+            const LocalPlatform().operatingSystem,
+            globals.fs,
+            buildRunner,
+          );
+        }
+      }
+
       final CompilerOutput? compilerOutput = await compiler!.recompile(
         request.mainUri,
         <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
@@ -171,6 +230,7 @@ class TestCompiler {
         projectRootPath: flutterProject?.directory.absolute.path,
         checkDartPluginRegistry: true,
         fs: globals.fs,
+        nativeAssetsYaml: nativeAssetsYaml,
       );
       final String? outputPath = compilerOutput?.outputFilename;
 

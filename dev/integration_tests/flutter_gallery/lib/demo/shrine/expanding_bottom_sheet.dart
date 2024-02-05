@@ -221,18 +221,13 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   // Returns the correct width of the ExpandingBottomSheet based on the number of
   // products in the cart.
   double _widthFor(int numProducts) {
-    switch (numProducts) {
-      case 0:
-        return _kWidthForCartIcon;
-      case 1:
-        return 136.0;
-      case 2:
-        return 192.0;
-      case 3:
-        return 248.0;
-      default:
-        return 278.0;
-    }
+    return switch (numProducts) {
+      0 => _kWidthForCartIcon,
+      1 => 136.0,
+      2 => 192.0,
+      3 => 248.0,
+      _ => 278.0,
+    };
   }
 
   // Returns true if the cart is open or opening and false otherwise.

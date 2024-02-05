@@ -56,8 +56,7 @@ import 'image.dart';
 class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
-  /// The [decoration] and [position] arguments must not be null. By default the
-  /// decoration paints behind the child.
+  /// By default the decoration paints behind the child.
   const DecoratedBox({
     super.key,
     required this.decoration,

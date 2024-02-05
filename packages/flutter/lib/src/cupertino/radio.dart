@@ -18,7 +18,7 @@ const Size _size = Size(18.0, 18.0);
 const double _kOuterRadius = 7.0;
 const double _kInnerRadius = 2.975;
 
-// The relative values needed to transform a color to its equivilant focus
+// The relative values needed to transform a color to its equivalent focus
 // outline color.
 const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;

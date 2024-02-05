@@ -286,10 +286,10 @@ abstract class BoxBorder extends ShapeBorder {
       rect.top - insets.top,
       rect.right + insets.right,
       rect.bottom + insets.bottom,
-      topLeft: (rect.tlRadius + Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: (rect.trRadius + Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: (rect.brRadius + Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft: (rect.blRadius + Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topLeft: (rect.tlRadius + Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero),
+      topRight: (rect.trRadius + Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero),
+      bottomRight: (rect.brRadius + Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero),
+      bottomLeft: (rect.blRadius + Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero),
     );
   }
 
@@ -299,10 +299,10 @@ abstract class BoxBorder extends ShapeBorder {
       rect.top + insets.top,
       rect.right - insets.right,
       rect.bottom - insets.bottom,
-      topLeft: (rect.tlRadius - Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: (rect.trRadius - Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: (rect.brRadius - Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft:(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topLeft: (rect.tlRadius - Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero),
+      topRight: (rect.trRadius - Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero),
+      bottomRight: (rect.brRadius - Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero),
+      bottomLeft:(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero),
     );
   }
 
@@ -387,8 +387,6 @@ class Border extends BoxBorder {
   /// Creates a border.
   ///
   /// All the sides of the border default to [BorderSide.none].
-  ///
-  /// The arguments must not be null.
   const Border({
     this.top = BorderSide.none,
     this.right = BorderSide.none,
@@ -397,8 +395,6 @@ class Border extends BoxBorder {
   });
 
   /// Creates a border whose sides are all the same.
-  ///
-  /// The `side` argument must not be null.
   const Border.fromBorderSide(BorderSide side)
       : top = side,
         right = side,
@@ -410,7 +406,7 @@ class Border extends BoxBorder {
   /// The `vertical` argument applies to the [left] and [right] sides, and the
   /// `horizontal` argument applies to the [top] and [bottom] sides.
   ///
-  /// All arguments default to [BorderSide.none] and must not be null.
+  /// All arguments default to [BorderSide.none].
   const Border.symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
@@ -437,8 +433,6 @@ class Border extends BoxBorder {
   ///
   /// It is only valid to call this if [BorderSide.canMerge] returns true for
   /// the pairwise combination of each side on both [Border]s.
-  ///
-  /// The arguments must not be null.
   static Border merge(Border a, Border b) {
     assert(BorderSide.canMerge(a.top, b.top));
     assert(BorderSide.canMerge(a.right, b.right));
@@ -761,8 +755,6 @@ class BorderDirectional extends BoxBorder {
   /// the trailing edge. They are resolved during [paint].
   ///
   /// All the sides of the border default to [BorderSide.none].
-  ///
-  /// The arguments must not be null.
   const BorderDirectional({
     this.top = BorderSide.none,
     this.start = BorderSide.none,
@@ -775,8 +767,6 @@ class BorderDirectional extends BoxBorder {
   ///
   /// It is only valid to call this if [BorderSide.canMerge] returns true for
   /// the pairwise combination of each side on both [BorderDirectional]s.
-  ///
-  /// The arguments must not be null.
   static BorderDirectional merge(BorderDirectional a, BorderDirectional b) {
     assert(BorderSide.canMerge(a.top, b.top));
     assert(BorderSide.canMerge(a.start, b.start));

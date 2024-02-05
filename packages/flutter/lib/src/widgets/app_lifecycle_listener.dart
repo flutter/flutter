@@ -73,6 +73,15 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
     this.onStateChange,
   })  : binding = binding ?? WidgetsBinding.instance,
         _lifecycleState = (binding ?? WidgetsBinding.instance).lifecycleState {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$AppLifecycleListener',
+        object: this,
+      );
+    }
     this.binding.addObserver(this);
   }
 
@@ -174,6 +183,11 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   @mustCallSuper
   void dispose() {
     assert(_debugAssertNotDisposed());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     binding.removeObserver(this);
     assert(() {
       _debugDisposed = true;

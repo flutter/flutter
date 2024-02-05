@@ -182,7 +182,7 @@ class Dialog extends StatelessWidget {
   /// See the enum [Clip] for details of all possible options and their common
   /// use cases.
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   /// {@endtemplate}
   final Clip clipBehavior;
 
@@ -718,7 +718,9 @@ class AlertDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScalerOf(context).textScaleFactor);
+    const double fontSizeToScale = 14.0;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double paddingScaleFactor = _scalePadding(effectiveTextScale);
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? iconWidget;
@@ -1096,8 +1098,6 @@ class SimpleDialog extends StatelessWidget {
   /// Creates a simple dialog.
   ///
   /// Typically used in conjunction with [showDialog].
-  ///
-  /// The [titlePadding] and [contentPadding] arguments must not be null.
   const SimpleDialog({
     super.key,
     this.title,
@@ -1215,7 +1215,11 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScalerOf(context).textScaleFactor);
+    final TextStyle defaultTextStyle = titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!;
+    final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
+    final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double paddingScaleFactor = _scalePadding(effectiveTextScale);
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? titleWidget;
@@ -1229,7 +1233,7 @@ class SimpleDialog extends StatelessWidget {
           bottom: children == null ? effectiveTitlePadding.bottom * paddingScaleFactor : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!,
+          style: defaultTextStyle,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
@@ -1340,6 +1344,11 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// The `routeSettings` argument is passed to [showGeneralDialog],
 /// see [RouteSettings] for details.
 ///
+/// If not null, the `traversalEdgeBehavior` argument specifies the transfer of
+/// focus beyond the first and the last items of the dialog route. By default,
+/// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
+/// to allow users to cycle through dialog widgets without leaving the dialog.
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
@@ -1377,12 +1386,6 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// push [DialogRoute] when the button is tapped.
 ///
 /// {@macro flutter.widgets.RestorationManager}
-///
-/// If not null, `traversalEdgeBehavior` argument specifies the transfer of
-/// focus beyond the first and the last items of the dialog route. By default,
-/// uses [TraversalEdgeBehavior.closedLoop], because it's typical for dialogs
-/// to allow users to cycle through widgets inside it without leaving the
-/// dialog.
 ///
 /// ** See code in examples/api/lib/material/dialog/show_dialog.2.dart **
 /// {@end-tool}
@@ -1579,7 +1582,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
        );
 }
 
-double _paddingScaleFactor(double textScaleFactor) {
+double _scalePadding(double textScaleFactor) {
   final double clampedTextScaleFactor = clampDouble(textScaleFactor, 1.0, 2.0);
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.

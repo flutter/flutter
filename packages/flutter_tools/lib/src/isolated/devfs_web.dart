@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
@@ -25,14 +24,15 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../build_system/targets/scene_importer.dart';
-import '../build_system/targets/shader_compiler.dart';
+import '../build_system/tools/scene_importer.dart';
+import '../build_system/tools/shader_compiler.dart';
 import '../bundle_builder.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
@@ -40,29 +40,13 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
-import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   required AssetReader assetReader,
   required Stream<BuildResult> buildResults,
   required ConnectionProvider chromeConnection,
-  required LoadStrategy loadStrategy,
-  required bool enableDebugging,
-  ExpressionCompiler? expressionCompiler,
-  bool enableDebugExtension,
-  String hostname,
-  bool useSseForDebugProxy,
-  bool useSseForDebugBackend,
-  bool useSseForInjectedClient,
-  UrlEncoder? urlEncoder,
-  bool spawnDds,
-  bool enableDevtoolsLaunch,
-  DevtoolsLauncher? devtoolsLauncher,
-  bool launchDevToolsInNewWindow,
-  bool emitDebugEvents,
-  bool isInternalBuild,
-  Future<bool> Function()? isFlutterApp,
+  required ToolConfiguration toolConfiguration,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -116,7 +100,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<void> initialize({String? moduleFormat, bool? soundNullSafety}) async {}
+  Future<void> initialize(CompilerOptions options) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -133,8 +117,9 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._nullSafetyMode,
-  ) : basePath = _getIndexHtml().getBaseHref();
+    this._nullSafetyMode, {
+    required this.webRenderer,
+  }) : basePath = _getIndexHtml().getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -180,6 +165,8 @@ class WebAssetServer implements AssetReader {
     ChromiumLauncher? chromiumLauncher,
     String hostname,
     int port,
+    String? tlsCertPath,
+    String? tlsCertKeyPath,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -189,7 +176,9 @@ class WebAssetServer implements AssetReader {
     bool enableDds,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler,
+    Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
+    required WebRendererMode webRenderer,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
@@ -203,7 +192,14 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port);
+        if (tlsCertPath != null && tlsCertKeyPath != null) {
+          final SecurityContext serverContext = SecurityContext()
+             ..useCertificateChain(tlsCertPath)
+             ..usePrivateKey(tlsCertKeyPath);
+          httpServer = await HttpServer.bindSecure(address, port, serverContext);
+        } else {
+          httpServer = await HttpServer.bind(address, port);
+        }
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -217,6 +213,10 @@ class WebAssetServer implements AssetReader {
     // Allow rendering in a iframe.
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
+    for (final MapEntry<String, String> header in extraHeaders.entries) {
+      httpServer.defaultResponseHeaders.add(header.key, header.value);
+    }
+
     final PackageConfig packageConfig = buildInfo.packageConfig;
     final Map<String, String> digests = <String, String>{};
     final Map<String, String> modules = <String, String>{};
@@ -227,6 +227,7 @@ class WebAssetServer implements AssetReader {
       modules,
       digests,
       nullSafetyMode,
+      webRenderer: webRenderer,
     );
     if (testMode) {
       return server;
@@ -278,29 +279,34 @@ class WebAssetServer implements AssetReader {
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
-      enableDebugExtension: true,
       buildResults: const Stream<BuildResult>.empty(),
       chromeConnection: () async {
         final Chromium chromium = await chromiumLauncher!.connectedInstance;
         return chromium.chromeConnection;
       },
-      hostname: hostname,
-      urlEncoder: urlTunneller,
-      enableDebugging: true,
-      useSseForDebugProxy: useSseForDebugProxy,
-      useSseForDebugBackend: useSseForDebugBackend,
-      useSseForInjectedClient: useSseForInjectedClient,
-      loadStrategy: FrontendServerRequireStrategyProvider(
+      toolConfiguration: ToolConfiguration(
+        loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        packageConfig.toPackageUri(
+          BuildSettings(
+            appEntrypoint: packageConfig.toPackageUri(
           globals.fs.file(entrypoint).absolute.uri,
-        ),
+            ),
+          ),
       ).strategy,
-      expressionCompiler: expressionCompiler,
-      spawnDds: enableDds,
+        debugSettings: DebugSettings(
+          enableDebugExtension: true,
+          urlEncoder: urlTunneller,
+          useSseForDebugProxy: useSseForDebugProxy,
+          useSseForDebugBackend: useSseForDebugBackend,
+          useSseForInjectedClient: useSseForInjectedClient,
+          expressionCompiler: expressionCompiler,
+          spawnDds: enableDds,
+        ),
+        appMetadata: AppMetadata(hostname: hostname),
+      ),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -501,16 +507,29 @@ class WebAssetServer implements AssetReader {
   }
 
   /// Determines what rendering backed to use.
-  WebRendererMode webRenderer = WebRendererMode.html;
+  final WebRendererMode webRenderer;
 
   shelf.Response _serveIndex() {
 
     final IndexHtml indexHtml = _getIndexHtml();
 
+    final Map<String, dynamic> buildConfig = <String, dynamic>{
+      'engineRevision': globals.flutterVersion.engineRevision,
+      'builds': <dynamic>[
+        <String, dynamic>{
+          'compileTarget': 'dartdevc',
+          'renderer': webRenderer.name,
+          'mainJsPath': 'main.dart.js',
+        },
+      ],
+    };
+    final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
+
     indexHtml.applySubstitutions(
       // Currently, we don't support --base-href for the "run" command.
       baseHref: '/',
       serviceWorkerVersion: null,
+      buildConfig: buildConfigString,
     );
 
     final Map<String, String> headers = <String, String>{
@@ -643,6 +662,8 @@ class WebDevFS implements DevFS {
   WebDevFS({
     required this.hostname,
     required int port,
+    required this.tlsCertPath,
+    required this.tlsCertKeyPath,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -653,10 +674,12 @@ class WebDevFS implements DevFS {
     required this.enableDds,
     required this.entrypoint,
     required this.expressionCompiler,
+    required this.extraHeaders,
     required this.chromiumLauncher,
     required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.nullSafetyMode,
+    required this.webRenderer,
     this.testMode = false,
   }) : _port = port;
 
@@ -670,6 +693,7 @@ class WebDevFS implements DevFS {
   final BuildInfo buildInfo;
   final bool enableDwds;
   final bool enableDds;
+  final Map<String, String> extraHeaders;
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
@@ -677,6 +701,9 @@ class WebDevFS implements DevFS {
   final bool nativeNullAssertions;
   final int _port;
   final NullSafetyMode nullSafetyMode;
+  final String? tlsCertPath;
+  final String? tlsCertKeyPath;
+  final WebRendererMode webRenderer;
 
   late WebAssetServer webAssetServer;
 
@@ -763,6 +790,8 @@ class WebDevFS implements DevFS {
       chromiumLauncher,
       hostname,
       _port,
+      tlsCertPath,
+      tlsCertKeyPath,
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
@@ -772,20 +801,20 @@ class WebDevFS implements DevFS {
       enableDds,
       entrypoint,
       expressionCompiler,
+      extraHeaders,
       nullSafetyMode,
+      webRenderer: webRenderer,
       testMode: testMode,
     );
 
     final int selectedPort = webAssetServer.selectedPort;
-    if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
-      webAssetServer.webRenderer = WebRendererMode.auto;
-    } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
-      webAssetServer.webRenderer = WebRendererMode.canvaskit;
-    }
+    String url = '$hostname:$selectedPort';
     if (hostname == 'any') {
-      _baseUri = Uri.http('localhost:$selectedPort', webAssetServer.basePath);
-    } else {
-      _baseUri = Uri.http('$hostname:$selectedPort', webAssetServer.basePath);
+      url ='localhost:$selectedPort';
+    }
+    _baseUri = Uri.http(url, webAssetServer.basePath);
+    if (tlsCertPath != null && tlsCertKeyPath!= null) {
+      _baseUri = Uri.https(url, webAssetServer.basePath);
     }
     return _baseUri!;
   }
@@ -838,14 +867,11 @@ class WebDevFS implements DevFS {
       final String entrypoint = globals.fs.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
       webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes(
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
-      final String fileGeneratorsPath = globals.artifacts!
-          .getArtifactPath(Artifact.flutterToolsFileGenerators);
-      webAssetServer.writeFile(
-          'flutter.js', flutter_js.generateFlutterJsFile(fileGeneratorsPath));
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -855,6 +881,7 @@ class WebDevFS implements DevFS {
         generateBootstrapScript(
           requireUrl: 'require.js',
           mapperUrl: 'stack_trace_mapper.js',
+          generateLoadingIndicator: enableDwds,
         ),
       );
       webAssetServer.writeFile(
@@ -871,8 +898,8 @@ class WebDevFS implements DevFS {
         await writeBundle(
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
-          bundle.entryKinds,
           targetPlatform: TargetPlatform.web_javascript,
+          impellerStatus: ImpellerStatus.disabled,
         );
       }
     }
@@ -935,6 +962,12 @@ class WebDevFS implements DevFS {
     'dev_compiler',
     'amd',
     'require.js',
+  ));
+
+  @visibleForTesting
+  final File flutterJs = globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+    'flutter.js',
   ));
 
   @visibleForTesting

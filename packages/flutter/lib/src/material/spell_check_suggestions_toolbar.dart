@@ -142,7 +142,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
       if (editableTextState.mounted) {
         editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
       }
-    });
+    }, debugLabel: 'SpellCheckerSuggestionsToolbar.bringIntoView');
     editableTextState.hideToolbar();
   }
 

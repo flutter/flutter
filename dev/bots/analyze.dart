@@ -17,6 +17,9 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
+import 'custom_rules/analyze.dart';
+import 'custom_rules/no_double_clamp.dart';
+import 'custom_rules/no_stop_watches.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -87,8 +90,8 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  printProgress('No Double.clamp');
-  await verifyNoDoubleClamp(flutterRoot);
+  printProgress('TargetPlatform tool/framework consistency');
+  await verifyTargetPlatform(flutterRoot);
 
   printProgress('All tool test files end in _test.dart...');
   await verifyToolTestsEndInTestDart(flutterRoot);
@@ -161,10 +164,31 @@ Future<void> run(List<String> arguments) async {
 
   // Analyze all the Dart code in the repo.
   printProgress('Dart analysis...');
-  await _runFlutterAnalyze(flutterRoot, options: <String>[
+  final CommandResult dartAnalyzeResult = await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     ...arguments,
   ]);
+
+  if (dartAnalyzeResult.exitCode == 0) {
+    // Only run the private lints when the code is free of type errors. The
+    // lints are easier to write when they can assume, for example, there is no
+    // inheritance cycles.
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches];
+    final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the framework with the following rules:$ruleNames');
+    await analyzeWithRules(flutterRoot, rules,
+      includePaths: <String>['packages/flutter/lib'],
+      excludePaths: <String>['packages/flutter/lib/fix_data'],
+    );
+    final List<AnalyzeRule> testRules = <AnalyzeRule>[noStopwatches];
+    final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
+    await analyzeWithRules(flutterRoot, testRules,
+      includePaths: <String>['packages/flutter/test'],
+    );
+  } else {
+    printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
+  }
 
   printProgress('Executable allowlist...');
   await _checkForNewExecutables();
@@ -238,66 +262,81 @@ _Line _getLine(ParseStringResult parseResult, int offset) {
   return _Line(lineNumber, content);
 }
 
-class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
-  _DoubleClampVisitor(this.parseResult);
-
-  final List<_Line> clamps = <_Line>[];
-  final ParseStringResult parseResult;
-
-  @override
-  CompilationUnit? visitMethodInvocation(MethodInvocation node) {
-    final NodeList<Expression> arguments = node.argumentList.arguments;
-    // This may produce false positives when `node.target` is not a subtype of
-    // num. The static type of `node.target` isn't guaranteed to be resolved at
-    // this time. Check whether the argument list consists of 2 positional args
-    // to reduce false positives.
-    final bool isNumClampInvocation = node.methodName.name == 'clamp'
-                                   && arguments.length == 2
-                                   && !arguments.any((Expression exp) => exp is NamedExpression);
-    if (isNumClampInvocation) {
-      final _Line line = _getLine(parseResult, node.function.offset);
-      if (!line.content.contains('// ignore_clamp_double_lint')) {
-        clamps.add(line);
+Future<void> verifyTargetPlatform(String workingDirectory) async {
+  final File framework = File('$workingDirectory/packages/flutter/lib/src/foundation/platform.dart');
+  final Set<String> frameworkPlatforms = <String>{};
+  List<String> lines = framework.readAsLinesSync();
+  int index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Can no longer find TargetPlatform enum.']);
+      return;
+    }
+    if (lines[index].startsWith('enum TargetPlatform {')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Could not find end of TargetPlatform enum.']);
+      return;
+    }
+    String line = lines[index].trim();
+    final int comment = line.indexOf('//');
+    if (comment >= 0) {
+      line = line.substring(0, comment);
+    }
+    if (line == '}') {
+      break;
+    }
+    if (line.isNotEmpty) {
+      if (line.endsWith(',')) {
+        frameworkPlatforms.add(line.substring(0, line.length - 1));
+      } else {
+        foundError(<String>['${framework.path}:$index: unparseable line when looking for TargetPlatform values']);
       }
     }
-
-    node.visitChildren(this);
-    return null;
+    index += 1;
   }
-}
-
-/// Verify that we use clampDouble instead of Double.clamp for performance reasons.
-///
-/// We currently can't distinguish valid uses of clamp from problematic ones so
-/// if the clamp is operating on a type other than a `double` the
-/// `// ignore_clamp_double_lint` comment must be added to the line where clamp is
-/// invoked.
-///
-/// See also:
-///   * https://github.com/flutter/flutter/pull/103559
-///   * https://github.com/flutter/flutter/issues/103917
-Future<void> verifyNoDoubleClamp(String workingDirectory) async {
-  final String flutterLibPath = '$workingDirectory/packages/flutter/lib';
-  final Stream<File> testFiles =
-      _allFiles(flutterLibPath, 'dart', minimumMatches: 100);
-  final List<String> errors = <String>[];
-  await for (final File file in testFiles) {
-    final ParseStringResult parseResult = parseFile(
-      featureSet: _parsingFeatureSet(),
-      path: file.absolute.path,
-    );
-    final _DoubleClampVisitor visitor = _DoubleClampVisitor(parseResult);
-    visitor.visitCompilationUnit(parseResult.unit);
-    for (final _Line clamp in visitor.clamps) {
-      errors.add('${file.path}:${clamp.line}: `clamp` method used instead of `clampDouble`.');
+  final File tool = File('$workingDirectory/packages/flutter_tools/lib/src/resident_runner.dart');
+  final Set<String> toolPlatforms = <String>{};
+  lines = tool.readAsLinesSync();
+  index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Can no longer find nextPlatform logic.']);
+      return;
     }
+    if (lines[index].trim().startsWith('const List<String> platforms = <String>[')) {
+      index += 1;
+      break;
+    }
+    index += 1;
   }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '\n${bold}For performance reasons, we use a custom `clampDouble` function instead of using `Double.clamp`.$reset',
-      '\n${bold}For non-double uses of `clamp`, use `// ignore_clamp_double_lint` on the line to silence this message.$reset',
-    ]);
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Could not find end of nextPlatform logic.']);
+      return;
+    }
+    final String line = lines[index].trim();
+    if (line.startsWith("'") && line.endsWith("',")) {
+      toolPlatforms.add(line.substring(1, line.length - 2));
+    } else if (line == '];') {
+      break;
+    } else {
+      foundError(<String>['${tool.path}:$index: unparseable line when looking for nextPlatform values']);
+    }
+    index += 1;
+  }
+  final Set<String> frameworkExtra = frameworkPlatforms.difference(toolPlatforms);
+  if (frameworkExtra.isNotEmpty) {
+    foundError(<String>['TargetPlatform has some extra values not found in the tool: ${frameworkExtra.join(", ")}']);
+  }
+  final Set<String> toolExtra = toolPlatforms.difference(frameworkPlatforms);
+  if (toolExtra.isNotEmpty) {
+    foundError(<String>['The nextPlatform logic in the tool has some extra values not found in TargetPlatform: ${toolExtra.join(", ")}']);
   }
 }
 

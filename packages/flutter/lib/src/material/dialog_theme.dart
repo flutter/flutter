@@ -107,8 +107,6 @@ class DialogTheme with Diagnosticable {
 
   /// Linearly interpolate between two dialog themes.
   ///
-  /// The arguments must not be null.
-  ///
   /// {@macro dart.ui.shadow.lerp}
   static DialogTheme lerp(DialogTheme? a, DialogTheme? b, double t) {
     if (identical(a, b) && a != null) {

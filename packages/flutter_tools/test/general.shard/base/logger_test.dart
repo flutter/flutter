@@ -1292,9 +1292,10 @@ void main() {
         terminal: AnsiTerminal(
           stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
-          isCliAnimationEnabled: false,
+          defaultCliAnimationEnabled: false,
         ),
         stdio: fakeStdio,
+        stopwatchFactory: FakeStopwatchFactory(stopwatch: FakeStopwatch()),
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
       );
       logger.startProgress('po').stop();

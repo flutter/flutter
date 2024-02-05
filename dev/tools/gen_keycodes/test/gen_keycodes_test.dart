@@ -79,6 +79,7 @@ void main() {
     expect(output, contains('modifierFlagToKeyCode'));
     expect(output, contains('kCapsLockPhysicalKey'));
     expect(output, contains('kCapsLockLogicalKey'));
+    expect(output, contains('kLayoutGoals'));
     checkCommonOutput(output);
   });
   test('Generate Keycodes for iOS', () {

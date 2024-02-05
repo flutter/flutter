@@ -57,7 +57,6 @@ enum DatePickerDateOrder {
 ///
 ///  * [DefaultCupertinoLocalizations], the default, English-only, implementation
 ///    of this interface.
-// TODO(xster): Supply non-english strings.
 abstract class CupertinoLocalizations {
   /// Year that is shown in [CupertinoDatePicker] spinner corresponding to the
   /// given year index.
@@ -251,6 +250,10 @@ abstract class CupertinoLocalizations {
   /// The term used for pasting.
   // The global version uses the translated string from the arb file.
   String get pasteButtonLabel;
+
+  /// The term used for clearing a field.
+  // The global version uses the translated string from the arb file.
+  String get clearButtonLabel;
 
   /// Label that appears in the Cupertino toolbar when the spell checker
   /// couldn't find any replacements for the current word.
@@ -479,6 +482,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get pasteButtonLabel => 'Paste';
+
+  @override
+  String get clearButtonLabel => 'Clear';
 
   @override
   String get noSpellCheckReplacementsLabel => 'No Replacements Found';

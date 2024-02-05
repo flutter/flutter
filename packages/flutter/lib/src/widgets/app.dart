@@ -31,6 +31,7 @@ import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
+import 'value_listenable_builder.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
@@ -263,8 +264,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
-  ///
-  /// The boolean arguments, [color], and [navigatorObservers] must not be null.
   ///
   /// Most callers will want to use the [home] or [routes] parameters, or both.
   /// The [home] parameter is a convenience for the following [routes] map:
@@ -707,7 +706,12 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
   /// The callback to use when receiving a [NavigationNotification].
   ///
-  /// By default this updates the engine with the navigation status.
+  /// By default this updates the engine with the navigation status and stops
+  /// bubbling the notification.
+  ///
+  /// See also:
+  ///
+  ///  * [NotificationListener.onNotification], which uses this callback.
   /// {@endtemplate}
   final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
@@ -1172,7 +1176,7 @@ class WidgetsApp extends StatefulWidget {
   final String? restorationScopeId;
 
   /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
-  /// Deprecated. This setting is not ignored.
+  /// Deprecated. This setting is now ignored.
   ///
   /// The widget never introduces its own [MediaQuery]; the [View] widget takes
   /// care of that.
@@ -1191,13 +1195,22 @@ class WidgetsApp extends StatefulWidget {
 
   /// If true, forces the widget inspector to be visible.
   ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
+  ///
   /// Used by the `debugShowWidgetInspector` debugging extension.
   ///
-  /// The inspector allows you to select a location on your device or emulator
+  /// The inspector allows the selection of a location on your device or emulator
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
-  static bool debugShowWidgetInspectorOverride = false;
+  static bool get debugShowWidgetInspectorOverride {
+    return _debugShowWidgetInspectorOverrideNotifier.value;
+  }
+  static set debugShowWidgetInspectorOverride(bool value) {
+    _debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
+
+  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1213,6 +1226,7 @@ class WidgetsApp extends StatefulWidget {
     SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
 
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -1346,12 +1360,18 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   /// the platform with [NavigationNotification.canHandlePop] and stops
   /// bubbling.
   bool _defaultOnNavigationNotification(NavigationNotification notification) {
-    // Don't do anything with navigation notifications if there is no engine
-    // attached.
-    if (_appLifecycleState != AppLifecycleState.detached) {
-      SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
+    switch (_appLifecycleState) {
+      case null:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.inactive:
+        // Avoid updating the engine when the app isn't ready.
+        return true;
+      case AppLifecycleState.resumed:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
+        return true;
     }
-    return true;
   }
 
   @override
@@ -1366,6 +1386,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     _updateRouting();
     _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
+    _appLifecycleState = WidgetsBinding.instance.lifecycleState;
   }
 
   @override
@@ -1678,6 +1699,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             },
           onUnknownRoute: _onUnknownRoute,
           observers: widget.navigatorObservers!,
+          routeTraversalEdgeBehavior: kIsWeb ? TraversalEdgeBehavior.leaveFlutterView : TraversalEdgeBehavior.parentScope,
           reportsRouteUpdateToEngine: true,
         ),
       );
@@ -1737,12 +1759,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
 
     assert(() {
-      if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
-        result = WidgetInspector(
-          selectButtonBuilder: widget.inspectorSelectButtonBuilder,
-          child: result,
-        );
-      }
+      result = ValueListenableBuilder<bool>(
+        valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
+        builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
+          if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
+            return WidgetInspector(
+              selectButtonBuilder: widget.inspectorSelectButtonBuilder,
+              child: child!,
+            );
+          }
+          return child!;
+        },
+        child: result,
+      );
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = CheckedModeBanner(
           child: result,

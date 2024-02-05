@@ -7,9 +7,10 @@ import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  late AppLifecycleListener listener;
+  AppLifecycleListener? listener;
 
   Future<void> setAppLifeCycleState(AppLifecycleState state) async {
     final ByteData? message = const StringCodec().encodeMessage(state.toString());
@@ -39,9 +40,10 @@ void main() {
   });
 
   tearDown(() {
-    listener.dispose();
+    listener?.dispose();
+    listener = null;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-    binding.resetLifecycleState();
+    binding.resetInternalState();
     binding.platformDispatcher.resetInitialLifecycleState();
     assert(TestAppLifecycleListener.registerCount == 0,
         'There were ${TestAppLifecycleListener.registerCount} listeners that were not disposed of in tests.');
@@ -161,6 +163,16 @@ void main() {
     );
     await sendAppExitRequest();
     expect(exitRequested, isTrue);
+  });
+
+  test('AppLifecycleListener dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => AppLifecycleListener(binding: WidgetsBinding.instance).dispose(),
+        AppLifecycleListener,
+      ),
+      areCreateAndDispose,
+    );
   });
 }
 

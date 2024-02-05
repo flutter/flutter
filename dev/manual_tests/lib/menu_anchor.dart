@@ -478,14 +478,11 @@ class _TestMenusState extends State<_TestMenus> {
   void _setCheck(TestMenu item) {
     debugPrint('App: Set Checkbox item ${item.label}');
     setState(() {
-      switch (checkboxState) {
-        case false:
-          checkboxState = true;
-        case true:
-          checkboxState = null;
-        case null:
-          checkboxState = false;
-      }
+      checkboxState = switch (checkboxState) {
+        false => true,
+        true  => null,
+        null  => false,
+      };
     });
   }
 

@@ -1,4 +1,7 @@
 {
+  "lookUpButtonLabel": "Regarder en haut",
+  "searchWebButtonLabel": "Rechercher sur le Web",
+  "shareButtonLabel": "Partager…",
   "scanTextButtonLabel": "Balayer un texte",
   "menuDismissLabel": "Ignorer le menu",
   "expansionTileExpandedHint": "toucher deux fois pour réduire",

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -904,7 +905,17 @@ class _DialPainter extends CustomPainter {
     required this.radius,
     required this.textDirection,
     required this.selectedValue,
-  }) : super(repaint: PaintingBinding.instance.systemFonts);
+  }) : super(repaint: PaintingBinding.instance.systemFonts) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_DialPainter',
+        object: this,
+      );
+    }
+  }
 
   final List<_TappableLabel> primaryLabels;
   final List<_TappableLabel> selectedLabels;
@@ -920,6 +931,9 @@ class _DialPainter extends CustomPainter {
   final int selectedValue;
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     for (final _TappableLabel label in primaryLabels) {
       label.painter.dispose();
     }
@@ -1631,6 +1645,14 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   final RestorableBool minuteHasError = RestorableBool(false);
 
   @override
+  void dispose() {
+    _selectedTime.dispose();
+    hourHasError.dispose();
+    minuteHasError.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -1989,6 +2011,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    controllerHasBeenSet.dispose();
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -2096,7 +2126,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 }
 
 /// Signature for when the time picker entry mode is changed.
-typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
+typedef EntryModeChangeCallback = void Function(TimePickerEntryMode mode);
 
 /// A Material Design time picker designed to appear inside a popup dialog.
 ///
@@ -2108,8 +2138,6 @@ typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
 /// Use [showTimePicker] to show a dialog already containing a [TimePickerDialog].
 class TimePickerDialog extends StatefulWidget {
   /// Creates a Material Design time picker.
-  ///
-  /// [initialTime] must not be null.
   const TimePickerDialog({
     super.key,
     required this.initialTime,
@@ -2205,6 +2233,15 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   static const Size _kTimePickerMinPortraitSize = Size(238, 326);
   static const Size _kTimePickerMinLandscapeSize = Size(416, 248);
   static const Size _kTimePickerMinInputSize = Size(312, 196);
+
+  @override
+  void dispose() {
+    _selectedTime.dispose();
+    _entryMode.dispose();
+    _autovalidateMode.dispose();
+    _orientation.dispose();
+    super.dispose();
+  }
 
   @override
   String? get restorationId => widget.restorationId;
@@ -2311,7 +2348,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     // Constrain the textScaleFactor to prevent layout issues. Since only some
     // parts of the time picker scale up with textScaleFactor, we cap the factor
     // to 1.1 as that provides enough space to reasonably fit all the content.
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.1).textScaleFactor;
+    //
+    // 14 is a common font size used to compute the effective text scale.
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.1).scale(fontSizeToScale) / fontSizeToScale;
 
     final Size timePickerSize;
     switch (_entryMode.value) {
@@ -2384,6 +2424,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                 overflowAlignment: OverflowBarAlignment.end,
                 children: <Widget>[
                   TextButton(
+                    style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
                     onPressed: _handleCancel,
                     child: Text(widget.cancelText ??
                         (theme.useMaterial3
@@ -2391,6 +2432,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                             : localizations.cancelButtonLabel.toUpperCase())),
                   ),
                   TextButton(
+                    style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
                     onPressed: _handleOk,
                     child: Text(widget.confirmText ?? localizations.okButtonLabel),
                   ),
@@ -2584,6 +2626,13 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
   void dispose() {
     _vibrateTimer?.cancel();
     _vibrateTimer = null;
+    _orientation.dispose();
+    _selectedTime.dispose();
+    _hourMinuteMode.dispose();
+    _lastModeAnnounced.dispose();
+    _autofocusHour.dispose();
+    _autofocusMinute.dispose();
+    _announcedInitialTime.dispose();
     super.dispose();
   }
 

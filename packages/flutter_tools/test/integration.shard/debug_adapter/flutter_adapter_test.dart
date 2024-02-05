@@ -184,7 +184,7 @@ void main() {
 
       final String output = _uniqueOutputLines(outputEvents);
       expect(output, contains('this code does not compile'));
-      expect(output, contains('Exception: Failed to build'));
+      expect(output, contains('Error: Failed to build'));
       expect(output, contains('Exited (1)'));
     });
 

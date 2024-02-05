@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import '../framework/devices.dart';
@@ -173,12 +174,14 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
     }
   );
 
+  final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
+
   static final RegExp _buildOutput = RegExp(
     r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
     multiLine: true,
   );
   static final RegExp _builtOutput = RegExp(
-    r'Built build\\windows\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?\.',
+    r'Built build\\windows\\(x64|arm64)\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?\.',
   );
 
   @override
@@ -205,7 +208,7 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
 
         return true;
       },
-      'Built build\\windows\\runner\\$buildMode\\app.exe',
+      'Built build\\windows\\$arch\\runner\\$buildMode\\app.exe',
     );
   }
 }

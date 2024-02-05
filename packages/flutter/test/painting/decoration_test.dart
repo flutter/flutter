@@ -34,7 +34,7 @@ class SynchronousTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
     );
@@ -52,7 +52,7 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     throw throwable;
   }
 }
@@ -68,7 +68,7 @@ class AsyncTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(TestImageInfo(key, image: image)),
     );
@@ -88,7 +88,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(DelayedImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -111,7 +111,7 @@ class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(MultiFrameImageProvider key, ImageDecoderCallback decode) {
     return completer;
   }
 
@@ -329,8 +329,7 @@ void main() {
     expect(paint.color, const Color(0x7F000000)); // 0.5 opacity
     expect(paint.filterQuality, FilterQuality.high);
     expect(paint.isAntiAlias, true);
-    // TODO(craiglabenz): change to true when https://github.com/flutter/flutter/issues/88909 is fixed
-    expect(paint.invertColors, !kIsWeb);
+    expect(paint.invertColors, isTrue);
   });
 
   test('DecorationImage.toString', () async {

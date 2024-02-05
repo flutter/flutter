@@ -393,6 +393,9 @@ class IOSSimulator extends Device {
   bool get supportsHotRestart => true;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<bool> get supportsHardwareRendering async => false;
 
   @override
@@ -567,7 +570,7 @@ class IOSSimulator extends Device {
       deviceID: id,
     );
     if (!buildResult.success) {
-      await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger);
+      await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger, globals.analytics);
       throwToolExit('Could not build the application for the simulator.');
     }
 

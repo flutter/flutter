@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 
@@ -30,6 +29,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -102,10 +102,11 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
+  testWidgets('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -243,18 +244,18 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-    controller.dispose();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     '$SelectionOverlay is not leaking',
     (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -273,7 +274,6 @@ void main() {
     await tester.tapAt(startBlah1);
     await tester.pumpAndSettle();
     await tester.pump();
-    controller.dispose();
   },
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
@@ -282,6 +282,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -326,6 +327,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -770,6 +772,7 @@ void main() {
               children: <Widget>[
                 const Text('Outside'),
                 TextFormField(
+                  autofocus: true,
                   onTapOutside: (PointerEvent event) {
                     tapOutsideCount += 1;
                   },
@@ -790,6 +793,37 @@ void main() {
     expect(tapOutsideCount, 3);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/134341.
+  testWidgets('onTapOutside is not called upon tap outside when field is not focused', (WidgetTester tester) async {
+    int tapOutsideCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                TextFormField(
+                  onTapOutside: (PointerEvent event) {
+                    tapOutsideCount += 1;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tapOutsideCount, 0);
+    await tester.tap(find.byType(TextFormField));
+    await tester.tap(find.text('Outside'));
+    await tester.tap(find.text('Outside'));
+    await tester.tap(find.text('Outside'));
+    expect(tapOutsideCount, 0);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -798,6 +832,31 @@ void main() {
           child: Center(
             child: TextFormField(
               initialValue: 'initialValue',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'changedValue');
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.reset();
+
+    expect(find.text('changedValue'), findsNothing);
+    expect(find.text('initialValue'), findsOneWidget);
+  });
+
+  testWidgets('reset resets the text fields value to the controller initial value', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'initialValue');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              controller: controller,
             ),
           ),
         ),
@@ -1012,6 +1071,7 @@ void main() {
 
   testWidgets('Passes scrollController to underlying TextField', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1100,6 +1160,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1230,6 +1291,7 @@ void main() {
 
   testWidgets('Passes undoController to undoController TextField', (WidgetTester tester) async {
     final UndoHistoryController undoController = UndoHistoryController(value: UndoHistoryValue.empty);
+    addTearDown(undoController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1362,7 +1424,7 @@ void main() {
   });
 
   testWidgets('Passes onAppPrivateCommand to onAppPrivateCommand TextField', (WidgetTester tester) async {
-    void onAppPrivateCommand(String p0, Map<String, dynamic> p1) {}
+    void onAppPrivateCommand(String action, Map<String, dynamic> data) {}
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1449,27 +1511,121 @@ void main() {
     expect(textFieldWidget.dragStartBehavior, dragStartBehavior);
   });
 
-  testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
-    const Color errorColor = Color(0xff123456);
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        colorScheme: const ColorScheme.light(error: errorColor),
+  testWidgets('Passes onTapAlwaysCalled to onTapAlwaysCalled TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onTapAlwaysCalled: true,
+            ),
+          ),
+        ),
       ),
-      home: Material(
-        child: Center(
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.onTapAlwaysCalled, isTrue);
+  });
+
+  testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
+    const Color themeErrorColor = Color(0xff111111);
+    const Color errorStyleColor = Color(0xff777777);
+    const Color cursorErrorColor = Color(0xffbbbbbb);
+
+    Widget buildWidget({Color? errorStyleColor, Color? cursorErrorColor}) {
+      return MaterialApp(
+        theme: ThemeData(
+          colorScheme: const ColorScheme.light(error: themeErrorColor),
+        ),
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              enabled: true,
+              autovalidateMode: AutovalidateMode.always,
+              decoration: InputDecoration(
+                errorStyle: TextStyle(
+                  color: errorStyleColor,
+                ),
+              ),
+              cursorErrorColor: cursorErrorColor,
+              validator: (String? value) {
+                return 'Please enter value';
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> runTest(Widget widget, {required Color expectedColor}) async {
+      await tester.pumpWidget(widget);
+      await tester.enterText(find.byType(TextField), 'a');
+      final EditableText textField = tester.widget(
+        find.byType(EditableText).first,
+      );
+      await tester.pump();
+      expect(textField.cursorColor, expectedColor);
+    }
+
+    await runTest(
+      buildWidget(),
+      expectedColor: themeErrorColor,
+    );
+    await runTest(
+      buildWidget(errorStyleColor: errorStyleColor),
+      expectedColor: errorStyleColor,
+    );
+    await runTest(
+      buildWidget(cursorErrorColor: cursorErrorColor),
+      expectedColor: cursorErrorColor,
+    );
+    await runTest(
+      buildWidget(
+        errorStyleColor: errorStyleColor,
+        cursorErrorColor: cursorErrorColor,
+      ),
+      expectedColor: cursorErrorColor,
+    );
+  });
+
+  testWidgets('TextFormField onChanged is called when the form is reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123009.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String value = 'initialValue';
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Form(
+          key: formKey,
           child: TextFormField(
-            enabled: true,
-            autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) {
-              return 'Please enter value';
+            key: stateKey,
+            initialValue: value,
+            onChanged: (String newValue) {
+              value = newValue;
             },
           ),
         ),
       ),
     ));
-    await tester.enterText(find.byType(TextField), 'a');
-    final EditableText textField = tester.widget(find.byType(EditableText).first);
+
+    // Initial value is 'initialValue'.
+    expect(stateKey.currentState!.value, 'initialValue');
+    expect(value, 'initialValue');
+
+    // Change value to 'changedValue'.
+    await tester.enterText(find.byType(TextField), 'changedValue');
+    expect(stateKey.currentState!.value,'changedValue');
+    expect(value, 'changedValue');
+
+    // Should be back to 'initialValue' when the form is reset.
+    formKey.currentState!.reset();
     await tester.pump();
-    expect(textField.cursorColor, errorColor);
+    expect(stateKey.currentState!.value,'initialValue');
+    expect(value, 'initialValue');
   });
 }

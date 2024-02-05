@@ -83,8 +83,6 @@ Future<void> _dummyAsyncVoidCallback() async {}
 @sealed
 class Runner {
   /// Creates a runner for the [recorder].
-  ///
-  /// All arguments must not be null.
   Runner({
     required this.recorder,
     this.setUpAllDidRun = _dummyAsyncVoidCallback,
@@ -289,7 +287,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         if (shouldContinue()) {
           PlatformDispatcher.instance.scheduleFrame();
         } else {
-          profileCompleter.complete(_profile);
+          profileCompleter.complete(_profile!);
         }
       } catch (error, stackTrace) {
         profileCompleter.completeError(error, stackTrace);

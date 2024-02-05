@@ -12,6 +12,9 @@ void main() {
   testWidgets('Traversal Order of SliverList', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
+    final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
+    addTearDown(controller.dispose);
+
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(
         height: 200.0,
@@ -38,7 +41,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: CustomScrollView(
-              controller: ScrollController(initialScrollOffset: 3000.0),
+              controller: controller,
               semanticChildCount: 30,
               slivers: <Widget>[
                 SliverList(
@@ -185,6 +188,9 @@ void main() {
   testWidgets('Traversal Order of SliverFixedExtentList', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
+    final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
+    addTearDown(controller.dispose);
+
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(
         height: 200.0,
@@ -211,7 +217,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: CustomScrollView(
-              controller: ScrollController(initialScrollOffset: 3000.0),
+              controller: controller,
               slivers: <Widget>[
                 SliverFixedExtentList(
                   itemExtent: 200.0,
@@ -324,6 +330,9 @@ void main() {
   testWidgets('Traversal Order of SliverGrid', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
+    final ScrollController controller = ScrollController(initialScrollOffset: 1600.0);
+    addTearDown(controller.dispose);
+
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(
         height: 200.0,
@@ -338,7 +347,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: CustomScrollView(
-              controller: ScrollController(initialScrollOffset: 1600.0),
+              controller: controller,
               slivers: <Widget>[
                 SliverGrid.count(
                   crossAxisCount: 2,
@@ -452,6 +461,9 @@ void main() {
   testWidgets('Traversal Order of List of individual slivers', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
+    final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
+    addTearDown(controller.dispose);
+
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
@@ -480,7 +492,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: CustomScrollView(
-              controller: ScrollController(initialScrollOffset: 3000.0),
+              controller: controller,
               slivers: listChildren,
             ),
           ),
@@ -588,6 +600,9 @@ void main() {
   testWidgets('Traversal Order of in a SingleChildScrollView', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
+    final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
+    addTearDown(controller.dispose);
+
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(
         height: 200.0,
@@ -614,7 +629,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: SingleChildScrollView(
-              controller: ScrollController(initialScrollOffset: 3000.0),
+              controller: controller,
               child: Column(
                 children: listChildren,
               ),

@@ -561,33 +561,22 @@ abstract class BindingBase {
         name: FoundationServiceExtensions.platformOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
-            switch (parameters['value']) {
-              case 'android':
-                debugDefaultTargetPlatformOverride = TargetPlatform.android;
-              case 'fuchsia':
-                debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-              case 'iOS':
-                debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-              case 'linux':
-                debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-              case 'macOS':
-                debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-              case 'windows':
-                debugDefaultTargetPlatformOverride = TargetPlatform.windows;
-              case 'default':
-              default:
-                debugDefaultTargetPlatformOverride = null;
+            final String value = parameters['value']!;
+            debugDefaultTargetPlatformOverride = null;
+            for (final TargetPlatform candidate in TargetPlatform.values) {
+              if (candidate.name == value) {
+                debugDefaultTargetPlatformOverride = candidate;
+                break;
+              }
             }
             _postExtensionStateChangedEvent(
               FoundationServiceExtensions.platformOverride.name,
-              defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
+              defaultTargetPlatform.name,
             );
             await reassembleApplication();
           }
           return <String, dynamic>{
-            'value': defaultTargetPlatform
-                     .toString()
-                     .substring('$TargetPlatform.'.length),
+            'value': defaultTargetPlatform.name,
           };
         },
       );
@@ -596,14 +585,11 @@ abstract class BindingBase {
         name: FoundationServiceExtensions.brightnessOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
-            switch (parameters['value']) {
-              case 'Brightness.light':
-                debugBrightnessOverride = ui.Brightness.light;
-              case 'Brightness.dark':
-                debugBrightnessOverride = ui.Brightness.dark;
-              default:
-                debugBrightnessOverride = null;
-            }
+            debugBrightnessOverride = switch (parameters['value']) {
+              'Brightness.light' => ui.Brightness.light,
+              'Brightness.dark'  => ui.Brightness.dark,
+              _ => null,
+            };
             _postExtensionStateChangedEvent(
               FoundationServiceExtensions.brightnessOverride.name,
               (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),

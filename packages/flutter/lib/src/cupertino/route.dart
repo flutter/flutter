@@ -122,6 +122,12 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  void dispose() {
+    _previousTitle?.dispose();
+    super.dispose();
+  }
+
+  @override
   void didChangePrevious(Route<dynamic>? previousRoute) {
     final String? previousTitleString = previousRoute is CupertinoRouteTransitionMixin
       ? previousRoute.title
@@ -152,7 +158,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   /// True if an iOS-style back swipe pop gesture is currently underway for [route].
   ///
-  /// This just check the route's [NavigatorState.userGestureInProgress].
+  /// This just checks the route's [NavigatorState.userGestureInProgress].
   ///
   /// See also:
   ///
@@ -241,6 +247,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
     return _CupertinoBackGestureController<T>(
       navigator: route.navigator!,
+      getIsCurrent: () => route.isCurrent,
+      getIsActive: () => route.isActive,
       controller: route.controller!, // protected access
     );
   }
@@ -287,6 +295,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => _isPopGestureEnabled<T>(route),
           onStartPopGesture: () => _startPopGesture<T>(route),
+          getIsCurrent: () => route.isCurrent,
+          getIsActive: () => route.isActive,
           child: child,
         ),
       );
@@ -311,6 +321,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 /// the route is popped from the stack via [Navigator.pop] when an optional
 /// `result` can be provided.
 ///
+/// If `barrierDismissible` is true, then pressing the escape key on the keyboard
+/// will cause the current route to be popped with null as the value.
+///
 /// See also:
 ///
 ///  * [CupertinoRouteTransitionMixin], for a mixin that provides iOS transition
@@ -334,6 +347,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
+    super.barrierDismissible = false,
   }) {
     assert(opaque);
   }
@@ -586,6 +600,8 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
+    required this.getIsActive,
+    required this.getIsCurrent,
   });
 
   final Widget child;
@@ -593,6 +609,9 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
   final ValueGetter<bool> enabledCallback;
 
   final ValueGetter<_CupertinoBackGestureController<T>> onStartPopGesture;
+
+  final ValueGetter<bool> getIsActive;
+  final ValueGetter<bool> getIsCurrent;
 
   @override
   _CupertinoBackGestureDetectorState<T> createState() => _CupertinoBackGestureDetectorState<T>();
@@ -616,6 +635,16 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   @override
   void dispose() {
     _recognizer.dispose();
+
+    // If this is disposed during a drag, call navigator.didStopUserGesture.
+    if (_backGestureController != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_backGestureController?.navigator.mounted ?? false) {
+          _backGestureController?.navigator.didStopUserGesture();
+        }
+        _backGestureController = null;
+      });
+    }
     super.dispose();
   }
 
@@ -653,12 +682,10 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 
   double _convertToLogical(double value) {
-    switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        return -value;
-      case TextDirection.ltr:
-        return value;
-    }
+    return switch (Directionality.of(context)) {
+      TextDirection.rtl => -value,
+      TextDirection.ltr =>  value,
+    };
   }
 
   @override
@@ -703,17 +730,19 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
 /// detector controller is associated.
 class _CupertinoBackGestureController<T> {
   /// Creates a controller for an iOS-style back gesture.
-  ///
-  /// The [navigator] and [controller] arguments must not be null.
   _CupertinoBackGestureController({
     required this.navigator,
     required this.controller,
+    required this.getIsActive,
+    required this.getIsCurrent,
   }) {
     navigator.didStartUserGesture();
   }
 
   final AnimationController controller;
   final NavigatorState navigator;
+  final ValueGetter<bool> getIsActive;
+  final ValueGetter<bool> getIsCurrent;
 
   /// The drag gesture has changed by [fractionalDelta]. The total range of the
   /// drag should be 0.0 to 1.0.
@@ -729,12 +758,21 @@ class _CupertinoBackGestureController<T> {
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
     const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
+    final bool isCurrent = getIsCurrent();
     final bool animateForward;
 
-    // If the user releases the page before mid screen with sufficient velocity,
-    // or after mid screen, we should animate the page out. Otherwise, the page
-    // should be animated back in.
-    if (velocity.abs() >= _kMinFlingVelocity) {
+    if (!isCurrent) {
+      // If the page has already been navigated away from, then the animation
+      // direction depends on whether or not it's still in the navigation stack,
+      // regardless of velocity or drag position. For example, if a route is
+      // being slowly dragged back by just a few pixels, but then a programmatic
+      // pop occurs, the route should still be animated off the screen.
+      // See https://github.com/flutter/flutter/issues/141268.
+      animateForward = getIsActive();
+    } else if (velocity.abs() >= _kMinFlingVelocity) {
+      // If the user releases the page before mid screen with sufficient velocity,
+      // or after mid screen, we should animate the page out. Otherwise, the page
+      // should be animated back in.
       animateForward = velocity <= 0;
     } else {
       animateForward = controller.value > 0.5;
@@ -750,8 +788,10 @@ class _CupertinoBackGestureController<T> {
       );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
-      // This route is destined to pop at this point. Reuse navigator's pop.
-      navigator.pop();
+      if (isCurrent) {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        navigator.pop();
+      }
 
       // The popping may have finished inline if already at the target destination.
       if (controller.isAnimating) {
@@ -835,16 +875,16 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       return b!._colors == null ? b : _CupertinoEdgeShadowDecoration._(b._colors!.map<Color>((Color color) => Color.lerp(null, color, t)!).toList());
     }
     if (b == null) {
-      return a._colors == null ? a : _CupertinoEdgeShadowDecoration._(a._colors!.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList());
+      return a._colors == null ? a : _CupertinoEdgeShadowDecoration._(a._colors.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList());
     }
     assert(b._colors != null || a._colors != null);
     // If it ever becomes necessary, we could allow decorations with different
     // length' here, similarly to how it is handled in [LinearGradient.lerp].
-    assert(b._colors == null || a._colors == null || a._colors!.length == b._colors!.length);
+    assert(b._colors == null || a._colors == null || a._colors.length == b._colors.length);
     return _CupertinoEdgeShadowDecoration._(
       <Color>[
         for (int i = 0; i < b._colors!.length; i += 1)
-          Color.lerp(a._colors?[i], b._colors?[i], t)!,
+          Color.lerp(a._colors?[i], b._colors[i], t)!,
       ],
     );
   }
@@ -894,7 +934,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
     this._decoration,
     super.onChanged,
-  ) : assert(_decoration._colors == null || _decoration._colors!.length > 1);
+  ) : assert(_decoration._colors == null || _decoration._colors.length > 1);
 
   final _CupertinoEdgeShadowDecoration _decoration;
 

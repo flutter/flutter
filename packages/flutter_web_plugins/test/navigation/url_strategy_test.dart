@@ -80,17 +80,34 @@ void main() {
       expect(strategy.getPath(), '/bar');
     });
 
-    test('gets path correctly in the presence of query params', () {
+    test('gets path correctly in the presence of query params and omits fragment if no flag specified', () {
       location.baseHref = 'https://example.com/foo/';
       location.pathname = '/foo/bar';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
-
 
       location.search = '?q=1';
       expect(strategy.getPath(), '/bar?q=1');
 
       location.search = '?q=1&t=r';
       expect(strategy.getPath(), '/bar?q=1&t=r');
+
+      location.hash = '#fragment=1';
+      expect(strategy.getPath(), '/bar?q=1&t=r');
+    });
+
+    test('gets path correctly in the presence of query params and fragment', () {
+      location.baseHref = 'https://example.com/foo/';
+      location.pathname = '/foo/bar';
+      final PathUrlStrategy strategy = PathUrlStrategy(location, true);
+
+      location.search = '?q=1';
+      expect(strategy.getPath(), '/bar?q=1');
+
+      location.search = '?q=1&t=r';
+      expect(strategy.getPath(), '/bar?q=1&t=r');
+
+      location.hash = '#fragment=1';
+      expect(strategy.getPath(), '/bar?q=1&t=r#fragment=1');
     });
 
     test('empty route name is ok', () {

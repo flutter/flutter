@@ -627,6 +627,41 @@ void main() {
     expect(observations[2].previous, '/A');
   });
 
+  testWidgets('$Route  dispatches memory events', (WidgetTester tester) async {
+    Future<void> createAndDisposeRoute() async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          home: const Scaffold(
+            body: Text('home'),
+          )
+        )
+      );
+
+      nav.currentState!.push(MaterialPageRoute<void>(builder: (_) => const Placeholder())); // This should create a route
+      await tester.pumpAndSettle();
+
+      nav.currentState!.pop();
+      await tester.pumpAndSettle(); // this should dispose the route.
+    }
+
+    final List<ObjectEvent> events = <ObjectEvent>[];
+    void listener(ObjectEvent event) {
+      if (event.object.runtimeType == MaterialPageRoute<void>) {
+        events.add(event);
+      }
+    }
+    FlutterMemoryAllocations.instance.addListener(listener);
+
+    await createAndDisposeRoute();
+    expect(events, hasLength(2));
+    expect(events.first, isA<ObjectCreated>());
+    expect(events.last, isA<ObjectDisposed>());
+
+    FlutterMemoryAllocations.instance.removeListener(listener);
+  });
+
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
     // Regression Test for https://github.com/flutter/flutter/issues/61346.
     Widget buildNavigator() {
@@ -640,6 +675,8 @@ void main() {
       );
     }
     final TabController controller = TabController(length: 3, vsync: tester);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       TestDependencies(
         child: TabBarView(
@@ -1451,29 +1488,34 @@ void main() {
         return result;
       },
     ));
-    expect(log, <String>['building page 1 - false']);
+    final List<String> expected = <String>['building page 1 - false'];
+    expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         log.add('building page 2 - ${ModalRoute.of(context)!.canPop}');
         return const Placeholder();
       },
     ));
-    expect(log, <String>['building page 1 - false']);
+    expect(log, expected);
     await tester.pump();
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expected.add('building page 2 - false');
+    expected.add('building page 1 - false'); // page 1 is rebuilt again because isCurrent changed.
+    expect(log, expected);
     await tester.pump(const Duration(milliseconds: 150));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         log.add('building page 3 - ${ModalRoute.of(context)!.canPop}');
         return const Placeholder();
       },
     ));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expect(log, expected);
     await tester.pump();
-    expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
+    expected.add('building page 3 - false');
+    expected.add('building page 2 - false'); // page 2 is rebuilt again because isCurrent changed.
+    expect(log, expected);
     await tester.pump(const Duration(milliseconds: 200));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
+    expect(log, expected);
   });
 
   testWidgets('route semantics', (WidgetTester tester) async {
@@ -2324,6 +2366,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2394,6 +2438,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2463,6 +2509,7 @@ void main() {
           ),
         );
       };
+    addTearDown(spy1.dispose);
     final List<NavigatorObservation> observations2 = <NavigatorObservation>[];
     final HeroControllerSpy spy2 = HeroControllerSpy()
       ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
@@ -2474,6 +2521,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy2.dispose);
+
     await tester.pumpWidget(
       TestDependencies(
         child: Stack(
@@ -2590,6 +2639,8 @@ void main() {
 
   testWidgets('hero controller subscribes to multiple navigators does throw', (WidgetTester tester) async {
     final HeroControllerSpy spy = HeroControllerSpy();
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2628,6 +2679,8 @@ void main() {
 
   testWidgets('hero controller throws has correct error message', (WidgetTester tester) async {
     final HeroControllerSpy spy = HeroControllerSpy();
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2872,6 +2925,90 @@ void main() {
         firstError!.exception.toString(),
         'The Navigator.pages must not be empty to use the Navigator.pages API',
       );
+    });
+
+    testWidgets('Can pop route with local history entries using page api', (WidgetTester tester) async {
+      List<Page<void>> myPages = const <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+        MaterialPage<void>(child: Text('page2')),
+      ];
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('page2'), findsOneWidget);
+      final ModalRoute<void> route = ModalRoute.of(tester.element(find.text('page2')))!;
+      bool entryRemoved = false;
+      route.addLocalHistoryEntry(LocalHistoryEntry(onRemove: () => entryRemoved = true));
+      expect(route.willHandlePopInternally, true);
+
+      myPages = const <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+      ];
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('page1'), findsOneWidget);
+      expect(entryRemoved, isTrue);
+    });
+
+    testWidgets('ModalRoute must comply with willHandlePopInternally when there is a PopScope', (WidgetTester tester) async {
+      const List<Page<void>> myPages = <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+        MaterialPage<void>(
+          child: PopScope(
+            canPop: false,
+            child: Text('page2'),
+          ),
+        ),
+      ];
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      final ModalRoute<void> route = ModalRoute.of(tester.element(find.text('page2')))!;
+      // PopScope only prevents user trigger action, e.g. Navigator.maybePop.
+      // The page can still be popped by the system if it needs to.
+      expect(route.willHandlePopInternally, false);
+      expect(route.didPop(null), true);
     });
 
     testWidgets('can push and pop pages using page api', (WidgetTester tester) async {
@@ -3940,6 +4077,7 @@ void main() {
     };
     late final NavigatorState navigator = navigatorKey.currentState! as NavigatorState;
     final FocusScopeNode focusNode = FocusScopeNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(Column(
       children: <Widget>[
@@ -4016,6 +4154,7 @@ void main() {
     late final NavigatorState navigator =
     navigatorKey.currentState! as NavigatorState;
     final FocusScopeNode focusNode = FocusScopeNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(Column(
       children: <Widget>[
@@ -4147,6 +4286,98 @@ void main() {
     expect(policy, isA<ReadingOrderTraversalPolicy>());
   });
 
+  testWidgets(
+      'Send semantic event to move a11y focus to the last focused item when pop next page',
+      (WidgetTester tester) async {
+    dynamic semanticEvent;
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+        SystemChannels.accessibility, (dynamic message) async {
+      semanticEvent = message;
+    });
+    final Key openSheetKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primarySwatch: Colors.blue),
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => _LinksPage(
+            title: 'Home page',
+            buttons: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/one');
+                },
+                child: const Text('Go to one'),
+              ),
+            ],
+          ),
+          '/one': (BuildContext context) => Scaffold(
+            body: Column(
+              children: <Widget>[
+                const ListTile(title: Text('Title 1')),
+                const ListTile(title: Text('Title 2')),
+                const ListTile(title: Text('Title 3')),
+                ElevatedButton(
+                  key: openSheetKey,
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Center(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close Sheet'),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Open Sheet'),
+                )
+              ],
+            ),
+          ),
+        },
+      ),
+    );
+
+    expect(find.text('Home page'), findsOneWidget);
+
+    await tester.tap(find.text('Go to one'));
+    await tester.pumpAndSettle();
+
+    // The focused node before opening the sheet.
+    final ByteData? fakeMessage =
+        SystemChannels.accessibility.codec.encodeMessage(<String, dynamic>{
+      'type': 'didGainFocus',
+      'nodeId': 5,
+    });
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.accessibility.name,
+      fakeMessage,
+      (ByteData? data) {},
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('Close Sheet'), findsOneWidget);
+    await tester.tap(find.text('Close Sheet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // The focused node before opening the sheet regains the focus;
+    expect(semanticEvent, <String, dynamic>{
+      'type': 'focus',
+      'nodeId': 5,
+      'data': <String, dynamic>{},
+    });
+
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+  },
+    variant:  const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS}),
+    skip: isBrowser, // [intended] only non-web supports move a11y focus back to last item.
+  );
+
   group('RouteSettings.toString', () {
     test('when name is not null, should have double quote', () {
       expect(const RouteSettings(name: '/home').toString(), 'RouteSettings("/home", null)');
@@ -4159,11 +4390,7 @@ void main() {
 
   group('Android Predictive Back', () {
     bool? lastFrameworkHandlesBack;
-    setUp(() {
-      // Initialize to false. Because this uses a static boolean internally, it
-      // is not reset between tests or calls to pumpWidget. Explicitly setting
-      // it to false before each test makes them behave deterministically.
-      SystemNavigator.setFrameworkHandlesBack(false);
+    setUp(() async {
       lastFrameworkHandlesBack = null;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -4173,12 +4400,17 @@ void main() {
           }
           return;
         });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            'flutter/lifecycle',
+            const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
+            (ByteData? data) {},
+          );
     });
 
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
-      SystemNavigator.setFrameworkHandlesBack(true);
     });
 
     testWidgets('a single route is already defaulted to false', (WidgetTester tester) async {
@@ -4867,6 +5099,140 @@ void main() {
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
+
+      testWidgets('popping a page with canPop true still calls onPopInvoked', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/141189.
+        final List<_PageWithYesPop> pages = <_PageWithYesPop>[_PageWithYesPop.home];
+        bool canPop() => pages.length <= 1;
+        int onPopInvokedCallCount = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return PopScope(
+                  canPop: canPop(),
+                  onPopInvoked: (bool success) {
+                    if (success || pages.last == _PageWithYesPop.noPop) {
+                      return;
+                    }
+                    setState(() {
+                      pages.removeLast();
+                    });
+                  },
+                  child: Navigator(
+                    onPopPage: (Route<void> route, void result) {
+                      if (!route.didPop(null)) {
+                        return false;
+                      }
+                      setState(() {
+                        pages.removeLast();
+                      });
+                      return true;
+                    },
+                    pages: pages.map((_PageWithYesPop page) {
+                      switch (page) {
+                        case _PageWithYesPop.home:
+                          return MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.noPop'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.yesPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.yesPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _PageWithYesPop.one:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Page one',
+                            ),
+                          );
+                        case _PageWithYesPop.noPop:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Cannot pop page',
+                              canPop: false,
+                            ),
+                          );
+                        case _PageWithYesPop.yesPop:
+                          return MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Can pop page',
+                              canPop: true,
+                              onPopInvoked: (bool didPop) {
+                                onPopInvokedCallCount += 1;
+                              },
+                            ),
+                          );
+                      }
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+        expect(onPopInvokedCallCount, equals(0));
+
+        await tester.tap(find.text('Go to _PageWithYesPop.yesPop'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Can pop page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+        expect(onPopInvokedCallCount, equals(0));
+
+        // A system back calls onPopInvoked.
+        await simulateSystemBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+        expect(onPopInvokedCallCount, equals(1));
+
+        await tester.tap(find.text('Go to _PageWithYesPop.yesPop'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Can pop page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+        expect(onPopInvokedCallCount, equals(1));
+
+        // Tapping a back button also calls onPopInvoked.
+        await tester.tap(find.text('Go back'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+        expect(onPopInvokedCallCount, equals(2));
+      },
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      );
     });
   });
 }
@@ -5163,18 +5529,27 @@ enum _Page {
   noPop,
 }
 
+enum _PageWithYesPop {
+  home,
+  one,
+  noPop,
+  yesPop,
+}
+
 class _LinksPage extends StatelessWidget {
   const _LinksPage ({
     this.buttons = const <Widget>[],
     this.canPop,
     required this.title,
     this.onBack,
+    this.onPopInvoked,
   });
 
   final List<Widget> buttons;
   final bool? canPop;
   final VoidCallback? onBack;
   final String title;
+  final PopInvokedCallback? onPopInvoked;
 
   @override
   Widget build(BuildContext context) {
@@ -5195,6 +5570,7 @@ class _LinksPage extends StatelessWidget {
             if (canPop != null)
               PopScope(
                 canPop: canPop!,
+                onPopInvoked: onPopInvoked,
                 child: const SizedBox.shrink(),
               ),
           ],

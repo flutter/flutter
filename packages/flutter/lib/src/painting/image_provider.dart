@@ -160,25 +160,6 @@ class ImageConfiguration {
   }
 }
 
-/// Performs the decode process for use in [ImageProvider.load].
-///
-/// This typedef is deprecated. Use [ImageDecoderCallback] with
-/// [ImageProvider.loadImage] instead.
-///
-/// This callback allows decoupling of the `cacheWidth`, `cacheHeight`, and
-/// `allowUpscaling` parameters from implementations of [ImageProvider] that do
-/// not expose them.
-///
-/// See also:
-///
-///  * [ResizeImage], which uses this to override the `cacheWidth`,
-///    `cacheHeight`, and `allowUpscaling` parameters.
-@Deprecated(
-  'Use ImageDecoderCallback with ImageProvider.loadImage instead. '
-  'This feature was deprecated after v2.13.0-1.0.pre.',
-)
-typedef DecoderCallback = Future<ui.Codec> Function(Uint8List buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
-
 /// Performs the decode process for use in [ImageProvider.loadBuffer].
 ///
 /// This callback allows decoupling of the `cacheWidth`, `cacheHeight`, and
@@ -194,6 +175,9 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List buffer, {int? cach
   'This feature was deprecated after v3.7.0-1.4.pre.',
 )
 typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
+
+// Method signature for _loadAsync decode callbacks.
+typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
 
 /// Performs the decode process for use in [ImageProvider.loadImage].
 ///
@@ -250,7 +234,7 @@ typedef ImageDecoderCallback = Future<ui.Codec> Function(
 ///      from the cache if possible, or call [loadImage] to fetch the encoded image
 ///      bytes and schedule decoding.
 ///   4. The [loadImage] method is responsible for both fetching the encoded bytes
-///      and decoding them using the provided [DecoderCallback]. It is called
+///      and decoding them using the provided [ImageDecoderCallback]. It is called
 ///      in a context that uses the [ImageErrorListener] to report errors back.
 ///
 /// Subclasses normally only have to implement the [loadImage] and [obtainKey]
@@ -365,10 +349,10 @@ abstract class ImageProvider<T extends Object> {
   ///
   /// This is the public entry-point of the [ImageProvider] class hierarchy.
   ///
-  /// Subclasses should implement [obtainKey] and [load], which are used by this
-  /// method. If they need to change the implementation of [ImageStream] used,
-  /// they should override [createStream]. If they need to manage the actual
-  /// resolution of the image, they should override [resolveStreamForKey].
+  /// Subclasses should implement [obtainKey] and [loadImage], which are used by
+  /// this method. If they need to change the implementation of [ImageStream]
+  /// used, they should override [createStream]. If they need to manage the
+  /// actual resolution of the image, they should override [resolveStreamForKey].
   ///
   /// See the Lifecycle documentation on [ImageProvider] for more information.
   @nonVirtual
@@ -422,8 +406,7 @@ abstract class ImageProvider<T extends Object> {
   /// The location may be [ImageCacheStatus.untracked], indicating that this
   /// image provider's key is not available in the [ImageCache].
   ///
-  /// The `cache` and `configuration` parameters must not be null. If the
-  /// `handleError` parameter is null, errors will be reported to
+  /// If the `handleError` parameter is null, errors will be reported to
   /// [FlutterError.onError], and the method will return null.
   ///
   /// A completed return value of null indicates that an error has occurred.
@@ -542,10 +525,6 @@ abstract class ImageProvider<T extends Object> {
         // of type `_AbstractImageStreamCompleter`.
         if (result is _AbstractImageStreamCompleter) {
           result = loadBuffer(key, PaintingBinding.instance.instantiateImageCodecFromBuffer);
-          if (result is _AbstractImageStreamCompleter) {
-            // Same fallback as above but for the deprecated `load()` method.
-            result = load(key, PaintingBinding.instance.instantiateImageCodec);
-          }
         }
         return result;
       },
@@ -610,38 +589,16 @@ abstract class ImageProvider<T extends Object> {
   /// that describes the precise image to load.
   ///
   /// The type of the key is determined by the subclass. It is a value that
-  /// unambiguously identifies the image (_including its scale_) that the [load]
-  /// method will fetch. Different [ImageProvider]s given the same constructor
-  /// arguments and [ImageConfiguration] objects should return keys that are
-  /// '==' to each other (possibly by using a class for the key that itself
-  /// implements [==]).
+  /// unambiguously identifies the image (_including its scale_) that the
+  /// [loadImage] method will fetch. Different [ImageProvider]s given the same
+  /// constructor arguments and [ImageConfiguration] objects should return keys
+  /// that are '==' to each other (possibly by using a class for the key that
+  /// itself implements [==]).
   ///
   /// If the result can be determined synchronously, this function should return
   /// a [SynchronousFuture]. This allows image resolution to progress
   /// synchronously during a frame rather than delaying image loading.
   Future<T> obtainKey(ImageConfiguration configuration);
-
-  /// Converts a key into an [ImageStreamCompleter], and begins fetching the
-  /// image.
-  ///
-  /// This method is deprecated. Implement [loadImage] for faster image
-  /// loading. Only one of [load] and [loadImage] must be implemented, and
-  /// [loadImage] is preferred.
-  ///
-  /// The [decode] callback provides the logic to obtain the codec for the
-  /// image.
-  ///
-  /// See also:
-  ///
-  ///  * [ResizeImage], for modifying the key to account for cache dimensions.
-  @protected
-  @Deprecated(
-    'Implement loadImage for faster image loading. '
-    'This feature was deprecated after v2.13.0-1.0.pre.',
-  )
-  ImageStreamCompleter load(T key, DecoderCallback decode) {
-    throw UnsupportedError('Implement loadImage for faster image loading');
-  }
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
@@ -697,8 +654,6 @@ class _AbstractImageStreamCompleter extends ImageStreamCompleter {}
 @immutable
 class AssetBundleImageKey {
   /// Creates the key for an [AssetImage] or [AssetBundleImageProvider].
-  ///
-  /// The arguments must not be null.
   const AssetBundleImageKey({
     required this.bundle,
     required this.name,
@@ -776,25 +731,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       return true;
     }());
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decodeBufferDeprecated: decode),
-      scale: key.scale,
-      debugLabel: key.name,
-      informationCollector: collector,
-    );
-  }
-
-  @override
-  ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
-    InformationCollector? collector;
-    assert(() {
-      collector = () => <DiagnosticsNode>[
-        DiagnosticsProperty<ImageProvider>('Image provider', this),
-        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
-      ];
-      return true;
-    }());
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decodeDeprecated: decode),
+      codec: _loadAsync(key, decode: decode),
       scale: key.scale,
       debugLabel: key.name,
       informationCollector: collector,
@@ -804,48 +741,22 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// Fetches the image from the asset bundle, decodes it, and returns a
   /// corresponding [ImageInfo] object.
   ///
-  /// This function is used by [load].
+  /// This function is used by [loadImage].
   @protected
   Future<ui.Codec> _loadAsync(
     AssetBundleImageKey key, {
-    ImageDecoderCallback? decode,
-    DecoderBufferCallback? decodeBufferDeprecated,
-    DecoderCallback? decodeDeprecated,
+    required _SimpleDecoderCallback decode,
   }) async {
-    if (decode != null) {
-      ui.ImmutableBuffer buffer;
-      // Hot reload/restart could change whether an asset bundle or key in a
-      // bundle are available, or if it is a network backed bundle.
-      try {
-        buffer = await key.bundle.loadBuffer(key.name);
-      } on FlutterError {
-        PaintingBinding.instance.imageCache.evict(key);
-        rethrow;
-      }
-      return decode(buffer);
-    }
-    if (decodeBufferDeprecated != null) {
-      ui.ImmutableBuffer buffer;
-      // Hot reload/restart could change whether an asset bundle or key in a
-      // bundle are available, or if it is a network backed bundle.
-      try {
-        buffer = await key.bundle.loadBuffer(key.name);
-      } on FlutterError {
-        PaintingBinding.instance.imageCache.evict(key);
-        rethrow;
-      }
-      return decodeBufferDeprecated(buffer);
-    }
-    ByteData data;
+    final ui.ImmutableBuffer buffer;
     // Hot reload/restart could change whether an asset bundle or key in a
     // bundle are available, or if it is a network backed bundle.
     try {
-      data = await key.bundle.load(key.name);
+      buffer = await key.bundle.loadBuffer(key.name);
     } on FlutterError {
       PaintingBinding.instance.imageCache.evict(key);
       rethrow;
     }
-    return decodeDeprecated!(data.buffer.asUint8List());
+    return decode(buffer);
   }
 }
 
@@ -897,7 +808,7 @@ enum ResizeImagePolicy {
   /// If only one of `width` and `height` is non-null, then the output image
   /// will be scaled to the associated width or height, and the other dimension
   /// will take whatever value is needed to maintain the image's original aspect
-  /// ratio. These cases are simnilar to [BoxFit.fitWidth] and
+  /// ratio. These cases are similar to [BoxFit.fitWidth] and
   /// [BoxFit.fitHeight], respectively.
   ///
   /// If [ResizeImage.allowUpscaling] is false (the default), the width and the
@@ -1339,28 +1250,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
   @override
   @Deprecated(
-    'Implement loadImage for faster image loading. '
-    'This feature was deprecated after v2.13.0-1.0.pre.',
-  )
-  ImageStreamCompleter load(ResizeImageKey key, DecoderCallback decode) {
-    Future<ui.Codec> decodeResize(Uint8List buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-      assert(
-        cacheWidth == null && cacheHeight == null && allowUpscaling == null,
-        'ResizeImage cannot be composed with another ImageProvider that applies '
-        'cacheWidth, cacheHeight, or allowUpscaling.',
-      );
-      return decode(buffer, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
-    }
-    final ImageStreamCompleter completer = imageProvider.load(key._providerCacheKey, decodeResize);
-    if (!kReleaseMode) {
-      completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
-    }
-    _configureErrorListener(completer, key);
-    return completer;
-  }
-
-  @override
-  @Deprecated(
     'Implement loadImage for image loading. '
     'This feature was deprecated after v3.7.0-1.4.pre.',
   )
@@ -1494,11 +1383,11 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 ///
 /// The image will be cached regardless of cache headers from the server.
 ///
-/// When a network image is used on the Web platform, the `cacheWidth` and
-/// `cacheHeight` parameters of the [DecoderCallback] are only supported when the
-/// application is running with the CanvasKit renderer. When the application is using
-/// the HTML renderer, the web engine delegates image decoding of network images to the Web,
-/// which does not support custom decode sizes.
+/// When a network image is used on the Web platform, the `getTargetSize`
+/// parameter of the [ImageDecoderCallback] is only supported when the
+/// application is running with the CanvasKit renderer. When the application is
+/// using the HTML renderer, the web engine delegates image decoding of network
+/// images to the Web, which does not support custom decode sizes.
 ///
 /// See also:
 ///
@@ -1511,7 +1400,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
-  /// The arguments [url] and [scale] must not be null.
+  /// The [scale] argument is the linear scale factor for drawing this image at
+  /// its intended size. See [ImageInfo.scale] for more information.
   const factory NetworkImage(String url, { double scale, Map<String, String>? headers }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
@@ -1524,9 +1414,6 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// When running Flutter on the web, headers are not used.
   Map<String, String>? get headers;
-
-  @override
-  ImageStreamCompleter load(NetworkImage key, DecoderCallback decode);
 
   @override
   ImageStreamCompleter loadBuffer(NetworkImage key, DecoderBufferCallback decode);
@@ -1547,8 +1434,6 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 @immutable
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
-  ///
-  /// The arguments must not be null.
   const FileImage(this.file, { this.scale = 1.0 });
 
   /// The file to decode into an image.
@@ -1563,21 +1448,9 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  ImageStreamCompleter load(FileImage key, DecoderCallback decode) {
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decodeDeprecated: decode),
-      scale: key.scale,
-      debugLabel: key.file.path,
-      informationCollector: () => <DiagnosticsNode>[
-        ErrorDescription('Path: ${file.path}'),
-      ],
-    );
-  }
-
-  @override
   ImageStreamCompleter loadBuffer(FileImage key, DecoderBufferCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decodeBufferDeprecated: decode),
+      codec: _loadAsync(key, decode: decode),
       scale: key.scale,
       debugLabel: key.file.path,
       informationCollector: () => <DiagnosticsNode>[
@@ -1601,12 +1474,9 @@ class FileImage extends ImageProvider<FileImage> {
 
   Future<ui.Codec> _loadAsync(
     FileImage key, {
-    ImageDecoderCallback? decode,
-    DecoderBufferCallback? decodeBufferDeprecated,
-    DecoderCallback? decodeDeprecated,
+    required _SimpleDecoderCallback decode,
   }) async {
     assert(key == this);
-
     // TODO(jonahwilliams): making this sync caused test failures that seem to
     // indicate that we can fail to call evict unless at least one await has
     // occurred in the test.
@@ -1617,19 +1487,9 @@ class FileImage extends ImageProvider<FileImage> {
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
-    if (decode != null) {
-      if (file.runtimeType == File) {
-        return decode(await ui.ImmutableBuffer.fromFilePath(file.path));
-      }
-      return decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
-    }
-    if (decodeBufferDeprecated != null) {
-      if (file.runtimeType == File) {
-        return decodeBufferDeprecated(await ui.ImmutableBuffer.fromFilePath(file.path));
-      }
-      return decodeBufferDeprecated(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
-    }
-    return decodeDeprecated!(await file.readAsBytes());
+    return (file.runtimeType == File)
+      ? decode(await ui.ImmutableBuffer.fromFilePath(file.path))
+      : decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
   }
 
   @override
@@ -1655,8 +1515,8 @@ class FileImage extends ImageProvider<FileImage> {
 /// The provided [bytes] buffer should not be changed after it is provided
 /// to a [MemoryImage]. To provide an [ImageStream] that represents an image
 /// that changes over time, consider creating a new subclass of [ImageProvider]
-/// whose [load] method returns a subclass of [ImageStreamCompleter] that can
-/// handle providing multiple images.
+/// whose [loadImage] method returns a subclass of [ImageStreamCompleter] that
+/// can handle providing multiple images.
 ///
 /// See also:
 ///
@@ -1664,8 +1524,6 @@ class FileImage extends ImageProvider<FileImage> {
 @immutable
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
-  ///
-  /// The arguments must not be null.
   const MemoryImage(this.bytes, { this.scale = 1.0 });
 
   /// The bytes to decode into an image.
@@ -1675,7 +1533,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   ///
   /// See also:
   ///
-  ///  * [PaintingBinding.instantiateImageCodec]
+  ///  * [PaintingBinding.instantiateImageCodecWithSize]
   final Uint8List bytes;
 
   /// The scale to place in the [ImageInfo] object of the image.
@@ -1692,18 +1550,10 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  ImageStreamCompleter load(MemoryImage key, DecoderCallback decode) {
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decodeDeprecated: decode),
-      scale: key.scale,
-      debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
-    );
-  }
-
-  @override
   ImageStreamCompleter loadBuffer(MemoryImage key, DecoderBufferCallback decode) {
+    assert(key == this);
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decodeBufferDeprecated: decode),
+      codec: _loadAsync(key, decode: decode),
       scale: key.scale,
       debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
     );
@@ -1720,20 +1570,10 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 
   Future<ui.Codec> _loadAsync(
     MemoryImage key, {
-    ImageDecoderCallback? decode,
-    DecoderBufferCallback? decodeBufferDeprecated,
-    DecoderCallback? decodeDeprecated,
+    required _SimpleDecoderCallback decode,
   }) async {
     assert(key == this);
-    if (decode != null) {
-      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-      return decode(buffer);
-    }
-    if (decodeBufferDeprecated != null) {
-      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-      return decodeBufferDeprecated(buffer);
-    }
-    return decodeDeprecated!(bytes);
+    return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
   }
 
   @override
@@ -1828,10 +1668,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 class ExactAssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches the given image from an asset bundle.
   ///
-  /// The [assetName] and [scale] arguments must not be null. The [scale] arguments
-  /// defaults to 1.0. The [bundle] argument may be null, in which case the
-  /// bundle provided in the [ImageConfiguration] passed to the [resolve] call
-  /// will be used instead.
+  /// The [scale] argument defaults to 1. The [bundle] argument may be null, in
+  /// which case the bundle provided in the [ImageConfiguration] passed to the
+  /// [resolve] call will be used instead.
   ///
   /// The [package] argument must be non-null when fetching an asset that is
   /// included in a package. See the documentation for the [ExactAssetImage] class

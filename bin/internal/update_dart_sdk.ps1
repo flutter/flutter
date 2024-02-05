@@ -47,7 +47,22 @@ if (-not $dartSdkBaseUrl) {
 if ($engineRealm) {
     $dartSdkBaseUrl = "$dartSdkBaseUrl/$engineRealm"
 }
-$dartZipName = "dart-sdk-windows-x64.zip"
+
+# It's important to use the native Dart SDK as the default target architecture
+# for Flutter Windows builds depend on the Dart executable's architecture.
+$dartZipNameX64 = "dart-sdk-windows-x64.zip"
+$dartZipNameArm64 = "dart-sdk-windows-arm64.zip"
+$dartZipName = $dartZipNameX64
+if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
+    $dartSdkArm64Url = "$dartSdkBaseUrl/flutter_infra_release/flutter/$engineVersion/$dartZipNameArm64"
+    Try {
+        Invoke-WebRequest -Uri $dartSdkArm64Url -UseBasicParsing -Method Head | Out-Null
+        $dartZipName = $dartZipNameArm64
+    }
+    Catch {
+        Write-Host "The current channel's Dart SDK does not support Windows Arm64, falling back to Windows x64..."
+    }
+}
 $dartSdkUrl = "$dartSdkBaseUrl/flutter_infra_release/flutter/$engineVersion/$dartZipName"
 
 if ((Test-Path $dartSdkPath) -or (Test-Path $dartSdkLicense)) {
@@ -83,18 +98,21 @@ Catch {
     $ProgressPreference = $OriginalProgressPreference
 }
 
-Write-Host "Expanding downloaded archive..."
 If (Get-Command 7z -errorAction SilentlyContinue) {
+    Write-Host "Expanding downloaded archive with 7z..."
     # The built-in unzippers are painfully slow. Use 7-Zip, if available.
     & 7z x $dartSdkZip "-o$cachePath" -bd | Out-Null
 } ElseIf (Get-Command 7za -errorAction SilentlyContinue) {
+    Write-Host "Expanding downloaded archive with 7za..."
     # Use 7-Zip's standalone version 7za.exe, if available.
     & 7za x $dartSdkZip "-o$cachePath" -bd | Out-Null
 } ElseIf (Get-Command Microsoft.PowerShell.Archive\Expand-Archive -errorAction SilentlyContinue) {
+    Write-Host "Expanding downloaded archive with PowerShell..."
     # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
     $global:ProgressPreference='SilentlyContinue'
     Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $cachePath
 } Else {
+    Write-Host "Expanding downloaded archive with Windows..."
     # As last resort: fall back to the Windows GUI.
     $shell = New-Object -com shell.application
     $zip = $shell.NameSpace($dartSdkZip)

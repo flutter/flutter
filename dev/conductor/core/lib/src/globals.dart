@@ -18,7 +18,7 @@ const List<String> kReleaseChannels = <String>[...kBaseReleaseChannels, Framewor
 
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
 
-const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
+const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/dart-internal/g/flutter_packaging/console';
 
 const String kWebsiteReleasesUrl = 'https://docs.flutter.dev/development/tools/sdk/releases';
 

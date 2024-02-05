@@ -400,5 +400,13 @@ void main() {
       });
     }
 
+    test('${nativeAssets.name} availability and default enabled', () {
+      expect(nativeAssets.master.enabledByDefault, false);
+      expect(nativeAssets.master.available, true);
+      expect(nativeAssets.beta.enabledByDefault, false);
+      expect(nativeAssets.beta.available, false);
+      expect(nativeAssets.stable.enabledByDefault, false);
+      expect(nativeAssets.stable.available, false);
+    });
   });
 }

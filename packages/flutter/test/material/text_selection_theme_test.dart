@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('TextSelectionThemeData copyWith, ==, hashCode basics', () {
@@ -26,7 +25,7 @@ void main() {
     expect(theme.selectionHandleColor, null);
   });
 
-  testWidgetsWithLeakTracking('Default TextSelectionThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default TextSelectionThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TextSelectionThemeData().debugFillProperties(builder);
 
@@ -38,7 +37,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('TextSelectionThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('TextSelectionThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TextSelectionThemeData(
       cursorColor: Color(0xffeeffaa),
@@ -58,7 +57,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Material2 - Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
+  testWidgets('Material2 - Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
     const Color defaultCursorColor = Color(0xff2196f3);
     const Color defaultSelectionColor = Color(0x662196f3);
@@ -105,22 +104,9 @@ void main() {
     await tester.pumpAndSettle();
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
-  },
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130469
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      notDisposedAllowList: <String, int?>{
-        'ValueNotifier<MagnifierInfo>': 1,
-        'ValueNotifier<_OverlayEntryWidgetState?>': 2,
-        'ValueNotifier<bool>': 2,
-        '_InputBorderGap': 1,
-      },
-      // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
-      allowAllNotGCed: true,
-    ),
-  );
+  });
 
-  testWidgetsWithLeakTracking('Material3 - Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final Color defaultCursorColor = theme.colorScheme.primary;
     final Color defaultSelectionColor = theme.colorScheme.primary.withOpacity(0.40);
@@ -167,20 +153,7 @@ void main() {
     await tester.pumpAndSettle();
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
-  },
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130469
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      notDisposedAllowList: <String, int?>{
-        'ValueNotifier<MagnifierInfo>': 1,
-        'ValueNotifier<_OverlayEntryWidgetState?>': 2,
-        'ValueNotifier<bool>': 2,
-        '_InputBorderGap': 1,
-      },
-      // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
-      allowAllNotGCed: true,
-    ),
-  );
+  });
 
   testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
     const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
@@ -346,7 +319,7 @@ void main() {
     expect(renderSelectable.cursorColor, cursorColor.withAlpha(0));
   });
 
-  testWidgetsWithLeakTracking('TextSelectionThem overrides DefaultSelectionStyle', (WidgetTester tester) async {
+  testWidgets('TextSelectionThem overrides DefaultSelectionStyle', (WidgetTester tester) async {
     const Color themeSelectionColor = Color(0xffaabbcc);
     const Color themeCursorColor = Color(0x00ccbbaa);
     const Color defaultSelectionColor = Color(0xffaa1111);

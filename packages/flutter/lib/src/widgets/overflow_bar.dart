@@ -54,11 +54,6 @@ enum OverflowBarAlignment {
 /// {@end-tool}
 class OverflowBar extends MultiChildRenderObjectWidget {
   /// Constructs an OverflowBar.
-  ///
-  /// The [spacing], [overflowSpacing], [overflowAlignment],
-  /// [overflowDirection], and [clipBehavior] parameters must not be
-  /// null. The [children] argument must not be null and must not contain
-  /// any null objects.
   const OverflowBar({
     super.key,
     this.spacing = 0.0,
@@ -67,7 +62,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
     this.overflowAlignment = OverflowBarAlignment.start,
     this.overflowDirection = VerticalDirection.down,
     this.textDirection,
-    this.clipBehavior = Clip.none,
     super.children,
   });
 
@@ -197,11 +191,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   ///    text and text-direction-sensitive render objects.
   final TextDirection? textDirection;
 
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  final Clip clipBehavior;
-
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderOverflowBar(
@@ -211,7 +200,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       overflowAlignment: overflowAlignment,
       overflowDirection: overflowDirection,
       textDirection: textDirection ?? Directionality.of(context),
-      clipBehavior: clipBehavior,
     );
   }
 
@@ -223,8 +211,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       ..overflowSpacing = overflowSpacing
       ..overflowAlignment = overflowAlignment
       ..overflowDirection = overflowDirection
-      ..textDirection = textDirection ?? Directionality.of(context)
-      ..clipBehavior = clipBehavior;
+      ..textDirection = textDirection ?? Directionality.of(context);
   }
 
   @override
@@ -252,14 +239,12 @@ class _RenderOverflowBar extends RenderBox
     OverflowBarAlignment overflowAlignment = OverflowBarAlignment.start,
     VerticalDirection overflowDirection = VerticalDirection.down,
     required TextDirection textDirection,
-    Clip clipBehavior = Clip.none,
   }) : _spacing = spacing,
        _alignment = alignment,
        _overflowSpacing = overflowSpacing,
        _overflowAlignment = overflowAlignment,
        _overflowDirection = overflowDirection,
-       _textDirection = textDirection,
-       _clipBehavior = clipBehavior {
+       _textDirection = textDirection {
     addAll(children);
   }
 
@@ -321,17 +306,6 @@ class _RenderOverflowBar extends RenderBox
     }
     _textDirection = value;
     markNeedsLayout();
-  }
-
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
-    if (value == _clipBehavior) {
-      return;
-    }
-    _clipBehavior = value;
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
   }
 
   @override
