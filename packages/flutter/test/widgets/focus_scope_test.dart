@@ -2000,13 +2000,14 @@ void main() {
       );
     });
 
-    testWidgets('Focus gains keyboard focus when it gains accessibility focus', (WidgetTester tester) async {
+    testWidgets('Focus widget gains input focus when it gains accessibility focus', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        Directionality(textDirection: TextDirection.rtl,
+        Directionality(
+          textDirection: TextDirection.rtl,
           child: Focus(
             focusNode: focusNode,
             child: const Text('Test'),
