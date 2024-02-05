@@ -170,7 +170,7 @@ void main() {
 
 void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator input/label text layout',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     // The label appears above the input text
@@ -7046,5 +7046,17 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(getLabelStyle(tester).height, beforeStyle.height);
+  });
+
+  test('InputDecorationTheme.copyWith keeps original iconColor.', () async {
+    const InputDecorationTheme original = InputDecorationTheme(iconColor: Color(0xDEADBEEF));
+    expect(original.iconColor, const Color(0xDEADBEEF));
+    expect(original.fillColor, isNot(const Color(0xDEADCAFE)));
+    final InputDecorationTheme copy1 = original.copyWith(fillColor: const Color(0xDEADCAFE));
+    expect(copy1.iconColor, const Color(0xDEADBEEF));
+    expect(copy1.fillColor, const Color(0xDEADCAFE));
+    final InputDecorationTheme copy2 = original.copyWith(iconColor: const Color(0xDEADCAFE));
+    expect(copy2.iconColor, const Color(0xDEADCAFE));
+    expect(copy2.fillColor, isNot(const Color(0xDEADCAFE)));
   });
 }
