@@ -355,7 +355,7 @@ void main() {
     // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgetsWithLeakTracking('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
+    testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
       Future<void> setAppLifeCycleState(AppLifecycleState state) async {
         final ByteData? message = const StringCodec().encodeMessage(state.toString());
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -365,10 +365,10 @@ void main() {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
-      final FocusAttachment scopeAttachment = scope.attach(context);
+      scope.attach(context);
       final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
       addTearDown(focusNode.dispose);
-      final FocusAttachment focusAttachment = focusNode.attach(context);
+      focusNode.attach(context);
       focusNode.requestFocus();
       expect(tester.binding.focusManager.primaryFocus, focusNode);
 
