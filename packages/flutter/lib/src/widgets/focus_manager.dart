@@ -1697,7 +1697,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier, WidgetsBindingO
         _suspendedNode = null;
         applyFocusChangesIfNeeded();
       }
-    } else if (_primaryFocus != null) {
+    } else if (_primaryFocus != rootScope) {
       assert(_focusDebug(() => 'suspending $_primaryFocus'));
       _markedForFocus = rootScope;
       _suspendedNode = _primaryFocus;
