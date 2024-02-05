@@ -108,11 +108,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
 
   id<MTLTexture> last_texture = static_cast<id<MTLTexture>>(last_texture_);
   SurfaceFrame::SubmitCallback submit_callback =
-      fml::MakeCopyable([this,                           //
-                         renderer = impeller_renderer_,  //
-                         aiks_context = aiks_context_,   //
-                         drawable,                       //
-                         last_texture                    //
+      fml::MakeCopyable([damage = damage_,
+                         disable_partial_repaint = disable_partial_repaint_,  //
+                         renderer = impeller_renderer_,                       //
+                         aiks_context = aiks_context_,                        //
+                         drawable,                                            //
+                         last_texture                                         //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         if (!aiks_context) {
           return false;
@@ -124,10 +125,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
           return false;
         }
 
-        if (!disable_partial_repaint_) {
+        if (!disable_partial_repaint && damage) {
           uintptr_t texture = reinterpret_cast<uintptr_t>(last_texture);
 
-          for (auto& entry : damage_) {
+          for (auto& entry : *damage) {
             if (entry.first != texture) {
               // Accumulate damage for other framebuffers
               if (surface_frame.submit_info().frame_damage) {
@@ -136,7 +137,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
             }
           }
           // Reset accumulated damage for current framebuffer
-          damage_[texture] = SkIRect::MakeEmpty();
+          (*damage)[texture] = SkIRect::MakeEmpty();
         }
 
         std::optional<impeller::IRect> clip_rect;
@@ -146,8 +147,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
                                                 buffer_damage->width(), buffer_damage->height());
         }
 
-        auto surface = impeller::SurfaceMTL::MakeFromMetalLayerDrawable(
-            impeller_renderer_->GetContext(), drawable, clip_rect);
+        auto surface = impeller::SurfaceMTL::MakeFromMetalLayerDrawable(renderer->GetContext(),
+                                                                        drawable, clip_rect);
 
         if (clip_rect && clip_rect->IsEmpty()) {
           return surface->Present();
@@ -174,8 +175,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
     // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
     // front buffer)
     uintptr_t texture = reinterpret_cast<uintptr_t>(drawable.texture);
-    auto i = damage_.find(texture);
-    if (i != damage_.end()) {
+    auto i = damage_->find(texture);
+    if (i != damage_->end()) {
       framebuffer_info.existing_damage = i->second;
     }
     framebuffer_info.supports_partial_repaint = true;
@@ -205,7 +206,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
   }
 
   SurfaceFrame::SubmitCallback submit_callback =
-      fml::MakeCopyable([this,                           //
+      fml::MakeCopyable([disable_partial_repaint = disable_partial_repaint_,  //
+                         damage = damage_,
                          renderer = impeller_renderer_,  //
                          aiks_context = aiks_context_,   //
                          texture_info,                   //
@@ -222,10 +224,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
           return false;
         }
 
-        if (!disable_partial_repaint_) {
+        if (!disable_partial_repaint && damage) {
           uintptr_t texture_ptr = reinterpret_cast<uintptr_t>(mtl_texture);
 
-          for (auto& entry : damage_) {
+          for (auto& entry : *damage) {
             if (entry.first != texture_ptr) {
               // Accumulate damage for other framebuffers
               if (surface_frame.submit_info().frame_damage) {
@@ -234,7 +236,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
             }
           }
           // Reset accumulated damage for current framebuffer
-          damage_[texture_ptr] = SkIRect::MakeEmpty();
+          (*damage)[texture_ptr] = SkIRect::MakeEmpty();
         }
 
         std::optional<impeller::IRect> clip_rect;
@@ -278,8 +280,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
     // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
     // front buffer)
     uintptr_t texture = reinterpret_cast<uintptr_t>(mtl_texture);
-    auto i = damage_.find(texture);
-    if (i != damage_.end()) {
+    auto i = damage_->find(texture);
+    if (i != damage_->end()) {
       framebuffer_info.existing_damage = i->second;
     }
     framebuffer_info.supports_partial_repaint = true;
