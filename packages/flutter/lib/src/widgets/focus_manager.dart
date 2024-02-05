@@ -1493,7 +1493,7 @@ enum FocusHighlightStrategy {
 ///    subtrees into groups and restrict focus to them.
 ///  * The [primaryFocus] global accessor, for convenient access from anywhere
 ///    to the current focus manager state.
-class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
+class FocusManager with DiagnosticableTreeMixin, ChangeNotifier, WidgetsBindingObserver {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
@@ -1508,6 +1508,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
+    WidgetsBinding.instance.addObserver(this);
     rootScope._manager = this;
   }
 
@@ -1524,6 +1525,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();
@@ -1681,6 +1683,27 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   // The set of nodes that need to notify their listeners of changes at the next
   // update.
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
+
+  // Stores the node that was focused before the app lifecycle changed.
+  // Will be restored as the primary focus once app is resumed.
+  FocusNode? _suspendedNode;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_suspendedNode != null) {
+        assert(_focusDebug(() => 'marking node $_suspendedNode to be focused'));
+        _markedForFocus = _suspendedNode;
+        _suspendedNode = null;
+        applyFocusChangesIfNeeded();
+      }
+    } else if (_primaryFocus != null) {
+      assert(_focusDebug(() => 'suspending $_primaryFocus'));
+      _suspendedNode = _primaryFocus;
+      _markedForFocus = rootScope;
+      applyFocusChangesIfNeeded();
+    }
+  }
 
   // The node that has requested to have the primary focus, but hasn't been
   // given it yet.
