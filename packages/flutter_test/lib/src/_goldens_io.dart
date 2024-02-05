@@ -175,7 +175,7 @@ mixin LocalComparisonOutput {
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
-  if (identical(test, master)) {
+  if (listEquals(test, master)) {
     return ComparisonResult(
       passed: true,
       diffPercent: 0.0,
