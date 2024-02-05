@@ -16,10 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-// TODO(bleroux): when the M3 test migration will be completed:
-//  - rename buildInputDecoratorLegacy to buildInputDecoratorM2.
-//  - remove its useMaterial3 parameter.
-Widget buildInputDecoratorLegacy({
+Widget buildInputDecoratorM2({
   InputDecoration decoration = const InputDecoration(),
   ThemeData? theme,
   InputDecorationTheme? inputDecorationTheme,
@@ -28,7 +25,6 @@ Widget buildInputDecoratorLegacy({
   bool isEmpty = false,
   bool isFocused = false,
   bool isHovering = false,
-  bool useMaterial3 = false,
   bool useIntrinsicWidth = false,
   TextStyle? baseStyle,
   TextAlignVertical? textAlignVertical,
@@ -62,7 +58,6 @@ Widget buildInputDecoratorLegacy({
             data: (theme ?? Theme.of(context)).copyWith(
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
-              useMaterial3: useMaterial3,
               textTheme: const TextTheme(bodyLarge: TextStyle(fontSize: 16.0)),
             ),
             child: Align(
@@ -223,26 +218,17 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
 }
 
 void main() {
-  runAllTests(useMaterial3: true);
-  runAllTests(useMaterial3: false);
-
-  // TODO(bleroux): remove below comment when the M3 migration is done.
-  // During M3 test migration, add new tests here and not in runAllTests.
-  // - runAllTest(useMaterial3: true) is misleading because it forced
-  // a Material2 theme at the MaterialApp level.
-  // - runAllTest(useMaterial3: false) is not a requirement for new tests
-  // When migration is done runAllTests will be removed.
+  runAllM2Tests();
 }
 
-void runAllTests({ required bool useMaterial3 }) {
+void runAllM2Tests() {
   testWidgets('InputDecorator input/label text layout',
   // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     // The label appears above the input text
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -269,8 +255,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // The label appears within the input when there is no text content
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -284,8 +269,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // The label appears above the input text when there is no content and floatingLabelBehavior is always
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -300,8 +284,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // The label appears within the input text when there is content and floatingLabelBehavior is never
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
@@ -325,8 +308,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // isFocused: true increases the border's weight from 1.0 to 2.0
     // but does not change the overall height.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         isFocused: true,
         decoration: const InputDecoration(
@@ -345,8 +327,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // isEmpty: true causes the label to be aligned with the input text
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -375,8 +356,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // isFocused: true causes the label to move back up above the input text.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         decoration: const InputDecoration(
@@ -406,8 +386,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // enabled: false produces a hairline border if filled: false (the default)
     // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -421,13 +400,12 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-    expect(getBorderWeight(tester), useMaterial3 ? 1.0 : 0.0);
+    expect(getBorderWeight(tester), 0.0);
 
     // enabled: false produces a transparent border if filled: true.
     // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -442,14 +420,12 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-    final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light());
-    expect(getBorderColor(tester), useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : Colors.transparent);
+    expect(getBorderColor(tester), Colors.transparent);
 
     // alignLabelWithHint: true positions the label at the text baseline,
     // aligned with the hint.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -460,10 +436,8 @@ void runAllTests({ required bool useMaterial3 }) {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    if (!useMaterial3) {
-      expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
-      expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
-    }
+    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
   });
 
   testWidgets('InputDecorator input/label widget layout', (WidgetTester tester) async {
@@ -471,8 +445,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // The label appears above the input text.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -510,8 +483,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // The label appears within the input when there is no text content.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -537,8 +509,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // The label appears above the input text when there is no content and the
     // floatingLabelBehavior is set to always.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -565,8 +536,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // The label appears within the input text when there is content and
     // the floatingLabelBehavior is set to never.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           label: Text.rich(
@@ -601,8 +571,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // isFocused: true increases the border's weight from 1.0 to 2.0
     // but does not change the overall height.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         isFocused: true,
         decoration: const InputDecoration(
@@ -632,8 +601,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // isEmpty: true causes the label to be aligned with the input text.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           label: Text.rich(
@@ -672,8 +640,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // isFocused: true causes the label to move back up above the input text.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         decoration: const InputDecoration(
@@ -716,8 +683,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // enabled: false produces a hairline border if filled: false (the default)
     // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           label: Text.rich(
@@ -742,13 +708,12 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('text')).dy,44.0);
     expect(tester.getTopLeft(find.byKey(key)).dy, 20.0);
     expect(tester.getBottomLeft(find.byKey(key)).dy, 36.0);
-    expect(getBorderWeight(tester),useMaterial3 ? 1.0 : 0.0);
+    expect(getBorderWeight(tester), 0.0);
 
     // enabled: false produces a transparent border if filled: true.
     // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           label: Text.rich(
@@ -774,14 +739,12 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.byKey(key)).dy, 20.0);
     expect(tester.getBottomLeft(find.byKey(key)).dy, 36.0);
-    final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light());
-    expect(getBorderColor(tester), useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : Colors.transparent);
+    expect(getBorderColor(tester), Colors.transparent);
 
     // alignLabelWithHint: true positions the label at the text baseline,
     // aligned with the hint.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           label: Text.rich(
@@ -803,11 +766,8 @@ void runAllTests({ required bool useMaterial3 }) {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    if (!useMaterial3) {
-      expect(tester.getTopLeft(find.byKey(key)).dy, tester.getTopLeft(find.text('hint')).dy);
-      expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
-    }
-
+    expect(tester.getTopLeft(find.byKey(key)).dy, tester.getTopLeft(find.text('hint')).dy);
+    expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
   });
 
   testWidgets('InputDecorator floating label animation duration and curve', (WidgetTester tester) async {
@@ -815,7 +775,7 @@ void runAllTests({ required bool useMaterial3 }) {
       required bool isFocused,
     }) async {
       return tester.pumpWidget(
-        buildInputDecoratorLegacy(
+        buildInputDecoratorM2(
           isEmpty: true,
           isFocused: isFocused,
           decoration: const InputDecoration(
@@ -1090,8 +1050,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator input/hint layout', (WidgetTester tester) async {
     // The hint aligns with the input text
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1114,8 +1073,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator input/label/hint layout', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1153,8 +1111,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Label moves upwards, hint is visible (opacity 1.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         decoration: const InputDecoration(
@@ -1188,8 +1145,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorderWeight(tester), 2.0);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isFocused: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -1225,8 +1181,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator input/label/hint dense layout', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1264,8 +1219,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         decoration: const InputDecoration(
@@ -1288,8 +1242,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator default hint animation duration', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -1303,8 +1256,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Focus to show the hint.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         decoration: const InputDecoration(
@@ -1329,8 +1281,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Unfocus to hide the hint.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -1355,8 +1306,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator custom hint animation duration', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -1371,8 +1321,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Focus to show the hint.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         decoration: const InputDecoration(
@@ -1398,8 +1347,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Unfocus to hide the hint.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -1425,8 +1373,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator custom hint animation duration from theme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         inputDecorationTheme: const InputDecorationTheme(
           hintFadeDuration: Duration(milliseconds: 120),
         ),
@@ -1443,8 +1390,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Focus to show the hint.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         inputDecorationTheme: const InputDecorationTheme(
           hintFadeDuration: Duration(milliseconds: 120),
         ),
@@ -1472,8 +1418,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Unfocus to hide the hint.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         inputDecorationTheme: const InputDecorationTheme(
           hintFadeDuration: Duration(milliseconds: 120),
         ),
@@ -1502,8 +1447,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1516,8 +1460,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator error/helper/counter layout', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1562,8 +1505,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // If errorText is specified then the helperText isn't shown
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1610,8 +1552,7 @@ void runAllTests({ required bool useMaterial3 }) {
     //   12 - help/error/counter text (font size 12dps)
     // The layout of the error/helper/counter subtext doesn't change for dense layout.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1638,8 +1579,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1774,8 +1714,7 @@ void runAllTests({ required bool useMaterial3 }) {
     const String kError3 = 'e0\ne1\ne2';
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1806,8 +1745,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // one, 88dps, because errorText only occupies two lines.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1828,8 +1766,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // one, 88dps, because errorText only occupies one line.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1853,8 +1790,7 @@ void runAllTests({ required bool useMaterial3 }) {
     const String kHelper3 = 'e0\ne1\ne2';
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1884,8 +1820,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // one, 88dps, because helperText only occupies two lines.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1905,8 +1840,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // one, 88dps, because helperText only occupies two lines.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1926,8 +1860,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // one, 88dps, because helperText only occupies one line.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -1946,8 +1879,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator shows error text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         decoration: const InputDecoration(
           errorText: 'errorText',
         ),
@@ -1966,8 +1898,7 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isFocused: true,
         decoration: const InputDecoration(
           errorText: 'error',
@@ -1981,8 +1912,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), focusedErrorBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           errorText: 'error',
@@ -1996,8 +1926,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), errorBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           errorText: 'error',
@@ -2011,8 +1940,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), errorBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isFocused: true,
         decoration: const InputDecoration(
           error: Text('error'),
@@ -2026,8 +1954,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), focusedErrorBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           error: Text('error'),
@@ -2041,8 +1968,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), errorBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           error: Text('error'),
@@ -2058,8 +1984,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         decoration: const InputDecoration(
           error: Text('error', style: TextStyle(fontSize: 20.0)),
         ),
@@ -2072,8 +1997,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator throws when error text and error widget are provided', (WidgetTester tester) async {
     expect(
       () {
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           decoration: InputDecoration(
             errorText: 'errorText',
             error: const Text('error', style: TextStyle(fontSize: 20.0)),
@@ -2086,8 +2010,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -2124,8 +2047,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator icon/prefix/suffix', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -2252,8 +2174,7 @@ void runAllTests({ required bool useMaterial3 }) {
     const Key pKey = Key('p');
     const Key sKey = Key('s');
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -2303,8 +2224,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator tall prefix', (WidgetTester tester) async {
     const Key pKey = Key('p');
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -2348,8 +2268,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator tall prefix with border', (WidgetTester tester) async {
     const Key pKey = Key('p');
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -2398,8 +2317,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator prefixIcon/suffixIcon', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -2434,8 +2352,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -2473,8 +2390,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         decoration: const InputDecoration(
           prefixIcon: Padding(
             padding: EdgeInsets.all(16.0),
@@ -2499,8 +2415,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator respects reduced theme visualDensity', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
@@ -2522,8 +2437,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Label moves upwards, hint is visible (opacity 1.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         visualDensity: VisualDensity.compact,
@@ -2558,8 +2472,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorderWeight(tester), 2.0);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isFocused: true,
         visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
@@ -2596,8 +2509,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator respects increased theme visualDensity', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
         decoration: const InputDecoration(
@@ -2619,8 +2531,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Label moves upwards, hint is visible (opacity 1.0).
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
@@ -2655,8 +2566,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorderWeight(tester), 2.0);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isFocused: true,
         visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
         decoration: const InputDecoration(
@@ -2693,8 +2603,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         decoration: const InputDecoration(
           prefixIcon: SizedBox(width: 100.0, height: 100.0, key: prefixKey),
           filled: true,
@@ -2715,9 +2624,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   group('constraints', () {
     testWidgets('No InputDecorator constraints', (WidgetTester tester) async {
-      await tester.pumpWidget(buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
-      ));
+      await tester.pumpWidget(buildInputDecoratorM2());
 
       // Should fill the screen width and be default height
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800, 48));
@@ -2725,8 +2632,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     testWidgets('InputDecoratorThemeData constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             theme: ThemeData(
               inputDecorationTheme: const InputDecorationTheme(
                 constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
@@ -2741,8 +2647,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     testWidgets('InputDecorator constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           theme: ThemeData(
             inputDecorationTheme: const InputDecorationTheme(
               constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
@@ -2765,8 +2670,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align top (default)', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true, // so we have a tall input where align can vary
@@ -2789,8 +2693,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align center', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -2813,8 +2716,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align bottom', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -2837,8 +2739,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align as a double', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -2871,8 +2772,7 @@ void runAllTests({ required bool useMaterial3 }) {
             child: SizedBox(
               key: containerKey,
               height: totalHeight,
-              child: buildInputDecoratorLegacy(
-                useMaterial3: useMaterial3,
+              child: buildInputDecoratorM2(
                 // isEmpty: false (default)
                 // isFocused: false (default)
                 expands: true,
@@ -2911,8 +2811,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align top', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true, // so we have a tall input where align can vary
@@ -2937,8 +2836,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align center (default)', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -2962,8 +2860,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align bottom', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -2990,8 +2887,7 @@ void runAllTests({ required bool useMaterial3 }) {
         const Key pKey = Key('p');
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             decoration: const InputDecoration(
@@ -3020,8 +2916,7 @@ void runAllTests({ required bool useMaterial3 }) {
         const Key pKey = Key('p');
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             decoration: const InputDecoration(
@@ -3050,8 +2945,7 @@ void runAllTests({ required bool useMaterial3 }) {
         const Key pKey = Key('p');
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             decoration: const InputDecoration(
@@ -3082,8 +2976,7 @@ void runAllTests({ required bool useMaterial3 }) {
         const Key pKey = Key('p');
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -3114,8 +3007,7 @@ void runAllTests({ required bool useMaterial3 }) {
         const Key pKey = Key('p');
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -3148,8 +3040,7 @@ void runAllTests({ required bool useMaterial3 }) {
         const Key pKey = Key('p');
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -3180,8 +3071,7 @@ void runAllTests({ required bool useMaterial3 }) {
         const Key pKey = Key('p');
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
@@ -3213,8 +3103,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align top (default)', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true, // so we have a tall input where align can vary
@@ -3239,8 +3128,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align center', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true, // so we have a tall input where align can vary
@@ -3265,8 +3153,7 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgets('align bottom', (WidgetTester tester) async {
         const String text = 'text';
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true, // so we have a tall input where align can vary
@@ -3294,8 +3181,7 @@ void runAllTests({ required bool useMaterial3 }) {
     group('default alignment', () {
       testWidgets('Centers when border', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
             ),
@@ -3311,8 +3197,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('Centers when border and label', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             decoration: const InputDecoration(
               labelText: 'label',
               border: OutlineInputBorder(),
@@ -3329,8 +3214,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('Centers when border and contentPadding', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
@@ -3350,8 +3234,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('Centers when border and contentPadding and label', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             decoration: const InputDecoration(
               labelText: 'label',
               border: OutlineInputBorder(),
@@ -3371,8 +3254,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('Centers when border and lopsided contentPadding and label', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             decoration: const InputDecoration(
               labelText: 'label',
               border: OutlineInputBorder(),
@@ -3391,29 +3273,9 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(getBorderWeight(tester), 1.0);
       });
 
-      testWidgets('Floating label is aligned with prefixIcon by default in M3', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.ac_unit),
-              labelText: 'label',
-              border: OutlineInputBorder(),
-            ),
-            isFocused: true,
-          ),
-        );
-
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('label')).dx, useMaterial3 ? 12.0 : 48.0);
-        expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
-        expect(getBorderWeight(tester), 2.0);
-      });
-
       testWidgets('Floating label for filled input decoration is aligned with text', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             decoration: const InputDecoration(
               prefixIcon: Icon(Icons.ac_unit),
               labelText: 'label',
@@ -3433,8 +3295,7 @@ void runAllTests({ required bool useMaterial3 }) {
     group('3 point interpolation alignment', () {
       testWidgets('top align includes padding', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             expands: true,
             textAlignVertical: TextAlignVertical.top,
             decoration: const InputDecoration(
@@ -3457,8 +3318,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('center align ignores padding', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             expands: true,
             textAlignVertical: TextAlignVertical.center,
             decoration: const InputDecoration(
@@ -3481,8 +3341,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('bottom align includes padding', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             expands: true,
             textAlignVertical: TextAlignVertical.bottom,
             decoration: const InputDecoration(
@@ -3505,8 +3364,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('padding exceeds middle keeps top at middle', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             expands: true,
             textAlignVertical: TextAlignVertical.top,
             decoration: const InputDecoration(
@@ -3531,8 +3389,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('counter text has correct right margin - LTR, not dense', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -3551,8 +3408,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('counter text has correct right margin - RTL, not dense', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         textDirection: TextDirection.rtl,
         // isEmpty: false (default)
         // isFocused: false (default)
@@ -3571,8 +3427,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('counter text has correct right margin - LTR, dense', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -3592,8 +3447,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('counter text has correct right margin - RTL, dense', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         textDirection: TextDirection.rtl,
         // isEmpty: false (default)
         // isFocused: false (default)
@@ -3613,8 +3467,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator error/helper/counter RTL layout', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         textDirection: TextDirection.rtl,
@@ -3648,8 +3501,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // If both error and helper are specified, show the error
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         textDirection: TextDirection.rtl,
@@ -3670,8 +3522,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator prefix/suffix RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         textDirection: TextDirection.rtl,
@@ -3705,8 +3556,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator contentPadding RTL layout', (WidgetTester tester) async {
     // LTR: content left edge is contentPadding.start: 40.0
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -3724,8 +3574,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // RTL: content right edge is 800 - contentPadding.start: 760.0.
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         isFocused: true, // label is floating, still adjusted for contentPadding
         textDirection: TextDirection.rtl,
@@ -3751,8 +3600,7 @@ void runAllTests({ required bool useMaterial3 }) {
   group('inputText width', () {
     testWidgets('outline textField', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
           ),
@@ -3764,8 +3612,7 @@ void runAllTests({ required bool useMaterial3 }) {
     });
     testWidgets('outline textField with prefix and suffix icons', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             prefixIcon: Icon(Icons.visibility),
@@ -3779,8 +3626,7 @@ void runAllTests({ required bool useMaterial3 }) {
     });
     testWidgets('filled textField', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           decoration: const InputDecoration(
             filled: true,
           ),
@@ -3792,8 +3638,7 @@ void runAllTests({ required bool useMaterial3 }) {
     });
     testWidgets('filled textField with prefix and suffix icons', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           decoration: const InputDecoration(
             filled: true,
             prefixIcon: Icon(Icons.visibility),
@@ -3808,12 +3653,13 @@ void runAllTests({ required bool useMaterial3 }) {
   });
 
   group('floatingLabelAlignment', () {
-    Widget buildInputDecoratorLegacyWithFloatingLabel({required TextDirection textDirection,
-          required bool hasIcon,
-          required FloatingLabelAlignment alignment,
-          bool borderIsOutline = false,
-    }) => buildInputDecoratorLegacy(
-      useMaterial3: useMaterial3,
+    Widget buildInputDecoratorM2WithFloatingLabel({
+      required TextDirection textDirection,
+      required bool hasIcon,
+      required FloatingLabelAlignment alignment,
+      bool borderIsOutline = false,
+    }) {
+      return buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         textDirection: textDirection,
@@ -3827,11 +3673,12 @@ void runAllTests({ required bool useMaterial3 }) {
           border: borderIsOutline ? const OutlineInputBorder() : null,
         ),
       );
+    }
 
     group('LTR with icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: true,
             alignment: FloatingLabelAlignment.start,
@@ -3842,7 +3689,7 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(tester.getTopLeft(find.text('label')).dx, 80.0);
 
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: true,
             alignment: FloatingLabelAlignment.start,
@@ -3855,7 +3702,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('center', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: true,
             alignment: FloatingLabelAlignment.center,
@@ -3866,7 +3713,7 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(tester.getCenter(find.text('label')).dx, 420.0);
 
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: true,
             alignment: FloatingLabelAlignment.center,
@@ -3881,7 +3728,7 @@ void runAllTests({ required bool useMaterial3 }) {
     group('LTR without icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: false,
             alignment: FloatingLabelAlignment.start,
@@ -3892,7 +3739,7 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(tester.getTopLeft(find.text('label')).dx, 40.0);
 
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: false,
             alignment: FloatingLabelAlignment.start,
@@ -3905,7 +3752,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('center', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: false,
             alignment: FloatingLabelAlignment.center,
@@ -3916,7 +3763,7 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(tester.getCenter(find.text('label')).dx, 400.0);
 
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: false,
             alignment: FloatingLabelAlignment.center,
@@ -3931,7 +3778,7 @@ void runAllTests({ required bool useMaterial3 }) {
     group('RTL with icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: true,
             alignment: FloatingLabelAlignment.start,
@@ -3942,7 +3789,7 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(tester.getTopRight(find.text('label')).dx, 720.0);
 
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: true,
             alignment: FloatingLabelAlignment.start,
@@ -3955,7 +3802,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('center', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: true,
             alignment: FloatingLabelAlignment.center,
@@ -3966,7 +3813,7 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(tester.getCenter(find.text('label')).dx, 380.0);
 
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: true,
             alignment: FloatingLabelAlignment.center,
@@ -3981,7 +3828,7 @@ void runAllTests({ required bool useMaterial3 }) {
     group('RTL without icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: false,
             alignment: FloatingLabelAlignment.start,
@@ -3992,7 +3839,7 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(tester.getTopRight(find.text('label')).dx, 760.0);
 
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: false,
             alignment: FloatingLabelAlignment.start,
@@ -4005,7 +3852,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
       testWidgets('center', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: false,
             alignment: FloatingLabelAlignment.center,
@@ -4016,7 +3863,7 @@ void runAllTests({ required bool useMaterial3 }) {
         expect(tester.getCenter(find.text('label')).dx, 400.0);
 
         await tester.pumpWidget(
-          buildInputDecoratorLegacyWithFloatingLabel(
+          buildInputDecoratorM2WithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: false,
             alignment: FloatingLabelAlignment.center,
@@ -4031,8 +3878,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator prefix/suffix dense layout', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         isFocused: true,
         decoration: const InputDecoration(
@@ -4072,9 +3918,7 @@ void runAllTests({ required bool useMaterial3 }) {
   });
 
   testWidgets('InputDecorator with empty InputDecoration', (WidgetTester tester) async {
-    await tester.pumpWidget(buildInputDecoratorLegacy(
-      useMaterial3: useMaterial3,
-    ));
+    await tester.pumpWidget(buildInputDecoratorM2());
 
     // Overall height for this InputDecorator is 40dps:
     //   12 - top padding
@@ -4092,8 +3936,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // Regression test for https://github.com/flutter/flutter/issues/42449
     const double verticalPadding = 1.0;
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default),
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -4117,8 +3960,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorderWeight(tester), 1.0);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default),
         // isFocused: false (default)
         decoration: const InputDecoration.collapsed(
@@ -4141,8 +3983,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorderWeight(tester), 1.0);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default),
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -4166,8 +4007,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator.collapsed', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default),
         // isFocused: false (default)
         decoration: const InputDecoration.collapsed(
@@ -4188,8 +4028,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // The hint should appear
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true,
         decoration: const InputDecoration.collapsed(
@@ -4212,8 +4051,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // text child to a smaller font reduces the InputDecoration's vertical size.
     const TextStyle style = TextStyle(fontSize: 10.0);
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         baseStyle: style,
         decoration: const InputDecoration(
@@ -4239,20 +4077,19 @@ void runAllTests({ required bool useMaterial3 }) {
     //      10 - label (font size 10dps)
     //   17.75 - bottom padding (empty input text still appears here)
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 50.0 : kMinInteractiveDimension)); // 45.5 bumped up to minimum.
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 45.5 bumped up to minimum.
     expect(tester.getSize(find.text('hint')).height, 10.0);
-    expect(tester.getSize(find.text('label')).height, useMaterial3 ? 16.0 : 10.0);
+    expect(tester.getSize(find.text('label')).height, 10.0);
     expect(tester.getSize(find.text('text')).height, 10.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, useMaterial3 ? 28 : 24.75);
-    expect(tester.getTopLeft(find.text('label')).dy, useMaterial3 ? 17 : 19.0);
-    expect(tester.getTopLeft(find.text('text')).dy, useMaterial3 ? 28 : 24.75);
+    expect(tester.getTopLeft(find.text('hint')).dy, 24.75);
+    expect(tester.getTopLeft(find.text('label')).dy, 19.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 24.75);
   });
 
   testWidgets('InputDecorator with empty style overrides', (WidgetTester tester) async {
     // Same as not specifying any style overrides
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -4293,8 +4130,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         isEmpty: true,
         decoration: const InputDecoration(
@@ -4318,8 +4154,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecoration outline shape with no border and no floating placeholder not empty', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -4470,8 +4305,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true, // label appears, vertically centered
         // isFocused: false (default)
         inputDecorationTheme: const InputDecorationTheme(
@@ -4496,8 +4330,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorationTheme outline border, dense layout', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true, // label appears, vertically centered
         // isFocused: false (default)
         inputDecorationTheme: const InputDecorationTheme(
@@ -4539,8 +4372,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // provided then the horizontal padding is included.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true, // label appears, vertically centered
         // isFocused: false (default)
         inputDecorationTheme: InputDecorationTheme(
@@ -4606,8 +4438,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // provided then the horizontal padding is included.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true, // Label appears floating above input field.
         inputDecorationTheme: InputDecorationTheme(
@@ -4672,8 +4503,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator.debugDescribeChildren', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         decoration: const InputDecoration(
           icon: Text('icon'),
           labelText: 'label',
@@ -4715,8 +4545,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator with empty border and label', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14165
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -5017,8 +4846,7 @@ void runAllTests({ required bool useMaterial3 }) {
     // This is a regression test for https://github.com/flutter/flutter/issues/15742
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -5056,8 +4884,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: const InputDecoration(
@@ -5203,10 +5030,10 @@ void runAllTests({ required bool useMaterial3 }) {
   );
 
   testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {
-    final Color fillColor = useMaterial3 ? const Color(0xffffffff) : const Color(0x0A000000);
+    const Color fillColor = Color(0x0A000000);
     const Color hoverColor = Color(0xFF00FF00);
-    final Color disabledColor =useMaterial3 ? const Color(0x0A000000) : const  Color(0x05000000);
-    final Color enabledBorderColor = useMaterial3 ? const Color(0xffffffff) : const Color(0x61000000);
+    const Color disabledColor = Color(0x05000000);
+    const Color enabledBorderColor = Color(0x61000000);
 
     Future<void> pumpDecorator({
       required bool hovering,
@@ -5214,8 +5041,7 @@ void runAllTests({ required bool useMaterial3 }) {
       bool filled = true,
     }) async {
       return tester.pumpWidget(
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           isHovering: hovering,
           decoration: InputDecoration(
             enabled: enabled,
@@ -5255,7 +5081,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getContainerColor(tester), equals(disabledColor));
 
     // Test outline text field.
-    final Color blendedHoverColor = useMaterial3 ? const Color(0xff000000) : const Color(0x74004400);
+    const Color blendedHoverColor = Color(0x74004400);
     await pumpDecorator(hovering: false, filled: false);
     await tester.pumpAndSettle();
     expect(getBorderColor(tester), equals(enabledBorderColor));
@@ -5286,7 +5112,7 @@ void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {
     const Color focusColor = Color(0xFF0000FF);
     const Color disabledColor = Color(0x05000000);
-    final Color enabledBorderColor = useMaterial3 ? const Color(0xffffffff) : const Color(0x61000000);
+    const Color enabledBorderColor = Color(0x61000000);
 
     Future<void> pumpDecorator({
       required bool focused,
@@ -5294,8 +5120,7 @@ void runAllTests({ required bool useMaterial3 }) {
       bool filled = true,
     }) async {
       return tester.pumpWidget(
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           isFocused: focused,
           decoration: InputDecoration(
             enabled: enabled,
@@ -5346,8 +5171,7 @@ void runAllTests({ required bool useMaterial3 }) {
       bool directional = false,
     }) async {
       return tester.pumpWidget(
-        buildInputDecoratorLegacy(
-          useMaterial3: useMaterial3,
+        buildInputDecoratorM2(
           isEmpty: empty,
           isFocused: focused,
           decoration: InputDecoration(
@@ -5458,15 +5282,14 @@ void runAllTests({ required bool useMaterial3 }) {
 
 
   testWidgets('InputDecoration default border uses colorScheme', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light());
-    final Color enabledColor = useMaterial3 ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onSurface.withOpacity(0.38);
-    final Color disabledColor = useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.12) : theme.disabledColor;
+    final ThemeData theme = ThemeData.light(useMaterial3: false);
+    final Color enabledColor = theme.colorScheme.onSurface.withOpacity(0.38);
+    final Color disabledColor = theme.disabledColor;
     final Color hoverColor = Color.alphaBlend(theme.hoverColor.withOpacity(0.12), enabledColor);
 
     // Enabled
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         theme: theme,
       ),
     );
@@ -5475,8 +5298,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Filled
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         theme: theme,
         decoration: const InputDecoration(
           filled: true,
@@ -5484,12 +5306,11 @@ void runAllTests({ required bool useMaterial3 }) {
       ),
     );
     await tester.pumpAndSettle();
-    expect(getBorderColor(tester), useMaterial3 ? theme.colorScheme.onSurfaceVariant : theme.hintColor);
+    expect(getBorderColor(tester), theme.hintColor);
 
     // Hovering
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         theme: theme,
         isHovering: true,
       ),
@@ -5499,8 +5320,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Focused
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         theme: theme,
         isFocused: true,
       ),
@@ -5510,8 +5330,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Error
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         theme: theme,
         decoration: const InputDecoration(
           errorText: 'Nope',
@@ -5523,8 +5342,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Disabled
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         theme: theme,
         decoration: const InputDecoration(
           enabled: false,
@@ -5536,8 +5354,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     // Disabled, filled
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         theme: theme,
         decoration: const InputDecoration(
           enabled: false,
@@ -5546,7 +5363,7 @@ void runAllTests({ required bool useMaterial3 }) {
       ),
     );
     await tester.pumpAndSettle();
-    expect(getBorderColor(tester), useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : Colors.transparent);
+    expect(getBorderColor(tester), Colors.transparent);
   });
 
   testWidgets('InputDecoration borders', (WidgetTester tester) async {
@@ -5567,8 +5384,7 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           // errorText: null (default)
@@ -5584,8 +5400,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), enabledBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isFocused: true,
         decoration: const InputDecoration(
           // errorText: null (default)
@@ -5602,8 +5417,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), focusedBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isFocused: true,
         decoration: const InputDecoration(
           errorText: 'error',
@@ -5620,8 +5434,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), focusedErrorBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           errorText: 'error',
@@ -5638,8 +5451,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), errorBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           errorText: 'error',
@@ -5656,8 +5468,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), errorBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         decoration: const InputDecoration(
           enabled: false,
@@ -5673,8 +5484,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorder(tester), disabledBorder);
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isFocused: true,
         decoration: const InputDecoration(
           // errorText: null (default)
@@ -5706,8 +5516,7 @@ void runAllTests({ required bool useMaterial3 }) {
     const double inputDecoratorWidth = 800.0;
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         decoration: const InputDecoration(
           filled: true,
           fillColor: Color(0xFF00FF00),
@@ -5811,8 +5620,7 @@ void runAllTests({ required bool useMaterial3 }) {
     const double inputDecoratorWidth = 800.0;
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFF00FF00),
@@ -5904,7 +5712,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     const double borderWidth = 4.0;
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
+      buildInputDecoratorM2(
         isFocused: true,
         decoration: const InputDecoration(
           filled: false,
@@ -6223,8 +6031,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
   testWidgets('InputDecorator floating label Y coordinate', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/54028
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -6245,8 +6052,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
 
   testWidgets('InputDecorator floating label obeys floatingLabelBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         decoration: const InputDecoration(
           labelText: 'label',
           floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -6262,8 +6068,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
 
   testWidgets('InputDecorator hint is displayed when floatingLabelBehavior is always', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isFocused: false (default)
         isEmpty: true,
         decoration: const InputDecoration(
@@ -6287,8 +6092,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
         child: SizedBox(
           width: 100,
           height: 100,
-          child: buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          child: buildInputDecoratorM2(
             // isFocused: false (default)
             isEmpty: true,
             decoration: InputDecoration(
@@ -6311,8 +6115,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
         child: SizedBox(
           width: 100,
           height: 100,
-          child: buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          child: buildInputDecoratorM2(
             isFocused: true,
             isEmpty: true,
             decoration: InputDecoration(
@@ -6836,8 +6639,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     // provided then the horizontal padding is included.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true,
         isFocused: true, // Label appears floating above input field.
         inputDecorationTheme: InputDecorationTheme(
@@ -6878,8 +6680,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     // provided then the horizontal padding is included.
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         isEmpty: true, // Label appears inline, on top of the input field.
         inputDecorationTheme: InputDecorationTheme(
           labelStyle: labelStyle,
@@ -6921,8 +6722,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     );
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: decoration,
@@ -6943,8 +6743,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     );
 
     await tester.pumpWidget(
-      buildInputDecoratorLegacy(
-        useMaterial3: useMaterial3,
+      buildInputDecoratorM2(
         // isEmpty: false (default)
         // isFocused: false (default)
         decoration: decoration,
@@ -6970,8 +6769,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     for (final TextDirection direction in TextDirection.values) {
       Future<Size> measureText(InputDecoration decoration) async {
         await tester.pumpWidget(
-          buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          buildInputDecoratorM2(
             // isEmpty: false (default)
             // isFocused: false (default)
             decoration: decoration,
@@ -7019,8 +6817,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
       Center(
         child: SizedBox.square(
           dimension: 0.0,
-          child: buildInputDecoratorLegacy(
-            useMaterial3: useMaterial3,
+          child: buildInputDecoratorM2(
             decoration: decoration,
           ),
         ),
