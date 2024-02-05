@@ -24,6 +24,7 @@ class TestGPUSurfaceMetalDelegate : public GPUSurfaceMetalDelegate {
   ~TestGPUSurfaceMetalDelegate() = default;
 
   GPUCAMetalLayerHandle GetCAMetalLayer(const SkISize& frame_info) const override {
+    layer_.drawableSize = CGSizeMake(frame_info.width(), frame_info.height());
     return (__bridge GPUCAMetalLayerHandle)(layer_);
   }
 
@@ -34,6 +35,8 @@ class TestGPUSurfaceMetalDelegate : public GPUSurfaceMetalDelegate {
   bool PresentTexture(GPUMTLTextureInfo texture) const override { return true; }
 
   bool AllowsDrawingWhenGpuDisabled() const override { return true; }
+
+  void SetDevice() { layer_.device = ::MTLCreateSystemDefaultDevice(); }
 
  private:
   CAMetalLayer* layer_ = nil;
@@ -75,6 +78,23 @@ TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerNullChecksDrawable) {
 
   auto frame = surface->AcquireFrame(SkISize::Make(100, 100));
   ASSERT_EQ(frame, nullptr);
+}
+
+TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerDoesNotRetainThis) {
+  auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
+  delegate->SetDevice();
+  std::unique_ptr<Surface> surface =
+      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), CreateImpellerContext());
+
+  ASSERT_TRUE(surface->IsValid());
+
+  auto frame = surface->AcquireFrame(SkISize::Make(100, 100));
+  ASSERT_TRUE(frame);
+
+  // Simulate a rasterizer teardown, e.g. due to going to the background.
+  surface.reset();
+
+  ASSERT_TRUE(frame->Submit());
 }
 
 }  // namespace testing
