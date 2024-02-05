@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(team-tool): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/142376
-// Fails with "flutter test --test-randomize-ordering-seed=20240127"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/dart/language_version.dart';
@@ -282,6 +275,7 @@ library funstuff;
 
   testWithoutContext('defaults to current version if package lookup returns null', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
+    setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
 // Some license
