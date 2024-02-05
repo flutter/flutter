@@ -841,19 +841,16 @@ Future<void> _runFrameworkTests() async {
   }
 
   Future<void> runExampleTests() async {
-    // TODO(gspencergoog): Currently Linux LUCI bots can't run desktop Flutter applications, https://github.com/flutter/flutter/issues/90676
-    if (!Platform.isLinux || ciProvider != CiProviders.luci) {
-      await runCommand(
-        flutter,
-        <String>['config', '--enable-${Platform.operatingSystem}-desktop'],
-        workingDirectory: flutterRoot,
-      );
-      await runCommand(
-        dart,
-        <String>[path.join(flutterRoot, 'dev', 'tools', 'examples_smoke_test.dart')],
-        workingDirectory: path.join(flutterRoot, 'examples', 'api'),
-      );
-    }
+    await runCommand(
+      flutter,
+      <String>['config', '--enable-${Platform.operatingSystem}-desktop'],
+      workingDirectory: flutterRoot,
+    );
+    await runCommand(
+      dart,
+      <String>[path.join(flutterRoot, 'dev', 'tools', 'examples_smoke_test.dart')],
+      workingDirectory: path.join(flutterRoot, 'examples', 'api'),
+    );
     for (final FileSystemEntity entity in Directory(path.join(flutterRoot, 'examples')).listSync()) {
       if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
         continue;
