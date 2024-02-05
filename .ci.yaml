@@ -1905,7 +1905,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    #presubmit: false
     timeout: 60
     properties:
       tags: >
