@@ -370,6 +370,7 @@ void main() {
       addTearDown(focusNode.dispose);
       focusNode.attach(context);
       focusNode.requestFocus();
+      await tester.pump();
       expect(tester.binding.focusManager.primaryFocus, focusNode);
 
       setAppLifeCycleState(AppLifecycleState.paused);
