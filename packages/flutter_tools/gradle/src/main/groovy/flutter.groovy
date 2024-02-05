@@ -66,7 +66,7 @@ class FlutterExtension {
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
-    String source = "../.."
+    String source
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
@@ -893,7 +893,7 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private List<Map<String, Object>> getPluginList(Project project) {
         if (pluginList == null) {
-            pluginList = project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
+            pluginList = project.ext.nativePluginLoader.getPlugins(project.projectDir.parentFile.parentFile)
         }
         return pluginList
     }
@@ -903,7 +903,7 @@ class FlutterPlugin implements Plugin<Project> {
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies(Project project) {
         if (pluginDependencies == null) {
-            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
+            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(project.projectDir.parentFile.parentFile)
             if (meta == null) {
                 return []
             }
