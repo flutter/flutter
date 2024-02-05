@@ -745,6 +745,162 @@ void main() {
       }
     });
 
+    testWidgets(
+      'non-selectable dates are greyed out, '
+      'when minimum date is unconstrained',
+      (WidgetTester tester) async {
+        final DateTime maximum = DateTime(2018, 6, 15);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (_) {},
+                  initialDateTime: DateTime(2018, 6, 15),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // unconstrained bounds are not affected.
+        expect(
+          tester.widget<Text>(find.text('14')).style!.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+
+        // the selected day is not affected.
+        expect(
+          tester.widget<Text>(find.text('15')).style!.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+
+        // out of bounds and should be greyed out.
+        expect(
+          tester.widget<Text>(find.text('16')).style!.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+      },
+    );
+
+    testWidgets(
+      'non-selectable dates are greyed out, '
+      'when maximum date is unconstrained',
+      (WidgetTester tester) async {
+        final DateTime minimum = DateTime(2018, 6, 15);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  minimumDate: minimum,
+                  onDateTimeChanged: (_) {},
+                  initialDateTime: DateTime(2018, 6, 15),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // out of bounds and should be greyed out.
+        expect(
+          tester.widget<Text>(find.text('14')).style!.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+
+        // the selected day is not affected.
+        expect(
+          tester.widget<Text>(find.text('15')).style!.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+
+        // unconstrained bounds are not affected.
+        expect(
+          tester.widget<Text>(find.text('16')).style!.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+      },
+    );
+
+    testWidgets(
+      'non-selectable dates are greyed out, '
+      'months should be taken into account when greying out days',
+      (WidgetTester tester) async {
+        final DateTime minimum = DateTime(2018, 5, 15);
+        final DateTime maximum = DateTime(2018, 7, 15);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  minimumDate: minimum,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (_) {},
+                  initialDateTime: DateTime(2018, 6, 15),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // days of a different min/max month are not affected.
+        expect(
+          tester.widget<Text>(find.text('14')).style!.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+        expect(
+          tester.widget<Text>(find.text('16')).style!.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+      },
+    );
+
+    testWidgets(
+      'non-selectable dates are greyed out, '
+      'years should be taken into account when greying out days',
+      (WidgetTester tester) async {
+        final DateTime minimum = DateTime(2017, 6, 15);
+        final DateTime maximum = DateTime(2019, 6, 15);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  minimumDate: minimum,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (_) {},
+                  initialDateTime: DateTime(2018, 6, 15),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // days of a different min/max year are not affected.
+        expect(
+          tester.widget<Text>(find.text('14')).style!.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+        expect(
+          tester.widget<Text>(find.text('16')).style!.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+      },
+    );
+
     testWidgets('picker automatically scrolls away from invalid date on month change', (WidgetTester tester) async {
       late DateTime date;
       await tester.pumpWidget(
