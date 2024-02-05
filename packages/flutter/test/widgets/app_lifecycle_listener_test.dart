@@ -129,7 +129,7 @@ void main() {
     await setAppLifeCycleState(AppLifecycleState.resumed);
     expect(transitions, equals(<String>['restart', 'show', 'resume']));
 
-    // Generates intermediate states from lower to higher lifecycle states
+    // Generates intermediate states from lower to higher lifecycle states.
     transitions.clear();
     await setAppLifeCycleState(AppLifecycleState.paused);
     expect(transitions, equals(<String>['inactive', 'hide', 'pause']));
@@ -142,7 +142,7 @@ void main() {
     await setAppLifeCycleState(AppLifecycleState.paused);
     expect(transitions, equals(<String>['inactive', 'hide', 'pause', 'detach', 'resume', 'inactive', 'hide', 'pause']));
 
-    // Generates intermediate states from higher to lower lifecycle states
+    // Generates intermediate states from higher to lower lifecycle states.
     transitions.clear();
     await setAppLifeCycleState(AppLifecycleState.resumed);
     expect(transitions, equals(<String>['restart', 'show', 'resume']));
