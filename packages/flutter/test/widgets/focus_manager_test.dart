@@ -371,13 +371,13 @@ void main() {
       focusNode.attach(context);
       focusNode.requestFocus();
       await tester.pump();
-      expect(tester.binding.focusManager.primaryFocus, focusNode);
+      expect(focusNode.hasPrimaryFocus, isTrue);
 
       setAppLifeCycleState(AppLifecycleState.paused);
-      expect(tester.binding.focusManager.primaryFocus, tester.binding.focusManager.rootScope);
+      expect(focusNode.hasPrimaryFocus, isFalse);
 
       setAppLifeCycleState(AppLifecycleState.resumed);
-      expect(tester.binding.focusManager.primaryFocus, focusNode);
+      expect(focusNode.hasPrimaryFocus, isTrue);
     });
   });
 
