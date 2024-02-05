@@ -3761,23 +3761,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final bool toolbarIsVisible = _selectionOverlay != null
                                   && _selectionOverlay!.toolbarIsVisible
                                   && !_selectionOverlay!.spellCheckToolbarIsVisible;
-      final List<TextBox>? selectionBoxes = !toolbarIsVisible ? null : renderEditable.getBoxesForSelection(_value.selection);
-      assert(
-         (toolbarIsVisible && selectionBoxes != null) ||
-         (!toolbarIsVisible && selectionBoxes == null),
-      );
-      final Rect? selectionBounds = !toolbarIsVisible
-                                  ? null
-                                  : _value.selection.isCollapsed || selectionBoxes!.isEmpty
+      if (!toolbarIsVisible) {
+        return;
+      }
+      final List<TextBox> selectionBoxes = renderEditable.getBoxesForSelection(_value.selection);
+      final Rect selectionBounds = _value.selection.isCollapsed || selectionBoxes.isEmpty
                                       ? renderEditable.getLocalRectForCaret(_value.selection.extent)
                                       : selectionBoxes
                                           .map((TextBox box) => box.toRect())
                                           .reduce((Rect result, Rect rect) => result.expandToInclude(rect));
-      assert(
-         (toolbarIsVisible && selectionBounds != null) ||
-         (!toolbarIsVisible && selectionBounds == null),
-      );
-      _dataWhenToolbarShowScheduled = toolbarIsVisible ? (value: _value, selectionBounds: selectionBounds!) : null;
+      _dataWhenToolbarShowScheduled = (value: _value, selectionBounds: selectionBounds);
       if (_dataWhenToolbarShowScheduled != null) {
         _selectionOverlay?.hideToolbar();
       }
