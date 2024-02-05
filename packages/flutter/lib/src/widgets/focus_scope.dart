@@ -675,11 +675,10 @@ class _FocusState extends State<Focus> {
         // receives accessibility focus. Nothing is needed for losing the
         // accessibility focus because if focus is lost, that means another node
         // will gain focus and take focus from this widget.
-        onDidGainAccessibilityFocus: () {
-          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
-            focusNode.requestFocus();
-          }
-        },
+        onDidGainAccessibilityFocus:
+          !focusNode.hasFocus && focusNode.canRequestFocus
+          ? focusNode.requestFocus
+          : null,
         focusable: _couldRequestFocus,
         focused: _hadPrimaryFocus,
         child: widget.child,
