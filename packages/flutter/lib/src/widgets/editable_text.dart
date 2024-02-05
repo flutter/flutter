@@ -3738,6 +3738,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return Rect.fromLTWH(view.padding.left / view.devicePixelRatio, view.padding.top / view.devicePixelRatio, visibleScreenSize.width, visibleScreenSize.height);
   }
 
+  bool _showToolbarOnScreenScheduled = false;
   void _handleContextMenuOnScroll(ScrollNotification notification) {
     if (_webContextMenuEnabled) {
       return;
@@ -3760,13 +3761,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final bool toolbarIsVisible = _selectionOverlay != null
                                   && _selectionOverlay!.toolbarIsVisible
                                   && !_selectionOverlay!.spellCheckToolbarIsVisible;
-      final Rect? selectionBounds = toolbarIsVisible
-                                  ? _value.selection.isCollapsed
+      final List<TextBox>? selectionBoxes = !toolbarIsVisible ? null : renderEditable.getBoxesForSelection(_value.selection);
+      assert(
+         (toolbarIsVisible && selectionBoxes != null) ||
+         (!toolbarIsVisible && selectionBoxes == null),
+      );
+      final Rect? selectionBounds = !toolbarIsVisible
+                                  ? null
+                                  : _value.selection.isCollapsed || selectionBoxes!.isEmpty
                                       ? renderEditable.getLocalRectForCaret(_value.selection.extent)
-                                      : renderEditable.getBoxesForSelection(_value.selection)
+                                      : selectionBoxes
                                           .map((TextBox box) => box.toRect())
-                                          .reduce((Rect result, Rect rect) => result.expandToInclude(rect))
-                                  : null;
+                                          .reduce((Rect result, Rect rect) => result.expandToInclude(rect));
+      assert(
+         (toolbarIsVisible && selectionBounds != null) ||
+         (!toolbarIsVisible && selectionBounds == null),
+      );
       _dataWhenToolbarShowScheduled = toolbarIsVisible ? (value: _value, selectionBounds: selectionBounds!) : null;
       if (_dataWhenToolbarShowScheduled != null) {
         _selectionOverlay?.hideToolbar();
@@ -3782,7 +3792,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return;
       }
 
+      if (_showToolbarOnScreenScheduled) {
+        return;
+      }
+      _showToolbarOnScreenScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _showToolbarOnScreenScheduled = false;
         if (!mounted) {
           return;
         }
@@ -3803,9 +3818,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _selectionInViewport(Rect selectionBounds) {
     RenderAbstractViewport? closestViewport = RenderAbstractViewport.maybeOf(renderEditable);
-    if (closestViewport == null) {
-      return true;
-    }
     while (closestViewport != null) {
       final Rect selectionBoundsLocalToViewport = MatrixUtils.transformRect(renderEditable.getTransformTo(closestViewport), selectionBounds);
       if (selectionBoundsLocalToViewport.hasNaN
