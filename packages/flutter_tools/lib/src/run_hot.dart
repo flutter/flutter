@@ -139,7 +139,7 @@ class HotRunner extends ResidentRunner {
   String? _sdkName;
   bool? _emulator;
 
-  NativeAssetsBuildRunner? _buildRunner;
+  final NativeAssetsBuildRunner? _buildRunner;
   final String? _nativeAssetsYamlFile;
 
   String? flavor;
@@ -374,17 +374,13 @@ class HotRunner extends ResidentRunner {
       nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
     } else {
       final Uri projectUri = Uri.directory(projectRootPath);
-      _buildRunner ??= NativeAssetsBuildRunnerImpl(
-        projectUri,
-        debuggingOptions.buildInfo.packageConfig,
-        fileSystem,
-        globals.logger,
-      );
       nativeAssetsYaml = await dryRunNativeAssets(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: _buildRunner!,
+        buildRunner: _buildRunner,
         flutterDevices: flutterDevices,
+        logger: logger,
+        packageConfig: debuggingOptions.buildInfo.packageConfig,
       );
     }
 

@@ -320,9 +320,17 @@ Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
 Future<Uri?> dryRunNativeAssets({
   required Uri projectUri,
   required FileSystem fileSystem,
-  required NativeAssetsBuildRunner buildRunner,
+  required NativeAssetsBuildRunner? buildRunner,
   required List<FlutterDevice> flutterDevices,
+  required PackageConfig packageConfig,
+  required Logger logger,
 }) async {
+  buildRunner ??= NativeAssetsBuildRunnerImpl(
+    projectUri,
+    packageConfig,
+    fileSystem,
+    globals.logger,
+  );
   if (flutterDevices.length != 1) {
     return dryRunNativeAssetsMultipleOSes(
       projectUri: projectUri,
