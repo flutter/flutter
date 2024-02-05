@@ -365,18 +365,20 @@ void main() {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
-      scope.attach(context);
+      final FocusAttachment scopeAttachment = scope.attach(context);
       final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
       addTearDown(focusNode.dispose);
-      focusNode.attach(context);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
       focusNode.requestFocus();
       await tester.pump();
       expect(focusNode.hasPrimaryFocus, isTrue);
 
-      setAppLifeCycleState(AppLifecycleState.paused);
+      await setAppLifeCycleState(AppLifecycleState.paused);
       expect(focusNode.hasPrimaryFocus, isFalse);
 
-      setAppLifeCycleState(AppLifecycleState.resumed);
+      await setAppLifeCycleState(AppLifecycleState.resumed);
       expect(focusNode.hasPrimaryFocus, isTrue);
     });
   });
