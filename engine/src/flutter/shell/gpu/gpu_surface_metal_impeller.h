@@ -47,7 +47,8 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
   bool disable_partial_repaint_ = false;
   // Accumulated damage for each framebuffer; Key is address of underlying
   // MTLTexture for each drawable
-  std::map<uintptr_t, SkIRect> damage_;
+  std::shared_ptr<std::map<uintptr_t, SkIRect>> damage_ =
+      std::make_shared<std::map<uintptr_t, SkIRect>>();
 
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(
