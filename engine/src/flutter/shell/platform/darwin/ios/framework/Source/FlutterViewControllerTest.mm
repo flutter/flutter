@@ -305,6 +305,18 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                 nibName:nil
                                                                                  bundle:nil];
+  FlutterMethodCall* setClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(123), @{@"autocorrect" : @YES} ]];
+  [engine.textInputPlugin handleMethodCall:setClientCall
+                                    result:^(id _Nullable result){
+                                    }];
+
+  // Check if FlutterTextInputViewAccessibilityHider exists.
+  FlutterTextInputPlugin* textInputPlugin = engine.textInputPlugin;
+  UIView* textInputHider = [[textInputPlugin textInputView] superview];
+  XCTAssertNotNil(textInputHider);
+
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   UIScreen* screen = [self setUpMockScreen];
   CGRect viewFrame = screen.bounds;
@@ -2186,6 +2198,48 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   [viewController setUpKeyboardAnimationVsyncClient:nil];
   XCTAssertNil(viewController.keyboardAnimationVSyncClient);
+}
+
+- (void)testAvoidKeyboardAnimationWhenFlutterTextInputViewAccessibilityHiderIsNil {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  UIScreen* screen = [self setUpMockScreen];
+  CGRect viewFrame = screen.bounds;
+  [self setUpMockView:viewControllerMock
+               screen:screen
+            viewFrame:viewFrame
+       convertedFrame:viewFrame];
+
+  CGFloat screenHeight = screen.bounds.size.height;
+  CGFloat screenWidth = screen.bounds.size.height;
+
+  // Check if FlutterTextInputViewAccessibilityHider is nil.
+  FlutterTextInputPlugin* textInputPlugin = engine.textInputPlugin;
+  UIView* textInputHider = [[textInputPlugin textInputView] superview];
+  XCTAssertNil(textInputHider);
+
+  // Start show keyboard animation.
+  CGRect showKeyboardBeginFrame = CGRectMake(0, screenHeight, screenWidth, 250);
+  CGRect showKeyboardEndFrame = CGRectMake(0, screenHeight - 250, screenWidth, 250);
+  NSNotification* fakeNotification =
+      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameBeginUserInfoKey" : @(showKeyboardBeginFrame),
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(showKeyboardEndFrame),
+                                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+                                  }];
+
+  viewControllerMock.targetViewInsetBottom = 0;
+  [viewControllerMock handleKeyboardNotification:fakeNotification];
+  BOOL isShowingAnimation = viewControllerMock.keyboardAnimationIsShowing;
+  XCTAssertFalse(isShowingAnimation);
 }
 
 @end
