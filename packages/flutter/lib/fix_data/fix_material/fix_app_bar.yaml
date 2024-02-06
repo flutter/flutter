@@ -23,6 +23,7 @@
 #     * SliverAppBar: fix_sliver_app_bar.yaml
 #     * TextTheme: fix_text_theme.yaml
 #     * ThemeData: fix_theme_data.yaml
+#     * WidgetState: fix_widget_state.yaml
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/86198
