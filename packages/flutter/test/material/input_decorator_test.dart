@@ -89,7 +89,8 @@ Widget buildInputDecorator({
   VisualDensity? visualDensity,
   Widget child = const Text(
     'text',
-    style: TextStyle(fontSize: 16.0),
+    // Use a text style copliant with M3 specification (which is bodyLarge for text fields).
+    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400, letterSpacing: 0.5, height: 1.50)
   ),
 }) {
   Widget widget = InputDecorator(
@@ -219,6 +220,86 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
 
 void main() {
   runAllM2Tests();
+
+  testWidgets('Material3 - Default height is 56dp on mobile', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dp on mobile:
+    //    8 - top padding
+    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
+    //    4 - gap between label and input
+    //   24 - input text (font size = 16, line height = 1.5)
+    //    8 - bottom padding
+    // TODO(bleroux): fix input decorator to not rely on a 4 pixels gap between the label and the input,
+    // this gap is not complient with the M3 spec (M3 spec uses line height for this purpose).
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('Material3 - Default height is 48dp on desktop', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 48dp on desktop:
+    //    4 - top padding
+    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
+    //    4 - gap between label and input
+    //   24 - input text (font size = 16, line height = 1.5)
+    //    4 - bottom padding
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Material3 - Input/label layout: label appears above input', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dp on mobile:
+    //    8 - top padding
+    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
+    //    4 - gap between label and input
+    //   24 - input text (font size = 16, line height = 1.5)
+    //    8 - bottom padding
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 8.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 1.0);
+  });
+
+  testWidgets('Material3 - Floating label is aligned with prefixIcon by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          prefixIcon: Icon(Icons.ac_unit),
+          labelText: 'label',
+          border: OutlineInputBorder(),
+        ),
+        isFocused: true,
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dx, 12.0);
+    expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
+    expect(getBorderWeight(tester), 2.0);
+  });
 }
 
 void runAllM2Tests() {
@@ -5995,6 +6076,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     Widget buildFrame(bool alignLabelWithHint) {
       return MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           textTheme: typography.dense,
         ),
         home: Material(
