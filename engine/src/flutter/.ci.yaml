@@ -218,6 +218,9 @@ targets:
     enabled_branches:
       - main
     timeout: 60
+    properties:
+      gclient_variables: >-
+        {"use_rbe": true}
 
   - name: Linux linux_clang_tidy
     recipe: engine_v2/engine_v2
