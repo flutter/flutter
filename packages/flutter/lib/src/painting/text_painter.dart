@@ -322,13 +322,16 @@ class _TextLayout {
 // text layout is invalidated.
 class _TextPainterLayoutCacheWithOffset {
   _TextPainterLayoutCacheWithOffset(this.layout, this.textAlignment, double minWidth, double maxWidth, TextWidthBasis widthBasis)
-    : contentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout),
+    : contentWidth = switch (widthBasis) {
+        TextWidthBasis.longestLine => clampDouble(layout.longestLine, minWidth, maxWidth),
+        TextWidthBasis.parent => clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth),
+      },
       assert(textAlignment >= 0.0 && textAlignment <= 1.0);
 
   final _TextLayout layout;
 
   // The content width the text painter should report in TextPainter.width.
-  // This is also used to compute `paintOffset`
+  // This is also used to compute `paintOffset`.
   double contentWidth;
 
   // The effective text alignment in the TextPainter's canvas. The value is
@@ -352,18 +355,11 @@ class _TextPainterLayoutCacheWithOffset {
 
   ui.Paragraph get paragraph => layout._paragraph;
 
-  static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
-    return switch (widthBasis) {
-      TextWidthBasis.longestLine => clampDouble(layout.longestLine, minWidth, maxWidth),
-      TextWidthBasis.parent => clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth),
-    };
-  }
-
   // Try to resize the contentWidth to fit the new input constraints, by just
   // adjusting the paint offset (so no line-breaking changes needed).
   //
-  // Returns false if the new constraints require re-computing the line breaks,
-  // in which case no side effects will occur.
+  // Returns false if the new constraints require the text layout library to
+  // re-compute the line breaks.
   bool _resizeToFit(double minWidth, double maxWidth, TextWidthBasis widthBasis) {
     assert(layout.maxIntrinsicLineExtent.isFinite);
     // The assumption here is that if a Paragraph's width is already >= its
@@ -377,7 +373,7 @@ class _TextPainterLayoutCacheWithOffset {
     // of double.infinity, and to make the text visible the paintOffset.dx is
     // bound to be double.negativeInfinity, which invalidates all arithmetic
     // operations.
-    final double newContentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
+    final double newContentWidth = clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth);
     if (newContentWidth == contentWidth) {
       return true;
     }
