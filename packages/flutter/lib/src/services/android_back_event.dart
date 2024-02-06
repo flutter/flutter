@@ -1,14 +1,14 @@
 import 'package:meta/meta.dart';
 
-/// Enum representing the edge from which a swipe starts in a back gesture.
+/// Enum represents the edge from which a swipe starts in a back gesture.
 ///
 /// This is used in [AndroidBackEvent] to indicate the starting edge of the
-/// swipe.
+/// swipe gesture.
 enum SwipeEdge {
-  /// Indicates that the edge swipe starts from the left edge of the screen.
+  /// Indicates that the swipe starts from the left edge of the screen.
   left,
 
-  /// Indicates that the edge swipe starts from the right edge of the screen.
+  /// Indicates that the swipe starts from the right edge of the screen.
   right,
 }
 
@@ -37,18 +37,20 @@ class AndroidBackEvent {
     );
   }
 
-  /// The absolute X location of the touch point, or `null` if the event is from
-  /// a button press.
+  /// The global X location of the touch point, or `null` if the event is from a
+  /// button press.
   final double? touchX;
 
-  /// The absolute Y location of the touch point, or `null` if the event is from
-  /// a button press.
+  /// The global Y location of the touch point, or `null` if the event is from a
+  /// button press.
   final double? touchY;
 
-  /// A value between 0 and 1 on how far along the back gesture is. This value
-  /// is driven by the horizontal location of the touch point, and should be
-  /// used as the fraction to seek the predictive back animation with.
+  /// Returns a value between 0 and 1 on how far along the back gesture is.
+  ///
+  /// This value is driven by the horizontal location of the touch point, and
+  /// should be used as the fraction to seek the predictive back animation with.
   /// Specifically,
+  ///
   /// - The progress is 0 when the touch is at the starting edge of the screen
   ///   (left or right), and animation should seek to its start state.
   /// - The progress is approximately 1 when the touch is at the opposite side
@@ -68,11 +70,9 @@ class AndroidBackEvent {
 
   /// Determines if the event was triggered by a button press.
   ///
-  /// In practice, when the back button is pressed for instance, if the user
-  /// employs 3-button Navigation instead of Gesture Navigation, [onBackStarted](https://developer.android.com/reference/android/window/OnBackAnimationCallback#onBackStarted(android.window.BackEvent))
-  /// is called with [touchX] at 0 and [touchY] at 0, instead of on NaN values.
-  /// Subsequently, [onBackInvoked](https://developer.android.com/reference/android/window/OnBackInvokedCallback#onBackInvoked())
-  /// is called immediately.
+  /// It returns true when the back button is pressed, such as when the user
+  /// opts for 3-button navigation. In cases of Gesture Navigation, it returns
+  /// false.
   bool get isBackPressed =>
       touchX == null || touchY == null || (touchX == 0 && touchY == 0);
 

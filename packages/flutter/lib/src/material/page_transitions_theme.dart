@@ -789,7 +789,10 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
           CupertinoRouteTransitionMixin.isPopGestureEnabled(route),
       builder: (BuildContext context, AndroidBackEvent? startBackEvent,
           AndroidBackEvent? currentBackEvent) {
-        if (hasBackGesture(route)) {
+        final bool linearTransition =
+            CupertinoRouteTransitionMixin.isPopGestureInProgress(route);
+
+        if (linearTransition) {
           return backGestureTransitionBuilder(
             route,
             context,
@@ -828,10 +831,6 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
       currentBackEvent: currentBackEvent,
       child: child,
     );
-  }
-
-  static bool hasBackGesture(PageRoute<dynamic> route) {
-    return route.navigator!.userGestureInProgress;
   }
 }
 
