@@ -2620,8 +2620,9 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
 
   void testWithSemantics(
     String description,
-    Future<void> Function() body,
-  ) {
+    Future<void> Function() body, {
+    Object? skip,
+  }) {
     test(
       description,
       () async {
@@ -2631,6 +2632,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
         await body();
         EngineSemantics.instance.semanticsEnabled = false;
       },
+      skip: skip,
     );
   }
 
@@ -2913,8 +2915,8 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       semanticsActions,
       isEmpty,
     );
-  });
-
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: operatingSystem == OperatingSystem.windows);
 
   testWithSemantics('Forwards click if enough time passed after the last flushed pointerup', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
