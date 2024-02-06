@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    hide BuildMode;
 
 import '../base/file_system.dart';
 import '../build_info.dart';
@@ -72,6 +73,7 @@ Future<CCompilerConfig> cCompilerConfigWindows() async {
     platform: globals.platform,
     logger: globals.logger,
     processManager: globals.processManager,
+    osUtils: globals.os,
   );
 
   return CCompilerConfig(

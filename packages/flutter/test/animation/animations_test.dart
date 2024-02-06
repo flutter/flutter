@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../scheduler/scheduler_tester.dart';
 
@@ -125,6 +126,19 @@ void main() {
     expect(animation.value, 0.25);
     expect(animation, hasOneLineDescription);
     expect(animation.toString(), contains('no next'));
+  });
+
+  test('TrainHoppingAnimation dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => TrainHoppingAnimation(
+          const AlwaysStoppedAnimation<double>(1),
+          const AlwaysStoppedAnimation<double>(1),
+        ).dispose(),
+        TrainHoppingAnimation,
+      ),
+      areCreateAndDispose,
+    );
   });
 
   test('AnimationMean control test', () {

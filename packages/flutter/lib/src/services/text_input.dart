@@ -721,10 +721,34 @@ TextAffinity? _toTextAffinity(String? affinity) {
   return null;
 }
 
-/// A floating cursor state the user has induced by force pressing an iOS
-/// keyboard.
+/// The state of a "floating cursor" drag on an iOS soft keyboard.
+///
+/// The "floating cursor" cursor-positioning mode is an iOS feature used to
+/// precisely position the caret in some editable text using certain touch
+/// gestures. As an example, when the user long-presses the spacebar on the iOS
+/// virtual keyboard, iOS enters floating cursor mode where the whole keyboard
+/// becomes a trackpad. In this mode, there are two visible cursors. One, the
+/// floating cursor, hovers over the text, following the user's horizontal
+/// movements exactly and snapping to lines vertically. The other, the
+/// placeholder cursor, is a "shadow" that also snaps to the actual location
+/// where the cursor will go horizontally when the user releases the trackpad.
+///
+/// The floating cursor renders over the text field, while the placeholder
+/// cursor is a faint shadow of the cursor rendered in the text field in the
+/// location between characters where the cursor will drop into when released.
+/// The placeholder cursor is a faint vertical bar, while the floating cursor
+/// has the same appearance as a normal cursor (a blue vertical bar).
+///
+/// This feature works out-of-the-box with Flutter. Support is built into
+/// [EditableText].
+///
+/// See also:
+///
+///  * [EditableText.backgroundCursorColor], which configures the color of the
+///    placeholder cursor while the floating cursor is being dragged.
 enum FloatingCursorDragState {
-  /// A user has just activated a floating cursor.
+  /// A user has just activated a floating cursor by long pressing on the
+  /// spacebar.
   Start,
 
   /// A user is dragging a floating cursor.
@@ -736,6 +760,11 @@ enum FloatingCursorDragState {
 }
 
 /// The current state and position of the floating cursor.
+///
+/// See also:
+///
+///  * [FloatingCursorDragState], which explains the floating cursor feature in
+///    detail.
 class RawFloatingCursorPoint {
   /// Creates information for setting the position and state of a floating
   /// cursor.
@@ -744,11 +773,17 @@ class RawFloatingCursorPoint {
   /// [FloatingCursorDragState.Update].
   RawFloatingCursorPoint({
     this.offset,
+    this.startLocation,
     required this.state,
   }) : assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset? offset;
+
+  /// Represents the starting location when initiating a floating cursor via long press.
+  /// This is a tuple where the first item is the local offset and the second item is the new caret position.
+  /// This is only non-null when a floating cursor is started.
+  final (Offset, TextPosition)? startLocation;
 
   /// The state of the floating cursor.
   final FloatingCursorDragState state;
@@ -889,7 +924,7 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= replacementRange.start && originalIndex < replacementRange.end ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start;
       return originalIndex + replacedLength - removedLength;
     }
 
@@ -1145,6 +1180,11 @@ mixin TextInputClient {
   void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
   /// Requests that this client display a prompt rectangle for the given text range,
@@ -2226,7 +2266,15 @@ class _PlatformTextInputControl with TextInputControl {
   Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
     final Map<String, dynamic> json = configuration.toJson();
     if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
-      json['inputType'] = TextInputType.none.toJson();
+      final Map<String, dynamic> none = TextInputType.none.toJson();
+      // See: https://github.com/flutter/flutter/issues/125875
+      // On Web engine, use isMultiline to create <input> or <textarea> element
+      // When there's a custom [TextInputControl] installed.
+      // It's only needed When there's a custom [TextInputControl] installed.
+      if (kIsWeb) {
+        none['isMultiline'] = configuration.inputType == TextInputType.multiline;
+      }
+      json['inputType'] = none;
     }
     return json;
   }

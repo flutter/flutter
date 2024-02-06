@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show LineSplitter, json, utf8;
+import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -28,6 +29,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   bool measureCpuGpu = true,
   bool badScroll = false,
   bool? enableImpeller,
+  bool forceOpenGLES = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -37,6 +39,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
     'complex_layout_scroll_perf',
     measureCpuGpu: measureCpuGpu,
     enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
   ).run;
 }
 
@@ -813,15 +816,7 @@ Future<void> _resetPlist(String testDirectory) async {
   await exec('git', <String>['checkout', file.path]);
 }
 
-/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
-/// and adds the following entry to the application.
-/// <meta-data
-///   android:name="io.flutter.embedding.android.ImpellerBackend"
-///   android:value="opengles" />
-/// <meta-data
-///   android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"
-///   android:value="true" />
-void _addOpenGLESToManifest(String testDirectory) {
+void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs) {
   final String manifestPath = path.join(
       testDirectory, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
   final File file = File(manifestPath);
@@ -832,11 +827,6 @@ void _addOpenGLESToManifest(String testDirectory) {
 
   final String xmlStr = file.readAsStringSync();
   final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
-  final List<(String, String)> keyPairs = <(String, String)>[
-    ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
-    ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true')
-  ];
-
   final XmlElement applicationNode =
       xmlDoc.findAllElements('application').first;
 
@@ -857,12 +847,38 @@ void _addOpenGLESToManifest(String testDirectory) {
           XmlAttribute(XmlName('android:value'), value)
         ],
       );
-
       applicationNode.children.add(metaData);
     }
   }
 
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
+}
+
+/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
+/// <meta-data
+///   android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"
+///   android:value="true" />
+void _addVulkanGPUTracingToManifest(String testDirectory) {
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.EnableVulkanGPUTracing', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
+/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
+/// and adds the following entry to the application.
+/// <meta-data
+///   android:name="io.flutter.embedding.android.ImpellerBackend"
+///   android:value="opengles" />
+/// <meta-data
+///   android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"
+///   android:value="true" />
+void _addOpenGLESToManifest(String testDirectory) {
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
+    ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
 }
 
 Future<void> _resetManifest(String testDirectory) async {
@@ -951,11 +967,12 @@ class StartupTest {
             '--target=$target',
           ]);
           final String basename = path.basename(testDirectory);
+          final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
           applicationBinaryPath = path.join(
             testDirectory,
             'build',
             'windows',
-            'x64',
+            arch,
             'runner',
             'Profile',
             '$basename.exe'
@@ -982,9 +999,6 @@ class StartupTest {
             '--verbose',
             '--profile',
             '--trace-startup',
-            // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-            if (device is IosDevice)
-              '--verbose-system-logs',
             '--target=$target',
             '-d',
             device.deviceId,
@@ -1307,10 +1321,12 @@ class PerfTest {
       }
 
       try {
-        if (forceOpenGLES ?? false) {
-          assert(enableImpeller!);
+        if (enableImpeller ?? false) {
           changedManifest = true;
-          _addOpenGLESToManifest(testDirectory);
+          _addVulkanGPUTracingToManifest(testDirectory);
+          if (forceOpenGLES ?? false) {
+            _addOpenGLESToManifest(testDirectory);
+          }
         }
         if (disablePartialRepaint) {
           changedPlist = true;
@@ -1685,7 +1701,17 @@ class CompileTest {
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
-        await flutter('build', options: options);
+        await flutter(
+          'build',
+          options: options,
+          environment: <String, String> {
+            // iOS 12.1 and lower did not have Swift ABI compatibility so Swift apps embedded the Swift runtime.
+            // https://developer.apple.com/documentation/xcode-release-notes/swift-5-release-notes-for-xcode-10_2#App-Thinning
+            // The gallery pulls in Swift plugins. Set lowest version to 12.2 to avoid benchmark noise.
+            // This should be removed when when Flutter's minimum supported version is >12.2.
+            'FLUTTER_XCODE_IPHONEOS_DEPLOYMENT_TARGET': '12.2',
+          },
+        );
         watch.stop();
         final Directory buildDirectory = dir(path.join(
           cwd,
@@ -1751,11 +1777,12 @@ class CompileTest {
         await flutter('build', options: options);
         watch.stop();
         final String basename = path.basename(cwd);
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
         final String exePath = path.join(
           cwd,
           'build',
           'windows',
-          'x64',
+          arch,
           'runner',
           'release',
           '$basename.exe');

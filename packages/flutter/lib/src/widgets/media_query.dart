@@ -290,7 +290,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [FlutterView.physicalSize], which returns the size in physical pixels.
+  /// * [FlutterView.physicalSize], which returns the size of the view in physical pixels.
+  /// * [FlutterView.display], which returns reports display information like size, and refresh rate.
   /// * [MediaQuery.sizeOf], a method to find and depend on the size defined for
   ///   a [BuildContext].
   final Size size;

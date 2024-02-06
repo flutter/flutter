@@ -666,7 +666,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final double lerpValue = _lerp(value);
     if (lerpValue != widget.value) {
       widget.onChanged!(lerpValue);
-      _focusNode?.requestFocus();
     }
   }
 
@@ -883,13 +882,16 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         shortcutMap = _traditionalNavShortcutMap;
     }
 
-    final double textScaleFactor = theme.useMaterial3
+    final double fontSize = sliderTheme.valueIndicatorTextStyle?.fontSize ?? kDefaultFontSize;
+    final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
+    final TextScaler textScaler = theme.useMaterial3
       // TODO(tahatesser): This is an eye-balled value.
       // This needs to be updated when accessibility
       // guidelines are available on the material specs page
       // https://m3.material.io/components/sliders/accessibility.
-      ? MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3).textScaleFactor
-      : MediaQuery.textScalerOf(context).textScaleFactor;
+      ? MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3)
+      : MediaQuery.textScalerOf(context);
+    final double effectiveTextScale = textScaler.scale(fontSizeToScale) / fontSizeToScale;
 
     return Semantics(
       container: true,
@@ -913,7 +915,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             divisions: widget.divisions,
             label: widget.label,
             sliderTheme: sliderTheme,
-            textScaleFactor: textScaleFactor,
+            textScaleFactor: effectiveTextScale,
             screenSize: screenSize(),
             onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
             onChangeStart: _handleDragStart,
@@ -1376,8 +1378,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (hovered && hoveringThumb) {
       _state.overlayController.forward();
     } else {
-      // Only remove overlay when Slider is unfocused.
-      if (!hasFocus) {
+      // Only remove overlay when Slider is inactive and unfocused.
+      if (!_active && !hasFocus) {
         _state.overlayController.reverse();
       }
     }

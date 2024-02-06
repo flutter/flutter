@@ -10,7 +10,6 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 // Android sets the 0x80000000 bit on a character to indicate that it is a
 // combining character, so we use this mask to remove that bit to make it a
@@ -19,14 +18,25 @@ const int _kCombiningCharacterMask = 0x7fffffff;
 
 /// Platform-specific key event data for Android.
 ///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
+///
 /// This object contains information about key events obtained from Android's
 /// `KeyEvent` interface.
 ///
 /// See also:
 ///
-///  * [RawKeyboard], which uses this interface to expose key data.
+/// * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataAndroid extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataAndroid({
     this.flags = 0,
     this.codePoint = 0,

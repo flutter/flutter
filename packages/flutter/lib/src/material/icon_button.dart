@@ -795,7 +795,6 @@ class IconButton extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Widget>('icon', icon, showName: false));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
     properties.add(ColorProperty('color', color, defaultValue: null));
@@ -945,16 +944,12 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `splashFactory` - Theme.splashFactory
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    switch (variant) {
-      case _IconButtonVariant.filled:
-        return _FilledIconButtonDefaultsM3(context, toggleable);
-      case _IconButtonVariant.filledTonal:
-        return _FilledTonalIconButtonDefaultsM3(context, toggleable);
-      case _IconButtonVariant.outlined:
-        return _OutlinedIconButtonDefaultsM3(context, toggleable);
-      case _IconButtonVariant.standard:
-        return _IconButtonDefaultsM3(context, toggleable);
-    }
+    return switch (variant) {
+      _IconButtonVariant.filled      => _FilledIconButtonDefaultsM3(context, toggleable),
+      _IconButtonVariant.filledTonal => _FilledTonalIconButtonDefaultsM3(context, toggleable),
+      _IconButtonVariant.outlined    => _OutlinedIconButtonDefaultsM3(context, toggleable),
+      _IconButtonVariant.standard    => _IconButtonDefaultsM3(context, toggleable),
+    };
   }
 
   /// Returns the [IconButtonThemeData.style] of the closest [IconButtonTheme] ancestor.

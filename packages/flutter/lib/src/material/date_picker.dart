@@ -659,7 +659,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).textScaleFactor;
+    // 14 is a common font size used to compute the effective text scale.
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     final DialogTheme dialogTheme = theme.dialogTheme;
     return Dialog(
@@ -687,7 +689,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
             final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
             // Make sure the portrait dialog can fit the contents comfortably when
             // resized from the landscape dialog.
-            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+            final bool isFullyPortrait = constraints.maxHeight >= math.min(dialogSize.height, portraitDialogSize.height);
 
             switch (orientation) {
               case Orientation.portrait:
@@ -2874,6 +2876,10 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       ),
     );
 
+    // 14 is a common font size used to compute the effective text scale.
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
+    final Size dialogSize = (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2) * textScaleFactor;
     switch (orientation) {
       case Orientation.portrait:
         return LayoutBuilder(
@@ -2881,7 +2887,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
             final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
             // Make sure the portrait dialog can fit the contents comfortably when
             // resized from the landscape dialog.
-            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+            final bool isFullyPortrait = constraints.maxHeight >= math.min(dialogSize.height, portraitDialogSize.height);
 
             return Column(
               mainAxisSize: MainAxisSize.min,

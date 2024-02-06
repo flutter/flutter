@@ -7,9 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../widgets/process_text_utils.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -18,7 +19,7 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('SelectionArea uses correct selection controls', (WidgetTester tester) async {
+  testWidgets('SelectionArea uses correct selection controls', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: SelectionArea(
         child: Text('abc'),
@@ -40,7 +41,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
+  testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123378
     await tester.pumpWidget(
       const MaterialApp(
@@ -71,7 +72,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/111370
-  testWidgetsWithLeakTracking('Handle is correctly transformed when the text is inside of a FittedBox ',(WidgetTester tester) async {
+  testWidgets('Handle is correctly transformed when the text is inside of a FittedBox ',(WidgetTester tester) async {
       final Key textKey = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -90,7 +91,7 @@ void main() {
         ),
       );
 
-      final TestGesture longpress = await tester.startGesture(const Offset(10, 10));
+      final TestGesture longpress = await tester.startGesture(tester.getCenter(find.byType(Text)));
       addTearDown(longpress.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await longpress.up();
@@ -128,7 +129,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
-  testWidgetsWithLeakTracking('builds the default context menu by default', (WidgetTester tester) async {
+  testWidgets('builds the default context menu by default', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -160,7 +161,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('builds a custom context menu if provided', (WidgetTester tester) async {
+  testWidgets('builds a custom context menu if provided', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -201,7 +202,55 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+  testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
+    final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          focusNode: focusNode,
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.text('How are you?'),
+        matching: find.byType(RichText),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The toolbar is visible.
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    // The text processing actions are visible on Android only.
+    final bool areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
+    expect(find.text(fakeAction1Label), areTextActionsSupported ? findsOneWidget : findsNothing);
+    expect(find.text(fakeAction2Label), areTextActionsSupported ? findsOneWidget : findsNothing);
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
     SelectedContent? content;
 
     await tester.pumpWidget(MaterialApp(
@@ -239,7 +288,7 @@ void main() {
     expect(content!.plainText, 'How');
   });
 
-  testWidgetsWithLeakTracking('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+  testWidgets('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 

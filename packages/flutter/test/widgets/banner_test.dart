@@ -246,7 +246,7 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(math.pi / 4.0));
   });
 
-  testWidgetsWithLeakTracking('Banner widget', (WidgetTester tester) async {
+  testWidgets('Banner widget', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const Directionality(
@@ -266,7 +266,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('Banner widget in MaterialApp', (WidgetTester tester) async {
+  testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(const MaterialApp(home: Placeholder()));
     expect(find.byType(CheckedModeBanner), paints

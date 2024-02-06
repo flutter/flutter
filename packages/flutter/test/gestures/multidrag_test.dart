@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'gesture_tester.dart';
 
@@ -111,4 +112,34 @@ void main() {
     // ignore: invalid_use_of_protected_member
     expect(recognizer2.isPointerAllowed(rejectedPointer), false);
   });
+
+  test('$MultiDragPointerState dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => _MultiDragPointerState(
+          Offset.zero,
+          PointerDeviceKind.touch,
+          null,
+        ).dispose(),
+        _MultiDragPointerState,
+      ),
+      areCreateAndDispose,
+    );
+  });
+}
+
+class _MultiDragPointerState extends MultiDragPointerState {
+  _MultiDragPointerState(
+    super.initialPosition,
+    super.kind,
+    super.gestureSettings,
+  );
+
+  @override
+  void accepted(GestureMultiDragStartCallback starter) {}
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

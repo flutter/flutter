@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -310,6 +309,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+          webRenderer: debuggingOptions.webRenderer,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
@@ -340,7 +340,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             target,
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
-            compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions)
+            compilerConfigs: <WebCompilerConfig>[
+              JsCompilerConfig.run(
+                nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+                renderer: debuggingOptions.webRenderer,
+              )
+            ]
           );
         }
         await device!.device!.startApp(
@@ -419,7 +424,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           target,
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
-          compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions),
+          compilerConfigs: <WebCompilerConfig>[
+            JsCompilerConfig.run(
+              nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+              renderer: debuggingOptions.webRenderer,
+            )
+          ],
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -452,6 +462,11 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
       _usage.sendTiming('hot', 'web-incremental-restart', elapsed);
+      _analytics.send(Event.timing(
+        workflow: 'hot',
+        variableName: 'web-incremental-restart',
+        elapsedMilliseconds: elapsed.inMilliseconds,
+      ));
       final String sdkName = await device!.device!.sdkNameAndVersion;
       HotEvent(
         'restart',

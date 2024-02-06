@@ -173,4 +173,8 @@ void main() {
 
   final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], body: const SizedBox());
   final Widget bodyValue = platformMenuBar.body;
+
+  // Changes made in TBD
+  final NavigatorState state = Navigator.of(context);
+  state.focusScopeNode;
 }

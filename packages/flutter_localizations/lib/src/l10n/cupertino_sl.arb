@@ -36,5 +36,6 @@
   "menuDismissLabel": "Opusti meni",
   "lookUpButtonLabel": "Pogled gor",
   "searchWebButtonLabel": "Iskanje v spletu",
-  "shareButtonLabel": "Deli …"
+  "shareButtonLabel": "Deli …",
+  "clearButtonLabel": "Clear"
 }
