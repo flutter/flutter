@@ -5256,8 +5256,9 @@ void main() {
       await navigate(count);
       final int consumedMbPerOperation = (ProcessInfo.currentRss - initialRss) ~/ (1024 * count);
 
-      expect(consumedMbPerOperation, lessThan(1)); // Actual value is 552 MB on polina-c's mac.
+      expect(consumedMbPerOperation, lessThan(1)); // Actual value is 552 MB per operation on polina-c's mac.
     },
+    skip: true, // https://github.com/flutter/flutter/issues/79605
   );
 }
 
