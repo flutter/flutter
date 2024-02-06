@@ -1238,11 +1238,92 @@ abstract class WidgetController {
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
       await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())));
+
       if (initialOffset.distance > 0.0) {
-        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
+        final double xSign = initialOffset.dx.sign;
+        final double ySign = initialOffset.dy.sign;
+
+        final double offsetX = initialOffset.dx;
+        final double offsetY = initialOffset.dy;
+
+        final bool separateX = initialOffset.dx.abs() > kDragSlopDefault;
+        final bool separateY = initialOffset.dy.abs() > kDragSlopDefault;
+
+        if (separateY || separateX) {
+          final double offsetSlope = offsetY / offsetX;
+          final double inverseOffsetSlope = offsetX / offsetY;
+          final double absoluteOffsetSlope = offsetSlope.abs();
+          final double signedSlopX = kDragSlopDefault * xSign;
+          final double signedSlopY = kDragSlopDefault * ySign;
+          if (absoluteOffsetSlope != 1) {
+            // The drag goes through one or both of the extents of the edges of the box.
+            if (absoluteOffsetSlope < 1) {
+              assert(offsetX.abs() > kDragSlopDefault);
+              // The drag goes through the vertical edge of the box.
+              // It is guaranteed that the |offsetX| > touchSlopX.
+              final double diffY = offsetSlope.abs() * kDragSlopDefault * ySign;
+
+              // The vector from the origin to the vertical edge.
+              await sendEventToBinding(testPointer.move(startLocation + Offset(signedSlopX, diffY),
+                  timeStamp: Duration(microseconds: timeStamp.round())));
+              if (offsetY.abs() <= kDragSlopDefault) {
+                // The drag ends on or before getting to the horizontal extension of the horizontal edge.
+                await sendEventToBinding(testPointer.move(
+                    startLocation + Offset(offsetX - signedSlopX, offsetY - diffY),
+                    timeStamp: Duration(microseconds: timeStamp.round())));
+              } else {
+                final double diffY2 = signedSlopY - diffY;
+                final double diffX2 = inverseOffsetSlope * diffY2;
+
+                // The vector from the edge of the box to the horizontal extension of the horizontal edge.
+                await sendEventToBinding(testPointer.move(startLocation + Offset(diffX2, diffY2),
+                    timeStamp: Duration(microseconds: timeStamp.round())));
+                await sendEventToBinding(testPointer.move(
+                    startLocation + Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY),
+                    timeStamp: Duration(microseconds: timeStamp.round())));
+              }
+            } else {
+              assert(offsetY.abs() > kDragSlopDefault);
+              // The drag goes through the horizontal edge of the box.
+              // It is guaranteed that the |offsetY| > touchSlopY.
+              final double diffX = inverseOffsetSlope.abs() * kDragSlopDefault * xSign;
+
+              // The vector from the origin to the vertical edge.
+              await sendEventToBinding(testPointer.move(startLocation + Offset(diffX, signedSlopY),
+                  timeStamp: Duration(microseconds: timeStamp.round())));
+              if (offsetX.abs() <= kDragSlopDefault) {
+                // The drag ends on or before getting to the vertical extension of the vertical edge.
+                await sendEventToBinding(testPointer.move(
+                    startLocation + Offset(offsetX - diffX, offsetY - signedSlopY),
+                    timeStamp: Duration(microseconds: timeStamp.round())));
+              } else {
+                final double diffX2 = signedSlopX - diffX;
+                final double diffY2 = offsetSlope * diffX2;
+
+                // The vector from the edge of the box to the vertical extension of the vertical edge.
+                await sendEventToBinding(testPointer.move(startLocation + Offset(diffX2, diffY2),
+                    timeStamp: Duration(microseconds: timeStamp.round())));
+                await sendEventToBinding(testPointer.move(
+                    startLocation + Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY),
+                    timeStamp: Duration(microseconds: timeStamp.round())));
+              }
+            }
+          } else {
+            // The drag goes through the corner of the box.
+            await sendEventToBinding(testPointer.move(startLocation + Offset(signedSlopX, signedSlopY),
+                timeStamp: Duration(microseconds: timeStamp.round())));
+            await sendEventToBinding(testPointer.move(startLocation + Offset(signedSlopX, signedSlopY),
+                timeStamp: Duration(microseconds: timeStamp.round())));
+          }
+        } else {
+          await sendEventToBinding(
+              testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
+        }
+
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
+
       for (int i = 0; i <= kMoveCount; i += 1) {
         final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
         await sendEventToBinding(testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())));
@@ -1252,6 +1333,7 @@ abstract class WidgetController {
           lastTimeStamp = timeStamp;
         }
       }
+
       await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())));
     });
   }
