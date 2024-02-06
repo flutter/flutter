@@ -19,16 +19,20 @@
   package: flow_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cm
   package: runtime_tests-0.far
+  variant: fuchsia_debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cm
   package: shell_tests-0.far
+  variant: fuchsia_debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/testing_tests#meta/testing_tests.cm
   package: testing_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cm -- --gtest_filter=-ParagraphTest.*
   package: txt_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
   package: ui_tests-0.far
+  variant: fuchsia_debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm
   package: embedder_tests-0.far
+  variant: fuchsia_debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm
   package: dart_utils_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/dart-jit-runner-integration-test#meta/dart-jit-runner-integration-test.cm
