@@ -23,9 +23,11 @@ void log(String msg) {
   stdout.writeln('$_gray$msg$_reset');
 }
 
+final class Panic extends Error {}
+
 void panic(List<String> messages) {
   for (final String message in messages) {
     stderr.writeln('$_red$message$_reset');
   }
-  throw 'panic';
+  throw Panic();
 }

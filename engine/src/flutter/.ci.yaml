@@ -60,6 +60,7 @@ targets:
       - DEPS
       - lib/ui/**
       - shell/platform/android/**
+      - testing/scenario_app/**
 
 # Task to run Linux linux_android_emulator_tests on AVDs running Android 33
 # instead of 34 for investigating https://github.com/flutter/flutter/issues/137947.
@@ -76,6 +77,7 @@ targets:
       - DEPS
       - lib/ui/**
       - shell/platform/android/**
+      - testing/scenario_app/**
 
   - name: Linux builder_cache
     enabled_branches:

@@ -25,14 +25,19 @@ void main() {
   channelBuffers.setListener('driver', _handleDriverMessage);
   channelBuffers.setListener('write_timeline', _handleWriteTimelineMessage);
 
-  final FlutterView view = PlatformDispatcher.instance.implicitView!;
+  // TODO(matanlurey): https://github.com/flutter/flutter/issues/142746.
+  // This Dart program is used for every test, but there is at least one test
+  // (EngineLaunchE2ETest.java) that does not create a FlutterView, so the
+  // implicit view's size is not initialized (and the assert would be tripped).
+  //
+  // final FlutterView view = PlatformDispatcher.instance.implicitView!;
   // Asserting that this is greater than zero since this app runs on different
   // platforms with different sizes. If it is greater than zero, it has been
   // initialized to some meaningful value at least.
-  assert(
-    view.display.size > Offset.zero,
-    'Expected ${view.display} to be initialized.',
-  );
+  // assert(
+  //   view.display.size > Offset.zero,
+  //   'Expected ${view.display} to be initialized.',
+  // );
 
   final ByteData data = ByteData(1);
   data.setUint8(0, 1);

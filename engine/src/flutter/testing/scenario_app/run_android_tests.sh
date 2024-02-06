@@ -33,7 +33,10 @@ function follow_links() (
 )
 
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
-SRC_DIR="$(cd "$SCRIPT_DIR/../../.."; pwd -P)"
+SRC_DIR="$(
+  cd "$SCRIPT_DIR/../../.."
+  pwd -P
+)"
 OUT_DIR="$SRC_DIR/out/$BUILD_VARIANT"
 
 # Dump the logcat and symbolize stack traces before exiting.

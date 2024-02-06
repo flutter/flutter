@@ -45,4 +45,11 @@ extension RunAndForward on ProcessManager {
   Future<int> runAndForward(List<String> cmd) async {
     return pipeProcessStreams(await start(cmd), out: stdout);
   }
+
+  /// Runs [cmd], and captures the stdout and stderr pipes.
+  Future<(int, StringBuffer)> runAndCapture(List<String> cmd) async {
+    final StringBuffer buffer = StringBuffer();
+    final int exitCode = await pipeProcessStreams(await start(cmd), out: buffer);
+    return (exitCode, buffer);
+  }
 }

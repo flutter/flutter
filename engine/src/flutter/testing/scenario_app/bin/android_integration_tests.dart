@@ -18,14 +18,49 @@ import 'utils/screenshot_transformer.dart';
 const int tcpPort = 3001;
 
 void main(List<String> args) async {
-  const ProcessManager pm = LocalProcessManager();
   final ArgParser parser = ArgParser()
-    ..addOption('adb', help: 'absolute path to the adb tool', mandatory: true)
-    ..addOption('out-dir', help: 'out directory', mandatory: true);
+    ..addOption(
+      'adb',
+      help: 'absolute path to the adb tool',
+      mandatory: true,
+    )
+    ..addOption(
+      'out-dir',
+      help: 'out directory',
+      mandatory: true,
+    )
+    ..addFlag(
+      'smoke-test',
+      help: 'runs a single test to verify the setup',
+      negatable: false,
+      defaultsTo: true,
+    );
 
-  final ArgResults results = parser.parse(args);
-  final Directory outDir = Directory(results['out-dir'] as String);
-  final File adb = File(results['adb'] as String);
+  runZonedGuarded(
+    () async {
+      final ArgResults results = parser.parse(args);
+      final Directory outDir = Directory(results['out-dir'] as String);
+      final File adb = File(results['adb'] as String);
+      final bool smokeTest = results['smoke-test'] as bool;
+      await _run(outDir: outDir, adb: adb, smokeTest: smokeTest);
+      exit(0);
+    },
+    (Object error, StackTrace stackTrace) {
+      if (error is! Panic) {
+        stderr.writeln(error);
+        stderr.writeln(stackTrace);
+      }
+      exit(1);
+    },
+  );
+}
+
+Future<void> _run({
+  required Directory outDir,
+  required File adb,
+  required bool smokeTest,
+}) async {
+  const ProcessManager pm = LocalProcessManager();
 
   if (!outDir.existsSync()) {
     panic(<String>['out-dir does not exist: $outDir', 'make sure to build the selected engine variant']);
@@ -170,15 +205,25 @@ void main(List<String> args) async {
     });
 
     await step('Running instrumented tests...', () async {
-      final int exitCode = await pm.runAndForward(<String>[
+      final (int exitCode, StringBuffer out) = await pm.runAndCapture(<String>[
         adb.path,
         'shell',
         'am',
         'instrument',
-        '-w', 'dev.flutter.scenarios.test/dev.flutter.TestRunner',
+        '-w',
+        if (smokeTest)
+          '-e class dev.flutter.scenarios.EngineLaunchE2ETest',
+        'dev.flutter.scenarios.test/dev.flutter.TestRunner',
       ]);
       if (exitCode != 0) {
-        panic(<String>['could not install test apk']);
+        panic(<String>['instrumented tests failed to run']);
+      }
+      // Unfortunately adb shell am instrument does not return a non-zero exit
+      // code when tests fail, but it does seem to print "FAILURES!!!" to
+      // stdout, so we can use that as a signal that something went wrong.
+      if (out.toString().contains('FAILURES!!!')) {
+        stdout.write(out);
+        panic(<String>['1 or more tests failed']);
       }
     });
   } finally {
@@ -221,8 +266,7 @@ void main(List<String> args) async {
 
     await step('Flush logcat...', () async {
       await logcat.flush();
+      await logcat.close();
     });
-
-    exit(0);
   }
 }
