@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('browser')
+library;
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -26,6 +29,17 @@ void doTests() {
       );
 
       expect(provider, isA<CustomElementDimensionsProvider>());
+    });
+  });
+
+  group('getDevicePixelRatio', () {
+    test('Returns the correct pixelRatio', () async {
+      // Override the DPI to something known, but weird...
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(33930);
+
+      final DimensionsProvider provider = DimensionsProvider.create();
+
+      expect(provider.getDevicePixelRatio(), 33930);
     });
   });
 }
