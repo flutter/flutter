@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('browser')
-library;
-
 import 'dart:async';
 
 import 'package:test/bootstrap/browser.dart';
@@ -109,23 +106,48 @@ void doTests() {
     });
 
     test('funnels resize events on sizeSource', () async {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.7);
+
       sizeSource
         ..style.width = '100px'
         ..style.height = '100px';
 
-      expect(await provider.onResize.first, const ui.Size(100, 100));
+      expect(provider.onResize.first, completes);
+      expect(provider.computePhysicalSize(), const ui.Size(270, 270));
 
       sizeSource
         ..style.width = '200px'
         ..style.height = '200px';
 
-      expect(await provider.onResize.first, const ui.Size(200, 200));
+      expect(provider.onResize.first, completes);
+      expect(provider.computePhysicalSize(), const ui.Size(540, 540));
 
       sizeSource
         ..style.width = '300px'
         ..style.height = '300px';
 
-      expect(await provider.onResize.first, const ui.Size(300, 300));
+      expect(provider.onResize.first, completes);
+      expect(provider.computePhysicalSize(), const ui.Size(810, 810));
+    });
+
+    test('funnels DPR change events too', () async {
+      // Override the source of DPR events...
+      final StreamController<double> dprController =
+          StreamController<double>.broadcast();
+
+      // Inject the dprController stream into the CustomElementDimensionsProvider.
+      final CustomElementDimensionsProvider provider =
+          CustomElementDimensionsProvider(
+        sizeSource,
+        onDprChange: dprController.stream,
+      );
+
+      // Set and broadcast the mock DPR value
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(3.2);
+      dprController.add(3.2);
+
+      expect(provider.onResize.first, completes);
+      expect(provider.computePhysicalSize(), const ui.Size(32, 32));
     });
 
     test('closed by onHotRestart', () async {

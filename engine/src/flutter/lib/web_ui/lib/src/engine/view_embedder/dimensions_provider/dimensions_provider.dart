@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine/dom.dart';
+import 'package:ui/src/engine/view_embedder/display_dpr_stream.dart';
 import 'package:ui/src/engine/window.dart';
 import 'package:ui/ui.dart' as ui show Size;
 
-import '../../display.dart';
-import '../../dom.dart';
 import 'custom_element_dimensions_provider.dart';
 import 'full_page_dimensions_provider.dart';
 
@@ -32,16 +32,13 @@ abstract class DimensionsProvider {
   /// Creates the appropriate DimensionsProvider depending on the incoming [hostElement].
   factory DimensionsProvider.create({DomElement? hostElement}) {
     if (hostElement != null) {
-      return CustomElementDimensionsProvider(hostElement);
+      return CustomElementDimensionsProvider(
+        hostElement,
+        onDprChange: DisplayDprStream.instance.dprChanged,
+      );
     } else {
       return FullPageDimensionsProvider();
     }
-  }
-
-  /// Returns the DPI reported by the browser.
-  double getDevicePixelRatio() {
-    // This is overridable in tests.
-    return EngineFlutterDisplay.instance.devicePixelRatio;
   }
 
   /// Returns the [ui.Size] of the "viewport".
@@ -57,6 +54,16 @@ abstract class DimensionsProvider {
   );
 
   /// Returns a Stream with the changes to [ui.Size] (when cheap to get).
+  ///
+  /// Currently this Stream always returns `null` measurements because the
+  /// resize event that we use for [FullPageDimensionsProvider] does not contain
+  /// the new size, so users of this Stream everywhere immediately retrieve the
+  /// new `physicalSize` from the window.
+  ///
+  /// The [CustomElementDimensionsProvider] *could* broadcast the new size, but
+  /// to keep both implementations consistent (and their consumers), for now all
+  /// events from this Stream are going to be `null` (until we find a performant
+  /// way to retrieve the dimensions in full-page mode).
   Stream<ui.Size?> get onResize;
 
   /// Whether the [DimensionsProvider] instance has been closed or not.

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/display.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/window.dart';
 import 'package:ui/ui.dart' as ui show Size;
@@ -67,7 +68,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     late double windowInnerWidth;
     late double windowInnerHeight;
     final DomVisualViewport? viewport = domWindow.visualViewport;
-    final double devicePixelRatio = getDevicePixelRatio();
+    final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
 
     if (viewport != null) {
       if (operatingSystem == OperatingSystem.iOs) {
@@ -102,7 +103,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     double physicalHeight,
     bool isEditingOnMobile,
   ) {
-    final double devicePixelRatio = getDevicePixelRatio();
+    final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     final DomVisualViewport? viewport = domWindow.visualViewport;
     late double windowInnerHeight;
 
