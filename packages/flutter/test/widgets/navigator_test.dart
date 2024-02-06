@@ -5262,8 +5262,6 @@ void main() {
   );
 }
 
-
-
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
 
 class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
