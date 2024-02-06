@@ -379,7 +379,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     required this.curve,
     this.reverseCurve,
   }) {
-        // TODO(polina-c): stop duplicating code across disposables
+    // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectCreated(
