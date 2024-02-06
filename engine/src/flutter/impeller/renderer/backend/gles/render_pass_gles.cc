@@ -151,10 +151,6 @@ struct RenderPassData {
     const std::shared_ptr<GPUTracerGLES>& tracer) {
   TRACE_EVENT0("impeller", "RenderPassGLES::EncodeCommandsInReactor");
 
-  if (commands.empty()) {
-    return true;
-  }
-
   const auto& gl = reactor.GetProcTable();
 #ifdef IMPELLER_DEBUG
   tracer->MarkFrameStart(gl);
@@ -516,9 +512,6 @@ struct RenderPassData {
 bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   if (!IsValid()) {
     return false;
-  }
-  if (commands_.empty()) {
-    return true;
   }
   const auto& render_target = GetRenderTarget();
   if (!render_target.HasColorAttachment(0u)) {
