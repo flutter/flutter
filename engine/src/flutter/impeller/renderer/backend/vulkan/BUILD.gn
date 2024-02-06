@@ -14,6 +14,7 @@ impeller_component("vulkan_unittests") {
     "context_vk_unittests.cc",
     "descriptor_pool_vk_unittests.cc",
     "fence_waiter_vk_unittests.cc",
+    "render_pass_cache_unittests.cc",
     "resource_manager_vk_unittests.cc",
     "test/gpu_tracer_unittests.cc",
     "test/mock_vulkan.cc",
@@ -23,6 +24,7 @@ impeller_component("vulkan_unittests") {
   ]
   deps = [
     ":vulkan",
+    "../../../playground:playground_test",
     "//flutter/testing:testing_lib",
   ]
 }
