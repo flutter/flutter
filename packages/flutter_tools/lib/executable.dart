@@ -51,6 +51,7 @@ import 'src/globals.dart' as globals;
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/native_assets.dart';
+import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
@@ -245,7 +246,11 @@ List<FlutterCommand> generateCommands({
   ),
   ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
-  TestCommand(verboseHelp: verboseHelp, verbose: verbose),
+  TestCommand(
+    verboseHelp: verboseHelp,
+    verbose: verbose,
+    buildRunner: TestCompilerNativeAssetsBuilderImpl(),
+  ),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(
     stdio: globals.stdio,

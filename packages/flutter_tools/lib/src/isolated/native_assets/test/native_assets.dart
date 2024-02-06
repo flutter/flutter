@@ -9,10 +9,18 @@ import '../../../base/platform.dart';
 import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
 import '../../../project.dart';
+import '../../../test/test_compiler.dart';
 import '../linux/native_assets.dart';
 import '../macos/native_assets.dart';
 import '../native_assets.dart';
 import '../windows/native_assets.dart';
+
+class TestCompilerNativeAssetsBuilderImpl
+    implements TestCompilerNativeAssetsBuilder {
+  @override
+  Future<Uri?> build(BuildInfo buildInfo) =>
+      testCompilerBuildNativeAssets(buildInfo);
+}
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   Uri? nativeAssetsYaml;

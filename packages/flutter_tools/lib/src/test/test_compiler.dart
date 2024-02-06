@@ -15,7 +15,6 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
-import '../isolated/native_assets/test/native_assets.dart';
 import '../project.dart';
 import 'test_time_recorder.dart';
 
@@ -46,9 +45,11 @@ class TestCompiler {
   /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(
     this.buildInfo,
-    this.flutterProject,
-    { String? precompiledDillPath, this.testTimeRecorder }
-  ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
+    this.flutterProject, {
+    String? precompiledDillPath,
+    this.testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? buildRunner,
+  }) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject!.directory.path,
         getBuildDirectory(),
         'test_cache',
@@ -57,7 +58,8 @@ class TestCompiler {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         )),
-       shouldCopyDillFile = precompiledDillPath == null {
+       shouldCopyDillFile = precompiledDillPath == null,
+       _buildRunner = buildRunner {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -78,6 +80,7 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
+  final TestCompilerNativeAssetsBuilder? _buildRunner;
 
 
   ResidentCompiler? compiler;
@@ -165,7 +168,7 @@ class TestCompiler {
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
       }
 
-      final Uri? nativeAssetsYaml = await testCompilerBuildNativeAssets(buildInfo);
+      final Uri? nativeAssetsYaml = await _buildRunner?.build(buildInfo);
 
       final CompilerOutput? compilerOutput = await compiler!.recompile(
         request.mainUri,
@@ -214,4 +217,8 @@ class TestCompiler {
       compilationQueue.removeAt(0);
     }
   }
+}
+
+abstract class TestCompilerNativeAssetsBuilder {
+  Future<Uri?> build(BuildInfo buildInfo);
 }
