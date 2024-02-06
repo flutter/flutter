@@ -512,14 +512,17 @@ FlutterError
     expect(animation.value, 10.0);
   });
 
-  test('AnimationController dispatches memory events', () async {
+  test('$CurvedAnimation dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () => AnimationController(
-          duration: const Duration(milliseconds: 100),
-          vsync: const TestVSync(),
+        () => CurvedAnimation(
+          parent: AnimationController(
+            duration: const Duration(milliseconds: 100),
+            vsync: const TestVSync(),
+          ),
+          curve: Curves.linear,
         ).dispose(),
-        AnimationController,
+        CurvedAnimation,
       ),
       areCreateAndDispose,
     );

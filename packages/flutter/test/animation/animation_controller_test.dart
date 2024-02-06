@@ -21,17 +21,14 @@ void main() {
         ..platformDispatcher.onDrawFrame = null;
   });
 
-  test('CurvedAnimation dispatches memory events', () async {
+  test('AnimationController dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () => CurvedAnimation(
-          parent: AnimationController(
-            duration: const Duration(milliseconds: 100),
-            vsync: const TestVSync(),
-          ),
-          curve: Curves.linear,
+        () => AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
         ).dispose(),
-        CurvedAnimation,
+        AnimationController,
       ),
       areCreateAndDispose,
     );
