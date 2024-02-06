@@ -23,6 +23,9 @@ const int32_t GaussianBlurFilterContents::kBlurFilterRequiredMipCount = 4;
 
 namespace {
 
+// 48 comes from kernel.glsl.
+const int32_t kMaxKernelSize = 48;
+
 SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
                                         SamplerAddressMode address_mode) {
   SamplerDescriptor sampler_desc;
@@ -189,6 +192,10 @@ Rect MakeReferenceUVs(const Rect& reference, const Rect& rect) {
                                      rect.GetSize());
   return result.Scale(1.0f / Vector2(reference.GetSize()));
 }
+
+int ScaleBlurRadius(Scalar radius, Scalar scalar) {
+  return static_cast<int>(std::round(radius * scalar));
+}
 }  // namespace
 
 std::string_view GaussianBlurFilterContents::kNoMipsError =
@@ -207,13 +214,21 @@ Scalar GaussianBlurFilterContents::CalculateScale(Scalar sigma) {
   if (sigma <= 4) {
     return 1.0;
   }
-  Scalar result = 4.0 / sigma;
+  Scalar raw_result = 4.0 / sigma;
   // Round to the nearest 1/(2^n) to get the best quality down scaling.
-  Scalar exponent = round(log2f(result));
+  Scalar exponent = round(log2f(raw_result));
   // Don't scale down below 1/16th to preserve signal.
   exponent = std::max(-4.0f, exponent);
   Scalar rounded = powf(2.0f, exponent);
-  return rounded;
+  Scalar result = rounded;
+  // Only drop below 1/8 if 1/8 would overflow our kernel.
+  if (rounded < 0.125f) {
+    Scalar rounded_plus = powf(2.0f, exponent + 1);
+    Scalar blur_radius = CalculateBlurRadius(sigma);
+    int kernel_size_plus = (ScaleBlurRadius(blur_radius, rounded_plus) * 2) + 1;
+    result = kernel_size_plus < kMaxKernelSize ? rounded_plus : rounded;
+  }
+  return result;
 };
 
 std::optional<Rect> GaussianBlurFilterContents::GetFilterSourceCoverage(
@@ -370,8 +385,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
       BlurParameters{
           .blur_uv_offset = Point(0.0, pass1_pixel_size.y),
           .blur_sigma = scaled_sigma.y * effective_scalar.y,
-          .blur_radius =
-              static_cast<int>(std::round(blur_radius.y * effective_scalar.y)),
+          .blur_radius = ScaleBlurRadius(blur_radius.y, effective_scalar.y),
           .step_size = 1,
       },
       /*destination_target=*/std::nullopt, blur_uvs);
@@ -392,8 +406,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
       BlurParameters{
           .blur_uv_offset = Point(pass1_pixel_size.x, 0.0),
           .blur_sigma = scaled_sigma.x * effective_scalar.x,
-          .blur_radius =
-              static_cast<int>(std::round(blur_radius.x * effective_scalar.x)),
+          .blur_radius = ScaleBlurRadius(blur_radius.x, effective_scalar.x),
           .step_size = 1,
       },
       pass3_destination, blur_uvs);
@@ -457,8 +470,7 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
   KernelPipeline::FragmentShader::KernelSamples result;
   result.sample_count =
       ((2 * parameters.blur_radius) / parameters.step_size) + 1;
-  // 48 comes from kernel.glsl.
-  FML_CHECK(result.sample_count < 48);
+  FML_CHECK(result.sample_count < kMaxKernelSize);
 
   // Chop off the last samples if the radius >= 3 where they account for < 1.56%
   // of the result.
