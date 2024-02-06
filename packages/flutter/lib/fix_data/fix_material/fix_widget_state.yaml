@@ -15,7 +15,7 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are for the ThemeData class from the Material library. *
+# * Fixes in this file are for the MaterialState enum and classes from the Material library. *
 #   For fixes to
 #     * AppBar: fix_app_bar.yaml
 #     * AppBarTheme: fix_app_bar_theme.yaml
@@ -23,6 +23,7 @@
 #     * Material (general): fix_material.yaml
 #     * SliverAppBar: fix_sliver_app_bar.yaml
 #     * TextTheme: fix_text_theme.yaml
+#     * ThemeDate: fix_theme_data.yaml
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/142151
@@ -42,8 +43,10 @@ transforms:
       uris: [ 'material.dart' ]
       function: 'MaterialPropertyResolver'
     changes:
-      - kind: 'rename'
-        newName: 'WidgetPropertyResolver'
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'widgets.dart' ]
+          function: 'WidgetPropertyResolver'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateColor'"
@@ -116,6 +119,16 @@ transforms:
         newName: 'WidgetStatePropertyAll'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStatesController'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart' ]
+      class: 'MaterialStatesController'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStatesController'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin.widgetStates'"
     date: 2024-02-01
     element:
@@ -123,11 +136,8 @@ transforms:
       field: 'materialStates'
       inMixin: 'MaterialStateMixin'
     changes:
-      - kind: 'replacedBy'
-        newElement:
-          uris: ['widget.dart']
-          field: 'widgetStates'
-          inMixin: 'WidgetStateMixin'
+      - kind: 'rename'
+        newName: 'widgetStates'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin.updateWidgetState'"
@@ -137,11 +147,8 @@ transforms:
       method: 'updateMaterialState'
       inMixin: 'MaterialStateMixin'
     changes:
-      - kind: 'replacedBy'
-        newElement:
-          uris: ['widget.dart']
-          method: 'updateWidgetState'
-          inMixin: 'WidgetStateMixin'
+      - kind: 'rename'
+        newName: 'updateWidgetState'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin.setWidgetState'"
@@ -151,11 +158,8 @@ transforms:
       method: 'setMaterialState'
       inMixin: 'MaterialStateMixin'
     changes:
-      - kind: 'replacedBy'
-        newElement:
-          uris: ['widget.dart']
-          method: 'setWidgetState'
-          inMixin: 'WidgetStateMixin'
+      - kind: 'rename'
+        newName: 'setWidgetState'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin.addWidgetState'"
@@ -165,11 +169,8 @@ transforms:
       method: 'addMaterialState'
       inMixin: 'MaterialStateMixin'
     changes:
-      - kind: 'replacedBy'
-        newElement:
-          uris: ['widget.dart']
-          method: 'addWidgetState'
-          inMixin: 'WidgetStateMixin'
+      - kind: 'rename'
+        newName: 'addWidgetState'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin.removeWidgetState'"
@@ -179,11 +180,8 @@ transforms:
       method: 'removeMaterialState'
       inMixin: 'MaterialStateMixin'
     changes:
-      - kind: 'replacedBy'
-        newElement:
-          uris: ['widget.dart']
-          method: 'removeWidgetState'
-          inMixin: 'WidgetStateMixin'
+      - kind: 'rename'
+        newName: 'removeWidgetState'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin'"
