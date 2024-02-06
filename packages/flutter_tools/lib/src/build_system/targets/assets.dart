@@ -13,9 +13,9 @@ import '../../devfs.dart';
 import '../../flutter_manifest.dart';
 import '../build_system.dart';
 import '../depfile.dart';
+import '../tools/asset_transformer.dart';
 import '../tools/scene_importer.dart';
 import '../tools/shader_compiler.dart';
-import 'asset_transformer.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
 

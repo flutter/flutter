@@ -15,9 +15,9 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
+import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
-import 'build_system/targets/asset_transformer.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'globals.dart' as globals; // TODO—dontmerge — don't depend on globals.
