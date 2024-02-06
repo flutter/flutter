@@ -2235,7 +2235,12 @@ void main() {
     }
 
     // When the layout is ltr and iconAlignment is start, the icon is aligned to the left of the button.
-    await tester.pumpWidget(buildWidget(textDirection: TextDirection.ltr, iconAlignment: IconAlignment.start));
+    await tester.pumpWidget(
+      buildWidget(
+        textDirection: TextDirection.ltr,
+        iconAlignment: IconAlignment.start,
+      ),
+    );
 
     Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
     Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
@@ -2244,7 +2249,12 @@ void main() {
     expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0); // 16.0 - padding between icon and button edge.
 
     // When the layout is ltr and iconAlignment is end, the icon is aligned to the right of the button.
-    await tester.pumpWidget(buildWidget(textDirection: TextDirection.ltr, iconAlignment: IconAlignment.end));
+    await tester.pumpWidget(
+      buildWidget(
+        textDirection: TextDirection.ltr,
+        iconAlignment: IconAlignment.end,
+      ),
+    );
 
     Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
     Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
@@ -2253,7 +2263,12 @@ void main() {
     expect(buttonTopRight.dx, iconTopRight.dx + 24.0); // 24.0 - padding between icon and button edge.
 
     // When the layout is rtl and iconAlignment is start, the icon is aligned to the right of the button.
-    await tester.pumpWidget(buildWidget(textDirection: TextDirection.rtl, iconAlignment: IconAlignment.start));
+    await tester.pumpWidget(
+      buildWidget(
+        textDirection: TextDirection.rtl,
+        iconAlignment: IconAlignment.start,
+      ),
+    );
 
     buttonTopRight = tester.getTopRight(find.byType(Material).last);
     iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
@@ -2262,7 +2277,12 @@ void main() {
     expect(buttonTopRight.dx, iconTopRight.dx + 16.0); // 16.0 - padding between icon and button edge.
 
     // When the layout is rtl and iconAlignment is end, the icon is aligned to the left of the button.
-    await tester.pumpWidget(buildWidget(textDirection: TextDirection.rtl, iconAlignment: IconAlignment.end));
+    await tester.pumpWidget(
+      buildWidget(
+        textDirection: TextDirection.rtl,
+        iconAlignment: IconAlignment.end,
+      ),
+    );
 
     buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
     iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
