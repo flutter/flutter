@@ -2411,7 +2411,7 @@ void main() {
       );
     }
 
-    // When the layout is ltr and iconAlignment is start, the icon is aligned to the left of the button.
+    // Test iconAlignment when textDirection is ltr.
     await tester.pumpWidget(
       buildWidget(
         textDirection: TextDirection.ltr,
@@ -2425,7 +2425,7 @@ void main() {
     // The icon is aligned to the left of the button.
     expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0); // 16.0 - padding between icon and button edge.
 
-    // When the layout is ltr and iconAlignment is end, the icon is aligned to the right of the button.
+    // Test iconAlignment when textDirection is ltr.
     await tester.pumpWidget(
       buildWidget(
         textDirection: TextDirection.ltr,
@@ -2439,7 +2439,7 @@ void main() {
     // The icon is aligned to the right of the button.
     expect(buttonTopRight.dx, iconTopRight.dx + 24.0); // 24.0 - padding between icon and button edge.
 
-    // When the layout is rtl and iconAlignment is start, the icon is aligned to the right of the button.
+    // Test iconAlignment when textDirection is rtl.
     await tester.pumpWidget(
       buildWidget(
         textDirection: TextDirection.rtl,
@@ -2453,7 +2453,7 @@ void main() {
     // The icon is aligned to the right of the button.
     expect(buttonTopRight.dx, iconTopRight.dx + 16.0); // 16.0 - padding between icon and button edge.
 
-    // When the layout is rtl and iconAlignment is end, the icon is aligned to the left of the button.
+    // Test iconAlignment when textDirection is rtl.
     await tester.pumpWidget(
       buildWidget(
         textDirection: TextDirection.rtl,
