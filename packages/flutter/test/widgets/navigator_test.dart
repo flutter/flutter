@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:io';
 import 'dart:ui' show FlutterView;
 
@@ -5253,10 +5254,13 @@ void main() {
       // Repeat the navigation and measure the memory consumption.
       const int count = 100;
       final int initialRss = ProcessInfo.currentRss;
+      final int initialGcCount = reachabilityBarrier;
       await navigate(count);
-      final int consumedMbPerOperation = (ProcessInfo.currentRss - initialRss) ~/ (1024 * count);
+      final int consumedKbPerOperation = (ProcessInfo.currentRss - initialRss) ~/ (1024 * count);
+      final int gcCount = reachabilityBarrier - initialGcCount;
 
-      expect(consumedMbPerOperation, lessThan(1)); // Actual value is 552 MB per operation on polina-c's mac.
+      expect(gcCount, greaterThan(count)); // Actual value is 0 on polina-c's mac.
+      expect(consumedKbPerOperation, lessThan(100)); // Actual value is 552 KB per operation on polina-c's mac.
     },
     skip: true, // https://github.com/flutter/flutter/issues/79605
   );
