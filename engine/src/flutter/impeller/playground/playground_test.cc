@@ -56,15 +56,27 @@ RuntimeStage::Map PlaygroundTest::OpenAssetAsRuntimeStage(
   return RuntimeStage::DecodeRuntimeStages(fixture);
 }
 
-static std::string FormatWindowTitle(const std::string& test_name) {
-  std::stringstream stream;
-  stream << "Impeller Playground for '" << test_name << "' (Press ESC to quit)";
-  return stream.str();
-}
-
 // |Playground|
 std::string PlaygroundTest::GetWindowTitle() const {
-  return FormatWindowTitle(flutter::testing::GetCurrentTestName());
+  std::stringstream stream;
+  stream << "Impeller Playground for '"
+         << flutter::testing::GetCurrentTestName() << "' ";
+  switch (GetBackend()) {
+    case PlaygroundBackend::kMetal:
+      break;
+    case PlaygroundBackend::kOpenGLES:
+      if (switches_.use_angle) {
+        stream << " (Angle) ";
+      }
+      break;
+    case PlaygroundBackend::kVulkan:
+      if (switches_.use_swiftshader) {
+        stream << " (SwiftShader) ";
+      }
+      break;
+  }
+  stream << " (Press ESC to quit)";
+  return stream.str();
 }
 
 // |Playground|
