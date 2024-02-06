@@ -49,18 +49,14 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               selected: _animationStyleSelection,
               onSelectionChanged: (Set<AnimationStyles> styles) {
                 setState(() {
-                  _animationStyleSelection = styles;
-                  switch (styles.first) {
-                    case AnimationStyles.defaultStyle:
-                      _animationStyle = null;
-                    case AnimationStyles.custom:
-                      _animationStyle = AnimationStyle(
-                        duration: const Duration(seconds: 3),
-                        reverseDuration: const Duration(seconds: 1),
-                      );
-                    case AnimationStyles.none:
-                      _animationStyle = AnimationStyle.noAnimation;
-                  }
+                  _animationStyle = switch (styles.first) {
+                    AnimationStyles.defaultStyle => null,
+                    AnimationStyles.custom => AnimationStyle(
+                      duration: const Duration(seconds: 3),
+                      reverseDuration: const Duration(seconds: 1),
+                    ),
+                    AnimationStyles.none => AnimationStyle.noAnimation,
+                  };
                 });
               },
               segments: animationStyleSegments
