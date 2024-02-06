@@ -92,13 +92,13 @@ class HotRunner extends ResidentRunner {
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    HotRunnerNativeAssetsBuilder? buildRunner,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
   })  : _stopwatchFactory = stopwatchFactory,
         _reloadSourcesHelper = reloadSourcesHelper,
         _reassembleHelper = reassembleHelper,
-        _buildRunner = buildRunner,
+        _nativeAssetsBuilder = nativeAssetsBuilder,
         _nativeAssetsYamlFile = nativeAssetsYamlFile,
         _analytics = analytics,
         super(
@@ -138,7 +138,7 @@ class HotRunner extends ResidentRunner {
   String? _sdkName;
   bool? _emulator;
 
-  HotRunnerNativeAssetsBuilder? _buildRunner;
+  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
   final String? _nativeAssetsYamlFile;
 
   String? flavor;
@@ -373,7 +373,7 @@ class HotRunner extends ResidentRunner {
       nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
     } else {
       final Uri projectUri = Uri.directory(projectRootPath);
-      nativeAssetsYaml = await _buildRunner?.dryRun(
+      nativeAssetsYaml = await _nativeAssetsBuilder?.dryRun(
         projectUri: projectUri,
         fileSystem: fileSystem,
         flutterDevices: flutterDevices,
@@ -1723,18 +1723,9 @@ class ReasonForCancelling {
   }
 }
 
-/// An interface that when invoked runs the dry run for native assets.
-///
-/// This interface is implemented as a no-op in g3.
-/// 
-/// This interface is implemented in
-/// lib/src/isolated/native_assets/native_assets.dart for normal use.
+/// An interface to enable overriding native assets build logic in other
+/// build systems.
 abstract class HotRunnerNativeAssetsBuilder {
-  /// Gets the native asset id to dylib mapping to embed in the kernel file.
-  ///
-  /// Run hot compiles a kernel file that is pushed to the device after hot
-  /// restart. We need to embed the native assets mapping in order to access
-  /// native assets after hot restart.
   Future<Uri?> dryRun({
     required Uri projectUri,
     required FileSystem fileSystem,

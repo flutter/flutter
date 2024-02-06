@@ -54,7 +54,7 @@ abstract class FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? buildRunner,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   });
 }
 
@@ -93,7 +93,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? buildRunner,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -213,7 +213,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: integrationTestUserIdentifier,
       testTimeRecorder: testTimeRecorder,
-      buildRunner: buildRunner,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
 
     try {

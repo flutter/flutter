@@ -69,7 +69,7 @@ FlutterPlatform installHook({
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
-  TestCompilerNativeAssetsBuilder? buildRunner,
+  TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
 }) {
   assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
@@ -100,7 +100,7 @@ FlutterPlatform installHook({
     integrationTestUserIdentifier: integrationTestUserIdentifier,
     testTimeRecorder: testTimeRecorder,
     uriConverter: uriConverter,
-    buildRunner: buildRunner,
+    nativeAssetsBuilder: nativeAssetsBuilder,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -293,7 +293,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.uriConverter,
-    this.buildRunner,
+    this.nativeAssetsBuilder,
   });
 
   final String shellPath;
@@ -310,7 +310,7 @@ class FlutterPlatform extends PlatformPlugin {
   final FlutterProject? flutterProject;
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
-  final TestCompilerNativeAssetsBuilder? buildRunner;
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
   // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
   final UriConverter? uriConverter;
@@ -474,7 +474,7 @@ class FlutterPlatform extends PlatformPlugin {
             flutterProject,
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
-            buildRunner: buildRunner,
+            nativeAssetsBuilder: nativeAssetsBuilder,
           );
           final Uri uri = globals.fs.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
@@ -501,7 +501,7 @@ class FlutterPlatform extends PlatformPlugin {
             debuggingOptions.buildInfo,
             flutterProject,
             testTimeRecorder: testTimeRecorder,
-            buildRunner: buildRunner,
+            nativeAssetsBuilder: nativeAssetsBuilder,
           );
           mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
 

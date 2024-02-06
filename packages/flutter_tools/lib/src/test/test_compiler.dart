@@ -48,7 +48,7 @@ class TestCompiler {
     this.flutterProject, {
     String? precompiledDillPath,
     this.testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? buildRunner,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject!.directory.path,
         getBuildDirectory(),
@@ -59,7 +59,7 @@ class TestCompiler {
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         )),
        shouldCopyDillFile = precompiledDillPath == null,
-       _buildRunner = buildRunner {
+       _nativeAssetsBuilder = nativeAssetsBuilder {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -80,7 +80,7 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
-  final TestCompilerNativeAssetsBuilder? _buildRunner;
+  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
 
   ResidentCompiler? compiler;
@@ -168,7 +168,7 @@ class TestCompiler {
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
       }
 
-      final Uri? nativeAssetsYaml = await _buildRunner?.build(buildInfo);
+      final Uri? nativeAssetsYaml = await _nativeAssetsBuilder?.build(buildInfo);
 
       final CompilerOutput? compilerOutput = await compiler!.recompile(
         request.mainUri,
@@ -219,6 +219,8 @@ class TestCompiler {
   }
 }
 
+/// An interface to enable overriding native assets build logic in other
+/// build systems.
 abstract class TestCompilerNativeAssetsBuilder {
   Future<Uri?> build(BuildInfo buildInfo);
 }

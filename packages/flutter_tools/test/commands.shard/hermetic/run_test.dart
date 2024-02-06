@@ -1579,7 +1579,7 @@ class CapturingAppDomain extends AppDomain {
     String? userIdentifier,
     bool enableDevTools = true,
     String? flavor,
-    required HotRunnerNativeAssetsBuilder? buildRunner,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     this.userIdentifier = userIdentifier;
     this.enableDevTools = enableDevTools;

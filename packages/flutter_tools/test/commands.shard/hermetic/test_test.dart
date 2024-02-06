@@ -1106,7 +1106,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? buildRunner,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     lastEnableVmServiceValue = enableVmService;
     lastDebuggingOptionsValue = debuggingOptions;

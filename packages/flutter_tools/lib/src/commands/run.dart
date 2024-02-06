@@ -336,8 +336,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 class RunCommand extends RunCommandBase {
   RunCommand({
     bool verboseHelp = false,
-    HotRunnerNativeAssetsBuilder? buildRunner,
-  }) : _buildRunner = buildRunner, super(verboseHelp: verboseHelp) {
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+  }) : _nativeAssetsBuilder = nativeAssetsBuilder,
+       super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -421,7 +422,7 @@ class RunCommand extends RunCommandBase {
       );
   }
 
-  final HotRunnerNativeAssetsBuilder? _buildRunner;
+  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   @override
   final String name = 'run';
@@ -665,7 +666,7 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6 ?? false,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-        buildRunner: _buildRunner,
+        nativeAssetsBuilder: _nativeAssetsBuilder,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -739,7 +740,7 @@ class RunCommand extends RunCommandBase {
           ipv6: ipv6 ?? false,
           userIdentifier: userIdentifier,
           enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
-          buildRunner: _buildRunner,
+          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

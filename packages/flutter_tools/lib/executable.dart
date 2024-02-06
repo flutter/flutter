@@ -179,7 +179,7 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
     processInfo: globals.processInfo,
     fileSystem: globals.fs,
-    buildRunner: HotRunnerNativeAssetsBuilderImpl(),
+    nativeAssetsBuilder: HotRunnerNativeAssetsBuilderImpl(),
   ),
   BuildCommand(
     artifacts: globals.artifacts!,
@@ -242,14 +242,14 @@ List<FlutterCommand> generateCommands({
   ),
   RunCommand(
     verboseHelp: verboseHelp,
-    buildRunner: HotRunnerNativeAssetsBuilderImpl(),
+    nativeAssetsBuilder: HotRunnerNativeAssetsBuilderImpl(),
   ),
   ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
   TestCommand(
     verboseHelp: verboseHelp,
     verbose: verbose,
-    buildRunner: TestCompilerNativeAssetsBuilderImpl(),
+    nativeAssetsBuilder: TestCompilerNativeAssetsBuilderImpl(),
   ),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(

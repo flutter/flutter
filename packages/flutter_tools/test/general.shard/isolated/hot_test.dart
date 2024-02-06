@@ -86,7 +86,7 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
-        buildRunner: FakeHotRunnerNativeAssetsBuilder(buildRunner),
+        nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
@@ -145,7 +145,7 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
-        buildRunner: FakeHotRunnerNativeAssetsBuilder(buildRunner),
+        nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
       );
       expect(

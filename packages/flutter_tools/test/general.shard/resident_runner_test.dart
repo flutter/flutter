@@ -2469,7 +2469,7 @@ flutter:
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          buildRunner: FakeHotRunnerNativeAssetsBuilder(buildRunner),
+          nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
           analytics: fakeAnalytics,
           nativeAssetsYamlFile: 'foo.yaml',
         );

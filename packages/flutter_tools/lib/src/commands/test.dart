@@ -64,7 +64,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
-    this.buildRunner,
+    this.nativeAssetsBuilder,
   }) {
     requiresPubspecYaml();
     usesPubOption();
@@ -239,7 +239,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
-  final TestCompilerNativeAssetsBuilder? buildRunner;
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
   final bool verbose;
 
@@ -508,7 +508,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
       testTimeRecorder: testTimeRecorder,
-      buildRunner: buildRunner,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
