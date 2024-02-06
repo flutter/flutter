@@ -110,7 +110,7 @@ abstract final class CupertinoColors {
   /// or the foreground red theme in various native apps such as HealthKit.
   ///
   /// This is SystemRed in the iOS palette.
-  static const Color destructiveRed = systemRed;
+  static const CupertinoDynamicColor destructiveRed = systemRed;
 
   /// A blue color that can adapt to the given [BuildContext].
   ///
