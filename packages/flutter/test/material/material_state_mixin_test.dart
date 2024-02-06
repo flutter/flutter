@@ -54,7 +54,7 @@ class _MyWidget extends StatefulWidget {
   State createState() => _MyWidgetState();
 }
 
-class _MyWidgetState extends State<_MyWidget> with WidgetStateMixin {
+class _MyWidgetState extends State<_MyWidget> with MaterialStateMixin {
 
   @override
   Widget build(BuildContext context) {
