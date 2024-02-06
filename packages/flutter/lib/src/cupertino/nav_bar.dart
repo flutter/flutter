@@ -807,8 +807,7 @@ class _LargeTitleNavigationBarSliverDelegate
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
-    final double expandedState = clampDouble(shrinkOffset - maxExtent + minExtent, 0, 1);
-
+    final double expandedState = shrinkOffset > minExtent ? (shrinkOffset - minExtent) / (maxExtent - minExtent) : 0;
 
     final _PersistentNavigationBar persistentNavigationBar =
         _PersistentNavigationBar(
@@ -823,7 +822,7 @@ class _LargeTitleNavigationBarSliverDelegate
 
     final Widget navBar = _wrapWithBackground(
       border: expandedTransparent
-          ? Border.lerp(null, border, expandedState)
+          ? Border.lerp(border?.scale(0), border, expandedState)
           : border,
       backgroundColor: expandedTransparent
           ? Color.lerp(
