@@ -213,6 +213,7 @@ enum WebRendererMode implements CliEnum {
 }
 
 /// The correct precompiled artifact to use for each build and render mode for DDC with AMD modules.
+// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
 const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kAmdDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
   WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
@@ -229,6 +230,7 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kAmdDartSdkJsArtif
 };
 
 /// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
+// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
 const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kAmdDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
   WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps,

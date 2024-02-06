@@ -4,35 +4,6 @@
 
 import 'package:package_config/package_config.dart';
 
-const String _currentDirectoryScript = r"""
-var _currentDirectory = (function () {
-  var lines = new Error().stack.split('\n');
-  function lookupUrl() {
-    if (lines.length > 2) {
-      var match = lines[1].match(/^\s+at (.+):\d+:\d+.*$/);
-      // Chrome.
-      if (match) return match[1];
-      // Chrome nested eval case.
-      match = lines[1].match(/^\s+at eval [(](.+):\d+:\d+[)]$/);
-      if (match) return match[1];
-      // Edge.
-      match = lines[1].match(/^\s+at.+\((.+):\d+:\d+\)$/);
-      if (match) return match[1];
-      // Firefox.
-      match = lines[0].match(/[<][@](.+):\d+:\d+$/);
-      if (match) return match[1];
-    }
-    // Safari.
-    return lines[0].match(/[@](.+):\d+:\d+$/)[1];
-  }
-  var _url = lookupUrl();
-  var lastSlash = _url.lastIndexOf('/');
-  if (lastSlash == -1) return _url;
-  var currentDirectory = _url.substring(0, lastSlash + 1);
-  return currentDirectory;
-})();
-""";
-
 /// Used to load prerequisite scripts such as ddc_module_loader.js
 const String _simpleLoaderScript = r'''
 window.$dartCreateScript = (function() {
@@ -84,7 +55,9 @@ String generateDDCBootstrapScript({
 }) {
   return '''
 ${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
-$_currentDirectoryScript
+// TODO(markzipan): This is safe if Flutter app roots are always equal to the
+// host root. Validate if this is true.
+var _currentDirectory = '/';
 $_simpleLoaderScript
 
 // A map containing the URLs for the bootstrap scripts in debug.
@@ -107,13 +80,6 @@ if (window.trustedTypes) {
   });
 }
 
-// Creates a TrustedScriptURL for a given `scriptName`.
-// See `_scriptUrls` and `_ttPolicy` above.
-function getTTScriptUrl(scriptName) {
-  let defaultUrl = _scriptUrls[scriptName];
-  return _ttPolicy ? _ttPolicy.createScriptURL(scriptName) : defaultUrl;
-}
-
 (function() {
   let appName = "$entrypoint";
 
@@ -128,11 +94,11 @@ function getTTScriptUrl(scriptName) {
   // We intentionally use invalid names to avoid namespace clashes.
   let prerequisiteScripts = [
     {
-      "src": getTTScriptUrl("moduleLoader"),
+      "src": "$ddcModuleLoaderUrl",
       "id": "ddc_module_loader \x00"
     },
     {
-      "src": getTTScriptUrl("mapper"),
+      "src": "$mapperUrl",
       "id": "dart_stack_trace_mapper \x00"
     }
   ];
@@ -173,11 +139,10 @@ function getTTScriptUrl(scriptName) {
           moduleSet = new Set(libraryCache["modules"])
         }
         loader.addScriptsToQueue(scripts, function(script) {
-            // Preemptively load the module loader and previously executed modules.
+            // Preemptively load the module loader and previously executed modules,
+            // and the stack_trace_mapper so that we can translate JS errors to Dart.
             return moduleSet.size == 0
                   || script.id.includes("ddc_module_loader")
-                  // We preemptively load the stack_trace_mapper module so that we can
-                  // translate JS errors to Dart.
                   || script.id.includes("stack_trace_mapper")
                   || moduleSet.has(script.id);
         });
@@ -399,7 +364,7 @@ var styles = `
   .flutter-loader {
     width: 100%;
     height: 8px;
-    background-color: #13B9FD;
+    background-color: #13B9FD;dg
     position: absolute;
     top: 0px;
     left: 0px;
