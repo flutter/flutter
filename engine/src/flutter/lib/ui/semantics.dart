@@ -1027,6 +1027,9 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implem
   }
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'SemanticsUpdateBuilder::build')
   external void _build(_NativeSemanticsUpdate outSemanticsUpdate);
+
+  @override
+  String toString() => 'SemanticsUpdateBuilder';
 }
 
 /// An opaque object representing a batch of semantics updates.
@@ -1056,4 +1059,7 @@ base class _NativeSemanticsUpdate extends NativeFieldWrapperClass1 implements Se
   @override
   @Native<Void Function(Pointer<Void>)>(symbol: 'SemanticsUpdate::dispose')
   external void dispose();
+
+  @override
+  String toString() => 'SemanticsUpdate';
 }

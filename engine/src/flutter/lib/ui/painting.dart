@@ -2131,6 +2131,9 @@ base class _NativeCodec extends NativeFieldWrapperClass1 implements Codec {
   @override
   @Native<Void Function(Pointer<Void>)>(symbol: 'Codec::dispose')
   external void dispose();
+
+  @override
+  String toString() => 'Codec(${_cachedFrameCount == null ? "" : "$_cachedFrameCount frames"})';
 }
 
 /// Instantiates an image [Codec].
@@ -3110,6 +3113,9 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
   PathMetrics computeMetrics({bool forceClosed = false}) {
     return PathMetrics._(this, forceClosed);
   }
+
+  @override
+  String toString() => 'Path';
 }
 
 /// The geometric description of a tangent: the angle at a point.
@@ -6238,6 +6244,9 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Uint32, Double, Bool)>(symbol: 'Canvas::drawShadow')
   external void _drawShadow(_NativePath path, int color, double elevation, bool transparentOccluder);
+
+  @override
+  String toString() => 'Canvas(recording: ${_recorder != null})';
 }
 
 /// Signature for [Picture] lifecycle events.
@@ -6381,6 +6390,9 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
   @override
   @Native<Uint64 Function(Pointer<Void>)>(symbol: 'Picture::GetAllocationSize', isLeaf: true)
   external int get approximateBytesUsed;
+
+  @override
+  String toString() => 'Picture';
 }
 
 /// Records a [Picture] containing a sequence of graphical operations.
@@ -6438,6 +6450,9 @@ base class _NativePictureRecorder extends NativeFieldWrapperClass1 implements Pi
   external void _endRecording(_NativePicture outPicture);
 
   _NativeCanvas? _canvas;
+
+  @override
+  String toString() => 'PictureRecorder(recording: $isRecording)';
 }
 
 /// A single shadow.
@@ -6895,6 +6910,9 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
 
   @Native<Void Function(Pointer<Void>, Handle, Int32, Int32)>(symbol: 'ImageDescriptor::instantiateCodec')
   external void _instantiateCodec(Codec outCodec, int targetWidth, int targetHeight);
+
+  @override
+  String toString() => 'ImageDescriptor(width: ${_width ?? '?'}, height: ${_height ?? '?'}, bytes per pixel: ${_bytesPerPixel ?? '?'})';
 }
 
 /// Generic callback signature, used by [_futurize].

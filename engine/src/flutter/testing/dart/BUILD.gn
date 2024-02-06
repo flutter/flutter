@@ -45,6 +45,7 @@ tests = [
   "serial_gc_test.dart",
   "spawn_helper.dart",
   "spawn_test.dart",
+  "stringification_test.dart",
   "task_order_test.dart",
   "text_test.dart",
   "window_test.dart",

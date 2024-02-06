@@ -3334,6 +3334,27 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
     }());
     return disposed ?? (throw StateError('$runtimeType.debugDisposed is only available when asserts are enabled.'));
   }
+
+  @override
+  String toString() {
+    String? result;
+    assert(() {
+      if (_disposed && _needsLayout) {
+        result = 'Paragraph(DISPOSED while dirty)';
+      }
+      if (_disposed && !_needsLayout) {
+        result = 'Paragraph(DISPOSED)';
+      }
+      return true;
+    }());
+    if (result != null) {
+      return result!;
+    }
+    if (_needsLayout) {
+      return 'Paragraph(dirty)';
+    }
+    return 'Paragraph()';
+  }
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.
@@ -3657,6 +3678,9 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
 
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'ParagraphBuilder::build')
   external void _build(_NativeParagraph outParagraph);
+
+  @override
+  String toString() => 'ParagraphBuilder';
 }
 
 /// Loads a font from a buffer and makes it available for rendering text.
