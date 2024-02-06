@@ -317,15 +317,11 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       'descendant Scaffolds to present to.',
     );
     _didUpdateAnimationStyle(snackBarAnimationStyle);
-    _snackBarController ??=
-      snackBarAnimationStyle != null
-        ? AnimationController(
-            duration: snackBarAnimationStyle.duration,
-            reverseDuration: snackBarAnimationStyle.reverseDuration,
-            debugLabel: 'SnackBar',
-            vsync: this,
-          )
-        : SnackBar.createAnimationController(vsync: this)
+    _snackBarController ??= SnackBar.createAnimationController(
+        duration: snackBarAnimationStyle?.duration,
+        reverseDuration: snackBarAnimationStyle?.reverseDuration,
+        vsync: this,
+      )
       ..addStatusListener(_handleSnackBarStatusChanged);
     if (_snackBars.isEmpty) {
       assert(_snackBarController!.isDismissed);
