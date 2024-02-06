@@ -6748,7 +6748,7 @@ void main() {
     void valueChanged() {
       count += 1;
     }
-    final MaterialStatesController statesController = MaterialStatesController();
+    final WidgetStatesController statesController = WidgetStatesController();
     addTearDown(statesController.dispose);
 
     statesController.addListener(valueChanged);
@@ -6872,7 +6872,7 @@ void main() {
     void valueChanged() {
       count += 1;
     }
-    final MaterialStatesController controller = MaterialStatesController();
+    final WidgetStatesController controller = WidgetStatesController();
     addTearDown(controller.dispose);
     controller.addListener(valueChanged);
     await tester.pumpWidget(

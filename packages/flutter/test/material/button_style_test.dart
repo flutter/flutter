@@ -107,22 +107,22 @@ void main() {
   });
 
   testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
-    const MaterialStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10));
-    const MaterialStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
-    const MaterialStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
-    const MaterialStateProperty<Color> overlayColor = MaterialStatePropertyAll<Color>(Color(0xfffffff3));
-    const MaterialStateProperty<Color> shadowColor =  MaterialStatePropertyAll<Color>(Color(0xfffffff4));
-    const MaterialStateProperty<Color> surfaceTintColor = MaterialStatePropertyAll<Color>(Color(0xfffffff5));
-    const MaterialStateProperty<double> elevation = MaterialStatePropertyAll<double>(1);
-    const MaterialStateProperty<EdgeInsets> padding = MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(1));
-    const MaterialStateProperty<Size> minimumSize = MaterialStatePropertyAll<Size>(Size(1, 2));
-    const MaterialStateProperty<Size> fixedSize = MaterialStatePropertyAll<Size>(Size(3, 4));
-    const MaterialStateProperty<Size> maximumSize = MaterialStatePropertyAll<Size>(Size(5, 6));
-    const MaterialStateProperty<Color> iconColor = MaterialStatePropertyAll<Color>(Color(0xfffffff6));
-    const MaterialStateProperty<double> iconSize = MaterialStatePropertyAll<double>(48.0);
-    const MaterialStateProperty<BorderSide> side = MaterialStatePropertyAll<BorderSide>(BorderSide());
-    const MaterialStateProperty<OutlinedBorder> shape = MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
-    const MaterialStateProperty<MouseCursor> mouseCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
+    const WidgetStateProperty<TextStyle> textStyle = WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 10));
+    const WidgetStateProperty<Color> backgroundColor = WidgetStatePropertyAll<Color>(Color(0xfffffff1));
+    const WidgetStateProperty<Color> foregroundColor = WidgetStatePropertyAll<Color>(Color(0xfffffff2));
+    const WidgetStateProperty<Color> overlayColor = WidgetStatePropertyAll<Color>(Color(0xfffffff3));
+    const WidgetStateProperty<Color> shadowColor =  WidgetStatePropertyAll<Color>(Color(0xfffffff4));
+    const WidgetStateProperty<Color> surfaceTintColor = WidgetStatePropertyAll<Color>(Color(0xfffffff5));
+    const WidgetStateProperty<double> elevation = WidgetStatePropertyAll<double>(1);
+    const WidgetStateProperty<EdgeInsets> padding = WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(1));
+    const WidgetStateProperty<Size> minimumSize = WidgetStatePropertyAll<Size>(Size(1, 2));
+    const WidgetStateProperty<Size> fixedSize = WidgetStatePropertyAll<Size>(Size(3, 4));
+    const WidgetStateProperty<Size> maximumSize = WidgetStatePropertyAll<Size>(Size(5, 6));
+    const WidgetStateProperty<Color> iconColor = WidgetStatePropertyAll<Color>(Color(0xfffffff6));
+    const WidgetStateProperty<double> iconSize = WidgetStatePropertyAll<double>(48.0);
+    const WidgetStateProperty<BorderSide> side = WidgetStatePropertyAll<BorderSide>(BorderSide());
+    const WidgetStateProperty<OutlinedBorder> shape = WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder());
+    const WidgetStateProperty<MouseCursor> mouseCursor = WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
     const VisualDensity visualDensity = VisualDensity.compact;
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Duration animationDuration = Duration(seconds: 1);

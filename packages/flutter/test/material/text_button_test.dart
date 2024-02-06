@@ -1757,7 +1757,7 @@ void main() {
     void valueChanged() {
       count += 1;
     }
-    final MaterialStatesController controller = MaterialStatesController();
+    final WidgetStatesController controller = WidgetStatesController();
     addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
@@ -1872,7 +1872,7 @@ void main() {
     void valueChanged() {
       count += 1;
     }
-    final MaterialStatesController controller = MaterialStatesController();
+    final WidgetStatesController controller = WidgetStatesController();
     addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 

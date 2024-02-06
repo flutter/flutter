@@ -2097,7 +2097,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
 
   testWidgets('InkWell disposes statesController', (WidgetTester tester) async {
     int tapCount = 0;
-    Widget buildFrame(MaterialStatesController? statesController) {
+    Widget buildFrame(WidgetStatesController? statesController) {
       return MaterialApp(
         home: Scaffold(
           body: Center(
@@ -2111,7 +2111,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
       );
     }
 
-    final MaterialStatesController controller = MaterialStatesController();
+    final WidgetStatesController controller = WidgetStatesController();
     addTearDown(controller.dispose);
     int pressedCount = 0;
     controller.addListener(() {
@@ -2266,7 +2266,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
 
   testWidgets('InkWell activation action does not end immediately', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/132377.
-    final MaterialStatesController controller = MaterialStatesController();
+    final WidgetStatesController controller = WidgetStatesController();
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,

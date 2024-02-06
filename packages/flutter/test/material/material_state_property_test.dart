@@ -8,59 +8,59 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('MaterialStateProperty.resolveWith()', () {
-    final MaterialStateProperty<MaterialState> value = MaterialStateProperty.resolveWith<MaterialState>(
-      (Set<MaterialState> states) => states.first,
+    final WidgetStateProperty<WidgetState> value = WidgetStateProperty.resolveWith<WidgetState>(
+      (Set<WidgetState> states) => states.first,
     );
-    expect(value.resolve(<MaterialState>{MaterialState.hovered}), MaterialState.hovered);
-    expect(value.resolve(<MaterialState>{MaterialState.focused}), MaterialState.focused);
-    expect(value.resolve(<MaterialState>{MaterialState.pressed}), MaterialState.pressed);
-    expect(value.resolve(<MaterialState>{MaterialState.dragged}), MaterialState.dragged);
-    expect(value.resolve(<MaterialState>{MaterialState.selected}), MaterialState.selected);
-    expect(value.resolve(<MaterialState>{MaterialState.disabled}), MaterialState.disabled);
-    expect(value.resolve(<MaterialState>{MaterialState.error}), MaterialState.error);
+    expect(value.resolve(<WidgetState>{WidgetState.hovered}), WidgetState.hovered);
+    expect(value.resolve(<WidgetState>{WidgetState.focused}), WidgetState.focused);
+    expect(value.resolve(<WidgetState>{WidgetState.pressed}), WidgetState.pressed);
+    expect(value.resolve(<WidgetState>{WidgetState.dragged}), WidgetState.dragged);
+    expect(value.resolve(<WidgetState>{WidgetState.selected}), WidgetState.selected);
+    expect(value.resolve(<WidgetState>{WidgetState.disabled}), WidgetState.disabled);
+    expect(value.resolve(<WidgetState>{WidgetState.error}), WidgetState.error);
   });
 
   test('MaterialStateProperty.all()', () {
-    final MaterialStateProperty<int> value = MaterialStateProperty.all<int>(123);
-    expect(value.resolve(<MaterialState>{MaterialState.hovered}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.focused}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.pressed}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.dragged}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.selected}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.disabled}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.error}), 123);
+    final WidgetStateProperty<int> value = WidgetStateProperty.all<int>(123);
+    expect(value.resolve(<WidgetState>{WidgetState.hovered}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.focused}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.pressed}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.dragged}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.selected}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.disabled}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.error}), 123);
   });
 
   test('MaterialStatePropertyAll', () {
-    const MaterialStatePropertyAll<int> value = MaterialStatePropertyAll<int>(123);
-    expect(value.resolve(<MaterialState>{}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.hovered}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.focused}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.pressed}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.dragged}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.selected}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.disabled}), 123);
-    expect(value.resolve(<MaterialState>{MaterialState.error}), 123);
+    const WidgetStatePropertyAll<int> value = WidgetStatePropertyAll<int>(123);
+    expect(value.resolve(<WidgetState>{}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.hovered}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.focused}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.pressed}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.dragged}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.selected}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.disabled}), 123);
+    expect(value.resolve(<WidgetState>{WidgetState.error}), 123);
   });
 
   test('toString formats correctly', () {
-    const MaterialStateProperty<Color?> colorProperty = MaterialStatePropertyAll<Color?>(Color(0xFFFFFFFF));
+    const WidgetStateProperty<Color?> colorProperty = WidgetStatePropertyAll<Color?>(Color(0xFFFFFFFF));
     expect(colorProperty.toString(), equals('WidgetStatePropertyAll(Color(0xffffffff))'));
 
-    const MaterialStateProperty<double?> doubleProperty = MaterialStatePropertyAll<double?>(33 + 1/3);
+    const WidgetStateProperty<double?> doubleProperty = WidgetStatePropertyAll<double?>(33 + 1/3);
     expect(doubleProperty.toString(), equals('WidgetStatePropertyAll(33.3)'));
   });
 
   test("Can interpolate between two MaterialStateProperty's", () {
-    const MaterialStateProperty<TextStyle?> textStyle1 =  MaterialStatePropertyAll<TextStyle?>(
+    const WidgetStateProperty<TextStyle?> textStyle1 =  WidgetStatePropertyAll<TextStyle?>(
       TextStyle(fontSize: 14.0),
     );
-    const MaterialStateProperty<TextStyle?> textStyle2 = MaterialStatePropertyAll<TextStyle?>(
+    const WidgetStateProperty<TextStyle?> textStyle2 = WidgetStatePropertyAll<TextStyle?>(
       TextStyle(fontSize: 20.0),
     );
 
     // Using `0.0` interpolation value.
-    TextStyle textStyle = MaterialStateProperty.lerp<TextStyle?>(
+    TextStyle textStyle = WidgetStateProperty.lerp<TextStyle?>(
       textStyle1,
       textStyle2,
       0.0,
@@ -69,7 +69,7 @@ void main() {
     expect(textStyle.fontSize, 14.0);
 
     // Using `0.5` interpolation value.
-    textStyle = MaterialStateProperty.lerp<TextStyle?>(
+    textStyle = WidgetStateProperty.lerp<TextStyle?>(
       textStyle1,
       textStyle2,
       0.5,
@@ -78,7 +78,7 @@ void main() {
     expect(textStyle.fontSize, 17.0);
 
     // Using `1.0` interpolation value.
-    textStyle = MaterialStateProperty.lerp<TextStyle?>(
+    textStyle = WidgetStateProperty.lerp<TextStyle?>(
       textStyle1,
       textStyle2,
       1.0,
@@ -88,4 +88,4 @@ void main() {
   });
 }
 
-Set<MaterialState> enabled = <MaterialState>{};
+Set<WidgetState> enabled = <WidgetState>{};
