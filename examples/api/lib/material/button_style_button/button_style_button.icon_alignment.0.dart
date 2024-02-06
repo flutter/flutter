@@ -60,7 +60,7 @@ class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButto
                   ),
                   FilledButton.icon(
                     onPressed: () {},
-                  icon: const Icon(Icons.beach_access),
+                    icon: const Icon(Icons.beach_access),
                     label: const Text('FilledButton'),
                     iconAlignment: _iconAlignment,
                   ),
