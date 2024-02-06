@@ -290,38 +290,13 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **
   /// {@end-tool}
   ///
-  /// If [AnimationStyle.duration] is provided in the [snackBarAnimationStyle]
-  /// parameter, it will be used to override the snackbar show animation duration.
-  /// Otherwise, defaults to 250ms.
-  ///
-  /// If [AnimationStyle.reverseDuration] is provided in the [snackBarAnimationStyle]
-  /// parameter, it will be used to override the snackbar hide animation duration.
-  /// Otherwise, defaults to 250ms.
-  ///
-  /// To disable the snackbar animation, use [AnimationStyle.noAnimation].
-  ///
-  /// {@tool dartpad}
-  /// This sample showcases how to override [SnackBar] show and hide animation
-  /// duration using [AnimationStyle] in [ScaffoldMessengerState.showSnackBar].
-  ///
-  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.2.dart **
-  /// {@end-tool}
-  ///
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(
-    SnackBar snackBar,
-    { AnimationStyle? snackBarAnimationStyle }
-  ) {
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
     assert(
       _scaffolds.isNotEmpty,
       'ScaffoldMessenger.showSnackBar was called, but there are currently no '
       'descendant Scaffolds to present to.',
     );
-    _didUpdateAnimationStyle(snackBarAnimationStyle);
-    _snackBarController ??= SnackBar.createAnimationController(
-        duration: snackBarAnimationStyle?.duration,
-        reverseDuration: snackBarAnimationStyle?.reverseDuration,
-        vsync: this,
-      )
+    _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChanged);
     if (_snackBars.isEmpty) {
       assert(_snackBarController!.isDismissed);
@@ -378,16 +353,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     }
 
     return controller;
-  }
-
-  void _didUpdateAnimationStyle(AnimationStyle? snackBarAnimationStyle) {
-    if (snackBarAnimationStyle != null) {
-      if (_snackBarController?.duration != snackBarAnimationStyle.duration ||
-          _snackBarController?.reverseDuration != snackBarAnimationStyle.reverseDuration) {
-        _snackBarController?.dispose();
-        _snackBarController = null;
-      }
-    }
   }
 
   void _handleSnackBarStatusChanged(AnimationStatus status) {
