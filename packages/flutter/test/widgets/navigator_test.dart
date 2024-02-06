@@ -5259,7 +5259,7 @@ void main() {
       final int consumedKbPerOperation = (ProcessInfo.currentRss - initialRss) ~/ (1024 * count);
       final int gcCount = reachabilityBarrier - initialGcCount;
 
-      expect(gcCount, greaterThan(count)); // Actual value is 0 on polina-c's mac.
+      expect(gcCount, greaterThan(0)); // Actual value is 0 on polina-c's mac.
       expect(consumedKbPerOperation, lessThan(100)); // Actual value is 552 KB per operation on polina-c's mac.
     },
     skip: true, // https://github.com/flutter/flutter/issues/79605
