@@ -12,6 +12,7 @@ import '../web/chrome.dart';
 import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
+import 'test_compiler.dart';
 import 'test_time_recorder.dart';
 import 'test_wrapper.dart';
 import 'watcher.dart';
@@ -53,6 +54,7 @@ abstract class FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   });
 }
 
@@ -91,6 +93,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -210,6 +213,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: integrationTestUserIdentifier,
       testTimeRecorder: testTimeRecorder,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
 
     try {

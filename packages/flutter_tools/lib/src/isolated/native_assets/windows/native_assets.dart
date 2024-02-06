@@ -5,11 +5,11 @@
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode;
 
-import '../base/file_system.dart';
-import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../../../base/file_system.dart';
+import '../../../build_info.dart';
+import '../../../globals.dart' as globals;
+import '../../../windows/visual_studio.dart';
 import '../native_assets.dart';
-import 'visual_studio.dart';
 
 /// Dry run the native builds.
 ///
@@ -65,7 +65,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
     fileSystem: fileSystem,
   );
 }
-
 
 Future<CCompilerConfig> cCompilerConfigWindows() async {
   final VisualStudio visualStudio = VisualStudio(
