@@ -314,6 +314,8 @@ Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
 }
 
 class HotRunnerNativeAssetsBuilderImpl implements HotRunnerNativeAssetsBuilder {
+  const HotRunnerNativeAssetsBuilderImpl();
+
   @override
   Future<Uri?> dryRun({
     required Uri projectUri,

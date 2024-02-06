@@ -17,6 +17,8 @@ import '../windows/native_assets.dart';
 
 class TestCompilerNativeAssetsBuilderImpl
     implements TestCompilerNativeAssetsBuilder {
+  const TestCompilerNativeAssetsBuilderImpl();
+
   @override
   Future<Uri?> build(BuildInfo buildInfo) =>
       testCompilerBuildNativeAssets(buildInfo);
