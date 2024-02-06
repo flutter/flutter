@@ -512,4 +512,16 @@ FlutterError
     expect(animation.value, 10.0);
   });
 
+  test('AnimationController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        ).dispose(),
+        AnimationController,
+      ),
+      areCreateAndDispose,
+    );
+  });
 }
