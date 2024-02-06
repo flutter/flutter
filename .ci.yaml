@@ -4133,6 +4133,7 @@ targets:
 
   # mac motog4 test
   - name: Mac_arm64_android integration_test_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/142960
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
