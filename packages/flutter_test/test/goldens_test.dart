@@ -192,7 +192,7 @@ void main() {
             throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
-              contains('% diff detected'),
+              contains('100.00%, 1px diff detected'),
             )),
           );
           final io.File master = fs.file(
@@ -223,7 +223,7 @@ void main() {
             throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
-              contains('% diff detected'),
+              contains('100.00%, 1px diff detected'),
             )),
           );
           final io.File master = fs.file(
@@ -274,7 +274,7 @@ void main() {
             throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
-              contains('% diff detected'),
+              contains('100.00%, 1px diff detected'),
             )),
           );
         });
