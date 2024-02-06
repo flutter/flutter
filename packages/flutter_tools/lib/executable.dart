@@ -55,7 +55,6 @@ import 'src/isolated/resident_web_runner.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/resident_runner.dart';
-import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/web_runner.dart';
 
@@ -141,7 +140,6 @@ Future<void> main(List<String> args) async {
         // runner.run calls "terminal.applyFeatureFlags()"
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
-      HotRunnerNativeAssetsBuilder: () => HotRunnerNativeAssetsBuilderImpl(),
     },
     shutdownHooks: globals.shutdownHooks,
   );
@@ -180,6 +178,7 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
     processInfo: globals.processInfo,
     fileSystem: globals.fs,
+    buildRunner: HotRunnerNativeAssetsBuilderImpl(),
   ),
   BuildCommand(
     artifacts: globals.artifacts!,
@@ -240,7 +239,10 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(verboseHelp: verboseHelp),
+  RunCommand(
+    verboseHelp: verboseHelp,
+    buildRunner: HotRunnerNativeAssetsBuilderImpl(),
+  ),
   ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
   TestCommand(verboseHelp: verboseHelp, verbose: verbose),

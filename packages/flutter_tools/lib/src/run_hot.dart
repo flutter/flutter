@@ -373,7 +373,6 @@ class HotRunner extends ResidentRunner {
       nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
     } else {
       final Uri projectUri = Uri.directory(projectRootPath);
-      _buildRunner ??= globals.nativeAssetsBuilder;
       nativeAssetsYaml = await _buildRunner?.dryRun(
         projectUri: projectUri,
         fileSystem: fileSystem,

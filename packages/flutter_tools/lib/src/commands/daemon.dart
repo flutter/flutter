@@ -654,6 +654,7 @@ class AppDomain extends Domain {
     bool machine = true,
     String? userIdentifier,
     bool enableDevTools = true,
+    required HotRunnerNativeAssetsBuilder? buildRunner,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -705,6 +706,7 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
+        buildRunner: buildRunner,
       );
     } else {
       runner = ColdRunner(
