@@ -259,8 +259,13 @@ ComponentV2::ComponentV2(
   fdio_service_connect_at(directory_ptr_.channel().get(), "svc",
                           request.release());
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
   auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
   composed_service_dir->set_fallback(std::move(flutter_public_dir));
+
+#pragma clang diagnostic pop
 
   // Clone and check if client is servicing the directory.
   directory_ptr_->Clone(fuchsia::io::OpenFlags::DESCRIBE |
