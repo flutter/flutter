@@ -85,7 +85,7 @@ void main() {
       // The foreground color is hardcoded to black or white by default, not the
       // default value from ColorScheme.onSurface.
       expect(
-        textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
+        textButton.style!.foregroundColor!.resolve(<WidgetState>{}),
         switch (colorScheme.brightness) {
           Brightness.light => const Color(0xff000000),
           Brightness.dark => const Color(0xffffffff),
@@ -118,7 +118,7 @@ void main() {
 
       final TextButton textButton = tester.widget(find.byType(TextButton));
       expect(
-        textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
+        textButton.style!.foregroundColor!.resolve(<WidgetState>{}),
         customForegroundColor,
       );
     });
@@ -149,7 +149,7 @@ void main() {
       // hardcodes the color value, and TextSelectionToolbarTextButton that are its
       // children should be that color.
       expect(
-        textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
+        textButton.style!.backgroundColor!.resolve(<WidgetState>{}),
         Colors.transparent,
       );
     });
@@ -162,7 +162,7 @@ void main() {
             colorScheme: colorScheme,
             textButtonTheme: const TextButtonThemeData(
               style: ButtonStyle(
-                backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue),
+                backgroundColor: WidgetStatePropertyAll<Color>(Colors.blue),
               ),
             ),
           ),
@@ -185,7 +185,7 @@ void main() {
       // hardcodes the color value, and TextSelectionToolbarTextButton that are its
       // children should be that color.
       expect(
-        textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
+        textButton.style!.backgroundColor!.resolve(<WidgetState>{}),
         Colors.transparent,
       );
     });

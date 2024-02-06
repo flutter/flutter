@@ -2081,17 +2081,17 @@ void main() {
     const Color defaultColor = Color(0x00000004);
     const Color selectedColor = Color(0x00000005);
 
-    Color getIconColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getIconColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
       return defaultColor;
@@ -2106,7 +2106,7 @@ void main() {
               body: Center(
                 child: IconButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getIconColor),
                   ),
                   isSelected: isSelected,
                   onPressed: () {
@@ -2172,7 +2172,7 @@ void main() {
                 // Specifying minimumSize to mimic the original minimumSize for
                 // RaisedButton so that the semantics tree's rect and transform
                 // match the original version of this test.
-                minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+                minimumSize: WidgetStatePropertyAll<Size>(Size(88, 36)),
               ),
               onPressed: () { },
               icon: const Icon(Icons.ac_unit),

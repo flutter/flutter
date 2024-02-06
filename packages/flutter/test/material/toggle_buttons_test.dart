@@ -706,8 +706,8 @@ void main() {
     const Color selectedFillColor = Colors.orange;
     const Color defaultFillColor = Colors.blue;
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedFillColor;
       }
       return defaultFillColor;
@@ -716,7 +716,7 @@ void main() {
     await tester.pumpWidget(
       boilerplate(
         child: ToggleButtons(
-          fillColor: MaterialStateColor.resolveWith(getFillColor),
+          fillColor: WidgetStateColor.resolveWith(getFillColor),
           isSelected: const <bool>[false, true],
           onPressed: (int index) {},
           children: const <Widget>[
@@ -736,7 +736,7 @@ void main() {
     await tester.pumpWidget(
       boilerplate(
         child: ToggleButtons(
-          fillColor: MaterialStateColor.resolveWith(getFillColor),
+          fillColor: WidgetStateColor.resolveWith(getFillColor),
           isSelected: const <bool>[false, true],
           children: const <Widget>[
             Text('First child'),

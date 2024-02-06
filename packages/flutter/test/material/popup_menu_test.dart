@@ -3176,8 +3176,8 @@ void main() {
   testWidgets('Popup menu scrollbar inherits ScrollbarTheme', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     const ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(
-      thumbColor: MaterialStatePropertyAll<Color?>(Color(0xffff0000)),
-      thumbVisibility: MaterialStatePropertyAll<bool?>(true),
+      thumbColor: WidgetStatePropertyAll<Color?>(Color(0xffff0000)),
+      thumbVisibility: WidgetStatePropertyAll<bool?>(true),
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -3231,7 +3231,7 @@ void main() {
             children: <Widget>[
               ScrollbarTheme(
                 data: scrollbarTheme.copyWith(
-                  thumbColor: const MaterialStatePropertyAll<Color?>(Color(0xff0000ff)),
+                  thumbColor: const WidgetStatePropertyAll<Color?>(Color(0xff0000ff)),
                 ),
                 child: PopupMenuButton<void>(
                   key: popupButtonKey,
@@ -3448,9 +3448,9 @@ void main() {
 
   testWidgets('CheckedPopupMenuItem.labelTextStyle resolve material states', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
-    final MaterialStateProperty<TextStyle?> labelTextStyle = MaterialStateProperty.resolveWith(
-     (Set<MaterialState> states) {
-       if (states.contains(MaterialState.selected)) {
+    final WidgetStateProperty<TextStyle?> labelTextStyle = WidgetStateProperty.resolveWith(
+     (Set<WidgetState> states) {
+       if (states.contains(WidgetState.selected)) {
         return const TextStyle(color: Colors.red, fontSize: 24.0);
        }
 
@@ -3488,11 +3488,11 @@ void main() {
 
     expect(
       _labelStyle(tester, 'Item 1'),
-      labelTextStyle.resolve(<MaterialState>{})
+      labelTextStyle.resolve(<WidgetState>{})
     );
     expect(
       _labelStyle(tester, 'Item 2'),
-      labelTextStyle.resolve(<MaterialState>{MaterialState.selected})
+      labelTextStyle.resolve(<WidgetState>{WidgetState.selected})
     );
   });
 

@@ -1069,9 +1069,9 @@ void main() {
     final Widget textButton = actionTextButton.widget;
     if (textButton is TextButton) {
       final ButtonStyle buttonStyle = textButton.style!;
-      if (buttonStyle.foregroundColor is MaterialStateColor) {
+      if (buttonStyle.foregroundColor is WidgetStateColor) {
         // Same color when resolved
-        expect(buttonStyle.foregroundColor!.resolve(<MaterialState>{}), usedColor);
+        expect(buttonStyle.foregroundColor!.resolve(<WidgetState>{}), usedColor);
       } else {
         expect(false, true);
       }
@@ -1121,7 +1121,7 @@ void main() {
     final Widget textButton = actionTextButton.widget;
     if (textButton is TextButton) {
       final ButtonStyle buttonStyle = textButton.style!;
-      if (buttonStyle.foregroundColor is MaterialStateColor) {
+      if (buttonStyle.foregroundColor is WidgetStateColor) {
         // Exactly the same object
         expect(buttonStyle.foregroundColor, usedColor);
       } else {
@@ -3591,8 +3591,8 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
   });
 
   testWidgets('SnackBarAction backgroundColor works as a MaterialStateColor', (WidgetTester tester) async {
-    final MaterialStateColor backgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    final WidgetStateColor backgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;
@@ -3696,8 +3696,8 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
   });
 
   testWidgets('SnackBarAction asserts when backgroundColor is a MaterialStateColor and disabledBackgroundColor is also provided', (WidgetTester tester) async {
-    final Color backgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    final Color backgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;
@@ -4030,15 +4030,15 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
   return dragGestures;
 }
 
-class _TestMaterialStateColor extends MaterialStateColor {
+class _TestMaterialStateColor extends WidgetStateColor {
   const _TestMaterialStateColor() : super(_colorRed);
 
   static const int _colorRed = 0xFFF44336;
   static const int _colorBlue = 0xFF2196F3;
 
   @override
-  Color resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.pressed)) {
+  Color resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.pressed)) {
       return const Color(_colorBlue);
     }
 

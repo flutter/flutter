@@ -52,13 +52,13 @@ void main() {
                 MenuBarTheme(
                   data: const MenuBarThemeData(
                     style: MenuStyle(
-                      fixedSize: MaterialStatePropertyAll<Size>(Size(600, 60)),
+                      fixedSize: WidgetStatePropertyAll<Size>(Size(600, 60)),
                     ),
                   ),
                   child: MenuTheme(
                     data: const MenuThemeData(
                       style: MenuStyle(
-                        fixedSize: MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        fixedSize: WidgetStatePropertyAll<Size>(Size(100, 100)),
                       ),
                     ),
                     child: MenuBar(
@@ -97,13 +97,13 @@ void main() {
                 MenuBarTheme(
                   data: const MenuBarThemeData(
                     style: MenuStyle(
-                      maximumSize: MaterialStatePropertyAll<Size>(Size(250, 40)),
+                      maximumSize: WidgetStatePropertyAll<Size>(Size(250, 40)),
                     ),
                   ),
                   child: MenuTheme(
                     data: const MenuThemeData(
                       style: MenuStyle(
-                        maximumSize: MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        maximumSize: WidgetStatePropertyAll<Size>(Size(100, 100)),
                       ),
                     ),
                     child: MenuBar(
@@ -140,13 +140,13 @@ void main() {
                 MenuBarTheme(
                   data: const MenuBarThemeData(
                     style: MenuStyle(
-                      minimumSize: MaterialStatePropertyAll<Size>(Size(400, 60)),
+                      minimumSize: WidgetStatePropertyAll<Size>(Size(400, 60)),
                     ),
                   ),
                   child: MenuTheme(
                     data: const MenuThemeData(
                       style: MenuStyle(
-                        minimumSize: MaterialStatePropertyAll<Size>(Size(300, 300)),
+                        minimumSize: WidgetStatePropertyAll<Size>(Size(300, 300)),
                       ),
                     ),
                     child: MenuBar(
@@ -183,25 +183,25 @@ void main() {
                 MenuBarTheme(
                   data: const MenuBarThemeData(
                     style: MenuStyle(
-                      backgroundColor: MaterialStatePropertyAll<Color>(Colors.red),
-                      shadowColor: MaterialStatePropertyAll<Color>(Colors.green),
-                      surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.blue),
-                      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(10)),
-                      elevation: MaterialStatePropertyAll<double>(10),
-                      side: MaterialStatePropertyAll<BorderSide>(BorderSide(color: Colors.redAccent)),
-                      shape: MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+                      backgroundColor: WidgetStatePropertyAll<Color>(Colors.red),
+                      shadowColor: WidgetStatePropertyAll<Color>(Colors.green),
+                      surfaceTintColor: WidgetStatePropertyAll<Color>(Colors.blue),
+                      padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(10)),
+                      elevation: WidgetStatePropertyAll<double>(10),
+                      side: WidgetStatePropertyAll<BorderSide>(BorderSide(color: Colors.redAccent)),
+                      shape: WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
                     ),
                   ),
                   child: MenuTheme(
                     data: const MenuThemeData(
                       style: MenuStyle(
-                        backgroundColor: MaterialStatePropertyAll<Color>(Colors.cyan),
-                        shadowColor: MaterialStatePropertyAll<Color>(Colors.purple),
-                        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.yellow),
-                        padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(20)),
-                        elevation: MaterialStatePropertyAll<double>(20),
-                        side: MaterialStatePropertyAll<BorderSide>(BorderSide(color: Colors.cyanAccent)),
-                        shape: MaterialStatePropertyAll<OutlinedBorder>(StarBorder()),
+                        backgroundColor: WidgetStatePropertyAll<Color>(Colors.cyan),
+                        shadowColor: WidgetStatePropertyAll<Color>(Colors.purple),
+                        surfaceTintColor: WidgetStatePropertyAll<Color>(Colors.yellow),
+                        padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(20)),
+                        elevation: WidgetStatePropertyAll<double>(20),
+                        side: WidgetStatePropertyAll<BorderSide>(BorderSide(color: Colors.cyanAccent)),
+                        shape: WidgetStatePropertyAll<OutlinedBorder>(StarBorder()),
                       ),
                     ),
                     child: MenuBar(

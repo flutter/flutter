@@ -136,7 +136,7 @@ void main() {
         home: const Material(
           child: DrawerButton(
             style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+              iconColor: WidgetStatePropertyAll<Color>(Colors.red),
             ),
           ),
         ),
@@ -269,7 +269,7 @@ void main() {
         home: const Material(
           child: EndDrawerButton(
             style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+              iconColor: WidgetStatePropertyAll<Color>(Colors.red),
             ),
           ),
         ),

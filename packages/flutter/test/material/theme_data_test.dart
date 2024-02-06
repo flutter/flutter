@@ -786,9 +786,9 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.pink)),
       listTileTheme: const ListTileThemeData(),
-      menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
+      menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.black))),
       menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
-      menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
+      menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.black))),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
       navigationDrawerTheme: const NavigationDrawerThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
@@ -905,9 +905,9 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
       iconButtonTheme: const IconButtonThemeData(),
       listTileTheme: const ListTileThemeData(),
-      menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
+      menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.white))),
       menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
-      menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
+      menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.white))),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white),
       navigationDrawerTheme: const NavigationDrawerThemeData(backgroundColor: Colors.white),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.white),
@@ -1310,7 +1310,7 @@ void main() {
         .adapt(theme, theme.switchTheme);
 
       expect(adaptiveString, 'Adaptive theme.');
-      expect(adaptiveSwitchTheme.thumbColor?.resolve(<MaterialState>{}),
+      expect(adaptiveSwitchTheme.thumbColor?.resolve(<WidgetState>{}),
         isSameColorAs(Colors.brown));
     });
 
@@ -1483,7 +1483,7 @@ class SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
 
   @override
   SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData(
-    thumbColor: MaterialStatePropertyAll<Color>(Colors.brown),
+    thumbColor: WidgetStatePropertyAll<Color>(Colors.brown),
   );
 }
 

@@ -170,10 +170,10 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<MaterialState> enabled = <MaterialState>{};
-    const Set<MaterialState> disabled = <MaterialState>{ MaterialState.disabled };
-    const Set<MaterialState> hovered = <MaterialState>{ MaterialState.hovered };
-    const Set<MaterialState> focused = <MaterialState>{ MaterialState.focused };
+    const Set<WidgetState> enabled = <WidgetState>{};
+    const Set<WidgetState> disabled = <WidgetState>{ WidgetState.disabled };
+    const Set<WidgetState> hovered = <WidgetState>{ WidgetState.hovered };
+    const Set<WidgetState> focused = <WidgetState>{ WidgetState.focused };
 
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
@@ -183,8 +183,8 @@ void main() {
       expect(material.color, backgroundColor);
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
-      expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
-      expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
+      expect(WidgetStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
+      expect(WidgetStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
       expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.04));
       expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.12));
       expect(inkWell.enableFeedback, enableFeedback);

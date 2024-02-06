@@ -60,17 +60,17 @@ void main() {
             return MenuTheme(
               data: const MenuThemeData(
                 style: MenuStyle(
-                  backgroundColor: MaterialStatePropertyAll<Color?>(Colors.green),
-                  elevation: MaterialStatePropertyAll<double?>(20.0),
+                  backgroundColor: WidgetStatePropertyAll<Color?>(Colors.green),
+                  elevation: WidgetStatePropertyAll<double?>(20.0),
                 ),
               ),
               child: MenuBarTheme(
                 data: const MenuBarThemeData(
                   style: MenuStyle(
-                    backgroundColor: MaterialStatePropertyAll<Color?>(Colors.red),
-                    elevation: MaterialStatePropertyAll<double?>(15.0),
-                    shape: MaterialStatePropertyAll<OutlinedBorder?>(StadiumBorder()),
-                    padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                    backgroundColor: WidgetStatePropertyAll<Color?>(Colors.red),
+                    elevation: WidgetStatePropertyAll<double?>(15.0),
+                    shape: WidgetStatePropertyAll<OutlinedBorder?>(StadiumBorder()),
+                    padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
                       EdgeInsetsDirectional.all(10.0),
                     ),
                   ),
@@ -114,17 +114,17 @@ void main() {
               return MenuTheme(
                 data: const MenuThemeData(
                   style: MenuStyle(
-                    backgroundColor: MaterialStatePropertyAll<Color?>(Colors.green),
-                    elevation: MaterialStatePropertyAll<double?>(20.0),
+                    backgroundColor: WidgetStatePropertyAll<Color?>(Colors.green),
+                    elevation: WidgetStatePropertyAll<double?>(20.0),
                   ),
                 ),
                 child: MenuBarTheme(
                   data: const MenuBarThemeData(
                     style: MenuStyle(
-                      backgroundColor: MaterialStatePropertyAll<Color?>(Colors.red),
-                      elevation: MaterialStatePropertyAll<double?>(15.0),
-                      shape: MaterialStatePropertyAll<OutlinedBorder?>(StadiumBorder()),
-                      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                      backgroundColor: WidgetStatePropertyAll<Color?>(Colors.red),
+                      elevation: WidgetStatePropertyAll<double?>(15.0),
+                      shape: WidgetStatePropertyAll<OutlinedBorder?>(StadiumBorder()),
+                      padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
                         EdgeInsetsDirectional.all(10.0),
                       ),
                     ),
@@ -133,9 +133,9 @@ void main() {
                     children: <Widget>[
                       MenuBar(
                         style: const MenuStyle(
-                          backgroundColor: MaterialStatePropertyAll<Color?>(Colors.blue),
-                          elevation: MaterialStatePropertyAll<double?>(10.0),
-                          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                          backgroundColor: WidgetStatePropertyAll<Color?>(Colors.blue),
+                          elevation: WidgetStatePropertyAll<double?>(10.0),
+                          padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
                             EdgeInsetsDirectional.all(12.0),
                           ),
                         ),
@@ -194,7 +194,7 @@ void main() {
             )
             .first)
         .style;
-    expect(textButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}), equals(Colors.blueGrey));
+    expect(textButtonStyle?.overlayColor?.resolve(<WidgetState>{WidgetState.hovered}), equals(Colors.blueGrey));
   });
 }
 
@@ -215,17 +215,17 @@ List<Widget> createTestMenus({
   OutlinedBorder? itemShape,
 }) {
   final MenuStyle menuStyle = MenuStyle(
-    padding: menuPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding) : null,
-    backgroundColor: menuBackground != null ? MaterialStatePropertyAll<Color>(menuBackground) : null,
-    elevation: menuElevation != null ? MaterialStatePropertyAll<double>(menuElevation) : null,
-    shape: menuShape != null ? MaterialStatePropertyAll<OutlinedBorder>(menuShape) : null,
+    padding: menuPadding != null ? WidgetStatePropertyAll<EdgeInsetsGeometry>(menuPadding) : null,
+    backgroundColor: menuBackground != null ? WidgetStatePropertyAll<Color>(menuBackground) : null,
+    elevation: menuElevation != null ? WidgetStatePropertyAll<double>(menuElevation) : null,
+    shape: menuShape != null ? WidgetStatePropertyAll<OutlinedBorder>(menuShape) : null,
   );
   final ButtonStyle itemStyle = ButtonStyle(
-    padding: itemPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,
-    shape: itemShape != null ? MaterialStatePropertyAll<OutlinedBorder>(itemShape) : null,
-    foregroundColor: itemForeground != null ? MaterialStatePropertyAll<Color>(itemForeground) : null,
-    backgroundColor: itemBackground != null ? MaterialStatePropertyAll<Color>(itemBackground) : null,
-    overlayColor: itemOverlay != null ? MaterialStatePropertyAll<Color>(itemOverlay) : null,
+    padding: itemPadding != null ? WidgetStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,
+    shape: itemShape != null ? WidgetStatePropertyAll<OutlinedBorder>(itemShape) : null,
+    foregroundColor: itemForeground != null ? WidgetStatePropertyAll<Color>(itemForeground) : null,
+    backgroundColor: itemBackground != null ? WidgetStatePropertyAll<Color>(itemBackground) : null,
+    overlayColor: itemOverlay != null ? WidgetStatePropertyAll<Color>(itemOverlay) : null,
   );
   final List<Widget> result = <Widget>[
     SubmenuButton(

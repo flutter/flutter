@@ -436,8 +436,8 @@ void main() {
 
   testWidgets('Menu scrollbar inherits ScrollbarTheme', (WidgetTester tester) async {
     const ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(
-      thumbColor: MaterialStatePropertyAll<Color?>(Color(0xffff0000)),
-      thumbVisibility: MaterialStatePropertyAll<bool?>(true),
+      thumbColor: WidgetStatePropertyAll<Color?>(Color(0xffff0000)),
+      thumbVisibility: WidgetStatePropertyAll<bool?>(true),
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -449,7 +449,7 @@ void main() {
                 menuChildren: <Widget>[
                   MenuItemButton(
                     style: ButtonStyle(
-                      minimumSize: MaterialStateProperty.all<Size>(
+                      minimumSize: WidgetStateProperty.all<Size>(
                         const Size.fromHeight(1000),
                       ),
                     ),
@@ -488,7 +488,7 @@ void main() {
         home: Material(
           child: ScrollbarTheme(
             data: scrollbarTheme.copyWith(
-              thumbColor: const MaterialStatePropertyAll<Color?>(Color(0xff00ff00)),
+              thumbColor: const WidgetStatePropertyAll<Color?>(Color(0xff00ff00)),
             ),
             child: MenuBar(
               children: <Widget>[
@@ -496,7 +496,7 @@ void main() {
                   menuChildren: <Widget>[
                     MenuItemButton(
                       style: ButtonStyle(
-                        minimumSize: MaterialStateProperty.all<Size>(
+                        minimumSize: WidgetStateProperty.all<Size>(
                           const Size.fromHeight(1000),
                         ),
                       ),
@@ -1022,8 +1022,8 @@ void main() {
                     Expanded(
                       child: MenuBar(
                         style: MenuStyle(
-                          elevation: MaterialStateProperty.all<double?>(10),
-                          backgroundColor: const MaterialStatePropertyAll<Color>(Colors.red),
+                          elevation: WidgetStateProperty.all<double?>(10),
+                          backgroundColor: const WidgetStatePropertyAll<Color>(Colors.red),
                         ),
                         children: createTestMenus(onPressed: onPressed),
                       ),
@@ -1267,8 +1267,8 @@ void main() {
       final MenuBar menuBar = MenuBar(
         controller: controller,
         style: const MenuStyle(
-          backgroundColor: MaterialStatePropertyAll<Color>(Colors.red),
-          elevation: MaterialStatePropertyAll<double?>(10.0),
+          backgroundColor: WidgetStatePropertyAll<Color>(Colors.red),
+          elevation: WidgetStatePropertyAll<double?>(10.0),
         ),
         children: const <Widget>[item],
       );
@@ -2308,14 +2308,14 @@ void main() {
 
     testWidgets('diagnostics', (WidgetTester tester) async {
       final ButtonStyle style = ButtonStyle(
-        shape: MaterialStateProperty.all<OutlinedBorder?>(const StadiumBorder()),
-        elevation: MaterialStateProperty.all<double?>(10.0),
-        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.red),
+        shape: WidgetStateProperty.all<OutlinedBorder?>(const StadiumBorder()),
+        elevation: WidgetStateProperty.all<double?>(10.0),
+        backgroundColor: const WidgetStatePropertyAll<Color>(Colors.red),
       );
       final MenuStyle menuStyle = MenuStyle(
-        shape: MaterialStateProperty.all<OutlinedBorder?>(const RoundedRectangleBorder()),
-        elevation: MaterialStateProperty.all<double?>(20.0),
-        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.green),
+        shape: WidgetStateProperty.all<OutlinedBorder?>(const RoundedRectangleBorder()),
+        elevation: WidgetStateProperty.all<double?>(20.0),
+        backgroundColor: const WidgetStatePropertyAll<Color>(Colors.green),
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -2970,7 +2970,7 @@ void main() {
                 children: <Widget>[
                   MenuBar(
                     style: menuPadding != null
-                        ? MenuStyle(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding))
+                        ? MenuStyle(padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(menuPadding))
                         : null,
                     children: createTestMenus(onPressed: onPressed),
                   ),

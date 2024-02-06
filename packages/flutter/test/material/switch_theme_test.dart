@@ -57,15 +57,15 @@ void main() {
   testWidgets('SwitchThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData(
-      thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
-      trackColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
-      trackOutlineColor: MaterialStatePropertyAll<Color>(Color(0xfffffff3)),
-      trackOutlineWidth: MaterialStatePropertyAll<double>(6.0),
-      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
+      thumbColor: WidgetStatePropertyAll<Color>(Color(0xfffffff0)),
+      trackColor: WidgetStatePropertyAll<Color>(Color(0xfffffff1)),
+      trackOutlineColor: WidgetStatePropertyAll<Color>(Color(0xfffffff3)),
+      trackOutlineWidth: WidgetStatePropertyAll<double>(6.0),
+      mouseCursor: WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
+      overlayColor: WidgetStatePropertyAll<Color>(Color(0xfffffff2)),
       splashRadius: 1.0,
-      thumbIcon: MaterialStatePropertyAll<Icon>(Icon(IconData(123))),
+      thumbIcon: WidgetStatePropertyAll<Icon>(Icon(IconData(123))),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -106,44 +106,44 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: false,
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return selectedThumbColor;
           }
           return defaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return selectedTrackColor;
           }
           return defaultTrackColor;
         }),
-        trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackOutlineColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return selectedTrackOutlineColor;
           }
           return defaultTrackOutlineColor;
         }),
-        trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackOutlineWidth: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return selectedTrackOutlineWidth;
           }
           return defaultTrackOutlineWidth;
         }),
-        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
+        mouseCursor: const WidgetStatePropertyAll<MouseCursor>(mouseCursor),
         materialTapTargetSize: materialTapTargetSize,
-        overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
+        overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.focused)) {
             return focusOverlayColor;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return hoverOverlayColor;
           }
           return null;
         }),
         splashRadius: splashRadius,
-        thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbIcon: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return icon1;
           }
           return icon2;
@@ -229,44 +229,44 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return selectedThumbColor;
           }
           return defaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return selectedTrackColor;
           }
           return defaultTrackColor;
         }),
-        trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackOutlineColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return selectedTrackOutlineColor;
           }
           return defaultTrackOutlineColor;
         }),
-        trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackOutlineWidth: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return selectedTrackOutlineWidth;
           }
           return defaultTrackOutlineWidth;
         }),
-        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
+        mouseCursor: const WidgetStatePropertyAll<MouseCursor>(mouseCursor),
         materialTapTargetSize: materialTapTargetSize,
-        overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
+        overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.focused)) {
             return focusOverlayColor;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return hoverOverlayColor;
           }
           return null;
         }),
         splashRadius: splashRadius,
-        thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbIcon: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return icon1;
           }
           return icon2;
@@ -359,44 +359,44 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: false,
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedThumbColor;
           }
           return themeDefaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedTrackColor;
           }
           return themeDefaultTrackColor;
         }),
-        trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackOutlineColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedOutlineColor;
           }
           return themeDefaultOutlineColor;
         }),
-        trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackOutlineWidth: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedOutlineWidth;
           }
           return themeDefaultOutlineWidth;
         }),
-        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
+        mouseCursor: const WidgetStatePropertyAll<MouseCursor>(themeMouseCursor),
         materialTapTargetSize: themeMaterialTapTargetSize,
-        overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
+        overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.focused)) {
             return themeFocusOverlayColor;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return themeHoverOverlayColor;
           }
           return null;
         }),
         splashRadius: themeSplashRadius,
-        thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbIcon: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return null;
           }
           return null;
@@ -412,26 +412,26 @@ void main() {
             value: selected,
             onChanged: (bool value) {},
             autofocus: autofocus,
-            thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedThumbColor;
               }
               return defaultThumbColor;
             }),
-            trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedTrackColor;
               }
               return defaultTrackColor;
             }),
-            trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            trackOutlineColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedOutlineColor;
               }
               return defaultOutlineColor;
             }),
-            trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            trackOutlineWidth: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedOutlineWidth;
               }
               return defaultOutlineWidth;
@@ -441,8 +441,8 @@ void main() {
             focusColor: focusColor,
             hoverColor: hoverColor,
             splashRadius: splashRadius,
-            thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            thumbIcon: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return const Icon(Icons.add);
               }
               return const Icon(Icons.access_alarm);
@@ -529,44 +529,44 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedThumbColor;
           }
           return themeDefaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedTrackColor;
           }
           return themeDefaultTrackColor;
         }),
-        trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackOutlineColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedOutlineColor;
           }
           return themeDefaultOutlineColor;
         }),
-        trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackOutlineWidth: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedOutlineWidth;
           }
           return themeDefaultOutlineWidth;
         }),
-        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
+        mouseCursor: const WidgetStatePropertyAll<MouseCursor>(themeMouseCursor),
         materialTapTargetSize: themeMaterialTapTargetSize,
-        overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
+        overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.focused)) {
             return themeFocusOverlayColor;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return themeHoverOverlayColor;
           }
           return null;
         }),
         splashRadius: themeSplashRadius,
-        thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbIcon: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return null;
           }
           return null;
@@ -582,26 +582,26 @@ void main() {
             value: selected,
             onChanged: (bool value) {},
             autofocus: autofocus,
-            thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedThumbColor;
               }
               return defaultThumbColor;
             }),
-            trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedTrackColor;
               }
               return defaultTrackColor;
             }),
-            trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            trackOutlineColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedOutlineColor;
               }
               return defaultOutlineColor;
             }),
-            trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            trackOutlineWidth: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedOutlineWidth;
               }
               return defaultOutlineWidth;
@@ -611,8 +611,8 @@ void main() {
             focusColor: focusColor,
             hoverColor: hoverColor,
             splashRadius: splashRadius,
-            thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            thumbIcon: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return const Icon(Icons.add);
               }
               return const Icon(Icons.access_alarm);
@@ -674,14 +674,14 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: false,
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedThumbColor;
           }
           return themeDefaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedTrackColor;
           }
           return themeDefaultTrackColor;
@@ -751,14 +751,14 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedThumbColor;
           }
           return themeDefaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return themeSelectedTrackColor;
           }
           return themeDefaultTrackColor;
@@ -810,9 +810,9 @@ void main() {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
@@ -823,7 +823,7 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: false,
       switchTheme: SwitchThemeData(
-        overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+        overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
         splashRadius: splashRadius,
       ),
     );
@@ -875,9 +875,9 @@ void main() {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
@@ -888,7 +888,7 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
       switchTheme: SwitchThemeData(
-        overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+        overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
         splashRadius: splashRadius,
       ),
     );
@@ -950,10 +950,10 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: false,
       switchTheme: const SwitchThemeData(
-        thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
-        trackColor: MaterialStatePropertyAll<Color>(globalThemeTrackColor),
-        trackOutlineColor: MaterialStatePropertyAll<Color>(globalThemeOutlineColor),
-        trackOutlineWidth: MaterialStatePropertyAll<double>(globalThemeOutlineWidth),
+        thumbColor: WidgetStatePropertyAll<Color>(globalThemeThumbColor),
+        trackColor: WidgetStatePropertyAll<Color>(globalThemeTrackColor),
+        trackOutlineColor: WidgetStatePropertyAll<Color>(globalThemeOutlineColor),
+        trackOutlineWidth: WidgetStatePropertyAll<double>(globalThemeOutlineWidth),
       ),
     );
     Widget buildSwitch({bool selected = false, bool autofocus = false}) {
@@ -962,10 +962,10 @@ void main() {
         home: Scaffold(
           body: SwitchTheme(
             data: const SwitchThemeData(
-              thumbColor: MaterialStatePropertyAll<Color>(localThemeThumbColor),
-              trackColor: MaterialStatePropertyAll<Color>(localThemeTrackColor),
-              trackOutlineColor: MaterialStatePropertyAll<Color>(localThemeOutlineColor),
-              trackOutlineWidth: MaterialStatePropertyAll<double>(localThemeOutlineWidth)
+              thumbColor: WidgetStatePropertyAll<Color>(localThemeThumbColor),
+              trackColor: WidgetStatePropertyAll<Color>(localThemeTrackColor),
+              trackOutlineColor: WidgetStatePropertyAll<Color>(localThemeOutlineColor),
+              trackOutlineWidth: WidgetStatePropertyAll<double>(localThemeOutlineWidth)
             ),
             child: Switch(
               value: selected,
@@ -1004,10 +1004,10 @@ void main() {
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
       switchTheme: const SwitchThemeData(
-        thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
-        trackColor: MaterialStatePropertyAll<Color>(globalThemeTrackColor),
-        trackOutlineColor: MaterialStatePropertyAll<Color>(globalThemeOutlineColor),
-        trackOutlineWidth: MaterialStatePropertyAll<double>(globalThemeOutlineWidth),
+        thumbColor: WidgetStatePropertyAll<Color>(globalThemeThumbColor),
+        trackColor: WidgetStatePropertyAll<Color>(globalThemeTrackColor),
+        trackOutlineColor: WidgetStatePropertyAll<Color>(globalThemeOutlineColor),
+        trackOutlineWidth: WidgetStatePropertyAll<double>(globalThemeOutlineWidth),
       ),
     );
     Widget buildSwitch({bool selected = false, bool autofocus = false}) {
@@ -1016,10 +1016,10 @@ void main() {
         home: Scaffold(
           body: SwitchTheme(
             data: const SwitchThemeData(
-                thumbColor: MaterialStatePropertyAll<Color>(localThemeThumbColor),
-                trackColor: MaterialStatePropertyAll<Color>(localThemeTrackColor),
-                trackOutlineColor: MaterialStatePropertyAll<Color>(localThemeOutlineColor),
-                trackOutlineWidth: MaterialStatePropertyAll<double>(localThemeOutlineWidth)
+                thumbColor: WidgetStatePropertyAll<Color>(localThemeThumbColor),
+                trackColor: WidgetStatePropertyAll<Color>(localThemeTrackColor),
+                trackOutlineColor: WidgetStatePropertyAll<Color>(localThemeOutlineColor),
+                trackOutlineWidth: WidgetStatePropertyAll<double>(localThemeOutlineWidth)
             ),
             child: Switch(
               value: selected,

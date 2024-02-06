@@ -12,7 +12,7 @@ void main() {
     expect(const DropdownMenuThemeData().hashCode, const DropdownMenuThemeData().copyWith().hashCode);
 
     const DropdownMenuThemeData custom = DropdownMenuThemeData(
-      menuStyle: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
+      menuStyle: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.green)),
       inputDecorationTheme: InputDecorationTheme(filled: true),
       textStyle: TextStyle(fontSize: 25.0),
     );
@@ -111,11 +111,11 @@ void main() {
           wordSpacing: 2.0,
         ),
         menuStyle: const MenuStyle(
-          backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey),
-          shadowColor: MaterialStatePropertyAll<Color>(Colors.brown),
-          surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
-          elevation: MaterialStatePropertyAll<double>(10.0),
-          shape: MaterialStatePropertyAll<OutlinedBorder>(
+          backgroundColor: WidgetStatePropertyAll<Color>(Colors.grey),
+          shadowColor: WidgetStatePropertyAll<Color>(Colors.brown),
+          surfaceTintColor: WidgetStatePropertyAll<Color>(Colors.amberAccent),
+          elevation: WidgetStatePropertyAll<double>(10.0),
+          shape: WidgetStatePropertyAll<OutlinedBorder>(
             RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
           ),
         ),
@@ -189,11 +189,11 @@ void main() {
         wordSpacing: 2.0,
       ),
       menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.brown),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
-        elevation: MaterialStatePropertyAll<double>(10.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
+        backgroundColor: WidgetStatePropertyAll<Color>(Colors.grey),
+        shadowColor: WidgetStatePropertyAll<Color>(Colors.brown),
+        surfaceTintColor: WidgetStatePropertyAll<Color>(Colors.amberAccent),
+        elevation: WidgetStatePropertyAll<double>(10.0),
+        shape: WidgetStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
       ),
@@ -210,11 +210,11 @@ void main() {
         wordSpacing: 5.0,
       ),
       menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.yellow),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.green),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.teal),
-        elevation: MaterialStatePropertyAll<double>(15.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
+        backgroundColor: WidgetStatePropertyAll<Color>(Colors.yellow),
+        shadowColor: WidgetStatePropertyAll<Color>(Colors.green),
+        surfaceTintColor: WidgetStatePropertyAll<Color>(Colors.teal),
+        elevation: WidgetStatePropertyAll<double>(15.0),
+        shape: WidgetStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         ),
       ),
@@ -292,11 +292,11 @@ void main() {
         wordSpacing: 2.0,
       ),
       menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.brown),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
-        elevation: MaterialStatePropertyAll<double>(10.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
+        backgroundColor: WidgetStatePropertyAll<Color>(Colors.grey),
+        shadowColor: WidgetStatePropertyAll<Color>(Colors.brown),
+        surfaceTintColor: WidgetStatePropertyAll<Color>(Colors.amberAccent),
+        elevation: WidgetStatePropertyAll<double>(10.0),
+        shape: WidgetStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
       ),
@@ -313,11 +313,11 @@ void main() {
         wordSpacing: 5.0,
       ),
       menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.yellow),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.green),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.teal),
-        elevation: MaterialStatePropertyAll<double>(15.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
+        backgroundColor: WidgetStatePropertyAll<Color>(Colors.yellow),
+        shadowColor: WidgetStatePropertyAll<Color>(Colors.green),
+        surfaceTintColor: WidgetStatePropertyAll<Color>(Colors.teal),
+        elevation: WidgetStatePropertyAll<double>(15.0),
+        shape: WidgetStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         ),
       ),
@@ -342,11 +342,11 @@ void main() {
                   wordSpacing: 3.0,
                 ),
                 menuStyle: const MenuStyle(
-                  backgroundColor: MaterialStatePropertyAll<Color>(Colors.limeAccent),
-                  shadowColor: MaterialStatePropertyAll<Color>(Colors.deepOrangeAccent),
-                  surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.lightBlue),
-                  elevation: MaterialStatePropertyAll<double>(21.0),
-                  shape: MaterialStatePropertyAll<OutlinedBorder>(
+                  backgroundColor: WidgetStatePropertyAll<Color>(Colors.limeAccent),
+                  shadowColor: WidgetStatePropertyAll<Color>(Colors.deepOrangeAccent),
+                  surfaceTintColor: WidgetStatePropertyAll<Color>(Colors.lightBlue),
+                  elevation: WidgetStatePropertyAll<double>(21.0),
+                  shape: WidgetStatePropertyAll<OutlinedBorder>(
                     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
                   ),
                 ),

@@ -98,7 +98,7 @@ void main() {
   testWidgets('ChipThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ChipThemeData(
-      color: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
+      color: WidgetStatePropertyAll<Color>(Color(0xfffffff0)),
       backgroundColor: Color(0xfffffff1),
       deleteIconColor: Color(0xfffffff2),
       disabledColor: Color(0xfffffff3),
@@ -748,24 +748,24 @@ void main() {
     const Color selectedColor = Color(0x00000005);
     const Color disabledColor = Color(0x00000006);
 
-    Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getTextColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return disabledColor;
       }
 
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
 
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
 
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
 
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
 
@@ -773,7 +773,7 @@ void main() {
     }
 
     final TextStyle labelStyle =  TextStyle(
-      color: MaterialStateColor.resolveWith(getTextColor),
+      color: WidgetStateColor.resolveWith(getTextColor),
     );
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
@@ -840,10 +840,10 @@ void main() {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
       Color color = defaultColor;
 
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         color = selectedColor;
       }
 
@@ -855,7 +855,7 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           chipTheme: ThemeData.light().chipTheme.copyWith(
-            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+            side: WidgetStateBorderSide.resolveWith(getBorderSide),
           ),
         ),
         home: Scaffold(
@@ -881,10 +881,10 @@ void main() {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
       Color color = defaultColor;
 
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         color = selectedColor;
       }
 
@@ -895,7 +895,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           chipTheme: ChipThemeData(
-            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+            side: WidgetStateBorderSide.resolveWith(getBorderSide),
           ),
         ),
         home: Scaffold(
@@ -921,9 +921,9 @@ void main() {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
       Color color = defaultColor;
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         color = selectedColor;
       }
       return BorderSide(color: color);
@@ -963,9 +963,9 @@ void main() {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
       Color color = defaultColor;
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         color = selectedColor;
       }
       return BorderSide(color: color);
@@ -998,8 +998,8 @@ void main() {
   });
 
   testWidgets('Material2 - Chip uses stateful shape from chip theme', (WidgetTester tester) async {
-    OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    OutlinedBorder? getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return const RoundedRectangleBorder();
       }
       return null;
@@ -1036,8 +1036,8 @@ void main() {
   });
 
   testWidgets('Material3 - Chip uses stateful shape from chip theme', (WidgetTester tester) async {
-    OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    OutlinedBorder? getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return const StadiumBorder();
       }
       return null;
@@ -1079,15 +1079,15 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           chipTheme: ChipThemeData(
-            color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)
-                && states.contains(MaterialState.selected)) {
+            color: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)
+                && states.contains(WidgetState.selected)) {
                   return disabledSelectedColor;
               }
-              if (states.contains(MaterialState.disabled)) {
+              if (states.contains(WidgetState.disabled)) {
                 return disabledColor;
               }
-              if (states.contains(MaterialState.selected)) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedColor;
               }
               return backgroundColor;
@@ -1402,20 +1402,20 @@ void main() {
   });
 }
 
-class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
+class _MaterialStateOutlinedBorder extends StadiumBorder implements WidgetStateOutlinedBorder {
   const _MaterialStateOutlinedBorder(this.resolver);
 
   final MaterialPropertyResolver<OutlinedBorder?> resolver;
 
   @override
-  OutlinedBorder? resolve(Set<MaterialState> states) => resolver(states);
+  OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
 }
 
-class _MaterialStateBorderSide extends MaterialStateBorderSide {
+class _MaterialStateBorderSide extends WidgetStateBorderSide {
   const _MaterialStateBorderSide(this.resolver);
 
   final MaterialPropertyResolver<BorderSide?> resolver;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) => resolver(states);
+  BorderSide? resolve(Set<WidgetState> states) => resolver(states);
 }

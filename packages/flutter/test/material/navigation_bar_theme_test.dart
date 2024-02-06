@@ -46,10 +46,10 @@ void main() {
       elevation: 20.0,
       indicatorColor: Color(0x00000098),
       indicatorShape: CircleBorder(),
-      labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-      iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000097))),
+      labelTextStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+      iconTheme: WidgetStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000097))),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-      overlayColor: MaterialStatePropertyAll<Color>(Color(0x00000096)),
+      overlayColor: WidgetStatePropertyAll<Color>(Color(0x00000096)),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -96,8 +96,8 @@ void main() {
               elevation: elevation,
               indicatorColor: indicatorColor,
               indicatorShape: indicatorShape,
-              iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              iconTheme: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return const IconThemeData(
                     size: selectedIconSize,
                     color: selectedIconColor,
@@ -110,8 +110,8 @@ void main() {
                   opacity: unselectedIconOpacity,
                 );
               }),
-              labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return const TextStyle(fontSize: selectedLabelFontSize);
                 }
                 return const TextStyle(fontSize: unselectedLabelFontSize);
@@ -181,7 +181,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           navigationBarTheme: const NavigationBarThemeData(
-            labelTextStyle: MaterialStatePropertyAll<TextStyle>(
+            labelTextStyle: WidgetStatePropertyAll<TextStyle>(
               TextStyle(fontSize: 25, color: Color(0xff0000ff)),
             ),
           ),
@@ -223,15 +223,15 @@ void main() {
     const Color hoverColor = Color(0xff0000ff);
     const Color focusColor = Color(0xff00ffff);
     const Color pressedColor = Color(0xffff00ff);
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.hovered)) {
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverColor;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return focusColor;
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return pressedColor;
         }
         return Colors.transparent;

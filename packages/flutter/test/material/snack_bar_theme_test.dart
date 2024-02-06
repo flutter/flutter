@@ -269,8 +269,8 @@ void main() {
   });
 
   testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;
@@ -318,15 +318,15 @@ void main() {
   });
 
   testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (WidgetTester tester) async {
-    final MaterialStateColor snackBarActionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    final WidgetStateColor snackBarActionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.amber;
       }
       return Colors.cyan;
     });
 
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;
@@ -375,8 +375,8 @@ void main() {
   });
 
   testWidgets('SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided', (WidgetTester tester) async {
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;

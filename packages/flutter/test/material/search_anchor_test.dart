@@ -425,14 +425,14 @@ void main() {
     const double hoveredElevation = 1.0;
     const double focusedElevation = 2.0;
     const double defaultElevation = 3.0;
-    double getElevation(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    double getElevation(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedElevation;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredElevation;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedElevation;
       }
       return defaultElevation;
@@ -442,7 +442,7 @@ void main() {
         home: Center(
           child: Material(
             child: SearchBar(
-              elevation: MaterialStateProperty.resolveWith<double>(getElevation),
+              elevation: WidgetStateProperty.resolveWith<double>(getElevation),
             ),
           ),
         ),
@@ -484,7 +484,7 @@ void main() {
         home: Center(
           child: Material(
             child: SearchBar(
-              backgroundColor: MaterialStateProperty.resolveWith<Color>(_getColor),
+              backgroundColor: WidgetStateProperty.resolveWith<Color>(_getColor),
             ),
           ),
         ),
@@ -526,7 +526,7 @@ void main() {
         home: Center(
           child: Material(
             child: SearchBar(
-              shadowColor: MaterialStateProperty.resolveWith<Color>(_getColor),
+              shadowColor: WidgetStateProperty.resolveWith<Color>(_getColor),
             ),
           ),
         ),
@@ -568,7 +568,7 @@ void main() {
         home: Center(
           child: Material(
             child: SearchBar(
-              surfaceTintColor: MaterialStateProperty.resolveWith<Color>(_getColor),
+              surfaceTintColor: WidgetStateProperty.resolveWith<Color>(_getColor),
             ),
           ),
         ),
@@ -614,7 +614,7 @@ void main() {
           child: Material(
             child: SearchBar(
               focusNode: focusNode,
-              overlayColor: MaterialStateProperty.resolveWith<Color>(_getColor),
+              overlayColor: WidgetStateProperty.resolveWith<Color>(_getColor),
             ),
           ),
         ),
@@ -656,26 +656,26 @@ void main() {
     const OutlinedBorder hoveredShape = ContinuousRectangleBorder();
     const OutlinedBorder focusedShape = CircleBorder();
     const OutlinedBorder defaultShape = StadiumBorder();
-    BorderSide getSide(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    BorderSide getSide(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedSide;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredSide;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedSide;
       }
       return defaultSide;
     }
-    OutlinedBorder getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    OutlinedBorder getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedShape;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredShape;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedShape;
       }
       return defaultShape;
@@ -685,8 +685,8 @@ void main() {
         home: Center(
           child: Material(
             child: SearchBar(
-              side: MaterialStateProperty.resolveWith<BorderSide>(getSide),
-              shape: MaterialStateProperty.resolveWith<OutlinedBorder>(getShape),
+              side: WidgetStateProperty.resolveWith<BorderSide>(getSide),
+              shape: WidgetStateProperty.resolveWith<OutlinedBorder>(getShape),
             ),
           ),
         ),
@@ -729,7 +729,7 @@ void main() {
           child: Material(
             child: SearchBar(
               leading: Icon(Icons.search),
-              padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(16.0)),
+              padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(16.0)),
               trailing: <Widget>[
                 Icon(Icons.menu),
               ]
@@ -757,7 +757,7 @@ void main() {
           child: Material(
             child: SearchBar(
               hintText: 'hint text',
-              hintStyle: MaterialStateProperty.resolveWith<TextStyle?>(_getTextStyle),
+              hintStyle: WidgetStateProperty.resolveWith<TextStyle?>(_getTextStyle),
             ),
           ),
         ),
@@ -796,7 +796,7 @@ void main() {
           child: Material(
             child: SearchBar(
               controller: controller,
-              textStyle: MaterialStateProperty.resolveWith<TextStyle?>(_getTextStyle),
+              textStyle: WidgetStateProperty.resolveWith<TextStyle?>(_getTextStyle),
             ),
           ),
         ),
@@ -1046,8 +1046,8 @@ void main() {
           child: Material(
             child: SearchBar(
               hintText: 'hint text',
-              hintStyle: MaterialStateProperty.resolveWith<TextStyle?>(_getTextStyle),
-              textStyle: const MaterialStatePropertyAll<TextStyle>(TextStyle(color: Colors.pink)),
+              hintStyle: WidgetStateProperty.resolveWith<TextStyle?>(_getTextStyle),
+              textStyle: const WidgetStatePropertyAll<TextStyle>(TextStyle(color: Colors.pink)),
             ),
           ),
         ),
@@ -2752,7 +2752,7 @@ void main() {
       matching: find.byType(Material),
     ).first);
     expect(find.byWidget(iconButtonMaterial), findsOneWidget);
-    expect(iconButtonMaterial.color, localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<MaterialState>{}));
+    expect(iconButtonMaterial.color, localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{}));
 
     // Test the suggestion card color.
     final Material suggestionMaterial = tester.widget<Material>(find.descendant(
@@ -3136,14 +3136,14 @@ const Color hoveredColor = Colors.orange;
 const Color focusedColor = Colors.yellow;
 const Color defaultColor = Colors.green;
 
-Color _getColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.pressed)) {
+Color _getColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.pressed)) {
     return pressedColor;
   }
-  if (states.contains(MaterialState.hovered)) {
+  if (states.contains(WidgetState.hovered)) {
     return hoveredColor;
   }
-  if (states.contains(MaterialState.focused)) {
+  if (states.contains(WidgetState.focused)) {
     return focusedColor;
   }
   return defaultColor;
@@ -3154,14 +3154,14 @@ final TextStyle? pressedStyle = theme.textTheme.bodyLarge?.copyWith(color: press
 final TextStyle? hoveredStyle = theme.textTheme.bodyLarge?.copyWith(color: hoveredColor);
 final TextStyle? focusedStyle = theme.textTheme.bodyLarge?.copyWith(color: focusedColor);
 
-TextStyle? _getTextStyle(Set<MaterialState> states) {
-  if (states.contains(MaterialState.pressed)) {
+TextStyle? _getTextStyle(Set<WidgetState> states) {
+  if (states.contains(WidgetState.pressed)) {
     return pressedStyle;
   }
-  if (states.contains(MaterialState.hovered)) {
+  if (states.contains(WidgetState.hovered)) {
     return hoveredStyle;
   }
-  if (states.contains(MaterialState.focused)) {
+  if (states.contains(WidgetState.focused)) {
     return focusedStyle;
   }
   return null;

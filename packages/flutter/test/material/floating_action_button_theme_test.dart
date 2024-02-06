@@ -393,7 +393,7 @@ void main() {
       extendedIconLabelSpacing: 12,
       extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
       extendedTextStyle: TextStyle(letterSpacing: 2.0),
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -430,7 +430,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
         floatingActionButtonTheme: FloatingActionButtonThemeData(
-          mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
+          mouseCursor: WidgetStateProperty.all(SystemMouseCursors.text),
         ),
       ),
       home: Scaffold(

@@ -78,7 +78,7 @@ void main() {
       showSelectedLabels: true,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -130,8 +130,8 @@ void main() {
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
-            mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return SystemMouseCursors.grab;
               }
               return SystemMouseCursors.move;
@@ -219,7 +219,7 @@ void main() {
     const TextStyle themeUnselectedTextStyle = TextStyle(fontSize: 21);
     const double themeElevation = 9.0;
     const BottomNavigationBarLandscapeLayout themeLandscapeLayout = BottomNavigationBarLandscapeLayout.centered;
-    const MaterialStateMouseCursor themeCursor = MaterialStateMouseCursor.clickable;
+    const WidgetStateMouseCursor themeCursor = WidgetStateMouseCursor.clickable;
 
     const Color backgroundColor = Color(0xFF000004);
     const Color selectedItemColor = Color(0xFF000005);
@@ -230,7 +230,7 @@ void main() {
     const TextStyle unselectedTextStyle = TextStyle(fontSize: 26);
     const double elevation = 7.0;
     const BottomNavigationBarLandscapeLayout landscapeLayout = BottomNavigationBarLandscapeLayout.spread;
-    const MaterialStateMouseCursor cursor = MaterialStateMouseCursor.textable;
+    const WidgetStateMouseCursor cursor = WidgetStateMouseCursor.textable;
 
     await tester.pumpWidget(
       MaterialApp(

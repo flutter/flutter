@@ -507,7 +507,7 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides tab mouse cursor', (WidgetTester tester) async {
-    const TabBarTheme tabBarTheme = TabBarTheme(mouseCursor: MaterialStateMouseCursor.textable);
+    const TabBarTheme tabBarTheme = TabBarTheme(mouseCursor: WidgetStateMouseCursor.textable);
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -1471,8 +1471,8 @@ void main() {
    testWidgets('TabBarTheme.labelColor resolves material states', (WidgetTester tester) async {
     const Color selectedColor = Color(0xff00ff00);
     const Color unselectedColor = Color(0xffff0000);
-    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    final WidgetStateColor labelColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
       return unselectedColor;
@@ -1498,8 +1498,8 @@ void main() {
     (WidgetTester tester) async {
       const Color selectedStateColor = Color(0xff00ff00);
       const Color unselectedStateColor = Color(0xffff0000);
-      final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
+      final WidgetStateColor labelColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
           return selectedStateColor;
         }
         return unselectedStateColor;

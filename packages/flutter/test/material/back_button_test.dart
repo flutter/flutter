@@ -140,7 +140,7 @@ void main() {
         home: const Material(
           child: BackButton(
             style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+              iconColor: WidgetStatePropertyAll<Color>(Colors.red),
             ),
           ),
         ),
@@ -162,7 +162,7 @@ void main() {
           child: BackButton(
             color: Colors.green,
             style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+              iconColor: WidgetStatePropertyAll<Color>(Colors.red),
             ),
           ),
         ),
@@ -288,7 +288,7 @@ void main() {
         home: const Material(
           child: CloseButton(
             style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+              iconColor: WidgetStatePropertyAll<Color>(Colors.red),
             ),
           ),
         ),
@@ -310,7 +310,7 @@ void main() {
           child: CloseButton(
             color: Colors.green,
             style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+              iconColor: WidgetStatePropertyAll<Color>(Colors.red),
             ),
           ),
         ),

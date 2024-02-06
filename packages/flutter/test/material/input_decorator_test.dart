@@ -2326,7 +2326,7 @@ void runAllM2Tests() {
           useMaterial3: true,
           iconButtonTheme: const IconButtonThemeData(
             style: ButtonStyle(
-              foregroundColor: MaterialStatePropertyAll<Color>(Colors.blue),
+              foregroundColor: WidgetStatePropertyAll<Color>(Colors.blue),
             ),
           ),
         );
@@ -4952,11 +4952,11 @@ void runAllM2Tests() {
   });
 
   testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (WidgetTester tester) async {
-    final MaterialStateTextStyle themeStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final WidgetStateTextStyle themeStyle =  WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       return const TextStyle(color: Colors.green);
     });
 
-    final MaterialStateTextStyle decorationStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final WidgetStateTextStyle decorationStyle =  WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       return const TextStyle(color: Colors.blue);
     });
 
@@ -4997,7 +4997,7 @@ void runAllM2Tests() {
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
-    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((Set<MaterialState> states) {
+    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((Set<WidgetState> states) {
       return const OutlineInputBorder();
     });
     decoration = InputDecoration(

@@ -1490,8 +1490,8 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
               builder: (BuildContext context, StateSetter setState) {
                 return Stepper(
                   type: StepperType.horizontal,
-                  connectorColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) =>
-                  states.contains(MaterialState.selected)
+                  connectorColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) =>
+                  states.contains(WidgetState.selected)
                     ? selectedColor
                     : disabledColor),
                   onStepTapped: (int i) => setState(() => index = i),

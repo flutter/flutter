@@ -70,7 +70,7 @@ class TallSliderTickMarkShape extends SliderTickMarkShape {
   }
 }
 
-class _StateDependentMouseCursor extends MaterialStateMouseCursor {
+class _StateDependentMouseCursor extends WidgetStateMouseCursor {
   const _StateDependentMouseCursor({
     this.disabled = SystemMouseCursors.none,
     this.dragged = SystemMouseCursors.none,
@@ -82,14 +82,14 @@ class _StateDependentMouseCursor extends MaterialStateMouseCursor {
   final MouseCursor dragged;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return disabled;
     }
-    if (states.contains(MaterialState.dragged)) {
+    if (states.contains(WidgetState.dragged)) {
       return dragged;
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return hovered;
     }
     return SystemMouseCursors.none;
@@ -1768,8 +1768,8 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Slider(
                 value: value,
-                overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.focused)) {
+                overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.focused)) {
                     return Colors.purple[500]!;
                   }
 
@@ -1890,8 +1890,8 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Slider(
                 value: value,
-                overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) {
+                overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return Colors.cyan[500]!;
                   }
 
@@ -2032,8 +2032,8 @@ void main() {
                 key: sliderKey,
                 value: value,
                 focusNode: focusNode,
-                overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.dragged)) {
+                overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.dragged)) {
                     return Colors.lime[500]!;
                   }
 
@@ -2102,7 +2102,7 @@ void main() {
               return Slider(
                 value: value,
                 activeColor: activeColor,
-                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                overlayColor: const WidgetStatePropertyAll<Color?>(overlayColor),
                 onChanged: enabled
                   ? (double newValue) {
                       setState(() {
@@ -3445,7 +3445,7 @@ void main() {
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             return Slider(
                 value: value,
-                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                overlayColor: const WidgetStatePropertyAll<Color?>(overlayColor),
                 onChanged: (double newValue) {
                   setState(() {
                     value = newValue;
@@ -3499,7 +3499,7 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Slider(
                 value: value,
-                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                overlayColor: const WidgetStatePropertyAll<Color?>(overlayColor),
                 onChanged: enabled
                   ? (double newValue) {
                       setState(() {
@@ -3565,7 +3565,7 @@ void main() {
               return Slider(
                 value: value,
                 focusNode: focusNode,
-                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                overlayColor: const WidgetStatePropertyAll<Color?>(overlayColor),
                 onChanged: enabled
                   ? (double newValue) {
                       setState(() {

@@ -60,8 +60,8 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData(
       backgroundColor: Color(0xfffffff0),
-      cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1))),
-      confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2))),
+      cancelButtonStyle: ButtonStyle(foregroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff1))),
+      confirmButtonStyle: ButtonStyle(foregroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff2))),
       dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3)),
       dayPeriodColor: Color(0x00000000),
       dayPeriodShape: RoundedRectangleBorder(
@@ -413,7 +413,7 @@ void main() {
     expect(hourDecoration.filled, true);
     expect(
       hourDecoration.fillColor,
-      MaterialStateColor.resolveWith((Set<MaterialState> states) =>
+      WidgetStateColor.resolveWith((Set<WidgetState> states) =>
         defaultTheme.colorScheme.onSurface.withOpacity(0.12))
     );
     expect(
@@ -779,8 +779,8 @@ void main() {
   });
 
   testWidgets('Time picker dayPeriodColor does the right thing with MaterialStateColor', (WidgetTester tester) async {
-    final MaterialStateColor testColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    final WidgetStateColor testColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return Colors.green;
       }
       return Colors.blue;
@@ -804,10 +804,10 @@ final Color _selectedColor = Colors.green[100]!;
 final Color _unselectedColor = Colors.green[200]!;
 
 TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
-  Color getColor(Set<MaterialState> states) {
-    return states.contains(MaterialState.selected) ? _selectedColor : _unselectedColor;
+  Color getColor(Set<WidgetState> states) {
+    return states.contains(WidgetState.selected) ? _selectedColor : _unselectedColor;
   }
-  final MaterialStateColor materialStateColor = MaterialStateColor.resolveWith(getColor);
+  final WidgetStateColor materialStateColor = WidgetStateColor.resolveWith(getColor);
   return TimePickerThemeData(
     backgroundColor: Colors.orange,
     cancelButtonStyle: TextButton.styleFrom(foregroundColor: Colors.red),

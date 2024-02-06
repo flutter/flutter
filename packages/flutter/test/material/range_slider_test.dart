@@ -2220,7 +2220,7 @@ void main() {
                 child: RangeSlider(
                   values: values,
                   max: 100.0,
-                  mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(SystemMouseCursors.text),
+                  mouseCursor: const WidgetStatePropertyAll<MouseCursor?>(SystemMouseCursors.text),
                   onChanged: (RangeValues values) {},
                 ),
               ),
@@ -2251,15 +2251,15 @@ void main() {
                   child: MouseRegion(
                   cursor: SystemMouseCursors.forbidden,
                   child: RangeSlider(
-                    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>(
-                      (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.disabled)) {
+                    mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>(
+                      (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.disabled)) {
                             return disabledCursor;
                           }
-                          if (states.contains(MaterialState.dragged)) {
+                          if (states.contains(WidgetState.dragged)) {
                             return draggedCursor;
                           }
-                          if (states.contains(MaterialState.hovered)) {
+                          if (states.contains(WidgetState.hovered)) {
                             return hoveredCursor;
                           }
 
@@ -2444,11 +2444,11 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    overlayColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-                      if (states.contains(MaterialState.hovered)) {
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                      if (states.contains(WidgetState.hovered)) {
                         return hoverColor;
                       }
-                      if (states.contains(MaterialState.dragged)) {
+                      if (states.contains(WidgetState.dragged)) {
                         return draggedColor;
                       }
 

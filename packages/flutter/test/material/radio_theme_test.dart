@@ -52,9 +52,9 @@ void main() {
   testWidgets('RadioThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const RadioThemeData(
-      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
-      fillColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
-      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
+      mouseCursor: WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
+      fillColor: WidgetStatePropertyAll<Color>(Color(0xfffffff0)),
+      overlayColor: WidgetStatePropertyAll<Color>(Color(0xfffffff1)),
       splashRadius: 1.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.standard,
@@ -94,18 +94,18 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            mouseCursor: const WidgetStatePropertyAll<MouseCursor>(mouseCursor),
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
+            overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.focused)) {
                 return focusOverlayColor;
               }
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return hoverOverlayColor;
               }
               return null;
@@ -176,18 +176,18 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            mouseCursor: const WidgetStatePropertyAll<MouseCursor>(themeMouseCursor),
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
+            overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.focused)) {
                 return themeFocusOverlayColor;
               }
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return themeHoverOverlayColor;
               }
               return null;
@@ -204,8 +204,8 @@ void main() {
             groupValue: 0,
             autofocus: autofocus,
             mouseCursor: mouseCursor,
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
@@ -255,8 +255,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
@@ -290,9 +290,9 @@ void main() {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
@@ -305,7 +305,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
             splashRadius: splashRadius,
           ),
         ),
@@ -356,13 +356,13 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: const RadioThemeData(
-            fillColor: MaterialStatePropertyAll<Color>(globalThemeFillColor),
+            fillColor: WidgetStatePropertyAll<Color>(globalThemeFillColor),
           ),
         ),
         home: Scaffold(
           body: RadioTheme(
             data: const RadioThemeData(
-              fillColor: MaterialStatePropertyAll<Color>(localThemeFillColor),
+              fillColor: WidgetStatePropertyAll<Color>(localThemeFillColor),
             ),
             child: Radio<int>(
               value: active ? 1 : 0,

@@ -66,16 +66,16 @@ void main() {
       WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData(
-      elevation: MaterialStatePropertyAll<double>(3.0),
-      backgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
-      shadowColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
-      surfaceTintColor: MaterialStatePropertyAll<Color>(Color(0xfffffff3)),
-      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff4)),
-      side: MaterialStatePropertyAll<BorderSide>(BorderSide(width: 2.0, color: Color(0xfffffff5))),
-      shape: MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
-      padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(16.0)),
-      textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 24.0)),
-      hintStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 16.0)),
+      elevation: WidgetStatePropertyAll<double>(3.0),
+      backgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff1)),
+      shadowColor: WidgetStatePropertyAll<Color>(Color(0xfffffff2)),
+      surfaceTintColor: WidgetStatePropertyAll<Color>(Color(0xfffffff3)),
+      overlayColor: WidgetStatePropertyAll<Color>(Color(0xfffffff4)),
+      side: WidgetStatePropertyAll<BorderSide>(BorderSide(width: 2.0, color: Color(0xfffffff5))),
+      shape: WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+      padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(16.0)),
+      textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 24.0)),
+      hintStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 16.0)),
       constraints: BoxConstraints(minWidth: 350, maxWidth: 850),
       textCapitalization: TextCapitalization.characters,
     ).debugFillProperties(builder);
@@ -111,16 +111,16 @@ void main() {
     const TextStyle textStyleValue = TextStyle(color: Color(0xff000005), fontSize: 20.0);
     const TextStyle hintStyleValue = TextStyle(color: Color(0xff000006), fontSize: 18.0);
 
-    const MaterialStateProperty<double?> elevation = MaterialStatePropertyAll<double>(elevationValue);
-    const MaterialStateProperty<Color?> backgroundColor = MaterialStatePropertyAll<Color>(backgroundColorValue);
-    const MaterialStateProperty<Color?> shadowColor = MaterialStatePropertyAll<Color>(shadowColorValue);
-    const MaterialStateProperty<Color?> surfaceTintColor = MaterialStatePropertyAll<Color>(surfaceTintColorValue);
-    const MaterialStateProperty<Color?> overlayColor = MaterialStatePropertyAll<Color>(overlayColorValue);
-    const MaterialStateProperty<BorderSide?> side = MaterialStatePropertyAll<BorderSide>(sideValue);
-    const MaterialStateProperty<OutlinedBorder?> shape = MaterialStatePropertyAll<OutlinedBorder>(shapeValue);
-    const MaterialStateProperty<EdgeInsetsGeometry?> padding = MaterialStatePropertyAll<EdgeInsets>(paddingValue);
-    const MaterialStateProperty<TextStyle?> textStyle = MaterialStatePropertyAll<TextStyle>(textStyleValue);
-    const MaterialStateProperty<TextStyle?> hintStyle = MaterialStatePropertyAll<TextStyle>(hintStyleValue);
+    const WidgetStateProperty<double?> elevation = WidgetStatePropertyAll<double>(elevationValue);
+    const WidgetStateProperty<Color?> backgroundColor = WidgetStatePropertyAll<Color>(backgroundColorValue);
+    const WidgetStateProperty<Color?> shadowColor = WidgetStatePropertyAll<Color>(shadowColorValue);
+    const WidgetStateProperty<Color?> surfaceTintColor = WidgetStatePropertyAll<Color>(surfaceTintColorValue);
+    const WidgetStateProperty<Color?> overlayColor = WidgetStatePropertyAll<Color>(overlayColorValue);
+    const WidgetStateProperty<BorderSide?> side = WidgetStatePropertyAll<BorderSide>(sideValue);
+    const WidgetStateProperty<OutlinedBorder?> shape = WidgetStatePropertyAll<OutlinedBorder>(shapeValue);
+    const WidgetStateProperty<EdgeInsetsGeometry?> padding = WidgetStatePropertyAll<EdgeInsets>(paddingValue);
+    const WidgetStateProperty<TextStyle?> textStyle = WidgetStatePropertyAll<TextStyle>(textStyleValue);
+    const WidgetStateProperty<TextStyle?> hintStyle = WidgetStatePropertyAll<TextStyle>(hintStyleValue);
     const BoxConstraints constraints = BoxConstraints(minWidth: 250.0, maxWidth: 300.0, minHeight: 80.0);
     const TextCapitalization textCapitalization = TextCapitalization.words;
 
@@ -201,9 +201,9 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<MaterialState> hovered = <MaterialState>{ MaterialState.hovered};
-    const Set<MaterialState> focused = <MaterialState>{ MaterialState.focused};
-    const Set<MaterialState> pressed = <MaterialState>{ MaterialState.pressed};
+    const Set<WidgetState> hovered = <WidgetState>{ WidgetState.hovered};
+    const Set<WidgetState> focused = <WidgetState>{ WidgetState.focused};
+    const Set<WidgetState> pressed = <WidgetState>{ WidgetState.pressed};
 
     Future<void> checkSearchBar(WidgetTester tester) async {
       final Material material = tester.widget<Material>(findMaterial);

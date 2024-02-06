@@ -6769,29 +6769,29 @@ void main() {
     final Offset center = tester.getCenter(find.byType(EditableText).first);
     await gesture.moveTo(center);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered});
     expect(count, 1);
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 2);
 
     await gesture.down(center);
     await tester.pump();
     await gesture.up();
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.focused});
     expect(count, 4); // adds hovered and pressed - two changes.
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.focused});
     expect(count, 5);
 
     await gesture.down(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 6);
     await gesture.up();
     await tester.pump();
@@ -6800,7 +6800,7 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.focused});
     expect(count, 8); // adds hovered and pressed - two changes.
 
     // If the text field is rebuilt disabled, then the focused state is
@@ -6819,12 +6819,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.disabled});
     expect(count, 10); // removes focused and adds disabled - two changes.
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.disabled});
+    expect(statesController.value, <WidgetState>{WidgetState.disabled});
     expect(count, 11);
 
     // If the text field is rebuilt enabled and in an error state, then the error
@@ -6845,7 +6845,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{MaterialState.error});
+    expect(statesController.value, <WidgetState>{WidgetState.error});
     expect(count, 13); // removes disabled and adds error - two changes.
 
     // If the text field is rebuilt without an error, then the error
@@ -6863,7 +6863,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 14);
   });
 
@@ -6887,7 +6887,7 @@ void main() {
         ),
       ),
     );
-    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 1);
   });
 
@@ -6906,8 +6906,8 @@ void main() {
             child: TextField(
               controller: controller,
               enabled: enabled,
-              style: MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.disabled)) {
+              style: WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.disabled)) {
                   return const TextStyle(color: Colors.red);
                 }
                 return const TextStyle(color: Colors.blue);

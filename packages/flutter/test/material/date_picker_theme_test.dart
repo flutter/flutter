@@ -21,16 +21,16 @@ void main() {
     headerHelpStyle: TextStyle(fontSize: 11),
     weekdayStyle: TextStyle(fontSize: 12),
     dayStyle: TextStyle(fontSize: 13),
-    dayForegroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff5)),
-    dayBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff6)),
-    dayOverlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff7)),
-    todayForegroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff8)),
-    todayBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff9)),
+    dayForegroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff5)),
+    dayBackgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff6)),
+    dayOverlayColor: WidgetStatePropertyAll<Color>(Color(0xfffffff7)),
+    todayForegroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff8)),
+    todayBackgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff9)),
     todayBorder: BorderSide(width: 3),
     yearStyle: TextStyle(fontSize: 13),
-    yearForegroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffffa)),
-    yearBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffffb)),
-    yearOverlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffffc)),
+    yearForegroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffffa)),
+    yearBackgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffffb)),
+    yearOverlayColor: WidgetStatePropertyAll<Color>(Color(0xfffffffc)),
     rangePickerBackgroundColor: Color(0xfffffffd),
     rangePickerElevation: 7,
     rangePickerShadowColor: Color(0xfffffffe),
@@ -41,14 +41,14 @@ void main() {
     rangePickerHeaderHeadlineStyle: TextStyle(fontSize: 14),
     rangePickerHeaderHelpStyle: TextStyle(fontSize: 15),
     rangeSelectionBackgroundColor: Color(0xffffff2f),
-    rangeSelectionOverlayColor: MaterialStatePropertyAll<Color>(Color(0xffffff3f)),
+    rangeSelectionOverlayColor: WidgetStatePropertyAll<Color>(Color(0xffffff3f)),
     dividerColor: Color(0xffffff4f),
     inputDecorationTheme: InputDecorationTheme(
       fillColor: Color(0xffffff5f),
       border: UnderlineInputBorder(),
     ),
-    cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff6f))),
-    confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f))),
+    cancelButtonStyle: ButtonStyle(foregroundColor: WidgetStatePropertyAll<Color>(Color(0xffffff6f))),
+    confirmButtonStyle: ButtonStyle(foregroundColor: WidgetStatePropertyAll<Color>(Color(0xffffff7f))),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -168,41 +168,41 @@ void main() {
     expect(m3.headerHelpStyle, textTheme.labelLarge);
     expect(m3.weekdayStyle, textTheme.bodyLarge?.apply(color: colorScheme.onSurface));
     expect(m3.dayStyle, textTheme.bodyLarge);
-    expect(m3.dayForegroundColor?.resolve(<MaterialState>{}), colorScheme.onSurface);
-    expect(m3.dayForegroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.onPrimary);
-    expect(m3.dayForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.onSurface.withOpacity(0.38));
-    expect(m3.dayBackgroundColor?.resolve(<MaterialState>{}), null);
-    expect(m3.dayBackgroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.primary);
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{}), null);
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.12));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.12));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.08));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
-    expect(m3.todayForegroundColor?.resolve(<MaterialState>{}), colorScheme.primary);
-    expect(m3.todayForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.primary.withOpacity(0.38));
+    expect(m3.dayForegroundColor?.resolve(<WidgetState>{}), colorScheme.onSurface);
+    expect(m3.dayForegroundColor?.resolve(<WidgetState>{WidgetState.selected}), colorScheme.onPrimary);
+    expect(m3.dayForegroundColor?.resolve(<WidgetState>{WidgetState.disabled}), colorScheme.onSurface.withOpacity(0.38));
+    expect(m3.dayBackgroundColor?.resolve(<WidgetState>{}), null);
+    expect(m3.dayBackgroundColor?.resolve(<WidgetState>{WidgetState.selected}), colorScheme.primary);
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{}), null);
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.focused}), colorScheme.onPrimary.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.hovered, WidgetState.focused}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.hovered, WidgetState.pressed}), colorScheme.onPrimary.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.hovered, WidgetState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.08));
+    expect(m3.dayOverlayColor?.resolve(<WidgetState>{WidgetState.hovered, WidgetState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.todayForegroundColor?.resolve(<WidgetState>{}), colorScheme.primary);
+    expect(m3.todayForegroundColor?.resolve(<WidgetState>{WidgetState.disabled}), colorScheme.primary.withOpacity(0.38));
     expect(m3.todayBorder, BorderSide(color: colorScheme.primary));
     expect(m3.yearStyle, textTheme.bodyLarge);
-    expect(m3.yearForegroundColor?.resolve(<MaterialState>{}), colorScheme.onSurfaceVariant);
-    expect(m3.yearForegroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.onPrimary);
-    expect(m3.yearForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.onSurfaceVariant.withOpacity(0.38));
-    expect(m3.yearBackgroundColor?.resolve(<MaterialState>{}), null);
-    expect(m3.yearBackgroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.primary);
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{}), null);
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.12));
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.yearForegroundColor?.resolve(<WidgetState>{}), colorScheme.onSurfaceVariant);
+    expect(m3.yearForegroundColor?.resolve(<WidgetState>{WidgetState.selected}), colorScheme.onPrimary);
+    expect(m3.yearForegroundColor?.resolve(<WidgetState>{WidgetState.disabled}), colorScheme.onSurfaceVariant.withOpacity(0.38));
+    expect(m3.yearBackgroundColor?.resolve(<WidgetState>{}), null);
+    expect(m3.yearBackgroundColor?.resolve(<WidgetState>{WidgetState.selected}), colorScheme.primary);
+    expect(m3.yearOverlayColor?.resolve(<WidgetState>{}), null);
+    expect(m3.yearOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m3.yearOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.focused}), colorScheme.onPrimary.withOpacity(0.12));
+    expect(m3.yearOverlayColor?.resolve(<WidgetState>{WidgetState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
+    expect(m3.yearOverlayColor?.resolve(<WidgetState>{WidgetState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.yearOverlayColor?.resolve(<WidgetState>{WidgetState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m3.rangePickerElevation, 0);
     expect(m3.rangePickerShape, const RoundedRectangleBorder());
     expect(m3.rangePickerShadowColor, Colors.transparent);
     expect(m3.rangePickerSurfaceTintColor, Colors.transparent);
-    expect(m3.rangeSelectionOverlayColor?.resolve(<MaterialState>{}), null);
+    expect(m3.rangeSelectionOverlayColor?.resolve(<WidgetState>{}), null);
     expect(m3.rangePickerHeaderBackgroundColor, Colors.transparent);
     expect(m3.rangePickerHeaderForegroundColor, colorScheme.onSurfaceVariant);
     expect(m3.rangePickerHeaderHeadlineStyle, textTheme.titleLarge);
@@ -242,22 +242,22 @@ void main() {
     expect(m2.headerHelpStyle, textTheme.labelSmall);
     expect(m2.weekdayStyle, textTheme.bodySmall?.apply(color: colorScheme.onSurface.withOpacity(0.60)));
     expect(m2.dayStyle, textTheme.bodySmall);
-    expect(m2.dayForegroundColor?.resolve(<MaterialState>{}), colorScheme.onSurface);
-    expect(m2.dayForegroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.onPrimary);
-    expect(m2.dayForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.onSurface.withOpacity(0.38));
-    expect(m2.dayBackgroundColor?.resolve(<MaterialState>{}), null);
-    expect(m2.dayBackgroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.primary);
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{}), null);
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.12));
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
-    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
-    expect(m2.todayForegroundColor?.resolve(<MaterialState>{}), colorScheme.primary);
-    expect(m2.todayForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.onSurface.withOpacity(0.38));
+    expect(m2.dayForegroundColor?.resolve(<WidgetState>{}), colorScheme.onSurface);
+    expect(m2.dayForegroundColor?.resolve(<WidgetState>{WidgetState.selected}), colorScheme.onPrimary);
+    expect(m2.dayForegroundColor?.resolve(<WidgetState>{WidgetState.disabled}), colorScheme.onSurface.withOpacity(0.38));
+    expect(m2.dayBackgroundColor?.resolve(<WidgetState>{}), null);
+    expect(m2.dayBackgroundColor?.resolve(<WidgetState>{WidgetState.selected}), colorScheme.primary);
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{}), null);
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.focused}), colorScheme.onPrimary.withOpacity(0.12));
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.hovered, WidgetState.focused}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.hovered, WidgetState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{WidgetState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{WidgetState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m2.dayOverlayColor?.resolve(<WidgetState>{WidgetState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m2.todayForegroundColor?.resolve(<WidgetState>{}), colorScheme.primary);
+    expect(m2.todayForegroundColor?.resolve(<WidgetState>{WidgetState.disabled}), colorScheme.onSurface.withOpacity(0.38));
     expect(m2.todayBorder, BorderSide(color: colorScheme.primary));
     expect(m2.yearStyle, textTheme.bodyLarge);
     expect(m2.rangePickerBackgroundColor, colorScheme.surface);
@@ -265,13 +265,13 @@ void main() {
     expect(m2.rangePickerShape, const RoundedRectangleBorder());
     expect(m2.rangePickerShadowColor, Colors.transparent);
     expect(m2.rangePickerSurfaceTintColor, Colors.transparent);
-    expect(m2.rangeSelectionOverlayColor?.resolve(<MaterialState>{}), null);
-    expect(m2.rangeSelectionOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m2.rangeSelectionOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.12));
-    expect(m2.rangeSelectionOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
-    expect(m2.rangeSelectionOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
-    expect(m2.rangeSelectionOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
-    expect(m2.rangeSelectionOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m2.rangeSelectionOverlayColor?.resolve(<WidgetState>{}), null);
+    expect(m2.rangeSelectionOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m2.rangeSelectionOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.focused}), colorScheme.onPrimary.withOpacity(0.12));
+    expect(m2.rangeSelectionOverlayColor?.resolve(<WidgetState>{WidgetState.selected, WidgetState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
+    expect(m2.rangeSelectionOverlayColor?.resolve(<WidgetState>{WidgetState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
+    expect(m2.rangeSelectionOverlayColor?.resolve(<WidgetState>{WidgetState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m2.rangeSelectionOverlayColor?.resolve(<WidgetState>{WidgetState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m2.rangePickerHeaderBackgroundColor, colorScheme.primary);
     expect(m2.rangePickerHeaderForegroundColor, colorScheme.onPrimary);
     expect(m2.rangePickerHeaderHeadlineStyle, textTheme.headlineSmall);
@@ -390,15 +390,15 @@ void main() {
 
     final Text day31 = tester.widget<Text>(find.text('31'));
     final BoxDecoration day31Decoration = findTextDecoration(tester, '31')!;
-    expect(day31.style?.color, datePickerTheme.dayForegroundColor?.resolve(<MaterialState>{}));
+    expect(day31.style?.color, datePickerTheme.dayForegroundColor?.resolve(<WidgetState>{}));
     expect(day31.style?.fontSize, datePickerTheme.dayStyle?.fontSize);
-    expect(day31Decoration.color, datePickerTheme.dayBackgroundColor?.resolve(<MaterialState>{}));
+    expect(day31Decoration.color, datePickerTheme.dayBackgroundColor?.resolve(<WidgetState>{}));
 
     final Text day24 = tester.widget<Text>(find.text('24')); // DatePickerDialog.currentDate
     final BoxDecoration day24Decoration = findTextDecoration(tester, '24')!;
     expect(day24.style?.fontSize, datePickerTheme.dayStyle?.fontSize);
-    expect(day24.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
-    expect(day24Decoration.color, datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}));
+    expect(day24.style?.color, datePickerTheme.todayForegroundColor?.resolve(<WidgetState>{}));
+    expect(day24Decoration.color, datePickerTheme.todayBackgroundColor?.resolve(<WidgetState>{}));
     expect(day24Decoration.border?.top.width, datePickerTheme.todayBorder?.width);
     expect(day24Decoration.border?.bottom.width, datePickerTheme.todayBorder?.width);
 
@@ -410,7 +410,7 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('25')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(<MaterialState>{})));
+    expect(inkFeatures, paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(<WidgetState>{})));
 
     // Show the year selector.
 
@@ -420,23 +420,23 @@ void main() {
     final Text year2022 = tester.widget<Text>(find.text('2022'));
     final BoxDecoration year2022Decoration = findTextDecoration(tester, '2022')!;
     expect(year2022.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
-    expect(year2022.style?.color, datePickerTheme.yearForegroundColor?.resolve(<MaterialState>{}));
-    expect(year2022Decoration.color, datePickerTheme.yearBackgroundColor?.resolve(<MaterialState>{}));
+    expect(year2022.style?.color, datePickerTheme.yearForegroundColor?.resolve(<WidgetState>{}));
+    expect(year2022Decoration.color, datePickerTheme.yearBackgroundColor?.resolve(<WidgetState>{}));
 
     final Text year2023 = tester.widget<Text>(find.text('2023')); // DatePickerDialog.currentDate
     final BoxDecoration year2023Decoration = findTextDecoration(tester, '2023')!;
     expect(year2023.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
-    expect(year2023.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
-    expect(year2023Decoration.color, datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}));
+    expect(year2023.style?.color, datePickerTheme.todayForegroundColor?.resolve(<WidgetState>{}));
+    expect(year2023Decoration.color, datePickerTheme.todayBackgroundColor?.resolve(<WidgetState>{}));
     expect(year2023Decoration.border?.top.width, datePickerTheme.todayBorder?.width);
     expect(year2023Decoration.border?.bottom.width, datePickerTheme.todayBorder?.width);
-    expect(year2023Decoration.border?.top.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
-    expect(year2023Decoration.border?.bottom.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
+    expect(year2023Decoration.border?.top.color, datePickerTheme.todayForegroundColor?.resolve(<WidgetState>{}));
+    expect(year2023Decoration.border?.bottom.color, datePickerTheme.todayForegroundColor?.resolve(<WidgetState>{}));
 
     // Test the year overlay color.
     await gesture.moveTo(tester.getCenter(find.text('2024')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..rect(color: datePickerTheme.yearOverlayColor?.resolve(<MaterialState>{})));
+    expect(inkFeatures, paints..rect(color: datePickerTheme.yearOverlayColor?.resolve(<WidgetState>{})));
 
     final ButtonStyle cancelButtonStyle = actionButtonStyle(tester, 'Cancel');
     expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(datePickerTheme.cancelButtonStyle.toString()));
@@ -545,12 +545,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('16')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(<MaterialState>{})));
+    expect(inkFeatures, paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(<WidgetState>{})));
 
     // Test the range selection overlay color.
     await gesture.moveTo(tester.getCenter(find.text('18')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(<MaterialState>{})));
+    expect(inkFeatures, paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(<WidgetState>{})));
   });
 
   testWidgets('Dividers use DatePickerThemeData.dividerColor', (WidgetTester tester) async {
@@ -651,14 +651,14 @@ void main() {
   });
 
   testWidgets('DatePickerDialog resolves DatePickerTheme.dayOverlayColor states', (WidgetTester tester) async {
-    final MaterialStateProperty<Color> dayOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    final WidgetStateProperty<Color> dayOverlayColor = WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return const Color(0xff00ff00);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return const Color(0xffff00ff);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return const Color(0xffffff00);
       }
       return Colors.transparent;
@@ -701,7 +701,7 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
+        ..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.hovered})),
     );
 
     // Test the pressed overlay color.
@@ -712,16 +712,16 @@ void main() {
       expect(
         inkFeatures,
         paints
-          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+          ..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.hovered}))
+          ..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.hovered}))
+          ..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.pressed})),
       );
     } else {
       expect(
         inkFeatures,
         paints
-          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+          ..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.hovered}))
+          ..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.pressed})),
       );
     }
 
@@ -738,19 +738,19 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.focused})),
+        ..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.focused})),
     );
   });
 
   testWidgets('DatePickerDialog resolves DatePickerTheme.yearOverlayColor states', (WidgetTester tester) async {
-    final MaterialStateProperty<Color> yearOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    final WidgetStateProperty<Color> yearOverlayColor = WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return const Color(0xff00ff00);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return const Color(0xffff00ff);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return const Color(0xffffff00);
       }
       return Colors.transparent;
@@ -794,7 +794,7 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..rect(color: yearOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
+        ..rect(color: yearOverlayColor.resolve(<WidgetState>{WidgetState.hovered})),
     );
 
     // Test the pressed overlay color.
@@ -803,8 +803,8 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..rect(color: yearOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-        ..rect(color: yearOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+        ..rect(color: yearOverlayColor.resolve(<WidgetState>{WidgetState.hovered}))
+        ..rect(color: yearOverlayColor.resolve(<WidgetState>{WidgetState.pressed})),
     );
 
     await gesture.removePointer();
@@ -820,16 +820,16 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..rect(color: yearOverlayColor.resolve(<MaterialState>{MaterialState.focused})),
+        ..rect(color: yearOverlayColor.resolve(<WidgetState>{WidgetState.focused})),
     );
   });
 
   testWidgets('DateRangePickerDialog resolves DatePickerTheme.rangeSelectionOverlayColor states', (WidgetTester tester) async {
-    final MaterialStateProperty<Color> rangeSelectionOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    final WidgetStateProperty<Color> rangeSelectionOverlayColor = WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return const Color(0xff00ff00);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return const Color(0xffffff00);
       }
       return Colors.transparent;
@@ -873,7 +873,7 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
+        ..circle(color: rangeSelectionOverlayColor.resolve(<WidgetState>{WidgetState.hovered})),
     );
 
     // Test the pressed overlay color.
@@ -884,16 +884,16 @@ void main() {
       expect(
         inkFeatures,
         paints
-          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+          ..circle(color: rangeSelectionOverlayColor.resolve(<WidgetState>{WidgetState.hovered}))
+          ..circle(color: rangeSelectionOverlayColor.resolve(<WidgetState>{WidgetState.hovered}))
+          ..circle(color: rangeSelectionOverlayColor.resolve(<WidgetState>{WidgetState.pressed})),
       );
     } else {
       expect(
         inkFeatures,
         paints
-          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+          ..circle(color: rangeSelectionOverlayColor.resolve(<WidgetState>{WidgetState.hovered}))
+          ..circle(color: rangeSelectionOverlayColor.resolve(<WidgetState>{WidgetState.pressed})),
       );
     }
   });

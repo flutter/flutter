@@ -41,8 +41,8 @@ void main() {
       indicatorColor: Color(0x00000096),
       indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       indicatorSize: Size(10, 10),
-      labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-      iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000095))),
+      labelTextStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+      iconTheme: WidgetStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000095))),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -77,8 +77,8 @@ void main() {
         surfaceTintColor: Color(0x00000003),
         indicatorColor: Color(0x00000004),
         indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(16.0))),
-        labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-        iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
+        labelTextStyle:WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+        iconTheme: WidgetStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
       );
 
       await tester.pumpWidget(
@@ -117,20 +117,20 @@ void main() {
       // Test icon.
       expect(
         _iconStyle(tester, Icons.ac_unit)?.color,
-        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<WidgetState>{})?.color,
       );
       expect(
         _iconStyle(tester, Icons.access_alarm)?.color,
-        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<WidgetState>{})?.color,
       );
       // Test label.
       expect(
         _labelStyle(tester, 'AC'),
-        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{})
+        navigationDrawerTheme.labelTextStyle?.resolve(<WidgetState>{})
       );
       expect(
         _labelStyle(tester, 'Alarm'),
-        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{})
+        navigationDrawerTheme.labelTextStyle?.resolve(<WidgetState>{})
       );
   });
 
@@ -145,8 +145,8 @@ void main() {
         surfaceTintColor: Color(0x00000003),
         indicatorColor: Color(0x00000004),
         indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(16.0))),
-        labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-        iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
+        labelTextStyle:WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+        iconTheme: WidgetStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
       );
       const Color backgroundColor = Color(0x00000009);
       const double elevation = 14.0;
@@ -218,8 +218,8 @@ void main() {
             surfaceTintColor: surfaceTintColor,
             indicatorShape: indicatorShape,
             indicatorColor: indicatorColor,
-            labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-            iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: iconColor)),
+            labelTextStyle:WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+            iconTheme: WidgetStatePropertyAll<IconThemeData>(IconThemeData(color: iconColor)),
           ),
           child: NavigationDrawer(
             children: const <Widget>[
@@ -244,8 +244,8 @@ void main() {
             surfaceTintColor: Color(0x00000003),
             indicatorColor: Color(0x00000004),
             indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(16.0))),
-            labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-            iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
+            labelTextStyle:WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+            iconTheme: WidgetStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
           ),
         ),
       ),

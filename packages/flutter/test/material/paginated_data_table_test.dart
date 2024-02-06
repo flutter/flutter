@@ -1387,7 +1387,7 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable custom heading row color', (WidgetTester tester) async {
-    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xffFF0000));
+    const WidgetStateProperty<Color> headingRowColor = WidgetStatePropertyAll<Color>(Color(0xffFF0000));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1411,6 +1411,6 @@ void main() {
     final Table table = tester.widget(find.byType(Table));
     final TableRow tableRow = table.children[0];
     final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
-    expect(tableRowBoxDecoration.color, headingRowColor.resolve(<MaterialState>{}));
+    expect(tableRowBoxDecoration.color, headingRowColor.resolve(<WidgetState>{}));
   });
 }

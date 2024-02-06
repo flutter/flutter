@@ -61,7 +61,7 @@ void main() {
       rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       allowedInteraction: SliderInteraction.tapOnly,
     ).debugFillProperties(builder);
 
@@ -797,8 +797,8 @@ void main() {
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
-      overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return Colors.brown[500]!;
         }
 
@@ -1914,7 +1914,7 @@ void main() {
   testWidgets('The mouse cursor is themeable', (WidgetTester tester) async {
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.text),
+        mouseCursor: const WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.text),
       )
     ));
 

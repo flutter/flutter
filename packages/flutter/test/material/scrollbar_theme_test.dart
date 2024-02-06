@@ -229,7 +229,7 @@ void main() {
             behavior: const NoScrollbarBehavior(),
             child: ScrollbarTheme(
               data: _scrollbarTheme().copyWith(
-                thumbColor: MaterialStateProperty.all(const Color(0xFF000000)),
+                thumbColor: WidgetStateProperty.all(const Color(0xFF000000)),
               ),
               child: Scrollbar(
                 thumbVisibility: true,
@@ -639,14 +639,14 @@ void main() {
 
   testWidgets('ScrollbarThemeData.trackVisibility test', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    bool? getTrackVisibility(Set<MaterialState> states) {
+    bool? getTrackVisibility(Set<WidgetState> states) {
       return true;
     }
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false).copyWith(
           scrollbarTheme: _scrollbarTheme(
-            trackVisibility: MaterialStateProperty.resolveWith(getTrackVisibility),
+            trackVisibility: WidgetStateProperty.resolveWith(getTrackVisibility),
           ),
         ),
         home: ScrollConfiguration(
@@ -700,13 +700,13 @@ void main() {
   testWidgets('ScrollbarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     ScrollbarThemeData(
-      thickness: MaterialStateProperty.resolveWith(_getThickness),
+      thickness: WidgetStateProperty.resolveWith(_getThickness),
       showTrackOnHover: true,
-      thumbVisibility: MaterialStateProperty.resolveWith(_getThumbVisibility),
+      thumbVisibility: WidgetStateProperty.resolveWith(_getThumbVisibility),
       radius: const Radius.circular(3.0),
-      thumbColor: MaterialStateProperty.resolveWith(_getThumbColor),
-      trackColor: MaterialStateProperty.resolveWith(_getTrackColor),
-      trackBorderColor: MaterialStateProperty.resolveWith(_getTrackBorderColor),
+      thumbColor: WidgetStateProperty.resolveWith(_getThumbColor),
+      trackColor: WidgetStateProperty.resolveWith(_getTrackColor),
+      trackBorderColor: WidgetStateProperty.resolveWith(_getTrackBorderColor),
       crossAxisMargin: 3.0,
       mainAxisMargin: 6.0,
       minThumbLength: 120.0,
@@ -746,61 +746,61 @@ class NoScrollbarBehavior extends ScrollBehavior {
 }
 
 ScrollbarThemeData _scrollbarTheme({
-  MaterialStateProperty<double?>? thickness,
-  MaterialStateProperty<bool?>? trackVisibility,
+  WidgetStateProperty<double?>? thickness,
+  WidgetStateProperty<bool?>? trackVisibility,
   bool showTrackOnHover = true,
-  MaterialStateProperty<bool?>? thumbVisibility,
+  WidgetStateProperty<bool?>? thumbVisibility,
   Radius radius = const Radius.circular(6.0),
-  MaterialStateProperty<Color?>? thumbColor,
-  MaterialStateProperty<Color?>? trackColor,
-  MaterialStateProperty<Color?>? trackBorderColor,
+  WidgetStateProperty<Color?>? thumbColor,
+  WidgetStateProperty<Color?>? trackColor,
+  WidgetStateProperty<Color?>? trackBorderColor,
   double crossAxisMargin = 5.0,
   double mainAxisMargin = 10.0,
   double minThumbLength = 50.0,
 }) {
   return ScrollbarThemeData(
-    thickness: thickness ?? MaterialStateProperty.resolveWith(_getThickness),
+    thickness: thickness ?? WidgetStateProperty.resolveWith(_getThickness),
     trackVisibility: trackVisibility,
     showTrackOnHover: showTrackOnHover,
     thumbVisibility: thumbVisibility,
     radius: radius,
-    thumbColor: thumbColor ?? MaterialStateProperty.resolveWith(_getThumbColor),
-    trackColor: trackColor ?? MaterialStateProperty.resolveWith(_getTrackColor),
-    trackBorderColor: trackBorderColor ?? MaterialStateProperty.resolveWith(_getTrackBorderColor),
+    thumbColor: thumbColor ?? WidgetStateProperty.resolveWith(_getThumbColor),
+    trackColor: trackColor ?? WidgetStateProperty.resolveWith(_getTrackColor),
+    trackBorderColor: trackBorderColor ?? WidgetStateProperty.resolveWith(_getTrackBorderColor),
     crossAxisMargin: crossAxisMargin,
     mainAxisMargin: mainAxisMargin,
     minThumbLength: minThumbLength,
   );
 }
 
-double? _getThickness(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered)) {
+double? _getThickness(Set<WidgetState> states) {
+  if (states.contains(WidgetState.hovered)) {
     return 20.0;
   }
   return 10.0;
 }
 
-bool? _getThumbVisibility(Set<MaterialState> states) => true;
+bool? _getThumbVisibility(Set<WidgetState> states) => true;
 
-Color? _getThumbColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.dragged)) {
+Color? _getThumbColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.dragged)) {
     return Colors.red;
   }
-  if (states.contains(MaterialState.hovered)) {
+  if (states.contains(WidgetState.hovered)) {
     return Colors.blue;
   }
   return Colors.green;
 }
 
-Color? _getTrackColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered)) {
+Color? _getTrackColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.hovered)) {
     return Colors.black;
   }
   return null;
 }
 
-Color? _getTrackBorderColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered)) {
+Color? _getTrackBorderColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.hovered)) {
     return Colors.yellow;
   }
   return null;
