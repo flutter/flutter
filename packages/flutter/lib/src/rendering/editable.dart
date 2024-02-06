@@ -325,6 +325,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     RenderEditablePainter? painter,
     RenderEditablePainter? foregroundPainter,
     List<RenderBox>? children,
+    bool preventFlutterPaint = false,
   }) : assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
@@ -372,6 +373,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _forceLine = forceLine,
        _clipBehavior = clipBehavior,
        _hasFocus = hasFocus ?? false,
+       _preventFlutterPaint = preventFlutterPaint,
        _disposeShowCursor = showCursor == null {
     assert(!_showCursor.value || cursorColor != null);
 
@@ -2588,8 +2590,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     defaultApplyPaintTransform(child, transform);
   }
 
+  /// docs
+  bool get preventFlutterPaint => _preventFlutterPaint;
+  bool _preventFlutterPaint;
+  set preventFlutterPaint(bool value) {
+    _preventFlutterPaint = value;
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Don't paint for web so platform view can render alone.
+    if(_preventFlutterPaint){
+      return;
+    }
+
     _computeTextMetricsIfNeeded();
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(

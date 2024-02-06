@@ -1137,6 +1137,9 @@ mixin TextSelectionDelegate {
 ///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
 ///    granular information from the platform's text input.
 mixin TextInputClient {
+  /// Unique identifier for the client.
+  int get clientId;
+
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue? get currentTextEditingValue;
 
@@ -1373,6 +1376,9 @@ class TextInputConnection {
 
   final TextInputClient _client;
 
+  /// getter for client associated with this connection.
+  TextInputClient get client => _client;
+  
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
 
@@ -1491,6 +1497,19 @@ class TextInputConnection {
       fontWeight: fontWeight,
       textDirection: textDirection,
       textAlign: textAlign,
+    );
+  }
+  
+  /// Send scroll state information.
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    assert(attached);
+
+    TextInput._instance._setScrollState(
+      scrollTop: scrollTop,
+      scrollLeft: scrollLeft,
     );
   }
 
@@ -2045,6 +2064,18 @@ class TextInput {
       );
     }
   }
+  
+  void _setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    for (final TextInputControl control in _inputControls) {
+      control.setScrollState(
+        scrollTop: scrollTop,
+        scrollLeft: scrollLeft,
+      );
+    }
+  }
 
   void _requestAutofill() {
     for (final TextInputControl control in _inputControls) {
@@ -2062,6 +2093,7 @@ class TextInput {
         control.setEditingState(value);
       }
     }
+
     _instance._currentConnection!._client.updateEditingValue(value);
   }
 
@@ -2239,6 +2271,15 @@ mixin TextInputControl {
     required FontWeight? fontWeight,
     required TextDirection textDirection,
     required TextAlign textAlign,
+  }) {}
+
+  /// Informs the text input control about scroll state changes.
+  /// 
+  /// This method is called on the when the attached input client's scroll state
+  /// changes.
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
   }) {}
 
   /// Requests autofill from the text input control.
