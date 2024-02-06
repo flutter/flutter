@@ -545,7 +545,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ipv6: usesIpv6,
           flutterProject: flutterProject,
           nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-            nativeAssetsBuilder: _nativeAssetsBuilder,
+          nativeAssetsBuilder: _nativeAssetsBuilder,
           analytics: analytics,
         )
       : ColdRunner(
