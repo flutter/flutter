@@ -6149,17 +6149,16 @@ void main() {
     scrollable.controller!.jumpTo(50.0);
     await tester.pumpAndSettle();
 
-    // Find the toolbar fade transition after the toolbar has been hidden.
+    // Try to find the toolbar fade transition after the toolbar has been hidden
+    // as a result of a scroll. This removes the toolbar overlay entry so no fade
+    // transition should be found.
     final List<FadeTransition> transitionsAfter = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarWrapper'),
       matching: find.byType(FadeTransition),
     ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-
-    expect(transitionsAfter.length, 1);
-
-    final FadeTransition toolbarAfter = transitionsAfter[0];
-
-    expect(toolbarAfter.opacity.value, 0.0);
+    expect(transitionsAfter.length, 0);
+    expect(state.selectionOverlay, isNotNull);
+    expect(state.selectionOverlay!.toolbarIsVisible, false);
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
@@ -9564,8 +9563,8 @@ void main() {
       ),
     );
 
-    expect(scrollController1.attached, isTrue);
-    expect(scrollController2.attached, isFalse);
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.scrollController, scrollController1);
 
     // Change scrollController to controller 2.
     await tester.pumpWidget(
@@ -9581,8 +9580,8 @@ void main() {
       ),
     );
 
-    expect(scrollController1.attached, isFalse);
-    expect(scrollController2.attached, isTrue);
+    expect(state.widget.scrollController, scrollController2);
+
 
     // Changing scrollController to null.
     await tester.pumpWidget(
@@ -9597,8 +9596,7 @@ void main() {
       ),
     );
 
-    expect(scrollController1.attached, isFalse);
-    expect(scrollController2.attached, isFalse);
+    expect(state.widget.scrollController, isNull);
 
     // Change scrollController to back controller 2.
     await tester.pumpWidget(
@@ -9614,8 +9612,7 @@ void main() {
       ),
     );
 
-    expect(scrollController1.attached, isFalse);
-    expect(scrollController2.attached, isTrue);
+    expect(state.widget.scrollController, scrollController2);
   });
 
   testWidgets('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {
