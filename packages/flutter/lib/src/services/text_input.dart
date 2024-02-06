@@ -2141,8 +2141,8 @@ class TextInput {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
 
-  static void showSystemContextMenu() {
-    _PlatformTextInputControl.instance.showSystemContextMenu();
+  static void showSystemContextMenu(Rect rect) {
+    _PlatformTextInputControl.instance.showSystemContextMenu(rect);
   }
 }
 
@@ -2415,13 +2415,7 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   //@override
-  void showSystemContextMenu() {
-    const Rect rect = Rect.fromLTWH(
-      0.0,
-      200.0,
-      800.0,
-      100.0,
-    );
+  void showSystemContextMenu(Rect rect) {
     _channel.invokeMethod<void>(
       'TextInput.showSystemContextMenu',
       <String, dynamic>{

@@ -830,6 +830,19 @@ class TextField extends StatefulWidget {
   final UndoHistoryController? undoController;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    // TODO(justinmc): Don't forget CupertinoTextField. Anything else like TextFormField?
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final (
+        startGlyphHeight: double startGlyphHeight,
+        endGlyphHeight: double endGlyphHeight,
+      ) = editableTextState.getGlyphHeights();
+      return _IOSSystemContextMenu(
+        renderBox: editableTextState.renderEditable,
+        startGlyphHeight: startGlyphHeight,
+        endGlyphHeight: endGlyphHeight,
+        selectionEndpoints: editableTextState.renderEditable.getEndpointsForSelection(editableTextState.textEditingValue.selection),
+      );
+    }
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -1625,3 +1638,99 @@ TextStyle _m3CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField
+
+class _IOSSystemContextMenu extends StatelessWidget {
+  const _IOSSystemContextMenu({
+    required this.renderBox,
+    required this.startGlyphHeight,
+    required this.endGlyphHeight,
+    required this.selectionEndpoints,
+  });
+
+    final RenderBox renderBox;
+    final double startGlyphHeight;
+    final double endGlyphHeight;
+    final List<TextSelectionPoint> selectionEndpoints;
+
+  // TODO(justinmc): Deduplicate logic with TextSelectionToolbarAnchors.fromSelection?
+  static Rect _getSelectionRect(
+    RenderBox renderBox,
+    double startGlyphHeight,
+    double endGlyphHeight,
+    List<TextSelectionPoint> selectionEndpoints,
+  ) {
+    final Rect editingRegion = Rect.fromPoints(
+      renderBox.localToGlobal(Offset.zero),
+      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+    );
+
+    if (editingRegion.left.isNaN || editingRegion.top.isNaN
+      || editingRegion.right.isNaN || editingRegion.bottom.isNaN) {
+      return Rect.zero;
+    }
+
+    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
+        endGlyphHeight / 2;
+
+    return Rect.fromLTRB(
+      isMultiline
+          ? editingRegion.left
+          : editingRegion.left + selectionEndpoints.first.point.dx,
+      editingRegion.top + selectionEndpoints.first.point.dy - startGlyphHeight,
+      isMultiline
+          ? editingRegion.right
+          : editingRegion.left + selectionEndpoints.last.point.dx,
+      editingRegion.top + selectionEndpoints.last.point.dy,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _IOSSystemContextMenuWithWidth(
+      selectionRect: _getSelectionRect(
+        renderBox,
+        startGlyphHeight,
+        endGlyphHeight,
+        selectionEndpoints,
+      ),
+      screenWidth: MediaQuery.of(context).size.width,
+    );
+  }
+}
+
+class _IOSSystemContextMenuWithWidth extends StatefulWidget {
+  const _IOSSystemContextMenuWithWidth({
+    required this.selectionRect,
+    required this.screenWidth,
+  });
+
+  final Rect selectionRect;
+  final double screenWidth;
+
+  @override
+  State<_IOSSystemContextMenuWithWidth> createState() => _IOSSystemContextMenuWithWidthState();
+}
+
+class _IOSSystemContextMenuWithWidthState extends State<_IOSSystemContextMenuWithWidth> {
+  @override
+  void initState() {
+    super.initState();
+    ContextMenuController.removeAny();
+
+    TextInput.showSystemContextMenu(widget.selectionRect);
+  }
+
+  @override
+  void didUpdateWidget(_IOSSystemContextMenuWithWidth oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectionRect != oldWidget.selectionRect ||
+        widget.screenWidth != oldWidget.screenWidth) {
+      TextInput.showSystemContextMenu(widget.selectionRect);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox.shrink();
+  }
+}
