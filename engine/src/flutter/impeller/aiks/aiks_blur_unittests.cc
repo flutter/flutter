@@ -571,6 +571,10 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
                      Point(1024 / 2 - boston->GetSize().width / 2,
                            (768 / 2 - boston->GetSize().height / 2) + y),
                      {});
+    auto [handle_a, handle_b] = IMPELLER_PLAYGROUND_LINE(
+        Point(100, 100), Point(900, 700), 20, Color::Red(), Color::Red());
+    canvas.ClipRect(
+        Rect::MakeLTRB(handle_a.x, handle_a.y, handle_b.x, handle_b.y));
     canvas.ClipRect(Rect::MakeLTRB(100, 100, 900, 700));
     canvas.SaveLayer({.blend_mode = BlendMode::kSource}, std::nullopt,
                      ImageFilter::MakeBlur(Sigma(sigma), Sigma(sigma),
