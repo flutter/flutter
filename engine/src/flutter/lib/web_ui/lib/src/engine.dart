@@ -190,7 +190,6 @@ export 'engine/vector_math.dart';
 export 'engine/view_embedder/dimensions_provider/custom_element_dimensions_provider.dart';
 export 'engine/view_embedder/dimensions_provider/dimensions_provider.dart';
 export 'engine/view_embedder/dimensions_provider/full_page_dimensions_provider.dart';
-export 'engine/view_embedder/display_dpr_stream.dart';
 export 'engine/view_embedder/dom_manager.dart';
 export 'engine/view_embedder/embedding_strategy/custom_element_embedding_strategy.dart';
 export 'engine/view_embedder/embedding_strategy/embedding_strategy.dart';
