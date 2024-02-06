@@ -33,7 +33,6 @@ void main(List<String> args) async {
       'smoke-test',
       help: 'runs a single test to verify the setup',
       negatable: false,
-      defaultsTo: true,
     );
 
   runZonedGuarded(
