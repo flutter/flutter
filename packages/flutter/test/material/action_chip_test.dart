@@ -161,7 +161,7 @@ void main() {
     Material chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, Colors.transparent);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       RoundedRectangleBorder(
@@ -189,7 +189,7 @@ void main() {
     chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, Colors.transparent);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       RoundedRectangleBorder(
@@ -235,7 +235,7 @@ void main() {
     Material chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 1);
     expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       const RoundedRectangleBorder(
@@ -263,7 +263,7 @@ void main() {
     chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       const RoundedRectangleBorder(

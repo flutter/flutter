@@ -3356,7 +3356,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get backgroundColor {
-    return _colors.surface;
+    return _colors.surfaceContainerHigh;
   }
 
   @override
@@ -3444,7 +3444,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return _colors.surfaceVariant;
+    return _colors.surfaceContainerHighest;
   }
 
   @override
@@ -3521,22 +3521,22 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onPrimaryContainer.withOpacity(hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.12;
+          const double focusOpacity = 0.1;
           overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
       } else {
-        Color overlayColor = _colors.surfaceVariant;
+        Color overlayColor = _colors.surfaceContainerHighest;
         if (states.contains(MaterialState.pressed)) {
           overlayColor = _colors.onSurface;
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.12;
+          const double focusOpacity = 0.1;
           overlayColor = _colors.onSurface.withOpacity(focusOpacity);
         }
-        return Color.alphaBlend(overlayColor, _colors.surfaceVariant);
+        return Color.alphaBlend(overlayColor, _colors.surfaceContainerHighest);
       }
     });
   }

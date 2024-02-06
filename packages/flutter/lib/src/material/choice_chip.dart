@@ -316,7 +316,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
     : _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get checkmarkColor => isEnabled

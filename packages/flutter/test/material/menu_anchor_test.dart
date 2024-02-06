@@ -289,9 +289,9 @@ void main() {
 
     Material material = tester.widget<Material>(menuMaterial);
     expect(opened, isEmpty);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
@@ -322,9 +322,9 @@ void main() {
 
     material = tester.widget<Material>(menuMaterial);
     expect(opened.last, equals(TestMenu.mainMenu1));
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
@@ -379,9 +379,9 @@ void main() {
 
     Material material = tester.widget<Material>(menuMaterial);
     expect(opened, isEmpty);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
@@ -409,9 +409,9 @@ void main() {
         .first;
 
     material = tester.widget<Material>(menuMaterial);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
