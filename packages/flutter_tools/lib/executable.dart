@@ -50,10 +50,12 @@ import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
+import 'src/isolated/native_assets/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/resident_runner.dart';
+import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/web_runner.dart';
 
@@ -139,6 +141,7 @@ Future<void> main(List<String> args) async {
         // runner.run calls "terminal.applyFeatureFlags()"
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
+      HotRunnerNativeAssetsBuilder: () => HotRunnerNativeAssetsBuilderImpl(),
     },
     shutdownHooks: globals.shutdownHooks,
   );

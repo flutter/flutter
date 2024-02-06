@@ -22,7 +22,6 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
-import 'isolated/native_assets/native_assets.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -93,7 +92,7 @@ class HotRunner extends ResidentRunner {
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    NativeAssetsBuildRunner? buildRunner,
+    HotRunnerNativeAssetsBuilder? buildRunner,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
   })  : _stopwatchFactory = stopwatchFactory,
@@ -139,7 +138,7 @@ class HotRunner extends ResidentRunner {
   String? _sdkName;
   bool? _emulator;
 
-  final NativeAssetsBuildRunner? _buildRunner;
+  HotRunnerNativeAssetsBuilder? _buildRunner;
   final String? _nativeAssetsYamlFile;
 
   String? flavor;
@@ -374,10 +373,10 @@ class HotRunner extends ResidentRunner {
       nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
     } else {
       final Uri projectUri = Uri.directory(projectRootPath);
-      nativeAssetsYaml = await dryRunNativeAssets(
+      _buildRunner ??= globals.nativeAssetsBuilder;
+      nativeAssetsYaml = await _buildRunner?.dryRun(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: _buildRunner,
         flutterDevices: flutterDevices,
         logger: logger,
         packageConfig: debuggingOptions.buildInfo.packageConfig,
@@ -1723,4 +1722,25 @@ class ReasonForCancelling {
   String toString() {
     return '$message.\nTry performing a hot restart instead.';
   }
+}
+
+/// An interface that when invoked runs the dry run for native assets.
+///
+/// This interface is implemented as a no-op in g3.
+/// 
+/// This interface is implemented in
+/// lib/src/isolated/native_assets/native_assets.dart for normal use.
+abstract class HotRunnerNativeAssetsBuilder {
+  /// Gets the native asset id to dylib mapping to embed in the kernel file.
+  ///
+  /// Run hot compiles a kernel file that is pushed to the device after hot
+  /// restart. We need to embed the native assets mapping in order to access
+  /// native assets after hot restart.
+  Future<Uri?> dryRun({
+    required Uri projectUri,
+    required FileSystem fileSystem,
+    required List<FlutterDevice> flutterDevices,
+    required PackageConfig packageConfig,
+    required Logger logger,
+  });
 }

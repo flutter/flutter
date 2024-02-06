@@ -21,6 +21,7 @@ import '../../cache.dart';
 import '../../features.dart';
 import '../../globals.dart' as globals;
 import '../../resident_runner.dart';
+import '../../run_hot.dart';
 import 'android/native_assets.dart';
 import 'ios/native_assets.dart';
 import 'linux/native_assets.dart';
@@ -312,6 +313,30 @@ Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
   return projectUri.resolve('$buildDir/native_assets/$os/');
 }
 
+class HotRunnerNativeAssetsBuilderImpl implements HotRunnerNativeAssetsBuilder {
+  @override
+  Future<Uri?> dryRun({
+    required Uri projectUri,
+    required FileSystem fileSystem,
+    required List<FlutterDevice> flutterDevices,
+    required PackageConfig packageConfig,
+    required Logger logger,
+  }) async {
+    final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
+      projectUri,
+      packageConfig,
+      fileSystem,
+      globals.logger,
+    );
+    return dryRunNativeAssets(
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildRunner: buildRunner,
+      flutterDevices: flutterDevices,
+    );
+  }
+}
+
 /// Gets the native asset id to dylib mapping to embed in the kernel file.
 ///
 /// Run hot compiles a kernel file that is pushed to the device after hot
@@ -320,17 +345,9 @@ Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
 Future<Uri?> dryRunNativeAssets({
   required Uri projectUri,
   required FileSystem fileSystem,
-  required NativeAssetsBuildRunner? buildRunner,
+  required NativeAssetsBuildRunner buildRunner,
   required List<FlutterDevice> flutterDevices,
-  required PackageConfig packageConfig,
-  required Logger logger,
 }) async {
-  buildRunner ??= NativeAssetsBuildRunnerImpl(
-    projectUri,
-    packageConfig,
-    fileSystem,
-    globals.logger,
-  );
   if (flutterDevices.length != 1) {
     return dryRunNativeAssetsMultipleOSes(
       projectUri: projectUri,
