@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
@@ -5235,11 +5236,73 @@ void main() {
       );
     });
   });
+
+  testWidgets(
+    'Navigation does not leak memory', (WidgetTester tester) async {
+      await tester.pumpWidget(const _MyAppWithMemoryTest());
+      Future<void> navigate(int count) async {
+        for (int i = 0; i < count; i++) {
+          await tester.tap(find.text('CLICK'));
+          await tester.pumpAndSettle();
+        }
+      }
+
+      // Warm up the engine.
+      await navigate(2);
+
+      // Repeat the navigation and measure the memory consumption.
+      const int count = 100;
+      final int initialRss = ProcessInfo.currentRss;
+      await navigate(count);
+      final int consumedMbPerOperation = (ProcessInfo.currentRss - initialRss) ~/ (1024 * count);
+
+      expect(consumedMbPerOperation, lessThan(1)); // Actual value is 552 MB on polina-c's mac.
+    },
+  );
 }
+
+
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
 
 class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
+
+class _MyAppWithMemoryTest extends StatelessWidget {
+  const _MyAppWithMemoryTest();
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const _MemoryTest(),
+    );
+  }
+}
+
+class _MemoryTest extends StatelessWidget {
+  const _MemoryTest();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget content = OutlinedButton(
+      child: const Text('CLICK'),
+      onPressed: () {
+        Navigator.of(context).pushReplacement(MaterialPageRoute<Widget>(
+          builder: (_) => const _MemoryTest(),
+        ));
+      },
+    );
+    for (int i = 10; i-- > 0;) {
+      content = Padding(padding: EdgeInsets.zero, child: content);
+    }
+    return content;
+  }
+}
 
 class RouteAnnouncementSpy extends Route<void> {
   RouteAnnouncementSpy({
