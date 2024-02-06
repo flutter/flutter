@@ -1511,6 +1511,7 @@ void main() {
   });
 
   test('LongestLine TextPainter properly relayout when maxWidth changes.', () {
+    // Regression test for https://github.com/flutter/flutter/issues/142309.
     final TextPainter painter = TextPainter()
       ..textAlign = TextAlign.justify
       ..textWidthBasis = TextWidthBasis.longestLine

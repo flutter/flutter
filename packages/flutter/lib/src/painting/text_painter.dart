@@ -373,8 +373,9 @@ class _TextPainterLayoutCacheWithOffset {
     // of double.infinity, and to make the text visible the paintOffset.dx is
     // bound to be double.negativeInfinity, which invalidates all arithmetic
     // operations.
-    final double newContentWidth = clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth);
-    if (newContentWidth == contentWidth) {
+
+    final double newIntrinsicContentWidth = clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth);
+    if (newIntrinsicContentWidth == contentWidth) {
       return true;
     }
     assert(minWidth <= maxWidth);
@@ -387,7 +388,7 @@ class _TextPainterLayoutCacheWithOffset {
     final double maxIntrinsicWidth = paragraph.maxIntrinsicWidth;
     if ((paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance && (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance) {
       // Adjust the paintOffset and contentWidth to the new input constraints.
-      contentWidth = newContentWidth;
+      contentWidth = newIntrinsicContentWidth;
       return true;
     }
     return false;
