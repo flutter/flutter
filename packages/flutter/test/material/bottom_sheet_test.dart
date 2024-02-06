@@ -2289,6 +2289,50 @@ void main() {
       expect(modalBarrier.semanticsLabel, MaterialLocalizations.of(scaffoldKey.currentContext!).scrimLabel);
     });
   });
+
+  testWidgets('Swiping up an almost contracted sheet should expand it', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
+
+    const double sheetHeight = 500;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsNothing);
+
+    scaffoldKey.currentState!
+        .showBottomSheet((BuildContext context) => const SizedBox(
+              height: sheetHeight,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ColoredBox(color: Colors.blue, child: Text('BottomSheet')),
+              ),
+            ))
+        .closed
+        .whenComplete(() => showBottomSheetThenCalled = true);
+
+    await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    await tester.flingFrom(
+      tester.getCenter(find.text('BottomSheet')),
+      const Offset(0, -100),
+      800, // _kminFlingVelocity == 700 pixels/second
+      initialOffset: const Offset(0, sheetHeight * 0.8),
+      initialOffsetDelay: const Duration(seconds: 1),
+    );
+
+    await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
+  });
 }
 
 class _TestPage extends StatelessWidget {
