@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/src/interface/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/run_hot.dart';
+import 'package:flutter_tools/src/native_assets.dart';
 import 'package:native_assets_builder/native_assets_builder.dart'
     as native_assets_builder;
 import 'package:native_assets_cli/native_assets_cli_internal.dart';
@@ -98,26 +94,4 @@ final class FakeNativeAssetsBuilderResult
 
   @override
   final bool success;
-}
-
-class FakeHotRunnerNativeAssetsBuilder implements HotRunnerNativeAssetsBuilder {
-  FakeHotRunnerNativeAssetsBuilder(this.buildRunner);
-
-  final NativeAssetsBuildRunner buildRunner;
-
-  @override
-  Future<Uri?> dryRun({
-    required Uri projectUri,
-    required FileSystem fileSystem,
-    required List<FlutterDevice> flutterDevices,
-    required PackageConfig packageConfig,
-    required Logger logger,
-  }) {
-    return dryRunNativeAssets(
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      buildRunner: buildRunner,
-      flutterDevices: flutterDevices,
-    );
-  }
 }

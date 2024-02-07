@@ -18,7 +18,6 @@ import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
-import '../test/test_compiler.dart';
 import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
@@ -64,7 +63,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
-    this.nativeAssetsBuilder,
   }) {
     requiresPubspecYaml();
     usesPubOption();
@@ -238,8 +236,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
-
-  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
   final bool verbose;
 
@@ -508,7 +504,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
       testTimeRecorder: testTimeRecorder,
-      nativeAssetsBuilder: nativeAssetsBuilder,
     );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 

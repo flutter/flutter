@@ -5,11 +5,11 @@
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode;
 
-import '../../../base/common.dart';
-import '../../../base/file_system.dart';
-import '../../../base/io.dart';
-import '../../../build_info.dart';
-import '../../../globals.dart' as globals;
+import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
+import '../build_info.dart';
+import '../globals.dart' as globals;
 import '../native_assets.dart';
 
 /// Dry run the native builds.

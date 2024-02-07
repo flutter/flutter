@@ -5,16 +5,16 @@
 import 'package:native_assets_builder/native_assets_builder.dart'
     show BuildResult, DryRunResult;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    as native_assets_cli;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    as native_assets_cli;
 
-import '../../../android/android_sdk.dart';
-import '../../../base/common.dart';
-import '../../../base/file_system.dart';
-import '../../../build_info.dart';
-import '../../../globals.dart' as globals;
+import '../base/common.dart';
+import '../base/file_system.dart';
+import '../build_info.dart';
+import '../globals.dart' as globals;
 import '../native_assets.dart';
+import 'android_sdk.dart';
 
 /// Dry run the native builds.
 ///
