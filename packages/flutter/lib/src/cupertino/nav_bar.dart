@@ -559,7 +559,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// The [expandedTransparent] parameter determines whether the background
 /// should be transparent when expanded. The background will be transparent
 /// if the [expandedTransparent] value is true, otherwise it will take
-/// the [backgroundColor]. Defaults to `false`.
+/// the [backgroundColor]. Defaults to `true`.
 ///
 /// {@tool dartpad}
 /// This example shows [CupertinoSliverNavigationBar] in action inside a [CustomScrollView].
@@ -590,7 +590,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
-    this.expandedTransparent = false,
+    this.expandedTransparent = true,
     this.brightness,
     this.padding,
     this.transitionBetweenRoutes = true,
