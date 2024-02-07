@@ -1211,7 +1211,7 @@ class WidgetsApp extends StatefulWidget {
   }
 
   static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier =
-    FlutterMemoryAllocations.instance.exemptFromDisposal(() => ValueNotifier<bool>(false));
+    exemptFromDisposal(() => ValueNotifier<bool>(false));
 
 
   /// If false, prevents the debug banner from being visible.

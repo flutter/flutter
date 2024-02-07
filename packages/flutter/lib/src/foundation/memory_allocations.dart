@@ -18,6 +18,30 @@ const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocation
 /// `--dart-define=flutter.memory_allocations=true`.
 const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 
+/// Create an object with exemption from disposal.
+///
+/// All objects created by [builder] will be exempt from disposal.
+///
+/// The method is useful for creating singletons:
+///
+/// ```dart
+/// final ValueNotifier<bool> mySingleton = FlutterMemoryAllocations.instance.exemptFromDisposal(() {
+///   return ValueNotifier<bool>(false);
+/// });
+/// ```
+T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder){
+  if (kFlutterMemoryAllocationsEnabled) {
+    ObjectCreated._exemptionFromDisposal++;
+    try {
+      return builder();
+    } finally {
+      ObjectCreated._exemptionFromDisposal--;
+    }
+  } else {
+    return builder();
+  }
+}
+
 const String _dartUiLibrary = 'dart:ui';
 
 class _FieldNames {
@@ -313,26 +337,6 @@ class FlutterMemoryAllocations {
       return;
     }
     dispatchObjectEvent(ObjectDisposed(object: object));
-  }
-
-  /// Create an object with exemption from disposal.
-  ///
-  /// All objects created by [builder] will be exempt from disposal.
-  ///
-  /// The method is useful for creating singletons:
-  ///
-  /// ```dart
-  /// final ValueNotifier<bool> mySingleton = FlutterMemoryAllocations.instance.exemptFromDisposal(() {
-  ///   return ValueNotifier<bool>(false);
-  /// });
-  /// ```
-  T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder){
-    ObjectCreated._exemptionFromDisposal++;
-    try {
-      return builder();
-    } finally {
-      ObjectCreated._exemptionFromDisposal--;
-    }
   }
 
   void _subscribeToSdkObjects() {

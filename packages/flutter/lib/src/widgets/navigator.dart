@@ -2940,8 +2940,7 @@ class _RouteEntry extends RouteTransitionRecord {
   /// remove as a result of a page update.
   static const int kDebugPopAttemptLimit = 100;
 
-  static final Route<dynamic> notAnnounced =
-    FlutterMemoryAllocations.instance.exemptFromDisposal(() => _NotAnnounced());
+  static final Route<dynamic> notAnnounced = exemptFromDisposal(() => _NotAnnounced());
 
   _RouteLifecycle currentState;
   Route<dynamic>? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
