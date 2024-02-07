@@ -70,6 +70,8 @@ const Widget _startSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(cap
 const Widget _centerSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capStartEdge: false, capEndEdge: false);
 const Widget _endSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capStartEdge: false);
 
+/// Defines a function signature for creating a widget that serves as a selection overlay,
+/// given the current context, the selected item's index, and the total number of columns.
 typedef SelectionOverlayBuilder = Widget Function(BuildContext context, int index, int columnCount);
 
 // Lays out the date picker based on how much space each single column needs.
