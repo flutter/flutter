@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -129,6 +130,14 @@ class WebBuilder {
     } finally {
       status.stop();
     }
+
+    // We don't print a size because the output directory can contain
+    // optional files not needed by the user.
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}',
+      color: TerminalColor.green,
+    );
 
     final String buildSettingsString = _buildEventAnalyticsSettings(
       configs: compilerConfigs,
