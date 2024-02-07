@@ -9,12 +9,13 @@ String generateDDCBootstrapScript({
   required String ddcModuleLoaderUrl,
   required String mapperUrl,
   required bool generateLoadingIndicator,
+  String appRootDirectory = '/',
 }) {
   return '''
 ${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
 // TODO(markzipan): This is safe if Flutter app roots are always equal to the
-// host root. Validate if this is true.
-var _currentDirectory = '/';
+// host root '/'. Validate if this is true.
+var _currentDirectory = "$appRootDirectory";
 
 window.\$dartCreateScript = (function() {
   // Find the nonce value. (Note, this is only computed once.)
@@ -61,20 +62,6 @@ let _scriptUrls = {
   "mapper": "$mapperUrl",
   "moduleLoader": "$ddcModuleLoaderUrl"
 };
-
-// Create a TrustedTypes policy so we can attach Scripts...
-let _ttPolicy;
-if (window.trustedTypes) {
-  _ttPolicy = trustedTypes.createPolicy("flutter-tools-bootstrap", {
-    createScriptURL: (url) => {
-      let scriptUrl = _scriptUrls[url];
-      if (!scriptUrl) {
-        console.error("Unknown Flutter Web bootstrap resource!", url);
-      }
-      return scriptUrl;
-    }
-  });
-}
 
 (function() {
   let appName = "$entrypoint";
@@ -228,7 +215,7 @@ var styles = `
   .flutter-loader {
     width: 100%;
     height: 8px;
-    background-color: #13B9FD;dg
+    background-color: #13B9FD;
     position: absolute;
     top: 0px;
     left: 0px;
