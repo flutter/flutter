@@ -593,7 +593,7 @@ class FlutterDevice {
       return UpdateFSReport();
     }
     devFSStatus.stop();
-    globals.printTrace('Synced ${getSizeAsPlatformMB(report.syncedBytes)}.');
+    globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
     return report;
   }
 
