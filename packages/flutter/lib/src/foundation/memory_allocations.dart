@@ -326,7 +326,7 @@ class FlutterMemoryAllocations {
   ///   return ValueNotifier<bool>(false);
   /// });
   /// ```
-  T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder ){
+  T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder){
     ObjectCreated._exemptionFromDisposal ++;
     try {
       return builder();
