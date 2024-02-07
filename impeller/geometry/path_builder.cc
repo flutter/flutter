@@ -22,7 +22,7 @@ Path PathBuilder::CopyPath(FillType fill) {
 Path PathBuilder::TakePath(FillType fill) {
   prototype_.fill = fill;
   UpdateBounds();
-  return Path(prototype_);
+  return Path(std::move(prototype_));
 }
 
 void PathBuilder::Reserve(size_t point_size, size_t verb_size) {
