@@ -1348,7 +1348,6 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
-  List<GlobalKey>? _itemKeys;
 
   /// A method to show a popup menu with the items supplied to
   /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
@@ -1382,7 +1381,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       Offset.zero & overlay.size,
     );
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
-    _itemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
       widget.onOpened?.call();
@@ -1392,7 +1390,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         shadowColor: widget.shadowColor ?? popupMenuTheme.shadowColor,
         surfaceTintColor: widget.surfaceTintColor ?? popupMenuTheme.surfaceTintColor,
         items: items,
-        itemKeys: _itemKeys,
         initialValue: widget.initialValue,
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,
