@@ -569,7 +569,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       generator: device!.generator!,
       fullRestart: fullRestart,
       dillOutputPath: dillOutputPath,
-      projectRootPath: projectRootPath,
       pathToReload: getReloadPath(fullRestart: fullRestart, swap: false),
       invalidatedFiles: invalidationResult.uris!,
       packageConfig: invalidationResult.packageConfig!,
