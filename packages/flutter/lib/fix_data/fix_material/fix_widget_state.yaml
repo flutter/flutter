@@ -30,7 +30,7 @@ transforms:
   - title: "Replace with 'WidgetState'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       enum: 'MaterialState'
     changes:
       - kind: 'rename'
@@ -40,7 +40,7 @@ transforms:
   - title: "Replace with 'WidgetPropertyResolver'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       function: 'MaterialPropertyResolver'
     changes:
       - kind: 'replacedBy'
@@ -52,7 +52,7 @@ transforms:
   - title: "Replace with 'WidgetStateColor'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStateColor'
     changes:
       - kind: 'rename'
@@ -62,7 +62,7 @@ transforms:
   - title: "Replace with 'WidgetStateMouseCursor'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStateMouseCursor'
     changes:
       - kind: 'rename'
@@ -72,7 +72,7 @@ transforms:
   - title: "Replace with 'WidgetStateBorderSide'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStateBorderSide'
     changes:
       - kind: 'rename'
@@ -82,7 +82,7 @@ transforms:
   - title: "Replace with 'WidgetStateOutlinedBorder'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStateOutlinedBorder'
     changes:
       - kind: 'rename'
@@ -92,7 +92,7 @@ transforms:
   - title: "Replace with 'WidgetStateTextStyle'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStateTextStyle'
     changes:
       - kind: 'rename'
@@ -102,7 +102,7 @@ transforms:
   - title: "Replace with 'WidgetStateProperty'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStateProperty'
     changes:
       - kind: 'rename'
@@ -112,7 +112,7 @@ transforms:
   - title: "Replace with 'WidgetStatePropertyAll'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStatePropertyAll'
     changes:
       - kind: 'rename'
@@ -122,7 +122,7 @@ transforms:
   - title: "Replace with 'WidgetStatesController'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStatesController'
     changes:
       - kind: 'rename'
@@ -132,7 +132,7 @@ transforms:
   - title: "Replace with 'WidgetStateMixin.widgetStates'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       field: 'materialStates'
       inMixin: 'MaterialStateMixin'
     changes:
@@ -143,7 +143,7 @@ transforms:
   - title: "Replace with 'WidgetStateMixin.updateWidgetState'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       method: 'updateMaterialState'
       inMixin: 'MaterialStateMixin'
     changes:
@@ -154,7 +154,7 @@ transforms:
   - title: "Replace with 'WidgetStateMixin.setWidgetState'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       method: 'setMaterialState'
       inMixin: 'MaterialStateMixin'
     changes:
@@ -165,7 +165,7 @@ transforms:
   - title: "Replace with 'WidgetStateMixin.addWidgetState'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       method: 'addMaterialState'
       inMixin: 'MaterialStateMixin'
     changes:
@@ -176,7 +176,7 @@ transforms:
   - title: "Replace with 'WidgetStateMixin.removeWidgetState'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       method: 'removeMaterialState'
       inMixin: 'MaterialStateMixin'
     changes:
@@ -187,7 +187,7 @@ transforms:
   - title: "Replace with 'WidgetStateMixin'"
     date: 2024-02-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'MaterialStateMixin'
     changes:
       - kind: 'rename'
