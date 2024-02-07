@@ -803,6 +803,34 @@ void main() {
     },
   );
 
+  test(
+    'calling repeat with a negative lower bound and a positive upper bound '
+    'values makes the animation alternate between min and max values on each repeat',
+    () {
+      final AnimationController controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        vsync: const TestVSync(),
+        lowerBound: -100,
+        upperBound: 200,
+      );
+
+      expect(controller.value, -100.0);
+
+      controller.repeat();
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 50.0);
+
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 100));
+      expect(controller.value, -100.0);
+
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 200));
+      expect(controller.value, -100.0);
+    },
+  );
+
   group('AnimationBehavior', () {
     test('Default values for constructor', () {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
