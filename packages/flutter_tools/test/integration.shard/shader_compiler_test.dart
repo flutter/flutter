@@ -4,7 +4,8 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
@@ -32,8 +33,7 @@ void main() {
     await shaderCompiler.compileShader(
       input: file,
       outputPath: tmpDir.childFile('test_shader.frag.out').path,
-      target: ShaderTarget.sksl,
-      json: false,
+      targetPlatform: TargetPlatform.tester,
     );
   }
 
@@ -62,8 +62,7 @@ void main() {
     final bool compileResult = await shaderCompiler.compileShader(
       input: globals.fs.file(inkSparklePath),
       outputPath: inkSparkleOutputPath,
-      target: ShaderTarget.sksl,
-      json: false,
+      targetPlatform: TargetPlatform.tester,
     );
     final File resultFile = globals.fs.file(inkSparkleOutputPath);
 

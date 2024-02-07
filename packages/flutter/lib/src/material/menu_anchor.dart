@@ -1071,7 +1071,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   @override
   void didUpdateWidget(MenuItemButton oldWidget) {
     if (widget.focusNode != oldWidget.focusNode) {
-      _focusNode.removeListener(_handleFocusChange);
+      (oldWidget.focusNode ?? _internalFocusNode)?.removeListener(_handleFocusChange);
       if (widget.focusNode != null) {
         _internalFocusNode?.dispose();
         _internalFocusNode = null;
@@ -1871,19 +1871,15 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   Widget build(BuildContext context) {
     Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
+    final Axis orientation = _anchor?._orientation ?? Axis.vertical;
     // Move the submenu over by the size of the menu padding, so that
     // the first menu item aligns with the submenu button that opens it.
-    switch (_anchor?._orientation ?? Axis.vertical) {
-      case Axis.horizontal:
-        switch (Directionality.of(context)) {
-          case TextDirection.rtl:
-            menuPaddingOffset += Offset(menuPadding.right, 0);
-          case TextDirection.ltr:
-            menuPaddingOffset += Offset(-menuPadding.left, 0);
-        }
-      case Axis.vertical:
-        menuPaddingOffset += Offset(0, -menuPadding.top);
-    }
+    menuPaddingOffset += switch ((orientation, Directionality.of(context))) {
+      (Axis.horizontal, TextDirection.rtl) => Offset(menuPadding.right, 0),
+      (Axis.horizontal, TextDirection.ltr) => Offset(-menuPadding.left, 0),
+      (Axis.vertical, TextDirection.rtl)   => Offset(0, -menuPadding.top),
+      (Axis.vertical, TextDirection.ltr)   => Offset(0, -menuPadding.top),
+    };
 
     return MenuAnchor(
       controller: _menuController,
@@ -3204,12 +3200,10 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       Offset desiredPosition = alignment.resolve(textDirection).withinRect(anchorRect);
       final Offset directionalOffset;
       if (alignment is AlignmentDirectional) {
-        switch (textDirection) {
-          case TextDirection.rtl:
-            directionalOffset = Offset(-alignmentOffset.dx, alignmentOffset.dy);
-          case TextDirection.ltr:
-            directionalOffset = alignmentOffset;
-        }
+        directionalOffset = switch (textDirection) {
+          TextDirection.rtl => Offset(-alignmentOffset.dx, alignmentOffset.dy),
+          TextDirection.ltr => alignmentOffset,
+        };
       } else {
         directionalOffset = alignmentOffset;
       }
@@ -3493,12 +3487,10 @@ class _MenuPanelState extends State<_MenuPanel> {
   }
 
   Widget _intrinsicCrossSize({required Widget child}) {
-    switch (widget.orientation) {
-      case Axis.horizontal:
-        return IntrinsicHeight(child: child);
-      case Axis.vertical:
-        return IntrinsicWidth(child: child);
-    }
+    return switch (widget.orientation) {
+      Axis.horizontal => IntrinsicHeight(child: child),
+      Axis.vertical   => IntrinsicWidth(child: child),
+    };
   }
 }
 

@@ -259,7 +259,11 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   double? get pressElevation => 1.0;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? _colors.onSurface
+      : _colors.onSurface,
+  );
 
   @override
   MaterialStateProperty<Color?>? get color =>

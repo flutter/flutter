@@ -73,6 +73,20 @@ dependencies:
 # PUBSPEC CHECKSUM: 6543
 ''';
 
+const String kVersionJson = '''
+{
+  "frameworkVersion": "1.2.3",
+  "channel": "[user-branch]",
+  "repositoryUrl": "git@github.com:flutter/flutter.git",
+  "frameworkRevision": "1234567812345678123456781234567812345678",
+  "frameworkCommitDate": "2024-02-06 22:26:52 +0100",
+  "engineRevision": "abcdef01abcdef01abcdef01abcdef01abcdef01",
+  "dartSdkVersion": "1.2.3",
+  "devToolsVersion": "1.2.3",
+  "flutterVersion": "1.2.3"
+}
+''';
+
 void main() {
   group('update-packages', () {
     late FileSystem fileSystem;
@@ -91,6 +105,9 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       flutterSdk = fileSystem.directory('flutter')..createSync();
       flutterSdk.childFile('version').writeAsStringSync('1.2.3');
+      flutterSdk.childDirectory('bin').childDirectory('cache').childFile('flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kVersionJson);
       flutter = flutterSdk.childDirectory('packages').childDirectory('flutter')
         ..createSync(recursive: true);
       flutterSdk.childDirectory('dev').createSync(recursive: true);

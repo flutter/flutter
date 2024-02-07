@@ -289,12 +289,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (previousState == state) {
       return const <AppLifecycleState>[];
     }
-    if (previousState == AppLifecycleState.paused && state == AppLifecycleState.detached) {
-      // Handle the wrap-around from paused to detached
-      return const <AppLifecycleState>[
-        AppLifecycleState.detached,
-      ];
-    }
     final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
     if (previousState == null) {
       // If there was no previous state, just jump directly to the new state.
@@ -304,7 +298,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       final int stateIndex = AppLifecycleState.values.indexOf(state);
       assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
       assert(stateIndex != -1, 'State $state missing in stateOrder array');
-      if (previousStateIndex > stateIndex) {
+      if (state == AppLifecycleState.detached) {
+        for (int i = previousStateIndex + 1; i < AppLifecycleState.values.length; ++i) {
+          stateChanges.add(AppLifecycleState.values[i]);
+        }
+        stateChanges.add(AppLifecycleState.detached);
+      } else if (previousStateIndex > stateIndex) {
         for (int i = stateIndex; i < previousStateIndex; ++i) {
           stateChanges.insert(0, AppLifecycleState.values[i]);
         }

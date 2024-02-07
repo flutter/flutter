@@ -2599,6 +2599,58 @@ void main() {
       );
     });
 
+    testWidgets('tapping MenuItemButton with null focus node', (WidgetTester tester) async {
+
+      FocusNode? buttonFocusNode = FocusNode();
+
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MenuAnchor(
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    focusNode: buttonFocusNode,
+                    closeOnActivate: false,
+                    child: const Text('Set focus to null'),
+                    onPressed: () {
+                      setState((){
+                        buttonFocusNode?.dispose();
+                        buttonFocusNode = null;
+                      });
+                    },
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return TextButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('OPEN MENU'),
+                  );
+                },
+              );
+            }
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('OPEN MENU'));
+      await tester.pump();
+
+      expect(find.text('Set focus to null'), findsOneWidget);
+
+      await tester.tap(find.text('Set focus to null'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('constrained menus show up in the right place in RTL', (WidgetTester tester) async {
       await changeSurfaceSize(tester, const Size(300, 300));
       await tester.pumpWidget(

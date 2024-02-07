@@ -202,6 +202,14 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// To make [SelectableText] react to touch events, use callback [onTap] to achieve
 /// the desired behavior.
 ///
+/// ## Scrolling Considerations
+///
+/// If this [SelectableText] is not a descendant of [Scaffold] and is being used
+/// within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [SelectableText] to ensure proper scroll coordination for [SelectableText]
+/// and its components like [TextSelectionOverlay].
+///
 /// See also:
 ///
 ///  * [Text], which is the non selectable version of this widget.
