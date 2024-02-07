@@ -3956,6 +3956,42 @@ void main() {
     expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 160.0)));
   });
 
+  testWidgets('PopupMenuButton scrolls initial value/selected value to visible', (WidgetTester tester) async {
+    const int length = 50;
+    const int selectedValue = length - 1;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: PopupMenuButton<int>(
+              itemBuilder: (BuildContext context) {
+                return List<PopupMenuEntry<int>>.generate(length, (int index) {
+                  return PopupMenuItem<int>(value: index, child: Text('item #$index'));
+                });
+              },
+              popUpAnimationStyle: AnimationStyle.noAnimation,
+              initialValue: selectedValue,
+              child: const Text('click here'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+
+    // Set up finder and verify basic widget structure
+    final Finder findSelectedItem = find.text('item #49');
+    expect(findSelectedItem, findsOne);
+
+    // The initially selected menu item should be positioned on screen
+    final RenderBox selectedItem = tester.renderObject<RenderBox>(findSelectedItem);
+    final Rect selectedItemBounds = selectedItem.localToGlobal(Offset.zero) & selectedItem.size;
+    final Size windowSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+    expect(selectedItemBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
+  });
+
   testWidgets('PopupMenuButton properly positions a constrained-size popup', (WidgetTester tester) async {
     final Size windowSize = tester.view.physicalSize / tester.view.devicePixelRatio;
     const int length = 50;
@@ -4006,53 +4042,6 @@ void main() {
     expect(listViewportBounds.topLeft.dy, lessThanOrEqualTo(windowSize.height));
     expect(listViewportBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
     expect(listViewportBounds, overlaps(buttonBounds));
-  });
-
-  testWidgets('The selected item should always visible', (WidgetTester tester) async {
-    const int length = 50;
-    int selectedIndex = length - 1;
-    Widget buildPopupMenu({ AnimationStyle? animationStyle }) {
-      return MaterialApp(
-        home: Material(
-          child: Center(
-            child: PopupMenuButton<int>(
-              initialValue: selectedIndex,
-              constraints: const BoxConstraints(maxHeight: 100),
-              itemBuilder: (BuildContext context) {
-                return List<PopupMenuEntry<int>>.generate(length, (int index) {
-                  return PopupMenuItem<int>(
-                      value: index,
-                      child: Text('Item $index'));
-                });
-              },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text('Click here to open popup menu '),
-                  Icon(Icons.ads_click),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildPopupMenu());
-    await tester.tap(find.ancestor(of: find.byIcon(Icons.ads_click), matching: find.byType(Row)));
-    await tester.pumpAndSettle();
-
-    final Finder item49 = find.text('Item 49');
-    expect(selectedIndex, 49);
-    expect(item49, findsOneWidget);
-    await tester.tap(item49);
-    await tester.pumpAndSettle();
-
-    selectedIndex = 20;
-    await tester.pumpWidget(buildPopupMenu());
-    await tester.tap(find.ancestor(of: find.byIcon(Icons.ads_click), matching: find.byType(Row)));
-    await tester.pumpAndSettle();
-    expect(find.text('Item 20'), findsOneWidget);
   });
 }
 
