@@ -58,7 +58,7 @@ void main() {
       ..testUri = testUri
       ..vmServiceHost = (() => fakeVmServiceHost)
       ..device = device
-      ..devFS = devFS;
+      ..fakeDevFS = devFS;
   });
 
   testUsingContext(
@@ -73,7 +73,7 @@ void main() {
           ..testUri = testUri
           ..vmServiceHost = (() => fakeVmServiceHost)
           ..device = device
-          ..devFS = devFS
+          ..fakeDevFS = devFS
           ..targetPlatform = TargetPlatform.darwin
           ..generator = residentCompiler;
 

@@ -211,10 +211,10 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   FlutterVmService? get vmService => vmServiceHost?.call()?.vmService;
 
-  DevFS? _devFS;
+  DevFS? fakeDevFS;
 
   @override
-  DevFS? get devFS => _devFS;
+  DevFS? get devFS => fakeDevFS;
 
   @override
   set devFS(DevFS? value) { }

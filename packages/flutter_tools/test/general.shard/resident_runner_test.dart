@@ -39,7 +39,6 @@ import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
-import 'isolated/fake_native_assets_build_runner.dart';
 import 'resident_runner_helpers.dart';
 
 void main() {
@@ -80,7 +79,7 @@ void main() {
       ..testUri = testUri
       ..vmServiceHost = (() => fakeVmServiceHost)
       ..device = device
-      ..devFS = devFS;
+      ..fakeDevFS = devFS;
   });
 
   testUsingContext('ResidentRunner can attach to device successfully', () => testbed.run(() async {
@@ -346,7 +345,7 @@ void main() {
       connectionInfoCompleter: futureConnectionInfo,
     ));
     await futureAppStart.future;
-    flutterDevice.devFS = null;
+    flutterDevice.fakeDevFS = null;
 
     final OperationResult result = await residentRunner.restart();
     expect(result.fatal, false);
@@ -2324,7 +2323,7 @@ flutter:
           ..testUri = testUri
           ..vmServiceHost = (() => fakeVmServiceHost)
           ..device = device
-          ..devFS = devFS
+          ..fakeDevFS = devFS
           ..targetPlatform = TargetPlatform.darwin
           ..generator = residentCompiler;
 
@@ -2335,7 +2334,6 @@ flutter:
         globals.fs
             .file(globals.fs.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
-        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
         residentRunner = HotRunner(
           <FlutterDevice>[
             flutterDevice,
@@ -2349,18 +2347,12 @@ flutter:
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
           analytics: fakeAnalytics,
           nativeAssetsYamlFile: 'foo.yaml',
         );
 
         final int? result = await residentRunner.run();
         expect(result, 0);
-
-        expect(buildRunner.buildInvocations, 0);
-        expect(buildRunner.dryRunInvocations, 0);
-        expect(buildRunner.hasPackageConfigInvocations, 0);
-        expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
 
         expect(residentCompiler.recompileCalled, true);
         expect(residentCompiler.receivedNativeAssetsYaml, globals.fs.path.toUri('foo.yaml'));
