@@ -21,6 +21,7 @@ const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 /// Create an object with exemption from disposal.
 ///
 /// All objects created by [builder] will be exempt from disposal.
+/// Noop if [kFlutterMemoryAllocationsEnabled] is false.
 ///
 /// The method is useful for creating singletons:
 ///
