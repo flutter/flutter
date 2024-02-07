@@ -327,7 +327,7 @@ class FlutterMemoryAllocations {
   /// });
   /// ```
   T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder){
-    ObjectCreated._exemptionFromDisposal ++;
+    ObjectCreated._exemptionFromDisposal++;
     try {
       return builder();
     } finally {
