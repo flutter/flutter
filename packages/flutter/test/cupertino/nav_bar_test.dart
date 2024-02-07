@@ -100,7 +100,7 @@ void main() {
     expect(find.byType(BackdropFilter), findsOneWidget);
   });
 
-  testWidgets('Default background is the default backgroundColor with zero opacity when expandedTransparent is true', (WidgetTester tester) async {
+  testWidgets('Default background is the default backgroundColor with zero opacity when expanded state', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -108,7 +108,6 @@ void main() {
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: Text('Large Title'),
-                expandedTransparent: true,
               ),
             ],
           ),
@@ -121,7 +120,7 @@ void main() {
       paints..rect(color: const CupertinoThemeData().barBackgroundColor.withOpacity(0)));
   });
 
-  testWidgets('Border is not visible when expandedTransparent is true', (WidgetTester tester) async {
+  testWidgets('Border is not visible when expanded state', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -129,7 +128,6 @@ void main() {
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: Text('Large Title'),
-                expandedTransparent: true,
               ),
             ],
           ),

@@ -130,7 +130,6 @@ class LastPage extends StatelessWidget {
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: CupertinoColors.destructiveRed,
-            expandedTransparent: true,
             border: Border(
               bottom: BorderSide(
                 color: brightness == Brightness.light ? CupertinoColors.black : CupertinoColors.white,
