@@ -53,6 +53,9 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
 
+// This test is currently on the preview shard (but not using the preview
+// version of android) because it is the only one using Java 11. This test
+// requires Java 11 due to the intentionally low version of Gradle.
 void main() {
   late Directory tempDir;
 
