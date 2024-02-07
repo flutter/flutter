@@ -510,7 +510,7 @@ targets:
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
-    presubmit: false
+    presubmit: true
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
