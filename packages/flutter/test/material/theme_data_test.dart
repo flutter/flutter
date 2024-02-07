@@ -409,7 +409,7 @@ void main() {
 
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
-        if (kIsWeb && !isCanvasKit) {
+        if (kIsWeb) {
           expect(theme.splashFactory, equals(InkRipple.splashFactory));
         } else {
           expect(theme.splashFactory, equals(InkSparkle.splashFactory));
