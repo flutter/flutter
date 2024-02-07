@@ -25,9 +25,7 @@ const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 /// The method is useful for creating singletons:
 ///
 /// ```dart
-/// final ValueNotifier<bool> mySingleton = FlutterMemoryAllocations.instance.exemptFromDisposal(() {
-///   return ValueNotifier<bool>(false);
-/// });
+/// final ValueNotifier<bool> mySingleton = exemptFromDisposal(() => ValueNotifier<bool>(false));
 /// ```
 T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder){
   if (kFlutterMemoryAllocationsEnabled) {
