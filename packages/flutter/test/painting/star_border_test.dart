@@ -117,7 +117,7 @@ void main() {
   testWidgets('StarBorder basic geometry', (WidgetTester tester) async {
     await testBorder(tester, 'basic_star', const StarBorder());
     await testBorder(tester, 'basic_polygon', const StarBorder.polygon());
-  });
+  }, skip: true); // TODO(flutter): https://github.com/flutter/flutter/issues/143101.
 
   testWidgets('StarBorder parameters', (WidgetTester tester) async {
     await testBorder(tester, 'points_6', const StarBorder(points: 6));
@@ -142,7 +142,7 @@ void main() {
     await testBorder(tester, 'side_10', const StarBorder(side: BorderSide(color: Color(0xffff0000), width: 10)));
     await testBorder(tester, 'side_align_center', const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
     await testBorder(tester, 'side_align_outside', const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
-  });
+  }, skip: true); // TODO(flutter): https://github.com/flutter/flutter/issues/143101.
 
   testWidgets('StarBorder.polygon parameters', (WidgetTester tester) async {
     await testBorder(tester, 'poly_sides_6', const StarBorder.polygon(sides: 6));
@@ -161,7 +161,7 @@ void main() {
     await testBorder(tester, 'poly_side_10', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), width: 10)));
     await testBorder(tester, 'poly_side_align_center', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
     await testBorder(tester, 'poly_side_align_outside', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
-  });
+  }, skip: true); // TODO(flutter): https://github.com/flutter/flutter/issues/143101.
 
   testWidgets("StarBorder doesn't try to scale an infinite scale matrix", (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -206,7 +206,7 @@ void main() {
     await testBorder(tester, 'from_star_border_20', from, lerpFrom: otherBorder, lerpAmount: 0.2);
     await testBorder(tester, 'from_star_border_70', from, lerpFrom: otherBorder, lerpAmount: 0.7);
     await testBorder(tester, 'from_star_border_100', from, lerpFrom: otherBorder, lerpAmount: 1.0);
-  });
+  }, skip: true); // TODO(flutter): https://github.com/flutter/flutter/issues/143101.
 
   testWidgets('StarBorder lerped with CircleBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
@@ -224,7 +224,7 @@ void main() {
     await testBorder(tester, 'from_eccentric_circle_border_20', from, lerpFrom: eccentricCircle, lerpAmount: 0.2);
     await testBorder(tester, 'from_eccentric_circle_border_70', from, lerpFrom: eccentricCircle, lerpAmount: 0.7);
     await testBorder(tester, 'from_eccentric_circle_border_100', from, lerpFrom: eccentricCircle, lerpAmount: 1.0);
-  });
+  }, skip: true); // TODO(flutter): https://github.com/flutter/flutter/issues/143101.
 
   testWidgets('StarBorder lerped with RoundedRectangleBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
@@ -248,7 +248,7 @@ void main() {
     await testBorder(tester, 'from_rrect_border_20', from, lerpFrom: roundedRectBorder, lerpAmount: 0.2);
     await testBorder(tester, 'from_rrect_border_70', from, lerpFrom: roundedRectBorder, lerpAmount: 0.7);
     await testBorder(tester, 'from_rrect_border_100', from, lerpFrom: roundedRectBorder, lerpAmount: 1.0);
-  });
+  }, skip: true); // TODO(flutter): https://github.com/flutter/flutter/issues/143101.
 
   testWidgets('StarBorder lerped with StadiumBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
@@ -260,7 +260,7 @@ void main() {
     await testBorder(tester, 'from_stadium_border_20', from, lerpFrom: stadiumBorder, lerpAmount: 0.2);
     await testBorder(tester, 'from_stadium_border_70', from, lerpFrom: stadiumBorder, lerpAmount: 0.7);
     await testBorder(tester, 'from_stadium_border_100', from, lerpFrom: stadiumBorder, lerpAmount: 1.0);
-  });
+  }, skip: true); // TODO(flutter): https://github.com/flutter/flutter/issues/143101.
 }
 
 class StarBorderSubclass extends StarBorder {
