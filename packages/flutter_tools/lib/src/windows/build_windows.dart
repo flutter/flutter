@@ -114,19 +114,20 @@ Future<void> buildWindows(
   }
 
   final String? binaryName = getCmakeExecutableName(windowsProject);
-  final File binaryFile = buildDirectory
+  final File appFile = buildDirectory
     .childDirectory('runner')
     .childDirectory(sentenceCase(buildModeName))
     .childFile('$binaryName.exe');
-  final FileSystemEntity buildOutput =  binaryFile.existsSync() ? binaryFile : binaryFile.parent;
-  // We don't print a size because the output directory can contain
-  // optional files not needed by the user and because the binary is not
-  // self-contained.
-  globals.logger.printStatus(
-    '${globals.logger.terminal.successMark} '
-    'Built ${globals.fs.path.relative(buildOutput.path)}',
-    color: TerminalColor.green,
-  );
+  if (appFile.existsSync()) {
+    final String appSize = (buildInfo.mode == BuildMode.debug)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsMB(appFile.lengthSync())})';
+    globals.logger.printStatus(
+      '${globals.logger.terminal.successMark}  '
+      'Built ${globals.fs.path.relative(appFile.path)}$appSize.',
+      color: TerminalColor.green,
+    );
+  }
 
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(targetPlatform);
