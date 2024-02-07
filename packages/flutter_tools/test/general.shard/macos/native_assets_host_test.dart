@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
+import 'package:flutter_tools/src/macos/native_assets_host.dart';
 
-import '../../../src/common.dart';
+import '../../src/common.dart';
 
 void main() {
   test('framework name', () {

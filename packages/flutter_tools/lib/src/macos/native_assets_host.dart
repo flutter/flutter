@@ -7,12 +7,12 @@
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode;
 
-import '../../../base/common.dart';
-import '../../../base/file_system.dart';
-import '../../../base/io.dart';
-import '../../../build_info.dart';
-import '../../../convert.dart';
-import '../../../globals.dart' as globals;
+import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
+import '../build_info.dart';
+import '../convert.dart';
+import '../globals.dart' as globals;
 
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
 ///
