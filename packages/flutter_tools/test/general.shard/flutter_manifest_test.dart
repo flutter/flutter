@@ -176,8 +176,13 @@ flutter:
           key2: value2
 ''';
     FlutterManifest.createFromString(manifest, logger: logger);
-    expect(logger.errorText, contains('Asset manifest entry is malformed. '
-      'Expected "flavors" entry to be a list of strings.'));
+    expect(
+      logger.errorText,
+      contains(
+        'Expected flavors list of entry "assets/vanilla/" to be a list of '
+        'String, but element 0 was a YamlMap\n',
+      ),
+    );
   });
 
   testWithoutContext('FlutterManifest has one font family with one asset', () async {
@@ -1404,7 +1409,9 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Asset manifest entry is malformed. Expected asset entry to be either a string or a map containing a "path" entry. Got Null instead.\n');
+    expect(logger.errorText, 'Asset entry is malformed. Expected asset entry '
+      'to be either a string or a map containing a "path" entry. '
+      'Found Null instead.\n');
   });
 
   testWithoutContext('FlutterManifest deferred component multiple assets is string', () async {
@@ -1428,7 +1435,9 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Asset manifest entry is malformed. Expected asset entry to be either a string or a map containing a "path" entry. Got Null instead.\n');
+    expect(logger.errorText, 'Asset entry is malformed. Expected asset entry '
+      'to be either a string or a map containing a "path" entry. '
+      'Found Null instead.\n');
   });
 
   testWithoutContext('FlutterManifest multiple deferred components assets is string', () async {
@@ -1455,7 +1464,9 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Asset manifest entry is malformed. Expected asset entry to be either a string or a map containing a "path" entry. Got Null instead.\n');
+    expect(logger.errorText, 'Asset entry is malformed. Expected asset entry '
+      'to be either a string or a map containing a "path" entry. '
+      'Found Null instead.\n');
   });
 
   testWithoutContext('FlutterManifest deferred component assets is list', () async {

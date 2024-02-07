@@ -840,6 +840,10 @@ class AssetsEntry {
         }
       }
 
+      if (errors.isNotEmpty) {
+        return (null, errors.join('\n\n'));
+      }
+
       final AssetsEntry entry = AssetsEntry(
         uri: Uri(pathSegments: path.split('/')),
         flavors: List<String>.from(flavors),
