@@ -54,6 +54,10 @@ targets:
     recipe: engine_v2/engine_v2
     properties:
       config_name: linux_android_emulator
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
     timeout: 60
     runIf:
       - .ci.yaml
@@ -71,6 +75,10 @@ targets:
     recipe: engine_v2/engine_v2
     properties:
       config_name: linux_android_emulator_api_33
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
     timeout: 60
     runIf:
       - .ci.yaml
