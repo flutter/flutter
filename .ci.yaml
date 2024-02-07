@@ -2800,7 +2800,7 @@ targets:
 
   - name: Linux_pixel_7pro platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2821,7 +2821,7 @@ targets:
 
   - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
