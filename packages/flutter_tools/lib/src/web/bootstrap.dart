@@ -4,9 +4,19 @@
 
 import 'package:package_config/package_config.dart';
 
-/// Used to load prerequisite scripts such as ddc_module_loader.js
-const String _simpleLoaderScript = r'''
-window.$dartCreateScript = (function() {
+String generateDDCBootstrapScript({
+  required String entrypoint,
+  required String ddcModuleLoaderUrl,
+  required String mapperUrl,
+  required bool generateLoadingIndicator,
+}) {
+  return '''
+${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
+// TODO(markzipan): This is safe if Flutter app roots are always equal to the
+// host root. Validate if this is true.
+var _currentDirectory = '/';
+
+window.\$dartCreateScript = (function() {
   // Find the nonce value. (Note, this is only computed once.)
   var scripts = Array.from(document.getElementsByTagName("script"));
   var nonce;
@@ -32,7 +42,7 @@ window.$dartCreateScript = (function() {
 var forceLoadModule = function (relativeUrl, root) {
   var actualRoot = root ?? _currentDirectory;
   return new Promise(function(resolve, reject) {
-    var script = self.$dartCreateScript();
+    var script = self.\$dartCreateScript();
     let policy = {
       createScriptURL: function(src) {return src;}
     };
@@ -45,20 +55,6 @@ var forceLoadModule = function (relativeUrl, root) {
     document.head.appendChild(script);
   });
 };
-''';
-
-String generateDDCBootstrapScript({
-  required String entrypoint,
-  required String ddcModuleLoaderUrl,
-  required String mapperUrl,
-  required bool generateLoadingIndicator,
-}) {
-  return '''
-${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
-// TODO(markzipan): This is safe if Flutter app roots are always equal to the
-// host root. Validate if this is true.
-var _currentDirectory = '/';
-$_simpleLoaderScript
 
 // A map containing the URLs for the bootstrap scripts in debug.
 let _scriptUrls = {
@@ -128,38 +124,13 @@ if (window.trustedTypes) {
     let loadConfig = new window.\$dartLoader.LoadConfiguration();
     loadConfig.bootstrapScript = scripts[scripts.length - 1];
 
-    if (window.\$dartJITModules) {
-      loadConfig.loadScriptFn = function(loader) {
-        // Loads just the entrypoint module and required SDK modules.
-        let moduleSet = new Set();
-        // This cache is populated by ddc_module_loader.js
-        let libraryCache = JSON.parse(window.localStorage.getItem(`dartLibraryCache:\${appName}`));
-        if (libraryCache) {
-          // TODO(b/165021238) - when should this be invalidated?
-          moduleSet = new Set(libraryCache["modules"])
-        }
-        loader.addScriptsToQueue(scripts, function(script) {
-            // Preemptively load the module loader and previously executed modules,
-            // and the stack_trace_mapper so that we can translate JS errors to Dart.
-            return moduleSet.size == 0
-                  || script.id.includes("ddc_module_loader")
-                  || script.id.includes("stack_trace_mapper")
-                  || moduleSet.has(script.id);
-        });
-        loader.loadEnqueuedModules();
-      }
-      loadConfig.ddcEventForLoadStart = /* LOAD_ENTRYPOINT_MODULES_START */ 4;
-      loadConfig.ddcEventForLoadedOk = /* LOAD_ENTRYPOINT_MODULES_END_OK */ 5;
-      loadConfig.ddcEventForLoadedError = /* LOAD_ENTRYPOINT_MODULES_END_ERROR */ 6;
-    } else {
-      loadConfig.loadScriptFn = function(loader) {
-        loader.addScriptsToQueue(scripts, null);
-        loader.loadEnqueuedModules();
-      }
-      loadConfig.ddcEventForLoadStart = /* LOAD_ALL_MODULES_START */ 1;
-      loadConfig.ddcEventForLoadedOk = /* LOAD_ALL_MODULES_END_OK */ 2;
-      loadConfig.ddcEventForLoadedError = /* LOAD_ALL_MODULES_END_ERROR */ 3;
+    loadConfig.loadScriptFn = function(loader) {
+      loader.addScriptsToQueue(scripts, null);
+      loader.loadEnqueuedModules();
     }
+    loadConfig.ddcEventForLoadStart = /* LOAD_ALL_MODULES_START */ 1;
+    loadConfig.ddcEventForLoadedOk = /* LOAD_ALL_MODULES_END_OK */ 2;
+    loadConfig.ddcEventForLoadedError = /* LOAD_ALL_MODULES_END_ERROR */ 3;
 
     let loader = new window.\$dartLoader.DDCLoader(loadConfig);
 
@@ -171,113 +142,6 @@ if (window.trustedTypes) {
     window.\$dartLoader.loadConfig = loadConfig;
     window.\$dartLoader.loader = loader;
     loader.nextAttempt();
-
-    let currentUri = _currentScript.src;
-    let fetchEtagsUri;
-    if (currentUri.indexOf("?") == -1) {
-      fetchEtagsUri = currentUri + "?fetch-etags=true";
-    } else {
-      fetchEtagsUri = currentUri + "&fetch-etags=true";
-    }
-
-    if (!window.\$dartAppNameToMetadata) {
-      window.\$dartAppNameToMetadata = new Map();
-    }
-    window.\$dartAppNameToMetadata.set(appName, {
-        currentDirectory: _currentDirectory,
-        currentUri: currentUri,
-        fetchEtagsUri: fetchEtagsUri,
-    });
-
-    if (!window.\$dartReloadModifiedModules) {
-      window.\$dartReloadModifiedModules = (function(appName, callback) {
-        function cb() {
-          window.postMessage(
-              {
-                type: "DDC_STATE_CHANGE",
-                state: "restart_end",
-                targetUuid: uuid,
-              },
-              "*");
-          callback();
-        }
-        window.postMessage(
-            {
-              type: "DDC_STATE_CHANGE",
-              state: "restart_begin",
-              targetUuid: uuid,
-            },
-            "*");
-        var xhttp = new XMLHttpRequest();
-        xhttp.withCredentials = true;
-        xhttp.onreadystatechange = function() {
-          // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState
-          if (this.readyState == 4 && this.status == 200 || this.status == 304) {
-            var scripts = JSON.parse(this.responseText);
-            var numToLoad = 0;
-            var numLoaded = 0;
-            for (var i = 0; i < scripts.length; i++) {
-              var script = scripts[i];
-              if (script.id == null) continue;
-              var src =
-                  window.\$dartAppNameToMetadata.get(appName).currentDirectory +
-                  script.src.toString();
-              var oldSrc = window.\$dartLoader.moduleIdToUrl.get(script.id);
-              // Only compare the search parameters which contain the cache
-              // busting portion of the uri. The path might be different if the
-              // script is loaded from a different application on the page.
-              if (new URL(oldSrc).search == new URL(src).search) continue;
-
-              // We might actually load from a different uri, delete the old one
-              // just to be sure.
-              window.\$dartLoader.urlToModuleId.delete(oldSrc);
-
-              window.\$dartLoader.moduleIdToUrl.set(script.id, src);
-              window.\$dartLoader.urlToModuleId.set(src, script.id);
-
-              if (window.\$dartJITModules) {
-              // Simply invalidate the import and the corresponding module will
-              // be lazily loaded.
-              dart_library.invalidateImport(script.id);
-              continue;
-              } else {
-                numToLoad++;
-              }
-
-              var el = document.getElementById(script.id);
-              if (el) el.remove();
-              el = window.\$dartCreateScript();
-              el.src = policy.createScriptURL(src);
-              el.async = false;
-              el.defer = true;
-              el.id = script.id;
-              el.onload = function() {
-                numLoaded++;
-                if (numToLoad == numLoaded) cb();
-              };
-              document.head.appendChild(el);
-            }
-            // Call `cb` right away if we found no updated scripts.
-            if (numToLoad == 0) cb();
-          }
-        };
-        xhttp.open("GET",
-          window.\$dartAppNameToMetadata.get(appName).fetchEtagsUri, true);
-        let sdk = dart_library.import("dart_sdk", appName);
-        let developer = sdk.developer;
-        if (developer._extensions.containsKey("ext.flutter.disassemble")) {
-          developer.invokeExtension("ext.flutter.disassemble", "{}").then(() => {
-            // TODO(b/204210914): we should really be clearing all statics for all
-            // apps, but for now we just do it for flutter apps which we recognize
-            // based on this extension.
-            sdk.dart.hotRestart();
-            xhttp.send();
-          });
-        } else {
-          xhttp.send();
-        }
-      });
-    }
   }
 })();
 ''';
