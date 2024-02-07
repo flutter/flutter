@@ -138,6 +138,15 @@ transforms:
     changes:
       - kind: 'rename'
         newName: 'widgetStates'
+  - title: "Replace with 'WidgetStateMixin.widgetStates'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      field: 'materialStates'
+      inMixin: 'WidgetStateMixin'
+    changes:
+      - kind: 'rename'
+        newName: 'widgetStates'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin.updateWidgetState'"
@@ -146,6 +155,15 @@ transforms:
       uris: [ 'material.dart', 'widgets.dart' ]
       method: 'updateMaterialState'
       inMixin: 'MaterialStateMixin'
+    changes:
+      - kind: 'rename'
+        newName: 'updateWidgetState'
+  - title: "Replace with 'WidgetStateMixin.updateWidgetState'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      method: 'updateMaterialState'
+      inMixin: 'WidgetStateMixin'
     changes:
       - kind: 'rename'
         newName: 'updateWidgetState'
@@ -160,6 +178,15 @@ transforms:
     changes:
       - kind: 'rename'
         newName: 'setWidgetState'
+  - title: "Replace with 'WidgetStateMixin.setWidgetState'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      method: 'setMaterialState'
+      inMixin: 'WidgetStateMixin'
+    changes:
+      - kind: 'rename'
+        newName: 'setWidgetState'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin.addWidgetState'"
@@ -171,6 +198,15 @@ transforms:
     changes:
       - kind: 'rename'
         newName: 'addWidgetState'
+  - title: "Replace with 'WidgetStateMixin.addWidgetState'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      method: 'addMaterialState'
+      inMixin: 'WidgetStateMixin'
+    changes:
+      - kind: 'rename'
+        newName: 'addWidgetState'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateMixin.removeWidgetState'"
@@ -179,6 +215,15 @@ transforms:
       uris: [ 'material.dart', 'widgets.dart' ]
       method: 'removeMaterialState'
       inMixin: 'MaterialStateMixin'
+    changes:
+      - kind: 'rename'
+        newName: 'removeWidgetState'
+  - title: "Replace with 'WidgetStateMixin.removeWidgetState'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      method: 'removeMaterialState'
+      inMixin: 'WidgetStateMixin'
     changes:
       - kind: 'rename'
         newName: 'removeWidgetState'
