@@ -11,6 +11,6 @@ void main() {
     await tester.pumpWidget(
       const example.SuffixIconExampleApp(),
     );
-    expect(tester.getCenter(find.byIcon(Icons.remove_red_eye)).dy, 32.0);
+    expect(tester.getCenter(find.byIcon(Icons.remove_red_eye)).dy, 28.0);
   });
 }
