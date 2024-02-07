@@ -312,6 +312,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
+          webRenderer: debuggingOptions.webRenderer,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
@@ -342,7 +343,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             target,
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
-            compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions)
+            compilerConfigs: <WebCompilerConfig>[
+              JsCompilerConfig.run(
+                nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+                renderer: debuggingOptions.webRenderer,
+              )
+            ]
           );
         }
         await device!.device!.startApp(
@@ -421,7 +427,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           target,
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
-          compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions),
+          compilerConfigs: <WebCompilerConfig>[
+            JsCompilerConfig.run(
+              nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+              renderer: debuggingOptions.webRenderer,
+            )
+          ],
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

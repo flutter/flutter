@@ -94,7 +94,6 @@ class SegmentedButtonThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('selectedIcon', selectedIcon, defaultValue: null));
   }
 }
 

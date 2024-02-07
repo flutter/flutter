@@ -43,7 +43,7 @@ void main() {
     listener?.dispose();
     listener = null;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-    binding.resetLifecycleState();
+    binding.resetInternalState();
     binding.platformDispatcher.resetInitialLifecycleState();
     assert(TestAppLifecycleListener.registerCount == 0,
         'There were ${TestAppLifecycleListener.registerCount} listeners that were not disposed of in tests.');
