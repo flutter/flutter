@@ -70,6 +70,8 @@ const Widget _startSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(cap
 const Widget _centerSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capStartEdge: false, capEndEdge: false);
 const Widget _endSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capStartEdge: false);
 
+typedef SelectionOverlayBuilder = Widget Function(BuildContext context, int index, int columnCount);
+
 // Lays out the date picker based on how much space each single column needs.
 //
 // Each column is a child of this delegate, indexed from 0 to number of columns - 1.
@@ -291,6 +293,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.backgroundColor,
     this.showDayOfWeek = false,
     this.itemExtent = _kItemExtent,
+    this.selectionOverlayBuilder,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(
          itemExtent > 0,
@@ -412,6 +415,9 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// Defaults to a value that matches the default iOS date picker wheel.
   final double itemExtent;
+
+  /// A builder to return the selection overlay widget for the picker.
+  final SelectionOverlayBuilder? selectionOverlayBuilder;
 
   @override
   State<StatefulWidget> createState() { // ignore: no_logic_in_create_state, https://github.com/flutter/flutter/issues/70499
@@ -1053,9 +1059,20 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     for (int i = 0; i < columnWidths.length; i++) {
       double offAxisFraction = 0.0;
       Widget selectionOverlay = _centerSelectionOverlay;
+
+      if (widget.selectionOverlayBuilder != null) {
+        selectionOverlay =
+            widget.selectionOverlayBuilder!(context, i, columnWidths.length);
+      } else {
+        if (i == 0) {
+          selectionOverlay = _startSelectionOverlay;
+        } else if (i == columnWidths.length - 1) {
+          selectionOverlay = _endSelectionOverlay;
+        }
+      }
+
       if (i == 0) {
         offAxisFraction = -_kMaximumOffAxisFraction * textDirectionFactor;
-        selectionOverlay = _startSelectionOverlay;
       } else if (i >= 2 || columnWidths.length == 2) {
         offAxisFraction = _kMaximumOffAxisFraction * textDirectionFactor;
       }
@@ -1063,7 +1080,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (i == columnWidths.length - 1) {
         padding = padding.flipped;
-        selectionOverlay = _endSelectionOverlay;
       }
       if (textDirectionFactor == -1) {
         padding = padding.flipped;
@@ -1462,10 +1478,16 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       }
 
       Widget selectionOverlay = _centerSelectionOverlay;
-      if (i == 0) {
-        selectionOverlay = _startSelectionOverlay;
-      } else if (i == columnWidths.length - 1) {
-        selectionOverlay = _endSelectionOverlay;
+
+      if (widget.selectionOverlayBuilder != null) {
+        selectionOverlay =
+            widget.selectionOverlayBuilder!(context, i, columnWidths.length);
+      } else {
+        if (i == 0) {
+          selectionOverlay = _startSelectionOverlay;
+        } else if (i == columnWidths.length - 1) {
+          selectionOverlay = _endSelectionOverlay;
+        }
       }
 
       totalColumnWidths += columnWidths[i] + (2 * _kDatePickerPadSize);
@@ -1769,6 +1791,19 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
 
       totalColumnWidths += columnWidths[i] + (2 * _kDatePickerPadSize);
 
+      Widget selectionOverlay = _centerSelectionOverlay;
+
+      if (widget.selectionOverlayBuilder != null) {
+        selectionOverlay =
+            widget.selectionOverlayBuilder!(context, i, columnWidths.length);
+      } else {
+        if (i == 0) {
+          selectionOverlay = _startSelectionOverlay;
+        } else if (i == columnWidths.length - 1) {
+          selectionOverlay = _endSelectionOverlay;
+        }
+      }
+
       pickers.add(LayoutId(
         id: i,
         child: pickerBuilders[i](
@@ -1788,11 +1823,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
               ),
             );
           },
-          switch (last) {
-            _ when first => _startSelectionOverlay,
-            false => _centerSelectionOverlay,
-            true  => _endSelectionOverlay,
-          },
+          selectionOverlay,
         ),
       ));
     }
@@ -1903,6 +1934,7 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.backgroundColor,
     this.itemExtent = _kItemExtent,
     required this.onTimerDurationChanged,
+    this.selectionOverlayBuilder,
   }) : assert(initialTimerDuration >= Duration.zero),
        assert(initialTimerDuration < const Duration(days: 1)),
        assert(minuteInterval > 0 && 60 % minuteInterval == 0),
@@ -1945,6 +1977,9 @@ class CupertinoTimerPicker extends StatefulWidget {
   ///
   /// Defaults to a value that matches the default iOS timer picker wheel.
   final double itemExtent;
+
+  /// A builder to return the selection overlay widget for the picker.
+  final SelectionOverlayBuilder? selectionOverlayBuilder;
 
   @override
   State<StatefulWidget> createState() => _CupertinoTimerPickerState();
@@ -2430,20 +2465,28 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               minuteColumnEndPadding = _kTimerPickerMinHorizontalPadding;
             }
 
+            Widget hourSelectionOverlay = _startSelectionOverlay;
+            Widget minuteSelectionOverlay = _endSelectionOverlay;
+
+            if(widget.selectionOverlayBuilder != null) {
+              hourSelectionOverlay = widget.selectionOverlayBuilder!(context, 0, 2);
+              minuteSelectionOverlay = widget.selectionOverlayBuilder!(context, 1, 2);
+            }
+
             columns = <Widget>[
               _buildHourColumn(
                   EdgeInsetsDirectional.only(
                       start: hourColumnStartPadding,
                       end: pickerColumnWidth - hourColumnStartPadding - hourLabelContentWidth,
                   ),
-                  _startSelectionOverlay,
+                  hourSelectionOverlay,
               ),
               _buildMinuteColumn(
                   EdgeInsetsDirectional.only(
                       start: pickerColumnWidth - minuteColumnEndPadding - minuteLabelContentWidth,
                       end: minuteColumnEndPadding,
                   ),
-                  _endSelectionOverlay,
+                  minuteSelectionOverlay,
               ),
             ];
           case CupertinoTimerPickerMode.ms:
@@ -2460,20 +2503,28 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               minuteColumnStartPadding = _kTimerPickerMinHorizontalPadding;
             }
 
+            Widget minuteSelectionOverlay = _startSelectionOverlay;
+            Widget secondSelectionOverlay = _endSelectionOverlay;
+
+            if(widget.selectionOverlayBuilder != null) {
+              minuteSelectionOverlay = widget.selectionOverlayBuilder!(context, 0, 2);
+              secondSelectionOverlay = widget.selectionOverlayBuilder!(context, 1, 2);
+            }
+
             columns = <Widget>[
               _buildMinuteColumn(
                   EdgeInsetsDirectional.only(
                       start: minuteColumnStartPadding,
                       end: pickerColumnWidth - minuteColumnStartPadding - minuteLabelContentWidth,
                   ),
-                  _startSelectionOverlay,
+                  minuteSelectionOverlay,
               ),
               _buildSecondColumn(
                   EdgeInsetsDirectional.only(
                       start: pickerColumnWidth - secondColumnEndPadding - minuteLabelContentWidth,
                       end: secondColumnEndPadding,
                   ),
-                  _endSelectionOverlay,
+                  secondSelectionOverlay,
               ),
             ];
           case CupertinoTimerPickerMode.hms:
@@ -2484,27 +2535,41 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             final double secondColumnStartPadding =
                 pickerColumnWidth - baseLabelContentWidth - secondLabelWidth - _kTimerPickerMinHorizontalPadding;
 
+
+            Widget hourSelectionOverlay = _startSelectionOverlay;
+            Widget minuteSelectionOverlay = _centerSelectionOverlay;
+            Widget secondSelectionOverlay = _endSelectionOverlay;
+
+            if (widget.selectionOverlayBuilder != null) {
+              hourSelectionOverlay =
+                  widget.selectionOverlayBuilder!(context, 0, 3);
+              minuteSelectionOverlay =
+                  widget.selectionOverlayBuilder!(context, 1, 3);
+              secondSelectionOverlay =
+                  widget.selectionOverlayBuilder!(context, 2, 3);
+            }
+
             columns = <Widget>[
               _buildHourColumn(
                   EdgeInsetsDirectional.only(
                       start: _kTimerPickerMinHorizontalPadding,
                       end: math.max(hourColumnEndPadding, 0),
                   ),
-                  _startSelectionOverlay,
+                  hourSelectionOverlay,
               ),
               _buildMinuteColumn(
                   EdgeInsetsDirectional.only(
                       start: minuteColumnPadding,
                       end: minuteColumnPadding,
                   ),
-                  _centerSelectionOverlay,
+                  minuteSelectionOverlay,
               ),
               _buildSecondColumn(
                   EdgeInsetsDirectional.only(
                       start: math.max(secondColumnStartPadding, 0),
                       end: _kTimerPickerMinHorizontalPadding,
                   ),
-                  _endSelectionOverlay,
+                  secondSelectionOverlay,
               ),
             ];
         }
