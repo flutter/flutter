@@ -3981,14 +3981,31 @@ void main() {
     await tester.tap(find.text('click here'));
     await tester.pump();
 
-    // Set up finder and verify basic widget structure
-    final Finder findSelectedItem = find.text('item #49');
-    expect(findSelectedItem, findsOne);
+    // Set up finder and verify basic widget structure.
+    final Finder item49 = find.text('item #49');
+    expect(item49, findsOneWidget);
 
-    // The initially selected menu item should be positioned on screen
-    final RenderBox selectedItem = tester.renderObject<RenderBox>(findSelectedItem);
-    final Rect selectedItemBounds = selectedItem.localToGlobal(Offset.zero) & selectedItem.size;
+    // The initially selected menu item should be positioned on screen.
+    final RenderBox initialItem = tester.renderObject<RenderBox>(item49);
+    final Rect initialItemBounds = initialItem.localToGlobal(Offset.zero) & initialItem.size;
     final Size windowSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+    expect(initialItemBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
+
+    // Select item 20.
+    final Finder item20 = find.text('item #20');
+    await tester.scrollUntilVisible(item20, 500);
+    expect(item20, findsOneWidget);
+    await tester.tap(item20);
+    await tester.pump();
+
+    // Open menu again.
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+    expect(item20, findsOneWidget);
+
+    // The selected menu item should be positioned on screen.
+    final RenderBox selectedItem = tester.renderObject<RenderBox>(item20);
+    final Rect selectedItemBounds = selectedItem.localToGlobal(Offset.zero) & selectedItem.size;
     expect(selectedItemBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
   });
 }
