@@ -22,6 +22,7 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'native_assets.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -92,13 +93,13 @@ class HotRunner extends ResidentRunner {
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+    NativeAssetsBuildRunner? buildRunner,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
   })  : _stopwatchFactory = stopwatchFactory,
         _reloadSourcesHelper = reloadSourcesHelper,
         _reassembleHelper = reassembleHelper,
-        _nativeAssetsBuilder = nativeAssetsBuilder,
+        _buildRunner = buildRunner,
         _nativeAssetsYamlFile = nativeAssetsYamlFile,
         _analytics = analytics,
         super(
@@ -138,7 +139,7 @@ class HotRunner extends ResidentRunner {
   String? _sdkName;
   bool? _emulator;
 
-  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
+  NativeAssetsBuildRunner? _buildRunner;
   final String? _nativeAssetsYamlFile;
 
   String? flavor;
@@ -373,12 +374,17 @@ class HotRunner extends ResidentRunner {
       nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
     } else {
       final Uri projectUri = Uri.directory(projectRootPath);
-      nativeAssetsYaml = await _nativeAssetsBuilder?.dryRun(
+      _buildRunner ??= NativeAssetsBuildRunnerImpl(
+        projectUri,
+        debuggingOptions.buildInfo.packageConfig,
+        fileSystem,
+        globals.logger,
+      );
+      nativeAssetsYaml = await dryRunNativeAssets(
         projectUri: projectUri,
         fileSystem: fileSystem,
+        buildRunner: _buildRunner!,
         flutterDevices: flutterDevices,
-        logger: logger,
-        packageConfig: debuggingOptions.buildInfo.packageConfig,
       );
     }
 
@@ -1721,16 +1727,4 @@ class ReasonForCancelling {
   String toString() {
     return '$message.\nTry performing a hot restart instead.';
   }
-}
-
-/// An interface to enable overriding native assets build logic in other
-/// build systems.
-abstract class HotRunnerNativeAssetsBuilder {
-  Future<Uri?> dryRun({
-    required Uri projectUri,
-    required FileSystem fileSystem,
-    required List<FlutterDevice> flutterDevices,
-    required PackageConfig packageConfig,
-    required Logger logger,
-  });
 }
