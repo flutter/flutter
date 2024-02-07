@@ -382,24 +382,24 @@ class _TextPainterLayoutCacheWithOffset {
 
     if (maxWidth == contentWidth && minWidth == contentWidth) {
       contentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
-      print('1');
-      return true;
-    }
-    // Same input max width so relayout is unnecessary.
-    if (maxWidth == layoutMaxWidth) {
-      print('2, ${layoutMaxWidth} $contentWidth => ${_contentWidthFor(minWidth, maxWidth, widthBasis, layout)}');
-      contentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
-      print(contentWidth);
       return true;
     }
 
     assert(minWidth <= maxWidth);
-    // Always needsLayout when the current paintOffset and the paragraph width are not finite.
+    // Always needsLayout when the current paintOffset and the paragraph width
+    // are not finite.
     if (!paintOffset.dx.isFinite && !paragraph.width.isFinite && minWidth.isFinite) {
       assert(paintOffset.dx == double.infinity);
       assert(paragraph.width == double.infinity);
       return false;
     }
+
+    // Same input max width so relayout is unnecessary.
+    if (maxWidth == layoutMaxWidth) {
+      contentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
+      return true;
+    }
+
     final double maxIntrinsicWidth = paragraph.maxIntrinsicWidth;
     if ((paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance && (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance) {
       // Adjust the paintOffset and contentWidth to the new input constraints.

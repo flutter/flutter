@@ -1473,7 +1473,6 @@ void main() {
     expect(mockCanvas.centerX, isNull);
 
     painter.layout();
-    print('??');
     expect(painter.width, 10);
     expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
     expect(mockCanvas.centerX, 5);
