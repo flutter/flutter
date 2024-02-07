@@ -244,6 +244,34 @@ void main() {
           expect(masked.existsSync(), isTrue);
         });
 
+        test('and generates correct output when images are not the same size', () async {
+          await fs.file(fix('/golden.png')).writeAsBytes(_kSizeFailurePngBytes);
+          await expectLater(
+            () => doComparison(),
+            throwsA(isFlutterError.having(
+              (FlutterError error) => error.message,
+              'message',
+              contains('image sizes do not match'),
+            )),
+          );
+          final io.File master = fs.file(
+            fix('/failures/golden_masterImage.png')
+          );
+          final io.File test = fs.file(
+            fix('/failures/golden_testImage.png')
+          );
+          final io.File isolated = fs.file(
+            fix('/failures/golden_isolatedDiff.png')
+          );
+          final io.File masked = fs.file(
+            fix('/failures/golden_maskedDiff.png')
+          );
+          expect(master.existsSync(), isTrue);
+          expect(test.existsSync(), isTrue);
+          expect(isolated.existsSync(), isFalse);
+          expect(masked.existsSync(), isFalse);
+        });
+
         test('when golden file does not exist', () async {
           await expectLater(
             () => doComparison(),

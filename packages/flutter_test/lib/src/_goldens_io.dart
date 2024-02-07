@@ -210,9 +210,11 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       error: 'Pixel test failed, image sizes do not match.\n'
         'Master Image: ${masterImage.width} X ${masterImage.height}\n'
         'Test Image: ${testImage.width} X ${testImage.height}',
+        diffs: <String, Image>{
+          'masterImage': masterImage,
+          'testImage': testImage,
+        },
     );
-    masterImage.dispose();
-    testImage.dispose();
     return result;
   }
 
