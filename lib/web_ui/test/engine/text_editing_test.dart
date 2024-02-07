@@ -441,6 +441,31 @@ Future<void> testMain() async {
       expect(event.defaultPrevented, isFalse);
     });
 
+    test('Triggers input action in multiline-none mode', () {
+      final InputConfiguration config = InputConfiguration(
+        inputType: EngineInputType.multilineNone,
+      );
+      editingStrategy!.enable(
+        config,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      // No input action so far.
+      expect(lastInputAction, isNull);
+
+      final DomKeyboardEvent event = dispatchKeyboardEvent(
+        editingStrategy!.domElement!,
+        'keydown',
+        keyCode: _kReturnKeyCode,
+      );
+
+      // Input action is triggered!
+      expect(lastInputAction, 'TextInputAction.done');
+      // And default behavior of keyboard event shouldn't have been prevented.
+      expect(event.defaultPrevented, isFalse);
+    });
+
     test('Triggers input action and prevent new line key event for single line field', () {
       // Regression test for https://github.com/flutter/flutter/issues/113559
       final InputConfiguration config = InputConfiguration();
@@ -509,13 +534,14 @@ Future<void> testMain() async {
       required String inputType,
       String? inputAction,
       bool decimal = false,
+      bool isMultiline = false,
     }) {
       final MethodCall setClient = MethodCall(
         'TextInput.setClient',
         <dynamic>[
           ++clientId,
           createFlutterConfig(inputType,
-              inputAction: inputAction, decimal: decimal),
+              inputAction: inputAction, decimal: decimal, isMultiline: isMultiline),
         ],
       );
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -2133,6 +2159,52 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     });
 
+    test('none mode works', () async {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, createFlutterConfig('none')]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      await waitForDesktopSafariFocus();
+
+      expect(textEditing!.strategy.domElement!.tagName, 'INPUT');
+      expect(getEditingInputMode(), 'none');
+    });
+
+    test('none multiline mode works', () async {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, createFlutterConfig('none', isMultiline: true)]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      await waitForDesktopSafariFocus();
+
+      expect(textEditing!.strategy.domElement!.tagName, 'TEXTAREA');
+      expect(getEditingInputMode(), 'none');
+    });
+
     test('sets correct input type in Android', () {
       debugOperatingSystemOverride = OperatingSystem.android;
       debugBrowserEngineOverride = BrowserEngine.blink;
@@ -2164,6 +2236,11 @@ Future<void> testMain() async {
 
       showKeyboard(inputType: 'none');
       expect(getEditingInputMode(), 'none');
+      expect(textEditing!.strategy.domElement!.tagName, 'INPUT');
+
+      showKeyboard(inputType: 'none', isMultiline: true);
+      expect(getEditingInputMode(), 'none');
+      expect(textEditing!.strategy.domElement!.tagName, 'TEXTAREA');
 
       hideKeyboard();
     });
@@ -2253,6 +2330,11 @@ Future<void> testMain() async {
 
         showKeyboard(inputType: 'none');
         expect(getEditingInputMode(), 'none');
+        expect(textEditing!.strategy.domElement!.tagName, 'INPUT');
+
+        showKeyboard(inputType: 'none', isMultiline: true);
+        expect(getEditingInputMode(), 'none');
+        expect(textEditing!.strategy.domElement!.tagName, 'TEXTAREA');
 
         hideKeyboard();
       }
@@ -3214,11 +3296,13 @@ Map<String, dynamic> createFlutterConfig(
   List<String>? autofillHintsForFields,
   bool decimal = false,
   bool enableDeltaModel = false,
+  bool isMultiline = false,
 }) {
   return <String, dynamic>{
     'inputType': <String, dynamic>{
       'name': 'TextInputType.$inputType',
       if (decimal) 'decimal': true,
+      if (isMultiline) 'isMultiline': true,
     },
     'readOnly': readOnly,
     'obscureText': obscureText,
