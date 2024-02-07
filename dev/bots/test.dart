@@ -2285,8 +2285,6 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
     flutter,
     <String>[
       'test',
-      if (ciProvider == CiProviders.cirrus)
-        '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
       '--web-renderer=$webRenderer',
@@ -2480,21 +2478,6 @@ void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
     toolsArgs += ' --enable-asserts';
   }
   environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-}
-
-enum CiProviders {
-  cirrus,
-  luci,
-}
-
-CiProviders? get ciProvider {
-  if (Platform.environment['CIRRUS_CI'] == 'true') {
-    return CiProviders.cirrus;
-  }
-  if (Platform.environment['LUCI_CONTEXT'] != null) {
-    return CiProviders.luci;
-  }
-  return null;
 }
 
 /// Checks the given file's contents to determine if they match the allowed
