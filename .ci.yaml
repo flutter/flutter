@@ -3193,6 +3193,7 @@ targets:
 
   - name: Mac_x64 build_tests_1_4
     recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3211,6 +3212,7 @@ targets:
 
   - name: Mac_x64 build_tests_2_4
     recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3229,6 +3231,7 @@ targets:
 
   - name: Mac_x64 build_tests_3_4
     recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3247,6 +3250,7 @@ targets:
 
   - name: Mac_x64 build_tests_4_4
     recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -4786,7 +4790,6 @@ targets:
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5927,7 +5930,6 @@ targets:
 
   # windows motog4 benchmark
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/142608
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
