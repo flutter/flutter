@@ -314,6 +314,13 @@ class _TextLayout {
       TextBaseline.ideographic => _paragraph.ideographicBaseline,
     };
   }
+
+  double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis) {
+    return switch (widthBasis) {
+      TextWidthBasis.longestLine => clampDouble(longestLine, minWidth, maxWidth),
+      TextWidthBasis.parent => clampDouble(maxIntrinsicLineExtent, minWidth, maxWidth),
+    };
+  }
 }
 
 // This class stores the current text layout and the corresponding
@@ -354,13 +361,6 @@ class _TextPainterLayoutCacheWithOffset {
 
   ui.Paragraph get paragraph => layout._paragraph;
 
-  static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
-    return switch (widthBasis) {
-      TextWidthBasis.longestLine => clampDouble(layout.longestLine, minWidth, maxWidth),
-      TextWidthBasis.parent => clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth),
-    };
-  }
-
   // Try to resize the contentWidth to fit the new input constraints, by just
   // adjusting the paint offset (so no line-breaking changes needed).
   //
@@ -368,6 +368,7 @@ class _TextPainterLayoutCacheWithOffset {
   // re-compute the line breaks.
   bool _resizeToFit(double minWidth, double maxWidth, TextWidthBasis widthBasis) {
     assert(layout.maxIntrinsicLineExtent.isFinite);
+    assert(minWidth <= maxWidth);
     // The assumption here is that if a Paragraph's width is already >= its
     // maxIntrinsicWidth, further increasing the input width does not change its
     // layout (but may change the paint offset if it's not left-aligned). This is
@@ -381,29 +382,27 @@ class _TextPainterLayoutCacheWithOffset {
     // operations.
 
     if (maxWidth == contentWidth && minWidth == contentWidth) {
-      contentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
+      contentWidth = layout._contentWidthFor(minWidth, maxWidth, widthBasis);
       return true;
     }
 
-    assert(minWidth <= maxWidth);
-    // Always needsLayout when the current paintOffset and the paragraph width
-    // are not finite.
+    // Special case:
+    // When the paint offset and the paragraph width are both +∞, it's likely
+    // that the text layout engine skipped layout. Always try to relayout to
     if (!paintOffset.dx.isFinite && !paragraph.width.isFinite && minWidth.isFinite) {
       assert(paintOffset.dx == double.infinity);
       assert(paragraph.width == double.infinity);
       return false;
     }
 
-    // Same input max width so relayout is unnecessary.
-    if (maxWidth == layoutMaxWidth) {
-      contentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
-      return true;
-    }
-
     final double maxIntrinsicWidth = paragraph.maxIntrinsicWidth;
-    if ((paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance && (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance) {
-      // Adjust the paintOffset and contentWidth to the new input constraints.
-      contentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
+    // Skip line breaking if the input width remains the same, of there will be
+    // no soft breaks.
+    final bool skipLineBreaking = maxWidth == layoutMaxWidth  // Same input max width so relayout is unnecessary.
+      || ((paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance && (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance);
+    if (skipLineBreaking) {
+      // Adjust the content width in case the TextWidthBasis changed.
+      contentWidth = layout._contentWidthFor(minWidth, maxWidth, widthBasis);
       return true;
     }
     return false;
@@ -1147,8 +1146,7 @@ class TextPainter {
     final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
       ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
     final _TextLayout layout = _TextLayout._(paragraph);
-    final double contentWidth = _TextPainterLayoutCacheWithOffset._contentWidthFor(minWidth, maxWidth, textWidthBasis, layout);
-
+    final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
     final _TextPainterLayoutCacheWithOffset newLayoutCache;
     // Call layout again if newLayoutCache had an infinite paint offset.
