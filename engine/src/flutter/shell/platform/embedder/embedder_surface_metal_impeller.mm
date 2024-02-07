@@ -34,16 +34,16 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
       metal_dispatch_table_(std::move(metal_dispatch_table)),
       external_view_embedder_(std::move(external_view_embedder)) {
   std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
-    std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
-                                           impeller_entity_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
+                                             impeller_entity_shaders_length),
 #if IMPELLER_ENABLE_3D
-    std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_data,
-                                           impeller_scene_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_data,
+                                             impeller_scene_shaders_length),
 #endif  // IMPELLER_ENABLE_3D
-    std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_data,
-                                           impeller_modern_shaders_length),
-    std::make_shared<fml::NonOwnedMapping>(impeller_framebuffer_blend_shaders_data,
-                                           impeller_framebuffer_blend_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_data,
+                                             impeller_modern_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_framebuffer_blend_shaders_data,
+                                             impeller_framebuffer_blend_shaders_length),
   };
   context_ = impeller::ContextMTL::Create(
       (id<MTLDevice>)device,                     // device
@@ -52,7 +52,7 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
       std::make_shared<fml::SyncSwitch>(false),  // is_gpu_disabled_sync_switch
       "Impeller Library"                         // library_label
   );
-  FML_LOG(ERROR) << "Using the Impeller rendering backend (Metal).";
+  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Metal).";
 
   valid_ = !!context_;
 }

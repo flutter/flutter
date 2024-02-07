@@ -60,6 +60,8 @@ FLUTTER_ASSERT_ARC
       return nil;
     }
 
+    FML_LOG(IMPORTANT) << "Using the Skia rendering backend (Metal).";
+
     _resourceContext->setResourceCacheLimit(0u);
   }
   return self;

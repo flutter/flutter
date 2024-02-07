@@ -13,8 +13,11 @@ typedef int LogSeverity;
 constexpr LogSeverity kLogInfo = 0;
 constexpr LogSeverity kLogWarning = 1;
 constexpr LogSeverity kLogError = 2;
-constexpr LogSeverity kLogFatal = 3;
-constexpr LogSeverity kLogNumSeverities = 4;
+// A log that is not an error, is important enough to display even if ordinary
+// info is hidden.
+constexpr LogSeverity kLogImportant = 3;
+constexpr LogSeverity kLogFatal = 4;
+constexpr LogSeverity kLogNumSeverities = 5;
 
 // DEPRECATED: Use |kLogInfo|.
 // Ignoring Clang Tidy because this is used in a very common substitution macro.
@@ -30,6 +33,11 @@ constexpr LogSeverity LOG_WARNING = kLogWarning;
 // Ignoring Clang Tidy because this is used in a very common substitution macro.
 // NOLINTNEXTLINE(readability-identifier-naming)
 constexpr LogSeverity LOG_ERROR = kLogError;
+
+// DEPRECATED: Use |kLogImportant|.
+// Ignoring Clang Tidy because this is used in a very common substitution macro.
+// NOLINTNEXTLINE(readability-identifier-naming)
+constexpr LogSeverity LOG_IMPORTANT = kLogImportant;
 
 // DEPRECATED: Use |kLogFatal|.
 // Ignoring Clang Tidy because this is used in a very common substitution macro.
