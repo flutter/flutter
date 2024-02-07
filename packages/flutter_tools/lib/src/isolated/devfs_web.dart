@@ -119,7 +119,7 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._nullSafetyMode, 
+    this._nullSafetyMode,
     this._ddcModuleSystem, {
     required this.webRenderer,
   }) : basePath = _getIndexHtml().getBaseHref();
