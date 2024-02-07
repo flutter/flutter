@@ -354,6 +354,7 @@ targets:
         ]
 
   - name: Linux_android_emu android views
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/143063
     recipe: devicelab/devicelab_drone
     properties:
       tags: >
