@@ -54,8 +54,7 @@ template("create_aot_snapshot") {
     # No asserts in debug or release product.
     # No asserts in release with flutter_profile=true (non-product)
     # Yes asserts in non-product debug.
-    if (!invoker.product &&
-        (!(flutter_runtime_mode == "profile") || is_debug)) {
+    if (!invoker.product && (flutter_runtime_mode == "debug" || is_debug)) {
       args += [ "--enable_asserts" ]
     }
     args += [ rebase_path(shim_kernel) ]
