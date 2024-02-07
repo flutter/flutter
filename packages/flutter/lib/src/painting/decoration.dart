@@ -203,6 +203,9 @@ abstract class BoxPainter {
   const BoxPainter([this.onChanged]);
 
   /// Use this constructor for subclasses that have non-empty [dispose].
+  ///
+  /// Enables memory debugging when [kFlutterMemoryAllocationsEnabled]
+  /// is true.
   BoxPainter.withMemoryEvents([this.onChanged]) {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
