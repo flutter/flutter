@@ -123,6 +123,7 @@ Future<void> precacheImage(
       // image stream.
       // See ImageCache._liveImages
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        image?.dispose();
         stream.removeListener(listener!);
       }, debugLabel: 'precacheImage.removeListener');
     },
