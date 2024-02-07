@@ -5,8 +5,10 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'artifacts.dart';
 import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -20,7 +22,6 @@ import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
-import 'globals.dart' as globals; // TODO—dontmerge — don't depend on globals.
 import 'vmservice.dart';
 
 const String _kFontManifest = 'FontManifest.json';
@@ -455,6 +456,8 @@ class DevFS {
     required OperatingSystemUtils osUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
@@ -473,10 +476,10 @@ class DevFS {
         _stopwatchFactory = stopwatchFactory,
         _assetTransformer = DevelopmentAssetTransformer(
           transformer: AssetTransformer(
-            processManager: globals.processManager,
+            processManager: processManager,
             logger: logger,
             fileSystem: fileSystem,
-            artifacts: globals.artifacts!,
+            artifacts: artifacts,
           ),
           fileSystem: fileSystem,
         );

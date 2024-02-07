@@ -143,6 +143,8 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
     expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
   });
@@ -166,6 +168,8 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
 
     expect(await devFS.create(), isNotNull);
@@ -214,6 +218,8 @@ void main() {
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (final List<int> chunk in expectedEncoded) ...chunk]),
       ]),
       uploadRetryThrottle: Duration.zero,
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
     await devFS.create();
 
@@ -247,6 +253,8 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
 
     await devFS.create();
@@ -287,6 +295,8 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
 
     await devFS.create();
@@ -329,6 +339,8 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
       httpClient: HttpClient(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
 
     await devFS.create();
@@ -378,6 +390,8 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
 
     await devFS.create();
@@ -455,6 +469,8 @@ void main() {
         'compile': FakeStopwatch()..elapsed = const Duration(seconds: 3),
         'transfer': FakeStopwatch()..elapsed = const Duration(seconds: 5),
       }),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
 
     await devFS.create();
@@ -499,6 +515,8 @@ void main() {
       logger: logger,
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(fileSystem: fileSystem),
     );
 
     await devFS.create();
@@ -609,6 +627,8 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        processManager: FakeProcessManager.empty(),
+        artifacts: Artifacts.test(fileSystem: fileSystem),
       );
 
       await devFS.create();
@@ -666,6 +686,8 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        processManager: FakeProcessManager.empty(),
+        artifacts: Artifacts.test(fileSystem: fileSystem),
       );
 
       await devFS.create();

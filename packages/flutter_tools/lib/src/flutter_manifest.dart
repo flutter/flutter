@@ -605,25 +605,28 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   }
 }
 
-void _validateListType<T>(Object yamlList, List<String> errors, String context, String typeAlias) {
+bool _validateListType<T>(Object yamlList, List<String> errors, String context, String typeAlias) {
   if (yamlList is! YamlList) {
     errors.add('Expected $context to be a list of $typeAlias, but found ${yamlList.runtimeType}.');
-    return;
+    return true;
   }
 
+  bool result = false;
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
       // ignore: avoid_dynamic_calls
       errors.add('Expected $context to be a list of $typeAlias, but element $i was a ${yamlList[i].runtimeType}');
+      result = true;
     }
   }
+  return result;
 }
 
-void _validateListTypeNullable<T>(Object? yamlList, List<String> errors, String context, String typeAlias) {
+bool _validateListTypeNullable<T>(Object? yamlList, List<String> errors, String context, String typeAlias) {
   if (yamlList == null) {
-    return;
+    return true;
   }
-  _validateListType<T>(yamlList, errors, context, typeAlias);
+  return _validateListType<T>(yamlList, errors, context, typeAlias);
 }
 
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
@@ -805,15 +808,28 @@ class AssetsEntry {
       }
 
       final List<String> errors = <String>[];
+
       final Object? flavorsYaml = yaml[_flavorKey];
-      _validateListTypeNullable<String>(flavorsYaml, errors, '$_flavorKey list of entry "$path"', 'String');
-      final List<String> flavors = flavorsYaml == null ? <String>[] : flavorsYaml as List<String>;
+      final bool flavorsSectionIsValid = _validateListTypeNullable<String>(
+        flavorsYaml,
+        errors,
+        '$_flavorKey list of entry "$path"',
+        'String',
+      );
+      final List<String> flavors = flavorsYaml == null || !flavorsSectionIsValid
+        ? <String>[]
+        : flavorsYaml as List<String>;
 
       final Object? transformersYaml = yaml[_transformersKey];
-      _validateListTypeNullable<YamlMap>(transformersYaml, errors, '$_transformersKey list of entry "$path"', 'Map');
+      final bool transformersSectionIsValid = _validateListTypeNullable<YamlMap>(
+        transformersYaml,
+        errors,
+        '$_transformersKey list of entry "$path"',
+        'Map',
+      );
       final List<AssetTransformerEntry> transformers = <AssetTransformerEntry>[];
 
-      if (transformersYaml != null) {
+      if (transformersYaml != null && transformersSectionIsValid) {
         for (final Object? transformerEntry in transformersYaml as List<Object?>) {
           final (AssetTransformerEntry? entry, String? error) = AssetTransformerEntry.tryParse(transformerEntry, path);
           if (error != null) {
