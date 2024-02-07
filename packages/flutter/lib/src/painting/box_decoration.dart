@@ -388,7 +388,7 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration, super.onChanged);
+  _BoxDecorationPainter(this._decoration, VoidCallback? onChanged) : super.withMemoryEvents(onChanged);
 
   final BoxDecoration _decoration;
 

@@ -202,6 +202,19 @@ abstract class BoxPainter {
   /// const constructors so that they can be used in const expressions.
   const BoxPainter([this.onChanged]);
 
+  /// Use this constructor for subclasses that have non-empty [dispose].
+  BoxPainter.withMemoryEvents([this.onChanged]) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/painting.dart',
+        className: '$BoxPainter',
+        object: this,
+      );
+    }
+  }
+
   /// Paints the [Decoration] for which this object was created on the
   /// given canvas using the given configuration.
   ///
@@ -243,5 +256,9 @@ abstract class BoxPainter {
   /// The [onChanged] callback will not be invoked after this method has been
   /// called.
   @mustCallSuper
-  void dispose() { }
+  void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+  }
 }

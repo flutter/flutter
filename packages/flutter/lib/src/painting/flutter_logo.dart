@@ -208,7 +208,7 @@ class FlutterLogoDecoration extends Decoration {
 class _FlutterLogoPainter extends BoxPainter {
   _FlutterLogoPainter(this._config)
       : assert(_config.debugAssertIsValid()),
-        super(null) {
+        super.withMemoryEvents(null) {
     _prepareText();
   }
 

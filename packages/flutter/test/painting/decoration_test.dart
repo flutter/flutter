@@ -9,6 +9,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -812,4 +813,18 @@ void main() {
 
     info.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('$BoxPainter dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => _BoxPainter().dispose(), _BoxPainter),
+      areCreateAndDispose,
+    );
+  });
+}
+
+class _BoxPainter extends BoxPainter {
+  _BoxPainter() : super.withMemoryEvents();
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {}
 }
