@@ -1432,6 +1432,7 @@
 ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 ../../../fuchsia/sdk/linux/pkg/utf-utils/meta.json
 ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/vfs_internal/meta.json
 ../../../fuchsia/sdk/linux/pkg/virtgralloc_headers/meta.json
 ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
