@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -1579,7 +1578,6 @@ class CapturingAppDomain extends AppDomain {
     String? userIdentifier,
     bool enableDevTools = true,
     String? flavor,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     this.userIdentifier = userIdentifier;
     this.enableDevTools = enableDevTools;
