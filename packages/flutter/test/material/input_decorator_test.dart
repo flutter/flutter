@@ -221,43 +221,10 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
 void main() {
   runAllM2Tests();
 
-  testWidgets('Material3 - Default height is 56dp on mobile', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      buildInputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'label',
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is 56dp on mobile:
-    //    8 - top padding
-    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
-    //    4 - gap between label and input
-    //   24 - input text (font size = 16, line height = 1.5)
-    //    8 - bottom padding
-    // TODO(bleroux): fix input decorator to not rely on a 4 pixels gap between the label and the input,
-    // this gap is not complient with the M3 spec (M3 spec uses line height for this purpose).
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-  }, variant: TargetPlatformVariant.mobile());
-
-  testWidgets('Material3 - Default height is 48dp on desktop', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      buildInputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'label',
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is 48dp on desktop:
-    //    4 - top padding
-    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
-    //    4 - gap between label and input
-    //   24 - input text (font size = 16, line height = 1.5)
-    //    4 - bottom padding
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
-  }, variant: TargetPlatformVariant.desktop());
+  // TODO(bleroux): migrate all M2 tests to M3.
+  // See https://github.com/flutter/flutter/issues/139076?
+  // For illustration, two of the existing tests are migrated below.
+  // Work is in progress to migrate the other tests.
 
   testWidgets('Material3 - Input/label layout: label appears above input', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -300,6 +267,47 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
     expect(getBorderWeight(tester), 2.0);
   });
+
+  // During the tests migration to M3, add new M3 tests below.
+  // TODO(bleroux): remove this comment when migration is done.
+
+  testWidgets('Material3 - Default height is 56dp on mobile', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dp on mobile:
+    //    8 - top padding
+    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
+    //    4 - gap between label and input
+    //   24 - input text (font size = 16, line height = 1.5)
+    //    8 - bottom padding
+    // TODO(bleroux): fix input decorator to not rely on a 4 pixels gap between the label and the input,
+    // this gap is not compliant with the M3 spec (M3 spec uses line height for this purpose).
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('Material3 - Default height is 48dp on desktop', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'label',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 48dp on desktop:
+    //    4 - top padding
+    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
+    //    4 - gap between label and input
+    //   24 - input text (font size = 16, line height = 1.5)
+    //    4 - bottom padding
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+  }, variant: TargetPlatformVariant.desktop());
 }
 
 void runAllM2Tests() {
