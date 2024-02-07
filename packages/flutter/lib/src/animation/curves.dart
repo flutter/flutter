@@ -193,13 +193,13 @@ class Interval extends Curve {
   }
 }
 
-/// A curve that progresses linearly until [startingPoint], then curved
-/// (according to [curve]) from t at [startingPoint] to 1.0.
+/// A curve that progresses linearly until [begin], then curved
+/// (according to [curve]) from t at [begin] to 1.0.
 ///
 /// Unlike [Interval], [curve] will not start at zero, but at the point
-/// corresponding to t=`startingPoint`.
+/// corresponding to t=`begin`.
 ///
-/// For example, if [startingPoint] is set to 0.5, and [curve] is set to
+/// For example, if [begin] is set to 0.5, and [curve] is set to
 /// [Curves.easeOut], then the bottom-left quarter of the curve will be a
 /// straight line, and the top-right quarter will contain the entire
 /// [Curves.easeOut] curve.
@@ -207,7 +207,7 @@ class Interval extends Curve {
 /// Suspended curves are useful in situations where a widget must track the
 /// user's finger (which requires a linear animation), but can also be flung
 /// using a curve specified with the [curve] argument, after the finger is
-/// released. In such a case, the value of [startingPoint] would be the progress
+/// released. In such a case, the value of [begin] would be the progress
 /// of the animation at the time when the finger was released.
 ///
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_suspended.mp4}
@@ -216,16 +216,16 @@ class Suspended extends Curve {
   ///
   /// The [begin] and [curve] arguments must not be null.
   const Suspended(
-    this.startingPoint, {
+    this.begin, {
     this.curve = Curves.easeOutCubic,
   });
 
   /// The progress value at which [curve] should begin.
   ///
-  /// From t=0.0 to t=`startingPoint`, the interval's value progresses linearly (i.e, = t).
-  final double startingPoint;
+  /// From t=0.0 to t=`begin`, the interval's value progresses linearly (i.e, = t).
+  final double begin;
 
-  /// The curve to use when [startingPoint] is reached.
+  /// The curve to use when [begin] is reached.
   ///
   /// This defaults to [Curves.easeOutCubic].
   final Curve curve;
@@ -233,9 +233,9 @@ class Suspended extends Curve {
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    assert(startingPoint >= 0.0 && startingPoint <= 1.0);
+    assert(begin >= 0.0 && begin <= 1.0);
 
-    if (t < startingPoint) {
+    if (t < begin) {
       return t;
     }
 
@@ -243,14 +243,14 @@ class Suspended extends Curve {
       return t;
     }
 
-    final double curveProgress = (t - startingPoint) / (1 - startingPoint);
+    final double curveProgress = (t - begin) / (1 - begin);
     final double transformed = curve.transform(curveProgress);
-    return lerpDouble(startingPoint, 1, transformed)!;
+    return lerpDouble(begin, 1, transformed)!;
   }
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($startingPoint, $curve)';
+    return '${describeIdentity(this)}($begin, $curve)';
   }
 }
 
