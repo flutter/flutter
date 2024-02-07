@@ -290,18 +290,17 @@ class ShapeDecoration extends Decoration {
 
 /// An object that paints a [ShapeDecoration] into a canvas.
 class _ShapeDecorationPainter extends BoxPainter {
-  _ShapeDecorationPainter(this._decoration, VoidCallback onChanged)
-    : super(onChanged){
-      // TODO(polina-c): stop duplicating code across disposables
-      // https://github.com/flutter/flutter/issues/137435
-      if (kFlutterMemoryAllocationsEnabled) {
-        FlutterMemoryAllocations.instance.dispatchObjectCreated(
-          library: 'package:flutter/painting.dart',
-          className: '$_ShapeDecorationPainter',
-          object: this,
-        );
-      }
+  _ShapeDecorationPainter(this._decoration, VoidCallback onChanged): super(onChanged) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/painting.dart',
+        className: '$_ShapeDecorationPainter',
+        object: this,
+      );
     }
+  }
 
   final ShapeDecoration _decoration;
 
