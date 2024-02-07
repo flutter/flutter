@@ -22,8 +22,8 @@ const double kMinInteractiveDimension = 48.0;
 ///
 /// This is deprecated and is replaced by [kM2ToolbarHeight].
 @Deprecated(
-    'Use kM2ToolbarHeight. '
-    'This feature was deprecated after v3.19.0-9.0.pre.'
+  'Use kM2ToolbarHeight. '
+  'This feature was deprecated after v3.19.0-9.0.pre.'
 )
 const double kToolbarHeight = 56.0;
 
