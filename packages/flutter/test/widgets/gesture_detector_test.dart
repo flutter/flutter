@@ -155,7 +155,7 @@ void main() {
 
     expect(endOffset, isNotNull);
     expect(updateOffset, endOffset);
-    // make sure details.globalPosition works correctly;
+    // Make sure details.globalPosition works correctly.
     expect(Offset(endOffset!.dx + paddingOffset.left, endOffset!.dy + paddingOffset.top), globalEndOffset);
   });
 
