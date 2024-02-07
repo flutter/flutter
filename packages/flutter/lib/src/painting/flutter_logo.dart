@@ -210,6 +210,16 @@ class _FlutterLogoPainter extends BoxPainter {
       : assert(_config.debugAssertIsValid()),
         super(null) {
     _prepareText();
+
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/painting.dart',
+        className: '$BoxPainter',
+        object: this,
+      );
+    }
   }
 
   final FlutterLogoDecoration _config;
@@ -220,6 +230,9 @@ class _FlutterLogoPainter extends BoxPainter {
 
   @override
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _textPainter.dispose();
     super.dispose();
   }
