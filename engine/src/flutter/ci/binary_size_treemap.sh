@@ -22,10 +22,11 @@ if [ "$(uname)" == "Darwin" ]; then
 else
   NDK_PLATFORM="linux-x86_64"
 fi
-ADDR2LINE="third_party/android_tools/ndk/toolchains/aarch64-linux-android-4.9/prebuilt/$NDK_PLATFORM/bin/aarch64-linux-android-addr2line"
+ADDR2LINE="third_party/android_tools/ndk/toolchains/llvm/prebuilt/$NDK_PLATFORM/bin/llvm-addr2line"
+NM="third_party/android_tools/ndk/toolchains/llvm/prebuilt/$NDK_PLATFORM/bin/llvm-nm"
 
 # Run the binary size script from the buildroot directory so the treemap path
 # navigation will start from there.
 cd "$ENGINE_BUILDROOT"
 RUN_BINARY_SIZE_ANALYSIS="third_party/dart/third_party/binary_size/src/run_binary_size_analysis.py"
-python3 "$RUN_BINARY_SIZE_ANALYSIS" --library "$INPUT_PATH" --destdir "$DEST_DIR" --addr2line-binary "$ADDR2LINE"
+python3 "$RUN_BINARY_SIZE_ANALYSIS" --library "$INPUT_PATH" --destdir "$DEST_DIR" --addr2line-binary "$ADDR2LINE" --nm-binary "$NM" --jobs 1 --no-check-support

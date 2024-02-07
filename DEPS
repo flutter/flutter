@@ -274,7 +274,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '52689fe8955a9a4916a38f0b8ae5ea3e217037f4',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '71c9a9987171ef3f8b60a9e0b346bce30ee65933',
 
   'src/flutter/third_party/rapidjson':
    Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
@@ -754,7 +754,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/android/sdk/all/${{platform}}',
-        'version': 'version:34v3'
+        'version': 'version:34v7'
        }
      ],
      'condition': 'download_android_deps',

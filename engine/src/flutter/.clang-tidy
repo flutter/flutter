@@ -22,6 +22,7 @@ Checks: >-
   -clang-analyzer-nullability.NullablePassedToNonnull,
   -clang-analyzer-nullability.NullReturnedFromNonnull,
   -clang-analyzer-nullability.NullableReturnedFromNonnull,
+  -clang-analyzer-nullability.NullableDereferenced,
   performance-for-range-copy,
   performance-inefficient-vector-operation,
   performance-move-const-arg,
