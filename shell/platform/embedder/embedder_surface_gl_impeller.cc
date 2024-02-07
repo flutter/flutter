@@ -94,7 +94,7 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   }
 
   gl_dispatch_table_.gl_clear_current_callback();
-  FML_LOG(ERROR) << "Using the Impeller rendering backend (OpenGL).";
+  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGL).";
   valid_ = true;
 }
 

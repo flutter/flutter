@@ -84,7 +84,7 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
     FML_LOG(ERROR) << "Could not add reactor worker.";
     return nullptr;
   }
-  FML_LOG(ERROR) << "Using the Impeller rendering backend (OpenGLES).";
+  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLES).";
   return context;
 }
 

@@ -7,10 +7,15 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/log_settings.h"
 #include "flutter/fml/logging.h"
+#include "fml/log_level.h"
 #include "gtest/gtest.h"
 
 namespace fml {
 namespace testing {
+
+static_assert(fml::kLogFatal == fml::kLogNumSeverities - 1);
+static_assert(fml::kLogImportant < fml::kLogFatal);
+static_assert(fml::kLogImportant > fml::kLogError);
 
 #ifndef OS_FUCHSIA
 class MakeSureFmlLogDoesNotSegfaultWhenStaticallyCalled {
@@ -66,6 +71,31 @@ TEST(LoggingTest, UnreachableKillProcessWithMacro) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_DEATH({ FML_UNREACHABLE(); }, "");
 }
+
+#ifndef OS_FUCHSIA
+TEST(LoggingTest, SanityTests) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  std::vector<std::string> severities = {"INFO", "WARNING", "ERROR",
+                                         "IMPORTANT"};
+
+  for (size_t i = 0; i < severities.size(); i++) {
+    LogCapture capture;
+    {
+      LogMessage log(i, "path/to/file.cc", 4, nullptr);
+      log.stream() << "Hello!";
+    }
+    EXPECT_EQ(capture.str(), std::string("[" + severities[i] +
+                                         ":path/to/file.cc(4)] Hello!\n"));
+  }
+
+  ASSERT_DEATH(
+      {
+        LogMessage log(kLogFatal, "path/to/file.cc", 5, nullptr);
+        log.stream() << "Goodbye";
+      },
+      R"(\[FATAL:path/to/file.cc\(5\)\] Goodbye)");
+}
+#endif  // !OS_FUCHSIA
 
 }  // namespace testing
 }  // namespace fml
