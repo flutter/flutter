@@ -611,12 +611,12 @@ bool _validateListType<T>(Object yamlList, List<String> errors, String context, 
     return true;
   }
 
-  bool result = false;
+  bool result = true;
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
       // ignore: avoid_dynamic_calls
       errors.add('Expected $context to be a list of $typeAlias, but element $i was a ${yamlList[i].runtimeType}');
-      result = true;
+      result = false;
     }
   }
   return result;
@@ -818,7 +818,7 @@ class AssetsEntry {
       );
       final List<String> flavors = flavorsYaml == null || !flavorsSectionIsValid
         ? <String>[]
-        : flavorsYaml as List<String>;
+        : List<String>.from(flavorsYaml as YamlList);
 
       final Object? transformersYaml = yaml[_transformersKey];
       final bool transformersSectionIsValid = _validateListTypeNullable<YamlMap>(
@@ -830,7 +830,7 @@ class AssetsEntry {
       final List<AssetTransformerEntry> transformers = <AssetTransformerEntry>[];
 
       if (transformersYaml != null && transformersSectionIsValid) {
-        for (final Object? transformerEntry in transformersYaml as List<Object?>) {
+        for (final Object? transformerEntry in List<Object?>.from(transformersYaml as YamlList)) {
           final (AssetTransformerEntry? entry, String? error) = AssetTransformerEntry.tryParse(transformerEntry, path);
           if (error != null) {
             errors.add(error);
