@@ -3502,12 +3502,26 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
 TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
   Canvas canvas;  // Depth 1 (base pass)
   canvas.DrawRRect(Rect::MakeLTRB(0, 0, 100, 100), {10, 10}, {});  // Depth 2
-  canvas.ClipRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});    // Depth 4
-  canvas.SaveLayer({});                                            // Depth 3
-  canvas.DrawRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});    // Depth 4
+  canvas.Save();
+  {
+    canvas.ClipRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});  // Depth 5
+    canvas.SaveLayer({});                                          // Depth 3
+    {
+      canvas.DrawRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});  // Depth 4
+    }
+    canvas.Restore();  // Restore the savelayer.
+  }
+  canvas.Restore();  // Depth 5 -- this will no longer append a restore entity
+                     //            once we switch to the clip depth approach.
 
   auto picture = canvas.EndRecordingAsPicture();
-  std::array<uint32_t, 4> expected = {2, 4, 3, 4};
+  std::array<uint32_t, 5> expected = {
+      2,  // DrawRRect
+      4,  // ClipRRect
+      3,  // SaveLayer
+      4,  // DrawRRect
+      5,  // Restore (will be removed once we switch to the clip depth approach)
+  };
   std::vector<uint32_t> actual;
 
   picture.pass->IterateAllElements([&](EntityPass::Element& element) -> bool {
