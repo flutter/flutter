@@ -27,8 +27,8 @@ namespace fml {
 namespace {
 
 #if !defined(OS_FUCHSIA)
-const char* const kLogSeverityNames[kLogNumSeverities] = {"INFO", "WARNING",
-                                                          "ERROR", "FATAL"};
+const char* const kLogSeverityNames[kLogNumSeverities] = {
+    "INFO", "WARNING", "ERROR", "IMPORTANT", "FATAL"};
 
 const char* GetNameForLogSeverity(LogSeverity severity) {
   if (severity >= kLogInfo && severity < kLogNumSeverities) {
@@ -41,14 +41,6 @@ const char* GetNameForLogSeverity(LogSeverity severity) {
 const char* StripDots(const char* path) {
   while (strncmp(path, "../", 3) == 0) {
     path += 3;
-  }
-  return path;
-}
-
-const char* StripPath(const char* path) {
-  auto* p = strrchr(path, '/');
-  if (p) {
-    return p + 1;
   }
   return path;
 }
@@ -98,9 +90,7 @@ LogMessage::LogMessage(LogSeverity severity,
                        const char* file,
                        int line,
                        const char* condition)
-    : severity_(severity),
-      file_(severity > kLogInfo ? StripDots(file) : StripPath(file)),
-      line_(line) {
+    : severity_(severity), file_(StripDots(file)), line_(line) {
 #if !defined(OS_FUCHSIA)
   stream_ << "[";
   if (severity >= kLogInfo) {
@@ -144,7 +134,6 @@ LogMessage::~LogMessage() {
 #if !defined(OS_FUCHSIA)
   stream_ << std::endl;
 #endif
-
   if (capture_next_log_stream_) {
     *capture_next_log_stream_ << stream_.str();
     capture_next_log_stream_ = nullptr;
@@ -153,6 +142,7 @@ LogMessage::~LogMessage() {
     android_LogPriority priority =
         (severity_ < 0) ? ANDROID_LOG_VERBOSE : ANDROID_LOG_UNKNOWN;
     switch (severity_) {
+      case kLogImportant:
       case kLogInfo:
         priority = ANDROID_LOG_INFO;
         break;
@@ -172,6 +162,7 @@ LogMessage::~LogMessage() {
 #elif defined(OS_FUCHSIA)
     FuchsiaLogSeverity severity;
     switch (severity_) {
+      case kLogImportant:
       case kLogInfo:
         severity = FUCHSIA_LOG_INFO;
         break;

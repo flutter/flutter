@@ -39,7 +39,6 @@ static std::shared_ptr<impeller::ContextMTL> CreateImpellerContext(
     FML_LOG(ERROR) << "Could not create Metal Impeller Context.";
     return nullptr;
   }
-  FML_LOG(ERROR) << "Using the Impeller rendering backend.";
 
   return context;
 }
