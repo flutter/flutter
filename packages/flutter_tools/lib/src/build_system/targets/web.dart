@@ -132,7 +132,7 @@ abstract class Dart2WebTarget extends Target {
 
   @override
   List<Source> get outputs => buildFiles.map(
-    (String file) => Source.pattern('{OUTPUT_DIR}/$file')
+    (String file) => Source.pattern('{BUILD_DIR}/$file')
   ).toList();
 
   @override
@@ -354,9 +354,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[];
-
-  @override
   Map<String, Object?> get buildConfig => <String, Object?>{
     'compileTarget': 'dart2wasm',
     'renderer': compilerConfig.renderer.name,
@@ -401,10 +398,13 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...buildFiles.map((String file) => Source.pattern('{BUILD_DIR}/$file'))
   ];
 
   @override
-  List<Source> get outputs => <Source>[];
+  List<Source> get outputs => <Source>[
+    ...buildFiles.map((String file) => Source.pattern('{OUTPUT_DIR}/$file'))
+  ];
 
   @override
   List<String> get depfiles => const <String>[
