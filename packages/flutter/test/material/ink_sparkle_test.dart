@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/src/foundation/capabilities.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,7 +30,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 
   testWidgets('InkSparkle default splashFactory paints with drawRect when bounded', (WidgetTester tester) async {
@@ -58,7 +59,7 @@ void main() {
     // ink feature is disposed.
     expect((material as dynamic).debugInkFeatures, isEmpty);
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 
   testWidgets('InkSparkle default splashFactory paints with drawPaint when unbounded', (WidgetTester tester) async {
@@ -81,7 +82,7 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(buttonFinder));
     expect(material, paintsExactlyCountTimes(#drawPaint, 1));
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 
   /////////////
@@ -91,37 +92,37 @@ void main() {
   testWidgets('Material2 - InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'top_left', 0.2);
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 
   testWidgets('Material3 - InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runM3Test(tester, 'top_left', 0.2);
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 
   testWidgets('Material2 - InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'center', 0.5);
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 
   testWidgets('Material3 - InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
     await _runM3Test(tester, 'center', 0.5);
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 
   testWidgets('Material2 - InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'bottom_right', 0.8);
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 
   testWidgets('Material3 - InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
     await _runM3Test(tester, 'bottom_right', 0.8);
   },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
+    skip: kIsWeb && !isCanvasKit, // [intended] shaders are not supported for the HTML renderer.
   );
 }
 
