@@ -528,7 +528,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final int? directorySize = globals.os.getDirectorySize(outputDirectory);
     final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
       ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(directorySize)})';
+        : ' (${getSizeAsPlatformMB(directorySize)})';
 
     globals.printStatus(
       '${globals.terminal.successMark} '
@@ -752,7 +752,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final int? directorySize = globals.os.getDirectorySize(outputDirectory);
       final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
         ? '' // Don't display the size when building a debug variant.
-          : ' (${getSizeAsMB(directorySize)})';
+          : ' (${getSizeAsPlatformMB(directorySize)})';
 
       globals.printStatus(
         '${globals.terminal.successMark} '

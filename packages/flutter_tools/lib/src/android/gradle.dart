@@ -546,7 +546,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final File bundleFile = findBundleFile(project, buildInfo, _logger, _usage, _analytics);
       final String appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
-          : ' (${getSizeAsMB(bundleFile.lengthSync())})';
+          : ' (${getSizeAsPlatformMB(bundleFile.lengthSync())})';
 
       if (buildInfo.codeSizeDirectory != null) {
         await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
@@ -584,7 +584,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
       final String appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
-          : ' (${getSizeAsMB(apkFile.lengthSync())})';
+          : ' (${getSizeAsPlatformMB(apkFile.lengthSync())})';
       _logger.printStatus(
         '${_logger.terminal.successMark} '
         'Built ${_fileSystem.path.relative(apkFile.path)}$appSize',

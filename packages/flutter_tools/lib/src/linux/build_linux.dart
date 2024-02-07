@@ -75,7 +75,8 @@ Future<void> buildLinux(
     'Building Linux application...',
   );
   final String buildModeName = buildInfo.mode.cliName;
-  final Directory buildDirectory = globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
+  final Directory platformBuildDirectory = globals.fs.directory(getLinuxBuildDirectory(targetPlatform));
+  final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory,
                     needCrossBuild, targetPlatform, targetSysroot);

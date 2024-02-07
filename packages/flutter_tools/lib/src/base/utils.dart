@@ -90,8 +90,8 @@ String getElapsedAsMilliseconds(Duration duration) {
   return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
 }
 
-/// Return a String - with units - for the size in MB of the given number of bytes.
-String getSizeAsMB(int bytesLength, {
+/// Return a platform-appropriate [String] representing the size of the given number of bytes.
+String getSizeAsPlatformMB(int bytesLength, {
     @visibleForTesting Platform platform = const LocalPlatform()
   }) {
   // Because Windows displays 'MB' but actually reports MiB, we calculate MiB

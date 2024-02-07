@@ -172,7 +172,7 @@ Future<void> buildMacOS({
     final int? directorySize = globals.os.getDirectorySize(outputDirectory);
     final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
         ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(directorySize)})';
+        : ' (${getSizeAsPlatformMB(directorySize)})';
     globals.printStatus(
       '${globals.terminal.successMark} '
       'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
