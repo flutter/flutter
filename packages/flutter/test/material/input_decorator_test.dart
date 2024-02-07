@@ -5132,8 +5132,8 @@ void runAllM2Tests() {
             enabled: enabled,
             filled: filled,
             hoverColor: hoverColor,
-            disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
-            border:  OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
+            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+            border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
           ),
         ),
       );
@@ -5213,7 +5213,7 @@ void runAllM2Tests() {
             focusColor: focusColor,
             focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: focusColor)),
             disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
-            border: OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
+            border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
           ),
         ),
       );
