@@ -52,7 +52,6 @@ class _IsScrollingListenerExampleState extends State<IsScrollingListenerExample>
 
   @override
   void dispose() {
-    scrollController.position.removeListener(handleScrollChange);
     scrollController.dispose();
     super.dispose();
   }
