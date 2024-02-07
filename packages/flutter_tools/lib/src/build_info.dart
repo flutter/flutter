@@ -41,7 +41,6 @@ class BuildInfo {
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
-    this.androidSkipBuildDependencyValidation = false,
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
@@ -153,10 +152,6 @@ class BuildInfo {
   ///
   /// The Gradle daemon may also be disabled in the Android application's properties file.
   final bool androidGradleDaemon;
-
-  /// Whether to skip checking of individual versions of our Android build time
-  /// dependencies.
-  final bool androidSkipBuildDependencyValidation;
 
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
   /// flag.
