@@ -35,6 +35,9 @@ platform_properties:
       os: Ubuntu
       cores: "8"
       device_type: none
+  # The current android emulator config names can be found here:
+  # https://chromium.googlesource.com/chromium/src.git/+/HEAD/tools/android/avd/proto
+  # You may use those names for the android_virtual_device version.
   linux_android_emu:
     properties:
       contexts: >-
@@ -44,7 +47,8 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
-          {"dependency": "android_virtual_device", "version": "34"},
+          {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8759428741582061553"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -226,7 +230,7 @@ platform_properties:
         ]
       os: Mac-13
       cpu: x86
-      device_os: iOS-16
+      device_os: iOS-16|iOS-17
       $flutter/osx_sdk : >-
         {
           "sdk_version": "15a240d"
@@ -244,7 +248,7 @@ platform_properties:
         ]
       os: Mac-13
       cpu: x86
-      device_os: iOS-16
+      device_os: iOS-16|iOS-17
       $flutter/osx_sdk : >-
         {
           "sdk_version": "15a240d"
@@ -262,7 +266,7 @@ platform_properties:
         ]
       os: Mac-13
       cpu: arm64
-      device_os: iOS-16
+      device_os: iOS-16|iOS-17
       $flutter/osx_sdk : >-
         {
           "sdk_version": "15a240d"
@@ -351,7 +355,6 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
-    bringup: true
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -1755,7 +1758,6 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3986,7 +3988,6 @@ targets:
 
   - name: Mac_x64 tool_tests_commands
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -4002,7 +4003,6 @@ targets:
 
   - name: Mac_arm64 tool_tests_commands
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -4239,11 +4239,9 @@ targets:
 
   - name: Mac_arm64_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
@@ -4342,7 +4340,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios_xcode_debug
@@ -4371,7 +4368,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up_xcode_debug
@@ -4429,10 +4425,8 @@ targets:
   - name: Mac_x64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
@@ -4440,10 +4434,8 @@ targets:
   - name: Mac_arm64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
@@ -4462,7 +4454,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver_xcode_debug
@@ -4589,7 +4580,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios_xcode_debug
@@ -4737,10 +4727,8 @@ targets:
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
@@ -4751,7 +4739,6 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      device_os: iOS-16|iOS-17
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
@@ -4798,13 +4785,15 @@ targets:
 
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
+    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-16","os=Mac-13", "cpu=x86"]
+        ["device_os=iOS-16|iOS-17","os=Mac-13", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -4835,7 +4824,6 @@ targets:
 
   - name: Mac_x64 native_ui_tests_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4853,7 +4841,6 @@ targets:
 
   - name: Mac_arm64 native_ui_tests_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5104,6 +5091,7 @@ targets:
     bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
+      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -5189,6 +5177,7 @@ targets:
     bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
+      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [

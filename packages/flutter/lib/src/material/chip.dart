@@ -2279,7 +2279,11 @@ class _ChipDefaultsM3 extends ChipThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? _colors.onSurfaceVariant
+      : _colors.onSurface,
+  );
 
   @override
   MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
@@ -2294,7 +2298,9 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get checkmarkColor => null;
 
   @override
-  Color? get deleteIconColor => null;
+  Color? get deleteIconColor => isEnabled
+    ? _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
   BorderSide? get side => isEnabled
