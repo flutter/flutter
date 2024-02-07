@@ -215,6 +215,10 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 - (void)announceAccessibilityMessage:(NSString*)message
                         withPriority:(NSAccessibilityPriorityLevel)priority;
 
+/**
+ * Returns an array of screen objects representing all of the screens available on the system.
+ */
+- (NSArray<NSScreen*>*)screens;
 @end
 
 @interface FlutterEngine (Tests)
