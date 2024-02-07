@@ -217,7 +217,7 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   command_buffer_vk_.beginRenderPass(pass_info, vk::SubpassContents::eInline);
 
-  // Set the initial viewport and scissors.
+  // Set the initial viewport.
   const auto vp = Viewport{.rect = Rect::MakeSize(target_size)};
   vk::Viewport viewport = vk::Viewport()
                               .setWidth(vp.rect.GetWidth())
@@ -227,13 +227,17 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                               .setMaxDepth(1.0f);
   command_buffer_vk_.setViewport(0, 1, &viewport);
 
-  // Set the initial scissor rect.
+  // Set the initial scissor.
   const auto sc = IRect::MakeSize(target_size);
   vk::Rect2D scissor =
       vk::Rect2D()
           .setOffset(vk::Offset2D(sc.GetX(), sc.GetY()))
           .setExtent(vk::Extent2D(sc.GetWidth(), sc.GetHeight()));
   command_buffer_vk_.setScissor(0, 1, &scissor);
+
+  // Set the initial stencil reference.
+  command_buffer_vk_.setStencilReference(
+      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, 0u);
 
   is_valid_ = true;
 }
