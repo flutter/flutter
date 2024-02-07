@@ -18,7 +18,7 @@ import os
 import sys
 
 from subprocess import CompletedProcess
-from typing import List
+from typing import List, Set
 
 # The import is coming from vpython wheel and pylint cannot find it.
 import yaml  # pylint: disable=import-error
@@ -55,10 +55,10 @@ class BundledTestRunner(TestRunner):
 
   # private, use bundled_test_runner_of function instead.
   def __init__(
-      self, target_id: str, package_deps: List[str], tests: List[str],
+      self, target_id: str, package_deps: Set[str], tests: List[str],
       logs_dir: str
   ):
-    super().__init__(OUT_DIR, [], None, target_id, package_deps)
+    super().__init__(OUT_DIR, [], None, target_id, list(package_deps))
     self.tests = tests
     self.logs_dir = logs_dir
 
@@ -82,38 +82,54 @@ def bundled_test_runner_of(target_id: str) -> BundledTestRunner:
   with open(os.path.join(os.path.dirname(__file__), 'test_suites.yaml'),
             'r') as file:
     tests = yaml.safe_load(file)
-  # TODO(zijiehe-google-com): Run tests with multiple packages or with extra
-  # test arguments, https://github.com/flutter/flutter/issues/140179.
+  # TODO(zijiehe-google-com): Run tests with extra test arguments,
+  # https://github.com/flutter/flutter/issues/140179.
   tests = list(
       filter(
           lambda test: test['test_command'].startswith('test run ') and test[
               'test_command'].endswith('.cm'), tests
       )
   )
+  # TODO(zijiehe-google-com): Run tests with dart aot,
+  # https://github.com/flutter/flutter/issues/140179.
   tests = list(
       filter(
-          lambda test: 'package' in test and test['package'].endswith('-0.far'),
-          tests
+          lambda test: 'run_with_dart_aot' not in test or test[
+              'run_with_dart_aot'] != 'true', tests
       )
   )
   tests = list(
       filter(
-          lambda test: not 'variant' in test or VARIANT == test['variant'],
+          lambda test: 'variant' not in test or VARIANT == test['variant'],
           tests
       )
   )
+  packages = set()
   for test in tests:
-    original_package = test['package']
-    test['package'] = os.path.join(
-        OUT_DIR, test['package'].replace('-0.far', '.far')
-    )
-    try:
-      os.remove(test['package'])
-    except FileNotFoundError:
-      pass
-    os.symlink(original_package, test['package'])
+    if 'package' in test:
+      packages.add(test['package'])
+    else:
+      assert 'packages' in test, \
+             'Expect either one package or a list of packages'
+      packages.update(test['packages'])
+  resolved_packages = set()
+  for package in packages:
+    if package.endswith('-0.far'):
+      # Make a symbolic link to match the name of the package itself without the
+      # '-0.far' suffix.
+      new_package = os.path.join(OUT_DIR, package.replace('-0.far', '.far'))
+      try:
+        # Remove the old one if it exists, usually happen on the devbox, so
+        # ignore the FileNotFoundError.
+        os.remove(new_package)
+      except FileNotFoundError:
+        pass
+      os.symlink(package, new_package)
+      resolved_packages.add(new_package)
+    else:
+      resolved_packages.add(os.path.join(OUT_DIR, package))
   return BundledTestRunner(
-      target_id, [test['package'] for test in tests],
+      target_id, resolved_packages,
       [test['test_command'][len('test run '):] for test in tests], log_dir
   )
 
@@ -123,6 +139,7 @@ def _get_test_runner(runner_args: argparse.Namespace, *_) -> TestRunner:
 
 
 if __name__ == '__main__':
+  logging.basicConfig(level=logging.INFO)
   logging.info('Running tests in %s', OUT_DIR)
   sys.argv.append('--out-dir=' + OUT_DIR)
   # The 'flutter-test-type' is a place holder and has no specific meaning; the

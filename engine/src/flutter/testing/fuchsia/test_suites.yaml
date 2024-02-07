@@ -43,6 +43,7 @@
   emulator_arch:
     - 'x64'
     - 'arm64'
+  variant: fuchsia_debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/dart-aot-runner-integration-test#meta/dart-aot-runner-integration-test.cm
   run_with_dart_aot: 'true'
   packages:
@@ -58,12 +59,14 @@
     - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/child-view/child-view/child-view.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/parent-view/parent-view/parent-view.far
+  variant: fuchsia_debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/touch-input-test#meta/touch-input-test.cm
   packages:
     - touch-input-test-0.far
     - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/touch-input-view/touch-input-view/touch-input-view.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/embedding-flutter-view/embedding-flutter-view/embedding-flutter-view.far
+  variant: fuchsia_debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/mouse-input-test#meta/mouse-input-test.cm
   packages:
     - mouse-input-test-0.far
@@ -74,3 +77,4 @@
     - text-input-test-0.far
     - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/text-input/text-input-view/text-input-view/text-input-view.far
+  variant: fuchsia_debug_x64
