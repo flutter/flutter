@@ -780,11 +780,20 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
-     * Returns `true` if the given path contains an `android/build.gradle` file.
+     * Returns `true` if the given path contains an `android` directory
+     * containing a `build.gradle` or `build.gradle.kts` file.
      */
     private Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
-        return editableAndroidProject.exists()
+        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
+        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+        if (buildGradle.exists() && buildGradleKts.exists()) {
+            logger.error(
+                "Both build.gradle and build.gradle.kts exist, so " +
+                "build.gradle.kts is ignored. This is likely a mistake."
+            )
+        }
+
+        return buildGradle.exists() || buildGradleKts.exists()
     }
 
     /**

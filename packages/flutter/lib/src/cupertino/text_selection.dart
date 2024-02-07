@@ -23,8 +23,8 @@ const double _kSelectionHandleRadius = 6;
 const double _kArrowScreenPadding = 26.0;
 
 /// Draws a single text selection handle with a bar and a ball.
-class _TextSelectionHandlePainter extends CustomPainter {
-  const _TextSelectionHandlePainter(this.color);
+class _CupertinoTextSelectionHandlePainter extends CustomPainter {
+  const _CupertinoTextSelectionHandlePainter(this.color);
 
   final Color color;
 
@@ -51,7 +51,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
+  bool shouldRepaint(_CupertinoTextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
 /// iOS Cupertino styled text selection handle controls.
@@ -116,7 +116,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle;
 
     final Widget customPaint = CustomPaint(
-      painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      painter: _CupertinoTextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom

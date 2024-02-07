@@ -138,24 +138,50 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final WebCompilerConfig compilerConfig;
+    final List<WebCompilerConfig> compilerConfigs;
     if (boolArg('wasm')) {
       if (!featureFlags.isFlutterWebWasmEnabled) {
         throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
       }
-      compilerConfig = WasmCompilerConfig(
-        omitTypeChecks: boolArg('omit-type-checks'),
-        wasmOpt: WasmOptLevel.values.byName(stringArg('wasm-opt')!),
+      if (stringArg(FlutterOptions.kWebRendererFlag) != argParser.defaultFor(FlutterOptions.kWebRendererFlag)) {
+        throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
+      }
+      globals.logger.printBox(
+        title: 'Experimental feature',
+        '''
+  WebAssembly compilation is experimental.
+  $kWasmMoreInfo''',
       );
+
+      compilerConfigs = <WebCompilerConfig>[
+        WasmCompilerConfig(
+          omitTypeChecks: boolArg('omit-type-checks'),
+          wasmOpt: WasmOptLevel.values.byName(stringArg('wasm-opt')!),
+          renderer: WebRendererMode.skwasm,
+        ),
+        JsCompilerConfig(
+          csp: boolArg('csp'),
+          optimizationLevel: stringArg('dart2js-optimization') ?? JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
+          dumpInfo: boolArg('dump-info'),
+          nativeNullAssertions: boolArg('native-null-assertions'),
+          noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          sourceMaps: boolArg('source-maps'),
+          renderer: WebRendererMode.canvaskit,
+        )];
     } else {
-      compilerConfig = JsCompilerConfig(
+      WebRendererMode webRenderer = WebRendererMode.auto;
+      if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
+        webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
+      }
+      compilerConfigs = <WebCompilerConfig>[JsCompilerConfig(
         csp: boolArg('csp'),
         optimizationLevel: stringArg('dart2js-optimization') ?? JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
         dumpInfo: boolArg('dump-info'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
         sourceMaps: boolArg('source-maps'),
-      );
+        renderer: webRenderer,
+      )];
     }
 
     final FlutterProject flutterProject = FlutterProject.current();
@@ -166,7 +192,10 @@ class BuildWebCommand extends BuildSubCommand {
     }
     final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
-      throwToolExit('base-href should start and end with /');
+      throwToolExit(
+        'Received a --base-href value of "$baseHref"\n'
+        '--base-href should start and end with /',
+      );
     }
     if (!flutterProject.web.existsSync()) {
       throwToolExit('Missing index.html.');
@@ -202,7 +231,7 @@ class BuildWebCommand extends BuildSubCommand {
       target,
       buildInfo,
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
-      compilerConfig: compilerConfig,
+      compilerConfigs: compilerConfigs,
       baseHref: baseHref,
       outputDirectoryPath: outputDirectoryPath,
     );

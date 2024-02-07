@@ -378,6 +378,8 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether flutter is being run from our CI.
   bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
 
+  String? get debugLogsDirectoryPath => stringArg(FlutterGlobalOptions.kDebugLogsDirectoryFlag, global: true);
+
   /// The value of the `--filesystem-scheme` argument.
   ///
   /// This can be overridden by some of its subclasses.
@@ -1271,13 +1273,7 @@ abstract class FlutterCommand extends Command<void> {
       : null;
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
-    List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
-
-    WebRendererMode webRenderer = WebRendererMode.auto;
-    if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-      webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
-      dartDefines = updateDartDefines(dartDefines, webRenderer);
-    }
+    final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
       final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
@@ -1325,7 +1321,6 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines: dartDefines,
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
-      webRenderer: webRenderer,
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
@@ -1564,19 +1559,6 @@ abstract class FlutterCommand extends Command<void> {
     return jsonEncode(propertyMap);
   }
 
-  /// Updates dart-defines based on [webRenderer].
-  @visibleForTesting
-  static List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
-    final Set<String> dartDefinesSet = dartDefines.toSet();
-    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
-        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
-    }
-    dartDefinesSet.addAll(webRenderer.dartDefines);
-    return dartDefinesSet.toList();
-  }
-
-
   Map<String, String> extractWebHeaders() {
     final Map<String, String> webHeaders = <String, String>{};
 
@@ -1736,6 +1718,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
       );
 
       await pub.get(
