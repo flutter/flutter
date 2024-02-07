@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
@@ -691,7 +690,6 @@ class ManifestAssetBundle implements AssetBundle {
       final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
       final Map<_Asset, List<_Asset>> componentAssets = <_Asset, List<_Asset>>{};
       for (final AssetsEntry assetsEntry in component.assets) {
-        final List<AssetTransformerEntry> transformers = _matchingTransformersForAsset(flutterManifest, assetsEntry.uri);
         if (assetsEntry.uri.path.endsWith('/')) {
           wildcardDirectories.add(assetsEntry.uri);
           _parseAssetsFromFolder(
@@ -701,7 +699,7 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             componentAssets,
             assetsEntry.uri,
-            transformers: transformers,
+            transformers: assetsEntry.transformers,
           );
         } else {
           _parseAssetFromFile(
@@ -711,7 +709,7 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             componentAssets,
             assetsEntry.uri,
-            transformers: transformers,
+            transformers: assetsEntry.transformers,
           );
         }
       }
@@ -720,19 +718,6 @@ class ManifestAssetBundle implements AssetBundle {
       deferredComponentsAssetVariants[component.name] = componentAssets;
     }
     return deferredComponentsAssetVariants;
-  }
-
-  List<AssetTransformerEntry> _matchingTransformersForAsset(FlutterManifest manifest, Uri assetUri) {
-    String path = assetUri.path;
-    return manifest.assetTransformers
-      .where((AssetTransformerEntry transformer) =>
-          transformer.assets.any((Glob glob) {
-            if (path.endsWith('/')) {
-              path = path.substring(0, path.length - 1);
-            }
-            return glob.matches(assetUri.path);
-          }))
-      .toList();
   }
 
   Map<String, List<String>> _createAssetManifest(
@@ -883,10 +868,6 @@ class ManifestAssetBundle implements AssetBundle {
 
     final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
     for (final AssetsEntry assetsEntry in flutterManifest.assets) {
-      final List<AssetTransformerEntry> transformers = _matchingTransformersForAsset(
-        flutterManifest,
-        assetsEntry.uri,
-      );
       if (assetsEntry.uri.path.endsWith('/')) {
         wildcardDirectories.add(assetsEntry.uri);
         _parseAssetsFromFolder(
@@ -899,7 +880,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
-          transformers: transformers,
+          transformers: assetsEntry.transformers,
         );
       } else {
         _parseAssetFromFile(
@@ -912,7 +893,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
-          transformers: transformers,
+          transformers: assetsEntry.transformers,
         );
       }
     }

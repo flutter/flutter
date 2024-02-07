@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
-import 'base/common.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -298,51 +296,6 @@ class FlutterManifest {
 
   late final List<AssetsEntry> assets = _computeAssets(_flutterDescriptor['assets']);
 
-  late final List<AssetTransformerEntry> assetTransformers = _parseAssetTransformers();
-
-  List<AssetTransformerEntry> _parseAssetTransformers() {
-    const String assetTransformersKey = 'asset-transformers';
-
-    if (!_flutterDescriptor.containsKey(assetTransformersKey)) {
-      return <AssetTransformerEntry>[];
-    }
-
-    final List<YamlMap> transformers = (_flutterDescriptor[assetTransformersKey]! as YamlList).value.cast();
-
-    return transformers.map((YamlMap transformerEntry) {
-      final Object? package = transformerEntry['package'];
-      if (package is! String || package.isEmpty) {
-        throw ToolExit('Asset transformer has a "package" that is not a non-empty String');
-      }
-
-      final String? args = transformerEntry['args'] as String?;
-      final Object? assetsEntry = transformerEntry['assets'];
-      if (assetsEntry is! List<Object?>) {
-        throw ToolExit('Expected assets section in asset transformer definition to be a list. Got "${assetsEntry.runtimeType}" instead.');
-      }
-
-      final List<Glob> assets = assetsEntry
-        .map((Object? entry) {
-          if (entry is! String || entry == '') {
-            _logger.printError(
-                'A transformer with package "$package" contains a null or empty entry.');
-            return null;
-          }
-          return Glob(entry); // TODO—dontmerge - can this throw given a bad pattern?
-        })
-        .whereType<Glob>()
-        .toList();
-
-      final AssetTransformerEntry transformer = AssetTransformerEntry(
-          assets: assets,
-          package: package,
-          args: args,
-      );
-
-      return transformer;
-    }).toList();
-  }
-
   late final List<Font> fonts = _extractFonts();
 
   List<Font> _extractFonts() {
@@ -518,14 +471,43 @@ bool _validate(Object? manifest, Logger logger) {
 @immutable
 final class AssetTransformerEntry {
   const AssetTransformerEntry({
-    required this.assets,
     required this.package,
-    this.args,
-  });
+    required List<String>? args,
+  }): args = args ?? const <String>[];
 
-  final List<Glob> assets;
+  static (AssetTransformerEntry? entry, String? error) tryParse(Object? yaml, String asset) {
+    if (yaml == null) {
+      return (null, 'Transformer entry is null.');
+    }
+    if (yaml is! YamlMap) {
+      return (null, 'Expected entry to be a map. Found ${yaml.runtimeType} instead');
+    }
+
+    final Object? package = yaml['package'];
+    if (package is! String || package.isEmpty) {
+      return (null, 'Expected "package" to be a String. Found ${package.runtimeType} instead.');
+    }
+
+    final Object? args = yaml['args'];
+    if (args != null) {
+      final List<String> argsErrors = <String>[];
+      _validateListType<String>(args, argsErrors, 'args', 'String');
+      if (argsErrors.isNotEmpty) {
+        return (null, argsErrors.join('\n'));
+      }
+    }
+
+    return (
+      AssetTransformerEntry(
+        package: package,
+        args: (args ?? <String>[]) as List<String>,
+      ),
+      null,
+    );
+  }
+
   final String package;
-  final String? args;
+  final List<String>? args;
 }
 
 void _validateFlutter(YamlMap? yaml, List<String> errors) {
@@ -616,9 +598,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
-      case 'asset-transformers':
-        // TODO—dontmerge — implement.
-        break;
       default:
         errors.add('Unexpected child "$yamlKey" found under "flutter".');
         break;
@@ -626,13 +605,25 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   }
 }
 
-void _validateListType<T>(YamlList yamlList, List<String> errors, String context, String typeAlias) {
+void _validateListType<T>(Object yamlList, List<String> errors, String context, String typeAlias) {
+  if (yamlList is! YamlList) {
+    errors.add('Expected $context to be a list of $typeAlias, but found ${yamlList.runtimeType}.');
+    return;
+  }
+
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
       // ignore: avoid_dynamic_calls
       errors.add('Expected $context to be a list of $typeAlias, but element $i was a ${yamlList[i].runtimeType}');
     }
   }
+}
+
+void _validateListTypeNullable<T>(Object? yamlList, List<String> errors, String context, String typeAlias) {
+  if (yamlList == null) {
+    return;
+  }
+  _validateListType<T>(yamlList, errors, context, typeAlias);
 }
 
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
@@ -685,7 +676,7 @@ List<String> _validateAssets(Object? yaml) {
   final List<AssetsEntry> results = <AssetsEntry>[];
   final List<String> errors = <String>[];
   for (final Object? rawAssetEntry in yaml) {
-    final (AssetsEntry? parsed, String? error) = AssetsEntry.parseFromYamlSafe(rawAssetEntry);
+    final (AssetsEntry? parsed, String? error) = AssetsEntry.tryParseFromYaml(rawAssetEntry);
     if (parsed != null) {
       results.add(parsed);
     }
@@ -764,23 +755,26 @@ class AssetsEntry {
   const AssetsEntry({
     required this.uri,
     this.flavors = const <String>[],
+    this.transformers = const <AssetTransformerEntry>[],
   });
 
   final Uri uri;
   final List<String> flavors;
+  final List<AssetTransformerEntry> transformers;
 
   static const String _pathKey = 'path';
   static const String _flavorKey = 'flavors';
+  static const String _transformersKey = 'transformers';
 
   static AssetsEntry? parseFromYaml(Object? yaml) {
-    final (AssetsEntry? value, String? error) = parseFromYamlSafe(yaml);
+    final (AssetsEntry? value, String? error) = tryParseFromYaml(yaml);
     if (error != null) {
       throw Exception('Unexpected error when parsing assets entry');
     }
     return value!;
   }
 
-  static (AssetsEntry? assetsEntry, String? error) parseFromYamlSafe(Object? yaml) {
+  static (AssetsEntry? assetsEntry, String? error) tryParseFromYaml(Object? yaml) {
 
     (Uri?, String?) tryParseUri(String uri) {
       try {
@@ -803,46 +797,44 @@ class AssetsEntry {
       if (yaml.keys.isEmpty) {
         return (null, null);
       }
-
       final Object? path = yaml[_pathKey];
-      final Object? flavors = yaml[_flavorKey];
-
       if (path == null || path is! String) {
-        return (null, 'Asset manifest entry is malformed. '
+        return (null, 'Asset entry is malformed. '
           'Expected asset entry to be either a string or a map '
-          'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
+          'containing a "$_pathKey" entry. Found ${path.runtimeType} instead.');
       }
 
-      final Uri uri = Uri(pathSegments: path.split('/'));
+      final List<String> errors = <String>[];
+      final Object? flavorsYaml = yaml[_flavorKey];
+      _validateListTypeNullable<String>(flavorsYaml, errors, '$_flavorKey list of entry "$path"', 'String');
+      final List<String> flavors = flavorsYaml == null ? <String>[] : flavorsYaml as List<String>;
 
-      if (flavors == null) {
-        return (AssetsEntry(uri: uri), null);
-      }
+      final Object? transformersYaml = yaml[_transformersKey];
+      _validateListTypeNullable<YamlMap>(transformersYaml, errors, '$_transformersKey list of entry "$path"', 'Map');
+      final List<AssetTransformerEntry> transformers = <AssetTransformerEntry>[];
 
-      if (flavors is! YamlList) {
-        return(null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a list of strings. '
-          'Got ${flavors.runtimeType} instead.');
-      }
-
-      final List<String> flavorsListErrors = <String>[];
-      _validateListType<String>(flavors, flavorsListErrors, 'flavors list of entry "$path"', 'String');
-      if (flavorsListErrors.isNotEmpty) {
-        return (null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a list of strings.\n'
-          '${flavorsListErrors.join('\n')}');
+      if (transformersYaml != null) {
+        for (final Object? transformerEntry in transformersYaml as List<Object?>) {
+          final (AssetTransformerEntry? entry, String? error) = AssetTransformerEntry.tryParse(transformerEntry, path);
+          if (error != null) {
+            errors.add(error);
+          } else {
+            transformers.add(entry!);
+          }
+        }
       }
 
       final AssetsEntry entry = AssetsEntry(
         uri: Uri(pathSegments: path.split('/')),
         flavors: List<String>.from(flavors),
+        transformers: transformers,
       );
 
       return (entry, null);
     }
 
     return (null, 'Assets entry had unexpected shape. '
-      'Expected a string or an object. Got ${yaml.runtimeType} instead.');
+      'Expected a string or an object. Found ${yaml.runtimeType} instead.');
   }
 
   @override
