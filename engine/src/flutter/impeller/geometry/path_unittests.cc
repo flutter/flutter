@@ -486,7 +486,7 @@ TEST(PathTest, CanBeCloned) {
   }
 }
 
-TEST(PathTest, PathBuilderDoesNotMutateTakenPaths) {
+TEST(PathTest, PathBuilderDoesNotMutateCopiedPaths) {
   auto test_isolation =
       [](const std::function<void(PathBuilder & builder)>& mutator,
          bool will_close, Point mutation_offset, const std::string& label) {
@@ -525,23 +525,23 @@ TEST(PathTest, PathBuilderDoesNotMutateTakenPaths) {
           }
         };
 
-        auto path1 = builder.TakePath();
+        auto path1 = builder.CopyPath();
         verify_path(path1, false, false, {},
                     "Initial Path1 state before " + label);
 
         for (int i = 0; i < 10; i++) {
-          auto path = builder.TakePath();
+          auto path = builder.CopyPath();
           verify_path(
               path, false, false, {},
-              "Extra TakePath #" + std::to_string(i + 1) + " for " + label);
+              "Extra CopyPath #" + std::to_string(i + 1) + " for " + label);
         }
         mutator(builder);
         verify_path(path1, false, false, {},
                     "Path1 state after subsequent " + label);
 
-        auto path2 = builder.TakePath();
+        auto path2 = builder.CopyPath();
         verify_path(path1, false, false, {},
-                    "Path1 state after subsequent " + label + " and TakePath");
+                    "Path1 state after subsequent " + label + " and CopyPath");
         verify_path(path2, true, will_close, mutation_offset,
                     "Initial Path2 state with subsequent " + label);
       };
