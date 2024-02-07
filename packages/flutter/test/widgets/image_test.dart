@@ -798,8 +798,6 @@ void main() {
   });
 
   testWidgets('Precache',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
@@ -818,7 +816,10 @@ void main() {
     // Check that a second resolve of the same image is synchronous.
     final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
     late bool isSync;
-    stream.addListener(ImageStreamListener((ImageInfo image, bool sync) { isSync = sync; }));
+    stream.addListener(ImageStreamListener((ImageInfo image, bool sync) {
+      image.dispose();
+      isSync = sync;
+    }));
     expect(isSync, isTrue);
   });
 
@@ -1565,8 +1566,6 @@ void main() {
   });
 
   testWidgets('precacheImage does not hold weak ref for more than a frame',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     imageCache.maximumSize = 0;
     final _TestImageProvider provider = _TestImageProvider();
@@ -1597,7 +1596,10 @@ void main() {
     expect(provider._lastResolvedConfiguration, isNotNull);
     final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
     late bool isSync;
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) {
+      image.dispose();
+      isSync = syncCall;
+    });
 
     // Still have live ref because frame has not pumped yet.
     await tester.pump();
