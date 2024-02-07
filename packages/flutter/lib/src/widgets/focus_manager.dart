@@ -1716,6 +1716,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier, WidgetsBindingO
     if (_primaryFocus == node) {
       _primaryFocus = null;
     }
+    if (_suspendedNode == node) {
+      _suspendedNode = null;
+    }
     _dirtyNodes.remove(node);
   }
 
