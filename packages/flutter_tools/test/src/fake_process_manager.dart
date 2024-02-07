@@ -334,7 +334,10 @@ abstract class FakeProcessManager implements ProcessManager {
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
-  }) {
+  }) async {
+    // allow callers to register error handling that can handle exceptions
+    // thrown from onRun
+    await Future<void>.delayed(Duration.zero);
     final FakeProcess process = _runCommand(
       command.cast<String>(),
       workingDirectory: workingDirectory,
@@ -344,11 +347,11 @@ abstract class FakeProcessManager implements ProcessManager {
     );
     if (process._completer != null) {
       _fakeRunningProcesses[process.pid] = process;
-      process.exitCode.whenComplete(() {
+      unawaited(process.exitCode.whenComplete(() {
         _fakeRunningProcesses.remove(process.pid);
-      });
+      }));
     }
-    return Future<io.Process>.value(process);
+    return process;
   }
 
   @override

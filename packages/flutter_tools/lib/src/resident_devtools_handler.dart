@@ -7,10 +7,13 @@ import 'dart:async';
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
+import 'globals.dart' as globals;
 import 'resident_runner.dart';
 import 'vmservice.dart';
+import 'web/chrome.dart';
 
 typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(DevtoolsLauncher?, ResidentRunner, Logger);
 
@@ -166,7 +169,13 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
         queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
       ).toString();
       _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
-      unawaited(Chrome.start(<String>[devToolsUrl]));
+      // TODO direct inject
+      globals.processManager
+        .start(<String>[findChromeExecutable(globals.platform, globals.fs)])
+        .then<Process?>((Process p) {print('in then'); return p;}, onError: (Object error) {
+          globals.printTrace('Experienced error $error while trying to launch Chrome for devtools.');
+          return null;
+        });
     }
     launchedInBrowser = true;
   }

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/dds.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -17,7 +18,7 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
+import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 
@@ -421,12 +422,55 @@ void main() {
     expect(handler.launchedInBrowser, isTrue);
   });
 
+  {
+    final BufferLogger logger = BufferLogger.test();
+    final Completer<void> completer = Completer<void>();
+
+    testUsingContext('catches async exceptions thrown from starting Chrome', () async {
+      final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+        FakeDevtoolsLauncher()
+          ..devToolsUrl = Uri(host: 'localhost', port: 8080)
+          ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+        FakeResidentRunner(),
+        BufferLogger.test(),
+      );
+      final FakeFlutterDevice device = FakeFlutterDevice();
+      device.vmService = FakeFlutterVmService();
+      expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[device]), isTrue);
+      expect(handler.launchedInBrowser, isTrue);
+      //await Future.delayed(Duration(seconds: 1));
+      await completer.future;
+      expect(logger.traceText, contains('Experienced error ProcessException: Something went wrong trying to spawn'));
+    }, overrides: <Type, Generator>{
+      Logger: () => logger,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[RegExp(r'.*chrome.*')],
+          onRun: (List<String> cmd) {
+            final ProcessException exception = ProcessException(
+              cmd.first,
+              cmd.sublist(1),
+              'Something went wrong trying to spawn ${cmd.first}',
+            );
+            completer.complete();
+            throw exception;
+          },
+        ),
+      ]),
+    });
+  }
+
   testWithoutContext('Converts a VM Service URI with a query parameter to a pretty display string', () {
     const String value = 'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
     final Uri uri = Uri.parse(value);
 
     expect(urlToDisplayString(uri), 'http://127.0.0.1:9100?uri=http://127.0.0.1:57922/_MXpzytpH20=/');
   });
+}
+
+class FakeFlutterVmService extends Fake implements FlutterVmService {
+  @override
+  Uri? httpAddress;
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -468,6 +512,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 }
 
 class FakeDevice extends Fake implements Device {
+  @override
+  String name = 'fakey';
+
   @override
   DartDevelopmentService get dds => FakeDartDevelopmentService();
 }
