@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -21,8 +21,10 @@ import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode, Target;
-import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    hide BuildMode, Target;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    as native_assets_cli;
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -683,7 +685,7 @@ void main() {
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       expect(result.isOk, true);
-      // Hot restart does not require reruning anything for native assets.
+      // Hot restart does not require rerunning anything for native assets.
       // The previous native assets mapping should be used.
       expect(buildRunner.buildInvocations, 0);
       expect(buildRunner.dryRunInvocations, 0);
@@ -786,9 +788,6 @@ class FakeDevFs extends Fake implements DevFS {
   Uri? baseUri;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     TargetPlatform targetPlatform = TargetPlatform.tester,
@@ -968,10 +967,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

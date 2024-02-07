@@ -165,7 +165,7 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
   /// The `boxes` list must be in logical order, which is the order each child
   /// is encountered when the user reads the text. Usually the length of the
   /// list equals [childCount], but it can be less than that, when some children
-  /// are ommitted due to ellipsing. It never exceeds [childCount].
+  /// are omitted due to ellipsing. It never exceeds [childCount].
   ///
   /// See also:
   ///
@@ -1044,6 +1044,16 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return _textPainter.size;
   }
 
+  /// Whether the text was truncated or ellipsized as laid out.
+  ///
+  /// This returns the [TextPainter.didExceedMaxLines] of the underlying [TextPainter].
+  ///
+  /// Valid only after [layout].
+  bool get didExceedMaxLines {
+    assert(!debugNeedsLayout);
+    return _textPainter.didExceedMaxLines;
+  }
+
   /// Collected during [describeSemanticsConfiguration], used by
   /// [assembleSemanticsNode] and [_combineSemanticsInfo].
   List<InlineSpanSemanticsInformation>? _semanticsInfo;
@@ -1053,19 +1063,19 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
     bool needsAssembleSemanticsNode = false;
-    bool needsChildConfigrationsDelegate = false;
+    bool needsChildConfigurationsDelegate = false;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.recognizer != null) {
         needsAssembleSemanticsNode = true;
         break;
       }
-      needsChildConfigrationsDelegate = needsChildConfigrationsDelegate || info.isPlaceholder;
+      needsChildConfigurationsDelegate = needsChildConfigurationsDelegate || info.isPlaceholder;
     }
 
     if (needsAssembleSemanticsNode) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
-    } else if (needsChildConfigrationsDelegate) {
+    } else if (needsChildConfigurationsDelegate) {
       config.childConfigurationsDelegate = _childSemanticsConfigurationsDelegate;
     } else {
       if (_cachedAttributedLabels == null) {

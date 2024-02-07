@@ -472,10 +472,9 @@ void main() {
     await tester.tap(find.text('Main Menu'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Scrollbar), findsOneWidget);
     // Test Scrollbar thumb color.
     expect(
-      find.byType(Scrollbar),
+      find.byType(Scrollbar).last,
       paints..rrect(color: const Color(0xffff0000)),
     );
 
@@ -521,10 +520,9 @@ void main() {
     await tester.tap(find.text('Main Menu'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Scrollbar), findsOneWidget);
     // Scrollbar thumb color should be updated.
     expect(
-      find.byType(Scrollbar),
+      find.byType(Scrollbar).last,
       paints..rrect(color: const Color(0xff00ff00)),
     );
   }, variant: TargetPlatformVariant.desktop());
@@ -2358,7 +2356,6 @@ void main() {
         description,
         equalsIgnoringHashCodes(
           <String>[
-            'child: Text("Menu 0")',
             'focusNode: null',
             'menuStyle: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: MaterialStatePropertyAll(20.0), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
@@ -2600,6 +2597,58 @@ void main() {
           Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)
         ]),
       );
+    });
+
+    testWidgets('tapping MenuItemButton with null focus node', (WidgetTester tester) async {
+
+      FocusNode? buttonFocusNode = FocusNode();
+
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MenuAnchor(
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    focusNode: buttonFocusNode,
+                    closeOnActivate: false,
+                    child: const Text('Set focus to null'),
+                    onPressed: () {
+                      setState((){
+                        buttonFocusNode?.dispose();
+                        buttonFocusNode = null;
+                      });
+                    },
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return TextButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('OPEN MENU'),
+                  );
+                },
+              );
+            }
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('OPEN MENU'));
+      await tester.pump();
+
+      expect(find.text('Set focus to null'), findsOneWidget);
+
+      await tester.tap(find.text('Set focus to null'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('constrained menus show up in the right place in RTL', (WidgetTester tester) async {
@@ -3521,6 +3570,7 @@ void main() {
 
   testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     int onFocusChangeCalled = 0;
     await tester.pumpWidget(
       MaterialApp(

@@ -113,7 +113,7 @@ body:
         Note: Please do not upload screenshots of text. Instead, use code blocks
         or the above mentioned ways to upload this.
       value: |
-        <details open><summary>pubspec.lock</summary>
+        <details><summary>pubspec.lock</summary>
 
         ```lock
         [Paste file content here]

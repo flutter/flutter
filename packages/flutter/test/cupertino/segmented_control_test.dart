@@ -61,28 +61,20 @@ int getChildCount(WidgetTester tester) {
 }
 
 ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
-  // Using dynamic so the test can access private classes.
-  // ignore: avoid_dynamic_calls
   return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
       .getChildrenAsList()[child].parentData! as dynamic).surroundingRect as ui.RRect;
 }
 
 Size getChildSize(WidgetTester tester, {int child = 0}) {
-  // Using dynamic so the test can access private classes.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
       .getChildrenAsList()[child].size;
 }
 
 Color getBorderColor(WidgetTester tester) {
-  // Using dynamic so the test can access a private class.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as dynamic).borderColor as Color;
 }
 
 int? getSelectedIndex(WidgetTester tester) {
-  // Using dynamic so the test can access a private class.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as dynamic).selectedIndex as int?;
 }
 
@@ -1114,7 +1106,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));
     expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
@@ -1135,7 +1127,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), const Color(0xff7bbaff));
     expect(getBackgroundColor(tester, 1), const Color(0x95007aff));
@@ -1156,7 +1148,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), const Color(0xffb9daff));
     expect(getBackgroundColor(tester, 1), const Color(0xc7007aff));
@@ -1177,7 +1169,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), const Color(0xfff7faff));
     expect(getBackgroundColor(tester, 1), const Color(0xf8007aff));
@@ -1198,7 +1190,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.white));
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);

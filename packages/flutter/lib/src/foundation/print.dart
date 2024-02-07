@@ -31,6 +31,14 @@ typedef DebugPrintCallback = void Function(String? message, { int? wrapWidth });
 /// Prints a message to the console, which you can access using the "flutter"
 /// tool's "logs" command ("flutter logs").
 ///
+/// The [debugPrint] function logs to console even in [release mode](https://docs.flutter.dev/testing/build-modes#release).
+/// As per convention, calls to [debugPrint] should be within a debug mode check or an assert:
+/// ```dart
+/// if (kDebugMode) {
+///   debugPrint('A useful message');
+/// }
+/// ```
+///
 /// See also:
 ///
 ///   * [DebugPrintCallback], for function parameters and usage details.

@@ -5,11 +5,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('SemanticsNodes overlapping in z', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes overlapping in z',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     // Cards are semantic boundaries that always own their own SemanticNode,
     // PhysicalModels merge their semantics information into parent.
     //

@@ -30,7 +30,7 @@ void main() {
     expect(recognizer.debugLastPendingEventTimestamp, null);
 
     // Not entirely clear how this can happen, but the bugs mentioned above show
-    // we can end up in this state empircally.
+    // we can end up in this state empirically.
     recognizer.acceptGesture(event.pointer);
     expect(recognizer.debugLastPendingEventTimestamp, null);
   });
@@ -40,8 +40,10 @@ void main() {
 
     final VerticalDragGestureRecognizer v = VerticalDragGestureRecognizer()
       ..onStart = (_) { };
+    addTearDown(v.dispose);
     final HorizontalDragGestureRecognizer h = HorizontalDragGestureRecognizer()
       ..onStart = (_) { };
+    addTearDown(h.dispose);
 
     const PointerDownEvent down90 = PointerDownEvent(
       pointer: 90,

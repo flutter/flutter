@@ -5,9 +5,7 @@
 name: Minimal workflow to test github action token
 
 on:
-  pull_request:
-    branches: master
-    types: [labeled]
+  workflow_dispatch
 
 permissions: write-all
 
@@ -15,9 +13,9 @@ jobs:
   minimal_token_test:
     name: minimal_token_test
     runs-on: ubuntu-latest
-    if: |
-      (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':')) &&
-      (github.event.pull_request.merged == true)
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout Flutter Repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
@@ -32,7 +30,7 @@ jobs:
           cd flutter
           touch empty.json
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
+        uses: peter-evans/create-pull-request@b1ddad2c994a25fbc81a28b3ec0e368bb2021c50
         with:
           path: flutter
           commit-message: blah
