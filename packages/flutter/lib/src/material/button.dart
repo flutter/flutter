@@ -341,13 +341,13 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with WidgetStateM
 
   @override
   Widget build(BuildContext context) {
-    final Color? effectiveTextColor = WidgetStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
-    final ShapeBorder? effectiveShape =  WidgetStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
+    final Color? effectiveTextColor = WidgetStateProperty.resolveAs<Color?>(widget.textStyle?.color, widgetStates);
+    final ShapeBorder? effectiveShape =  WidgetStateProperty.resolveAs<ShapeBorder?>(widget.shape, widgetStates);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
     final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
       widget.mouseCursor ?? WidgetStateMouseCursor.clickable,
-      materialStates,
+      widgetStates,
     );
     final EdgeInsetsGeometry padding = widget.padding.add(
       EdgeInsets.only(

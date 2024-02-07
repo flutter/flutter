@@ -1025,11 +1025,11 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
   }
 
   OutlinedBorder _getShape(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
-    final BorderSide? resolvedSide = WidgetStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
-      ?? WidgetStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates);
-    final OutlinedBorder resolvedShape = WidgetStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates)
-      ?? WidgetStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, materialStates)
-      ?? WidgetStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, materialStates)
+    final BorderSide? resolvedSide = WidgetStateProperty.resolveAs<BorderSide?>(widget.side, widgetStates)
+      ?? WidgetStateProperty.resolveAs<BorderSide?>(chipTheme.side, widgetStates);
+    final OutlinedBorder resolvedShape = WidgetStateProperty.resolveAs<OutlinedBorder?>(widget.shape, widgetStates)
+      ?? WidgetStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, widgetStates)
+      ?? WidgetStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, widgetStates)
       // TODO(tahatesser): Remove this fallback when Material 2 is deprecated.
       ?? const StadiumBorder();
     // If the side is provided, shape uses the provided side.
@@ -1055,7 +1055,7 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
       selectedColor: selectedColor,
       backgroundColor: backgroundColor,
       disabledColor: disabledColor,
-    ).resolve(materialStates) ?? defaultColor?.resolve(materialStates);
+    ).resolve(widgetStates) ?? defaultColor?.resolve(widgetStates);
   }
 
   /// Picks between three different colors, depending upon the state of two
@@ -1256,7 +1256,7 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
       ?? chipTheme.deleteIconBoxConstraints;
 
     final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
-    final Color? resolvedLabelColor = WidgetStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
+    final Color? resolvedLabelColor = WidgetStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, widgetStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final Widget? avatar = iconTheme != null && hasAvatar
       ? IconTheme.merge(
