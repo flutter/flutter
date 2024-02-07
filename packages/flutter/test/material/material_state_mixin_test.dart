@@ -12,7 +12,7 @@ const Color trueColor = Colors.red;
 const Color falseColor = Colors.green;
 
 /// Mock widget which plays the role of a button -- it can emit notifications
-/// that [WidgetState] values are now in or out of play.
+/// that [MaterialState] values are now in or out of play.
 class _InnerWidget extends StatefulWidget {
   const _InnerWidget({required this.onValueChanged, required this.controller});
   final ValueChanged<bool> onValueChanged;
@@ -48,7 +48,7 @@ class _MyWidget extends StatefulWidget {
   final StreamController<bool> controller;
 
   /// The value we're watching in the given test.
-  final WidgetState materialState;
+  final MaterialState materialState;
 
   @override
   State createState() => _MyWidgetState();
@@ -88,7 +88,7 @@ void main() {
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isPressed,
-      materialState: WidgetState.pressed,
+      materialState: MaterialState.pressed,
     );
     await verify(tester, widget, controller);
   });
@@ -98,7 +98,7 @@ void main() {
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isFocused,
-      materialState: WidgetState.focused,
+      materialState: MaterialState.focused,
     );
     await verify(tester, widget, controller);
   });
@@ -108,7 +108,7 @@ void main() {
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isHovered,
-      materialState: WidgetState.hovered,
+      materialState: MaterialState.hovered,
     );
     await verify(tester, widget, controller);
   });
@@ -118,7 +118,7 @@ void main() {
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isDisabled,
-      materialState: WidgetState.disabled,
+      materialState: MaterialState.disabled,
     );
     await verify(tester, widget, controller);
   });
@@ -128,7 +128,7 @@ void main() {
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isSelected,
-      materialState: WidgetState.selected,
+      materialState: MaterialState.selected,
     );
     await verify(tester, widget, controller);
   });
@@ -138,7 +138,7 @@ void main() {
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isScrolledUnder,
-      materialState: WidgetState.scrolledUnder,
+      materialState: MaterialState.scrolledUnder,
     );
     await verify(tester, widget, controller);
   });
@@ -148,7 +148,7 @@ void main() {
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isDragged,
-      materialState: WidgetState.dragged,
+      materialState: MaterialState.dragged,
     );
     await verify(tester, widget, controller);
   });
@@ -158,7 +158,7 @@ void main() {
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isErrored,
-      materialState: WidgetState.error,
+      materialState: MaterialState.error,
     );
     await verify(tester, widget, controller);
   });

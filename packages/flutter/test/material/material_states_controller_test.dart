@@ -8,14 +8,14 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('MaterialStatesController constructor', () {
-    expect(WidgetStatesController().value, <WidgetState>{});
-    expect(WidgetStatesController(<WidgetState>{}).value, <WidgetState>{});
-    expect(WidgetStatesController(<WidgetState>{WidgetState.selected}).value, <WidgetState>{WidgetState.selected});
+    expect(MaterialStatesController().value, <MaterialState>{});
+    expect(MaterialStatesController(<MaterialState>{}).value, <MaterialState>{});
+    expect(MaterialStatesController(<MaterialState>{MaterialState.selected}).value, <MaterialState>{MaterialState.selected});
   });
 
   test('MaterialStatesController dispatches memory events', () async {
     await expectLater(
-      await memoryEvents(() => WidgetStatesController().dispose(), WidgetStatesController),
+      await memoryEvents(() => MaterialStatesController().dispose(), MaterialStatesController),
       areCreateAndDispose,
     );
   });
@@ -25,51 +25,51 @@ void main() {
     void valueChanged() {
       count += 1;
     }
-    final WidgetStatesController controller = WidgetStatesController();
+    final MaterialStatesController controller = MaterialStatesController();
     controller.addListener(valueChanged);
 
-    controller.update(WidgetState.selected, true);
-    expect(controller.value, <WidgetState>{WidgetState.selected});
+    controller.update(MaterialState.selected, true);
+    expect(controller.value, <MaterialState>{MaterialState.selected});
     expect(count, 1);
-    controller.update(WidgetState.selected, true);
-    expect(controller.value, <WidgetState>{WidgetState.selected});
+    controller.update(MaterialState.selected, true);
+    expect(controller.value, <MaterialState>{MaterialState.selected});
     expect(count, 1);
 
-    controller.update(WidgetState.hovered, false);
+    controller.update(MaterialState.hovered, false);
     expect(count, 1);
-    expect(controller.value, <WidgetState>{WidgetState.selected});
-    controller.update(WidgetState.selected, false);
+    expect(controller.value, <MaterialState>{MaterialState.selected});
+    controller.update(MaterialState.selected, false);
     expect(count, 2);
-    expect(controller.value, <WidgetState>{});
+    expect(controller.value, <MaterialState>{});
 
-    controller.update(WidgetState.hovered, true);
-    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    controller.update(MaterialState.hovered, true);
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
     expect(count, 3);
-    controller.update(WidgetState.hovered, true);
-    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    controller.update(MaterialState.hovered, true);
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
     expect(count, 3);
-    controller.update(WidgetState.pressed, true);
-    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
+    controller.update(MaterialState.pressed, true);
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
     expect(count, 4);
-    controller.update(WidgetState.selected, true);
-    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed, WidgetState.selected});
+    controller.update(MaterialState.selected, true);
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed, MaterialState.selected});
     expect(count, 5);
-    controller.update(WidgetState.selected, false);
-    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
+    controller.update(MaterialState.selected, false);
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
     expect(count, 6);
-    controller.update(WidgetState.selected, false);
-    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
+    controller.update(MaterialState.selected, false);
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
     expect(count, 6);
-    controller.update(WidgetState.pressed, false);
-    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    controller.update(MaterialState.pressed, false);
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
     expect(count, 7);
-    controller.update(WidgetState.hovered, false);
-    expect(controller.value, <WidgetState>{});
+    controller.update(MaterialState.hovered, false);
+    expect(controller.value, <MaterialState>{});
     expect(count, 8);
 
     controller.removeListener(valueChanged);
-    controller.update(WidgetState.selected, true);
-    expect(controller.value, <WidgetState>{WidgetState.selected});
+    controller.update(MaterialState.selected, true);
+    expect(controller.value, <MaterialState>{MaterialState.selected});
     expect(count, 8);
   });
 
@@ -79,15 +79,15 @@ void main() {
     void valueChanged() {
       count += 1;
     }
-    final WidgetStatesController controller = WidgetStatesController(const <WidgetState>{WidgetState.selected});
+    final MaterialStatesController controller = MaterialStatesController(const <MaterialState>{MaterialState.selected});
     controller.addListener(valueChanged);
 
-    controller.update(WidgetState.selected, true);
-    expect(controller.value, <WidgetState>{WidgetState.selected});
+    controller.update(MaterialState.selected, true);
+    expect(controller.value, <MaterialState>{MaterialState.selected});
     expect(count, 0);
 
-    controller.update(WidgetState.selected, false);
-    expect(controller.value, <WidgetState>{});
+    controller.update(MaterialState.selected, false);
+    expect(controller.value, <MaterialState>{});
     expect(count, 1);
   });
 }
