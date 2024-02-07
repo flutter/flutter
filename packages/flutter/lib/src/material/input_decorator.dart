@@ -2025,9 +2025,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return Colors.transparent;
     }
     if (decoration.fillColor != null) {
-      return MaterialStateProperty.resolveAs(decoration.fillColor!, materialState);
+      return WidgetStateProperty.resolveAs(decoration.fillColor!, materialState);
     }
-    return MaterialStateProperty.resolveAs(defaults.fillColor!, materialState);
+    return WidgetStateProperty.resolveAs(defaults.fillColor!, materialState);
   }
 
   Color _getHoverColor(ThemeData themeData) {
@@ -2038,21 +2038,21 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return  MaterialStateProperty.resolveAs(decoration.iconColor, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
-      ?? MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
+    return  WidgetStateProperty.resolveAs(decoration.iconColor, materialState)
+      ?? WidgetStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
+      ?? WidgetStateProperty.resolveAs(defaults.iconColor!, materialState);
   }
 
   Color _getPrefixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.prefixIconColor, materialState)
-      ?? MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
+    return WidgetStateProperty.resolveAs(decoration.prefixIconColor, materialState)
+      ?? WidgetStateProperty.resolveAs(themeData.inputDecorationTheme.prefixIconColor, materialState)
+      ?? WidgetStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
   }
 
   Color _getSuffixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.suffixIconColor, materialState)
-      ?? MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
+    return WidgetStateProperty.resolveAs(decoration.suffixIconColor, materialState)
+      ?? WidgetStateProperty.resolveAs(themeData.inputDecorationTheme.suffixIconColor, materialState)
+      ?? WidgetStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
   }
 
   // True if the label will be shown and the hint will not.
@@ -2071,10 +2071,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
-    final TextStyle defaultStyle = MaterialStateProperty.resolveAs(defaults.labelStyle!, materialState);
+    final TextStyle defaultStyle = WidgetStateProperty.resolveAs(defaults.labelStyle!, materialState);
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
+    final TextStyle? style = WidgetStateProperty.resolveAs(decoration.labelStyle, materialState)
+      ?? WidgetStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
     return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
@@ -2086,10 +2086,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineHintStyle(ThemeData themeData, InputDecorationTheme defaults) {
-    final TextStyle defaultStyle = MaterialStateProperty.resolveAs(defaults.hintStyle!, materialState);
+    final TextStyle defaultStyle = WidgetStateProperty.resolveAs(defaults.hintStyle!, materialState);
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
+    final TextStyle? style = WidgetStateProperty.resolveAs(decoration.hintStyle, materialState)
+      ?? WidgetStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
 
     return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
@@ -2098,14 +2098,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
-    TextStyle defaultTextStyle = MaterialStateProperty.resolveAs(defaults.floatingLabelStyle!, materialState);
+    TextStyle defaultTextStyle = WidgetStateProperty.resolveAs(defaults.floatingLabelStyle!, materialState);
     if (_hasError && decoration.errorStyle?.color != null) {
       defaultTextStyle = defaultTextStyle.copyWith(color: decoration.errorStyle?.color);
     }
     defaultTextStyle = defaultTextStyle.merge(decoration.floatingLabelStyle ?? decoration.labelStyle);
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.floatingLabelStyle, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
+    final TextStyle? style = WidgetStateProperty.resolveAs(decoration.floatingLabelStyle, materialState)
+      ?? WidgetStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
 
     return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
@@ -2115,30 +2115,30 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getHelperStyle(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(defaults.helperStyle!, materialState)
-      .merge(MaterialStateProperty.resolveAs(decoration.helperStyle, materialState));
+    return WidgetStateProperty.resolveAs(defaults.helperStyle!, materialState)
+      .merge(WidgetStateProperty.resolveAs(decoration.helperStyle, materialState));
   }
 
   TextStyle _getErrorStyle(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(defaults.errorStyle!, materialState)
+    return WidgetStateProperty.resolveAs(defaults.errorStyle!, materialState)
       .merge(decoration.errorStyle);
   }
 
-  Set<MaterialState> get materialState {
-    return <MaterialState>{
-      if (!decoration.enabled) MaterialState.disabled,
-      if (isFocused) MaterialState.focused,
-      if (isHovering) MaterialState.hovered,
-      if (_hasError) MaterialState.error,
+  Set<WidgetState> get materialState {
+    return <WidgetState>{
+      if (!decoration.enabled) WidgetState.disabled,
+      if (isFocused) WidgetState.focused,
+      if (isHovering) WidgetState.hovered,
+      if (_hasError) WidgetState.error,
     };
   }
 
 
   InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationTheme defaults) {
-    final InputBorder border =  MaterialStateProperty.resolveAs(decoration.border, materialState)
+    final InputBorder border =  WidgetStateProperty.resolveAs(decoration.border, materialState)
       ?? const UnderlineInputBorder();
 
-    if (decoration.border is MaterialStateProperty<InputBorder>) {
+    if (decoration.border is WidgetStateProperty<InputBorder>) {
       return border;
     }
 
@@ -2149,11 +2149,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (themeData.useMaterial3) {
       if (decoration.filled!) {
         return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(defaults.activeIndicatorBorder, materialState),
+          borderSide: WidgetStateProperty.resolveAs(defaults.activeIndicatorBorder, materialState),
         );
       } else {
         return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(defaults.outlineBorder, materialState),
+          borderSide: WidgetStateProperty.resolveAs(defaults.outlineBorder, materialState),
         );
       }
     }
@@ -2249,7 +2249,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ? _AffixText(
           labelIsFloating: widget._labelShouldWithdraw,
           text: decoration.prefixText,
-          style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
+          style: WidgetStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
           semanticsSortKey: needsSemanticsSortOrder ? _kPrefixSemanticsSortOrder : null,
           semanticsTag: _kPrefixSemanticsTag,
           child: decoration.prefix,
@@ -2260,7 +2260,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ? _AffixText(
           labelIsFloating: widget._labelShouldWithdraw,
           text: decoration.suffixText,
-          style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
+          style: WidgetStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
           semanticsSortKey: needsSemanticsSortOrder ? _kSuffixSemanticsSortOrder : null,
           semanticsTag: _kSuffixSemanticsTag,
           child: decoration.suffix,
@@ -2382,7 +2382,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         liveRegion: isFocused,
         child: Text(
           decoration.counterText!,
-          style: _getHelperStyle(themeData, defaults).merge(MaterialStateProperty.resolveAs(decoration.counterStyle, materialState)),
+          style: _getHelperStyle(themeData, defaults).merge(WidgetStateProperty.resolveAs(decoration.counterStyle, materialState)),
           overflow: TextOverflow.ellipsis,
           semanticsLabel: decoration.semanticCounterText,
         ),
@@ -2698,8 +2698,8 @@ class InputDecoration {
 
   /// The color of the [icon].
   ///
-  /// If [iconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [iconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final Color? iconColor;
 
@@ -2739,8 +2739,8 @@ class InputDecoration {
   /// The style to use for [InputDecoration.labelText] when the label is on top
   /// of the input field.
   ///
-  /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [labelStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// When the [InputDecoration.labelText] is above (i.e., vertically adjacent to)
@@ -2757,7 +2757,7 @@ class InputDecoration {
   /// It's possible to override the label style for just the error state, or
   /// just the default state, or both.
   ///
-  /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
+  /// In this example the [labelStyle] is specified with a [WidgetStateProperty]
   /// which resolves to a text style whose color depends on the decorator's
   /// error state.
   ///
@@ -2773,8 +2773,8 @@ class InputDecoration {
   /// When the [InputDecoration.labelText] is on top of the input field, the
   /// text uses the [labelStyle] instead.
   ///
-  /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [floatingLabelStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to [labelStyle].
@@ -2788,7 +2788,7 @@ class InputDecoration {
   /// just the default state, or both.
   ///
   /// In this example the [floatingLabelStyle] is specified with a
-  /// [MaterialStateProperty] which resolves to a text style whose color depends
+  /// [WidgetStateProperty] which resolves to a text style whose color depends
   /// on the decorator's error state.
   ///
   /// ** See code in examples/api/lib/material/input_decorator/input_decoration.floating_label_style_error.0.dart **
@@ -2806,8 +2806,8 @@ class InputDecoration {
 
   /// The style to use for the [helperText].
   ///
-  /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [helperStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
 
@@ -2834,8 +2834,8 @@ class InputDecoration {
 
   /// The style to use for the [hintText].
   ///
-  /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [hintStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
@@ -3089,8 +3089,8 @@ class InputDecoration {
 
   /// The style to use for the [prefixText].
   ///
-  /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [prefixStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
@@ -3104,8 +3104,8 @@ class InputDecoration {
   ///
   /// Defaults to [iconColor]
   ///
-  /// If [prefixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [prefixIconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final Color? prefixIconColor;
 
@@ -3187,8 +3187,8 @@ class InputDecoration {
 
   /// The style to use for the [suffixText].
   ///
-  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective text
-  /// style can depend on the [MaterialState.focused] state, i.e. if the
+  /// If [suffixStyle] is a [WidgetStateTextStyle], then the effective text
+  /// style can depend on the [WidgetState.focused] state, i.e. if the
   /// [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
@@ -3202,8 +3202,8 @@ class InputDecoration {
   ///
   /// Defaults to [iconColor]
   ///
-  /// If [suffixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [suffixIconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final Color? suffixIconColor;
 
@@ -3251,8 +3251,8 @@ class InputDecoration {
 
   /// The style to use for the [counterText].
   ///
-  /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [counterStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [helperStyle].
@@ -3434,7 +3434,7 @@ class InputDecoration {
   ///
   /// If [border] is a [MaterialStateUnderlineInputBorder]
   /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
-  /// the [MaterialState.focused] state, i.e. if the [TextField] is focused or not.
+  /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
   /// i.e. the border's color and width, will be overridden to reflect the input
@@ -3892,8 +3892,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for [InputDecoration.helperText].
   ///
-  /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [helperStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
 
@@ -3912,8 +3912,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.hintText].
   ///
-  /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [hintStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// Also used for the [InputDecoration.labelText] when the
@@ -3982,8 +3982,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The Color to use for the [InputDecoration.icon].
   ///
-  /// If [iconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [iconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
@@ -3991,8 +3991,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.prefixText].
   ///
-  /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [prefixStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
@@ -4000,8 +4000,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The Color to use for the [InputDecoration.prefixIcon].
   ///
-  /// If [prefixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [prefixIconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
@@ -4009,8 +4009,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.suffixText].
   ///
-  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [suffixStyle] is a [WidgetStateTextStyle], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
@@ -4018,8 +4018,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The Color to use for the [InputDecoration.suffixIcon].
   ///
-  /// If [suffixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [suffixIconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
@@ -4027,8 +4027,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.counterText].
   ///
-  /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [counterStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [helperStyle].
@@ -4205,7 +4205,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// If [border] is a [MaterialStateUnderlineInputBorder]
   /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
-  /// the [MaterialState.focused] state, i.e. if the [TextField] is focused or not.
+  /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
@@ -4506,39 +4506,39 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   final BuildContext context;
 
   @override
-  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get hintStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     return TextStyle(color: Theme.of(context).hintColor);
   });
 
   @override
-  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get labelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     return TextStyle(color: Theme.of(context).hintColor);
   });
 
   @override
-  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get floatingLabelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
-    if (states.contains(MaterialState.error)) {
+    if (states.contains(WidgetState.error)) {
       return TextStyle(color: Theme.of(context).colorScheme.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return TextStyle(color: Theme.of(context).colorScheme.primary);
     }
     return TextStyle(color: Theme.of(context).hintColor);
   });
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get helperStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final ThemeData themeData= Theme.of(context);
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
 
@@ -4546,17 +4546,17 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   });
 
   @override
-  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get errorStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final ThemeData themeData= Theme.of(context);
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
     return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    return switch ((Theme.of(context).brightness, states.contains(MaterialState.disabled))) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    return switch ((Theme.of(context).brightness, states.contains(WidgetState.disabled))) {
       (Brightness.dark, true)   => const Color(0x0DFFFFFF), //  5% white
       (Brightness.dark, false)  => const Color(0x1AFFFFFF), // 10% white
       (Brightness.light, true)  => const Color(0x05000000), //  2% black
@@ -4565,11 +4565,11 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   });
 
   @override
-  Color? get iconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+  Color? get iconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.of(context).brightness) {
@@ -4579,11 +4579,11 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   });
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.of(context).brightness) {
@@ -4593,11 +4593,11 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.of(context).brightness) {
@@ -4624,62 +4624,62 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get hintStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     return TextStyle(color: Theme.of(context).hintColor);
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
     return _colors.surfaceVariant;
   });
 
   @override
-  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  BorderSide? get activeIndicatorBorder => WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(color: _colors.onErrorContainer);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
       return BorderSide(color: _colors.error);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return BorderSide(color: _colors.onSurface);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
     }
     return BorderSide(color: _colors.onSurfaceVariant);
     });
 
   @override
-  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  BorderSide? get outlineBorder => WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.12));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(color: _colors.onErrorContainer);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
       return BorderSide(color: _colors.error);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return BorderSide(color: _colors.onSurface);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
     }
     return BorderSide(color: _colors.outline);
@@ -4689,80 +4689,80 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     return _colors.onSurfaceVariant;
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
-    if (states.contains(MaterialState.error)) {
+    if (states.contains(WidgetState.error)) {
       return _colors.error;
     }
     return _colors.onSurfaceVariant;
   });
 
   @override
-  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get labelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
       return textStyle.copyWith(color: _colors.error);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get floatingLabelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
       return textStyle.copyWith(color: _colors.error);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get helperStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get errorStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     return textStyle.copyWith(color: _colors.error);
   });

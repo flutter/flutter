@@ -288,7 +288,7 @@ class PaginatedDataTable extends StatefulWidget {
   final bool? primary;
 
    /// {@macro flutter.material.dataTable.headingRowColor}
-  final MaterialStateProperty<Color?>? headingRowColor;
+  final WidgetStateProperty<Color?>? headingRowColor;
 
   /// Controls the visibility of empty rows on the last page of a
   /// [PaginatedDataTable].

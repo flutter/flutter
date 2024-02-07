@@ -108,27 +108,27 @@ class RawMaterialButton extends StatefulWidget {
   /// button.
   ///
   /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.pressed].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.pressed].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
   ///
-  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
+  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [WidgetStateProperty.resolve]
+  /// is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.pressed].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.pressed].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   final TextStyle? textStyle;
 
   /// The color of the button's [Material].
@@ -245,13 +245,13 @@ class RawMaterialButton extends StatefulWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this shape.
   ///
-  /// If [shape] is a [MaterialStateProperty<ShapeBorder>], [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
+  /// If [shape] is a [MaterialStateProperty<ShapeBorder>], [WidgetStateProperty.resolve]
+  /// is used for the following [WidgetState]s:
   ///
-  /// * [MaterialState.pressed].
-  /// * [MaterialState.hovered].
-  /// * [MaterialState.focused].
-  /// * [MaterialState.disabled].
+  /// * [WidgetState.pressed].
+  /// * [WidgetState.hovered].
+  /// * [WidgetState.focused].
+  /// * [WidgetState.disabled].
   final ShapeBorder shape;
 
   /// Defines the duration of animated changes for [shape] and [elevation].
@@ -302,24 +302,24 @@ class RawMaterialButton extends StatefulWidget {
   State<RawMaterialButton> createState() => _RawMaterialButtonState();
 }
 
-class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStateMixin {
+class _RawMaterialButtonState extends State<RawMaterialButton> with WidgetStateMixin {
 
   @override
   void initState() {
     super.initState();
-    setMaterialState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(WidgetState.disabled, !widget.enabled);
   }
 
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    setMaterialState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(WidgetState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
     // InkWell makes a call to handleHighlightChanged. This causes an exception
     // because it calls setState in the middle of a build. To preempt this, we
     // manually update pressed to false when this situation occurs.
     if (isDisabled && isPressed) {
-      removeMaterialState(MaterialState.pressed);
+      removeMaterialState(WidgetState.pressed);
     }
   }
 
@@ -343,12 +343,12 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
 
   @override
   Widget build(BuildContext context) {
-    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
-    final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
+    final Color? effectiveTextColor = WidgetStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
+    final ShapeBorder? effectiveShape =  WidgetStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
-    final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+    final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
+      widget.mouseCursor ?? WidgetStateMouseCursor.clickable,
       materialStates,
     );
     final EdgeInsetsGeometry padding = widget.padding.add(
@@ -376,14 +376,14 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         child: InkWell(
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-          onFocusChange: updateMaterialState(MaterialState.focused),
+          onFocusChange: updateMaterialState(WidgetState.focused),
           autofocus: widget.autofocus,
-          onHighlightChanged: updateMaterialState(MaterialState.pressed, onChanged: widget.onHighlightChanged),
+          onHighlightChanged: updateMaterialState(WidgetState.pressed, onChanged: widget.onHighlightChanged),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           focusColor: widget.focusColor,
           hoverColor: widget.hoverColor,
-          onHover: updateMaterialState(MaterialState.hovered),
+          onHover: updateMaterialState(WidgetState.hovered),
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
           enableFeedback: widget.enableFeedback,

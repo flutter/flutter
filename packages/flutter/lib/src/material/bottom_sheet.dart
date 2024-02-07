@@ -262,11 +262,11 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
-  Set<MaterialState> dragHandleMaterialState = <MaterialState>{};
+  Set<WidgetState> dragHandleMaterialState = <WidgetState>{};
 
   void _handleDragStart(DragStartDetails details) {
     setState(() {
-      dragHandleMaterialState.add(MaterialState.dragged);
+      dragHandleMaterialState.add(WidgetState.dragged);
     });
     widget.onDragStart?.call(details);
   }
@@ -293,7 +293,7 @@ class _BottomSheetState extends State<BottomSheet> {
       return;
     }
     setState(() {
-      dragHandleMaterialState.remove(MaterialState.dragged);
+      dragHandleMaterialState.remove(WidgetState.dragged);
     });
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
@@ -331,13 +331,13 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragHandleHover(bool hovering) {
-    if (hovering != dragHandleMaterialState.contains(MaterialState.hovered)) {
+    if (hovering != dragHandleMaterialState.contains(WidgetState.hovered)) {
       setState(() {
         if (hovering){
-          dragHandleMaterialState.add(MaterialState.hovered);
+          dragHandleMaterialState.add(WidgetState.hovered);
         }
         else{
-          dragHandleMaterialState.remove(MaterialState.hovered);
+          dragHandleMaterialState.remove(WidgetState.hovered);
         }
       });
     }
@@ -441,7 +441,7 @@ class _DragHandle extends StatelessWidget {
 
   final VoidCallback? onSemanticsTap;
   final ValueChanged<bool> handleHover;
-  final Set<MaterialState> materialState;
+  final Set<WidgetState> materialState;
   final Color? dragHandleColor;
   final Size? dragHandleSize;
 
@@ -467,8 +467,8 @@ class _DragHandle extends StatelessWidget {
               width: handleSize.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(handleSize.height/2),
-                color: MaterialStateProperty.resolveAs<Color?>(dragHandleColor, materialState)
-                  ?? MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState)
+                color: WidgetStateProperty.resolveAs<Color?>(dragHandleColor, materialState)
+                  ?? WidgetStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState)
                   ?? m3Defaults.dragHandleColor,
               ),
             ),

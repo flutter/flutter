@@ -87,16 +87,16 @@ class DataColumn {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// heading row.
   ///
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.disabled].
   ///
   /// If this is null, then the value of [DataTableThemeData.headingCellCursor]
-  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
+  /// is used. If that's null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 }
 
 /// Row configuration and cell data for a [DataTable].
@@ -188,7 +188,7 @@ class DataRow {
   /// By default, the color is transparent unless selected. Selected rows has
   /// a grey translucent color.
   ///
-  /// The effective color can depend on the [MaterialState] state, if the
+  /// The effective color can depend on the [WidgetState] state, if the
   /// row is selected, pressed, hovered, focused, disabled or enabled. The
   /// color is painted as an overlay to the row. To make sure that the row's
   /// [InkWell] is visible (when pressed, hovered and focused), it is
@@ -213,21 +213,21 @@ class DataRow {
   ///  * The Material Design specification for overlay colors and how they
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
-  final MaterialStateProperty<Color?>? color;
+  final WidgetStateProperty<Color?>? color;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// data row.
   ///
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
+  ///  * [WidgetState.selected].
   ///
   /// If this is null, then the value of [DataTableThemeData.dataRowCursor]
-  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
+  /// is used. If that's null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
 }
@@ -508,7 +508,7 @@ class DataTable extends StatelessWidget {
   /// The background color for the data rows.
   ///
   /// The effective background color can be made to depend on the
-  /// [MaterialState] state, i.e. if the row is selected, pressed, hovered,
+  /// [WidgetState] state, i.e. if the row is selected, pressed, hovered,
   /// focused, disabled or enabled. The color is painted as an overlay to the
   /// row. To make sure that the row's [InkWell] is visible (when pressed,
   /// hovered and focused), it is recommended to use a translucent background
@@ -540,7 +540,7 @@ class DataTable extends StatelessWidget {
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
   /// {@endtemplate}
-  final MaterialStateProperty<Color?>? dataRowColor;
+  final WidgetStateProperty<Color?>? dataRowColor;
 
   /// {@template flutter.material.dataTable.dataRowHeight}
   /// The height of each row (excluding the row that contains column headings).
@@ -585,7 +585,7 @@ class DataTable extends StatelessWidget {
   /// The background color for the heading row.
   ///
   /// The effective background color can be made to depend on the
-  /// [MaterialState] state, i.e. if the row is pressed, hovered, focused when
+  /// [WidgetState] state, i.e. if the row is pressed, hovered, focused when
   /// sorted. The color is painted as an overlay to the row. To make sure that
   /// the row's [InkWell] is visible (when pressed, hovered and focused), it is
   /// recommended to use a translucent color.
@@ -613,7 +613,7 @@ class DataTable extends StatelessWidget {
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
   /// {@endtemplate}
-  final MaterialStateProperty<Color?>? headingRowColor;
+  final WidgetStateProperty<Color?>? headingRowColor;
 
   /// {@template flutter.material.dataTable.headingRowHeight}
   /// The height of the heading row.
@@ -770,7 +770,7 @@ class DataTable extends StatelessWidget {
     required bool? checked,
     required VoidCallback? onRowTap,
     required ValueChanged<bool?>? onCheckboxChanged,
-    required MaterialStateProperty<Color?>? overlayColor,
+    required WidgetStateProperty<Color?>? overlayColor,
     required bool tristate,
     MouseCursor? rowMouseCursor,
   }) {
@@ -823,7 +823,7 @@ class DataTable extends StatelessWidget {
     required VoidCallback? onSort,
     required bool sorted,
     required bool ascending,
-    required MaterialStateProperty<Color?>? overlayColor,
+    required WidgetStateProperty<Color?>? overlayColor,
     required MouseCursor? mouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
@@ -894,7 +894,7 @@ class DataTable extends StatelessWidget {
     required GestureLongPressCallback? onLongPress,
     required GestureTapDownCallback? onTapDown,
     required GestureTapCancelCallback? onTapCancel,
-    required MaterialStateProperty<Color?>? overlayColor,
+    required WidgetStateProperty<Color?>? overlayColor,
     required GestureLongPressCallback? onRowLongPress,
     required MouseCursor? mouseCursor,
   }) {
@@ -964,15 +964,15 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
-    final MaterialStateProperty<Color?>? effectiveHeadingRowColor = headingRowColor
+    final WidgetStateProperty<Color?>? effectiveHeadingRowColor = headingRowColor
       ?? dataTableTheme.headingRowColor
       ?? theme.dataTableTheme.headingRowColor;
-    final MaterialStateProperty<Color?>? effectiveDataRowColor = dataRowColor
+    final WidgetStateProperty<Color?>? effectiveDataRowColor = dataRowColor
       ?? dataTableTheme.dataRowColor
       ?? theme.dataTableTheme.dataRowColor;
-    final MaterialStateProperty<Color?> defaultRowColor = MaterialStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
+    final WidgetStateProperty<Color?> defaultRowColor = WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
           return theme.colorScheme.primary.withOpacity(0.08);
         }
         return null;
@@ -1009,14 +1009,14 @@ class DataTable extends StatelessWidget {
       (int index) {
         final bool isSelected = index > 0 && rows[index - 1].selected;
         final bool isDisabled = index > 0 && anyRowSelectable && rows[index - 1].onSelectChanged == null;
-        final Set<MaterialState> states = <MaterialState>{
+        final Set<WidgetState> states = <WidgetState>{
           if (isSelected)
-            MaterialState.selected,
+            WidgetState.selected,
           if (isDisabled)
-            MaterialState.disabled,
+            WidgetState.disabled,
         };
         final Color? resolvedDataRowColor = index > 0 ? (rows[index - 1].color ?? effectiveDataRowColor)?.resolve(states) : null;
-        final Color? resolvedHeadingRowColor = effectiveHeadingRowColor?.resolve(<MaterialState>{});
+        final Color? resolvedHeadingRowColor = effectiveHeadingRowColor?.resolve(<WidgetState>{});
         final Color? rowColor = index > 0 ? resolvedDataRowColor : resolvedHeadingRowColor;
         final BorderSide borderSide = Divider.createBorderSide(
           context,
@@ -1054,9 +1054,9 @@ class DataTable extends StatelessWidget {
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
-        final Set<MaterialState> states = <MaterialState>{
+        final Set<WidgetState> states = <WidgetState>{
           if (row.selected)
-            MaterialState.selected,
+            WidgetState.selected,
         };
         tableRows[rowIndex].children[0] = _buildCheckbox(
           context: context,
@@ -1102,9 +1102,9 @@ class DataTable extends StatelessWidget {
       } else {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
-      final Set<MaterialState> headerStates = <MaterialState>{
+      final Set<WidgetState> headerStates = <WidgetState>{
         if (column.onSort == null)
-          MaterialState.disabled,
+          WidgetState.disabled,
       };
       tableRows[0].children[displayColumnIndex] = _buildHeadingCell(
         context: context,
@@ -1120,9 +1120,9 @@ class DataTable extends StatelessWidget {
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
-        final Set<MaterialState> states = <MaterialState>{
+        final Set<WidgetState> states = <WidgetState>{
           if (row.selected)
-            MaterialState.selected,
+            WidgetState.selected,
         };
         final DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(

@@ -894,15 +894,15 @@ class MenuItemButton extends StatefulWidget {
   /// Customizes this button's appearance.
   ///
   /// Non-null properties of this style override the corresponding properties in
-  /// [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s that resolve
+  /// [themeStyleOf] and [defaultStyleOf]. [WidgetStateProperty]s that resolve
   /// to non-null values will similarly override the corresponding
-  /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
+  /// [WidgetStateProperty]s in [themeStyleOf] and [defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
 
   /// {@macro flutter.material.inkwell.statesController}
-  final MaterialStatesController? statesController;
+  final WidgetStatesController? statesController;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -956,7 +956,7 @@ class MenuItemButton extends StatefulWidget {
   /// A static convenience method that constructs a [MenuItemButton]'s
   /// [ButtonStyle] given simple values.
   ///
-  /// The [foregroundColor] color is used to create a [MaterialStateProperty]
+  /// The [foregroundColor] color is used to create a [WidgetStateProperty]
   /// [ButtonStyle.foregroundColor] value. Specify a value for [foregroundColor]
   /// to specify the color of the button's icons. Use [backgroundColor] for the
   /// button's background fill color. Use [disabledForegroundColor] and
@@ -964,7 +964,7 @@ class MenuItemButton extends StatefulWidget {
   /// color.
   ///
   /// All of the other parameters are either used directly or used to create a
-  /// [MaterialStateProperty] with a single value for all states.
+  /// [WidgetStateProperty] with a single value for all states.
   ///
   /// All parameters default to null, by default this method returns a
   /// [ButtonStyle] that doesn't override anything.
@@ -1044,7 +1044,7 @@ class MenuItemButton extends StatefulWidget {
     properties.add(DiagnosticsProperty<MenuSerializableShortcut?>('shortcut', shortcut, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode, defaultValue: null));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
-    properties.add(DiagnosticsProperty<MaterialStatesController?>('statesController', statesController, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStatesController?>('statesController', statesController, defaultValue: null));
   }
 }
 
@@ -1283,15 +1283,15 @@ class CheckboxMenuButton extends StatelessWidget {
   ///
   /// Non-null properties of this style override the corresponding properties in
   /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
-  /// [MaterialStateProperty]s that resolve to non-null values will similarly
-  /// override the corresponding [MaterialStateProperty]s in
+  /// [WidgetStateProperty]s that resolve to non-null values will similarly
+  /// override the corresponding [WidgetStateProperty]s in
   /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
 
   /// {@macro flutter.material.inkwell.statesController}
-  final MaterialStatesController? statesController;
+  final WidgetStatesController? statesController;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -1482,15 +1482,15 @@ class RadioMenuButton<T> extends StatelessWidget {
   ///
   /// Non-null properties of this style override the corresponding properties in
   /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
-  /// [MaterialStateProperty]s that resolve to non-null values will similarly
-  /// override the corresponding [MaterialStateProperty]s in
+  /// [WidgetStateProperty]s that resolve to non-null values will similarly
+  /// override the corresponding [WidgetStateProperty]s in
   /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
 
   /// {@macro flutter.material.inkwell.statesController}
-  final MaterialStatesController? statesController;
+  final WidgetStatesController? statesController;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -1632,9 +1632,9 @@ class SubmenuButton extends StatefulWidget {
   /// Customizes this button's appearance.
   ///
   /// Non-null properties of this style override the corresponding properties in
-  /// [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s that resolve
+  /// [themeStyleOf] and [defaultStyleOf]. [WidgetStateProperty]s that resolve
   /// to non-null values will similarly override the corresponding
-  /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
+  /// [WidgetStateProperty]s in [themeStyleOf] and [defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
@@ -1663,7 +1663,7 @@ class SubmenuButton extends StatefulWidget {
   final FocusNode? focusNode;
 
   /// {@macro flutter.material.inkwell.statesController}
-  final MaterialStatesController? statesController;
+  final WidgetStatesController? statesController;
 
   /// An optional icon to display before the [child].
   final Widget? leadingIcon;
@@ -1708,7 +1708,7 @@ class SubmenuButton extends StatefulWidget {
   /// A static convenience method that constructs a [SubmenuButton]'s
   /// [ButtonStyle] given simple values.
   ///
-  /// The [foregroundColor] color is used to create a [MaterialStateProperty]
+  /// The [foregroundColor] color is used to create a [WidgetStateProperty]
   /// [ButtonStyle.foregroundColor] value. Specify a value for [foregroundColor]
   /// to specify the color of the button's icons. Use [backgroundColor] for the
   /// button's background fill color. Use [disabledForegroundColor] and
@@ -1716,7 +1716,7 @@ class SubmenuButton extends StatefulWidget {
   /// color.
   ///
   /// All of the other parameters are either used directly or used to create a
-  /// [MaterialStateProperty] with a single value for all states.
+  /// [WidgetStateProperty] with a single value for all states.
   ///
   /// All parameters default to null, by default this method returns a
   /// [ButtonStyle] that doesn't override anything.
@@ -1971,12 +1971,12 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   EdgeInsets _computeMenuPadding(BuildContext context) {
-    final MaterialStateProperty<EdgeInsetsGeometry?> insets =
+    final WidgetStateProperty<EdgeInsetsGeometry?> insets =
       widget.menuStyle?.padding ??
       MenuTheme.of(context).style?.padding ??
       _MenuDefaultsM3(context).padding!;
     return insets
-      .resolve(widget.statesController?.value ?? const <MaterialState>{})!
+      .resolve(widget.statesController?.value ?? const <WidgetState>{})!
       .resolve(Directionality.of(context));
   }
 
@@ -3376,10 +3376,10 @@ class _MenuPanelState extends State<_MenuPanel> {
       return getProperty(widgetStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }
 
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
+    T? resolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
       return effectiveValue(
         (MenuStyle? style) {
-          return getProperty(style)?.resolve(<MaterialState>{});
+          return getProperty(style)?.resolve(<WidgetState>{});
         },
       );
     }
@@ -3531,16 +3531,16 @@ class _Submenu extends StatelessWidget {
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
       return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
+    T? resolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
       return effectiveValue(
         (MenuStyle? style) {
-          return getProperty(style)?.resolve(<MaterialState>{});
+          return getProperty(style)?.resolve(<WidgetState>{});
         },
       );
     }
 
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
-      (Set<MaterialState> states) => effectiveValue((MenuStyle? style) => style?.mouseCursor?.resolve(states)),
+    final WidgetStateMouseCursor mouseCursor = _MouseCursor(
+      (Set<WidgetState> states) => effectiveValue((MenuStyle? style) => style?.mouseCursor?.resolve(states)),
     );
 
     final VisualDensity visualDensity =
@@ -3620,15 +3620,15 @@ class _Submenu extends StatelessWidget {
   }
 }
 
-/// Wraps the [MaterialStateMouseCursor] so that it can default to
+/// Wraps the [WidgetStateMouseCursor] so that it can default to
 /// [MouseCursor.uncontrolled] if none is set.
-class _MouseCursor extends MaterialStateMouseCursor {
+class _MouseCursor extends WidgetStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
   final MaterialPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) => resolveCallback(states) ?? MouseCursor.uncontrolled;
+  MouseCursor resolve(Set<WidgetState> states) => resolveCallback(states) ?? MouseCursor.uncontrolled;
 
   @override
   String get debugDescription => 'Menu_MouseCursor';
@@ -3701,8 +3701,8 @@ bool get _platformSupportsAccelerators {
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
     : super(
-      elevation: const MaterialStatePropertyAll<double?>(3.0),
-      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      elevation: const WidgetStatePropertyAll<double?>(3.0),
+      shape: const WidgetStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
       alignment: AlignmentDirectional.bottomStart,
     );
 
@@ -3714,23 +3714,23 @@ class _MenuBarDefaultsM3 extends MenuStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<Color?> get backgroundColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surface);
+  WidgetStateProperty<Color?> get backgroundColor {
+    return WidgetStatePropertyAll<Color?>(_colors.surface);
   }
 
   @override
-  MaterialStateProperty<Color?>? get shadowColor {
-    return MaterialStatePropertyAll<Color?>(_colors.shadow);
+  WidgetStateProperty<Color?>? get shadowColor {
+    return WidgetStatePropertyAll<Color?>(_colors.shadow);
   }
 
   @override
-  MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+  WidgetStateProperty<Color?>? get surfaceTintColor {
+    return WidgetStatePropertyAll<Color?>(_colors.surfaceTint);
   }
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
+  WidgetStateProperty<EdgeInsetsGeometry?>? get padding {
+    return const WidgetStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(
         horizontal: _kTopLevelMenuHorizontalMinPadding
       ),
@@ -3755,7 +3755,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor {
+  WidgetStateProperty<Color?>? get backgroundColor {
     return ButtonStyleButton.allOrNull<Color>(Colors.transparent);
   }
 
@@ -3764,23 +3764,23 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   // No default surface tint color
 
   @override
-  MaterialStateProperty<double>? get elevation {
+  WidgetStateProperty<double>? get elevation {
     return ButtonStyleButton.allOrNull<double>(0.0);
   }
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get foregroundColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface;
       }
       return _colors.onSurface;
@@ -3788,18 +3788,18 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Color?>? get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get iconColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurfaceVariant;
       }
       return _colors.onSurfaceVariant;
@@ -3809,20 +3809,20 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   // No default fixedSize
 
   @override
-  MaterialStateProperty<Size>? get maximumSize {
+  WidgetStateProperty<Size>? get maximumSize {
     return ButtonStyleButton.allOrNull<Size>(Size.infinite);
   }
 
   @override
-  MaterialStateProperty<Size>? get minimumSize {
+  WidgetStateProperty<Size>? get minimumSize {
     return ButtonStyleButton.allOrNull<Size>(const Size(64.0, 48.0));
   }
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor {
-    return MaterialStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return SystemMouseCursors.basic;
         }
         return SystemMouseCursors.click;
@@ -3831,16 +3831,16 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor {
-    return MaterialStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
+  WidgetStateProperty<Color?>? get overlayColor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurface.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onSurface.withOpacity(0.12);
         }
         return Colors.transparent;
@@ -3849,14 +3849,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding {
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding {
     return ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
   }
 
   // No default side
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape {
+  WidgetStateProperty<OutlinedBorder>? get shape {
     return ButtonStyleButton.allOrNull<OutlinedBorder>(const RoundedRectangleBorder());
   }
 
@@ -3867,10 +3867,10 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle {
+  WidgetStateProperty<TextStyle?> get textStyle {
     // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
     // Update this when the token is available.
-    return MaterialStatePropertyAll<TextStyle?>(_textTheme.labelLarge);
+    return WidgetStatePropertyAll<TextStyle?>(_textTheme.labelLarge);
   }
 
   @override
@@ -3910,8 +3910,8 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 class _MenuDefaultsM3 extends MenuStyle {
   _MenuDefaultsM3(this.context)
     : super(
-      elevation: const MaterialStatePropertyAll<double?>(3.0),
-      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      elevation: const WidgetStatePropertyAll<double?>(3.0),
+      shape: const WidgetStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
       alignment: AlignmentDirectional.topEnd,
     );
 
@@ -3923,23 +3923,23 @@ class _MenuDefaultsM3 extends MenuStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<Color?> get backgroundColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surface);
+  WidgetStateProperty<Color?> get backgroundColor {
+    return WidgetStatePropertyAll<Color?>(_colors.surface);
   }
 
   @override
-  MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+  WidgetStateProperty<Color?>? get surfaceTintColor {
+    return WidgetStatePropertyAll<Color?>(_colors.surfaceTint);
   }
 
   @override
-  MaterialStateProperty<Color?>? get shadowColor {
-    return MaterialStatePropertyAll<Color?>(_colors.shadow);
+  WidgetStateProperty<Color?>? get shadowColor {
+    return WidgetStatePropertyAll<Color?>(_colors.shadow);
   }
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
+  WidgetStateProperty<EdgeInsetsGeometry?>? get padding {
+    return const WidgetStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(vertical: _kMenuVerticalMinPadding),
     );
   }

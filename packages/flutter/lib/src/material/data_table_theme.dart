@@ -68,7 +68,7 @@ class DataTableThemeData with Diagnosticable {
 
   /// {@macro flutter.material.dataTable.dataRowColor}
   /// {@macro flutter.material.DataTable.dataRowColor}
-  final MaterialStateProperty<Color?>? dataRowColor;
+  final WidgetStateProperty<Color?>? dataRowColor;
 
   /// {@macro flutter.material.dataTable.dataRowHeight}
   @Deprecated(
@@ -88,7 +88,7 @@ class DataTableThemeData with Diagnosticable {
 
   /// {@macro flutter.material.dataTable.headingRowColor}
   /// {@macro flutter.material.DataTable.headingRowColor}
-  final MaterialStateProperty<Color?>? headingRowColor;
+  final WidgetStateProperty<Color?>? headingRowColor;
 
   /// {@macro flutter.material.dataTable.headingRowHeight}
   final double? headingRowHeight;
@@ -109,16 +109,16 @@ class DataTableThemeData with Diagnosticable {
   final double? checkboxHorizontalMargin;
 
   /// If specified, overrides the default value of [DataColumn.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? headingCellCursor;
+  final WidgetStateProperty<MouseCursor?>? headingCellCursor;
 
   /// If specified, overrides the default value of [DataRow.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? dataRowCursor;
+  final WidgetStateProperty<MouseCursor?>? dataRowCursor;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
     Decoration? decoration,
-    MaterialStateProperty<Color?>? dataRowColor,
+    WidgetStateProperty<Color?>? dataRowColor,
     @Deprecated(
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.7.0-5.0.pre.',
@@ -127,15 +127,15 @@ class DataTableThemeData with Diagnosticable {
     double? dataRowMinHeight,
     double? dataRowMaxHeight,
     TextStyle? dataTextStyle,
-    MaterialStateProperty<Color?>? headingRowColor,
+    WidgetStateProperty<Color?>? headingRowColor,
     double? headingRowHeight,
     TextStyle? headingTextStyle,
     double? horizontalMargin,
     double? columnSpacing,
     double? dividerThickness,
     double? checkboxHorizontalMargin,
-    MaterialStateProperty<MouseCursor?>? headingCellCursor,
-    MaterialStateProperty<MouseCursor?>? dataRowCursor,
+    WidgetStateProperty<MouseCursor?>? headingCellCursor,
+    WidgetStateProperty<MouseCursor?>? dataRowCursor,
   }) {
     assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
       'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.');
@@ -169,11 +169,11 @@ class DataTableThemeData with Diagnosticable {
     }
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
-      dataRowColor: MaterialStateProperty.lerp<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
+      dataRowColor: WidgetStateProperty.lerp<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
       dataRowMinHeight: lerpDouble(a.dataRowMinHeight, b.dataRowMinHeight, t),
       dataRowMaxHeight: lerpDouble(a.dataRowMaxHeight, b.dataRowMaxHeight, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
-      headingRowColor: MaterialStateProperty.lerp<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
+      headingRowColor: WidgetStateProperty.lerp<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
@@ -232,19 +232,19 @@ class DataTableThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
     properties.add(DoubleProperty('dataRowMinHeight', dataRowMinHeight, defaultValue: null));
     properties.add(DoubleProperty('dataRowMaxHeight', dataRowMaxHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
     properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('headingCellCursor', headingCellCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('dataRowCursor', dataRowCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<MouseCursor?>?>('headingCellCursor', headingCellCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<MouseCursor?>?>('dataRowCursor', dataRowCursor, defaultValue: null));
   }
 }
 

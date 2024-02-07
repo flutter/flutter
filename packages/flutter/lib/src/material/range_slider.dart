@@ -334,18 +334,18 @@ class RangeSlider extends StatefulWidget {
   /// an opacity of 0.12. If null, [SliderThemeData.overlayColor]
   /// will be used, otherwise defaults to [ColorScheme.primary] with
   /// an opacity of 0.12.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
   /// If null, then the value of [SliderThemeData.mouseCursor] is used. If that
-  /// is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// The callback used to create a semantic value from the slider's values.
   ///
@@ -604,10 +604,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
     const double defaultMinThumbSeparation = 8;
 
-    final Set<MaterialState> states = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-      if (_hovering) MaterialState.hovered,
-      if (_dragging) MaterialState.dragged,
+    final Set<WidgetState> states = <WidgetState>{
+      if (!_enabled) WidgetState.disabled,
+      if (_hovering) WidgetState.hovered,
+      if (_dragging) WidgetState.dragged,
     };
 
     // The value indicator's color is not the same as the thumb and active track
@@ -625,7 +625,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     Color? effectiveOverlayColor() {
       return widget.overlayColor?.resolve(states)
         ?? widget.activeColor?.withOpacity(0.12)
-        ?? MaterialStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states)
+        ?? WidgetStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states)
         ?? theme.colorScheme.primary.withOpacity(0.12);
     }
 
@@ -658,7 +658,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     );
     final MouseCursor effectiveMouseCursor = widget.mouseCursor?.resolve(states)
       ?? sliderTheme.mouseCursor?.resolve(states)
-      ?? MaterialStateMouseCursor.clickable.resolve(states);
+      ?? WidgetStateMouseCursor.clickable.resolve(states);
 
     // This size is used as the max bounds for the painting of the value
     // indicators. It must be kept in sync with the function with the same name

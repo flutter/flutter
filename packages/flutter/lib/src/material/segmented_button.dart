@@ -204,7 +204,7 @@ class SegmentedButton<T> extends StatefulWidget {
   /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
   /// All of the other parameters are either used directly or used to
-  /// create a [MaterialStateProperty] with a single value for all
+  /// create a [WidgetStateProperty] with a single value for all
   /// states.
   ///
   /// All parameters default to null. By default this method returns
@@ -270,15 +270,15 @@ class SegmentedButton<T> extends StatefulWidget {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColorProp =
+    final WidgetStateProperty<Color?>? foregroundColorProp =
       (foregroundColor == null && disabledForegroundColor == null && selectedForegroundColor == null)
         ? null
         : _SegmentButtonDefaultColor(foregroundColor, disabledForegroundColor, selectedForegroundColor);
-    final MaterialStateProperty<Color?>? backgroundColorProp =
+    final WidgetStateProperty<Color?>? backgroundColorProp =
       (backgroundColor == null && disabledBackgroundColor == null && selectedBackgroundColor == null)
         ? null
         : _SegmentButtonDefaultColor(backgroundColor, disabledBackgroundColor, selectedBackgroundColor);
-    final MaterialStateProperty<Color?>? overlayColor = (foregroundColor == null && selectedForegroundColor == null)
+    final WidgetStateProperty<Color?>? overlayColor = (foregroundColor == null && selectedForegroundColor == null)
       ? null
       : _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor);
     return TextButton.styleFrom(
@@ -318,7 +318,7 @@ class SegmentedButton<T> extends StatefulWidget {
   ///   * [ButtonStyle.shape]
   ///
   /// The following style properties are applied to each of the individual
-  /// button segments. For properties that are a [MaterialStateProperty],
+  /// button segments. For properties that are a [WidgetStateProperty],
   /// they will be resolved with the current state of the segment:
   ///
   ///   * [ButtonStyle.textStyle]
@@ -375,13 +375,13 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
   /// Controllers for the [ButtonSegment]s.
   @visibleForTesting
-  final Map<ButtonSegment<T>, MaterialStatesController> statesControllers = <ButtonSegment<T>, MaterialStatesController>{};
+  final Map<ButtonSegment<T>, WidgetStatesController> statesControllers = <ButtonSegment<T>, WidgetStatesController>{};
 
   @override
   void didUpdateWidget(covariant SegmentedButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget != widget) {
-      statesControllers.removeWhere((ButtonSegment<T> segment, MaterialStatesController controller) {
+      statesControllers.removeWhere((ButtonSegment<T> segment, WidgetStatesController controller) {
         if (widget.segments.contains(segment)) {
           return false;
         } else {
@@ -421,9 +421,9 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final SegmentedButtonThemeData defaults = _SegmentedButtonDefaultsM3(context);
     final TextDirection direction = Directionality.of(context);
 
-    const Set<MaterialState> enabledState = <MaterialState>{};
-    const Set<MaterialState> disabledState = <MaterialState>{ MaterialState.disabled };
-    final Set<MaterialState> currentState = _enabled ? enabledState : disabledState;
+    const Set<WidgetState> enabledState = <WidgetState>{};
+    const Set<WidgetState> disabledState = <WidgetState>{ WidgetState.disabled };
+    final Set<WidgetState> currentState = _enabled ? enabledState : disabledState;
 
     P? effectiveValue<P>(P? Function(ButtonStyle? style) getProperty) {
       late final P? widgetValue  = getProperty(widget.style);
@@ -432,7 +432,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       return widgetValue ?? themeValue ?? defaultValue;
     }
 
-    P? resolve<P>(MaterialStateProperty<P>? Function(ButtonStyle? style) getProperty, [Set<MaterialState>? states]) {
+    P? resolve<P>(WidgetStateProperty<P>? Function(ButtonStyle? style) getProperty, [Set<WidgetState>? states]) {
       return effectiveValue(
         (ButtonStyle? style) => getProperty(style)?.resolve(states ?? currentState),
       );
@@ -449,7 +449,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
         padding: style?.padding,
         iconColor: style?.iconColor,
         iconSize: style?.iconSize,
-        shape: const MaterialStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
+        shape: const WidgetStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
         mouseCursor: style?.mouseCursor,
         visualDensity: style?.visualDensity,
         tapTargetSize: style?.tapTargetSize,
@@ -474,8 +474,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
         : segment.label != null
           ? segment.icon
           : null;
-      final MaterialStatesController controller = statesControllers.putIfAbsent(segment, () => MaterialStatesController());
-      controller.update(MaterialState.selected, segmentSelected);
+      final WidgetStatesController controller = statesControllers.putIfAbsent(segment, () => WidgetStatesController());
+      controller.update(WidgetState.selected, segmentSelected);
 
       final Widget button = icon != null
         ? TextButton.icon(
@@ -553,7 +553,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
   @override
   void dispose() {
-    for (final MaterialStatesController controller in statesControllers.values) {
+    for (final WidgetStatesController controller in statesControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -561,7 +561,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 }
 
 @immutable
-class _SegmentButtonDefaultColor extends MaterialStateProperty<Color?> with Diagnosticable {
+class _SegmentButtonDefaultColor extends WidgetStateProperty<Color?> with Diagnosticable {
   _SegmentButtonDefaultColor(this.color, this.disabled, this.selected);
 
   final Color? color;
@@ -569,11 +569,11 @@ class _SegmentButtonDefaultColor extends MaterialStateProperty<Color?> with Diag
   final Color? selected;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return disabled;
     }
-    if (states.contains(MaterialState.selected)) {
+    if (states.contains(WidgetState.selected)) {
       return selected;
     }
     return color;
@@ -944,104 +944,104 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   late final ColorScheme _colors = _theme.colorScheme;
   @override ButtonStyle? get style {
     return ButtonStyle(
-      textStyle: MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge),
-      backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      textStyle: WidgetStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge),
+      backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return _colors.secondaryContainer;
         }
         return null;
       }),
-      foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      foregroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return _colors.onSurface.withOpacity(0.38);
         }
-        if (states.contains(MaterialState.selected)) {
-          if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
+          if (states.contains(WidgetState.pressed)) {
             return _colors.onSecondaryContainer;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return _colors.onSecondaryContainer;
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return _colors.onSecondaryContainer;
           }
           return _colors.onSecondaryContainer;
         } else {
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return _colors.onSurface;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return _colors.onSurface;
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return _colors.onSurface;
           }
           return _colors.onSurface;
         }
       }),
-      overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          if (states.contains(MaterialState.pressed)) {
+      overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          if (states.contains(WidgetState.pressed)) {
             return _colors.onSecondaryContainer.withOpacity(0.12);
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return _colors.onSecondaryContainer.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return _colors.onSecondaryContainer.withOpacity(0.12);
           }
         } else {
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return _colors.onSurface.withOpacity(0.12);
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return _colors.onSurface.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return _colors.onSurface.withOpacity(0.12);
           }
         }
         return null;
       }),
-      surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-      elevation: const MaterialStatePropertyAll<double>(0),
-      iconSize: const MaterialStatePropertyAll<double?>(18.0),
-      side: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      surfaceTintColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+      elevation: const WidgetStatePropertyAll<double>(0),
+      iconSize: const WidgetStatePropertyAll<double?>(18.0),
+      side: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return BorderSide(color: _colors.onSurface.withOpacity(0.12));
         }
         return BorderSide(color: _colors.outline);
       }),
-      shape: const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
-      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(40.0)),
+      shape: const WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+      minimumSize: const WidgetStatePropertyAll<Size?>(Size.fromHeight(40.0)),
     );
   }
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 
-  static MaterialStateProperty<Color?> resolveStateColor(Color? unselectedColor, Color? selectedColor){
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+  static WidgetStateProperty<Color?> resolveStateColor(Color? unselectedColor, Color? selectedColor){
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return selectedColor?.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return selectedColor?.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return selectedColor?.withOpacity(0.12);
         }
       } else {
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return unselectedColor?.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return unselectedColor?.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return unselectedColor?.withOpacity(0.12);
         }
       }

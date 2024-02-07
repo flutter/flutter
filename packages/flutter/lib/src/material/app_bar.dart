@@ -497,8 +497,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
   /// then [AppBar] uses the overall theme's [ColorScheme.surface]
   ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.scrolledUnder] when the content of the app's
+  /// If this color is a [WidgetStateColor] it will be resolved against
+  /// [WidgetState.scrolledUnder] when the content of the app's
   /// primary scrollable overlaps the app bar.
   /// {@endtemplate}
   ///
@@ -800,10 +800,10 @@ class _AppBarState extends State<AppBar> {
     }
   }
 
-  Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
-    return MaterialStateProperty.resolveAs<Color?>(widgetColor, states)
-      ?? MaterialStateProperty.resolveAs<Color?>(themeColor, states)
-      ?? MaterialStateProperty.resolveAs<Color>(defaultColor, states);
+  Color _resolveColor(Set<WidgetState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
+    return WidgetStateProperty.resolveAs<Color?>(widgetColor, states)
+      ?? WidgetStateProperty.resolveAs<Color?>(themeColor, states)
+      ?? WidgetStateProperty.resolveAs<Color>(defaultColor, states);
   }
 
   SystemUiOverlayStyle _systemOverlayStyleForBrightness(Brightness brightness, [Color? backgroundColor]) {
@@ -831,8 +831,8 @@ class _AppBarState extends State<AppBar> {
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
 
     final FlexibleSpaceBarSettings? settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-    final Set<MaterialState> states = <MaterialState>{
-      if (settings?.isScrolledUnder ?? _scrolledUnder) MaterialState.scrolledUnder,
+    final Set<WidgetState> states = <WidgetState>{
+      if (settings?.isScrolledUnder ?? _scrolledUnder) WidgetState.scrolledUnder,
     };
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
@@ -856,7 +856,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.elevation
       ?? defaults.elevation!;
 
-    final double effectiveElevation = states.contains(MaterialState.scrolledUnder)
+    final double effectiveElevation = states.contains(WidgetState.scrolledUnder)
       ? widget.scrolledUnderElevation
         ?? appBarTheme.scrolledUnderElevation
         ?? defaults.scrolledUnderElevation

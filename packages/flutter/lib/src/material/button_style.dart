@@ -20,7 +20,7 @@ import 'theme_data.dart';
 ///
 /// The [states] parameter is the button's current pressed/hovered/etc state. The [child] is
 /// typically a descendant of the returned widget.
-typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<MaterialState> states, Widget? child);
+typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<WidgetState> states, Widget? child);
 
 /// The visual properties that most buttons have in common.
 ///
@@ -31,7 +31,7 @@ typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<MaterialS
 ///
 /// All of the ButtonStyle properties are null by default.
 ///
-/// Many of the ButtonStyle properties are [MaterialStateProperty] objects which
+/// Many of the ButtonStyle properties are [WidgetStateProperty] objects which
 /// resolve to different values depending on the button's state. For example
 /// the [Color] properties are defined with `MaterialStateProperty<Color>` and
 /// can resolve to different colors depending on if the button is pressed,
@@ -176,10 +176,10 @@ class ButtonStyle with Diagnosticable {
   ///
   /// The color of the [textStyle] is typically not used directly, the
   /// [foregroundColor] is used instead.
-  final MaterialStateProperty<TextStyle?>? textStyle;
+  final WidgetStateProperty<TextStyle?>? textStyle;
 
   /// The button's background fill color.
-  final MaterialStateProperty<Color?>? backgroundColor;
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   /// The color for the button's [Text] and [Icon] widget descendants.
   ///
@@ -187,11 +187,11 @@ class ButtonStyle with Diagnosticable {
   /// of the components that compute defaults from [ButtonStyle] values
   /// compute a default [foregroundColor] and use that instead of the
   /// [textStyle]'s color.
-  final MaterialStateProperty<Color?>? foregroundColor;
+  final WidgetStateProperty<Color?>? foregroundColor;
 
   /// The highlight color that's typically used to indicate that
   /// the button is focused, hovered, or pressed.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// The shadow color of the button's [Material].
   ///
@@ -199,18 +199,18 @@ class ButtonStyle with Diagnosticable {
   /// dark themes, so by default the button classes add a
   /// semi-transparent overlay to indicate elevation. See
   /// [ThemeData.applyElevationOverlayColor].
-  final MaterialStateProperty<Color?>? shadowColor;
+  final WidgetStateProperty<Color?>? shadowColor;
 
   /// The surface tint color of the button's [Material].
   ///
   /// See [Material.surfaceTintColor] for more details.
-  final MaterialStateProperty<Color?>? surfaceTintColor;
+  final WidgetStateProperty<Color?>? surfaceTintColor;
 
   /// The elevation of the button's [Material].
-  final MaterialStateProperty<double?>? elevation;
+  final WidgetStateProperty<double?>? elevation;
 
   /// The padding between the button's boundary and its child.
-  final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
+  final WidgetStateProperty<EdgeInsetsGeometry?>? padding;
 
   /// The minimum size of the button itself.
   ///
@@ -218,7 +218,7 @@ class ButtonStyle with Diagnosticable {
   /// per [tapTargetSize].
   ///
   /// This value must be less than or equal to [maximumSize].
-  final MaterialStateProperty<Size?>? minimumSize;
+  final WidgetStateProperty<Size?>? minimumSize;
 
   /// The button's size.
   ///
@@ -229,7 +229,7 @@ class ButtonStyle with Diagnosticable {
   /// To specify buttons with a fixed width and the default height use
   /// `fixedSize: Size.fromWidth(320)`. Similarly, to specify a fixed
   /// height and the default width use `fixedSize: Size.fromHeight(100)`.
-  final MaterialStateProperty<Size?>? fixedSize;
+  final WidgetStateProperty<Size?>? fixedSize;
 
   /// The maximum size of the button itself.
   ///
@@ -237,31 +237,31 @@ class ButtonStyle with Diagnosticable {
   /// the button's maximum size is not constrained.
   ///
   /// This value must be greater than or equal to [minimumSize].
-  final MaterialStateProperty<Size?>? maximumSize;
+  final WidgetStateProperty<Size?>? maximumSize;
 
   /// The icon's color inside of the button.
   ///
   /// If this is null, the icon color will be [foregroundColor].
-  final MaterialStateProperty<Color?>? iconColor;
+  final WidgetStateProperty<Color?>? iconColor;
 
   /// The icon's size inside of the button.
-  final MaterialStateProperty<double?>? iconSize;
+  final WidgetStateProperty<double?>? iconSize;
 
   /// The color and weight of the button's outline.
   ///
   /// This value is combined with [shape] to create a shape decorated
   /// with an outline.
-  final MaterialStateProperty<BorderSide?>? side;
+  final WidgetStateProperty<BorderSide?>? side;
 
   /// The shape of the button's underlying [Material].
   ///
   /// This shape is combined with [side] to create a shape decorated
   /// with an outline.
-  final MaterialStateProperty<OutlinedBorder?>? shape;
+  final WidgetStateProperty<OutlinedBorder?>? shape;
 
   /// The cursor for a mouse pointer when it enters or is hovering over
   /// this button's [InkWell].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Defines how compact the button's layout will be.
   ///
@@ -362,22 +362,22 @@ class ButtonStyle with Diagnosticable {
   /// Returns a copy of this ButtonStyle with the given fields replaced with
   /// the new values.
   ButtonStyle copyWith({
-    MaterialStateProperty<TextStyle?>? textStyle,
-    MaterialStateProperty<Color?>? backgroundColor,
-    MaterialStateProperty<Color?>? foregroundColor,
-    MaterialStateProperty<Color?>? overlayColor,
-    MaterialStateProperty<Color?>? shadowColor,
-    MaterialStateProperty<Color?>? surfaceTintColor,
-    MaterialStateProperty<double?>? elevation,
-    MaterialStateProperty<EdgeInsetsGeometry?>? padding,
-    MaterialStateProperty<Size?>? minimumSize,
-    MaterialStateProperty<Size?>? fixedSize,
-    MaterialStateProperty<Size?>? maximumSize,
-    MaterialStateProperty<Color?>? iconColor,
-    MaterialStateProperty<double?>? iconSize,
-    MaterialStateProperty<BorderSide?>? side,
-    MaterialStateProperty<OutlinedBorder?>? shape,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<TextStyle?>? textStyle,
+    WidgetStateProperty<Color?>? backgroundColor,
+    WidgetStateProperty<Color?>? foregroundColor,
+    WidgetStateProperty<Color?>? overlayColor,
+    WidgetStateProperty<Color?>? shadowColor,
+    WidgetStateProperty<Color?>? surfaceTintColor,
+    WidgetStateProperty<double?>? elevation,
+    WidgetStateProperty<EdgeInsetsGeometry?>? padding,
+    WidgetStateProperty<Size?>? minimumSize,
+    WidgetStateProperty<Size?>? fixedSize,
+    WidgetStateProperty<Size?>? maximumSize,
+    WidgetStateProperty<Color?>? iconColor,
+    WidgetStateProperty<double?>? iconSize,
+    WidgetStateProperty<BorderSide?>? side,
+    WidgetStateProperty<OutlinedBorder?>? shape,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
     MaterialTapTargetSize? tapTargetSize,
     Duration? animationDuration,
@@ -521,22 +521,22 @@ class ButtonStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('textStyle', textStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('foregroundColor', foregroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('surfaceTintColor', surfaceTintColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('iconColor', iconColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<TextStyle?>>('textStyle', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('surfaceTintColor', surfaceTintColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<double?>>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('iconColor', iconColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<BorderSide?>>('side', side, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(EnumProperty<MaterialTapTargetSize>('tapTargetSize', tapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('animationDuration', animationDuration, defaultValue: null));
@@ -552,21 +552,21 @@ class ButtonStyle with Diagnosticable {
       return a;
     }
     return ButtonStyle(
-      textStyle: MaterialStateProperty.lerp<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
-      backgroundColor: MaterialStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
-      foregroundColor: MaterialStateProperty.lerp<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
-      overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
-      shadowColor: MaterialStateProperty.lerp<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
-      surfaceTintColor: MaterialStateProperty.lerp<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
-      elevation: MaterialStateProperty.lerp<double?>(a?.elevation, b?.elevation, t, lerpDouble),
-      padding: MaterialStateProperty.lerp<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
-      minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
-      fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
-      maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
-      iconColor: MaterialStateProperty.lerp<Color?>(a?.iconColor, b?.iconColor, t, Color.lerp),
-      iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
+      textStyle: WidgetStateProperty.lerp<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
+      backgroundColor: WidgetStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
+      foregroundColor: WidgetStateProperty.lerp<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
+      overlayColor: WidgetStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
+      shadowColor: WidgetStateProperty.lerp<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
+      surfaceTintColor: WidgetStateProperty.lerp<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
+      elevation: WidgetStateProperty.lerp<double?>(a?.elevation, b?.elevation, t, lerpDouble),
+      padding: WidgetStateProperty.lerp<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
+      minimumSize: WidgetStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
+      fixedSize: WidgetStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
+      maximumSize: WidgetStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
+      iconColor: WidgetStateProperty.lerp<Color?>(a?.iconColor, b?.iconColor, t, Color.lerp),
+      iconSize: WidgetStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       side: _lerpSides(a?.side, b?.side, t),
-      shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
+      shape: WidgetStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       tapTargetSize: t < 0.5 ? a?.tapTargetSize : b?.tapTargetSize,
@@ -580,7 +580,7 @@ class ButtonStyle with Diagnosticable {
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
+  static WidgetStateProperty<BorderSide?>? _lerpSides(WidgetStateProperty<BorderSide?>? a, WidgetStateProperty<BorderSide?>? b, double t) {
     if (a == null && b == null) {
       return null;
     }
@@ -588,15 +588,15 @@ class ButtonStyle with Diagnosticable {
   }
 }
 
-class _LerpSides implements MaterialStateProperty<BorderSide?> {
+class _LerpSides implements WidgetStateProperty<BorderSide?> {
   const _LerpSides(this.a, this.b, this.t);
 
-  final MaterialStateProperty<BorderSide?>? a;
-  final MaterialStateProperty<BorderSide?>? b;
+  final WidgetStateProperty<BorderSide?>? a;
+  final WidgetStateProperty<BorderSide?>? b;
   final double t;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
+  BorderSide? resolve(Set<WidgetState> states) {
     final BorderSide? resolvedA = a?.resolve(states);
     final BorderSide? resolvedB = b?.resolve(states);
     if (resolvedA == null && resolvedB == null) {

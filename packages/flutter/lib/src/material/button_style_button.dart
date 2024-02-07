@@ -116,9 +116,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Customizes this button's appearance.
   ///
   /// Non-null properties of this style override the corresponding
-  /// properties in [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s
+  /// properties in [themeStyleOf] and [defaultStyleOf]. [WidgetStateProperty]s
   /// that resolve to non-null values will similarly override the corresponding
-  /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
+  /// [WidgetStateProperty]s in [themeStyleOf] and [defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
@@ -137,7 +137,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   final bool autofocus;
 
   /// {@macro flutter.material.inkwell.statesController}
-  final MaterialStatesController? statesController;
+  final WidgetStatesController? statesController;
 
   /// Determine whether this subtree represents a button.
   ///
@@ -166,7 +166,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// [TextButtonTheme].
   ///
   /// Concrete button subclasses should return a ButtonStyle that
-  /// has no null properties, and where all of the [MaterialStateProperty]
+  /// has no null properties, and where all of the [WidgetStateProperty]
   /// properties resolve to non-null values.
   ///
   /// See also:
@@ -209,7 +209,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Returns null if [value] is null, otherwise `MaterialStatePropertyAll<T>(value)`.
   ///
   /// A convenience method for subclasses.
-  static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
+  static WidgetStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : WidgetStatePropertyAll<T>(value);
 
   /// A convenience method used by subclasses in the framework, that returns an
   /// interpolated value based on the [fontSizeMultiplier] parameter:
@@ -257,20 +257,20 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   AnimationController? controller;
   double? elevation;
   Color? backgroundColor;
-  MaterialStatesController? internalStatesController;
+  WidgetStatesController? internalStatesController;
 
   void handleStatesControllerChange() {
     // Force a rebuild to resolve MaterialStateProperty properties
     setState(() { });
   }
 
-  MaterialStatesController get statesController => widget.statesController ?? internalStatesController!;
+  WidgetStatesController get statesController => widget.statesController ?? internalStatesController!;
 
   void initStatesController() {
     if (widget.statesController == null) {
-      internalStatesController = MaterialStatesController();
+      internalStatesController = WidgetStatesController();
     }
-    statesController.update(MaterialState.disabled, !widget.enabled);
+    statesController.update(WidgetState.disabled, !widget.enabled);
     statesController.addListener(handleStatesControllerChange);
   }
 
@@ -292,10 +292,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       initStatesController();
     }
     if (widget.enabled != oldWidget.enabled) {
-      statesController.update(MaterialState.disabled, !widget.enabled);
+      statesController.update(WidgetState.disabled, !widget.enabled);
       if (!widget.enabled) {
         // The button may have been disabled while a press gesture is currently underway.
-        statesController.update(MaterialState.pressed, false);
+        statesController.update(WidgetState.pressed, false);
       }
     }
   }
@@ -321,7 +321,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       return widgetValue ?? themeValue ?? defaultValue;
     }
 
-    T? resolve<T>(MaterialStateProperty<T>? Function(ButtonStyle? style) getProperty) {
+    T? resolve<T>(WidgetStateProperty<T>? Function(ButtonStyle? style) getProperty) {
       return effectiveValue(
         (ButtonStyle? style) {
           return getProperty(style)?.resolve(statesController.value);
@@ -344,12 +344,12 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
-      (Set<MaterialState> states) => effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
+    final WidgetStateMouseCursor mouseCursor = _MouseCursor(
+      (Set<WidgetState> states) => effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
     );
 
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) => effectiveValue((ButtonStyle? style) => style?.overlayColor?.resolve(states)),
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color?>(
+      (Set<WidgetState> states) => effectiveValue((ButtonStyle? style) => style?.overlayColor?.resolve(states)),
     );
 
     final VisualDensity? resolvedVisualDensity = effectiveValue((ButtonStyle? style) => style?.visualDensity);
@@ -505,13 +505,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   }
 }
 
-class _MouseCursor extends MaterialStateMouseCursor {
+class _MouseCursor extends WidgetStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
   final MaterialPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) => resolveCallback(states)!;
+  MouseCursor resolve(Set<WidgetState> states) => resolveCallback(states)!;
 
   @override
   String get debugDescription => 'ButtonStyleButton_MouseCursor';

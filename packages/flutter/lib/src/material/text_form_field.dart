@@ -170,7 +170,7 @@ class TextFormField extends FormField<String> {
     ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ContentInsertionConfiguration? contentInsertionConfiguration,
-    MaterialStatesController? statesController,
+    WidgetStatesController? statesController,
     Clip clipBehavior = Clip.hardEdge,
     bool scribbleEnabled = true,
     bool canRequestFocus = true,

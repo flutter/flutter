@@ -193,7 +193,7 @@ enum ListTileTitleAlignment {
 ///
 /// {@tool dartpad}
 /// This sample shows [ListTile]'s [textColor] and [iconColor] can use
-/// [MaterialStateColor] color to change the color of the text and icon
+/// [WidgetStateColor] color to change the color of the text and icon
 /// when the [ListTile] is enabled, selected, or disabled.
 ///
 /// ** See code in examples/api/lib/material/list_tile/list_tile.3.dart **
@@ -479,8 +479,8 @@ class ListTile extends StatelessWidget {
   /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
   /// is used. If that is also null then [ColorScheme.primary] is used.
   ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.selected] and [MaterialState.disabled] states.
+  /// If this color is a [WidgetStateColor] it will be resolved against
+  /// [WidgetState.selected] and [WidgetState.disabled] states.
   ///
   /// See also:
   ///
@@ -498,8 +498,8 @@ class ListTile extends StatelessWidget {
   /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
   /// is used. If that is also null then [ColorScheme.primary] is used.
   ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.selected] and [MaterialState.disabled] states.
+  /// If this color is a [WidgetStateColor] it will be resolved against
+  /// [WidgetState.selected] and [WidgetState.disabled] states.
   ///
   /// See also:
   ///
@@ -576,18 +576,18 @@ class ListTile extends StatelessWidget {
   /// widget.
   ///
   /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [ListTileThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
   ///    that is also a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
@@ -738,9 +738,9 @@ class ListTile extends StatelessWidget {
     final ListTileThemeData defaults = theme.useMaterial3
         ? _LisTileDefaultsM3(context)
         : _LisTileDefaultsM2(context, listTileStyle);
-    final Set<MaterialState> states = <MaterialState>{
-      if (!enabled) MaterialState.disabled,
-      if (selected) MaterialState.selected,
+    final Set<WidgetState> states = <WidgetState>{
+      if (!enabled) WidgetState.disabled,
+      if (selected) WidgetState.selected,
     };
 
     Color? resolveColor(Color? explicitColor, Color? selectedColor, Color? enabledColor, [Color? disabledColor]) {
@@ -830,12 +830,12 @@ class ListTile extends StatelessWidget {
       ?? defaults.contentPadding!.resolve(textDirection);
 
     // Show basic cursor when ListTile isn't enabled or gesture callbacks are null.
-    final Set<MaterialState> mouseStates = <MaterialState>{
-      if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
+    final Set<WidgetState> mouseStates = <WidgetState>{
+      if (!enabled || (onTap == null && onLongPress == null)) WidgetState.disabled,
     };
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates)
+    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates)
       ?? tileTheme.mouseCursor?.resolve(mouseStates)
-      ?? MaterialStateMouseCursor.clickable.resolve(mouseStates);
+      ?? WidgetStateMouseCursor.clickable.resolve(mouseStates);
 
     final ListTileTitleAlignment effectiveTitleAlignment = titleAlignment
       ?? tileTheme.titleAlignment
@@ -928,7 +928,7 @@ class ListTile extends StatelessWidget {
   }
 }
 
-class _IndividualOverrides extends MaterialStateProperty<Color?> {
+class _IndividualOverrides extends WidgetStateProperty<Color?> {
   _IndividualOverrides({
     this.explicitColor,
     this.enabledColor,
@@ -942,14 +942,14 @@ class _IndividualOverrides extends MaterialStateProperty<Color?> {
   final Color? disabledColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
-    if (explicitColor is MaterialStateColor) {
-      return MaterialStateProperty.resolveAs<Color?>(explicitColor, states);
+  Color? resolve(Set<WidgetState> states) {
+    if (explicitColor is WidgetStateColor) {
+      return WidgetStateProperty.resolveAs<Color?>(explicitColor, states);
     }
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return disabledColor;
     }
-    if (states.contains(MaterialState.selected)) {
+    if (states.contains(WidgetState.selected)) {
       return selectedColor;
     }
     return enabledColor;

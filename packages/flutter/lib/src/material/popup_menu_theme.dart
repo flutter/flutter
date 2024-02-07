@@ -79,7 +79,7 @@ class PopupMenuThemeData with Diagnosticable {
 
   /// You can use this to specify a different style of the label
   /// when the popup menu item is enabled and disabled.
-  final MaterialStateProperty<TextStyle?>? labelTextStyle;
+  final WidgetStateProperty<TextStyle?>? labelTextStyle;
 
   /// If specified, defines the feedback property for [PopupMenuButton].
   ///
@@ -89,7 +89,7 @@ class PopupMenuThemeData with Diagnosticable {
   /// {@macro flutter.material.popupmenu.mouseCursor}
   ///
   /// If specified, overrides the default value of [PopupMenuItem.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Whether the popup menu is positioned over or under the popup menu button.
   ///
@@ -112,9 +112,9 @@ class PopupMenuThemeData with Diagnosticable {
     Color? shadowColor,
     Color? surfaceTintColor,
     TextStyle? textStyle,
-    MaterialStateProperty<TextStyle?>? labelTextStyle,
+    WidgetStateProperty<TextStyle?>? labelTextStyle,
     bool? enableFeedback,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     PopupMenuPosition? position,
     Color? iconColor,
     double? iconSize,
@@ -151,7 +151,7 @@ class PopupMenuThemeData with Diagnosticable {
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
-      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
+      labelTextStyle: WidgetStateProperty.lerp<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       position: t < 0.5 ? a?.position : b?.position,
@@ -208,9 +208,9 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(EnumProperty<PopupMenuPosition?>('position', position, defaultValue: null));
     properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
     properties.add(DoubleProperty('iconSize', iconSize, defaultValue: null));

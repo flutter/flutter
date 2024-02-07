@@ -130,7 +130,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 
   /// If specified, overrides the default value of [BottomNavigationBar.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -148,7 +148,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
     BottomNavigationBarType? type,
     bool? enableFeedback,
     BottomNavigationBarLandscapeLayout? landscapeLayout,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return BottomNavigationBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -252,7 +252,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BottomNavigationBarType>('type', type, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<BottomNavigationBarLandscapeLayout>('landscapeLayout', landscapeLayout, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }
 

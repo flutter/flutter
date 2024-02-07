@@ -77,7 +77,7 @@ class SnackBarThemeData with Diagnosticable {
           'Width can only be set if behaviour is SnackBarBehavior.floating'),
         assert(actionOverflowThreshold == null || (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
           'Action overflow threshold must be between 0 and 1 inclusive'),
-        assert(actionBackgroundColor is! MaterialStateColor || disabledActionBackgroundColor == null,
+        assert(actionBackgroundColor is! WidgetStateColor || disabledActionBackgroundColor == null,
           'disabledBackgroundColor must not be provided when background color is '
           'a MaterialStateColor');
 

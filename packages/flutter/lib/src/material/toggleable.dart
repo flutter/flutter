@@ -271,19 +271,19 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     }
   }
 
-  /// Describes the current [MaterialState] of the Toggleable.
+  /// Describes the current [WidgetState] of the Toggleable.
   ///
   /// The returned set will include:
   ///
-  ///  * [MaterialState.disabled], if [isInteractive] is false
-  ///  * [MaterialState.hovered], if a pointer is hovering over the Toggleable
-  ///  * [MaterialState.focused], if the Toggleable has input focus
-  ///  * [MaterialState.selected], if [value] is true or null
-  Set<MaterialState> get states => <MaterialState>{
-    if (!isInteractive) MaterialState.disabled,
-    if (_hovering) MaterialState.hovered,
-    if (_focused) MaterialState.focused,
-    if (value ?? true) MaterialState.selected,
+  ///  * [WidgetState.disabled], if [isInteractive] is false
+  ///  * [WidgetState.hovered], if a pointer is hovering over the Toggleable
+  ///  * [WidgetState.focused], if the Toggleable has input focus
+  ///  * [WidgetState.selected], if [value] is true or null
+  Set<WidgetState> get states => <WidgetState>{
+    if (!isInteractive) WidgetState.disabled,
+    if (_hovering) WidgetState.hovered,
+    if (_focused) WidgetState.focused,
+    if (value ?? true) WidgetState.selected,
   };
 
   /// Typically wraps a `painter` that draws the actual visuals of the
@@ -304,7 +304,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     FocusNode? focusNode,
     ValueChanged<bool>? onFocusChange,
     bool autofocus = false,
-    required MaterialStateProperty<MouseCursor> mouseCursor,
+    required WidgetStateProperty<MouseCursor> mouseCursor,
     required Size size,
     required CustomPainter painter,
   }) {

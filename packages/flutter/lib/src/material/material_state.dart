@@ -263,14 +263,14 @@ typedef MaterialStateOutlinedBorder = WidgetStateOutlinedBorder;
 )
 typedef MaterialStateTextStyle = WidgetStateTextStyle;
 
-/// Defines a [OutlineInputBorder] that is also a [MaterialStateProperty].
+/// Defines a [OutlineInputBorder] that is also a [WidgetStateProperty].
 ///
 /// This class exists to enable widgets with [OutlineInputBorder] valued properties
 /// to also accept [MaterialStateProperty<OutlineInputBorder>] values. A material
 /// state input border property represents a text style which depends on
 /// a widget's "interactive state". This state is represented as a
-/// [Set] of [MaterialState]s, like [MaterialState.pressed],
-/// [MaterialState.focused] and [MaterialState.hovered].
+/// [Set] of [WidgetState]s, like [WidgetState.pressed],
+/// [WidgetState.focused] and [WidgetState.hovered].
 ///
 /// [MaterialStateOutlineInputBorder] should only be used with widgets that document
 /// their support, like [InputDecoration.border].
@@ -288,7 +288,7 @@ typedef MaterialStateTextStyle = WidgetStateTextStyle;
 /// [MaterialStateOutlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implements MaterialStateProperty<InputBorder> {
+abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implements WidgetStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateOutlineInputBorder();
@@ -307,7 +307,7 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
   /// Returns a [InputBorder] that's to be used when a Material component is in the
   /// specified state.
   @override
-  InputBorder resolve(Set<MaterialState> states);
+  InputBorder resolve(Set<WidgetState> states);
 }
 
 /// A [MaterialStateOutlineInputBorder] created from a [MaterialPropertyResolver<OutlineInputBorder>]
@@ -316,24 +316,24 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
 /// If used as a regular input border, the border resolved in the default state will
 /// be used.
 ///
-/// Used by [MaterialStateTextStyle.resolveWith].
+/// Used by [WidgetStateTextStyle.resolveWith].
 class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
   const _MaterialStateOutlineInputBorder(this._resolve);
 
   final MaterialPropertyResolver<InputBorder> _resolve;
 
   @override
-  InputBorder resolve(Set<MaterialState> states) => _resolve(states);
+  InputBorder resolve(Set<WidgetState> states) => _resolve(states);
 }
 
-/// Defines a [UnderlineInputBorder] that is also a [MaterialStateProperty].
+/// Defines a [UnderlineInputBorder] that is also a [WidgetStateProperty].
 ///
 /// This class exists to enable widgets with [UnderlineInputBorder] valued properties
 /// to also accept [MaterialStateProperty<UnderlineInputBorder>] values. A material
 /// state input border property represents a text style which depends on
 /// a widget's "interactive state". This state is represented as a
-/// [Set] of [MaterialState]s, like [MaterialState.pressed],
-/// [MaterialState.focused] and [MaterialState.hovered].
+/// [Set] of [WidgetState]s, like [WidgetState.pressed],
+/// [WidgetState.focused] and [WidgetState.hovered].
 ///
 /// [MaterialStateUnderlineInputBorder] should only be used with widgets that document
 /// their support, like [InputDecoration.border].
@@ -351,7 +351,7 @@ class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
 /// [MaterialStateUnderlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder implements MaterialStateProperty<InputBorder> {
+abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder implements WidgetStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateUnderlineInputBorder();
@@ -370,7 +370,7 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
   /// Returns a [InputBorder] that's to be used when a Material component is in the
   /// specified state.
   @override
-  InputBorder resolve(Set<MaterialState> states);
+  InputBorder resolve(Set<WidgetState> states);
 }
 
 /// A [MaterialStateUnderlineInputBorder] created from a [MaterialPropertyResolver<UnderlineInputBorder>]
@@ -379,14 +379,14 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
 /// If used as a regular input border, the border resolved in the default state will
 /// be used.
 ///
-/// Used by [MaterialStateTextStyle.resolveWith].
+/// Used by [WidgetStateTextStyle.resolveWith].
 class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBorder {
   const _MaterialStateUnderlineInputBorder(this._resolve);
 
   final MaterialPropertyResolver<InputBorder> _resolve;
 
   @override
-  InputBorder resolve(Set<MaterialState> states) => _resolve(states);
+  InputBorder resolve(Set<WidgetState> states) => _resolve(states);
 }
 
 /// Interface for classes that [resolve] to a value of type `T` based

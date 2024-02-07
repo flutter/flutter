@@ -34,7 +34,7 @@ import 'theme_data.dart';
 ///
 /// All of the [MenuStyle] properties are null by default.
 ///
-/// Many of the [MenuStyle] properties are [MaterialStateProperty] objects which
+/// Many of the [MenuStyle] properties are [WidgetStateProperty] objects which
 /// resolve to different values depending on the menu's state. For example the
 /// [Color] properties are defined with `MaterialStateProperty<Color>` and can
 /// resolve to different colors depending on if the menu is pressed, hovered,
@@ -117,30 +117,30 @@ class MenuStyle with Diagnosticable {
   });
 
   /// The menu's background fill color.
-  final MaterialStateProperty<Color?>? backgroundColor;
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   /// The shadow color of the menu's [Material].
   ///
   /// The material's elevation shadow can be difficult to see for dark themes,
   /// so by default the menu classes add a semi-transparent overlay to indicate
   /// elevation. See [ThemeData.applyElevationOverlayColor].
-  final MaterialStateProperty<Color?>? shadowColor;
+  final WidgetStateProperty<Color?>? shadowColor;
 
   /// The surface tint color of the menu's [Material].
   ///
   /// See [Material.surfaceTintColor] for more details.
-  final MaterialStateProperty<Color?>? surfaceTintColor;
+  final WidgetStateProperty<Color?>? surfaceTintColor;
 
   /// The elevation of the menu's [Material].
-  final MaterialStateProperty<double?>? elevation;
+  final WidgetStateProperty<double?>? elevation;
 
   /// The padding between the menu's boundary and its child.
-  final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
+  final WidgetStateProperty<EdgeInsetsGeometry?>? padding;
 
   /// The minimum size of the menu itself.
   ///
   /// This value must be less than or equal to [maximumSize].
-  final MaterialStateProperty<Size?>? minimumSize;
+  final WidgetStateProperty<Size?>? minimumSize;
 
   /// The menu's size.
   ///
@@ -151,7 +151,7 @@ class MenuStyle with Diagnosticable {
   /// To specify menus with a fixed width and the default height use `fixedSize:
   /// Size.fromWidth(320)`. Similarly, to specify a fixed height and the default
   /// width use `fixedSize: Size.fromHeight(100)`.
-  final MaterialStateProperty<Size?>? fixedSize;
+  final WidgetStateProperty<Size?>? fixedSize;
 
   /// The maximum size of the menu itself.
   ///
@@ -159,23 +159,23 @@ class MenuStyle with Diagnosticable {
   /// maximum size is not constrained.
   ///
   /// This value must be greater than or equal to [minimumSize].
-  final MaterialStateProperty<Size?>? maximumSize;
+  final WidgetStateProperty<Size?>? maximumSize;
 
   /// The color and weight of the menu's outline.
   ///
   /// This value is combined with [shape] to create a shape decorated with an
   /// outline.
-  final MaterialStateProperty<BorderSide?>? side;
+  final WidgetStateProperty<BorderSide?>? side;
 
   /// The shape of the menu's underlying [Material].
   ///
   /// This shape is combined with [side] to create a shape decorated with an
   /// outline.
-  final MaterialStateProperty<OutlinedBorder?>? shape;
+  final WidgetStateProperty<OutlinedBorder?>? shape;
 
   /// The cursor for a mouse pointer when it enters or is hovering over this
   /// menu's [InkWell].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Defines how compact the menu's layout will be.
   ///
@@ -245,17 +245,17 @@ class MenuStyle with Diagnosticable {
   /// Returns a copy of this MenuStyle with the given fields replaced with
   /// the new values.
   MenuStyle copyWith({
-    MaterialStateProperty<Color?>? backgroundColor,
-    MaterialStateProperty<Color?>? shadowColor,
-    MaterialStateProperty<Color?>? surfaceTintColor,
-    MaterialStateProperty<double?>? elevation,
-    MaterialStateProperty<EdgeInsetsGeometry?>? padding,
-    MaterialStateProperty<Size?>? minimumSize,
-    MaterialStateProperty<Size?>? fixedSize,
-    MaterialStateProperty<Size?>? maximumSize,
-    MaterialStateProperty<BorderSide?>? side,
-    MaterialStateProperty<OutlinedBorder?>? shape,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<Color?>? backgroundColor,
+    WidgetStateProperty<Color?>? shadowColor,
+    WidgetStateProperty<Color?>? surfaceTintColor,
+    WidgetStateProperty<double?>? elevation,
+    WidgetStateProperty<EdgeInsetsGeometry?>? padding,
+    WidgetStateProperty<Size?>? minimumSize,
+    WidgetStateProperty<Size?>? fixedSize,
+    WidgetStateProperty<Size?>? maximumSize,
+    WidgetStateProperty<BorderSide?>? side,
+    WidgetStateProperty<OutlinedBorder?>? shape,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
     AlignmentGeometry? alignment,
   }) {
@@ -308,16 +308,16 @@ class MenuStyle with Diagnosticable {
       return a;
     }
     return MenuStyle(
-      backgroundColor: MaterialStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
-      shadowColor: MaterialStateProperty.lerp<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
-      surfaceTintColor: MaterialStateProperty.lerp<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
-      elevation: MaterialStateProperty.lerp<double?>(a?.elevation, b?.elevation, t, lerpDouble),
-      padding:  MaterialStateProperty.lerp<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
-      minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
-      fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
-      maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
+      backgroundColor: WidgetStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
+      shadowColor: WidgetStateProperty.lerp<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
+      surfaceTintColor: WidgetStateProperty.lerp<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
+      elevation: WidgetStateProperty.lerp<double?>(a?.elevation, b?.elevation, t, lerpDouble),
+      padding:  WidgetStateProperty.lerp<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
+      minimumSize: WidgetStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
+      fixedSize: WidgetStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
+      maximumSize: WidgetStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
       side: _LerpSides(a?.side, b?.side, t),
-      shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
+      shape: WidgetStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
@@ -327,17 +327,17 @@ class MenuStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('surfaceTintColor', surfaceTintColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Color?>>('surfaceTintColor', surfaceTintColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<double?>>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<BorderSide?>>('side', side, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
   }
@@ -345,15 +345,15 @@ class MenuStyle with Diagnosticable {
 
 /// A required helper class because [BorderSide.lerp] doesn't support passing or
 /// returning null values.
-class _LerpSides implements MaterialStateProperty<BorderSide?> {
+class _LerpSides implements WidgetStateProperty<BorderSide?> {
   const _LerpSides(this.a, this.b, this.t);
 
-  final MaterialStateProperty<BorderSide?>? a;
-  final MaterialStateProperty<BorderSide?>? b;
+  final WidgetStateProperty<BorderSide?>? a;
+  final WidgetStateProperty<BorderSide?>? b;
   final double t;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
+  BorderSide? resolve(Set<WidgetState> states) {
     final BorderSide? resolvedA = a?.resolve(states);
     final BorderSide? resolvedB = b?.resolve(states);
     if (resolvedA == null && resolvedB == null) {

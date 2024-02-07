@@ -115,7 +115,7 @@ class ListTileThemeData with Diagnosticable {
   final bool? enableFeedback;
 
   /// If specified, overrides the default value of [ListTile.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// If specified, overrides the default value of [ListTile.visualDensity].
   final VisualDensity? visualDensity;
@@ -142,7 +142,7 @@ class ListTileThemeData with Diagnosticable {
     double? minVerticalPadding,
     double? minLeadingWidth,
     bool? enableFeedback,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     bool? isThreeLine,
     VisualDensity? visualDensity,
     ListTileTitleAlignment? titleAlignment,
@@ -270,7 +270,7 @@ class ListTileThemeData with Diagnosticable {
     properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
     properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<ListTileTitleAlignment>('titleAlignment', titleAlignment, defaultValue: null));
   }
@@ -303,7 +303,7 @@ class ListTileTheme extends InheritedTheme {
     Color? tileColor,
     Color? selectedTileColor,
     bool? enableFeedback,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
@@ -352,7 +352,7 @@ class ListTileTheme extends InheritedTheme {
   final double? _minVerticalPadding;
   final double? _minLeadingWidth;
   final bool? _enableFeedback;
-  final MaterialStateProperty<MouseCursor?>? _mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? _mouseCursor;
 
   /// The configuration of this theme.
   ListTileThemeData get data {
@@ -489,7 +489,7 @@ class ListTileTheme extends InheritedTheme {
     double? minVerticalPadding,
     double? minLeadingWidth,
     ListTileTitleAlignment? titleAlignment,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
     required Widget child,
   }) {

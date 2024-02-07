@@ -61,9 +61,9 @@ class TabBarTheme with Diagnosticable {
 
   /// Overrides the default value for [TabBar.labelColor].
   ///
-  /// If [labelColor] is a [MaterialStateColor], then the effective color will
-  /// depend on the [MaterialState.selected] state, i.e. if the [Tab] is
-  /// selected or not. In case of unselected state, this [MaterialStateColor]'s
+  /// If [labelColor] is a [WidgetStateColor], then the effective color will
+  /// depend on the [WidgetState.selected] state, i.e. if the [Tab] is
+  /// selected or not. In case of unselected state, this [WidgetStateColor]'s
   /// resolved color will be used even if [TabBar.unselectedLabelColor] or
   /// [unselectedLabelColor] is non-null.
   final Color? labelColor;
@@ -85,7 +85,7 @@ class TabBarTheme with Diagnosticable {
   final TextStyle? unselectedLabelStyle;
 
   /// Overrides the default value for [TabBar.overlayColor].
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// Overrides the default value for [TabBar.splashFactory].
   final InteractiveInkFeatureFactory? splashFactory;
@@ -93,7 +93,7 @@ class TabBarTheme with Diagnosticable {
   /// {@macro flutter.material.tabs.mouseCursor}
   ///
   /// If specified, overrides the default value of [TabBar.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Overrides the default value for [TabBar.tabAlignment].
   final TabAlignment? tabAlignment;
@@ -111,9 +111,9 @@ class TabBarTheme with Diagnosticable {
     TextStyle? labelStyle,
     Color? unselectedLabelColor,
     TextStyle? unselectedLabelStyle,
-    MaterialStateProperty<Color?>? overlayColor,
+    WidgetStateProperty<Color?>? overlayColor,
     InteractiveInkFeatureFactory? splashFactory,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     TabAlignment? tabAlignment,
   }) {
     return TabBarTheme(
@@ -157,7 +157,7 @@ class TabBarTheme with Diagnosticable {
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
       unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
       unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
-      overlayColor: MaterialStateProperty.lerp<Color?>(a.overlayColor, b.overlayColor, t, Color.lerp),
+      overlayColor: WidgetStateProperty.lerp<Color?>(a.overlayColor, b.overlayColor, t, Color.lerp),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
