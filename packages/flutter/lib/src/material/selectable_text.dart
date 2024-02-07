@@ -502,15 +502,13 @@ class SelectableText extends StatefulWidget {
     );
   }
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// The configuration for the magnifier used when the text is selected.
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
-  /// on Android, and builds nothing on all other platforms. If it is desired to
-  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  /// on Android, and builds nothing on all other platforms. To suppress the
+  /// magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override
