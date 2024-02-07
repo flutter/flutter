@@ -961,6 +961,7 @@ class InputConfiguration {
       : inputType = EngineInputType.fromName(
           flutterInputConfiguration.readJson('inputType').readString('name'),
           isDecimal: flutterInputConfiguration.readJson('inputType').tryBool('decimal') ?? false,
+          isMultiline: flutterInputConfiguration.readJson('inputType').tryBool('isMultiline') ?? false,
         ),
         inputAction =
             flutterInputConfiguration.tryString('inputAction') ?? 'TextInputAction.done',
@@ -1280,7 +1281,7 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
       activeDomElement.setAttribute('type', 'password');
     }
 
-    if (config.inputType == EngineInputType.none) {
+    if (config.inputType.inputmodeAttribute == 'none') {
       activeDomElement.setAttribute('inputmode', 'none');
     }
 
