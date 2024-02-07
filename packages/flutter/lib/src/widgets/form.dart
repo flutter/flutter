@@ -611,9 +611,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     if (widget.enabled) {
       final AutovalidateMode? formMode = formState?.widget.autovalidateMode;
       final AutovalidateMode fieldMode = widget.autovalidateMode;
-      if(formMode == AutovalidateMode.always || fieldMode == AutovalidateMode.always) {
+      if (formMode == AutovalidateMode.always || fieldMode == AutovalidateMode.always) {
         _validate();
-      } else if(formMode == AutovalidateMode.onUserInteraction || fieldMode == AutovalidateMode.onUserInteraction) {
+      } else if (formMode == AutovalidateMode.onUserInteraction || fieldMode == AutovalidateMode.onUserInteraction) {
         if (_hasInteractedByUser.value) {
           _validate();
         }
