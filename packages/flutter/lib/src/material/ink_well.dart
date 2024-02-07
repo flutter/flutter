@@ -14,7 +14,6 @@ import 'debug.dart';
 import 'feedback.dart';
 import 'ink_highlight.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:

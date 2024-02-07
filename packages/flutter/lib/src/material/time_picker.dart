@@ -25,7 +25,6 @@ import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'text_button.dart';
 import 'text_form_field.dart';
 import 'text_theme.dart';

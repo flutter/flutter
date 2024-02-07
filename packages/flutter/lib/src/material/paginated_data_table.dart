@@ -17,7 +17,6 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_decoration.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 

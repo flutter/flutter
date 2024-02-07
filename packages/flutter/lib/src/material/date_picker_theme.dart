@@ -11,7 +11,6 @@ import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'input_decorator.dart';
-import 'material_state.dart';
 import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';

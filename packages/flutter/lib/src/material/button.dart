@@ -12,8 +12,6 @@ import 'button_theme.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
-import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -307,19 +305,19 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with WidgetStateM
   @override
   void initState() {
     super.initState();
-    setMaterialState(WidgetState.disabled, !widget.enabled);
+    setWidgetState(WidgetState.disabled, !widget.enabled);
   }
 
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    setMaterialState(WidgetState.disabled, !widget.enabled);
+    setWidgetState(WidgetState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
     // InkWell makes a call to handleHighlightChanged. This causes an exception
     // because it calls setState in the middle of a build. To preempt this, we
     // manually update pressed to false when this situation occurs.
     if (isDisabled && isPressed) {
-      removeMaterialState(WidgetState.pressed);
+      removeWidgetState(WidgetState.pressed);
     }
   }
 
@@ -376,14 +374,14 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with WidgetStateM
         child: InkWell(
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-          onFocusChange: updateMaterialState(WidgetState.focused),
+          onFocusChange: updateWidgetState(WidgetState.focused),
           autofocus: widget.autofocus,
-          onHighlightChanged: updateMaterialState(WidgetState.pressed, onChanged: widget.onHighlightChanged),
+          onHighlightChanged: updateWidgetState(WidgetState.pressed, onChanged: widget.onHighlightChanged),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           focusColor: widget.focusColor,
           hoverColor: widget.hoverColor,
-          onHover: updateMaterialState(WidgetState.hovered),
+          onHover: updateWidgetState(WidgetState.hovered),
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
           enableFeedback: widget.enableFeedback,

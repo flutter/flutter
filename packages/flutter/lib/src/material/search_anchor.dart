@@ -21,7 +21,6 @@ import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'search_bar_theme.dart';
 import 'search_view_theme.dart';
 import 'text_field.dart';

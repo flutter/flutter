@@ -17,7 +17,6 @@ import 'constants.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'segmented_button_theme.dart';
 import 'text_button.dart';
 import 'text_button_theme.dart';

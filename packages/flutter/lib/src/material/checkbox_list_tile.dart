@@ -8,7 +8,6 @@ import 'checkbox.dart';
 import 'checkbox_theme.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 

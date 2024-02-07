@@ -18,8 +18,6 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
-import 'material_state_mixin.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -921,8 +919,8 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
   void initState() {
     assert(widget.onSelected == null || widget.onPressed == null);
     super.initState();
-    setMaterialState(WidgetState.disabled, !widget.isEnabled);
-    setMaterialState(WidgetState.selected, widget.selected);
+    setWidgetState(WidgetState.disabled, !widget.isEnabled);
+    setWidgetState(WidgetState.selected, widget.selected);
     selectController = AnimationController(
       duration: _kSelectDuration,
       value: widget.selected ? 1.0 : 0.0,
@@ -997,7 +995,7 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
     if (!canTap) {
       return;
     }
-    setMaterialState(WidgetState.pressed, true);
+    setWidgetState(WidgetState.pressed, true);
     setState(() {
       _isTapping = true;
     });
@@ -1007,7 +1005,7 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
     if (!canTap) {
       return;
     }
-    setMaterialState(WidgetState.pressed, false);
+    setWidgetState(WidgetState.pressed, false);
     setState(() {
       _isTapping = false;
     });
@@ -1017,7 +1015,7 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
     if (!canTap) {
       return;
     }
-    setMaterialState(WidgetState.pressed, false);
+    setWidgetState(WidgetState.pressed, false);
     setState(() {
       _isTapping = false;
     });
@@ -1114,7 +1112,7 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
-        setMaterialState(WidgetState.disabled, !widget.isEnabled);
+        setWidgetState(WidgetState.disabled, !widget.isEnabled);
         if (widget.isEnabled) {
           enableController.forward();
         } else {
@@ -1133,7 +1131,7 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
     }
     if (oldWidget.selected != widget.selected) {
       setState(() {
-        setMaterialState(WidgetState.selected, widget.selected);
+        setWidgetState(WidgetState.selected, widget.selected);
         if (widget.selected) {
           selectController.forward();
         } else {
@@ -1292,14 +1290,14 @@ class _RawChipState extends State<RawChip> with WidgetStateMixin, TickerProvider
       shape: resolvedShape,
       clipBehavior: widget.clipBehavior,
       child: InkWell(
-        onFocusChange: updateMaterialState(WidgetState.focused),
+        onFocusChange: updateWidgetState(WidgetState.focused),
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         canRequestFocus: widget.isEnabled,
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
-        onHover: canTap ? updateMaterialState(WidgetState.hovered) : null,
+        onHover: canTap ? updateWidgetState(WidgetState.hovered) : null,
         customBorder: resolvedShape,
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),

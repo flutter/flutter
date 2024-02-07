@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'switch.dart';
 import 'switch_theme.dart';
 import 'theme.dart';

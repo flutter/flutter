@@ -12,7 +12,6 @@ import 'button_style.dart';
 import 'color_scheme.dart';
 import 'constants.dart';
 import 'ink_ripple.dart';
-import 'material_state.dart';
 import 'text_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';

@@ -10,7 +10,6 @@ import 'drawer.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'navigation_bar.dart';
 import 'navigation_drawer_theme.dart';
 import 'text_theme.dart';

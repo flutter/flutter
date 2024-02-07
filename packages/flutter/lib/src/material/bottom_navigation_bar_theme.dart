@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_navigation_bar.dart';
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:

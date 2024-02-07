@@ -16,7 +16,6 @@ import 'dropdown.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 

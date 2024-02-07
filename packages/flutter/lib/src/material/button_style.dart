@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
-import 'material_state.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
