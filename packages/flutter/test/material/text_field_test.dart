@@ -17838,7 +17838,6 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-
   testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = _textEditingController(
@@ -17876,6 +17875,58 @@ void main() {
     );
     await gesture.up();
     EditableText.debugDeterministicCursor = false;
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets('Cursor should not blink when long-pressing to show floating cursor.', (WidgetTester tester) async {
+    final TextEditingController controller = _textEditingController(
+      text: 'abcdefghijklmnopqr',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              autofocus: true,
+              controller: controller,
+              cursorOpacityAnimates: false
+            )
+          ),
+        ),
+      ),
+    );
+    final EditableTextState state = tester.state(find.byType(EditableText));
+    Future<void> checkCursorBlinking({ bool isBlinking = true }) async {
+      bool initialShowCursor = true;
+      if (isBlinking) {
+        initialShowCursor = state.renderEditable.showCursor.value;
+      }
+      await tester.pump(state.cursorBlinkInterval);
+      expect(state.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
+      await tester.pump(state.cursorBlinkInterval);
+      expect(state.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(state.cursorBlinkInterval);
+      expect(state.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
+      await tester.pump(state.cursorBlinkInterval);
+      expect(state.cursorCurrentlyVisible, equals(initialShowCursor));
+    }
+    // Wait for autofocus.
+    await tester.pumpAndSettle();
+    // Before long-pressing, the cursor should blink.
+    await checkCursorBlinking();
+
+    final TestGesture gesture = await tester.startGesture(tester.getTopLeft(find.byType(TextField)));
+    await tester.pump(kLongPressTimeout);
+    // When long-pressing, the cursor shouldn't blink.
+    await checkCursorBlinking(isBlinking: false);
+    await gesture.moveBy(const Offset(20, 0));
+    await tester.pump();
+    // When long-pressing and dragging to move the cursor, the cursor shouldn't blink.
+    await checkCursorBlinking(isBlinking: false);
+    await gesture.up();
+    // After finishing the long-press, the cursor should blink.
+    await checkCursorBlinking();
   },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
