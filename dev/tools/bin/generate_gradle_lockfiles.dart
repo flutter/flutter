@@ -40,6 +40,15 @@ void main(List<String> arguments) {
       continue;
     }
 
+    final File wrapperGradle = androidDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
+    if (!wrapperGradle.existsSync()) {
+      print('${wrapperGradle.path} does not exist - skipping');
+      continue;
+    }
+
     if (settingsGradle.readAsStringSync().contains('include_flutter.groovy')) {
       print('${settingsGradle.path} add to app - skipping');
       continue;
@@ -78,6 +87,7 @@ void main(List<String> arguments) {
 
     rootBuildGradle.writeAsStringSync(rootGradleFileContent);
     settingsGradle.writeAsStringSync(settingGradleFile);
+    wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
 
     final String appDirectory = androidDirectory.parent.absolute.path;
 
@@ -213,4 +223,12 @@ pluginManagement {
 include ":app"
 
 apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+''';
+
+const String wrapperGradleFileContent = r'''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-all.zip
 ''';
