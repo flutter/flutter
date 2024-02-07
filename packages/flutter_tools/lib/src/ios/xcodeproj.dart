@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -30,6 +31,7 @@ class XcodeProjectInterpreter {
     required Logger logger,
     required FileSystem fileSystem,
     required Usage usage,
+    required Analytics analytics,
   }) {
     return XcodeProjectInterpreter._(
       platform: platform,
@@ -37,6 +39,7 @@ class XcodeProjectInterpreter {
       logger: logger,
       fileSystem: fileSystem,
       usage: usage,
+      analytics: analytics,
     );
   }
 
@@ -46,6 +49,7 @@ class XcodeProjectInterpreter {
     required Logger logger,
     required FileSystem fileSystem,
     required Usage usage,
+    required Analytics analytics,
     Version? version,
     String? build,
   }) : _platform = platform,
@@ -61,7 +65,8 @@ class XcodeProjectInterpreter {
         _version = version,
         _build = build,
         _versionText = version?.toString(),
-        _usage = usage;
+        _usage = usage,
+        _analytics = analytics;
 
   /// Create an [XcodeProjectInterpreter] for testing.
   ///
@@ -73,6 +78,7 @@ class XcodeProjectInterpreter {
     required ProcessManager processManager,
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
     String? build = '13C100',
+    Analytics? analytics,
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -86,6 +92,7 @@ class XcodeProjectInterpreter {
       logger: BufferLogger.test(),
       version: version,
       build: build,
+      analytics: analytics ?? NoOpAnalytics(),
     );
   }
 
@@ -95,6 +102,7 @@ class XcodeProjectInterpreter {
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
   final Usage _usage;
+  final Analytics _analytics;
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
 
   void _updateVersion() {
@@ -185,6 +193,7 @@ class XcodeProjectInterpreter {
     final Status status = _logger.startSpinner();
     final String? scheme = buildContext.scheme;
     final String? configuration = buildContext.configuration;
+    final String? target = buildContext.target;
     final String? deviceId = buildContext.deviceId;
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
@@ -195,10 +204,16 @@ class XcodeProjectInterpreter {
         ...<String>['-scheme', scheme],
       if (configuration != null)
         ...<String>['-configuration', configuration],
+      if (target != null)
+        ...<String>['-target', target],
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
-      if (deviceId != null)
+      if (buildContext.isWatch && buildContext.environmentType == EnvironmentType.physical)
+        'generic/platform=watchOS'
+      else if (buildContext.isWatch)
+        'generic/platform=watchOS Simulator'
+      else if (deviceId != null)
         'id=$deviceId'
       else if (buildContext.environmentType == EnvironmentType.physical)
         'generic/platform=iOS'
@@ -228,6 +243,11 @@ class XcodeProjectInterpreter {
           command: showBuildSettingsCommand.join(' '),
           flutterUsage: _usage,
         ).send();
+        _analytics.send(Event.flutterBuildInfo(
+          label: 'xcode-show-build-settings-timeout',
+          buildType: 'ios',
+          command: showBuildSettingsCommand.join(' '),
+        ));
       }
       _logger.printTrace('Unexpected failure to get Xcode build settings: $error.');
       return const <String, String>{};
@@ -283,6 +303,11 @@ class XcodeProjectInterpreter {
           command: showBuildSettingsCommand.join(' '),
           flutterUsage: _usage,
         ).send();
+        _analytics.send(Event.flutterBuildInfo(
+          label: 'xcode-show-build-settings-timeout',
+          buildType: 'ios',
+          command: showBuildSettingsCommand.join(' '),
+        ));
       }
       _logger.printTrace('Unexpected failure to get Pod Xcode project build settings: $error.');
       return null;
@@ -306,7 +331,7 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
@@ -376,15 +401,19 @@ class XcodeProjectBuildContext {
     this.configuration,
     this.environmentType = EnvironmentType.physical,
     this.deviceId,
+    this.target,
+    this.isWatch = false,
   });
 
   final String? scheme;
   final String? configuration;
   final EnvironmentType environmentType;
   final String? deviceId;
+  final String? target;
+  final bool isWatch;
 
   @override
-  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
+  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId, target);
 
   @override
   bool operator ==(Object other) {
@@ -395,7 +424,9 @@ class XcodeProjectBuildContext {
         other.scheme == scheme &&
         other.configuration == configuration &&
         other.deviceId == deviceId &&
-        other.environmentType == environmentType;
+        other.environmentType == environmentType &&
+        other.isWatch == isWatch &&
+        other.target == target;
   }
 }
 
@@ -470,6 +501,7 @@ class XcodeProjectInfo {
     }
     return false;
   }
+
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String? schemeFor(BuildInfo? buildInfo) {

@@ -10,7 +10,6 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 String? _unicodeChar(String key) {
   if (key.length == 1) {
@@ -21,22 +20,30 @@ String? _unicodeChar(String key) {
 
 /// Platform-specific key event data for Web.
 ///
+/// This class is DEPRECATED. Platform specific key event data will no longer
+/// available. See [KeyEvent] for what is available.
+///
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 @immutable
 class RawKeyEventDataWeb extends RawKeyEventData {
   /// Creates a key event data structure specific for Web.
-  ///
-  /// The [code] and [metaState] arguments must not be null.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataWeb({
     required this.code,
     required this.key,
     this.location = 0,
     this.metaState = modifierNone,
     this.keyCode = 0,
-  })  : assert(code != null),
-        assert(metaState != null);
+  });
 
   /// The `KeyboardEvent.code` corresponding to this event.
   ///
@@ -69,7 +76,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   /// The modifiers that were present when the key event occurred.
   ///
   /// See `lib/src/engine/keyboard.dart` in the web engine for the numerical
-  /// values of the `metaState`. These constants are also replicated as static
+  /// values of the [metaState]. These constants are also replicated as static
   /// constants in this class.
   ///
   /// See also:
@@ -106,8 +113,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
       return maybeLocationKey;
     }
 
-    // Look to see if the [code] is one we know about and have a mapping for.
-    final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
+    // Look to see if the [key] is one we know about and have a mapping for.
+    final LogicalKeyboardKey? newKey = kWebToLogicalKey[key];
     if (newKey != null) {
       return newKey;
     }

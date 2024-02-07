@@ -40,20 +40,14 @@ HttpMethod _fromMethodString(String value) {
 }
 
 String _toMethodString(HttpMethod method) {
-  switch (method) {
-    case HttpMethod.get:
-      return 'GET';
-    case HttpMethod.put:
-      return 'PUT';
-    case HttpMethod.delete:
-      return 'DELETE';
-    case HttpMethod.post:
-      return 'POST';
-    case HttpMethod.patch:
-      return 'PATCH';
-    case HttpMethod.head:
-      return 'HEAD';
-  }
+  return switch (method) {
+    HttpMethod.get => 'GET',
+    HttpMethod.put => 'PUT',
+    HttpMethod.delete => 'DELETE',
+    HttpMethod.post => 'POST',
+    HttpMethod.patch => 'PATCH',
+    HttpMethod.head => 'HEAD'
+  };
 }
 
 /// Create a fake request that configures the [FakeHttpClient] to respond
@@ -153,7 +147,7 @@ class FakeHttpClient implements HttpClient {
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
 
   @override
-  Function(String line)? keyLog;
+  void Function(String line)? keyLog;
 
   @override
   void close({bool force = false}) { }
@@ -347,7 +341,7 @@ class _FakeHttpClientRequest implements HttpClientRequest {
     });
     await completer.future;
     if (_responseError != null) {
-      return Future<HttpClientResponse>.error(_responseError!);
+      return Future<HttpClientResponse>.error(_responseError);
     }
     return _FakeHttpClientResponse(_response);
   }
@@ -457,7 +451,7 @@ class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientRes
   int get statusCode => _response.statusCode;
 }
 
-class _FakeHttpHeaders extends HttpHeaders {
+class _FakeHttpHeaders implements HttpHeaders {
   _FakeHttpHeaders(this._backingData);
 
   final Map<String, List<String>> _backingData;
@@ -472,12 +466,30 @@ class _FakeHttpHeaders extends HttpHeaders {
   }
 
   @override
+  late bool chunkedTransferEncoding;
+
+  @override
   void clear() {
     _backingData.clear();
   }
 
   @override
+  int contentLength = -1;
+
+  @override
+  ContentType? contentType;
+
+  @override
+  DateTime? date;
+
+  @override
+  DateTime? expires;
+
+  @override
   void forEach(void Function(String name, List<String> values) action) { }
+
+  @override
+  String? host;
 
   @override
   void noFolding(String name) {  }
@@ -501,4 +513,13 @@ class _FakeHttpHeaders extends HttpHeaders {
   String? value(String name) {
     return _backingData[name]?.join('; ');
   }
+
+  @override
+  DateTime? ifModifiedSince;
+
+  @override
+  late bool persistentConnection;
+
+  @override
+  int? port;
 }

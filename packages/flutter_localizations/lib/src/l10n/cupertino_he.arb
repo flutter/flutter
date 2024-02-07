@@ -31,5 +31,11 @@
   "selectAllButtonLabel": "בחירת הכול",
   "tabSemanticsLabel": "כרטיסייה $tabIndex מתוך $tabCount",
   "modalBarrierDismissLabel": "סגירה",
-  "searchTextFieldPlaceholderLabel": "חיפוש"
+  "searchTextFieldPlaceholderLabel": "חיפוש",
+  "noSpellCheckReplacementsLabel": "לא נמצאו חלופות",
+  "menuDismissLabel": "סגירת התפריט",
+  "lookUpButtonLabel": "חיפוש",
+  "searchWebButtonLabel": "חיפוש באינטרנט",
+  "shareButtonLabel": "שיתוף…",
+  "clearButtonLabel": "Clear"
 }

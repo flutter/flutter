@@ -10,7 +10,6 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 // Virtual key VK_PROCESSKEY in Win32 API.
 //
@@ -19,26 +18,31 @@ const int _vkProcessKey = 0xe5;
 
 /// Platform-specific key event data for Windows.
 ///
+/// This class is DEPRECATED. Platform specific key event data will no longer
+/// available. See [KeyEvent] for what is available.
+///
 /// This object contains information about key events obtained from Windows's
 /// win32 API.
 ///
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataWindows extends RawKeyEventData {
   /// Creates a key event data structure specific for Windows.
-  ///
-  /// The [keyCode], [scanCode], [characterCodePoint], and [modifiers], arguments
-  /// must not be null.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataWindows({
     this.keyCode = 0,
     this.scanCode = 0,
     this.characterCodePoint = 0,
     this.modifiers = 0,
-  }) : assert(keyCode != null),
-       assert(scanCode != null),
-       assert(characterCodePoint != null),
-       assert(modifiers != null);
+  });
 
   /// The hardware key code corresponding to this key event.
   ///
@@ -125,32 +129,24 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
-        break;
       case ModifierKey.shiftModifier:
         result = _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
-        break;
       case ModifierKey.altModifier:
         result = _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
-        break;
       case ModifierKey.metaModifier:
         // Windows does not provide an "any" key for win key press.
         result = _isLeftRightModifierPressed(side, modifierLeftMeta | modifierRightMeta , modifierLeftMeta, modifierRightMeta);
-        break;
       case ModifierKey.capsLockModifier:
         result = modifiers & modifierCaps != 0;
-        break;
       case ModifierKey.scrollLockModifier:
         result = modifiers & modifierScrollLock != 0;
-        break;
       case ModifierKey.numLockModifier:
         result = modifiers & modifierNumLock != 0;
-        break;
       // The OS does not expose the Fn key to the drivers, it doesn't generate a key message.
       case ModifierKey.functionModifier:
       case ModifierKey.symbolModifier:
         // These modifier masks are not used in Windows keyboards.
         result = false;
-        break;
     }
     assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;

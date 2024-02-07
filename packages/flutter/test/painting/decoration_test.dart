@@ -34,7 +34,7 @@ class SynchronousTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
     );
@@ -52,7 +52,7 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     throw throwable;
   }
 }
@@ -68,7 +68,7 @@ class AsyncTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(TestImageInfo(key, image: image)),
     );
@@ -88,7 +88,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(DelayedImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -111,7 +111,7 @@ class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(MultiFrameImageProvider key, ImageDecoderCallback decode) {
     return completer;
   }
 
@@ -140,6 +140,12 @@ void main() {
 
     c = Decoration.lerp(a, b, 1.0)! as BoxDecoration;
     expect(c.color, equals(b.color));
+  });
+
+  test('Decoration.lerp identical a,b', () {
+    expect(Decoration.lerp(null, null, 0), null);
+    const Decoration decoration = BoxDecoration();
+    expect(identical(Decoration.lerp(decoration, decoration, 0.5), decoration), true);
   });
 
   test('Decoration equality', () {
@@ -240,7 +246,6 @@ void main() {
   test('BoxDecoration backgroundImage clip', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
     void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip }) {
-      assert(shape != null);
       FakeAsync().run((FakeAsync async) async {
         final DelayedImageProvider imageProvider = DelayedImageProvider(image);
         final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
@@ -324,8 +329,20 @@ void main() {
     expect(paint.color, const Color(0x7F000000)); // 0.5 opacity
     expect(paint.filterQuality, FilterQuality.high);
     expect(paint.isAntiAlias, true);
-    // TODO(craiglabenz): change to true when https://github.com/flutter/flutter/issues/88909 is fixed
-    expect(paint.invertColors, !kIsWeb);
+    expect(paint.invertColors, isTrue);
+  });
+
+  test('DecorationImage.toString', () async {
+    expect(
+      DecorationImage(
+        image: SynchronousTestImageProvider(
+          await createTestImage(width: 100, height: 100),
+        ),
+        opacity: 0.99,
+        scale: 2.01,
+      ).toString(),
+      'DecorationImage(SynchronousTestImageProvider(), Alignment.center, scale 2.0, opacity 1.0, FilterQuality.low)',
+    );
   });
 
   test('DecorationImage with null textDirection configuration should throw Error', () async {
@@ -667,6 +684,86 @@ void main() {
       // ignore: avoid_dynamic_calls
       expect(call.positionalArguments[2].center, outputRect.center);
     }
+  });
+
+  test('paintImage with repeatX and fitHeight', () async {
+    final TestCanvas canvas = TestCanvas();
+
+    // Paint a square image into an output rect that is twice as wide as it is
+    // tall.  Two copies of the image should be painted, one next to the other.
+    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+
+    paintImage(
+      canvas: canvas,
+      rect: outputRect,
+      image: image,
+      alignment: Alignment.topLeft,
+      fit: BoxFit.fitHeight,
+      repeat: ImageRepeat.repeatX,
+    );
+
+    const Size imageSize = Size(100.0, 100.0);
+
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final Set<Rect> tileRects = <Rect>{};
+
+    expect(calls, hasLength(2));
+    for (final Invocation call in calls) {
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
+
+      expect(call.positionalArguments[0], isA<ui.Image>());
+
+      // sourceRect should contain all pixels of the source image
+      expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+      tileRects.add(call.positionalArguments[2] as Rect);
+
+      expect(call.positionalArguments[3], isA<Paint>());
+    }
+
+    expect(tileRects, <Rect>{const Rect.fromLTWH(30.0, 30.0, 200.0, 200.0), const Rect.fromLTWH(230.0, 30.0, 200.0, 200.0)});
+  });
+
+  test('paintImage with repeatY and fitWidth', () async {
+    final TestCanvas canvas = TestCanvas();
+
+    // Paint a square image into an output rect that is twice as tall as it is
+    // wide.  Two copies of the image should be painted, one above the other.
+    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+
+    paintImage(
+      canvas: canvas,
+      rect: outputRect,
+      image: image,
+      alignment: Alignment.topLeft,
+      fit: BoxFit.fitWidth,
+      repeat: ImageRepeat.repeatY,
+    );
+
+    const Size imageSize = Size(100.0, 100.0);
+
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final Set<Rect> tileRects = <Rect>{};
+
+    expect(calls, hasLength(2));
+    for (final Invocation call in calls) {
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
+
+      expect(call.positionalArguments[0], isA<ui.Image>());
+
+      // sourceRect should contain all pixels of the source image
+      expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+      tileRects.add(call.positionalArguments[2] as Rect);
+
+      expect(call.positionalArguments[3], isA<Paint>());
+    }
+
+    expect(tileRects, <Rect>{const Rect.fromLTWH(30.0, 30.0, 200.0, 200.0), const Rect.fromLTWH(30.0, 230.0, 200.0, 200.0)});
   });
 
   test('DecorationImage scale test', () async {

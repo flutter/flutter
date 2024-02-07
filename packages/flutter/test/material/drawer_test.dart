@@ -9,11 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Drawer control test', (WidgetTester tester) async {
+  testWidgets('Material2 - Drawer control test', (WidgetTester tester) async {
     const Key containerKey = Key('container');
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           drawer: Drawer(
             child: ListView(
@@ -52,6 +53,54 @@ void main() {
     box = tester.renderObject(find.byKey(containerKey));
     expect(box.size.width, equals(drawerWidth - 2 * 16.0));
     expect(box.size.height, equals(drawerHeight - 2 * 16.0));
+
+    expect(find.text('header'), findsOneWidget);
+  });
+
+  testWidgets('Material3 - Drawer control test', (WidgetTester tester) async {
+    const Key containerKey = Key('container');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          drawer: Drawer(
+            child: ListView(
+              children: <Widget>[
+                DrawerHeader(
+                  child: Container(
+                    key: containerKey,
+                    child: const Text('header'),
+                  ),
+                ),
+                const ListTile(
+                  leading: Icon(Icons.archive),
+                  title: Text('Archive'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Archive'), findsNothing);
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Archive'), findsOneWidget);
+
+    RenderBox box = tester.renderObject(find.byType(DrawerHeader));
+    expect(box.size.height, equals(160.0 + 8.0 + 1.0)); // height + bottom margin + bottom edge
+
+    final double drawerWidth = box.size.width;
+    final double drawerHeight = box.size.height;
+
+    box = tester.renderObject(find.byKey(containerKey));
+    expect(box.size.width, equals(drawerWidth - 2 * 16.0));
+    expect(box.size.height, equals(drawerHeight - 2 * 16.0 - 1.0)); // Header divider thickness is 1.0 in Material 3.
 
     expect(find.text('header'), findsOneWidget);
   });
@@ -424,8 +473,8 @@ void main() {
 
   testWidgets('Disposing drawer does not crash if drawer is open and framework is locked', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/34978
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(1800.0, 2400.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -458,15 +507,15 @@ void main() {
 
     // Change the orientation and cause the drawer controller to be disposed
     // while the framework is locked.
-    tester.binding.window.physicalSizeTestValue = const Size(2400.0, 1800.0);
+    tester.view.physicalSize = const Size(2400.0, 1800.0);
     await tester.pumpAndSettle();
     expect(find.byType(BackButton), findsNothing);
   });
 
   testWidgets('Disposing endDrawer does not crash if endDrawer is open and framework is locked', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/34978
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(1800.0, 2400.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -499,7 +548,7 @@ void main() {
 
     // Change the orientation and cause the drawer controller to be disposed
     // while the framework is locked.
-    tester.binding.window.physicalSizeTestValue = const Size(2400.0, 1800.0);
+    tester.view.physicalSize = const Size(2400.0, 1800.0);
     await tester.pumpAndSettle();
     expect(find.byType(BackButton), findsNothing);
   });
@@ -566,5 +615,275 @@ void main() {
 
     final RenderBox box = tester.renderObject(find.byType(Drawer));
     expect(box.size.width, equals(smallWidth));
+  });
+
+  testWidgets('Material3 - Drawer default shape (ltr)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      ),
+    );
+
+    final Finder drawerMaterial = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Material),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+    // Open the drawer.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the drawer shape.
+    Material material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16.0),
+          bottomRight: Radius.circular(16.0),
+        ),
+      ),
+    );
+
+    // Close the opened drawer.
+    await tester.tapAt(const Offset(750, 300));
+    await tester.pumpAndSettle();
+
+    // Open the end drawer.
+    state.openEndDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the end drawer shape.
+    material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          bottomLeft: Radius.circular(16.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Material3 - Drawer default shape (rtl)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      ),
+    );
+
+    final Finder drawerMaterial = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Material),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+    // Open the drawer.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the drawer shape.
+    Material material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          bottomLeft: Radius.circular(16.0),
+        ),
+      ),
+    );
+
+    // Close the opened drawer.
+    await tester.tapAt(const Offset(750, 300));
+    await tester.pumpAndSettle();
+
+    // Open the end drawer.
+    state.openEndDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the end drawer shape.
+    material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16.0),
+          bottomRight: Radius.circular(16.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Material3 - Drawer clip behavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Scaffold(
+          drawer: Drawer(),
+        ),
+      ),
+    );
+
+    final Finder drawerMaterial = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Material),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+    // Open the drawer.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test default clip behavior.
+    Material material = tester.widget<Material>(drawerMaterial);
+    expect(material.clipBehavior, Clip.hardEdge);
+
+    state.closeDrawer();
+    await tester.pumpAndSettle();
+
+    // Provide a custom clip behavior.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Scaffold(
+          drawer: Drawer(
+            clipBehavior: Clip.antiAlias,
+          ),
+        ),
+      ),
+    );
+
+    // Open the drawer again.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Clip behavior is now updated.
+    material = tester.widget<Material>(drawerMaterial);
+    expect(material.clipBehavior, Clip.antiAlias);
+  });
+
+  group('Material 2', () {
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    testWidgets('Material2 - Drawer default shape', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      );
+
+      final Finder drawerMaterial = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.byType(Material),
+      );
+
+      final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+      // Open the drawer.
+      state.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Test the drawer shape.
+      Material material = tester.widget<Material>(drawerMaterial);
+      expect(material.shape, null);
+
+      // Close the opened drawer.
+      await tester.tapAt(const Offset(750, 300));
+      await tester.pumpAndSettle();
+
+      // Open the end drawer.
+      state.openEndDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Test the end drawer shape.
+      material = tester.widget<Material>(drawerMaterial);
+      expect(material.shape, null);
+    });
+
+    testWidgets('Material2 - Drawer clip behavior', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
+            drawer: Drawer(),
+          ),
+        ),
+      );
+
+      final Finder drawerMaterial = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.byType(Material),
+      );
+
+      final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+      // Open the drawer.
+      state.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Test default clip behavior.
+      Material material = tester.widget<Material>(drawerMaterial);
+      expect(material.clipBehavior, Clip.none);
+
+      state.closeDrawer();
+      await tester.pumpAndSettle();
+
+      // Provide a shape and custom clip behavior.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
+            drawer: Drawer(
+              clipBehavior: Clip.hardEdge,
+              shape: RoundedRectangleBorder(),
+            ),
+          ),
+        ),
+      );
+
+      // Open the drawer again.
+      state.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Clip behavior is now updated.
+      material = tester.widget<Material>(drawerMaterial);
+      expect(material.clipBehavior, Clip.hardEdge);
+    });
   });
 }

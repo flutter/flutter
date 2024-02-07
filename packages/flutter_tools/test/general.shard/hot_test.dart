@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -12,23 +10,30 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    hide BuildMode, Target;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    as native_assets_cli;
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
+import 'fake_native_assets_build_runner.dart';
 
 void main() {
   group('validateReloadReport', () {
@@ -116,16 +121,21 @@ void main() {
 
   group('hotRestart', () {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    FileSystem fileSystem;
-    TestUsage testUsage;
+    late FileSystem fileSystem;
+    late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       testUsage = TestUsage();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     group('fails to setup', () {
-      TestHotRunnerConfig failingTestingConfig;
+      late TestHotRunnerConfig failingTestingConfig;
       setUp(() {
         failingTestingConfig = TestHotRunnerConfig(
           successfulHotRestartSetup: false,
@@ -147,6 +157,8 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
+          analytics: fakeAnalytics,
+
         ).restart(fullRestart: true);
         expect(result.isOk, false);
         expect(result.message, 'setupHotRestart failed');
@@ -174,16 +186,16 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           reassembleHelper: (
-            List<FlutterDevice> flutterDevices,
-            Map<FlutterDevice, List<FlutterView>> viewCache,
-            void Function(String message) onSlow,
+            List<FlutterDevice?> flutterDevices,
+            Map<FlutterDevice?, List<FlutterView>> viewCache,
+            void Function(String message)? onSlow,
             String reloadMessage,
-            String fastReassembleClassName,
           ) async => ReassembleResult(
-              <FlutterView, FlutterVmService>{null: null},
+              <FlutterView?, FlutterVmService?>{null: null},
               false,
               true,
             ),
+            analytics: fakeAnalytics,
         ).restart();
         expect(result.isOk, false);
         expect(result.message, 'setupHotReload failed');
@@ -198,7 +210,7 @@ void main() {
     });
 
     group('shutdown hook tests', () {
-      TestHotRunnerConfig shutdownTestingConfig;
+      late TestHotRunnerConfig shutdownTestingConfig;
 
       setUp(() {
         shutdownTestingConfig = TestHotRunnerConfig();
@@ -216,6 +228,7 @@ void main() {
           devices,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
+          analytics: fakeAnalytics,
         ).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
@@ -238,6 +251,7 @@ void main() {
           devices,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
+          analytics: fakeAnalytics,
         ).preExit();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
@@ -250,7 +264,7 @@ void main() {
     });
 
     group('successful hot restart', () {
-      TestHotRunnerConfig testingConfig;
+      late TestHotRunnerConfig testingConfig;
       setUp(() {
         testingConfig = TestHotRunnerConfig(
           successfulHotRestartSetup: true,
@@ -279,7 +293,7 @@ void main() {
           },
         );
 
-        (fakeFlutterDevice.devFS as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+        (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
         final OperationResult result = await HotRunner(
           devices,
@@ -287,6 +301,7 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           stopwatchFactory: fakeStopwatchFactory,
+          analytics: fakeAnalytics,
         ).restart(fullRestart: true);
 
         expect(result.isOk, true);
@@ -296,7 +311,6 @@ void main() {
             hotEventSdkName: 'Tester',
             hotEventEmulator: false,
             hotEventFullRestart: true,
-            fastReassemble: false,
             hotEventOverallTimeInMs: 64000,
             hotEventSyncedBytes: 4,
             hotEventInvalidatedSourcesCount: 2,
@@ -306,6 +320,23 @@ void main() {
             hotEventScannedSourcesCount: 8,
           )),
         ]);
+
+        expect(fakeAnalytics.sentEvents, contains(
+          Event.hotRunnerInfo(
+            label: 'restart',
+            targetPlatform: 'flutter-tester',
+            sdkName: 'Tester',
+            emulator: false,
+            fullRestart: true,
+            syncedBytes: 4,
+            invalidatedSourcesCount: 2,
+            transferTimeInMs: 32000,
+            overallTimeInMs: 64000,
+            compileTimeInMs: 16000,
+            findInvalidatedTimeInMs: 128000,
+            scannedSourcesCount: 8
+          )
+        ));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -318,7 +349,7 @@ void main() {
     });
 
     group('successful hot reload', () {
-      TestHotRunnerConfig testingConfig;
+      late TestHotRunnerConfig testingConfig;
       setUp(() {
         testingConfig = TestHotRunnerConfig(
           successfulHotReloadSetup: true,
@@ -349,7 +380,7 @@ void main() {
           },
         );
 
-        (fakeFlutterDevice.devFS as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+        (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
         final OperationResult result = await HotRunner(
           devices,
@@ -357,15 +388,18 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           stopwatchFactory: fakeStopwatchFactory,
+          analytics: fakeAnalytics,
           reloadSourcesHelper: (
             HotRunner hotRunner,
-            List<FlutterDevice> flutterDevices,
-            bool pause,
+            List<FlutterDevice?> flutterDevices,
+            bool? pause,
             Map<String, dynamic> firstReloadDetails,
-            String targetPlatform,
-            String sdkName,
-            bool emulator,
-            String reason,
+            String? targetPlatform,
+            String? sdkName,
+            bool? emulator,
+            String? reason,
+            Usage usage,
+            Analytics? analytics,
           ) async {
             firstReloadDetails['finalLibraryCount'] = 2;
             firstReloadDetails['receivedLibraryCount'] = 3;
@@ -374,13 +408,12 @@ void main() {
             return OperationResult.ok;
           },
           reassembleHelper: (
-            List<FlutterDevice> flutterDevices,
-            Map<FlutterDevice, List<FlutterView>> viewCache,
-            void Function(String message) onSlow,
+            List<FlutterDevice?> flutterDevices,
+            Map<FlutterDevice?, List<FlutterView>> viewCache,
+            void Function(String message)? onSlow,
             String reloadMessage,
-            String fastReassembleClassName,
           ) async => ReassembleResult(
-              <FlutterView, FlutterVmService>{null: null},
+              <FlutterView?, FlutterVmService?>{null: null},
               false,
               true,
             ),
@@ -401,7 +434,6 @@ void main() {
             hotEventSdkName: 'Tester',
             hotEventEmulator: false,
             hotEventFullRestart: false,
-            fastReassemble: false,
             hotEventCompileTimeInMs: 16000,
             hotEventFindInvalidatedTimeInMs: 64000,
             hotEventScannedSourcesCount: 16,
@@ -409,6 +441,28 @@ void main() {
             hotEventReloadVMTimeInMs: 512000,
           )),
         ]);
+        expect(fakeAnalytics.sentEvents, contains(
+          Event.hotRunnerInfo(
+            label: 'reload',
+            targetPlatform: 'flutter-tester',
+            sdkName: 'Tester',
+            emulator: false,
+            fullRestart: false,
+            finalLibraryCount: 2,
+            syncedLibraryCount: 3,
+            syncedClassesCount: 4,
+            syncedProceduresCount: 5,
+            syncedBytes: 8,
+            invalidatedSourcesCount: 6,
+            transferTimeInMs: 32000,
+            overallTimeInMs: 128000,
+            compileTimeInMs: 16000,
+            findInvalidatedTimeInMs: 64000,
+            scannedSourcesCount: 16,
+            reassembleTimeInMs: 256000,
+            reloadVMTimeInMs: 512000
+          ),
+        ));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -421,7 +475,7 @@ void main() {
     });
 
     group('hot restart that failed to sync dev fs', () {
-      TestHotRunnerConfig testingConfig;
+      late TestHotRunnerConfig testingConfig;
       setUp(() {
         testingConfig = TestHotRunnerConfig(
           successfulHotRestartSetup: true,
@@ -440,6 +494,7 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
+          analytics: fakeAnalytics,
         );
 
         await expectLater(runner.restart(fullRestart: true), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
@@ -455,7 +510,7 @@ void main() {
     });
 
     group('hot reload that failed to sync dev fs', () {
-      TestHotRunnerConfig testingConfig;
+      late TestHotRunnerConfig testingConfig;
       setUp(() {
         testingConfig = TestHotRunnerConfig(
           successfulHotReloadSetup: true,
@@ -474,6 +529,7 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
+          analytics: fakeAnalytics,
         );
 
         await expectLater(runner.restart(), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
@@ -490,10 +546,15 @@ void main() {
   });
 
   group('hot attach', () {
-    FileSystem fileSystem;
+    late FileSystem fileSystem;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     testUsingContext('Exits with code 2 when HttpException is thrown '
@@ -516,6 +577,7 @@ void main() {
       final int exitCode = await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
+        analytics: fakeAnalytics,
       ).attach(needsFullRestart: false);
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{
@@ -528,6 +590,17 @@ void main() {
   });
 
   group('hot cleanupAtFinish()', () {
+    late FileSystem fileSystem;
+    late FakeAnalytics fakeAnalytics;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+    });
+
     testUsingContext('disposes each device', () async {
       final FakeDevice device1 = FakeDevice();
       final FakeDevice device2 = FakeDevice();
@@ -542,6 +615,7 @@ void main() {
       await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
+        analytics: fakeAnalytics,
       ).cleanupAtFinish();
 
       expect(device1.disposed, true);
@@ -549,6 +623,141 @@ void main() {
 
       expect(flutterDevice1.stoppedEchoingDeviceLog, true);
       expect(flutterDevice2.stoppedEchoingDeviceLog, true);
+    });
+  });
+
+  group('native assets', () {
+    late TestHotRunnerConfig testingConfig;
+    late FileSystem fileSystem;
+    late FakeAnalytics fakeAnalytics;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      testingConfig = TestHotRunnerConfig(
+        successfulHotRestartSetup: true,
+      );
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+    });
+    testUsingContext('native assets restart', () async {
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        fakeFlutterDevice,
+      ];
+
+      fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
+        success: true,
+        invalidatedSourcesCount: 6,
+        syncedBytes: 8,
+        scannedSourcesCount: 16,
+        compileDuration: const Duration(seconds: 16),
+        transferDuration: const Duration(seconds: 32),
+      );
+
+      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+
+      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', fileSystem.currentDirectory.uri),
+        ],
+        dryRunResult: FakeNativeAssetsBuilderResult(
+          assets: <Asset>[
+            Asset(
+              id: 'package:bar/bar.dart',
+              linkMode: LinkMode.dynamic,
+              target: native_assets_cli.Target.macOSArm64,
+              path: AssetAbsolutePath(Uri.file('bar.dylib')),
+            ),
+          ],
+        ),
+      );
+
+      final HotRunner hotRunner = HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+        devtoolsHandler: createNoOpHandler,
+        buildRunner: buildRunner,
+        analytics: fakeAnalytics,
+      );
+      final OperationResult result = await hotRunner.restart(fullRestart: true);
+      expect(result.isOk, true);
+      // Hot restart does not require rerunning anything for native assets.
+      // The previous native assets mapping should be used.
+      expect(buildRunner.buildInvocations, 0);
+      expect(buildRunner.dryRunInvocations, 0);
+      expect(buildRunner.hasPackageConfigInvocations, 0);
+      expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
+    }, overrides: <Type, Generator>{
+      HotRunnerConfig: () => testingConfig,
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+    });
+
+    testUsingContext('native assets run unsupported', () async {
+      final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.fuchsia_arm64);
+      final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        fakeFlutterDevice,
+      ];
+
+      fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
+        success: true,
+        invalidatedSourcesCount: 6,
+        syncedBytes: 8,
+        scannedSourcesCount: 16,
+        compileDuration: const Duration(seconds: 16),
+        transferDuration: const Duration(seconds: 32),
+      );
+
+      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+
+      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', fileSystem.currentDirectory.uri),
+        ],
+        dryRunResult: FakeNativeAssetsBuilderResult(
+          assets: <Asset>[
+            Asset(
+              id: 'package:bar/bar.dart',
+              linkMode: LinkMode.dynamic,
+              target: native_assets_cli.Target.macOSArm64,
+              path: AssetAbsolutePath(Uri.file('bar.dylib')),
+            ),
+          ],
+        ),
+      );
+
+      final HotRunner hotRunner = HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+        devtoolsHandler: createNoOpHandler,
+        buildRunner: buildRunner,
+        analytics: fakeAnalytics,
+      );
+      expect(
+        () => hotRunner.run(),
+        throwsToolExit( message:
+          'Package(s) bar require the native assets feature. '
+          'This feature has not yet been implemented for `TargetPlatform.fuchsia_arm64`. '
+          'For more info see https://github.com/flutter/flutter/issues/129757.',
+        )
+      );
+
+    }, overrides: <Type, Generator>{
+      HotRunnerConfig: () => testingConfig,
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     });
   });
 }
@@ -561,10 +770,10 @@ class FakeDevFs extends Fake implements DevFS {
   List<Uri> sources = <Uri>[];
 
   @override
-  DateTime lastCompiled;
+  DateTime? lastCompiled;
 
   @override
-  PackageConfig lastPackageConfig;
+  PackageConfig? lastPackageConfig;
 
   @override
   Set<String> assetPathsToEvict = <String>{};
@@ -573,13 +782,19 @@ class FakeDevFs extends Fake implements DevFS {
   Set<String> shaderPathsToEvict= <String>{};
 
   @override
-  Uri baseUri;
+  Set<String> scenePathsToEvict= <String>{};
+
+  @override
+  Uri? baseUri;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
+  FakeDevice({
+    TargetPlatform targetPlatform = TargetPlatform.tester,
+  }) : _targetPlatform = targetPlatform;
+
+  final TargetPlatform _targetPlatform;
+
   bool disposed = false;
 
   @override
@@ -595,7 +810,7 @@ class FakeDevice extends Fake implements Device {
   bool supportsFlutterExit = true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
   @override
   Future<String> get sdkNameAndVersion async => 'Tester';
@@ -608,8 +823,8 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage app, {
-    String userIdentifier,
+    ApplicationPackage? app, {
+    String? userIdentifier,
   }) async {
     return true;
   }
@@ -624,7 +839,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   bool stoppedEchoingDeviceLog = false;
-  Future<UpdateFSReport> Function() updateDevFSReportCallback;
+  late Future<UpdateFSReport> Function() updateDevFSReportCallback;
 
   @override
   final FakeDevice device;
@@ -635,55 +850,58 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }
 
   @override
-  DevFS devFS = FakeDevFs();
+  DevFS? devFS = FakeDevFs();
 
   @override
   FlutterVmService get vmService => FakeFlutterVmService();
 
   @override
-  ResidentCompiler generator;
+  ResidentCompiler? generator;
 
   @override
   Future<UpdateFSReport> updateDevFS({
-    Uri mainUri,
-    String target,
-    AssetBundle bundle,
-    DateTime firstBuildTime,
+    Uri? mainUri,
+    String? target,
+    AssetBundle? bundle,
+    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
-    String projectRootPath,
-    String pathToReload,
-    @required String dillOutputPath,
-    @required List<Uri> invalidatedFiles,
-    @required PackageConfig packageConfig,
+    String? projectRootPath,
+    String? pathToReload,
+    required String dillOutputPath,
+    required List<Uri> invalidatedFiles,
+    required PackageConfig packageConfig,
   }) => updateDevFSReportCallback();
+
+  @override
+  TargetPlatform? get targetPlatform => device._targetPlatform;
 }
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({
-    @required Device device,
-    @required this.exception,
-    @required ResidentCompiler generator,
-  })  : assert(exception != null),
-        super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
+    required Device device,
+    required this.exception,
+    required ResidentCompiler generator,
+  })  : super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
 
   @override
   Future<void> connect({
-    ReloadSources reloadSources,
-    Restart restart,
-    CompileExpression compileExpression,
-    GetSkSLMethod getSkSLMethod,
-    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    ReloadSources? reloadSources,
+    Restart? restart,
+    CompileExpression? compileExpression,
+    GetSkSLMethod? getSkSLMethod,
+    FlutterProject? flutterProject,
+    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
     bool cacheStartupProfile = false,
-    bool ipv6 = false,
-    int hostVmServicePort,
-    int ddsPort,
+    bool? ipv6 = false,
+    int? hostVmServicePort,
+    int? ddsPort,
     bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
@@ -692,19 +910,19 @@ class TestFlutterDevice extends FlutterDevice {
 
 class TestHotRunnerConfig extends HotRunnerConfig {
   TestHotRunnerConfig({this.successfulHotRestartSetup, this.successfulHotReloadSetup});
-  bool successfulHotRestartSetup;
-  bool successfulHotReloadSetup;
+  bool? successfulHotRestartSetup;
+  bool? successfulHotReloadSetup;
   bool shutdownHookCalled = false;
   bool updateDevFSCompleteCalled = false;
 
   @override
-  Future<bool> setupHotRestart() async {
+  Future<bool?> setupHotRestart() async {
     assert(successfulHotRestartSetup != null, 'setupHotRestart is not expected to be called in this test.');
     return successfulHotRestartSetup;
   }
 
   @override
-  Future<bool> setupHotReload() async {
+  Future<bool?> setupHotReload() async {
     assert(successfulHotReloadSetup != null, 'setupHotReload is not expected to be called in this test.');
     return successfulHotReloadSetup;
   }
@@ -749,7 +967,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

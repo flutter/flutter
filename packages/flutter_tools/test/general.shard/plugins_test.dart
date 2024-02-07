@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
+import 'package:flutter_tools/src/preview_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
@@ -34,6 +35,7 @@ class _PluginPlatformInfo {
     this.pluginClass,
     this.dartPluginClass,
     this.androidPackage,
+    this.sharedDarwinSource = false,
     this.fileName
   }) : assert(pluginClass != null || dartPluginClass != null),
        assert(androidPackage == null || pluginClass != null);
@@ -46,6 +48,8 @@ class _PluginPlatformInfo {
 
   /// The package entry for an Android plugin implementation using pluginClass.
   final String? androidPackage;
+
+  final bool sharedDarwinSource;
 
   /// The fileName entry for a web plugin implementation.
   final String? fileName;
@@ -61,6 +65,8 @@ class _PluginPlatformInfo {
         '${indentation}dartPluginClass: $dartPluginClass',
       if (androidPackage != null)
         '${indentation}package: $androidPackage',
+      if (sharedDarwinSource)
+        '${indentation}sharedDarwinSource: true',
       if (fileName != null)
         '${indentation}fileName: $fileName',
     ].join('\n');
@@ -205,7 +211,7 @@ void main() {
             ? fakePubCache.childDirectory(name)
             : fileSystem.directory(nameOrPath);
         packagesFile.writeAsStringSync(
-            '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+            '$name:${pluginDirectory.childFile('lib').uri}\n',
             mode: FileMode.writeOnlyAppend);
         pluginDirectory.childFile('pubspec.yaml')
             ..createSync(recursive: true)
@@ -374,8 +380,6 @@ flutter:
       required String name,
       required List<String> dependencies,
     }) {
-      assert(name != null);
-      assert(dependencies != null);
 
       final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('flutter_plugin.');
       pluginDirectory
@@ -407,8 +411,6 @@ dependencies:
       required Map<String, _PluginPlatformInfo> platforms,
       List<String> dependencies = const <String>[],
     }) {
-      assert(name != null);
-      assert(dependencies != null);
 
       final Iterable<String> platformSections = platforms.entries.map((MapEntry<String, _PluginPlatformInfo> entry) => '''
       ${entry.key}:
@@ -595,14 +597,14 @@ dependencies:
       });
 
       testUsingContext(
-        '.flutter-plugins-dependencies indicates native build inclusion', () async {
+        '.flutter-plugins-dependencies contains plugin platform info', () async {
         createPlugin(
           name: 'plugin-a',
           platforms: const <String, _PluginPlatformInfo>{
             // Native-only; should include native build.
             'android': _PluginPlatformInfo(pluginClass: 'Foo', androidPackage: 'bar.foo'),
             // Hybrid native and Dart; should include native build.
-            'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar'),
+            'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar', sharedDarwinSource: true),
             // Web; should not have the native build key at all since it doesn't apply.
             'web': _PluginPlatformInfo(pluginClass: 'Foo', fileName: 'lib/foo.dart'),
             // Dart-only; should not include native build.
@@ -618,20 +620,45 @@ dependencies:
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as  Map<String, dynamic>;
-        final Map<String, dynamic>? plugins = jsonContent['plugins'] as Map<String, dynamic>?;
+        final Map<String, dynamic>? actualPlugins = jsonContent['plugins'] as Map<String, dynamic>?;
 
-        // Extracts the native_build key (if any) from the first plugin for the
-        // given platform.
-        bool? getNativeBuildValue(String platform) {
-          final List<Map<String, dynamic>> platformPlugins = (plugins![platform]
-            as List<dynamic>).cast<Map<String, dynamic>>();
-          expect(platformPlugins.length, 1);
-          return platformPlugins[0]['native_build'] as bool?;
-        }
-        expect(getNativeBuildValue('android'), true);
-        expect(getNativeBuildValue('ios'), true);
-        expect(getNativeBuildValue('web'), null);
-        expect(getNativeBuildValue('windows'), false);
+        final Map<String, Object> expectedPlugins = <String, Object>{
+          'ios': <Map<String, Object>>[
+            <String, Object>{
+              'name': 'plugin-a',
+              'path': '/.tmp_rand0/flutter_plugin.rand0/',
+              'shared_darwin_source': true,
+              'native_build': true,
+              'dependencies': <String>[]
+            }
+          ],
+          'android': <Map<String, Object>>[
+            <String, Object>{
+              'name': 'plugin-a',
+              'path': '/.tmp_rand0/flutter_plugin.rand0/',
+              'native_build': true,
+              'dependencies': <String>[]
+            }
+          ],
+          'macos': <Map<String, Object>>[],
+          'linux': <Map<String, Object>>[],
+          'windows': <Map<String, Object>>[
+            <String, Object>{
+              'name': 'plugin-a',
+              'path': '/.tmp_rand0/flutter_plugin.rand0/',
+              'native_build': false,
+              'dependencies': <String>[]
+            }
+          ],
+          'web': <Map<String, Object>>[
+            <String, Object>{
+              'name': 'plugin-a',
+              'path': '/.tmp_rand0/flutter_plugin.rand0/',
+              'dependencies': <String>[]
+            }
+          ]
+        };
+        expect(actualPlugins, expectedPlugins);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1034,10 +1061,10 @@ dependencies:
         const String newPluginName = 'flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());';
         const String oldPluginName = 'abcplugin1.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("abcplugin1.UseOldEmbedding"));';
         final String content = registrant.readAsStringSync();
-        for(final String plugin in <String>[newPluginName,oldPluginName]) {
+        for (final String plugin in <String>[newPluginName,oldPluginName]) {
           expect(content, contains(plugin));
           expect(content.split(plugin).first.trim().endsWith('try {'), isTrue);
-          expect(content.split(plugin).last.trim().startsWith('} catch(Exception e) {'), isTrue);
+          expect(content.split(plugin).last.trim().startsWith('} catch (Exception e) {'), isTrue);
         }
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -1412,6 +1439,29 @@ flutter:
         FileSystem: () => fsWindows,
         ProcessManager: () => FakeProcessManager.any(),
       });
+
+      testUsingContext('injectPlugins will validate if all plugins in the project are part of the passed allowedPlugins', () async {
+        // Re-run the setup using the Windows filesystem.
+        setUpProject(fsWindows);
+        createFakePlugins(fsWindows, const <String>['plugin_one', 'plugin_two']);
+
+        expect(
+          () => injectPlugins(
+            flutterProject,
+            linuxPlatform: true,
+            windowsPlatform: true,
+            allowedPlugins: PreviewDevice.supportedPubPlugins,
+          ),
+          throwsToolExit(message: '''
+The Flutter Preview device does not support the following plugins from your pubspec.yaml:
+
+[plugin_one, plugin_two]
+'''),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fsWindows,
+        ProcessManager: () => FakeProcessManager.empty(),
+      });
     });
 
     group('createPluginSymlinks', () {
@@ -1661,6 +1711,24 @@ flutter:
           destination: ephemeralPackagePath,
         ),
         throwsToolExit(message: 'administrator'),
+      );
+    });
+
+    testWithoutContext('Symlink failures instruct developers to have their project on the same drive as their SDK', () async {
+      final Platform platform = FakePlatform(operatingSystem: 'windows');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972]');
+
+      const FileSystemException e = FileSystemException('', '', OSError('', 1));
+
+      expect(
+        () => handleSymlinkException(
+          e,
+          platform: platform,
+          os: os,
+          source: pubCachePath,
+          destination: ephemeralPackagePath,
+        ),
+        throwsToolExit(message: 'Try moving your Flutter project to the same drive as your Flutter SDK'),
       );
     });
 

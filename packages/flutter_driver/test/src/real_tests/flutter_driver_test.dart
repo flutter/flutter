@@ -189,6 +189,33 @@ void main() {
       );
     });
 
+    test('Refreshes isolate if it is not started for long time', () async {
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kNone, timestamp: 0);
+      fakeClient.onGetIsolate = changeIsolateEventAfter(
+        5,
+        vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 1),
+      );
+
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expect(driver, isNotNull);
+      expect(
+        fakeClient.connectionLog,
+        <String>[
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'setFlag pause_isolates_on_start false',
+          'resume',
+          'streamListen Isolate',
+          'getIsolate',
+          'onIsolateEvent',
+          'streamCancel Isolate',
+        ],
+      );
+    });
+
     test('Connects to isolate number', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number!));
@@ -240,6 +267,14 @@ void main() {
 
     test('connects to isolate paused mid-flight', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseBreakpoint, timestamp: 0);
+
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expect(driver, isNotNull);
+      expectLogContains('Isolate is paused mid-flight');
+    });
+
+    test('connects to isolate paused mid-flight after request', () async {
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPausePostRequest, timestamp: 0);
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -1055,6 +1090,15 @@ vms.Response? makeFakeResponse(
   });
 }
 
+void Function(vms.Isolate) changeIsolateEventAfter(int gets, vms.Event nextEvent) {
+  return (vms.Isolate i) {
+    gets -= 1;
+    if (gets == 0) {
+      i.pauseEvent = nextEvent;
+    }
+  };
+}
+
 class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   @override
   bool supportsTimelineAction = false;
@@ -1082,6 +1126,7 @@ class FakeVmService extends Fake implements vms.VmService {
   FakeVM? vm;
   bool failOnSetFlag = false;
   bool failOnResumeWith101 = false;
+  void Function(vms.Isolate)? onGetIsolate;
 
   final List<String> connectionLog = <String>[];
 
@@ -1092,6 +1137,7 @@ class FakeVmService extends Fake implements vms.VmService {
   Future<vms.Isolate> getIsolate(String isolateId) async {
     connectionLog.add('getIsolate');
     if (isolateId == vm!.isolate!.id) {
+      onGetIsolate?.call(vm!.isolate!);
       return vm!.isolate!;
     }
     throw UnimplementedError('getIsolate called with unrecognized $isolateId');
@@ -1147,9 +1193,9 @@ class FakeVmService extends Fake implements vms.VmService {
     commandLog.add('$method $args');
     await artificialExtensionDelay;
 
-    final vms.Response response = responses[args!['command']]!;
+    final vms.Response? response = responses[args!['command']];
     assert(response != null, 'Failed to create a response for ${args['command']}');
-    return response;
+    return response!;
   }
 
   @override
@@ -1197,9 +1243,9 @@ class FakeVmService extends Fake implements vms.VmService {
   @override
   Future<vms.Timeline> getVMTimeline({int? timeOriginMicros, int? timeExtentMicros}) async {
     connectionLog.add('getVMTimeline $timeOriginMicros $timeExtentMicros');
-    final vms.Timeline timeline = timelineResponses[timeOriginMicros ?? 1]!;
+    final vms.Timeline? timeline = timelineResponses[timeOriginMicros ?? 1];
     assert(timeline != null, 'Missing entry in timelineResponses[$timeOriginMicros]');
-    return timeline;
+    return timeline!;
   }
 
   @override

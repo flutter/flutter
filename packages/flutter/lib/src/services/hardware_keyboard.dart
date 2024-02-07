@@ -7,14 +7,51 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
+import 'debug.dart';
 import 'raw_keyboard.dart';
+import 'raw_keyboard_android.dart';
+import 'system_channels.dart';
 
 export 'dart:ui' show KeyData;
 
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
+
+// When using _keyboardDebug, always call it like so:
+//
+// assert(_keyboardDebug(() => 'Blah $foo'));
+//
+// It needs to be inside the assert in order to be removed in release mode, and
+// it needs to use a closure to generate the string in order to avoid string
+// interpolation when debugPrintKeyboardEvents is false.
+//
+// It will throw a StateError if you try to call it when the app is in release
+// mode.
+bool _keyboardDebug(
+  String Function() messageFunc, [
+  Iterable<Object> Function()? detailsFunc,
+]) {
+  if (kReleaseMode) {
+    throw StateError(
+      '_keyboardDebug was called in Release mode, which means they are called '
+      'without being wrapped in an assert. Always call _keyboardDebug like so:\n'
+      r"  assert(_keyboardDebug(() => 'Blah $foo'));"
+    );
+  }
+  if (!debugPrintKeyboardEvents) {
+    return true;
+  }
+  debugPrint('KEYBOARD: ${messageFunc()}');
+  final Iterable<Object> details = detailsFunc?.call() ?? const <Object>[];
+  if (details.isNotEmpty) {
+    for (final Object detail in details) {
+      debugPrint('    $detail');
+    }
+  }
+  // Return true so that it can be used inside of an assert.
+  return true;
+}
 
 /// Represents a lock mode of a keyboard, such as [KeyboardLockMode.capsLock].
 ///
@@ -26,34 +63,33 @@ export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
 /// Only a limited number of modes are supported, which are enumerated as
 /// static members of this class. Manual constructing of this class is
 /// prohibited.
-@immutable
-class KeyboardLockMode {
-  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
-  // members of this class, therefore constructing is prohibited.
-  const KeyboardLockMode._(this.logicalKey);
-
-  /// The logical key that triggers this lock mode.
-  final LogicalKeyboardKey logicalKey;
-
+enum KeyboardLockMode {
   /// Represents the number lock mode on the keyboard.
   ///
   /// On supporting systems, enabling number lock mode usually allows key
   /// presses of the number pad to input numbers, instead of acting as up, down,
   /// left, right, page up, end, etc.
-  static const KeyboardLockMode numLock = KeyboardLockMode._(LogicalKeyboardKey.numLock);
+  numLock._(LogicalKeyboardKey.numLock),
 
   /// Represents the scrolling lock mode on the keyboard.
   ///
   /// On supporting systems and applications (such as a spreadsheet), enabling
   /// scrolling lock mode usually allows key presses of the cursor keys to
   /// scroll the document instead of the cursor.
-  static const KeyboardLockMode scrollLock = KeyboardLockMode._(LogicalKeyboardKey.scrollLock);
+  scrollLock._(LogicalKeyboardKey.scrollLock),
 
   /// Represents the capital letters lock mode on the keyboard.
   ///
   /// On supporting systems, enabling capital lock mode allows key presses of
   /// the letter keys to input uppercase letters instead of lowercase.
-  static const KeyboardLockMode capsLock = KeyboardLockMode._(LogicalKeyboardKey.capsLock);
+  capsLock._(LogicalKeyboardKey.capsLock);
+
+  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
+  // members of this class, therefore constructing is prohibited.
+  const KeyboardLockMode._(this.logicalKey);
+
+  /// The logical key that triggers this lock mode.
+  final LogicalKeyboardKey logicalKey;
 
   static final Map<int, KeyboardLockMode> _knownLockModes = <int, KeyboardLockMode>{
     numLock.logicalKey.keyId: numLock,
@@ -88,6 +124,7 @@ abstract class KeyEvent with Diagnosticable {
     required this.logicalKey,
     this.character,
     required this.timeStamp,
+    this.deviceType = ui.KeyEventDeviceType.keyboard,
     this.synthesized = false,
   });
 
@@ -101,7 +138,7 @@ abstract class KeyEvent with Diagnosticable {
   /// is a mnemonic ("keyA" is easier to remember than 0x70004), derived from the
   /// key's effect on a QWERTY keyboard. The name does not represent the key's
   /// effect whatsoever (a physical "keyA" can be the Q key on an AZERTY
-  /// keyboard.)
+  /// keyboard).
   ///
   /// For instance, if you wanted to make a game where the key to the right of
   /// the CAPS LOCK key made the player move left, you would be comparing a
@@ -115,10 +152,10 @@ abstract class KeyEvent with Diagnosticable {
   ///
   /// Also, even though physical keys are defined with USB HID codes, their
   /// values are not necessarily the same HID codes produced by the hardware and
-  /// presented to the driver, because on most platforms Flutter has to map the
-  /// platform representation back to an HID code since the original HID
-  /// code is not provided. USB HID is simply a conveniently well-defined
-  /// standard to list possible keys that a Flutter app can encounter.
+  /// presented to the driver. On most platforms, Flutter has to map the
+  /// platform representation back to a HID code because the original HID
+  /// code is not provided. USB HID was chosen because it is a well-defined
+  /// standard for referring to keys such as those a Flutter app may encounter.
   ///
   /// See also:
   ///
@@ -146,7 +183,7 @@ abstract class KeyEvent with Diagnosticable {
   /// keystroke, if any.
   ///
   /// This will only return a character if this keystroke, combined with any
-  /// preceding keystroke(s), generats a character, and only on a "key down"
+  /// preceding keystroke(s), generates a character, and only on a "key down"
   /// event. It will return null if no character has been generated by the
   /// keystroke (e.g. a "dead" or "combining" key), or if the corresponding key
   /// is a key without a visual representation, such as a modifier key or a
@@ -170,6 +207,13 @@ abstract class KeyEvent with Diagnosticable {
   /// All events share the same timeStamp origin.
   final Duration timeStamp;
 
+  /// The source device type for the key event.
+  ///
+  /// Not all platforms supply an accurate type.
+  ///
+  /// Defaults to [ui.KeyEventDeviceType.keyboard].
+  final ui.KeyEventDeviceType deviceType;
+
   /// Whether this event is synthesized by Flutter to synchronize key states.
   ///
   /// An non-[synthesized] event is converted from a native event, and a native
@@ -178,7 +222,7 @@ abstract class KeyEvent with Diagnosticable {
   /// might be converted to a Flutter down event when necessary.)
   ///
   /// A [synthesized] event is created without a source native event in order to
-  /// synthronize key states. For example, if the native platform shows that a
+  /// synchronize key states. For example, if the native platform shows that a
   /// shift key that was previously held has been released somehow without the
   /// key up event dispatched (probably due to loss of focus), a synthesized key
   /// up event will be added to regularized the event stream.
@@ -217,6 +261,7 @@ class KeyDownEvent extends KeyEvent {
     super.character,
     required super.timeStamp,
     super.synthesized,
+    super.deviceType,
   });
 }
 
@@ -236,11 +281,15 @@ class KeyUpEvent extends KeyEvent {
     required super.logicalKey,
     required super.timeStamp,
     super.synthesized,
+    super.deviceType,
   });
 }
 
 /// An event indicating that the user has been holding a key on the keyboard
 /// and causing repeated events.
+///
+/// Repeat events are not guaranteed and are provided only if supported by the
+/// underlying platform.
 ///
 /// See also:
 ///
@@ -256,10 +305,11 @@ class KeyRepeatEvent extends KeyEvent {
     required super.logicalKey,
     super.character,
     required super.timeStamp,
+    super.deviceType,
   });
 }
 
-/// The signature for [HardwareKeyboard.addHandler], a callback to to decide whether
+/// The signature for [HardwareKeyboard.addHandler], a callback to decide whether
 /// the entire framework handles a key event.
 typedef KeyEventCallback = bool Function(KeyEvent event);
 
@@ -350,31 +400,11 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 /// resolve any conflicts and provide a regularized key event stream, which
 /// can deviate from the ground truth.
 ///
-/// ## Compared to [RawKeyboard]
-///
-/// [RawKeyboard] is the legacy API, and will be deprecated and removed in the
-/// future. It is recommended to always use [HardwareKeyboard] and [KeyEvent]
-/// APIs (such as [FocusNode.onKeyEvent]) to handle key events.
-///
-/// Behavior-wise, [RawKeyboard] provides a less unified, less regular
-/// event model than [HardwareKeyboard]. For example:
-///
-///  * Down events might not be matched with an up event, and vice versa (the
-///    set of pressed keys is silently updated).
-///  * The logical key of the down event might not be the same as that of the up
-///    event.
-///  * Down events and repeat events are not easily distinguishable (must be
-///    tracked manually).
-///  * Lock modes (such as CapsLock) only have their "enabled" state recorded.
-///    There's no way to acquire their pressing state.
-///
 /// See also:
 ///
 ///  * [KeyDownEvent], [KeyRepeatEvent], and [KeyUpEvent], the classes used to
 ///    describe specific key events.
 ///  * [instance], the singleton instance of this class.
-///  * [RawKeyboard], the legacy API that dispatches key events containing raw
-///    system data.
 class HardwareKeyboard {
   /// Provides convenient access to the current [HardwareKeyboard] singleton from
   /// the [ServicesBinding] instance.
@@ -417,6 +447,53 @@ class HardwareKeyboard {
   /// If called from a key event handler, the result will already include the effect
   /// of the event.
   Set<KeyboardLockMode> get lockModesEnabled => _lockModes;
+
+  /// Returns true if the given [LogicalKeyboardKey] is pressed, according to
+  /// the [HardwareKeyboard].
+  bool isLogicalKeyPressed(LogicalKeyboardKey key) => _pressedKeys.values.contains(key);
+
+  /// Returns true if the given [PhysicalKeyboardKey] is pressed, according to
+  /// the [HardwareKeyboard].
+  bool isPhysicalKeyPressed(PhysicalKeyboardKey key) => _pressedKeys.containsKey(key);
+
+  /// Returns true if a logical CTRL modifier key is pressed, regardless of
+  /// which side of the keyboard it is on.
+  ///
+  /// Use [isLogicalKeyPressed] if you need to know which control key was
+  /// pressed.
+  bool get isControlPressed {
+    return isLogicalKeyPressed(LogicalKeyboardKey.controlLeft) || isLogicalKeyPressed(LogicalKeyboardKey.controlRight);
+  }
+
+  /// Returns true if a logical SHIFT modifier key is pressed, regardless of
+  /// which side of the keyboard it is on.
+  ///
+  /// Use [isLogicalKeyPressed] if you need to know which shift key was pressed.
+  bool get isShiftPressed {
+    return isLogicalKeyPressed(LogicalKeyboardKey.shiftLeft) || isLogicalKeyPressed(LogicalKeyboardKey.shiftRight);
+  }
+
+  /// Returns true if a logical ALT modifier key is pressed, regardless of which
+  /// side of the keyboard it is on.
+  ///
+  /// The `AltGr` key that appears on some keyboards is considered to be the
+  /// same as [LogicalKeyboardKey.altRight] on some platforms (notably Android).
+  /// On platforms that can distinguish between `altRight` and `altGr`, a press
+  /// of `AltGr` will not return true here, and will need to be tested for
+  /// separately.
+  ///
+  /// Use [isLogicalKeyPressed] if you need to know which alt key was pressed.
+  bool get isAltPressed {
+    return isLogicalKeyPressed(LogicalKeyboardKey.altLeft) || isLogicalKeyPressed(LogicalKeyboardKey.altRight);
+  }
+
+  /// Returns true if a logical META modifier key is pressed, regardless of
+  /// which side of the keyboard it is on.
+  ///
+  /// Use [isLogicalKeyPressed] if you need to know which meta key was pressed.
+  bool get isMetaPressed {
+    return isLogicalKeyPressed(LogicalKeyboardKey.metaLeft) || isLogicalKeyPressed(LogicalKeyboardKey.metaRight);
+  }
 
   void _assertEventIsRegular(KeyEvent event) {
     assert(() {
@@ -492,6 +569,24 @@ class HardwareKeyboard {
     }
   }
 
+  /// Query the engine and update _pressedKeys accordingly to the engine answer.
+  //
+  /// Both the framework and the engine maintain a state of the current pressed
+  /// keys. There are edge cases, related to startup and restart, where the framework
+  /// needs to resynchronize its keyboard state.
+  Future<void> syncKeyboardState() async {
+    final Map<int, int>? keyboardState = await SystemChannels.keyboard.invokeMapMethod<int, int>(
+      'getKeyboardState',
+    );
+    if (keyboardState != null) {
+      for (final int key in keyboardState.keys) {
+        final PhysicalKeyboardKey physicalKey = PhysicalKeyboardKey(key);
+        final LogicalKeyboardKey logicalKey = LogicalKeyboardKey(keyboardState[key]!);
+        _pressedKeys[physicalKey] = logicalKey;
+      }
+    }
+  }
+
   bool _dispatchKeyEvent(KeyEvent event) {
     // This dispatching could have used the same algorithm as [ChangeNotifier],
     // but since 1) it shouldn't be necessary to support reentrantly
@@ -529,9 +624,22 @@ class HardwareKeyboard {
     return handled;
   }
 
+  List<String> _debugPressedKeysDetails() {
+    if (_pressedKeys.isEmpty) {
+      return <String>['Empty'];
+    }
+    final List<String> details = <String>[];
+    for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys) {
+      details.add('$physicalKey: ${_pressedKeys[physicalKey]}');
+    }
+    return details;
+  }
+
   /// Process a new [KeyEvent] by recording the state changes and dispatching
   /// to handlers.
   bool handleKeyEvent(KeyEvent event) {
+    assert(_keyboardDebug(() => 'Key event received: $event'));
+    assert(_keyboardDebug(() => 'Pressed state before processing the event:', _debugPressedKeysDetails));
     _assertEventIsRegular(event);
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
@@ -551,6 +659,7 @@ class HardwareKeyboard {
       // Empty
     }
 
+    assert(_keyboardDebug(() => 'Pressed state after processing the event:', _debugPressedKeysDetails));
     return _dispatchKeyEvent(event);
   }
 
@@ -571,6 +680,10 @@ class HardwareKeyboard {
 
 /// The mode in which information of key messages is delivered.
 ///
+/// This enum is deprecated and will be removed. There is no direct substitute
+/// planned, since this enum will no longer be necessary once [RawKeyEvent] and
+/// associated APIs are removed.
+///
 /// Different platforms use different methods, classes, and models to inform the
 /// framework of native key events, which is called "transit mode".
 ///
@@ -584,12 +697,16 @@ class HardwareKeyboard {
 ///
 /// See also:
 ///
-///  * [KeyEventManager], which infers the transit mode of the current platform
-///    and guides how key messages are dispatched.
-///  * [debugKeyEventSimulatorTransitModeOverride], overrides the transit mode
-///    used to simulate key events.
-///  * [KeySimulatorTransitModeVariant], an easier way to set
-///    [debugKeyEventSimulatorTransitModeOverride] in widget tests.
+/// * [KeyEventManager], which infers the transit mode of the current platform
+///   and guides how key messages are dispatched.
+/// * [debugKeyEventSimulatorTransitModeOverride], overrides the transit mode
+///   used to simulate key events.
+/// * [KeySimulatorTransitModeVariant], an easier way to set
+///   [debugKeyEventSimulatorTransitModeOverride] in widget tests.
+@Deprecated(
+  'No longer supported. Transit mode is always key data only. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 enum KeyDataTransitMode {
   /// Key event information is delivered as raw key data.
   ///
@@ -599,55 +716,68 @@ enum KeyDataTransitMode {
   ///
   /// If the current transit mode is [rawKeyData], the raw key data is converted
   /// to both [KeyMessage.events] and [KeyMessage.rawEvent].
+  @Deprecated(
+    'No longer supported. Transit mode is always key data only. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   rawKeyData,
 
-  /// Key event information is delivered as converted key data, followed
-  /// by raw key data.
+  /// Key event information is delivered as converted key data, followed by raw
+  /// key data.
   ///
   /// Key data ([ui.KeyData]) is a standardized event stream converted from
-  /// platform's native key event information, sent through the embedder
-  /// API. Its event model is described in [HardwareKeyboard].
+  /// platform's native key event information, sent through the embedder API.
+  /// Its event model is described in [HardwareKeyboard].
   ///
   /// Raw key data is platform's native key event information sent in JSON
   /// through a method channel. It is interpreted by subclasses of
   /// [RawKeyEventData].
   ///
-  /// If the current transit mode is [rawKeyData], the key data is converted to
-  /// [KeyMessage.events], and the raw key data is converted to
-  /// [KeyMessage.rawEvent].
+  /// If the current transit mode is [keyDataThenRawKeyData], then the
+  /// [KeyEventManager] will use the [ui.KeyData] for [KeyMessage.events], and
+  /// the raw data for [KeyMessage.rawEvent].
+  @Deprecated(
+    'No longer supported. Transit mode is always key data only. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   keyDataThenRawKeyData,
 }
 
 /// The assembled information converted from a native key message.
 ///
-/// Native key messages, produced by physically pressing or releasing
-/// keyboard keys, are translated into two different event streams in Flutter:
+/// This class is deprecated, and will be removed. There is no direct substitute
+/// planned, since this class will no longer be necessary once [RawKeyEvent] and
+/// associated APIs are removed.
 ///
-///  * The [KeyEvent] stream, represented by [KeyMessage.events] (recommended).
-///  * The [RawKeyEvent] stream, represented by [KeyMessage.rawEvent] (legacy,
-///    to be deprecated).
+/// Native key messages, produced by physically pressing or releasing keyboard
+/// keys, are translated into two different event streams in Flutter:
+///
+/// * The [KeyEvent] stream, represented by [KeyMessage.events] (recommended).
+/// * The [RawKeyEvent] stream, represented by [KeyMessage.rawEvent] (legacy, to
+///   be deprecated).
 ///
 /// Either the [KeyEvent] stream or the [RawKeyEvent] stream alone provides a
 /// complete description of the keyboard messages, but in different event
 /// models. Flutter is still transitioning from the legacy model to the new
 /// model, therefore it dispatches both streams simultaneously until the
-/// transition is completed. [KeyMessage] is used to bundle the
-/// stream segments of both models from a native key message together for the
-/// convenience of propagation.
+/// transition is completed. [KeyMessage] is used to bundle the stream segments
+/// of both models from a native key message together for the convenience of
+/// propagation.
 ///
-/// Typically, an application either processes [KeyMessage.events]
-/// or [KeyMessage.rawEvent], not both. For example, handling a
-/// [KeyMessage], means handling each event in [KeyMessage.events].
+/// Typically, an application either processes [KeyMessage.events] or
+/// [KeyMessage.rawEvent], not both. For example, handling a [KeyMessage], means
+/// handling each event in [KeyMessage.events].
 ///
 /// In advanced cases, a widget needs to process both streams at the same time.
 /// For example, [FocusNode] has an `onKey` that dispatches [RawKeyEvent]s and
-/// an `onKeyEvent` that dispatches [KeyEvent]s. To processes a [KeyMessage],
-/// it first calls `onKeyEvent` with each [KeyEvent] of [events], and then
-/// `onKey` with [rawEvent]. All callbacks are invoked regardless of their
+/// an `onKeyEvent` that dispatches [KeyEvent]s. To processes a [KeyMessage], it
+/// first calls `onKeyEvent` with each [KeyEvent] of [events], and then `onKey`
+/// with [rawEvent]. All callbacks are invoked regardless of their
 /// [KeyEventResult]. Their results are combined into the result of the node
 /// using [combineKeyEventResults].
 ///
 /// ```dart
+/// // ignore: deprecated_member_use
 /// void handleMessage(FocusNode node, KeyMessage message) {
 ///   final List<KeyEventResult> results = <KeyEventResult>[];
 ///   if (node.onKeyEvent != null) {
@@ -655,18 +785,28 @@ enum KeyDataTransitMode {
 ///       results.add(node.onKeyEvent!(node, event));
 ///     }
 ///   }
+///   // ignore: deprecated_member_use
 ///   if (node.onKey != null && message.rawEvent != null) {
+///     // ignore: deprecated_member_use
 ///     results.add(node.onKey!(node, message.rawEvent!));
 ///   }
 ///   final KeyEventResult result = combineKeyEventResults(results);
 ///   // Progress based on `result`...
 /// }
 /// ```
+@Deprecated(
+  'No longer supported. Once RawKeyEvent is removed, it will no longer be needed. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 @immutable
 class KeyMessage {
   /// Create a [KeyMessage] by providing all information.
   ///
   /// The [events] might be empty.
+  @Deprecated(
+    'No longer supported. Once RawKeyEvent is removed, will no longer be needed. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const KeyMessage(this.events, this.rawEvent);
 
   /// The list of [KeyEvent]s converted from the native key message.
@@ -708,40 +848,93 @@ class KeyMessage {
 
 /// The signature for [KeyEventManager.keyMessageHandler].
 ///
-/// A [KeyMessageHandler] processes a [KeyMessage] and returns whether
-/// the message is considered handled. Handled messages should not be
-/// propagated to other native components.
+/// A [KeyMessageHandler] processes a [KeyMessage] and returns whether the
+/// message is considered handled. Handled messages should not be propagated to
+/// other native components.
+///
+/// This message handler signature is deprecated, and will be removed. There is
+/// no direct substitute planned, since this handler type will no longer be
+/// necessary once [RawKeyEvent] and associated APIs are removed.
+@Deprecated(
+  'No longer supported. Once KeyMessage is removed, will no longer be needed. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 typedef KeyMessageHandler = bool Function(KeyMessage message);
 
 /// A singleton class that processes key messages from the platform and
 /// dispatches converted messages accordingly.
 ///
-/// [KeyEventManager] receives platform key messages by [handleKeyData]
-/// and [handleRawKeyMessage], sends converted events to [HardwareKeyboard]
-/// and [RawKeyboard] for recording keeping, and then dispatches the [KeyMessage]
-/// to [keyMessageHandler], the global message handler.
+/// This class is deprecated, and will be removed. There is no direct substitute
+/// planned, since this class will no longer be necessary once [RawKeyEvent] and
+/// associated APIs are removed.
 ///
-/// [KeyEventManager] also resolves cross-platform compatibility of keyboard
-/// implementations. Legacy platforms might have not implemented the new key
-/// data API and only send raw key data on each key message. [KeyEventManager]
-/// recognize platform types as [KeyDataTransitMode] and dispatches events in
-/// different ways accordingly.
+/// [KeyEventManager] receives platform key messages by [handleKeyData] and
+/// [handleRawKeyMessage], sends converted events to [HardwareKeyboard] and
+/// [RawKeyboard] for recording keeping, and then dispatches the [KeyMessage] to
+/// [keyMessageHandler], the global message handler.
 ///
 /// [KeyEventManager] is typically created, owned, and invoked by
 /// [ServicesBinding].
+///
+/// ## On embedder implementation
+///
+/// Currently, Flutter has two sets of key event API pathways running in
+/// parallel.
+///
+/// * The "hardware key event" pathway receives messages from the
+///   "flutter/keydata" message channel (embedder API
+///   `FlutterEngineSendKeyEvent`) and dispatches [KeyEvent] to
+///   [HardwareKeyboard] and some methods such as [Focus.onKeyEvent].
+/// * The deprecated "raw key event" pathway receives messages from the
+///   "flutter/keyevent" message channel ([SystemChannels.keyEvent]) and
+///   dispatches [RawKeyEvent] to [RawKeyboard] and [Focus.onKey] as well as
+///   similar methods. This pathway will be removed at a future date.
+///
+/// [KeyEventManager] resolves cross-platform compatibility of keyboard
+/// implementations, since legacy platforms might have not implemented the new
+/// key data API and only send raw key data on each key message.
+/// [KeyEventManager] recognizes the platform support by detecting whether a
+/// message comes from platform channel "flutter/keyevent" before one from
+/// "flutter/keydata", or vice versa, at the beginning of the app.
+///
+/// * If a "flutter/keydata" message is received first, then this platform is
+///   considered a modern platform. The hardware key events are stored, and
+///   dispatched only when a raw key message is received.
+/// * If a "flutter/keyevent" message is received first, then this platform is
+///   considered a legacy platform. The raw key event is transformed into a
+///   hardware key event at best effort. No messages from "flutter/keydata" are
+///   expected. This behavior has been deprecated, and will be removed at a
+///   future date.
+///
+/// Therefore, to correctly implement a platform that supports
+/// `FlutterEngineSendKeyEvent`, the platform must ensure that
+/// `FlutterEngineSendKeyEvent` is called before sending a message to
+/// "flutter/keyevent" at the beginning of the app, and every physical key event
+/// is ended with a "flutter/keyevent" message.
+@Deprecated(
+  'No longer supported. Once RawKeyEvent is removed, will no longer be needed. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class KeyEventManager {
   /// Create an instance.
   ///
   /// This is typically only called by [ServicesBinding].
+  @Deprecated(
+    'No longer supported. Once RawKeyEvent is removed, will no longer be needed. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   KeyEventManager(this._hardwareKeyboard, this._rawKeyboard);
 
   /// The global entrance which handles all key events sent to Flutter.
   ///
-  /// Typical applications use [WidgetsBinding], where this field is
-  /// set by the focus system (see `FocusManger`) on startup to a function that
-  /// dispatches incoming events to the focus system, including
-  /// `FocusNode.onKey`, `FocusNode.onKeyEvent`, and `Shortcuts`. In this case,
-  /// the application does not need to read, assign, or invoke this value.
+  /// This handler is deprecated and will be removed. Use
+  /// [HardwareKeyboard.addHandler]/[HardwareKeyboard.removeHandler] instead.
+  ///
+  /// Typical applications use [WidgetsBinding], where this field is set by the
+  /// focus system (see `FocusManager`) on startup to a function that dispatches
+  /// incoming events to the focus system, including `FocusNode.onKey`,
+  /// `FocusNode.onKeyEvent`, and `Shortcuts`. In this case, the application
+  /// does not need to read, assign, or invoke this value.
   ///
   /// For advanced uses, the application can "patch" this callback. See below
   /// for details.
@@ -757,32 +950,32 @@ class KeyEventManager {
   /// 4. Other native components (possibly non-Flutter).
   ///
   /// Each phase will conclude with a boolean called an "event result". If the
-  /// result is true, this phase _handles_ the event and prevents the event
-  /// from being propagated to the next phase. This mechanism allows shortcuts
-  /// such as "Ctrl-C" to not generate a text "C" in the text field, or
-  /// shortcuts that are not handled by any components to trigger special alerts
-  /// (such as the "bonk" noise on macOS).
+  /// result is true, this phase _handles_ the event and prevents the event from
+  /// being propagated to the next phase. This mechanism allows shortcuts such
+  /// as "Ctrl-C" to not generate a text "C" in the text field, or shortcuts
+  /// that are not handled by any components to trigger special alerts (such as
+  /// the "bonk" noise on macOS).
   ///
-  /// In the second phase, known as "the key event system", the event is dispatched
-  /// to several destinations: [RawKeyboard]'s listeners,
-  /// [HardwareKeyboard]'s handlers, and [keyMessageHandler].
-  /// All destinations will always receive the event regardless of the handlers'
-  /// results. If any handler's result is true, then the overall result of the
-  /// second phase is true, and event propagation is stopped.
+  /// In the second phase, known as "the key event system", the event is
+  /// dispatched to several destinations: [RawKeyboard]'s listeners,
+  /// [HardwareKeyboard]'s handlers, and [keyMessageHandler]. All destinations
+  /// will always receive the event regardless of the handlers' results. If any
+  /// handler's result is true, then the overall result of the second phase is
+  /// true, and event propagation is stopped.
   ///
   /// See also:
   ///
-  ///  * [RawKeyboard.addListener], which adds a raw keyboard listener.
-  ///  * [RawKeyboardListener], which is also implemented by adding a raw
-  ///    keyboard listener.
-  ///  * [HardwareKeyboard.addHandler], which adds a hardware keyboard handler.
+  /// * [RawKeyboard.addListener], which adds a raw keyboard listener.
+  /// * [RawKeyboardListener], which is also implemented by adding a raw
+  ///   keyboard listener.
+  /// * [HardwareKeyboard.addHandler], which adds a hardware keyboard handler.
   ///
   /// ## Advanced usages: Manual assignment or patching
   ///
-  /// If you are not using the focus system to manage focus, set this
-  /// attribute to a [KeyMessageHandler] that returns true if the propagation
-  /// on the platform should not be continued. If this field is null, key events
-  /// will be assumed to not have been handled by Flutter, a result of "false".
+  /// If you are not using the focus system to manage focus, set this attribute
+  /// to a [KeyMessageHandler] that returns true if the propagation on the
+  /// platform should not be continued. If this field is null, key events will
+  /// be assumed to not have been handled by Flutter, a result of "false".
   ///
   /// Even if you are using the focus system, you might also want to do more
   /// than the focus system allows. In these cases, you can _patch_
@@ -790,24 +983,26 @@ class KeyEventManager {
   /// and calls the original callback in between (or not at all.)
   ///
   /// Patching [keyMessageHandler] can not be reverted. You should always assume
-  /// that another component might haved patched it before you and after you.
+  /// that another component might have patched it before you and after you.
   /// This means that you might want to write your own global notification
   /// manager, to which callbacks can be added and removed.
   ///
-  /// You should not patch [keyMessageHandler] until the `FocusManager` has assigned
-  /// its callback. This is assured during any time within the widget lifecycle
-  /// (such as `initState`), or after calling `WidgetManager.instance`.
+  /// You should not patch [keyMessageHandler] until the `FocusManager` has
+  /// assigned its callback. This is assured during any time within the widget
+  /// lifecycle (such as `initState`), or after calling
+  /// `WidgetManager.instance`.
   ///
   /// {@tool dartpad}
-  /// This example shows how to process key events that are not handled by any
-  /// focus handler (such as `Shortcuts`) by patching [keyMessageHandler].
+  /// This example shows how to process key events that are not
+  /// handled by any focus handler (such as `Shortcuts`) by patching
+  /// [keyMessageHandler].
   ///
   /// The app prints out any key events that are not handled by the app body.
   /// Try typing something in the first text field. These key presses are not
-  /// handled by `Shorcuts` and will be sent to the fallback handler and printed
-  /// out. Now try some text shortcuts, such as Ctrl+A. The KeyA press is
-  /// handled as a shortcut, and is not sent to the fallback handler and so is
-  /// not printed out.
+  /// handled by `Shortcuts` and will be sent to the fallback handler and
+  /// printed out. Now try some text shortcuts, such as Ctrl+A. The KeyA press
+  /// is handled as a shortcut, and is not sent to the fallback handler and so
+  /// is not printed out.
   ///
   /// The key widget is `FallbackKeyEventRegistrar`, a necessity class to allow
   /// reversible patching. `FallbackFocus` and `FallbackFocusNode` are also
@@ -819,8 +1014,12 @@ class KeyEventManager {
   ///
   /// See also:
   ///
-  ///  * [HardwareKeyboard.addHandler], which accepts multiple global handlers
-  ///    to process [KeyEvent]s
+  /// * [HardwareKeyboard.addHandler], which accepts multiple global handlers to
+  ///   process [KeyEvent]s
+  @Deprecated(
+    'No longer supported. Once RawKeyEvent is removed, will no longer be needed. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   KeyMessageHandler? keyMessageHandler;
 
   final HardwareKeyboard _hardwareKeyboard;
@@ -854,6 +1053,13 @@ class KeyEventManager {
   /// Dispatch a key data to global and leaf listeners.
   ///
   /// This method is the handler to the global `onKeyData` API.
+  ///
+  /// This handler is deprecated, and will be removed. Use
+  /// [HardwareKeyboard.addHandler] instead.
+  @Deprecated(
+    'No longer supported. Use HardwareKeyboard.instance.addHandler instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   bool handleKeyData(ui.KeyData data) {
     _transitMode ??= KeyDataTransitMode.keyDataThenRawKeyData;
     switch (_transitMode!) {
@@ -862,7 +1068,7 @@ class KeyEventManager {
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
         // Having 0 as the physical and logical ID indicates an empty key data
-        // (the only occassion either field can be 0,) transmitted to ensure
+        // (the only occasion either field can be 0,) transmitted to ensure
         // that the transit mode is correctly inferred. These events should be
         // ignored.
         if (data.physical == 0 && data.logical == 0) {
@@ -917,9 +1123,16 @@ class KeyEventManager {
 
   /// Handles a raw key message.
   ///
-  /// This method is the handler to [SystemChannels.keyEvent], processing
-  /// the JSON form of the native key message and returns the responds for the
+  /// This method is the handler to [SystemChannels.keyEvent], processing the
+  /// JSON form of the native key message and returns the responds for the
   /// channel.
+  ///
+  /// This handler is deprecated, and will be removed. Use
+  /// [HardwareKeyboard.addHandler] instead.
+  @Deprecated(
+    'No longer supported. Use HardwareKeyboard.instance.addHandler instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   Future<Map<String, dynamic>> handleRawKeyMessage(dynamic message) async {
     if (_transitMode == null) {
       _transitMode = KeyDataTransitMode.rawKeyData;
@@ -966,6 +1179,33 @@ class KeyEventManager {
     return <String, dynamic>{ 'handled': handled };
   }
 
+  ui.KeyEventDeviceType _convertDeviceType(RawKeyEvent rawEvent) {
+    final RawKeyEventData data = rawEvent.data;
+    // Device type is only available from Android.
+    if (data is! RawKeyEventDataAndroid) {
+      return ui.KeyEventDeviceType.keyboard;
+    }
+
+    switch (data.eventSource) {
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_KEYBOARD
+      case 0x00000101:
+        return ui.KeyEventDeviceType.keyboard;
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_DPAD
+      case 0x00000201:
+        return ui.KeyEventDeviceType.directionalPad;
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_GAMEPAD
+      case 0x00000401:
+        return ui.KeyEventDeviceType.gamepad;
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_JOYSTICK
+      case 0x01000010:
+        return ui.KeyEventDeviceType.joystick;
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_HDMI
+      case 0x02000001:
+        return ui.KeyEventDeviceType.hdmi;
+    }
+    return ui.KeyEventDeviceType.keyboard;
+  }
+
   // Convert the raw event to key events, including synthesizing events for
   // modifiers, and store the key events in `_keyEventsSinceLastMessage`.
   //
@@ -980,6 +1220,7 @@ class KeyEventManager {
     final LogicalKeyboardKey? recordedLogicalMain = _hardwareKeyboard.lookUpLayout(physicalKey);
     final Duration timeStamp = ServicesBinding.instance.currentSystemFrameTimeStamp;
     final String? character = rawEvent.character == '' ? null : rawEvent.character;
+    final ui.KeyEventDeviceType deviceType = _convertDeviceType(rawEvent);
     if (rawEvent is RawKeyDownEvent) {
       if (recordedLogicalMain == null) {
         mainEvent = KeyDownEvent(
@@ -987,6 +1228,7 @@ class KeyEventManager {
           logicalKey: logicalKey,
           character: character,
           timeStamp: timeStamp,
+          deviceType: deviceType,
         );
         physicalKeysPressed.add(physicalKey);
       } else {
@@ -996,6 +1238,7 @@ class KeyEventManager {
           logicalKey: recordedLogicalMain,
           character: character,
           timeStamp: timeStamp,
+          deviceType: deviceType,
         );
       }
     } else {
@@ -1007,6 +1250,7 @@ class KeyEventManager {
           logicalKey: recordedLogicalMain,
           physicalKey: physicalKey,
           timeStamp: timeStamp,
+          deviceType: deviceType,
         );
         physicalKeysPressed.remove(physicalKey);
       }
@@ -1021,6 +1265,7 @@ class KeyEventManager {
           logicalKey: logicalKey,
           timeStamp: timeStamp,
           synthesized: true,
+          deviceType: deviceType,
         ));
       } else {
         _keyEventsSinceLastMessage.add(KeyUpEvent(
@@ -1028,6 +1273,7 @@ class KeyEventManager {
           logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
           timeStamp: timeStamp,
           synthesized: true,
+          deviceType: deviceType,
         ));
       }
     }
@@ -1037,6 +1283,7 @@ class KeyEventManager {
         logicalKey: _rawKeyboard.lookUpLayout(key)!,
         timeStamp: timeStamp,
         synthesized: true,
+        deviceType: deviceType,
       ));
     }
     if (mainEvent != null) {
@@ -1074,6 +1321,7 @@ class KeyEventManager {
           timeStamp: timeStamp,
           character: keyData.character,
           synthesized: keyData.synthesized,
+          deviceType: keyData.deviceType,
         );
       case ui.KeyEventType.up:
         assert(keyData.character == null);
@@ -1082,6 +1330,7 @@ class KeyEventManager {
           logicalKey: logicalKey,
           timeStamp: timeStamp,
           synthesized: keyData.synthesized,
+          deviceType: keyData.deviceType,
         );
       case ui.KeyEventType.repeat:
         return KeyRepeatEvent(
@@ -1089,6 +1338,7 @@ class KeyEventManager {
           logicalKey: logicalKey,
           timeStamp: timeStamp,
           character: keyData.character,
+          deviceType: keyData.deviceType,
         );
     }
   }

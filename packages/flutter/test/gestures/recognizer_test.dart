@@ -6,6 +6,7 @@ import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'gesture_tester.dart';
 
@@ -49,6 +50,16 @@ void main() {
     expect(recognizer, hasAGoodToStringDeep);
   });
 
+  test('GestureRecognizer dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => TestGestureRecognizer().dispose(),
+        TestGestureRecognizer
+      ,),
+      areCreateAndDispose,
+    );
+  });
+
   test('OffsetPair', () {
     const OffsetPair offset1 = OffsetPair(
       local: Offset(10, 20),
@@ -70,21 +81,6 @@ void main() {
     final OffsetPair difference = offset2 - offset1;
     expect(difference.local, const Offset(40, 40));
     expect(difference.global, const Offset(40, 40));
-  });
-
-  testWidgets('EagerGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        EagerGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
   });
 
   group('PrimaryPointerGestureRecognizer', () {

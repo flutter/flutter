@@ -200,7 +200,8 @@ Future<void> main() async {
     final RenderImage renderImage = RenderImage(image: image.clone());
     expect(image.debugGetOpenHandleStackTraces()!.length, 2);
 
-    renderImage.image = renderImage.image;
+    // Testing short-circuit logic of setter.
+    renderImage.image = renderImage.image; // ignore: no_self_assignments
     expect(image.debugGetOpenHandleStackTraces()!.length, 2);
 
     renderImage.image = null;

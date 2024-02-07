@@ -19,17 +19,19 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
+import 'notification_listener.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
 import 'restoration.dart';
 import 'router.dart';
-import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
+import 'value_listenable_builder.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
@@ -241,9 +243,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// It is used by both [MaterialApp] and [CupertinoApp] to implement base
 /// functionality for an app.
 ///
-/// Builds a [MediaQuery] using [MediaQuery.fromWindow]. To use an inherited
-/// [MediaQuery] instead, set [useInheritedMediaQuery] to true.
-///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
 ///
@@ -255,8 +254,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
-///  * [MediaQuery.fromWindow], which builds a [MediaQuery] with data derived
-///    from [WidgetsBinding.window].
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
 ///  * [Navigator], a widget that manages a set of child widgets with a stack
@@ -267,8 +264,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
-  ///
-  /// The boolean arguments, [color], and [navigatorObservers] must not be null.
   ///
   /// Most callers will want to use the [home] or [routes] parameters, or both.
   /// The [home] parameter is a convenience for the following [routes] map:
@@ -318,6 +313,7 @@ class WidgetsApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
+    this.onNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
     this.pageRouteBuilder,
@@ -343,10 +339,13 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
     this.useInheritedMediaQuery = false,
-  }) : assert(navigatorObservers != null),
-       assert(routes != null),
-       assert(
+  }) : assert(
          home == null ||
          onGenerateInitialRoutes == null,
          'If onGenerateInitialRoutes is specified, the home argument will be '
@@ -398,15 +397,7 @@ class WidgetsApp extends StatefulWidget {
          'pageRouteBuilder must be specified so that the default handler '
          'will know what kind of PageRoute transition to build.',
        ),
-       assert(title != null),
-       assert(color != null),
-       assert(supportedLocales != null && supportedLocales.isNotEmpty),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       assert(debugShowWidgetInspector != null),
+       assert(supportedLocales.isNotEmpty),
        routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
@@ -430,6 +421,7 @@ class WidgetsApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.onNavigationNotification,
     this.textStyle,
     required this.color,
     this.locale,
@@ -447,6 +439,11 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
     this.useInheritedMediaQuery = false,
   }) : assert((){
          if (routerConfig != null) {
@@ -463,15 +460,7 @@ class WidgetsApp extends StatefulWidget {
          );
          return true;
        }()),
-       assert(title != null),
-       assert(color != null),
-       assert(supportedLocales != null && supportedLocales.isNotEmpty),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       assert(debugShowWidgetInspector != null),
+       assert(supportedLocales.isNotEmpty),
        navigatorObservers = null,
        navigatorKey = null,
        onGenerateRoute = null,
@@ -714,6 +703,18 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final RouteFactory? onUnknownRoute;
 
+  /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
+  /// The callback to use when receiving a [NavigationNotification].
+  ///
+  /// By default this updates the engine with the navigation status and stops
+  /// bubbling the notification.
+  ///
+  /// See also:
+  ///
+  ///  * [NotificationListener.onNotification], which uses this callback.
+  /// {@endtemplate}
+  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
+
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
   ///
@@ -737,6 +738,10 @@ class WidgetsApp extends StatefulWidget {
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [initialRoute] must be null and [builder] must not be null.
+  ///
+  /// Changing the [initialRoute] will have no effect, as it only controls the
+  /// _initial_ route. To change the route while the application is running, use
+  /// the [Navigator] or [Router] APIs.
   ///
   /// See also:
   ///
@@ -1171,31 +1176,45 @@ class WidgetsApp extends StatefulWidget {
   final String? restorationScopeId;
 
   /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
-  /// If true, an inherited MediaQuery will be used. If one is not available,
-  /// or this is false, one will be built from the window.
+  /// Deprecated. This setting is now ignored.
   ///
-  /// Cannot be null, defaults to false.
+  /// The widget never introduces its own [MediaQuery]; the [View] widget takes
+  /// care of that.
   /// {@endtemplate}
+  @Deprecated(
+    'This setting is now ignored. '
+    'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+    'This feature was deprecated after v3.7.0-29.0.pre.'
+  )
   final bool useInheritedMediaQuery;
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///
-  /// Used by the `showPerformanceOverlay` observatory extension.
+  /// Used by the `showPerformanceOverlay` VM service extension.
   static bool showPerformanceOverlayOverride = false;
 
   /// If true, forces the widget inspector to be visible.
   ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
+  ///
   /// Used by the `debugShowWidgetInspector` debugging extension.
   ///
-  /// The inspector allows you to select a location on your device or emulator
+  /// The inspector allows the selection of a location on your device or emulator
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
-  /// more detailed information is shown in the IDE or Observatory.
-  static bool debugShowWidgetInspectorOverride = false;
+  /// more detailed information is shown in the IDE or DevTools.
+  static bool get debugShowWidgetInspectorOverride {
+    return _debugShowWidgetInspectorOverrideNotifier.value;
+  }
+  static set debugShowWidgetInspectorOverride(bool value) {
+    _debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
+
+  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///
-  /// Used by the `debugAllowBanner` observatory extension.
+  /// Used by the `debugAllowBanner` VM service extension.
   ///
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".
@@ -1207,6 +1226,7 @@ class WidgetsApp extends StatefulWidget {
     SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
 
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -1332,12 +1352,41 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
     : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
+  AppLifecycleState? _appLifecycleState;
+
+  /// The default value for [onNavigationNotification].
+  ///
+  /// Does nothing and stops bubbling if the app is detached. Otherwise, updates
+  /// the platform with [NavigationNotification.canHandlePop] and stops
+  /// bubbling.
+  bool _defaultOnNavigationNotification(NavigationNotification notification) {
+    switch (_appLifecycleState) {
+      case null:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.inactive:
+        // Avoid updating the engine when the app isn't ready.
+        return true;
+      case AppLifecycleState.resumed:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
+        return true;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _appLifecycleState = state;
+    super.didChangeAppLifecycleState(state);
+  }
+
   @override
   void initState() {
     super.initState();
     _updateRouting();
     _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
+    _appLifecycleState = WidgetsBinding.instance.lifecycleState;
   }
 
   @override
@@ -1370,7 +1419,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.routeInformationProvider == null && widget.routeInformationParser != null) {
         _defaultRouteInformationProvider ??= PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
-            location: _initialRouteName,
+            uri: Uri.parse(_initialRouteName),
           ),
         );
       } else {
@@ -1432,7 +1481,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         settings,
         pageContentBuilder,
       );
-      assert(route != null, 'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
       return route;
     }
     if (widget.onGenerateRoute != null) {
@@ -1493,7 +1541,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  Future<bool> didPushRoute(String route) async {
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
@@ -1505,7 +1553,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (navigator == null) {
       return false;
     }
-    navigator.pushNamed(route);
+    final Uri uri = routeInformation.uri;
+    navigator.pushNamed(
+      Uri.decodeComponent(
+        Uri(
+          path: uri.path.isEmpty ? '/' : uri.path,
+          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          fragment: uri.fragment.isEmpty ? null : uri.fragment,
+        ).toString(),
+      ),
+    );
     return true;
   }
 
@@ -1630,6 +1687,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         debugLabel: 'Navigator Scope',
         autofocus: true,
         child: Navigator(
+          clipBehavior: Clip.none,
           restorationScopeId: 'nav',
           key: _navigator,
           initialRoute: _initialRouteName,
@@ -1641,6 +1699,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             },
           onUnknownRoute: _onUnknownRoute,
           observers: widget.navigatorObservers!,
+          routeTraversalEdgeBehavior: kIsWeb ? TraversalEdgeBehavior.leaveFlutterView : TraversalEdgeBehavior.parentScope,
           reportsRouteUpdateToEngine: true,
         ),
       );
@@ -1700,12 +1759,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
 
     assert(() {
-      if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
-        result = WidgetInspector(
-          selectButtonBuilder: widget.inspectorSelectButtonBuilder,
-          child: result,
-        );
-      }
+      result = ValueListenableBuilder<bool>(
+        valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
+        builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
+          if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
+            return WidgetInspector(
+              selectButtonBuilder: widget.inspectorSelectButtonBuilder,
+              child: child!,
+            );
+          }
+          return child!;
+        },
+        child: result,
+      );
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = CheckedModeBanner(
           child: result,
@@ -1722,7 +1788,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // parameter.
         builder: (BuildContext context) {
           final String title = widget.onGenerateTitle!(context);
-          assert(title != null, 'onGenerateTitle must return a non-null String');
           return Title(
             title: title,
             color: widget.color.withOpacity(1.0),
@@ -1744,35 +1809,32 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    Widget child = Localizations(
-      locale: appLocale,
-      delegates: _localizationsDelegates.toList(),
-      child: title,
-    );
-
-    final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (!widget.useInheritedMediaQuery || data == null) {
-      child = MediaQuery.fromWindow(
-        child: child,
-      );
-    }
-
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: SharedAppData(
-        child: Shortcuts(
-          debugLabel: '<Default WidgetsApp Shortcuts>',
-          shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-          // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
-          // fall through to the defaultShortcuts.
-          child: DefaultTextEditingShortcuts(
-            child: Actions(
-              actions: widget.actions ?? WidgetsApp.defaultActions,
-              child: FocusTraversalGroup(
-                policy: ReadingOrderTraversalPolicy(),
-                child: TapRegionSurface(
-                  child: ShortcutRegistrar(
-                    child: child,
+        child: NotificationListener<NavigationNotification>(
+          onNotification: widget.onNavigationNotification ?? _defaultOnNavigationNotification,
+          child: Shortcuts(
+            debugLabel: '<Default WidgetsApp Shortcuts>',
+            shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+            // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+            // fall through to the defaultShortcuts.
+            child: DefaultTextEditingShortcuts(
+              child: Actions(
+                actions: widget.actions ?? <Type, Action<Intent>>{
+                  ...WidgetsApp.defaultActions,
+                  ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
+                },
+                child: FocusTraversalGroup(
+                  policy: ReadingOrderTraversalPolicy(),
+                  child: TapRegionSurface(
+                    child: ShortcutRegistrar(
+                      child: Localizations(
+                        locale: appLocale,
+                        delegates: _localizationsDelegates.toList(),
+                        child: title,
+                      ),
+                    ),
                   ),
                 ),
               ),

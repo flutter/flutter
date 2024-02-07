@@ -19,7 +19,8 @@ FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
-ENGINE_VERSION=`cat "$FLUTTER_ROOT/bin/internal/engine.version"`
+ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
+ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
 OS="$(uname -s)"
 
 if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
@@ -102,7 +103,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
       DART_ZIP_NAME="dart-sdk-linux-${ARCH}.zip"
       IS_USER_EXECUTABLE="-perm /u+x"
       ;;
-    MINGW*)
+    MINGW* | MSYS* )
       DART_ZIP_NAME="dart-sdk-windows-x64.zip"
       IS_USER_EXECUTABLE="-perm /u+x"
       ;;
@@ -121,7 +122,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     FIND=find
   fi
 
-  DART_SDK_BASE_URL="${FLUTTER_STORAGE_BASE_URL:-https://storage.googleapis.com}"
+  DART_SDK_BASE_URL="${FLUTTER_STORAGE_BASE_URL:-https://storage.googleapis.com}${ENGINE_REALM:+/$ENGINE_REALM}"
   DART_SDK_URL="$DART_SDK_BASE_URL/flutter_infra_release/flutter/$ENGINE_VERSION/$DART_ZIP_NAME"
 
   # if the sdk path exists, copy it to a temporary location
@@ -169,7 +170,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     >&2 echo
     >&2 echo "It appears that the downloaded file is corrupt; please try again."
     >&2 echo "If this problem persists, please report the problem at:"
-    >&2 echo "  https://github.com/flutter/flutter/issues/new?template=1_activation.md"
+    >&2 echo "  https://github.com/flutter/flutter/issues/new?template=1_activation.yml"
     >&2 echo
     rm -f -- "$DART_SDK_ZIP"
     exit 1

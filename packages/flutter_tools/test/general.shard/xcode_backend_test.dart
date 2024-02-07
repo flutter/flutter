@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../../bin/xcode_backend.dart';
-import '../src/common.dart';
+import '../src/common.dart' hide Context;
 import '../src/fake_process_manager.dart';
 
 void main() {
@@ -31,7 +31,6 @@ void main() {
         <String, String>{
           'ACTION': 'build',
           'BUILT_PRODUCTS_DIR': buildDir.path,
-          'ENABLE_BITCODE': 'YES',
           'FLUTTER_ROOT': flutterRoot.path,
           'INFOPLIST_PATH': 'Info.plist',
         },
@@ -51,8 +50,8 @@ void main() {
               '-dTreeShakeIcons=',
               '-dTrackWidgetCreation=',
               '-dDartObfuscation=',
-              '-dEnableBitcode=',
               '-dAction=build',
+              '-dFrontendServerStarterPath=',
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
@@ -85,7 +84,6 @@ void main() {
         <String, String>{
           'BUILT_PRODUCTS_DIR': buildDir.path,
           'CONFIGURATION': buildMode,
-          'ENABLE_BITCODE': 'YES',
           'FLUTTER_ROOT': flutterRoot.path,
           'INFOPLIST_PATH': 'Info.plist',
         },
@@ -105,8 +103,8 @@ void main() {
               '-dTreeShakeIcons=',
               '-dTrackWidgetCreation=',
               '-dDartObfuscation=',
-              '-dEnableBitcode=',
               '-dAction=',
+              '-dFrontendServerStarterPath=',
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
@@ -140,6 +138,7 @@ void main() {
       const String expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
       const String extraFrontEndOptions = '--some-option';
       const String extraGenSnapshotOptions = '--obfuscate';
+      const String frontendServerStarterPath = '/path/to/frontend_server_starter.dart';
       const String sdkRoot = '/path/to/sdk';
       const String splitDebugInfo = '/path/to/split/debug/info';
       const String trackWidgetCreation = 'true';
@@ -154,13 +153,14 @@ void main() {
           'CONFIGURATION': buildMode,
           'DART_DEFINES': dartDefines,
           'DART_OBFUSCATION': dartObfuscation,
-          'ENABLE_BITCODE': 'YES',
           'EXPANDED_CODE_SIGN_IDENTITY': expandedCodeSignIdentity,
           'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions,
           'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions,
           'FLUTTER_ROOT': flutterRoot.path,
+          'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath,
           'INFOPLIST_PATH': 'Info.plist',
           'SDKROOT': sdkRoot,
+          'FLAVOR': 'strawberry',
           'SPLIT_DEBUG_INFO': splitDebugInfo,
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
@@ -175,14 +175,15 @@ void main() {
               '-dTargetPlatform=ios',
               '-dTargetFile=lib/main.dart',
               '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dFlavor=strawberry',
               '-dIosArchs=$archs',
               '-dSdkRoot=$sdkRoot',
               '-dSplitDebugInfo=$splitDebugInfo',
               '-dTreeShakeIcons=$treeShake',
               '-dTrackWidgetCreation=$trackWidgetCreation',
               '-dDartObfuscation=$dartObfuscation',
-              '-dEnableBitcode=true',
               '-dAction=install',
+              '-dFrontendServerStarterPath=$frontendServerStarterPath',
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
@@ -201,12 +202,12 @@ void main() {
     });
   });
 
-  group('test_observatory_bonjour_service', () {
+  group('test_vm_service_bonjour_service', () {
     test('handles when the Info.plist is missing', () {
       final Directory buildDir = fileSystem.directory('/path/to/builds');
       buildDir.createSync(recursive: true);
       final TestContext context = TestContext(
-        <String>['test_observatory_bonjour_service'],
+        <String>['test_vm_service_bonjour_service'],
         <String, String>{
           'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -218,7 +219,7 @@ void main() {
       expect(
         context.stdout,
         contains(
-            'Info.plist does not exist. Skipping _dartobservatory._tcp NSBonjourServices insertion.'),
+            'Info.plist does not exist. Skipping _dartVmService._tcp NSBonjourServices insertion.'),
       );
     });
   });
@@ -239,11 +240,6 @@ class TestContext extends Context {
 
   String stdout = '';
   String stderr = '';
-
-  @override
-  bool existsDir(String path) {
-    return fileSystem.directory(path).existsSync();
-  }
 
   @override
   bool existsFile(String path) {

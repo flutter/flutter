@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -23,9 +24,8 @@ export 'package:flutter/painting.dart' show
 class RenderImage extends RenderBox {
   /// Creates a render box that displays an image.
   ///
-  /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments
-  /// must not be null. The [textDirection] argument must not be null if
-  /// [alignment] will need resolving or if [matchTextDirection] is true.
+  /// The [textDirection] argument must not be null if [alignment] will need
+  /// resolving or if [matchTextDirection] is true.
   RenderImage({
     ui.Image? image,
     this.debugImageLabel,
@@ -44,13 +44,7 @@ class RenderImage extends RenderBox {
     bool invertColors = false,
     bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.low,
-  }) : assert(scale != null),
-       assert(repeat != null),
-       assert(alignment != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
-       assert(isAntiAlias != null),
-       _image = image,
+  }) : _image = image,
        _width = width,
        _height = height,
        _scale = scale,
@@ -144,7 +138,6 @@ class RenderImage extends RenderBox {
   double get scale => _scale;
   double _scale;
   set scale(double value) {
-    assert(value != null);
     if (value == _scale) {
       return;
     }
@@ -200,7 +193,6 @@ class RenderImage extends RenderBox {
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
-    assert(value != null);
     if (value == _filterQuality) {
       return;
     }
@@ -249,7 +241,6 @@ class RenderImage extends RenderBox {
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
   set alignment(AlignmentGeometry value) {
-    assert(value != null);
     if (value == _alignment) {
       return;
     }
@@ -261,7 +252,6 @@ class RenderImage extends RenderBox {
   ImageRepeat get repeat => _repeat;
   ImageRepeat _repeat;
   set repeat(ImageRepeat value) {
-    assert(value != null);
     if (value == _repeat) {
       return;
     }
@@ -318,7 +308,6 @@ class RenderImage extends RenderBox {
   bool get matchTextDirection => _matchTextDirection;
   bool _matchTextDirection;
   set matchTextDirection(bool value) {
-    assert(value != null);
     if (value == _matchTextDirection) {
       return;
     }
@@ -350,7 +339,6 @@ class RenderImage extends RenderBox {
     if (_isAntiAlias == value) {
       return;
     }
-    assert(value != null);
     _isAntiAlias = value;
     markNeedsPaint();
   }
@@ -414,7 +402,8 @@ class RenderImage extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _sizeForConstraints(constraints);
   }
 

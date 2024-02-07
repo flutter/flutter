@@ -31,7 +31,7 @@ class ABCModel extends InheritedModel<String> {
 
   @override
   bool isSupportedAspect(Object aspect) {
-    return aspect == null || aspects == null || aspects!.contains(aspect);
+    return aspects == null || aspects!.contains(aspect);
   }
 
   @override

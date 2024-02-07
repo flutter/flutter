@@ -10,12 +10,14 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -40,6 +42,62 @@ void main() {
         ],
         processManager: FakeProcessManager.any(),
       );
+    });
+
+    group('startLogger', () {
+      testWithoutContext('starts idevicesyslog when USB connected', () async {
+        final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
+          <FakeCommand>[
+            const FakeCommand(
+              command: <String>['HostArtifact.idevicesyslog', '-u', '1234'],
+              environment: <String, String>{
+                'DYLD_LIBRARY_PATH': '/path/to/libraries'
+              },
+            ),
+          ],
+        );
+
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: artifacts,
+          cache: cache,
+          processManager: fakeProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.startLogger(
+          '1234',
+          false,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('starts idevicesyslog when wirelessly connected', () async {
+        final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
+          <FakeCommand>[
+            const FakeCommand(
+              command: <String>[
+                'HostArtifact.idevicesyslog', '-u', '1234', '--network'
+              ],
+              environment: <String, String>{
+                'DYLD_LIBRARY_PATH': '/path/to/libraries'
+              },
+            ),
+          ],
+        );
+
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: artifacts,
+          cache: cache,
+          processManager: fakeProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.startLogger(
+          '1234',
+          true,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
     });
 
     group('screenshot', () {
@@ -76,7 +134,7 @@ void main() {
         expect(() async => iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.usb,
+          DeviceConnectionInterface.attached,
         ), throwsA(anything));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
@@ -99,7 +157,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.usb,
+          DeviceConnectionInterface.attached,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
@@ -122,7 +180,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.network,
+          DeviceConnectionInterface.wireless,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
@@ -132,12 +190,19 @@ void main() {
   group('Diagnose Xcode build failure', () {
     late Map<String, String> buildSettings;
     late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       buildSettings = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
       };
       testUsage = TestUsage();
+
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     testWithoutContext('Sends analytics when bitcode fails', () async {
@@ -153,7 +218,7 @@ void main() {
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
       expect(testUsage.events, contains(
         TestUsageEvent(
           'build',
@@ -165,6 +230,15 @@ void main() {
           ),
         ),
       ));
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.flutterBuildInfo(
+          label: 'xcode-bitcode-failure',
+          buildType: 'ios',
+          command: '[xcrun, cc, blah]',
+          settings: '{PRODUCT_BUNDLE_IDENTIFIER: test.app}'
+        )),
+      );
     });
 
     testWithoutContext('fallback to stdout: No provisioning profile shows message', () async {
@@ -237,10 +311,48 @@ Error launching application on iPhone.''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
       expect(
         logger.errorText,
         contains(noProvisioningProfileInstruction),
+      );
+    });
+
+    testWithoutContext('fallback to stdout: Ineligible destinations', () async {
+      final Map<String, String> buildSettingsWithDevTeam = <String, String>{
+        'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
+        'DEVELOPMENT_TEAM': 'a team',
+      };
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stderr: '''
+Launching lib/main.dart on iPhone in debug mode...
+Signing iOS app for device deployment using developer identity: "iPhone Developer: test@flutter.io (1122334455)"
+Running Xcode build...                                1.3s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+               		{ id:1234D567-890C-1DA2-34E5-F6789A0123C4 }
+
+               	Ineligible destinations for the "Runner" scheme:
+               		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 17.0 is not installed. To use with Xcode, first download and install the platform }
+
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettingsWithDevTeam,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
+      expect(
+        logger.errorText,
+        contains(missingPlatformInstructions('iOS 17.0')),
       );
     });
 
@@ -265,49 +377,8 @@ Xcode's output:
 ↳
     blah
 
-    === CLEAN TARGET url_launcher OF PROJECT Pods WITH CONFIGURATION Release ===
-
-    Check dependencies
-
-    blah
-
-    === CLEAN TARGET Pods-Runner OF PROJECT Pods WITH CONFIGURATION Release ===
-
-    Check dependencies
-
-    blah
-
-    === CLEAN TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
-
     Check dependencies
     [BCEROR]Signing for "Runner" requires a development team. Select a development team in the project editor.
-    [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-    [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-    [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-
-    blah
-
-    ** CLEAN SUCCEEDED **
-
-    === BUILD TARGET url_launcher OF PROJECT Pods WITH CONFIGURATION Release ===
-
-    Check dependencies
-
-    blah
-
-    === BUILD TARGET Pods-Runner OF PROJECT Pods WITH CONFIGURATION Release ===
-
-    Check dependencies
-
-    blah
-
-    === BUILD TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
-
-    Check dependencies
-    Signing for "Runner" requires a development team. Select a development team in the project editor.
-    Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-    Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-    Code signing is required for product type 'Application' in SDK 'iOS 10.3'
 
 Could not build the precompiled application for the device.''',
         xcodeBuildExecution: XcodeBuildExecution(
@@ -318,11 +389,52 @@ Could not build the precompiled application for the device.''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
       expect(
         logger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
+    });
+
+    testWithoutContext('does not show no development team message when other Xcode issues detected', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Running "flutter pub get" in flutter_gallery...  0.6s
+Launching lib/main.dart on x in release mode...
+Running pod install...                                1.2s
+Running Xcode build...                                1.4s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD FAILED **
+
+
+    The following build commands failed:
+    	Check dependencies
+    (1 failure)
+Xcode's output:
+↳
+    blah
+
+    Check dependencies
+    [BCEROR]Signing for "Runner" requires a development team. Select a development team in the project editor.
+
+Could not build the precompiled application for the device.''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(issues: <XCResultIssue>[
+          XCResultIssue.test(message: 'Target aot_assembly_release failed', subType: 'Error'),
+        ])
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
+      expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
+      expect(logger.errorText, isNot(contains('Building a deployable iOS app requires a selected Development Team')));
     });
   });
 

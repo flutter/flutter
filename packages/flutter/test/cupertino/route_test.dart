@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -11,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -136,7 +137,7 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
       CupertinoPageRoute<void>(
@@ -151,15 +152,16 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.widgetWithText(CupertinoNavigationBar, 'A Phone'), findsOneWidget);
     expect(tester.getCenter(find.text('A Phone')).dx, 400.0);
 
     // Also shows the previous page's title next to the back button.
     expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
-    // 3 paddings + 1 ahem character at font size 34.0.
-    expect(tester.getTopLeft(find.text('An iPod')).dx, 8.0 + 4.0 + 34.0 + 6.0);
+    // 3 paddings + 1 test font character at font size 34.0.
+    // The epsilon is needed since the text theme has a negative letter spacing thus.
+    expect(tester.getTopLeft(find.text('An iPod')).dx, moreOrLessEquals(8.0 + 4.0 + 34.0 + 6.0, epsilon: 0.5));
   });
 
   testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
@@ -265,7 +267,8 @@ void main() {
     // from An iPod to Back (since An Internet communicator is too long to
     // fit in the back button).
     expect(find.widgetWithText(CupertinoButton, 'Back'), findsOneWidget);
-    expect(tester.getTopLeft(find.text('Back')).dx, 8.0 + 4.0 + 34.0 + 6.0);
+    // The epsilon is needed since the text theme has a negative letter spacing thus.
+    expect(tester.getTopLeft(find.text('Back')).dx, moreOrLessEquals(8.0 + 4.0 + 34.0 + 6.0, epsilon: 0.5));
   });
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
@@ -374,6 +377,272 @@ void main() {
     );
   });
 
+  testWidgets('Back swipe less than halfway is interrupted by route pop', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it less than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(100.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically pop and observe that Page 2 was popped as if there were
+    // no back gesture.
+    Navigator.pop<void>(scaffoldKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets('Back swipe more than halfway is interrupted by route pop', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it more than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(500.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically pop and observe that Page 2 was popped as if there were
+    // no back gesture.
+    Navigator.pop<void>(scaffoldKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets('Back swipe less than halfway is interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it less than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(100.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically push and observe that Page 3 was pushed as if there were
+    // no back gesture.
+    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Center(child: Text('Page 3')),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+  });
+
+  testWidgets('Back swipe more than halfway is interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it more than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(500.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically push and observe that Page 3 was pushed as if there were
+    // no back gesture.
+    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Center(child: Text('Page 3')),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+  });
+
   testWidgets('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -413,65 +682,66 @@ void main() {
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(443.7, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(475.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(291.9, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(350.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(168.2, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(237.4, epsilon: 0.1));
+
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(149.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(89.5, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(48.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(54.4, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(26.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(33.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(14.3, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(20.4, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.41, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(12.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(3.0, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.4, epsilon: 0.1));
 
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(0.0, epsilon: 0.1));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(156.3, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(411.03, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(308.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(484.35, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(431.7, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(530.67, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(510.4, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(557.61, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(551.8, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(573.88, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(573.8, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(583.86, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(585.6, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(590.26, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(592.6, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(594.58, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(596.9, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(597.66, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(600.0, epsilon: 0.1));
@@ -518,41 +788,41 @@ void main() {
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-70.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-55.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-137.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-111.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-192.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-161.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-227.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-200.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-246.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-226.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-255.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-242.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-260.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-251.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-264.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-257.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-266.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-261.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-267.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-263.0, epsilon: 1.0));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-198.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-83.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 360));
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
@@ -671,40 +941,40 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
-    // The whole transition is 400ms based on CupertinoPageRoute.transitionDuration.
+    // The whole transition is 500ms based on CupertinoPageRoute.transitionDuration.
     // Break it up into small chunks.
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-87, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(537, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-69, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(609, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(301, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-136, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(362, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Translation slows down as time goes on.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-220, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(141, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-191, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(192, epsilon: 1));
 
     // Finish the rest of the animation
-    await tester.pump(const Duration(milliseconds: 250));
+    await tester.pump(const Duration(milliseconds: 350));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-179, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(262, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-197, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(190, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-100, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(499, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-129, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(437, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Translation slows down as time goes on.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-47, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(659, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-74, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(607, epsilon: 1));
   });
 
   testWidgets('Dragged pop gesture is linear', (WidgetTester tester) async {
@@ -751,6 +1021,40 @@ void main() {
     await tester.pump();
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(300));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/137033.
+  testWidgets('Update pages during a drag gesture will not stuck', (WidgetTester tester) async {
+
+    await tester.pumpWidget(const _TestPageUpdate());
+
+    // Tap this button will update the pages in two seconds.
+    await tester.tap(find.text('Update Pages'));
+    await tester.pump();
+
+    // Start swiping.
+    final TestGesture swipeGesture = await tester.startGesture(const Offset(5, 100));
+    await swipeGesture.moveBy(const Offset(100, 0));
+    await tester.pump();
+
+    expect(
+      tester.stateList<NavigatorState>(find.byType(Navigator)).last.userGestureInProgress,
+      true,
+    );
+
+    // Wait for pages to update.
+    await tester.pump(const Duration(seconds: 3));
+
+    // Verify pages are updated.
+    expect(
+      find.text('New page'),
+      findsOneWidget,
+    );
+    // Verify `userGestureInProgress` is set to false.
+    expect(
+      tester.stateList<NavigatorState>(find.byType(Navigator)).last.userGestureInProgress,
+      false,
+    );
   });
 
   testWidgets('Pop gesture snapping is not linear', (WidgetTester tester) async {
@@ -1058,7 +1362,7 @@ void main() {
       expect(box, paintsShadowRect(dx: 468, color: const Color(0x01000000)));
       expect(box, paintsShadowRect(dx: 458, color: const Color(0x00000000)));
 
-      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // At the end of the animation, the shadow approaches full transparency
       expect(box, paintsShadowRect(dx: 794, color: const Color(0x01000000)));
@@ -1482,6 +1786,7 @@ void main() {
       label: 'Dismiss',
     )));
     debugDefaultTargetPlatformOverride = null;
+    semantics.dispose();
   });
 
   testWidgets('showCupertinoModalPopup allows for semantics dismiss when set', (WidgetTester tester) async {
@@ -1517,6 +1822,7 @@ void main() {
       label: 'Dismiss',
     ));
     debugDefaultTargetPlatformOverride = null;
+    semantics.dispose();
   });
 
   testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
@@ -1698,6 +2004,7 @@ void main() {
     ];
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1724,6 +2031,7 @@ void main() {
 
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1752,6 +2060,7 @@ void main() {
     ];
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1773,6 +2082,7 @@ void main() {
 
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1828,7 +2138,6 @@ void main() {
             child: const Text('Home'),
             onPressed: () {
               navigator = Navigator.of(context);
-              assert(navigator != null);
               navigator.push<void>(r);
             },
           );
@@ -2210,12 +2519,13 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 
 Widget buildNavigator({
   required List<Page<dynamic>> pages,
+  required FlutterView view,
   PopPageCallback? onPopPage,
   GlobalKey<NavigatorState>? key,
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+    data: MediaQueryData.fromView(view),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2236,6 +2546,68 @@ Widget buildNavigator({
 }
 
 
+// A test target to updating pages in navigator.
+//
+// It contains 3 routes:
+//
+//  * The initial route, 'home'.
+//  * The 'old' route, displays a button showing 'Update pages'. Tap the button
+//    will update pages.
+//  * The 'new' route, displays the new page.
+class _TestPageUpdate extends StatefulWidget {
+  const _TestPageUpdate();
+
+  @override
+  State<StatefulWidget> createState() => _TestPageUpdateState();
+}
+class _TestPageUpdateState extends State<_TestPageUpdate> {
+  bool updatePages = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final GlobalKey<State<StatefulWidget>> navKey = GlobalKey();
+    return MaterialApp(
+      home: Navigator(
+        key: navKey,
+        pages: updatePages
+            ? <Page<dynamic>>[
+                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
+                const CupertinoPage<dynamic>(name: '/home/new', child: Text('New page')),
+              ]
+            : <Page<dynamic>>[
+                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
+                CupertinoPage<dynamic>(name: '/home/old', child: buildMainPage()),
+              ],
+        onPopPage: (_, __) {
+          return false;
+        },
+      ),
+    );
+  }
+
+  Widget buildMainPage() {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('Main'),
+            ElevatedButton(
+              onPressed: () {
+                Future<void>.delayed(const Duration(seconds: 2), () {
+                  setState(() {
+                    updatePages = true;
+                  });
+                });
+              },
+              child: const Text('Update Pages'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 // A test target for post-route cancel events.
 //
 // It contains 2 routes:
@@ -2312,6 +2684,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
 class _RestorableModalTestWidget extends StatelessWidget {
   const _RestorableModalTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {

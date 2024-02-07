@@ -3,7 +3,12 @@ def flutterPluginVersion = 'managed'
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion {{compileSdkVersion}}
+    // Conditional for compatibility with AGP <4.2.
+    if (project.android.hasProperty("namespace")) {
+        namespace "{{androidIdentifier}}.host"
+    }
+
+    compileSdk {{compileSdkVersion}}
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -12,8 +17,8 @@ android {
 
     defaultConfig {
         applicationId "{{androidIdentifier}}.host"
-        minSdkVersion {{minSdkVersion}}
-        targetSdkVersion {{targetSdkVersion}}
+        minSdk {{minSdkVersion}}
+        targetSdk {{targetSdkVersion}}
         versionCode 1
         versionName "1.0"
     }

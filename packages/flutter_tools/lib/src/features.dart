@@ -5,8 +5,6 @@
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
-///
-/// If not injected, a default implementation is provided.
 FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 
 /// The interface used to determine if a particular [Feature] is enabled.
@@ -44,8 +42,17 @@ abstract class FeatureFlags {
   /// Whether custom devices are enabled.
   bool get areCustomDevicesEnabled => false;
 
-  /// Whether fast single widget reloads are enabled.
-  bool get isSingleWidgetReloadEnabled => false;
+  /// Whether WebAssembly compilation for Flutter Web is enabled.
+  bool get isFlutterWebWasmEnabled => false;
+
+  /// Whether animations are used in the command line interface.
+  bool get isCliAnimationEnabled => true;
+
+  /// Whether native assets compilation and bundling is enabled.
+  bool get isNativeAssetsEnabled => false;
+
+  /// Whether native assets compilation and bundling is enabled.
+  bool get isPreviewDeviceEnabled => true;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -59,124 +66,59 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
+  flutterWebWasm,
+  cliAnimation,
+  nativeAssets,
+  previewDevice,
 ];
 
+/// All current Flutter feature flags that can be configured.
+///
+/// [Feature.configSetting] is not `null`.
+Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
+
 /// The [Feature] for flutter web.
-const Feature flutterWebFeature = Feature(
+const Feature flutterWebFeature = Feature.fullyEnabled(
   name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for macOS desktop.
-const Feature flutterMacOSDesktopFeature = Feature(
+const Feature flutterMacOSDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Linux desktop.
-const Feature flutterLinuxDesktopFeature = Feature(
+const Feature flutterLinuxDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Windows desktop.
-const Feature flutterWindowsDesktopFeature = Feature(
+const Feature flutterWindowsDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Android devices.
-const Feature flutterAndroidFeature = Feature(
+const Feature flutterAndroidFeature = Feature.fullyEnabled(
   name: 'Flutter for Android',
   configSetting: 'enable-android',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
-
 /// The [Feature] for iOS devices.
-const Feature flutterIOSFeature = Feature(
+const Feature flutterIOSFeature = Feature.fullyEnabled(
   name: 'Flutter for iOS',
   configSetting: 'enable-ios',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Fuchsia support.
@@ -190,7 +132,7 @@ const Feature flutterFuchsiaFeature = Feature(
 );
 
 const Feature flutterCustomDevicesFeature = Feature(
-  name: 'Early support for custom device types',
+  name: 'early support for custom device types',
   configSetting: 'enable-custom-devices',
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
   master: FeatureChannelSetting(
@@ -204,14 +146,43 @@ const Feature flutterCustomDevicesFeature = Feature(
   ),
 );
 
-/// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
-const Feature singleWidgetReload = Feature(
-  name: 'Hot reload optimization for changes to class body of a single widget',
-  configSetting: 'single-widget-reload-optimization',
-  environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
+/// Enabling WebAssembly compilation from `flutter build web`
+const Feature flutterWebWasm = Feature(
+  name: 'WebAssembly compilation from flutter build web',
+  environmentOverride: 'FLUTTER_WEB_WASM',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
+  ),
+);
+
+const String kCliAnimationsFeatureName = 'cli-animations';
+
+/// The [Feature] for CLI animations.
+///
+/// The TERM environment variable set to "dumb" turns this off.
+const Feature cliAnimation = Feature.fullyEnabled(
+  name: 'animations in the command line interface',
+  configSetting: kCliAnimationsFeatureName,
+);
+
+/// Enable native assets compilation and bundling.
+const Feature nativeAssets = Feature(
+  name: 'native assets compilation and bundling',
+  configSetting: 'enable-native-assets',
+  environmentOverride: 'FLUTTER_NATIVE_ASSETS',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
+/// Enable Flutter preview prebuilt device.
+const Feature previewDevice = Feature(
+  name: 'Flutter preview prebuilt device',
+  configSetting: 'enable-flutter-preview',
+  environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
+  master: FeatureChannelSetting(
+    available: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
@@ -237,6 +208,25 @@ class Feature {
     this.beta = const FeatureChannelSetting(),
     this.stable = const FeatureChannelSetting()
   });
+
+  /// Creates a [Feature] that is fully enabled across channels.
+  const Feature.fullyEnabled(
+      {required this.name,
+      this.environmentOverride,
+      this.configSetting,
+      this.extraHelpText})
+      : master = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        ),
+        beta = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        ),
+        stable = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        );
 
   /// The user visible name for this feature.
   final String name;
@@ -274,21 +264,17 @@ class Feature {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name. '
-        'This setting will take effect on ');
+    final StringBuffer buffer = StringBuffer('Enable or disable $name.');
     final List<String> channels = <String>[
       if (master.available) 'master',
       if (beta.available) 'beta',
       if (stable.available) 'stable',
     ];
+    // Add channel info for settings only on some channels.
     if (channels.length == 1) {
-      buffer.write('the ${channels.single} channel.');
+      buffer.write('\nThis setting applies only to the ${channels.single} channel.');
     } else if (channels.length == 2) {
-      buffer.write('the ${channels.join(' and ')} channels.');
-    } else {
-      final String prefix = (channels.toList()
-        ..removeLast()).join(', ');
-      buffer.write('the $prefix, and ${channels.last} channels.');
+      buffer.write('\nThis setting applies only to the ${channels.join(' and ')} channels.');
     }
     if (extraHelpText != null) {
       buffer.write(' $extraHelpText');

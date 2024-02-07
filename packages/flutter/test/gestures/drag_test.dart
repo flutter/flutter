@@ -81,8 +81,8 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
     final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..onStart = (_) {};
-    addTearDown(() => drag.dispose);
-    addTearDown(() => competingDrag.dispose);
+    addTearDown(drag.dispose);
+    addTearDown(competingDrag.dispose);
 
     late Offset positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
@@ -104,8 +104,8 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
     final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..onStart = (_) {};
-    addTearDown(() => drag.dispose);
-    addTearDown(() => competingDrag.dispose);
+    addTearDown(drag.dispose);
+    addTearDown(competingDrag.dispose);
 
     Offset? positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
@@ -354,7 +354,7 @@ void main() {
 
     final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..onStart = (_) {};
-    addTearDown(() => competingDrag.dispose);
+    addTearDown(competingDrag.dispose);
 
     down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 600));
     drag.addPointer(down);
@@ -436,8 +436,8 @@ void main() {
     final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
       ..onStart = (_) {};
-    addTearDown(() => drag.dispose);
-    addTearDown(() => competingDrag.dispose);
+    addTearDown(drag.dispose);
+    addTearDown(competingDrag.dispose);
 
     Offset? positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
@@ -466,13 +466,17 @@ void main() {
     expect(updateDelta, const Offset(20.0, 0.0));
   });
 
-  testGesture('Drag with multiple pointers in down behavior', (GestureTester tester) {
+  testGesture('Drag with multiple pointers in down behavior - sumAllPointers', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 =
-      HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+      HorizontalDragGestureRecognizer()
+        ..dragStartBehavior = DragStartBehavior.down
+        ..multitouchDragStrategy = MultitouchDragStrategy.sumAllPointers;
     final VerticalDragGestureRecognizer drag2 =
-      VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
-    addTearDown(() => drag1.dispose);
-    addTearDown(() => drag2.dispose);
+      VerticalDragGestureRecognizer()
+        ..dragStartBehavior = DragStartBehavior.down
+        ..multitouchDragStrategy = MultitouchDragStrategy.sumAllPointers;
+    addTearDown(drag1.dispose);
+    addTearDown(drag2.dispose);
 
     final List<String> log = <String>[];
     drag1.onDown = (_) { log.add('drag1-down'); };
@@ -507,10 +511,17 @@ void main() {
     tester.route(down6);
     log.add('-d');
 
+    // Check all active pointers can trigger 'drag1-update'.
+
     tester.route(pointer5.move(const Offset(0.0, 100.0)));
     log.add('-e');
     tester.route(pointer5.move(const Offset(70.0, 70.0)));
     log.add('-f');
+
+    tester.route(pointer6.move(const Offset(0.0, 100.0)));
+    log.add('-g');
+    tester.route(pointer6.move(const Offset(70.0, 70.0)));
+    log.add('-h');
 
     tester.route(pointer5.up());
     tester.route(pointer6.up());
@@ -532,7 +543,108 @@ void main() {
       '-e',
       'drag1-update',
       '-f',
-      'drag1-end',
+      'drag1-update',
+      '-g',
+      'drag1-update',
+      '-h',
+      'drag1-end'
+    ]);
+  });
+
+  testGesture('Drag with multiple pointers in down behavior - default', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag1 =
+    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 =
+    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag1.dispose);
+    addTearDown(drag2.dispose);
+
+    final List<String> log = <String>[];
+    drag1.onDown = (_) { log.add('drag1-down'); };
+    drag1.onStart = (_) { log.add('drag1-start'); };
+    drag1.onUpdate = (_) { log.add('drag1-update'); };
+    drag1.onEnd = (_) { log.add('drag1-end'); };
+    drag1.onCancel = () { log.add('drag1-cancel'); };
+    drag2.onDown = (_) { log.add('drag2-down'); };
+    drag2.onStart = (_) { log.add('drag2-start'); };
+    drag2.onUpdate = (_) { log.add('drag2-update'); };
+    drag2.onEnd = (_) { log.add('drag2-end'); };
+    drag2.onCancel = () { log.add('drag2-cancel'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
+    drag1.addPointer(down5);
+    drag2.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    log.add('-a');
+
+    tester.route(pointer5.move(const Offset(100.0, 0.0)));
+    log.add('-b');
+    tester.route(pointer5.move(const Offset(50.0, 50.0)));
+    log.add('-c');
+
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(const Offset(20.0, 20.0));
+    drag1.addPointer(down6);
+    drag2.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    log.add('-d');
+
+    // Current latest active pointer is pointer6.
+
+    // Should not trigger the drag1-update.
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+    log.add('-e');
+    tester.route(pointer5.move(const Offset(70.0, 70.0)));
+    log.add('-f');
+
+    // Latest active pointer can trigger the drag1-update.
+    tester.route(pointer6.move(const Offset(0.0, 100.0)));
+    log.add('-g');
+    tester.route(pointer6.move(const Offset(70.0, 70.0)));
+    log.add('-h');
+
+    // Release the latest active pointer.
+    tester.route(pointer6.up());
+    log.add('-i');
+
+    // Current latest active pointer is pointer5.
+
+    // Latest active pointer can trigger the drag1-update.
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+    log.add('-j');
+    tester.route(pointer5.move(const Offset(70.0, 70.0)));
+    log.add('-k');
+
+    tester.route(pointer5.up());
+
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      '-a',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      '-b',
+      'drag1-update',
+      '-c',
+      'drag2-down',
+      'drag2-cancel',
+      '-d',
+      '-e',
+      '-f',
+      'drag1-update',
+      '-g',
+      'drag1-update',
+      '-h',
+      '-i',
+      'drag1-update',
+      '-j',
+      'drag1-update',
+      '-k',
+      'drag1-end'
     ]);
   });
 
@@ -567,6 +679,86 @@ void main() {
     expect(velocity.pixelsPerSecond.dx, inInclusiveRange(0.99 * kMaxFlingVelocity, kMaxFlingVelocity));
     expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
     expect(primaryVelocity, velocity.pixelsPerSecond.dx);
+  });
+
+  /// Drag the pointer at the given velocity, and return the details
+  /// the recognizer passes to onEnd.
+  ///
+  /// This method will mutate `recognizer.onEnd`.
+  DragEndDetails performDragToEnd(GestureTester tester, DragGestureRecognizer recognizer, Offset pointerVelocity) {
+    late DragEndDetails actual;
+    recognizer.onEnd = (DragEndDetails details) {
+      actual = details;
+    };
+    final TestPointer pointer = TestPointer();
+    final PointerDownEvent down = pointer.down(Offset.zero);
+    recognizer.addPointer(down);
+    tester.closeArena(pointer.pointer);
+    tester.route(down);
+    tester.route(pointer.move(pointerVelocity * 0.025, timeStamp: const Duration(milliseconds: 25)));
+    tester.route(pointer.move(pointerVelocity * 0.050, timeStamp: const Duration(milliseconds: 50)));
+    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 50)));
+    return actual;
+  }
+
+  testGesture('Clamp max pan velocity in 2D, isotropically', (GestureTester tester) {
+    final PanGestureRecognizer recognizer = PanGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, Offset expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.velocity.pixelsPerSecond, offsetMoreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.primaryVelocity, isNull);
+    }
+
+    checkDrag(const Offset(  400.0,   400.0), const Offset(  400.0,   400.0));
+    checkDrag(const Offset( 2000.0, -2000.0), const Offset( 2000.0, -2000.0));
+    checkDrag(const Offset(-8000.0, -8000.0), const Offset(-5656.9, -5656.9));
+    checkDrag(const Offset(-8000.0,  6000.0), const Offset(-6400.0,  4800.0));
+    checkDrag(const Offset(-9000.0,     0.0), const Offset(-8000.0,     0.0));
+    checkDrag(const Offset(-9000.0, -1000.0), const Offset(-7951.1, - 883.5));
+    checkDrag(const Offset(-1000.0,  9000.0), const Offset(- 883.5,  7951.1));
+    checkDrag(const Offset(    0.0,  9000.0), const Offset(    0.0,  8000.0));
+  });
+
+  testGesture('Clamp max vertical-drag velocity vertically', (GestureTester tester) {
+    final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, double expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.primaryVelocity, moreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.velocity.pixelsPerSecond.dx, 0.0);
+      expect(actual.velocity.pixelsPerSecond.dy, actual.primaryVelocity);
+    }
+
+    checkDrag(const Offset(  500.0,   400.0),   400.0);
+    checkDrag(const Offset( 3000.0, -2000.0), -2000.0);
+    checkDrag(const Offset(-9000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(-9000.0,     0.0),     0.0);
+    checkDrag(const Offset(-9000.0,  1000.0),  1000.0);
+    checkDrag(const Offset(-1000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(    0.0, -9000.0), -8000.0);
+  });
+
+  testGesture('Clamp max horizontal-drag velocity horizontally', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer recognizer = HorizontalDragGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, double expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.primaryVelocity, moreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.velocity.pixelsPerSecond.dx, actual.primaryVelocity);
+      expect(actual.velocity.pixelsPerSecond.dy, 0.0);
+    }
+
+    checkDrag(const Offset(  500.0,   400.0),   500.0);
+    checkDrag(const Offset( 3000.0, -2000.0),  3000.0);
+    checkDrag(const Offset(-9000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(-9000.0,     0.0), -8000.0);
+    checkDrag(const Offset(-9000.0,  1000.0), -8000.0);
+    checkDrag(const Offset(-1000.0, -9000.0), -1000.0);
+    checkDrag(const Offset(    0.0, -9000.0),     0.0);
   });
 
   testGesture('Synthesized pointer events are ignored for velocity tracking', (GestureTester tester) {
@@ -730,7 +922,7 @@ void main() {
   testGesture('Can filter drags based on device kind', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag =
         HorizontalDragGestureRecognizer(
-            kind: PointerDeviceKind.mouse,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse },
         )
         ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);

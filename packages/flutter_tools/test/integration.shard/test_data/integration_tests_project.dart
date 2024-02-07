@@ -14,7 +14,7 @@ class IntegrationTestsProject extends Project implements TestsProject {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=2.12.0-0 <3.0.0'
+    sdk: '>=3.2.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -58,11 +58,11 @@ class IntegrationTestsProject extends Project implements TestsProject {
   String get testFilePath => fileSystem.path.join(dir.path, 'integration_test', 'app_test.dart');
 
   @override
-  Uri get breakpointUri => throw UnimplementedError();
+  Uri get breakpointUri => Uri.file(testFilePath);
 
   @override
   Uri get breakpointAppUri => throw UnimplementedError();
 
   @override
-  int get breakpointLine => throw UnimplementedError();
+  int get breakpointLine => lineContaining(testContent, '// BREAKPOINT');
 }

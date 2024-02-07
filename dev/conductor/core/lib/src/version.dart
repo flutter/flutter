@@ -54,20 +54,16 @@ class Version {
         assert(m == null);
         assert(n == null);
         assert(commits == null);
-        break;
       case VersionType.development:
         assert(m != null);
         assert(n != null);
         assert(commits == null);
-        break;
       case VersionType.latest:
         assert(m != null);
         assert(n != null);
         assert(commits != null);
-        break;
       case VersionType.gitDescribe:
         assert(commits != null);
-        break;
     }
   }
 
@@ -77,7 +73,6 @@ class Version {
   /// `flutter --version` and match one of `stablePattern`, `developmentPattern`
   /// and `latestPattern`.
   factory Version.fromString(String versionString) {
-    assert(versionString != null);
 
     versionString = versionString.trim();
     // stable tag
@@ -183,19 +178,15 @@ class Version {
           nextM = 0;
           nextN = 0;
         }
-        break;
       case 'z':
         // Hotfix to stable release.
         assert(previousVersion.type == VersionType.stable);
         nextZ += 1;
-        break;
       case 'm':
         assert(false, "Do not increment 'm' via Version.increment, use instead Version.fromCandidateBranch()");
-        break;
       case 'n':
         // Hotfix to internal roll.
         nextN = nextN! + 1;
-        break;
       default:
         throw Exception('Unknown increment level $increment.');
     }
@@ -304,15 +295,11 @@ class Version {
 
   @override
   String toString() {
-    switch (type) {
-      case VersionType.stable:
-        return '$x.$y.$z';
-      case VersionType.development:
-        return '$x.$y.$z-$m.$n.pre';
-      case VersionType.latest:
-        return '$x.$y.$z-$m.$n.pre.$commits';
-      case VersionType.gitDescribe:
-        return '$x.$y.$z-$m.$n.pre.$commits';
-    }
+    return switch (type) {
+      VersionType.stable      => '$x.$y.$z',
+      VersionType.development => '$x.$y.$z-$m.$n.pre',
+      VersionType.latest      => '$x.$y.$z-$m.$n.pre.$commits',
+      VersionType.gitDescribe => '$x.$y.$z-$m.$n.pre.$commits',
+    };
   }
 }

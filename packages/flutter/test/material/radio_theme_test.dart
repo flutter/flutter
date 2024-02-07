@@ -7,12 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   test('RadioThemeData copyWith, ==, hashCode basics', () {
     expect(const RadioThemeData(), const RadioThemeData().copyWith());
     expect(const RadioThemeData().hashCode, const RadioThemeData().copyWith().hashCode);
+  });
+
+  test('RadioThemeData lerp special cases', () {
+    expect(RadioThemeData.lerp(null, null, 0), const RadioThemeData());
+    const RadioThemeData data = RadioThemeData();
+    expect(identical(RadioThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('RadioThemeData defaults', () {

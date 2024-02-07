@@ -6,13 +6,25 @@
 
 static const CGFloat kStandardTimeOut = 60.0;
 
-@interface XCUIElement(KeyboardFocus)
+@interface XCUIElement(Test)
 @property (nonatomic, readonly) BOOL flt_hasKeyboardFocus;
+- (void)flt_forceTap;
 @end
 
-@implementation XCUIElement(KeyboardFocus)
+@implementation XCUIElement(Test)
 - (BOOL)flt_hasKeyboardFocus {
   return [[self valueForKey:@"hasKeyboardFocus"] boolValue];
+}
+
+- (void)flt_forceTap {
+  if (self.isHittable) {
+    [self tap];
+  } else {
+    XCUICoordinate *normalized = [self coordinateWithNormalizedOffset:CGVectorMake(0, 0)];
+    // The offset is in actual pixels. (1, 1) to make sure tap within the view boundary.
+    XCUICoordinate *coordinate = [normalized coordinateWithOffset:CGVectorMake(1, 1)];
+    [coordinate tap];
+  }
 }
 @end
 
@@ -25,45 +37,6 @@ static const CGFloat kStandardTimeOut = 60.0;
 - (void)setUp {
   [super setUp];
   self.continueAfterFailure = NO;
-
-  // Delete the previously installed app if needed before running.
-  // This is to address "Failed to terminate" failure.
-  // The solution is based on https://stackoverflow.com/questions/50016018/uitest-failed-to-terminate-com-test-abc3708-after-60-0s-state-is-still-runnin
-  XCUIApplication *springboard = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
-  [springboard activate];
-  XCUIElement *appIcon = springboard.icons[@"ios_platform_view_tests"];
-
-  if ([appIcon waitForExistenceWithTimeout:kStandardTimeOut]) {
-    NSLog(@"Deleting previously installed app.");
-
-    // It's possible that app icon is not hittable yet.
-    NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
-    [self expectationForPredicate:hittable evaluatedWithObject:appIcon handler:nil];
-    [self waitForExpectationsWithTimeout:kStandardTimeOut handler:nil];
-
-    // Pressing for 2 seconds will bring up context menu.
-    // Pressing for 3 seconds will dismiss the context menu and make icons wiggle.
-    [appIcon pressForDuration:2];
-
-    // The "Remove App" button in context menu.
-    XCUIElement *contextMenuRemoveButton = springboard.buttons[@"Remove App"];
-    XCTAssert([contextMenuRemoveButton waitForExistenceWithTimeout:kStandardTimeOut], @"The context menu remove app button must appear.");
-    [contextMenuRemoveButton tap];
-
-    // Tap the delete confirmation
-    XCUIElement *deleteConfirmationButton = springboard.alerts.buttons[@"Delete App"];
-    XCTAssert([deleteConfirmationButton waitForExistenceWithTimeout:kStandardTimeOut], @"The first delete confirmation button must appear.");
-    [deleteConfirmationButton tap];
-
-    // Tap the second delete confirmation
-    XCUIElement *secondDeleteConfirmationButton = springboard.alerts.buttons[@"Delete"];
-    XCTAssert([secondDeleteConfirmationButton waitForExistenceWithTimeout:kStandardTimeOut], @"The second delete confirmation button must appear.");
-    [secondDeleteConfirmationButton tap];
-
-    [NSThread sleepForTimeInterval:3];
-  } else {
-    NSLog(@"No previously installed app found.");
-  }
 
   self.app = [[XCUIApplication alloc] init];
   [self.app launch];
@@ -93,6 +66,33 @@ static const CGFloat kStandardTimeOut = 60.0;
   [platformView tap];
   XCTAssertTrue(platformView.flt_hasKeyboardFocus);
   XCTAssertFalse(flutterTextField.flt_hasKeyboardFocus);
+}
+
+- (void)testPlatformViewZOrder {
+  XCUIElement *entranceButton = self.app.buttons[@"platform view z order test"];
+  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut], @"The element tree is %@", self.app.debugDescription);
+  [entranceButton tap];
+
+  XCUIElement *showAlertButton = self.app.buttons[@"Show Alert"];
+  XCTAssertTrue([showAlertButton waitForExistenceWithTimeout:kStandardTimeOut]);
+
+  [showAlertButton tap];
+
+  XCUIElement *platformButton = self.app.buttons[@"platform_view[0]"];
+  XCTAssertTrue([platformButton waitForExistenceWithTimeout:kStandardTimeOut]);
+  XCTAssertTrue([platformButton.label isEqualToString:@"Initial Button Title"]);
+
+  // The `app.otherElements` query fails to query `platform_view[1]` (the background),
+  // because it is covered by a dialog prompt, which removes semantic nodes underneath.
+  // The workaround is to set a manual delay here (must be longer than the delay used to
+  // show the background view on the dart side).
+  [NSThread sleepForTimeInterval:3];
+
+  for (int i = 1; i <= 5; i++) {
+    [platformButton flt_forceTap];
+    NSString *expectedButtonTitle = [NSString stringWithFormat:@"Button Tapped %d", i];
+    XCTAssertTrue([platformButton.label isEqualToString:expectedButtonTitle]);
+  }
 }
 
 @end

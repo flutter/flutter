@@ -7,10 +7,11 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
@@ -141,7 +142,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   @override
-  Stream<Uri> get observatoryUris => const Stream<Uri>.empty();
+  Stream<Uri> get vmServiceUris => const Stream<Uri>.empty();
 
   @override
   final Device device;
@@ -167,9 +168,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> initLogReader() async { }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   bool isSupported() => true;
@@ -202,8 +200,7 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
-  })  : assert(exception != null),
-        super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
+  })  : super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
@@ -214,6 +211,7 @@ class TestFlutterDevice extends FlutterDevice {
     Restart? restart,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
+    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     bool enableDds = true,
     bool cacheStartupProfile = false,
@@ -281,7 +279,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

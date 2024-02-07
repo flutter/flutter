@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Does not animate if already at target position', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -29,6 +30,7 @@ void main() {
 
   testWidgets('Does not animate if already at target position within tolerance', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -41,7 +43,7 @@ void main() {
 
     expectNoAnimation();
 
-    final double halfTolerance = controller.position.physics.tolerance.distance / 2;
+    final double halfTolerance = controller.position.physics.toleranceFor(controller.position).distance / 2;
     expect(halfTolerance, isNonZero);
     final double targetPosition = controller.position.pixels + halfTolerance;
     controller.position.animateTo(targetPosition, duration: const Duration(seconds: 10), curve: Curves.linear);
@@ -52,6 +54,7 @@ void main() {
 
   testWidgets('Animates if going to a position outside of tolerance', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -64,7 +67,7 @@ void main() {
 
     expectNoAnimation();
 
-    final double doubleTolerance = controller.position.physics.tolerance.distance * 2;
+    final double doubleTolerance = controller.position.physics.toleranceFor(controller.position).distance * 2;
     expect(doubleTolerance, isNonZero);
     final double targetPosition = controller.position.pixels + doubleTolerance;
     controller.position.animateTo(targetPosition, duration: const Duration(seconds: 10), curve: Curves.linear);

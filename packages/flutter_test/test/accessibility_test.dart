@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -21,6 +22,61 @@ void main() {
       );
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
+    });
+
+    testWidgets('Multiple text with same label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          const Column(
+            children: <Widget>[
+              Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+              Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets(
+      'Multiple text with same label but Nodes excluded from '
+      'semantic tree have failing contrast should pass a11y guideline ',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _boilerplate(
+            const Column(
+              children: <Widget>[
+                Text(
+                  'this is a test',
+                  style: TextStyle(fontSize: 14.0, color: Colors.black),
+                ),
+                SizedBox(height: 50),
+                Text(
+                  'this is a test',
+                  style: TextStyle(fontSize: 14.0, color: Colors.black),
+                ),
+                SizedBox(height: 50),
+                ExcludeSemantics(
+                  child: Text(
+                    'this is a test',
+                    style: TextStyle(fontSize: 14.0, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
     });
 
     testWidgets('white text on black background - Text Widget - direct style',
@@ -52,8 +108,8 @@ void main() {
           width: 200.0,
           height: 300.0,
           color: Colors.white,
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Text(
                 'this is a white text',
                 style: TextStyle(fontSize: 14.0, color: Colors.white),
@@ -170,6 +226,37 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('Correctly identify failures in complex transforms', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Padding(
+            padding: const EdgeInsets.only(left: 100),
+            child: Semantics(
+              container: true,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 100),
+                child: Semantics(
+                  container: true,
+                  child: Container(
+                    width: 100.0,
+                    height: 200.0,
+                    color: Colors.amberAccent,
+                    child: const Text(
+                      'this',
+                      style: TextStyle(color: Colors.amber),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
     testWidgets('Material text field - default style',
         (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -188,11 +275,12 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('yellow text on yellow background fails with correct message',
+    testWidgets('Material2: yellow text on yellow background fails with correct message',
         (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
+          useMaterial3: false,
           Container(
             width: 200.0,
             height: 200.0,
@@ -214,6 +302,38 @@ void main() {
         'size of 14.0.\n'
         'The computed colors was:\n'
         'light - Color(0xfffafafa), dark - Color(0xffffeb3b)\n'
+         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
+      );
+      handle.dispose();
+    });
+
+    testWidgets('Material3: yellow text on yellow background fails with correct message',
+        (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          useMaterial3: true,
+          Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.yellow,
+            child: const Text(
+              'this is a test',
+              style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+            ),
+          ),
+        ),
+      );
+      final Evaluation result = await textContrastGuideline.evaluate(tester);
+      expect(result.passed, false);
+      expect(
+        result.reason,
+        'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
+        'label: "this is a test", textDirection: ltr):\n'
+        'Expected contrast ratio of at least 4.5 but found 1.19 for a font '
+        'size of 14.0.\n'
+        'The computed colors was:\n'
+        'light - Color(0xfffffbfe), dark - Color(0xffffeb3b)\n'
          'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
       );
       handle.dispose();
@@ -730,6 +850,36 @@ void main() {
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
+
+    testWidgets('Tap size test can handle partially off-screen items', (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(title: const Text('Foo')),
+              body: ListView(
+                  controller: controller,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: Semantics(container: true, onTap: () {}, child: const Text('hello'))),
+                    ),
+                    Container(
+                      height: 1000,
+                      color: Colors.red,
+                    ),
+                  ]
+              ),
+            ),
+          )
+      );
+      controller.jumpTo(90);
+      await tester.pump();
+      await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    });
   });
 
   group('Labeled tappable node guideline', () {
@@ -788,6 +938,14 @@ void main() {
       expect(result.passed, true);
       handle.dispose();
     });
+
+    testWidgets('Passes if text field does not have label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(const TextField()));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
   });
 
   testWidgets('regression test for material widget',
@@ -812,5 +970,11 @@ void main() {
   });
 }
 
-Widget _boilerplate(Widget child) =>
-  MaterialApp(home: Scaffold(body: Center(child: child)));
+Widget _boilerplate(Widget child, { bool? useMaterial3 }) {
+  return MaterialApp(
+    theme: ThemeData(useMaterial3: useMaterial3),
+    home: Scaffold(
+      body: Center(child: child),
+    ),
+  );
+}

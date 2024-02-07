@@ -70,7 +70,7 @@ void main() {
       final TestClipPaintingContext context = TestClipPaintingContext();
       final RenderBox child = box200x200;
       final RenderStack stack;
-      switch(clip){
+      switch (clip){
         case Clip.none:
         case Clip.hardEdge:
         case Clip.antiAlias:
@@ -80,13 +80,11 @@ void main() {
             children: <RenderBox>[child],
             clipBehavior: clip!,
           );
-          break;
         case null:
           stack = RenderStack(
             textDirection: TextDirection.ltr,
             children: <RenderBox>[child],
           );
-          break;
       }
       { // Make sure that the child is positioned so the stack will consider it as overflowed.
         final StackParentData parentData = child.parentData! as StackParentData;

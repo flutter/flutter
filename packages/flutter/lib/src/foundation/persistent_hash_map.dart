@@ -53,7 +53,7 @@ class PersistentHashMap<K extends Object, V> {
 
     // Unfortunately can not use unsafeCast<V?>(...) here because it leads
     // to worse code generation on VM.
-    return _root!.get(0, key, key.hashCode) as V?;
+    return _root.get(0, key, key.hashCode) as V?;
   }
 }
 
@@ -390,7 +390,7 @@ List<Object?> _makeArray(int length) {
   return List<Object?>.filled(length, null);
 }
 
-/// This helper method becomes an noop when compiled with dart2js on
+/// This helper method becomes an no-op when compiled with dart2js on
 /// with high level of optimizations enabled.
 @pragma('dart2js:tryInline')
 @pragma('dart2js:as:trust')

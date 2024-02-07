@@ -160,7 +160,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
-    testWithoutContext('Windows', () async {
+    testWithoutContext('Windows default', () async {
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.hostPlatform, HostPlatform.windows_x64);
@@ -670,7 +670,7 @@ void main() {
             '-d',
             tempDirectory.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempDirectory, exists);
             tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
             tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
@@ -751,12 +751,32 @@ void main() {
       );
 
       expect(
-            () => unknownOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        () => unknownOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
         throwsToolExit
           (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
             'Please install unzip.'),
       );
     });
+  });
+
+  testWithoutContext('directory size', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'fuchsia'),
+      processManager: fakeProcessManager,
+    );
+
+    final Directory directory = fileSystem.systemTempDirectory.childDirectory('test_directory');
+    directory.createSync();
+    directory.childFile('file1.txt').writeAsBytesSync(List<int>.filled(10, 0));
+    directory.childFile('file2.txt').writeAsBytesSync(List<int>.filled(20, 0));
+    final Directory subDirectory = directory.childDirectory('sub_directory');
+    subDirectory.createSync();
+    subDirectory.childFile('file3.txt').writeAsBytesSync(List<int>.filled(15, 0));
+
+    expect(osUtils.getDirectorySize(directory), equals(10 + 20 + 15));
   });
 
   testWithoutContext('stream compression level', () {

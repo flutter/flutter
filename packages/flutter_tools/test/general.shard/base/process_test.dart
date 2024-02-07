@@ -33,7 +33,10 @@ void main() {
         exitCode: 1,
       ));
 
-      expect(() async => processUtils.run(<String>['false'], throwOnError: true), throwsProcessException());
+      expect(
+        () async => processUtils.run(<String>['false'], throwOnError: true),
+        throwsProcessException(message: 'Process exited abnormally with exit code 1'),
+      );
     });
   });
 
@@ -42,13 +45,13 @@ void main() {
       int i = 1;
       int? cleanup;
 
-      final ShutdownHooks shutdownHooks = ShutdownHooks(logger: BufferLogger.test());
+      final ShutdownHooks shutdownHooks = ShutdownHooks();
 
       shutdownHooks.addShutdownHook(() async {
         cleanup = i++;
       });
 
-      await shutdownHooks.runShutdownHooks();
+      await shutdownHooks.runShutdownHooks(BufferLogger.test());
 
       expect(cleanup, 1);
     });

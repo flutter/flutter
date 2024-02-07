@@ -16,6 +16,12 @@ import 'theme_data.dart';
 // late BuildContext context;
 // typedef MyAppHome = Placeholder;
 
+/// The type for [ButtonStyle.backgroundBuilder] and [ButtonStyle.foregroundBuilder].
+///
+/// The [states] parameter is the button's current pressed/hovered/etc state. The [child] is
+/// typically a descendant of the returned widget.
+typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<MaterialState> states, Widget? child);
+
 /// The visual properties that most buttons have in common.
 ///
 /// Buttons and their themes have a ButtonStyle property which defines the visual
@@ -151,6 +157,7 @@ class ButtonStyle with Diagnosticable {
     this.minimumSize,
     this.fixedSize,
     this.maximumSize,
+    this.iconColor,
     this.iconSize,
     this.side,
     this.shape,
@@ -161,6 +168,8 @@ class ButtonStyle with Diagnosticable {
     this.enableFeedback,
     this.alignment,
     this.splashFactory,
+    this.backgroundBuilder,
+    this.foregroundBuilder,
   });
 
   /// The style for a button's [Text] widget descendants.
@@ -229,6 +238,11 @@ class ButtonStyle with Diagnosticable {
   ///
   /// This value must be greater than or equal to [minimumSize].
   final MaterialStateProperty<Size?>? maximumSize;
+
+  /// The icon's color inside of the button.
+  ///
+  /// If this is null, the icon color will be [foregroundColor].
+  final MaterialStateProperty<Color?>? iconColor;
 
   /// The icon's size inside of the button.
   final MaterialStateProperty<double?>? iconSize;
@@ -309,6 +323,42 @@ class ButtonStyle with Diagnosticable {
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;
 
+  /// Creates a widget that becomes the child of the button's [Material]
+  /// and whose child is the rest of the button, including the button's
+  /// `child` parameter.
+  ///
+  /// The widget created by [backgroundBuilder] is constrained to be
+  /// the same size as the overall button and will appear behind the
+  /// button's child. The widget created by [foregroundBuilder] is
+  /// constrained to be the same size as the button's child, i.e. it's
+  /// inset by [ButtonStyle.padding] and aligned by the button's
+  /// [ButtonStyle.alignment].
+  ///
+  /// By default the returned widget is clipped to the Material's [ButtonStyle.shape].
+  ///
+  /// See also:
+  ///
+  ///  * [foregroundBuilder], to create a widget that's as big as the button's
+  ///    child and is layered behind the child.
+  ///  * [ButtonStyleButton.clipBehavior], for more information about
+  ///    configuring clipping.
+  final ButtonLayerBuilder? backgroundBuilder;
+
+  /// Creates a Widget that contains the button's child parameter which is used
+  /// instead of the button's child.
+  ///
+  /// The returned widget is clipped by the button's
+  /// [ButtonStyle.shape], inset by the button's [ButtonStyle.padding]
+  /// and aligned by the button's [ButtonStyle.alignment].
+  ///
+  /// See also:
+  ///
+  ///  * [backgroundBuilder], to create a widget that's as big as the button and
+  ///    is layered behind the button's child.
+  ///  * [ButtonStyleButton.clipBehavior], for more information about
+  ///    configuring clipping.
+  final ButtonLayerBuilder? foregroundBuilder;
+
   /// Returns a copy of this ButtonStyle with the given fields replaced with
   /// the new values.
   ButtonStyle copyWith({
@@ -323,6 +373,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<Size?>? minimumSize,
     MaterialStateProperty<Size?>? fixedSize,
     MaterialStateProperty<Size?>? maximumSize,
+    MaterialStateProperty<Color?>? iconColor,
     MaterialStateProperty<double?>? iconSize,
     MaterialStateProperty<BorderSide?>? side,
     MaterialStateProperty<OutlinedBorder?>? shape,
@@ -333,6 +384,8 @@ class ButtonStyle with Diagnosticable {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    ButtonLayerBuilder? backgroundBuilder,
+    ButtonLayerBuilder? foregroundBuilder,
   }) {
     return ButtonStyle(
       textStyle: textStyle ?? this.textStyle,
@@ -346,6 +399,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: minimumSize ?? this.minimumSize,
       fixedSize: fixedSize ?? this.fixedSize,
       maximumSize: maximumSize ?? this.maximumSize,
+      iconColor: iconColor ?? this.iconColor,
       iconSize: iconSize ?? this.iconSize,
       side: side ?? this.side,
       shape: shape ?? this.shape,
@@ -356,6 +410,8 @@ class ButtonStyle with Diagnosticable {
       enableFeedback: enableFeedback ?? this.enableFeedback,
       alignment: alignment ?? this.alignment,
       splashFactory: splashFactory ?? this.splashFactory,
+      backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
+      foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
     );
   }
 
@@ -380,6 +436,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: minimumSize ?? style.minimumSize,
       fixedSize: fixedSize ?? style.fixedSize,
       maximumSize: maximumSize ?? style.maximumSize,
+      iconColor: iconColor ?? style.iconColor,
       iconSize: iconSize ?? style.iconSize,
       side: side ?? style.side,
       shape: shape ?? style.shape,
@@ -390,6 +447,8 @@ class ButtonStyle with Diagnosticable {
       enableFeedback: enableFeedback ?? style.enableFeedback,
       alignment: alignment ?? style.alignment,
       splashFactory: splashFactory ?? style.splashFactory,
+      backgroundBuilder: backgroundBuilder ?? style.backgroundBuilder,
+      foregroundBuilder: foregroundBuilder ?? style.foregroundBuilder,
     );
   }
 
@@ -407,6 +466,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize,
       fixedSize,
       maximumSize,
+      iconColor,
       iconSize,
       side,
       shape,
@@ -417,6 +477,8 @@ class ButtonStyle with Diagnosticable {
       enableFeedback,
       alignment,
       splashFactory,
+      backgroundBuilder,
+      foregroundBuilder,
     ];
     return Object.hashAll(values);
   }
@@ -441,6 +503,7 @@ class ButtonStyle with Diagnosticable {
         && other.minimumSize == minimumSize
         && other.fixedSize == fixedSize
         && other.maximumSize == maximumSize
+        && other.iconColor == iconColor
         && other.iconSize == iconSize
         && other.side == side
         && other.shape == shape
@@ -450,7 +513,9 @@ class ButtonStyle with Diagnosticable {
         && other.animationDuration == animationDuration
         && other.enableFeedback == enableFeedback
         && other.alignment == alignment
-        && other.splashFactory == splashFactory;
+        && other.splashFactory == splashFactory
+        && other.backgroundBuilder == backgroundBuilder
+        && other.foregroundBuilder == foregroundBuilder;
   }
 
   @override
@@ -467,6 +532,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('iconColor', iconColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
@@ -476,13 +542,14 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<Duration>('animationDuration', animationDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonLayerBuilder>('backgroundBuilder', backgroundBuilder, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonLayerBuilder>('foregroundBuilder', foregroundBuilder, defaultValue: null));
   }
 
   /// Linearly interpolate between two [ButtonStyle]s.
   static ButtonStyle? lerp(ButtonStyle? a, ButtonStyle? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ButtonStyle(
       textStyle: MaterialStateProperty.lerp<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
@@ -496,6 +563,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
+      iconColor: MaterialStateProperty.lerp<Color?>(a?.iconColor, b?.iconColor, t, Color.lerp),
       iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       side: _lerpSides(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
@@ -506,6 +574,8 @@ class ButtonStyle with Diagnosticable {
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
       splashFactory: t < 0.5 ? a?.splashFactory : b?.splashFactory,
+      backgroundBuilder: t < 0.5 ? a?.backgroundBuilder : b?.backgroundBuilder,
+      foregroundBuilder: t < 0.5 ? a?.foregroundBuilder : b?.foregroundBuilder,
     );
   }
 

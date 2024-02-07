@@ -83,6 +83,11 @@ const CommonFinders find = CommonFinders._();
 /// See also [FlutterDriver.waitFor].
 typedef EvaluatorFunction = dynamic Function();
 
+// Examples can assume:
+// import 'package:flutter_driver/flutter_driver.dart';
+// import 'package:test/test.dart';
+// late FlutterDriver driver;
+
 /// Drives a Flutter Application running in another process.
 abstract class FlutterDriver {
   /// Default constructor.
@@ -432,11 +437,6 @@ abstract class FlutterDriver {
     double dyScroll = 0.0,
     Duration? timeout,
   }) async {
-    assert(scrollable != null);
-    assert(item != null);
-    assert(alignment != null);
-    assert(dxScroll != null);
-    assert(dyScroll != null);
     assert(dxScroll != 0.0 || dyScroll != 0.0);
 
     // Kick off an (unawaited) waitFor that will complete when the item we're
@@ -483,7 +483,7 @@ abstract class FlutterDriver {
   ///
   /// ```dart
   /// test('enters text in a text field', () async {
-  ///   var textField = find.byValueKey('enter-text-field');
+  ///   final SerializableFinder textField = find.byValueKey('enter-text-field');
   ///   await driver.tap(textField);  // acquire focus
   ///   await driver.enterText('Hello!');  // enter text
   ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
@@ -509,7 +509,6 @@ abstract class FlutterDriver {
   /// invoked when the widget is focused, as the [SystemChannels.textInput]
   /// channel will be mocked out.
   Future<void> setTextEntryEmulation({ required bool enabled, Duration? timeout }) async {
-    assert(enabled != null);
     await sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
   }
 
@@ -526,7 +525,7 @@ abstract class FlutterDriver {
   ///
   /// ```dart
   /// test('submit text in a text field', () async {
-  ///   var textField = find.byValueKey('enter-text-field');
+  ///   final SerializableFinder textField = find.byValueKey('enter-text-field');
   ///   await driver.tap(textField);  // acquire focus
   ///   await driver.enterText('Hello!');  // enter text
   ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
@@ -537,7 +536,6 @@ abstract class FlutterDriver {
   ///
   Future<void> sendTextInputAction(TextInputAction action,
       {Duration? timeout}) async {
-    assert(action != null);
     await sendCommand(SendTextInputAction(action, timeout: timeout));
   }
 

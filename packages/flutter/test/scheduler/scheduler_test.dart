@@ -215,6 +215,8 @@ void main() {
     tick(const Duration(seconds: 8));
     expect(lastTimeStamp, const Duration(seconds: 3)); // 2s + (8 - 6)s / 2
     expect(lastSystemTimeStamp, const Duration(seconds: 8));
+
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   test('Animation frame scheduled in the middle of the warm-up frame', () {
@@ -249,6 +251,31 @@ void main() {
     // callback that reschedules the engine frame.
     warmUpDrawFrame();
     expect(scheduler.hasScheduledFrame, isTrue);
+  });
+
+  test('Can schedule futures to completion', () async {
+    bool isCompleted = false;
+
+    // `Future` is disallowed in this file due to the import of
+    // scheduler_tester.dart so annotations cannot be specified.
+    // ignore: always_specify_types
+    final result = scheduler.scheduleTask(
+      () async {
+        // Yield, so if awaiting `result` did not wait for completion of this
+        // task, the assertion on `isCompleted` will fail.
+        await null;
+        await null;
+
+        isCompleted = true;
+        return 1;
+      },
+      Priority.idle,
+    );
+
+    scheduler.handleEventLoopCallback();
+    await result;
+
+    expect(isCompleted, true);
   });
 }
 

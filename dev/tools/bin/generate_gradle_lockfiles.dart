@@ -40,6 +40,15 @@ void main(List<String> arguments) {
       continue;
     }
 
+    final File wrapperGradle = androidDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
+    if (!wrapperGradle.existsSync()) {
+      print('${wrapperGradle.path} does not exist - skipping');
+      continue;
+    }
+
     if (settingsGradle.readAsStringSync().contains('include_flutter.groovy')) {
       print('${settingsGradle.path} add to app - skipping');
       continue;
@@ -78,6 +87,7 @@ void main(List<String> arguments) {
 
     rootBuildGradle.writeAsStringSync(rootGradleFileContent);
     settingsGradle.writeAsStringSync(settingGradleFile);
+    wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
 
     final String appDirectory = androidDirectory.parent.absolute.path;
 
@@ -86,13 +96,11 @@ void main(List<String> arguments) {
 
     // Verify that the Gradlew wrapper exists.
     final File gradleWrapper = androidDirectory.childFile('gradlew');
-    // Generate Gradle wrapper if it doesn't exists.
-    // This logic is embedded within the Flutter tool.
-    // To generate the wrapper, build a flavor that doesn't exist.
+    // Generate Gradle wrapper if it doesn't exist.
     if (!gradleWrapper.existsSync()) {
       Process.runSync(
         'flutter',
-        <String>['build', 'apk', '--debug', '--flavor=does-not-exist'],
+        <String>['build', 'apk', '--config-only'],
         workingDirectory: appDirectory,
       );
     }
@@ -149,7 +157,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 
@@ -181,7 +189,7 @@ subprojects {
     }
 }
 
-task clean(type: Delete) {
+tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 ''';
@@ -195,17 +203,32 @@ const String settingGradleFile = r'''
 // To update all the settings.gradle files in the Flutter repo,
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
-include ':app'
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }
+    settings.ext.flutterSdkPath = flutterSdkPath()
 
-enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
+    includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
 
-def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
-def properties = new Properties()
+    plugins {
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    }
+}
 
-assert localPropertiesFile.exists()
-localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+include ":app"
 
-def flutterSdkPath = properties.getProperty("flutter.sdk")
-assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+''';
+
+const String wrapperGradleFileContent = r'''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-all.zip
 ''';

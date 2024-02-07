@@ -16,10 +16,17 @@ const String _activityName = 'MainActivity';
 const int _numberOfIterations = 10;
 
 Future<void> _withApkInstall(
-    String apkPath, String bundleName, Function(AndroidDevice) body) async {
+    String apkPath, String bundleName, Future<void> Function(AndroidDevice) body) async {
   final DeviceDiscovery devices = DeviceDiscovery();
   final AndroidDevice device = await devices.workingDevice as AndroidDevice;
   await device.unlock();
+  try {
+    // Force proper cleanup before trying to install app. If uninstall fails,
+    // we log exception and proceed with running the test.
+    await device.adb(<String>['uninstall', bundleName]);
+  } on Exception catch (error) {
+    print('adb uninstall failed with exception: $error. Will proceed with test run.');
+  }
   await device.adb(<String>['install', '-r', apkPath]);
   try {
     await body(device);
@@ -58,10 +65,9 @@ Future<TaskResult> _doTest() async {
     final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
     final String gradlewExecutable =
         Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-    final String flutterPath = path.join(flutterDirectory, 'bin', 'flutter');
-    await utils.eval(flutterPath, <String>['precache', '--android'],
+    await utils.flutter('precache', options: <String>['--android'],
         workingDirectory: modulePath);
-    await utils.eval(flutterPath, <String>['pub', 'get'],
+    await utils.flutter('pub', options: <String>['get'],
         workingDirectory: modulePath);
     _copyGradleFromModule(modulePath, androidPath);
 

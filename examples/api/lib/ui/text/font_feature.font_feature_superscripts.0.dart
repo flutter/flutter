@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature.FontFeature.superscripts
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [FontFeature.FontFeature.superscripts].
 
 void main() => runApp(const ExampleApp());
 
@@ -26,7 +25,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Sorts Mill Goudy font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Sorts Mill Goudy font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'The isotope 238U decays to 206Pb',
       style: TextStyle(

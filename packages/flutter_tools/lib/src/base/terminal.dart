@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../convert.dart';
+import '../features.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 import 'platform.dart';
@@ -69,6 +70,7 @@ class OutputPreferences {
 }
 
 /// The command line terminal, if available.
+// TODO(ianh): merge this with AnsiTerminal, the abstraction isn't giving us anything.
 abstract class Terminal {
   /// Create a new test [Terminal].
   ///
@@ -76,7 +78,16 @@ abstract class Terminal {
   factory Terminal.test({bool supportsColor, bool supportsEmoji}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
+  ///
+  /// Check [isCliAnimationEnabled] as well before using `\r` or ANSI sequences
+  /// to perform animations.
   bool get supportsColor;
+
+  /// Whether animations should be used in the output.
+  bool get isCliAnimationEnabled;
+
+  /// Configures isCliAnimationEnabled based on a [FeatureFlags] object.
+  void applyFeatureFlags(FeatureFlags flags);
 
   /// Whether the current terminal can display emoji.
   bool get supportsEmoji;
@@ -152,10 +163,12 @@ class AnsiTerminal implements Terminal {
     required io.Stdio stdio,
     required Platform platform,
     DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
+    bool defaultCliAnimationEnabled = true,
   })
     : _stdio = stdio,
       _platform = platform,
-      _now = now ?? DateTime(1);
+      _now = now ?? DateTime(1),
+      _isCliAnimationEnabled = defaultCliAnimationEnabled;
 
   final io.Stdio _stdio;
   final Platform _platform;
@@ -175,6 +188,15 @@ class AnsiTerminal implements Terminal {
   static const String yellow = '\u001b[33m';
   static const String grey = '\u001b[90m';
 
+  // Moves cursor up 1 line.
+  static const String cursorUpLineCode = '\u001b[1A';
+
+  // Moves cursor to the beginning of the line.
+  static const String cursorBeginningOfLineCode = '\u001b[1G';
+
+  // Clear the entire line, cursor position does not change.
+  static const String clearEntireLineCode = '\u001b[2K';
+
   static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
     TerminalColor.green: green,
@@ -189,6 +211,16 @@ class AnsiTerminal implements Terminal {
 
   @override
   bool get supportsColor => _platform.stdoutSupportsAnsi;
+
+  @override
+  bool get isCliAnimationEnabled => _isCliAnimationEnabled;
+
+  bool _isCliAnimationEnabled;
+
+  @override
+  void applyFeatureFlags(FeatureFlags flags) {
+    _isCliAnimationEnabled = flags.isCliAnimationEnabled;
+  }
 
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,
@@ -226,7 +258,6 @@ class AnsiTerminal implements Terminal {
 
   @override
   String bolden(String message) {
-    assert(message != null);
     if (!supportsColor || message.isEmpty) {
       return message;
     }
@@ -247,8 +278,7 @@ class AnsiTerminal implements Terminal {
 
   @override
   String color(String message, TerminalColor color) {
-    assert(message != null);
-    if (!supportsColor || color == null || message.isEmpty) {
+    if (!supportsColor || message.isEmpty) {
       return message;
     }
     final StringBuffer buffer = StringBuffer();
@@ -268,7 +298,20 @@ class AnsiTerminal implements Terminal {
   }
 
   @override
-  String clearScreen() => supportsColor ? clear : '\n\n';
+  String clearScreen() => supportsColor && isCliAnimationEnabled ? clear : '\n\n';
+
+  /// Returns ANSI codes to clear [numberOfLines] lines starting with the line
+  /// the cursor is on.
+  ///
+  /// If the terminal does not support ANSI codes, returns an empty string.
+  String clearLines(int numberOfLines) {
+    if (!supportsColor || !isCliAnimationEnabled) {
+      return '';
+    }
+    return cursorBeginningOfLineCode +
+        clearEntireLineCode +
+        (cursorUpLineCode + clearEntireLineCode) * (numberOfLines - 1);
+  }
 
   @override
   bool get singleCharMode {
@@ -284,13 +327,19 @@ class AnsiTerminal implements Terminal {
       return;
     }
     final io.Stdin stdin = _stdio.stdin as io.Stdin;
-    // The order of setting lineMode and echoMode is important on Windows.
-    if (value) {
-      stdin.echoMode = false;
-      stdin.lineMode = false;
-    } else {
-      stdin.lineMode = true;
-      stdin.echoMode = true;
+
+    try {
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
+      }
+    } on io.StdinException {
+      // If the pipe to STDIN has been closed it's probably because the
+      // terminal has been closed, and there is nothing actionable to do here.
     }
   }
 
@@ -381,6 +430,16 @@ class _TestTerminal implements Terminal {
 
   @override
   final bool supportsColor;
+
+  @override
+  bool get isCliAnimationEnabled => supportsColor && _isCliAnimationEnabled;
+
+  bool _isCliAnimationEnabled = true;
+
+  @override
+  void applyFeatureFlags(FeatureFlags flags) {
+    _isCliAnimationEnabled = flags.isCliAnimationEnabled;
+  }
 
   @override
   final bool supportsEmoji;

@@ -79,14 +79,13 @@ void main() {
             expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
             expect(
               error.toStringDeep(),
-              equalsIgnoringHashCodes(
+              startsWith(
                 'FlutterError\n'
                 '   No Table widget found.\n'
                 '   Builder widgets require a Table widget ancestor.\n'
                 '   The specific widget that could not find a Table ancestor was:\n'
                 '     Builder\n'
-                '   The ownership chain for the affected widget is: "Builder ←\n'
-                '     [root]"\n',
+                '   The ownership chain for the affected widget is: "Builder ←', // End of ownership chain omitted, not relevant for test.
               ),
             );
           }
@@ -97,7 +96,10 @@ void main() {
   });
 
   testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
+    // Cannot use tester.pumpWidget here because it wraps the widget in a View,
+    // which introduces a MediaQuery ancestor.
     await tester.pumpWidget(
+      wrapWithView: false,
       Builder(
         builder: (BuildContext context) {
           late FlutterError error;
@@ -114,32 +116,38 @@ void main() {
               error.diagnostics.last.toStringDeep(),
               equalsIgnoringHashCodes(
                 'No MediaQuery ancestor could be found starting from the context\n'
-                'that was passed to MediaQuery.of(). This can happen because you\n'
-                'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-                '(those widgets introduce a MediaQuery), or it can happen if the\n'
-                'context you use comes from a widget above those widgets.\n',
+                'that was passed to MediaQuery.of(). This can happen because the\n'
+                'context used is not a descendant of a View widget, which\n'
+                'introduces a MediaQuery.\n'
               ),
             );
             expect(
               error.toStringDeep(),
-              equalsIgnoringHashCodes(
+              startsWith(
                 'FlutterError\n'
                 '   No MediaQuery widget ancestor found.\n'
                 '   Builder widgets require a MediaQuery widget ancestor.\n'
                 '   The specific widget that could not find a MediaQuery ancestor\n'
                 '   was:\n'
                 '     Builder\n'
-                '   The ownership chain for the affected widget is: "Builder ←\n'
-                '     [root]"\n'
+                '   The ownership chain for the affected widget is: "Builder ←' // Full chain omitted, not relevant for test.
+              ),
+            );
+            expect(
+              error.toStringDeep(),
+              endsWith(
+                '[root]"\n' // End of ownership chain.
                 '   No MediaQuery ancestor could be found starting from the context\n'
-                '   that was passed to MediaQuery.of(). This can happen because you\n'
-                '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-                '   (those widgets introduce a MediaQuery), or it can happen if the\n'
-                '   context you use comes from a widget above those widgets.\n',
+                '   that was passed to MediaQuery.of(). This can happen because the\n'
+                '   context used is not a descendant of a View widget, which\n'
+                '   introduces a MediaQuery.\n'
               ),
             );
           }
-          return Container();
+          return View(
+            view: tester.view,
+            child: const SizedBox(),
+          );
         },
       ),
     );
@@ -304,10 +312,6 @@ void main() {
                   ).createShader(bounds),
                   child: const Placeholder(),
                 ),
-                RangeSlider(
-                  values: const RangeValues(0.3, 0.7),
-                  onChanged: (RangeValues newValues) {},
-                ),
                 CompositedTransformFollower(
                  link: LayerLink(),
                 ),
@@ -333,9 +337,6 @@ void main() {
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
 
     renderObject = tester.firstRenderObject(find.byType(ShaderMask));
-    expect(renderObject.debugLayer?.debugCreator, isNotNull);
-
-    renderObject = tester.firstRenderObject(find.byType(RangeSlider));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
 
     renderObject = tester.firstRenderObject(find.byType(CompositedTransformFollower));

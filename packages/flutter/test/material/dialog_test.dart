@@ -4,13 +4,19 @@
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textScaleFactor = 1.0 }) {
+MaterialApp _buildAppWithDialog(
+  Widget dialog, {
+  ThemeData? theme,
+  double textScaleFactor = 1.0,
+  TraversalEdgeBehavior? traversalEdgeBehavior,
+}) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -22,9 +28,11 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
               onPressed: () {
                 showDialog<void>(
                   context: context,
+                  traversalEdgeBehavior: traversalEdgeBehavior,
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: dialog,
                     );
                   },
@@ -49,7 +57,7 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 // What was the AlertDialog's ButtonBar when many of these tests were written,
 // is now a Padding widget with an OverflowBar child. The Padding widget's size
 // and location match the original ButtonBar's size and location.
-Finder _findButtonBar() {
+Finder _findOverflowBar() {
   return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }
 
@@ -103,7 +111,7 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
-  testWidgets('Dialog Defaults', (WidgetTester tester) async {
+  testWidgets('Material2 - Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
@@ -123,26 +131,84 @@ void main() {
       find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
     );
     expect(bottomLeft.dy, 360.0);
+  });
 
-    await tester.tapAt(const Offset(10.0, 10.0));
-    await tester.pumpAndSettle();
-
+  testWidgets('Material3 - Dialog Defaults', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      content: Text('Y'),
+      actions: <Widget>[ ],
+    );
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
     final Material material3Widget = _getMaterialFromDialog(tester);
-    expect(material3Widget.color, const Color(0xff424242));
+    expect(material3Widget.color, material3Theme.colorScheme.surface);
     expect(material3Widget.shape, _defaultM3DialogShape);
     expect(material3Widget.elevation, 6.0);
   });
 
+  testWidgets('Material2 - Dialog.fullscreen Defaults', (WidgetTester tester) async {
+    const String dialogTextM2 = 'Fullscreen Dialog - M2';
+
+    await tester.pumpWidget(_buildAppWithDialog(
+      theme: material2Theme,
+      const Dialog.fullscreen(
+        child: Text(dialogTextM2),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM2), findsOneWidget);
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, Colors.grey[800]);
+
+    // Try to dismiss the fullscreen dialog with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM2), findsNothing);
+  });
+
+  testWidgets('Material3 - Dialog.fullscreen Defaults', (WidgetTester tester) async {
+    const String dialogTextM3 = 'Fullscreen Dialog - M3';
+
+    await tester.pumpWidget(_buildAppWithDialog(
+      theme: material3Theme,
+      const Dialog.fullscreen(
+        child: Text(dialogTextM3),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM3), findsOneWidget);
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, material3Theme.colorScheme.surface);
+
+    // Try to dismiss the fullscreen dialog with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM3), findsNothing);
+  });
+
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
+    const Color shadowColor = Color(0xFF000001);
+    const Color surfaceTintColor = Color(0xFF000002);
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
       elevation: customElevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -151,6 +217,8 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.elevation, customElevation);
+    expect(materialWidget.shadowColor, shadowColor);
+    expect(materialWidget.surfaceTintColor, surfaceTintColor);
   });
 
   testWidgets('Custom Title Text Style', (WidgetTester tester) async {
@@ -232,16 +300,17 @@ void main() {
   });
 
   testWidgets('Null dialog shape', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
     final Material materialWidget = _getMaterialFromDialog(tester);
-    expect(materialWidget.shape, _defaultM2DialogShape);
+    expect(materialWidget.shape, theme.useMaterial3 ? _defaultM3DialogShape : _defaultM2DialogShape);
   });
 
   testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
@@ -541,7 +610,7 @@ void main() {
         matching: find.byType(Material),
       ).first,
     );
-    final Size actionsSize = tester.getSize(_findButtonBar());
+    final Size actionsSize = tester.getSize(_findOverflowBar());
 
     expect(actionsSize.width, dialogSize.width);
   });
@@ -582,7 +651,7 @@ void main() {
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
 
-  testWidgets('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+  testWidgets('Material2 - AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -618,30 +687,48 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy + 8.0,
+      tester.getTopRight(_findOverflowBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 8.0,
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy + 8.0,
+      tester.getTopRight(_findOverflowBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 8.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dx - 8.0,
     ); // right
+  });
 
-    // Dismiss it and test material 3 dialog
-    await tester.tapAt(const Offset(10.0, 10.0));
-    await tester.pumpAndSettle();
+  testWidgets('Material3 - AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        ElevatedButton(
+          key: key1,
+          onPressed: () {},
+          child: const Text('button 1'),
+        ),
+        ElevatedButton(
+          key: key2,
+          onPressed: () {},
+          child: const Text('button 2'),
+        ),
+      ],
+    );
 
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
@@ -658,25 +745,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy,
+      tester.getTopRight(_findOverflowBar()).dy,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 24.0,
     ); // bottom
 
     // // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy,
+      tester.getTopRight(_findOverflowBar()).dy,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 24.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dx - 24.0,
     ); // right
   });
 
@@ -706,7 +793,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _buildAppWithDialog(dialog),
+      _buildAppWithDialog(dialog, theme: ThemeData(useMaterial3: false)),
     );
 
     await tester.tap(find.text('X'));
@@ -722,25 +809,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findOverflowBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findOverflowBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dx - ((10.0 + 20.0) / 2),
     ); // right
   });
 
@@ -763,7 +850,7 @@ void main() {
     final Finder iconFinder = find.byKey(iconKey);
     final Finder titleFinder = find.byKey(titleKey);
     final Finder contentFinder = find.byKey(contentKey);
-    final Finder actionsFinder = _findButtonBar();
+    final Finder actionsFinder = _findOverflowBar();
     final Finder childrenFinder = find.byKey(childrenKey);
 
     Future<void> openDialog(WidgetTester tester, Widget dialog, double textScaleFactor, {bool isM3 = false}) async {
@@ -1453,7 +1540,7 @@ void main() {
         ElevatedButton(
           key: key1,
           onPressed: () {},
-          child: const Text('Loooooooooog button 1'),
+          child: const Text('Loooooooooong button 1'),
         ),
         ElevatedButton(
           key: key2,
@@ -2145,7 +2232,7 @@ void main() {
           return const AlertDialog(title: Text('Title'));
         },
       );
-    } catch(exception) {
+    } catch (exception) {
       error = exception;
     }
 
@@ -2445,6 +2532,7 @@ void main() {
       label: 'Custom label',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
+    semantics.dispose();
   });
 
   testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
@@ -2482,6 +2570,7 @@ void main() {
 
     Widget buildFrame(MainAxisAlignment? alignment) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: AlertDialog(
             content: const SizedBox(width: 800),
@@ -2528,11 +2617,236 @@ void main() {
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
   });
+
+  testWidgets('Uses closed loop focus traversal', (WidgetTester tester) async {
+    final FocusNode okNode = FocusNode();
+    final FocusNode cancelNode = FocusNode();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    Future<bool> previousFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const PreviousFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    final AlertDialog dialog = AlertDialog(
+      content: const Text('Test dialog'),
+      actions: <Widget>[
+        TextButton(
+          focusNode: okNode,
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+        TextButton(
+          focusNode: cancelNode,
+          onPressed: () {},
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Start at OK
+    okNode.requestFocus();
+    await tester.pump();
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // OK -> Cancel
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // Cancel -> OK
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // Cancel <- OK
+    expect(await previousFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // OK <- Cancel
+    expect(await previousFocus(), true);
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    cancelNode.dispose();
+    okNode.dispose();
+  });
+
+  testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
+    final AlertDialog dialog = AlertDialog.adaptive(
+      content: Container(
+        height: 5000.0,
+        width: 300.0,
+        color: Colors.green[500],
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+      ],
+    );
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+    }
+  });
+
+  testWidgets('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const Material(
+          child: Center(
+            child: ElevatedButton(
+              onPressed: null,
+              child: Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Go'));
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog1'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsNothing);
+
+    showAdaptiveDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog2'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog2'), findsOneWidget);
+
+    // Tap on the barrier, which shouldn't do anything this time.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog2'), findsOneWidget);
+  });
+
+  testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
+    final FocusNode okNode = FocusNode();
+    addTearDown(okNode.dispose);
+    final FocusNode cancelNode = FocusNode();
+    addTearDown(cancelNode.dispose);
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    final AlertDialog dialog = AlertDialog(
+      content: const Text('Test dialog'),
+      actions: <Widget>[
+        TextButton(
+          focusNode: okNode,
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+        TextButton(
+          focusNode: cancelNode,
+          onPressed: () {},
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, traversalEdgeBehavior: TraversalEdgeBehavior.leaveFlutterView));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Start at OK
+    okNode.requestFocus();
+    await tester.pump();
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // OK -> Cancel
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // Cancel -> nothing
+    expect(await nextFocus(), false);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, false);
+  });
 }
 
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<Object?> _materialDialogBuilder(BuildContext context, Object? arguments) {
     return DialogRoute<void>(
       context: context,

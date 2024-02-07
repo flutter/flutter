@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -12,10 +10,13 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -26,8 +27,10 @@ const String _kProjectRoot = '/project';
 
 void main() {
   group('FlutterCommandRunner', () {
-    MemoryFileSystem fileSystem;
-    Platform platform;
+    late MemoryFileSystem fileSystem;
+    late Platform platform;
+    late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -38,6 +41,11 @@ void main() {
       fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
       fileSystem.directory(_kProjectRoot).createSync(recursive: true);
       fileSystem.currentDirectory = _kProjectRoot;
+      testUsage = TestUsage();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
 
       platform = FakePlatform(
         environment: <String, String>{
@@ -146,14 +154,25 @@ void main() {
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
 
         await runner.run(<String>['--version']);
-
         expect(version.didFetchTagsAndUpdate, true);
+        expect(testUsage.commands, contains(
+          const TestUsageCommand('version'),
+        ));
+        expect(fakeAnalytics.sentEvents, contains(
+          Event.flutterCommandResult(
+            commandPath: 'version',
+            result: 'success',
+            commandHasTerminal: false,
+          ),
+        ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
         OutputPreferences: () => OutputPreferences.test(),
+        Usage: () => testUsage,
+        Analytics: () => fakeAnalytics,
       });
 
     testUsingContext("Doesn't crash on invalid .packages file", () async {
@@ -173,7 +192,7 @@ void main() {
     });
 
     group('getRepoPackages', () {
-      String oldFlutterRoot;
+      late String? oldFlutterRoot;
 
       setUp(() {
         oldFlutterRoot = Cache.flutterRoot;
@@ -270,7 +289,7 @@ void main() {
 }
 
 class FakeFlutterCommand extends FlutterCommand {
-  OutputPreferences preferences;
+  late OutputPreferences preferences;
 
   @override
   Future<FlutterCommandResult> runCommand() {
@@ -279,14 +298,14 @@ class FakeFlutterCommand extends FlutterCommand {
   }
 
   @override
-  String get description => null;
+  String get description => '';
 
   @override
   String get name => 'fake';
 }
 
 class FakeStdio extends Stdio {
-  FakeStdio({this.hasFakeTerminal});
+  FakeStdio({required this.hasFakeTerminal});
 
   final bool hasFakeTerminal;
 
@@ -294,10 +313,10 @@ class FakeStdio extends Stdio {
   bool get hasTerminal => hasFakeTerminal;
 
   @override
-  int get terminalColumns => hasFakeTerminal ? 80 : null;
+  int? get terminalColumns => hasFakeTerminal ? 80 : null;
 
   @override
-  int get terminalLines => hasFakeTerminal ? 24 : null;
+  int? get terminalLines => hasFakeTerminal ? 24 : null;
   @override
   bool get supportsAnsiEscapes => hasFakeTerminal;
 }

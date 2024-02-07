@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_driver/driver_extension.dart';
 
 import 'android_platform_view.dart';
@@ -35,12 +34,6 @@ class PlatformViewAppState extends State<PlatformViewApp> {
       home: const PlatformViewLayout(),
     );
   }
-
-  void toggleAnimationSpeed() {
-    setState(() {
-      timeDilation = (timeDilation != 1.0) ? 1.0 : 5.0;
-    });
-  }
 }
 
 class PlatformViewLayout extends StatelessWidget {
@@ -59,8 +52,8 @@ class PlatformViewLayout extends StatelessWidget {
             child: Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
-              child: Stack(
-                children: const <Widget> [
+              child: const Stack(
+                children: <Widget> [
                   DummyPlatformView(),
                   RotationContainer(),
                 ],
@@ -121,6 +114,13 @@ class _RotationContainerState extends State<RotationContainer>
     );
     _rotationController.repeat();
   }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return RotationTransition(

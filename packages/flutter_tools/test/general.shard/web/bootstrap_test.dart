@@ -12,11 +12,14 @@ void main() {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
     );
     // require js source is interpolated correctly.
-    expect(result, contains('requireEl.src = "require.js";'));
+    expect(result, contains('"requireJs": "require.js"'));
+    expect(result, contains('requireEl.src = getTTScriptUrl("requireJs");'));
     // stack trace mapper source is interpolated correctly.
-    expect(result, contains('mapperEl.src = "mapper.js";'));
+    expect(result, contains('"mapper": "mapper.js"'));
+    expect(result, contains('mapperEl.src = getTTScriptUrl("mapper");'));
     // data-main is set to correct bootstrap module.
     expect(result, contains('requireEl.setAttribute("data-main", "main_module.bootstrap");'));
   });
@@ -25,9 +28,20 @@ void main() {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
     );
     expect(result, contains('"flutter-loader"'));
     expect(result, contains('"indeterminate"'));
+  });
+
+  test('generateBootstrapScript does not include loading indicator', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+      generateLoadingIndicator: false,
+    );
+    expect(result, isNot(contains('"flutter-loader"')));
+    expect(result, isNot(contains('"indeterminate"')));
   });
 
   // https://github.com/flutter/flutter/issues/107742
@@ -35,6 +49,7 @@ void main() {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
     );
 
     // See: https://regexr.com/6q0ft
@@ -58,6 +73,18 @@ void main() {
       r'(?:(?!\}\);).|\s)*\}\);');
 
     expect(result, matches(regex), reason: 'require.config must have a waitSeconds: 0 config entry');
+  });
+
+  test('generateMainModule hides requireJS injected by DDC', () {
+    final String result = generateMainModule(
+      entrypoint: 'foo/bar/main.js',
+      nullAssertions: false,
+      nativeNullAssertions: false,
+    );
+    expect(result, contains('''define._amd = define.amd;'''),
+      reason: 'define.amd must be preserved as _amd so users may restore it if needed.');
+    expect(result, contains('''delete define.amd;'''),
+      reason: "define.amd must be removed so packages don't attempt to use Dart's instance.");
   });
 
   test('generateMainModule embeds urls correctly', () {

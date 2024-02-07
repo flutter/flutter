@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'theme.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
@@ -63,8 +64,7 @@ import 'thumb_painter.dart';
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
   ///
-  /// The [value] parameter must not be null.
-  /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start] and must not be null.
+  /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start].
   const CupertinoSwitch({
     super.key,
     required this.value,
@@ -72,13 +72,17 @@ class CupertinoSwitch extends StatefulWidget {
     this.activeColor,
     this.trackColor,
     this.thumbColor,
+    this.applyTheme,
+    this.focusColor,
+    this.onLabelColor,
+    this.offLabelColor,
+    this.focusNode,
+    this.onFocusChange,
+    this.autofocus = false,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(value != null),
-       assert(dragStartBehavior != null);
+  });
 
   /// Whether this switch is on or off.
-  ///
-  /// Must not be null.
   final bool value;
 
   /// Called when the user toggles with switch on or off.
@@ -105,13 +109,15 @@ class CupertinoSwitch extends StatefulWidget {
   /// ```
   final ValueChanged<bool>? onChanged;
 
-  /// The color to use when this switch is on.
+  /// The color to use for the track when the switch is on.
   ///
-  /// Defaults to [CupertinoColors.systemGreen] when null and ignores
-  /// the [CupertinoTheme] in accordance to native iOS behavior.
+  /// If null and [applyTheme] is false, defaults to [CupertinoColors.systemGreen]
+  /// in accordance to native iOS behavior. Otherwise, defaults to
+  /// [CupertinoThemeData.primaryColor].
   final Color? activeColor;
 
-  /// The color to use for the background when the switch is off.
+
+  /// The color to use for the track when the switch is off.
   ///
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
@@ -120,6 +126,41 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// Defaults to [CupertinoColors.white] when null.
   final Color? thumbColor;
+
+  /// The color to use for the focus highlight for keyboard interactions.
+  ///
+  /// Defaults to a slightly transparent [activeColor].
+  final Color? focusColor;
+
+  /// The color to use for the accessibility label when the switch is on.
+  ///
+  /// Defaults to [CupertinoColors.white] when null.
+  final Color? onLabelColor;
+
+  /// The color to use for the accessibility label when the switch is off.
+  ///
+  /// Defaults to [Color.fromARGB(255, 179, 179, 179)]
+  /// (or [Color.fromARGB(255, 255, 255, 255)] in high contrast) when null.
+  final Color? offLabelColor;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
+  /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}
+  /// Whether to apply the ambient [CupertinoThemeData].
+  ///
+  /// If true, the track uses [CupertinoThemeData.primaryColor] for the track
+  /// when the switch is on.
+  ///
+  /// Defaults to [CupertinoThemeData.applyThemeToAll].
+  /// {@endtemplate}
+  final bool? applyTheme;
 
   /// {@template flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
@@ -164,7 +205,13 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   late AnimationController _reactionController;
   late Animation<double> _reaction;
 
+  late bool isFocused;
+
   bool get isInteractive => widget.onChanged != null;
+
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
+  };
 
   // A non-null boolean value that changes to true at the end of a drag if the
   // switch must be animated to the position indicated by the widget's value.
@@ -173,6 +220,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   void initState() {
     super.initState();
+
+    isFocused = false;
 
     _tap = TapGestureRecognizer()
       ..onTapDown = _handleTapDown
@@ -239,7 +288,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       _reactionController.forward();
   }
 
-  void _handleTap() {
+  void _handleTap([Intent? _]) {
     if (isInteractive) {
       widget.onChanged!(!widget.value);
       _emitVibration();
@@ -273,14 +322,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         ..curve = Curves.linear
         ..reverseCurve = Curves.linear;
       final double delta = details.primaryDelta! / _kTrackInnerLength;
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          _positionController.value -= delta;
-          break;
-        case TextDirection.ltr:
-          _positionController.value += delta;
-          break;
-      }
+      _positionController.value += switch (Directionality.of(context)) {
+        TextDirection.rtl => -delta,
+        TextDirection.ltr =>  delta,
+      };
     }
   }
 
@@ -298,7 +343,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         HapticFeedback.lightImpact();
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -308,8 +352,32 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     }
   }
 
+  void _onShowFocusHighlight(bool showHighlight) {
+    setState(() { isFocused = showHighlight; });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final CupertinoThemeData theme = CupertinoTheme.of(context);
+    final Color activeColor = CupertinoDynamicColor.resolve(
+      widget.activeColor
+      ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
+      ?? CupertinoColors.systemGreen,
+      context,
+    );
+    final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
+        MediaQuery.onOffSwitchLabelsOf(context)
+            ? (
+                CupertinoDynamicColor.resolve(
+                  widget.onLabelColor ?? CupertinoColors.white,
+                  context,
+                ),
+                CupertinoDynamicColor.resolve(
+                  widget.offLabelColor ?? _kOffLabelColor,
+                  context,
+                ),
+              )
+            : null;
     if (needsPositionAnimation) {
       _resumePositionAnimation();
     }
@@ -317,17 +385,33 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       cursor: isInteractive && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: Opacity(
         opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
-        child: _CupertinoSwitchRenderObjectWidget(
-          value: widget.value,
-          activeColor: CupertinoDynamicColor.resolve(
-            widget.activeColor ?? CupertinoColors.systemGreen,
-            context,
+        child: FocusableActionDetector(
+          onShowFocusHighlight: _onShowFocusHighlight,
+          actions: _actionMap,
+          enabled: isInteractive,
+          focusNode: widget.focusNode,
+          onFocusChange: widget.onFocusChange,
+          autofocus: widget.autofocus,
+          child: _CupertinoSwitchRenderObjectWidget(
+            value: widget.value,
+            activeColor: activeColor,
+            trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
+            thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
+            // Opacity, lightness, and saturation values were approximated with
+            // color pickers on the switches in the macOS settings.
+            focusColor: CupertinoDynamicColor.resolve(
+              widget.focusColor ??
+              HSLColor
+                    .fromColor(activeColor.withOpacity(0.80))
+                    .withLightness(0.69).withSaturation(0.835)
+                    .toColor(),
+              context),
+            onChanged: widget.onChanged,
+            textDirection: Directionality.of(context),
+            isFocused: isFocused,
+            state: this,
+            onOffLabelColors: onOffLabelColors,
           ),
-          trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
-          thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-          onChanged: widget.onChanged,
-          textDirection: Directionality.of(context),
-          state: this,
         ),
       ),
     );
@@ -350,18 +434,24 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.activeColor,
     required this.trackColor,
     required this.thumbColor,
+    required this.focusColor,
     required this.onChanged,
     required this.textDirection,
+    required this.isFocused,
     required this.state,
+    required this.onOffLabelColors,
   });
 
   final bool value;
   final Color activeColor;
   final Color trackColor;
   final Color thumbColor;
+  final Color focusColor;
   final ValueChanged<bool>? onChanged;
   final _CupertinoSwitchState state;
   final TextDirection textDirection;
+  final bool isFocused;
+  final (Color onLabelColor, Color offLabelColor)? onOffLabelColors;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
@@ -370,21 +460,27 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       activeColor: activeColor,
       trackColor: trackColor,
       thumbColor: thumbColor,
+      focusColor: focusColor,
       onChanged: onChanged,
       textDirection: textDirection,
+      isFocused: isFocused,
       state: state,
+      onOffLabelColors: onOffLabelColors,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoSwitch renderObject) {
+    assert(renderObject._state == state);
     renderObject
       ..value = value
       ..activeColor = activeColor
       ..trackColor = trackColor
       ..thumbColor = thumbColor
+      ..focusColor = focusColor
       ..onChanged = onChanged
-      ..textDirection = textDirection;
+      ..textDirection = textDirection
+      ..isFocused = isFocused;
   }
 }
 
@@ -396,6 +492,24 @@ const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
+// Label sizes and padding taken from xcode inspector.
+// See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360
+const double _kOnLabelWidth = 1.0;
+const double _kOnLabelHeight = 10.0;
+const double _kOnLabelPaddingHorizontal = 11.0;
+const double _kOffLabelWidth = 1.0;
+const double _kOffLabelPaddingHorizontal = 12.0;
+const double _kOffLabelRadius = 5.0;
+const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightnessAndContrast(
+  debugLabel: 'offSwitchLabel',
+  // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
+  color: Color.fromARGB(255, 179, 179, 179),
+  // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
+  darkColor: Color.fromARGB(255, 179, 179, 179),
+  // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
+  highContrastColor: Color.fromARGB(255, 255, 255, 255),
+  darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+);
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
@@ -408,19 +522,22 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required Color activeColor,
     required Color trackColor,
     required Color thumbColor,
+    required Color focusColor,
     ValueChanged<bool>? onChanged,
     required TextDirection textDirection,
+    required bool isFocused,
     required _CupertinoSwitchState state,
-  }) : assert(value != null),
-       assert(activeColor != null),
-       assert(state != null),
-       _value = value,
+    required (Color onLabelColor, Color offLabelColor)? onOffLabelColors,
+  }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
+       _focusColor = focusColor,
        _thumbPainter = CupertinoThumbPainter.switchThumb(color: thumbColor),
        _onChanged = onChanged,
        _textDirection = textDirection,
+       _isFocused = isFocused,
        _state = state,
+       _onOffLabelColors = onOffLabelColors,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
          state.position.addListener(markNeedsPaint);
          state._reaction.addListener(markNeedsPaint);
@@ -431,7 +548,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get value => _value;
   bool _value;
   set value(bool value) {
-    assert(value != null);
     if (value == _value) {
       return;
     }
@@ -442,7 +558,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get activeColor => _activeColor;
   Color _activeColor;
   set activeColor(Color value) {
-    assert(value != null);
     if (value == _activeColor) {
       return;
     }
@@ -453,7 +568,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get trackColor => _trackColor;
   Color _trackColor;
   set trackColor(Color value) {
-    assert(value != null);
     if (value == _trackColor) {
       return;
     }
@@ -464,11 +578,20 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get thumbColor => _thumbPainter.color;
   CupertinoThumbPainter _thumbPainter;
   set thumbColor(Color value) {
-    assert(value != null);
     if (value == thumbColor) {
       return;
     }
     _thumbPainter = CupertinoThumbPainter.switchThumb(color: value);
+    markNeedsPaint();
+  }
+
+  Color get focusColor => _focusColor;
+  Color _focusColor;
+  set focusColor(Color value) {
+    if (value == _focusColor) {
+      return;
+    }
+    _focusColor = value;
     markNeedsPaint();
   }
 
@@ -489,11 +612,30 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
     _textDirection = value;
+    markNeedsPaint();
+  }
+
+  bool get isFocused => _isFocused;
+  bool _isFocused;
+  set isFocused(bool value) {
+    if (value == _isFocused) {
+      return;
+    }
+    _isFocused = value;
+    markNeedsPaint();
+  }
+
+  (Color onLabelColor, Color offLabelColor)? get onOffLabelColors => _onOffLabelColors;
+  (Color onLabelColor, Color offLabelColor)? _onOffLabelColors;
+  set onOffLabelColors((Color onLabelColor, Color offLabelColor)? value) {
+    if (value == _onOffLabelColors) {
+      return;
+    }
+    _onOffLabelColors = value;
     markNeedsPaint();
   }
 
@@ -530,15 +672,10 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final double currentValue = _state.position.value;
     final double currentReactionValue = _state._reaction.value;
 
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - currentValue;
-        break;
-      case TextDirection.ltr:
-        visualPosition = currentValue;
-        break;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - currentValue,
+      TextDirection.ltr => currentValue,
+    };
 
     final Paint paint = Paint()
       ..color = Color.lerp(trackColor, activeColor, currentValue)!;
@@ -551,6 +688,64 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     );
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
+
+    if (_isFocused) {
+      // Paints a border around the switch in the focus color.
+      final RRect borderTrackRRect = trackRRect.inflate(1.75);
+
+      final Paint borderPaint = Paint()
+        ..color = focusColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.5;
+
+      canvas.drawRRect(borderTrackRRect, borderPaint);
+    }
+
+    if (_onOffLabelColors != null) {
+      final (Color onLabelColor, Color offLabelColor) = onOffLabelColors!;
+
+      final double leftLabelOpacity = visualPosition * (1.0 - currentReactionValue);
+      final double rightLabelOpacity = (1.0 - visualPosition) * (1.0 - currentReactionValue);
+      final (double onLabelOpacity, double offLabelOpacity) =
+          switch (textDirection) {
+        TextDirection.ltr => (leftLabelOpacity, rightLabelOpacity),
+        TextDirection.rtl => (rightLabelOpacity, leftLabelOpacity),
+      };
+
+      final (Offset onLabelOffset, Offset offLabelOffset) =
+          switch (textDirection) {
+        TextDirection.ltr => (
+            trackRect.centerLeft.translate(_kOnLabelPaddingHorizontal, 0),
+            trackRect.centerRight.translate(-_kOffLabelPaddingHorizontal, 0),
+          ),
+        TextDirection.rtl => (
+            trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0),
+            trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0),
+          ),
+      };
+
+      // Draws '|' label
+      final Rect onLabelRect = Rect.fromCenter(
+        center: onLabelOffset,
+        width: _kOnLabelWidth,
+        height: _kOnLabelHeight,
+      );
+      final Paint onLabelPaint = Paint()
+        ..color = onLabelColor.withOpacity(onLabelOpacity)
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(onLabelRect, onLabelPaint);
+
+      // Draws 'O' label
+      final Paint offLabelPaint = Paint()
+        ..color = offLabelColor.withOpacity(offLabelOpacity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _kOffLabelWidth;
+      canvas.drawCircle(
+        offLabelOffset,
+        _kOffLabelRadius,
+        offLabelPaint,
+      );
+    }
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
     final double thumbLeft = lerpDouble(

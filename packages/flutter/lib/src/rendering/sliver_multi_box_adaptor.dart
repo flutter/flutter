@@ -113,7 +113,7 @@ abstract class RenderSliverBoxChildManager {
   /// This function always returns true.
   ///
   /// The manager is not required to track whether it is expecting modifications
-  /// to the [RenderSliverMultiBoxAdaptor]'s child list and can simply return
+  /// to the [RenderSliverMultiBoxAdaptor]'s child list and can return
   /// true without making any assertions.
   bool debugAssertChildListLocked() => true;
 }
@@ -151,7 +151,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   bool _keptAlive = false;
 
   @override
-  String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
+  String toString() => 'index=$index; ${keepAlive ? "keepAlive; " : ""}${super.toString()}';
 }
 
 /// A sliver with multiple box children.
@@ -169,7 +169,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 ///   been laid out during that layout pass.
 /// * Children cannot be added except during a call to [childManager], and
 ///   then only if there is no child corresponding to that index (or the child
-///   child corresponding to that index was first removed).
+///   corresponding to that index was first removed).
 ///
 /// See also:
 ///
@@ -184,12 +184,9 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
        RenderSliverHelpers, RenderSliverWithKeepAliveMixin {
 
   /// Creates a sliver with multiple box children.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverMultiBoxAdaptor({
     required RenderSliverBoxChildManager childManager,
-  }) : assert(childManager != null),
-       _childManager = childManager {
+  }) : _childManager = childManager {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
       return true;
@@ -229,7 +226,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   bool get debugChildIntegrityEnabled => _debugChildIntegrityEnabled;
   bool _debugChildIntegrityEnabled = true;
   set debugChildIntegrityEnabled(bool enabled) {
-    assert(enabled != null);
     assert(() {
       _debugChildIntegrityEnabled = enabled;
       return _debugVerifyChildOrder() &&
@@ -536,7 +532,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Returns the index of the given child, as given by the
   /// [SliverMultiBoxAdaptorParentData.index] field of the child's [parentData].
   int indexOf(RenderBox child) {
-    assert(child != null);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     assert(childParentData.index != null);
     return childParentData.index!;
@@ -546,7 +541,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// child's [RenderBox.size] property. This is only valid after layout.
   @protected
   double paintExtentOf(RenderBox child) {
-    assert(child != null);
     assert(child.hasSize);
     switch (constraints.axis) {
       case Axis.horizontal:
@@ -576,7 +570,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   double? childScrollOffset(RenderObject child) {
-    assert(child != null);
     assert(child.parent == this);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     return childParentData.layoutOffset;
@@ -620,28 +613,22 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         crossAxisUnit = const Offset(1.0, 0.0);
         originOffset = offset + Offset(0.0, geometry!.paintExtent);
         addExtent = true;
-        break;
       case AxisDirection.right:
         mainAxisUnit = const Offset(1.0, 0.0);
         crossAxisUnit = const Offset(0.0, 1.0);
         originOffset = offset;
         addExtent = false;
-        break;
       case AxisDirection.down:
         mainAxisUnit = const Offset(0.0, 1.0);
         crossAxisUnit = const Offset(1.0, 0.0);
         originOffset = offset;
         addExtent = false;
-        break;
       case AxisDirection.left:
         mainAxisUnit = const Offset(-1.0, 0.0);
         crossAxisUnit = const Offset(0.0, 1.0);
         originOffset = offset + Offset(geometry!.paintExtent, 0.0);
         addExtent = true;
-        break;
     }
-    assert(mainAxisUnit != null);
-    assert(addExtent != null);
     RenderBox? child = firstChild;
     while (child != null) {
       final double mainAxisDelta = childMainAxisPosition(child);

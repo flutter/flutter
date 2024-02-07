@@ -23,13 +23,21 @@ class BottomNavigationBarItem {
   ///
   /// The argument [icon] should not be null and the argument [label] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
+    this.key,
     required this.icon,
     this.label,
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
-  }) : activeIcon = activeIcon ?? icon,
-       assert(icon != null);
+  }) : activeIcon = activeIcon ?? icon;
+
+  /// A key to be passed through to the resultant widget.
+  ///
+  /// This allows the identification of different [BottomNavigationBarItem]s through their keys.
+  ///
+  /// When changing the number of bar items in response to a bar item being tapped, giving
+  /// each item a key will allow the inkwell / splash animation to be correctly positioned.
+  final Key? key;
 
   /// The icon of the item.
   ///
@@ -83,7 +91,7 @@ class BottomNavigationBarItem {
 
   /// The text to display in the [Tooltip] for this [BottomNavigationBarItem].
   ///
-  /// A [Tooltip] will only appear on this item if `tooltip` is set to a non-empty string.
+  /// A [Tooltip] will only appear on this item if [tooltip] is set to a non-empty string.
   ///
   /// Defaults to null, in which case the tooltip is not shown.
   final String? tooltip;

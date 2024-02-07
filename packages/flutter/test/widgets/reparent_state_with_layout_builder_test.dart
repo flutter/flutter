@@ -96,7 +96,7 @@ void main() {
     Widget deepChild = Container();
 
     await tester.pumpWidget(MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      data: MediaQueryData.fromView(tester.view),
       child: Column(
         children: <Widget>[
           StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -108,17 +108,17 @@ void main() {
               },
             );
           }),
-          Container(
+          ColoredBox(
             color: Colors.green,
-            child: Container(
+            child: ColoredBox(
               color: Colors.green,
-              child: Container(
+              child: ColoredBox(
                 color: Colors.green,
-                child: Container(
+                child: ColoredBox(
                   color: Colors.green,
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.green,
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.green,
                       child: StatefulBuilder(
                         builder: (BuildContext context, StateSetter setState) {

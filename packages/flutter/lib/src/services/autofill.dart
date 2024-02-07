@@ -651,8 +651,7 @@ class AutofillConfiguration {
     this.autofillHints = const <String>[],
     this.hintText,
     required this.currentEditingValue,
-  }) : assert(uniqueIdentifier != null),
-       assert(autofillHints != null);
+  });
 
   /// An [AutofillConfiguration] that indicates the [AutofillClient] does not
   /// wish to be autofilled.
@@ -671,14 +670,10 @@ class AutofillConfiguration {
   ///
   /// The identifier needs to be unique within the [AutofillScope] for the
   /// [AutofillClient] to receive the correct autofill value.
-  ///
-  /// Must not be null.
   final String uniqueIdentifier;
 
   /// A list of strings that helps the autofill service identify the type of the
   /// [AutofillClient].
-  ///
-  /// Must not be null.
   ///
   /// {@template flutter.services.AutofillConfiguration.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
@@ -754,7 +749,7 @@ class AutofillConfiguration {
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// Must not be null and the identifier must not be changed.
+  /// The identifier must not be changed.
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].
@@ -810,9 +805,7 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
     required TextInputConfiguration currentClientConfiguration,
-  }) : assert(allConfigurations != null),
-       assert(currentClientConfiguration != null),
-       super(inputType: currentClientConfiguration.inputType,
+  }) : super(inputType: currentClientConfiguration.inputType,
          obscureText: currentClientConfiguration.obscureText,
          autocorrect: currentClientConfiguration.autocorrect,
          smartDashesType: currentClientConfiguration.smartDashesType,
@@ -843,7 +836,6 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
 mixin AutofillScopeMixin implements AutofillScope {
   @override
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration) {
-    assert(trigger != null);
     assert(
       !autofillClients.any((AutofillClient client) => !client.textInputConfiguration.autofillConfiguration.enabled),
       'Every client in AutofillScope.autofillClients must enable autofill',

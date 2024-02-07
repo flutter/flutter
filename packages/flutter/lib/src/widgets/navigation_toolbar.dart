@@ -30,8 +30,7 @@ class NavigationToolbar extends StatelessWidget {
     this.trailing,
     this.centerMiddle = true,
     this.middleSpacing = kMiddleSpacing,
-  }) : assert(centerMiddle != null),
-       assert(middleSpacing != null);
+  });
 
   /// The default spacing around the [middle] widget in dp.
   static const double kMiddleSpacing = 16.0;
@@ -85,8 +84,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     required this.centerMiddle,
     required this.middleSpacing,
     required this.textDirection,
-  }) : assert(middleSpacing != null),
-       assert(textDirection != null);
+  });
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
@@ -106,7 +104,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ToolbarSlot.leading)) {
       final BoxConstraints constraints = BoxConstraints(
-        maxWidth: size.width / 3.0, // The leading widget shouldn't take up more than 1/3 of the space.
+        maxWidth: size.width,
         minHeight: size.height, // The height should be exactly the height of the bar.
         maxHeight: size.height,
       );
@@ -115,10 +113,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           leadingX = size.width - leadingWidth;
-          break;
         case TextDirection.ltr:
           leadingX = 0.0;
-          break;
       }
       positionChild(_ToolbarSlot.leading, Offset(leadingX, 0.0));
     }
@@ -130,10 +126,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           trailingX = 0.0;
-          break;
         case TextDirection.ltr:
           trailingX = size.width - trailingSize.width;
-          break;
       }
       final double trailingY = (size.height - trailingSize.height) / 2.0;
       trailingWidth = trailingSize.width;
@@ -163,10 +157,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           middleX = size.width - middleSize.width - middleStart;
-          break;
         case TextDirection.ltr:
           middleX = middleStart;
-          break;
       }
 
       positionChild(_ToolbarSlot.middle, Offset(middleX, middleY));

@@ -137,68 +137,36 @@ const String getterTemplate = '''
 const String methodTemplate = '''
   @override
   String @(name)(@(parameters)) {
-    return @(message);
-  }''';
-
-const String formatMethodTemplate = '''
-  @override
-  String @(name)(@(parameters)) {
 @(dateFormatting)
 @(numberFormatting)
-    return @(message);
+@(tempVars)    return @(message);
   }''';
 
-const String pluralMethodTemplate = '''
+const String methodWithNamedParameterTemplate = '''
   @override
-  String @(name)(@(parameters)) {
+  String @(name)({@(parameters)}) {
 @(dateFormatting)
 @(numberFormatting)
-    return intl.Intl.pluralLogic(
+@(tempVars)    return @(message);
+  }''';
+
+const String pluralVariableTemplate = '''
+    String @(varName) = intl.Intl.pluralLogic(
       @(count),
       locale: localeName,
-@(pluralLogicArgs),
-    );
-  }''';
+@(pluralLogicArgs)
+    );''';
 
-const String pluralMethodTemplateInString = '''
-  @override
-  String @(name)(@(parameters)) {
-@(dateFormatting)
-@(numberFormatting)
-    final String @(variable) = intl.Intl.pluralLogic(
-      @(count),
-      locale: localeName,
-@(pluralLogicArgs),
-    );
-
-    return @(string);
-  }''';
-
-const String selectMethodTemplate = '''
-  @override
-  String @(name)(@(parameters)) {
-    return intl.Intl.select(
+const String selectVariableTemplate = '''
+    String @(varName) = intl.Intl.selectLogic(
       @(choice),
       {
-        @(cases)
+@(selectCases)
       },
-      desc: '@(description)'
-    );
-  }''';
+    );''';
 
-const String selectMethodTemplateInString = '''
-  @override
-  String @(name)(@(parameters)) {
-    final String @(variable) = intl.Intl.select(
-      @(choice),
-      {
-        @(cases)
-      },
-      desc: '@(description)'
-    );
-
-    return @(string);
-  }''';
+const String dateVariableTemplate = '''
+    String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
 
 const String classFileTemplate = '''
 @(header)@(requiresIntlImport)import '@(fileName)';
@@ -222,17 +190,24 @@ class @(class) extends @(baseLanguageClassName) {
 ''';
 
 const String baseClassGetterTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
 const String baseClassMethodTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String @(name)(@(parameters));
+''';
+
+const String baseClassMethodWithNamedParameterTemplate = '''
+@(comment)
+  ///
+@(templateLocaleTranslationComment)
+  String @(name)({@(parameters)});
 ''';
 
 // DELEGATE CLASS TEMPLATES

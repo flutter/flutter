@@ -13,13 +13,74 @@ import 'package:package_config/package_config.dart';
 /// This file is served when the browser requests "main.dart.js" in debug mode,
 /// and is responsible for bootstrapping the RequireJS modules and attaching
 /// the hot reload hooks.
+///
+/// If `generateLoadingIndicator` is true, embeds a loading indicator onto the
+/// web page that's visible while the Flutter app is loading.
 String generateBootstrapScript({
   required String requireUrl,
   required String mapperUrl,
+  required bool generateLoadingIndicator,
 }) {
   return '''
 "use strict";
 
+${generateLoadingIndicator ? _generateLoadingIndicator() : ''}
+
+// A map containing the URLs for the bootstrap scripts in debug.
+let _scriptUrls = {
+  "mapper": "$mapperUrl",
+  "requireJs": "$requireUrl"
+};
+
+// Create a TrustedTypes policy so we can attach Scripts...
+let _ttPolicy;
+if (window.trustedTypes) {
+  _ttPolicy = trustedTypes.createPolicy("flutter-tools-bootstrap", {
+    createScriptURL: (url) => {
+      let scriptUrl = _scriptUrls[url];
+      if (!scriptUrl) {
+        console.error("Unknown Flutter Web bootstrap resource!", url);
+      }
+      return scriptUrl;
+    }
+  });
+}
+
+// Creates a TrustedScriptURL for a given `scriptName`.
+// See `_scriptUrls` and `_ttPolicy` above.
+function getTTScriptUrl(scriptName) {
+  let defaultUrl = _scriptUrls[scriptName];
+  return _ttPolicy ? _ttPolicy.createScriptURL(scriptName) : defaultUrl;
+}
+
+// Attach source mapping.
+var mapperEl = document.createElement("script");
+mapperEl.defer = true;
+mapperEl.async = false;
+mapperEl.src = getTTScriptUrl("mapper");
+document.head.appendChild(mapperEl);
+
+// Attach require JS.
+var requireEl = document.createElement("script");
+requireEl.defer = true;
+requireEl.async = false;
+requireEl.src = getTTScriptUrl("requireJs");
+// This attribute tells require JS what to load as main (defined below).
+requireEl.setAttribute("data-main", "main_module.bootstrap");
+document.head.appendChild(requireEl);
+''';
+}
+
+/// Creates a visual animated loading indicator and puts it on the page to
+/// provide feedback to the developer that the app is being loaded. Otherwise,
+/// the developer would be staring at a blank page wondering if the app will
+/// come up or not.
+///
+/// This indicator should only be used when DWDS is enabled, e.g. with the
+/// `-d chrome` option. Debug builds without DWDS, e.g. `flutter run -d web-server`
+/// or `flutter build web --debug` should not use this indicator.
+String _generateLoadingIndicator() {
+  return '''
 var styles = `
   .flutter-loader {
     width: 100%;
@@ -93,22 +154,6 @@ document.addEventListener('dart-app-ready', function (e) {
    loader.parentNode.removeChild(loader);
    styleSheet.parentNode.removeChild(styleSheet);
 });
-
-// Attach source mapping.
-var mapperEl = document.createElement("script");
-mapperEl.defer = true;
-mapperEl.async = false;
-mapperEl.src = "$mapperUrl";
-document.head.appendChild(mapperEl);
-
-// Attach require JS.
-var requireEl = document.createElement("script");
-requireEl.defer = true;
-requireEl.async = false;
-requireEl.src = "$requireUrl";
-// This attribute tells require JS what to load as main (defined below).
-requireEl.setAttribute("data-main", "main_module.bootstrap");
-document.head.appendChild(requireEl);
 ''';
 }
 
@@ -130,6 +175,7 @@ String generateMainModule({
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
 }) {
+  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
 // Disable require module timeout
@@ -168,6 +214,12 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
       return dart.getSourceMap(url);
     });
   }
+  // Prevent DDC's requireJS to interfere with modern bundling.
+  if (typeof define === 'function' && define.amd) {
+    // Preserve a copy just in case...
+    define._amd = define.amd;
+    delete define.amd;
+  }
 });
 ''';
 }
@@ -185,21 +237,20 @@ String generateTestEntrypoint({
   // @dart = ${languageVersion.major}.${languageVersion.minor}
   import 'org-dartlang-app:///$relativeTestPath' as test;
   import 'dart:ui' as ui;
+  import 'dart:ui_web' as ui_web;
   import 'dart:html';
   import 'dart:js';
   ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
   import 'package:stream_channel/stream_channel.dart';
   import 'package:flutter_test/flutter_test.dart';
-  import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/backend/suite_channel_manager.dart'; // ignore: implementation_imports
+  import 'package:test_api/backend.dart';
 
   Future<void> main() async {
-    ui.debugEmulateFlutterTesterEnvironment = true;
-    await ui.webOnlyInitializePlatform();
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
+    await ui_web.bootstrapEngine();
     webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
-    (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
-    (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
+    ui_web.debugOverrideDevicePixelRatio(3.0);
+    ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
 
     internalBootstrapBrowserTest(() {
       return ${testConfigPath != null ? "() => test_config.testExecutable(test.main)" : "test.main"};
@@ -214,25 +265,16 @@ String generateTestEntrypoint({
   StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
 
   StreamChannel postMessageChannel() {
-    var controller = StreamChannelController(sync: true);
-    window.onMessage.firstWhere((message) {
-      return message.origin == window.location.origin && message.data == "port";
-    }).then((message) {
-      var port = message.ports.first;
-      var portSubscription = port.onMessage.listen((message) {
-        controller.local.sink.add(message.data);
-      });
-      controller.local.stream.listen((data) {
-        port.postMessage({"data": data});
-      }, onDone: () {
-        port.postMessage({"event": "done"});
-        portSubscription.cancel();
-      });
+    var controller = StreamChannelController<Object?>(sync: true);
+    var channel = MessageChannel();
+    window.parent!.postMessage('port', window.location.origin, [channel.port2]);
+
+    var portSubscription = channel.port1.onMessage.listen((message) {
+      controller.local.sink.add(message.data);
     });
-    context['parent'].callMethod('postMessage', [
-      JsObject.jsify({"href": window.location.href, "ready": true}),
-      window.location.origin,
-    ]);
+    controller.local.stream
+        .listen(channel.port1.postMessage, onDone: portSubscription.cancel);
+
     return controller.foreign;
   }
   ''';

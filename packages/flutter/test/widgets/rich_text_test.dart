@@ -9,14 +9,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('RichText with recognizers without handlers does not throw', (WidgetTester tester) async {
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    addTearDown(recognizer1.dispose);
+    final LongPressGestureRecognizer recognizer2 = LongPressGestureRecognizer();
+    addTearDown(recognizer2.dispose);
+    final DoubleTapGestureRecognizer recognizer3 = DoubleTapGestureRecognizer();
+    addTearDown(recognizer3.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: RichText(
           text: TextSpan(text: 'root', children: <InlineSpan>[
-            TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
-            TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()),
-            TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+            TextSpan(text: 'one', recognizer: recognizer1),
+            TextSpan(text: 'two', recognizer: recognizer2),
+            TextSpan(text: 'three', recognizer: recognizer3),
           ]),
         ),
       ),
@@ -41,6 +48,11 @@ void main() {
   });
 
   testWidgets('TextSpan Locale works', (WidgetTester tester) async {
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    addTearDown(recognizer1.dispose);
+    final DoubleTapGestureRecognizer recognizer2 = DoubleTapGestureRecognizer();
+    addTearDown(recognizer2.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -49,11 +61,11 @@ void main() {
             text: 'root',
             locale: const Locale('es', 'MX'),
             children: <InlineSpan>[
-              TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+              TextSpan(text: 'one', recognizer: recognizer1),
               const WidgetSpan(
                 child: SizedBox(),
               ),
-              TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+              TextSpan(text: 'three', recognizer: recognizer2),
             ]
           ),
         ),
@@ -90,6 +102,11 @@ void main() {
   });
 
   testWidgets('TextSpan spellOut works', (WidgetTester tester) async {
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    addTearDown(recognizer1.dispose);
+    final DoubleTapGestureRecognizer recognizer2 = DoubleTapGestureRecognizer();
+    addTearDown(recognizer2.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -98,11 +115,11 @@ void main() {
               text: 'root',
               spellOut: true,
               children: <InlineSpan>[
-                TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+                TextSpan(text: 'one', recognizer: recognizer1),
                 const WidgetSpan(
                   child: SizedBox(),
                 ),
-                TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+                TextSpan(text: 'three', recognizer: recognizer2),
               ]
           ),
         ),
@@ -143,21 +160,21 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: ColoredBox(
             color: Colors.green,
             child: IntrinsicHeight(
               child: RichText(
-                text: TextSpan(
+                text: const TextSpan(
                   children: <InlineSpan>[
-                    const TextSpan(text: 'Start\n', style: TextStyle(height: 1.0, fontSize: 16)),
+                    TextSpan(text: 'Start\n', style: TextStyle(height: 1.0, fontSize: 16)),
                     WidgetSpan(
                       child: Row(
-                        children: const <Widget>[
+                        children: <Widget>[
                           SizedBox(height: 16, width: 16),
                         ],
                       ),
                     ),
-                    const TextSpan(text: 'End', style: TextStyle(height: 1.0, fontSize: 16)),
+                    TextSpan(text: 'End', style: TextStyle(height: 1.0, fontSize: 16)),
                   ],
                 ),
               ),
@@ -193,12 +210,12 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description, unorderedMatches(<dynamic>[
+    expect(description, unorderedMatches(<Matcher>[
       contains('textAlign: center'),
       contains('textDirection: rtl'),
       contains('softWrap: no wrapping except at line break characters'),
       contains('overflow: ellipsis'),
-      contains('textScaleFactor: 1.3'),
+      contains('textScaler: linear (1.3x)'),
       contains('maxLines: 1'),
       contains('textWidthBasis: longestLine'),
       contains('text: "rich text"'),

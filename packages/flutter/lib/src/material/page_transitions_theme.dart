@@ -151,15 +151,15 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 class _ZoomPageTransition extends StatelessWidget {
   /// Creates a [_ZoomPageTransition].
   ///
-  /// The [animation] and [secondaryAnimation] argument are required and must
+  /// The [animation] and [secondaryAnimation] arguments are required and must
   /// not be null.
   const _ZoomPageTransition({
     required this.animation,
     required this.secondaryAnimation,
     required this.allowSnapshotting,
+    required this.allowEnterRouteSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(secondaryAnimation != null);
+  });
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
@@ -196,9 +196,15 @@ class _ZoomPageTransition extends StatelessWidget {
 
   /// Whether the [SnapshotWidget] will be used.
   ///
-  /// Notably, this improves performance by disabling animations on both the outgoing and
-  /// incoming route. This also implies that ink-splashes or similar animations will
-  /// not animate during the transition.
+  /// When this value is true, performance is improved by disabling animations
+  /// on both the outgoing and incoming route. This also implies that ink-splashes
+  /// or similar animations will not animate during the transition.
+  ///
+  /// See also:
+  ///
+  ///  * [TransitionRoute.allowSnapshotting], which defines whether the route
+  ///    transition will prefer to animate a snapshot of the entering and exiting
+  ///    routes.
   final bool allowSnapshotting;
 
   /// The widget below this widget in the tree.
@@ -206,6 +212,15 @@ class _ZoomPageTransition extends StatelessWidget {
   /// This widget will transition in and out as driven by [animation] and
   /// [secondaryAnimation].
   final Widget? child;
+
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
+  ///
+  /// If not specified, defaults to true.
+  /// If false, the route snapshotting will not be applied to the route being
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
+  final bool allowEnterRouteSnapshotting;
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +233,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomEnterTransition(
           animation: animation,
-          allowSnapshotting: allowSnapshotting,
+          allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
           child: child,
         );
       },
@@ -243,7 +258,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomEnterTransition(
             animation: animation,
-            allowSnapshotting: allowSnapshotting,
+            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
             reverse: true,
             child: child,
           );
@@ -271,8 +286,7 @@ class _ZoomEnterTransition extends StatefulWidget {
     this.reverse = false,
     required this.allowSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null);
+  });
 
   final Animation<double> animation;
   final Widget? child;
@@ -283,7 +297,7 @@ class _ZoomEnterTransition extends StatefulWidget {
   State<_ZoomEnterTransition> createState() => _ZoomEnterTransitionState();
 }
 
-class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
+class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase<_ZoomEnterTransition> {
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
   // support this functionality and the canvaskit backend uses a single thread for UI and raster
   // work which diminishes the impact of this performance improvement.
@@ -369,6 +383,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
@@ -380,8 +395,7 @@ class _ZoomExitTransition extends StatefulWidget {
     this.reverse = false,
     required this.allowSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null);
+  });
 
   final Animation<double> animation;
   final bool allowSnapshotting;
@@ -392,7 +406,7 @@ class _ZoomExitTransition extends StatefulWidget {
   State<_ZoomExitTransition> createState() => _ZoomExitTransitionState();
 }
 
-class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
+class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase<_ZoomExitTransition> {
   late _ZoomExitTransitionPainter delegate;
 
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
@@ -472,6 +486,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
@@ -594,7 +609,50 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
-  const ZoomPageTransitionsBuilder();
+  const ZoomPageTransitionsBuilder({
+    this.allowSnapshotting = true,
+    this.allowEnterRouteSnapshotting = true,
+  });
+
+  /// Whether zoom page transitions will prefer to animate a snapshot of the entering
+  /// and exiting routes.
+  ///
+  /// If not specified, defaults to true.
+  ///
+  /// When this value is true, zoom page transitions will snapshot the entering and
+  /// exiting routes. These snapshots are then animated in place of the underlying
+  /// widgets to improve performance of the transition.
+  ///
+  /// Generally this means that animations that occur on the entering/exiting route
+  /// while the route animation plays may appear frozen - unless they are a hero
+  /// animation or something that is drawn in a separate overlay.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [MaterialApp] that disables snapshotting for the zoom
+  /// transitions on Android.
+  ///
+  /// ** See code in examples/api/lib/material/page_transitions_theme/page_transitions_theme.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [PageRoute.allowSnapshotting], which enables or disables snapshotting
+  ///    on a per route basis.
+  final bool allowSnapshotting;
+
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
+  ///
+  /// If not specified, defaults to true.
+  /// If false, the route snapshotting will not be applied to the route being
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
+  final bool allowEnterRouteSnapshotting;
+
+  // Allows devicelab benchmarks to force disable the snapshotting. This is
+  // intended to allow us to profile and fix the underlying performance issues
+  // for the Impeller backend.
+  static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
   @override
   Widget buildTransitions<T>(
@@ -604,10 +662,18 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget? child,
   ) {
+    if (_kProfileForceDisableSnapshotting) {
+      return _ZoomPageTransitionNoCache(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      child: child,
+      );
+    }
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      allowSnapshotting: route?.allowSnapshotting ?? true,
+      allowSnapshotting: allowSnapshotting && (route?.allowSnapshotting ?? true),
+      allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
       child: child,
     );
   }
@@ -648,7 +714,13 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// and delegates to [buildTransitions].
 ///
 /// If a builder with a matching platform is not found, then the
-/// [FadeUpwardsPageTransitionsBuilder] is used.
+/// [ZoomPageTransitionsBuilder] is used.
+///
+/// {@tool dartpad}
+/// This example shows a [MaterialApp] that defines a custom [PageTransitionsTheme].
+///
+/// ** See code in examples/api/lib/material/page_transitions_theme/page_transitions_theme.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -681,8 +753,9 @@ class PageTransitionsTheme with Diagnosticable {
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the builder for the current [ThemeData.platform]
-  /// or [ZoomPageTransitionsBuilder].
+  /// Delegates to the builder for the current [ThemeData.platform].
+  /// If a builder for the current platform is not found, then the
+  /// [ZoomPageTransitionsBuilder] is used.
   ///
   /// [MaterialPageRoute.buildTransitions] delegates to this method.
   Widget buildTransitions<T>(
@@ -703,8 +776,8 @@ class PageTransitionsTheme with Diagnosticable {
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
-  // Just used to the builders Map to a list with one PageTransitionsBuilder per platform
-  // for the operator == overload.
+  // Map the builders to a list with one PageTransitionsBuilder per platform for
+  // the operator == overload.
   List<PageTransitionsBuilder?> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
     return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
   }
@@ -769,7 +842,7 @@ void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
   transform.translate(-dx, -dy);
 }
 
-mixin _ZoomTransitionBase {
+mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {
   bool get useSnapshot;
 
   // Don't rasterize if:
@@ -797,12 +870,16 @@ mixin _ZoomTransitionBase {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         controller.allowSnapshotting = false;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         controller.allowSnapshotting = useSnapshot;
-        break;
     }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
 
@@ -874,7 +951,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
   }
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
     _drawScrim(context, offset, size);
     _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
   }
@@ -924,7 +1001,7 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
   final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
     _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
   }
 
@@ -947,7 +1024,9 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
 
   @override
   bool shouldRepaint(covariant _ZoomExitTransitionPainter oldDelegate) {
-    return oldDelegate.reverse != reverse || oldDelegate.fade.value != fade.value || oldDelegate.scale.value != scale.value;
+    return oldDelegate.reverse != reverse
+      || oldDelegate.fade.value != fade.value
+      || oldDelegate.scale.value != scale.value;
   }
 
   @override
@@ -958,5 +1037,189 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
     fade.removeListener(notifyListeners);
     animation.removeStatusListener(_onStatusChange);
     super.dispose();
+  }
+}
+
+// Zooms and fades a new page in, zooming out the previous page. This transition
+// is designed to match the Android Q activity transition.
+//
+// This was the historical implementation of the cacheless zoom page transition
+// that was too slow to run on the Skia backend. This is being benchmarked on
+// the Impeller backend so that we can improve performance enough to restore
+// the default behavior.
+class _ZoomPageTransitionNoCache extends StatelessWidget {
+  /// Creates a [_ZoomPageTransitionNoCache].
+  ///
+  /// The [animation] and [secondaryAnimation] argument are required and must
+  /// not be null.
+  const _ZoomPageTransitionNoCache({
+    required this.animation,
+    required this.secondaryAnimation,
+    this.child,
+  });
+
+  /// The animation that drives the [child]'s entrance and exit.
+  ///
+  /// See also:
+  ///
+  ///  * [TransitionRoute.animation], which is the value given to this property
+  ///    when the [_ZoomPageTransition] is used as a page transition.
+  final Animation<double> animation;
+
+  /// The animation that transitions [child] when new content is pushed on top
+  /// of it.
+  ///
+  /// See also:
+  ///
+  ///  * [TransitionRoute.secondaryAnimation], which is the value given to this
+  ///    property when the [_ZoomPageTransition] is used as a page transition.
+  final Animation<double> secondaryAnimation;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// This widget will transition in and out as driven by [animation] and
+  /// [secondaryAnimation].
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DualTransitionBuilder(
+      animation: animation,
+      forwardBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _ZoomEnterTransitionNoCache(
+          animation: animation,
+          child: child,
+        );
+      },
+      reverseBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _ZoomExitTransitionNoCache(
+          animation: animation,
+          reverse: true,
+          child: child,
+        );
+      },
+      child: DualTransitionBuilder(
+        animation: ReverseAnimation(secondaryAnimation),
+        forwardBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Widget? child,
+        ) {
+          return _ZoomEnterTransitionNoCache(
+            animation: animation,
+            reverse: true,
+            child: child,
+          );
+        },
+        reverseBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Widget? child,
+        ) {
+          return _ZoomExitTransitionNoCache(
+            animation: animation,
+            child: child,
+          );
+        },
+        child: child,
+      ),
+    );
+  }
+}
+
+class _ZoomEnterTransitionNoCache extends StatelessWidget {
+  const _ZoomEnterTransitionNoCache({
+    required this.animation,
+    this.reverse = false,
+    this.child,
+  });
+
+  final Animation<double> animation;
+  final Widget? child;
+  final bool reverse;
+
+  @override
+  Widget build(BuildContext context) {
+    double opacity = 0;
+    // The transition's scrim opacity only increases on the forward transition.
+    // In the reverse transition, the opacity should always be 0.0.
+    //
+    // Therefore, we need to only apply the scrim opacity animation when
+    // the transition is running forwards.
+    //
+    // The reason that we check that the animation's status is not `completed`
+    // instead of checking that it is `forward` is that this allows
+    // the interrupted reversal of the forward transition to smoothly fade
+    // the scrim away. This prevents a disjointed removal of the scrim.
+    if (!reverse && animation.status != AnimationStatus.completed) {
+      opacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
+    }
+
+    final Animation<double> fadeTransition = reverse
+      ? kAlwaysCompleteAnimation
+      : _ZoomEnterTransitionState._fadeInTransition.animate(animation);
+
+    final Animation<double> scaleTransition = (reverse
+      ? _ZoomEnterTransitionState._scaleDownTransition
+      : _ZoomEnterTransitionState._scaleUpTransition
+    ).animate(animation);
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        return ColoredBox(
+          color: Colors.black.withOpacity(opacity),
+          child: child,
+        );
+      },
+      child: FadeTransition(
+        opacity: fadeTransition,
+        child: ScaleTransition(
+          scale: scaleTransition,
+          filterQuality: FilterQuality.none,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _ZoomExitTransitionNoCache extends StatelessWidget {
+  const _ZoomExitTransitionNoCache({
+    required this.animation,
+    this.reverse = false,
+    this.child,
+  });
+
+  final Animation<double> animation;
+  final bool reverse;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> fadeTransition = reverse
+      ? _ZoomExitTransitionState._fadeOutTransition.animate(animation)
+      : kAlwaysCompleteAnimation;
+    final Animation<double> scaleTransition = (reverse
+      ? _ZoomExitTransitionState._scaleDownTransition
+      : _ZoomExitTransitionState._scaleUpTransition
+    ).animate(animation);
+
+    return FadeTransition(
+      opacity: fadeTransition,
+      child: ScaleTransition(
+        scale: scaleTransition,
+        filterQuality: FilterQuality.none,
+        child: child,
+      ),
+    );
   }
 }

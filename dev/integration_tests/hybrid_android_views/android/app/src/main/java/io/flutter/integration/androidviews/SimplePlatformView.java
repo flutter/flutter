@@ -50,7 +50,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        switch(methodCall.method) {
+        switch (methodCall.method) {
             case "pipeTouchEvents":
                 touchPipe.enable();
                 result.success(null);

@@ -19,6 +19,7 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'context_menu_button_item.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
@@ -29,30 +30,56 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
+import 'notification_listener.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
+import 'scroll_notification.dart';
+import 'scroll_notification_observer.dart';
 import 'scroll_physics.dart';
+import 'scroll_position.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
+import 'size_changed_layout_notifier.dart';
 import 'spell_check.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
+import 'text_selection_toolbar_anchors.dart';
 import 'ticker_provider.dart';
+import 'undo_history.dart';
+import 'view.dart';
 import 'widget_span.dart';
 
-export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
+export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
 
 // Examples can assume:
 // late BuildContext context;
+// late WidgetTester tester;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
-typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
+
+/// Signature for a widget builder that builds a context menu for the given
+/// [EditableTextState].
+///
+/// See also:
+///
+///  * [SelectableRegionContextMenuBuilder], which performs the same role for
+///    [SelectableRegion].
+typedef EditableTextContextMenuBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+);
+
+// Signature for a function that determines the target location of the given
+// [TextPosition] after applying the given [TextBoundary].
+typedef _ApplyTextBoundary = TextPosition Function(TextPosition, bool, TextBoundary);
 
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
@@ -63,9 +90,63 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
-// The minimum width of an iPad screen. The smallest iPad is currently the
-// iPad Mini 6th Gen according to ios-resolution.com.
-const double _kIPadWidth = 1488.0;
+/// The default mime types to be used when allowedMimeTypes is not provided.
+///
+/// The default value supports inserting images of any supported format.
+const List<String> kDefaultContentInsertionMimeTypes = <String>[
+  'image/png',
+  'image/bmp',
+  'image/jpg',
+  'image/tiff',
+  'image/gif',
+  'image/jpeg',
+  'image/webp'
+];
+
+class _CompositionCallback extends SingleChildRenderObjectWidget {
+  const _CompositionCallback({ required this.compositeCallback, required this.enabled, super.child });
+  final CompositionCallback compositeCallback;
+  final bool enabled;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderCompositionCallback(compositeCallback, enabled);
+  }
+  @override
+  void updateRenderObject(BuildContext context, _RenderCompositionCallback renderObject) {
+    super.updateRenderObject(context, renderObject);
+    // _EditableTextState always uses the same callback.
+    assert(renderObject.compositeCallback == compositeCallback);
+    renderObject.enabled = enabled;
+  }
+}
+
+class _RenderCompositionCallback extends RenderProxyBox {
+  _RenderCompositionCallback(this.compositeCallback, this._enabled);
+
+  final CompositionCallback compositeCallback;
+  VoidCallback? _cancelCallback;
+
+  bool get enabled => _enabled;
+  bool _enabled = false;
+  set enabled(bool newValue) {
+    _enabled = newValue;
+    if (!newValue) {
+      _cancelCallback?.call();
+      _cancelCallback = null;
+    } else if (_cancelCallback == null) {
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, ui.Offset offset) {
+    if (enabled) {
+      _cancelCallback ??= context.addCompositionCallback(compositeCallback);
+    }
+    super.paint(context, offset);
+  }
+}
 
 /// A controller for an editable text field.
 ///
@@ -129,7 +210,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
         value == null || !value.composing.isValid || value.isComposingRangeValid,
         'New TextEditingValue $value has an invalid non-empty composing range '
         '${value.composing}. It is recommended to use a valid composing range, '
-        'even for readonly text fields',
+        'even for readonly text fields.',
       ),
       super(value ?? TextEditingValue.empty);
 
@@ -141,9 +222,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   ///
   /// This property can be set from a listener added to this
-  /// [TextEditingController]; however, one should not also set [selection]
+  /// [TextEditingController]; **however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
-  /// change the controller's [value].
+  /// change the controller's [value].**
   set text(String newText) {
     value = value.copyWith(
       text: newText,
@@ -158,7 +239,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       !newValue.composing.isValid || newValue.isComposingRangeValid,
       'New TextEditingValue $newValue has an invalid non-empty composing range '
       '${newValue.composing}. It is recommended to use a valid composing range, '
-      'even for readonly text fields',
+      'even for readonly text fields.',
     );
     super.value = newValue;
   }
@@ -208,16 +289,13 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
   ///
-  /// If the new selection is of non-zero length, or is outside the composing
-  /// range, the composing range is cleared.
+  /// If the new selection is outside the composing range, the composing range is
+  /// cleared.
   set selection(TextSelection newSelection) {
-    if (!isSelectionWithinTextBounds(newSelection)) {
+    if (!_isSelectionWithinTextBounds(newSelection)) {
       throw FlutterError('invalid text selection: $newSelection');
     }
-    final TextRange newComposing =
-        newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
-            ? value.composing
-            : TextRange.empty;
+    final TextRange newComposing = _isSelectionWithinComposingRange(newSelection) ? value.composing : TextRange.empty;
     value = value.copyWith(selection: newSelection, composing: newComposing);
   }
 
@@ -249,7 +327,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   }
 
   /// Check that the [selection] is inside of the bounds of [text].
-  bool isSelectionWithinTextBounds(TextSelection selection) {
+  bool _isSelectionWithinTextBounds(TextSelection selection) {
     return selection.start <= text.length && selection.end <= text.length;
   }
 
@@ -268,43 +346,117 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// [EditableText] and its derived widgets have their own default [ToolbarOptions].
 /// Create a custom [ToolbarOptions] if you want explicit control over the toolbar
 /// option.
+@Deprecated(
+  'Use `contextMenuBuilder` instead. '
+  'This feature was deprecated after v3.3.0-0.5.pre.',
+)
 class ToolbarOptions {
   /// Create a toolbar configuration with given options.
   ///
   /// All options default to false if they are not explicitly set.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   const ToolbarOptions({
     this.copy = false,
     this.cut = false,
     this.paste = false,
     this.selectAll = false,
-  }) : assert(copy != null),
-       assert(cut != null),
-       assert(paste != null),
-       assert(selectAll != null);
+  });
+
+  /// An instance of [ToolbarOptions] with no options enabled.
+  static const ToolbarOptions empty = ToolbarOptions();
 
   /// Whether to show copy option in toolbar.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   final bool copy;
 
   /// Whether to show cut option in toolbar.
   ///
   /// If [EditableText.readOnly] is set to true, cut will be disabled regardless.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   final bool cut;
 
   /// Whether to show paste option in toolbar.
   ///
   /// If [EditableText.readOnly] is set to true, paste will be disabled regardless.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   final bool paste;
 
   /// Whether to show select all option in toolbar.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   final bool selectAll;
+}
+
+/// Configures the ability to insert media content through the soft keyboard.
+///
+/// The configuration provides a handler for any rich content inserted through
+/// the system input method, and also provides the ability to limit the mime
+/// types of the inserted content.
+///
+/// See also:
+///
+/// * [EditableText.contentInsertionConfiguration]
+class ContentInsertionConfiguration {
+  /// Creates a content insertion configuration with the specified options.
+  ///
+  /// A handler for inserted content, in the form of [onContentInserted], must
+  /// be supplied.
+  ///
+  /// The allowable mime types of inserted content may also
+  /// be provided via [allowedMimeTypes], which cannot be an empty list.
+  ContentInsertionConfiguration({
+    required this.onContentInserted,
+    this.allowedMimeTypes = kDefaultContentInsertionMimeTypes,
+  }) : assert(allowedMimeTypes.isNotEmpty);
+
+  /// Called when a user inserts content through the virtual / on-screen keyboard,
+  /// currently only used on Android.
+  ///
+  /// [KeyboardInsertedContent] holds the data representing the inserted content.
+  ///
+  /// {@tool dartpad}
+  ///
+  /// This example shows how to access the data for inserted content in your
+  /// `TextField`.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
+  final ValueChanged<KeyboardInsertedContent> onContentInserted;
+
+  /// {@template flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
+  /// Used when a user inserts image-based content through the device keyboard,
+  /// currently only used on Android.
+  ///
+  /// The passed list of strings will determine which MIME types are allowed to
+  /// be inserted via the device keyboard.
+  ///
+  /// The default mime types are given by [kDefaultContentInsertionMimeTypes].
+  /// These are all the mime types that are able to be handled and inserted
+  /// from keyboards.
+  ///
+  /// This field cannot be an empty list.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to limit image insertion to specific file types.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
+  /// {@endtemplate}
+  final List<String> allowedMimeTypes;
 }
 
 // A time-value pair that represents a key frame in an animation.
@@ -396,8 +548,11 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///
 /// This widget interacts with the [TextInput] service to let the user edit the
 /// text it contains. It also provides scrolling, selection, and cursor
-/// movement. This widget does not provide any focus management (e.g.,
-/// tap-to-focus).
+/// movement.
+///
+/// The [EditableText] widget is a low-level widget that is intended as a
+/// building block for custom widget sets. For a complete user experience,
+/// consider using a [TextField] or [CupertinoTextField].
 ///
 /// ## Handling User Input
 ///
@@ -483,6 +638,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// | [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent](`collapseSelection: true`)  | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position, or [TextSelection.base], whichever is closest in the given direction | Moves the caret to the previous/next word boundary. |
 /// | [ExtendSelectionToLineBreakIntent](`collapseSelection: true`)                        | Collapses the selection to the start/end of the line at the selection's [TextSelection.extent] position | Moves the caret to the start/end of the current line .|
 /// | [ExtendSelectionVerticallyToAdjacentLineIntent](`collapseSelection: true`)           | Collapses the selection to the position closest to the selection's [TextSelection.extent], on the previous/next adjacent line | Moves the caret to the closest position on the previous/next adjacent line. |
+/// | [ExtendSelectionVerticallyToAdjacentPageIntent](`collapseSelection: true`)           | Collapses the selection to the position closest to the selection's [TextSelection.extent], on the previous/next adjacent page | Moves the caret to the closest position on the previous/next adjacent page. |
 /// | [ExtendSelectionToDocumentBoundaryIntent](`collapseSelection: true`)                 | Collapses the selection to the start/end of the document | Moves the caret to the start/end of the document. |
 ///
 /// #### Intents for Extending the Selection
@@ -494,6 +650,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// | [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent](`collapseSelection: false`) | Moves the selection's [TextSelection.extent] to the previous/next word boundary, or [TextSelection.base] whichever is closest in the given direction | Moves the selection's [TextSelection.extent] to the previous/next word boundary. |
 /// | [ExtendSelectionToLineBreakIntent](`collapseSelection: false`)                       | Moves the selection's [TextSelection.extent] to the start/end of the line |
 /// | [ExtendSelectionVerticallyToAdjacentLineIntent](`collapseSelection: false`)          | Moves the selection's [TextSelection.extent] to the closest position on the previous/next adjacent line |
+/// | [ExtendSelectionVerticallyToAdjacentPageIntent](`collapseSelection: false`)          | Moves the selection's [TextSelection.extent] to the closest position on the previous/next adjacent page |
 /// | [ExtendSelectionToDocumentBoundaryIntent](`collapseSelection: false`)                | Moves the selection's [TextSelection.extent] to the start/end of the document |
 /// | [SelectAllTextIntent]  | Selects the entire document |
 ///
@@ -509,13 +666,14 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///
 /// ## Gesture Events Handling
 ///
-/// This widget provides rudimentary, platform-agnostic gesture handling for
-/// user actions such as tapping, long-pressing and scrolling when
-/// [rendererIgnoresPointer] is false (false by default). To tightly conform
-/// to the platform behavior with respect to input gestures in text fields, use
-/// [TextField] or [CupertinoTextField]. For custom selection behavior, call
-/// methods such as [RenderEditable.selectPosition],
-/// [RenderEditable.selectWord], etc. programmatically.
+/// When [rendererIgnoresPointer] is false (the default), this widget provides
+/// rudimentary, platform-agnostic gesture handling for user actions such as
+/// tapping, long-pressing, and scrolling.
+///
+/// To provide more complete gesture handling, including double-click to select
+/// a word, drag selection, and platform-specific handling of gestures such as
+/// long presses, consider setting [rendererIgnoresPointer] to true and using
+/// [TextSelectionGestureDetectorBuilder].
 ///
 /// {@template flutter.widgets.editableText.showCaretOnScreen}
 /// ## Keep the caret visible when focused
@@ -528,6 +686,14 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///    text when the text field is not [readOnly].
 ///  * When the virtual keyboard pops up.
 /// {@endtemplate}
+///
+/// ## Scrolling Considerations
+///
+/// If this [EditableText] is not a descendant of [Scaffold] and is being used
+/// within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [EditableText] to ensure proper scroll coordination for [EditableText] and
+/// its components like [TextSelectionOverlay].
 ///
 /// {@template flutter.widgets.editableText.accessibility}
 /// ## Troubleshooting Common Accessibility Issues
@@ -543,7 +709,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// a currency value text field. The following example demonstrates how to
 /// suppress the default accessibility announcements by always announcing
 /// the content of the text field as a US currency value (the `\$` inserts
-/// a dollar sign, the `$newText interpolates the `newText` variable):
+/// a dollar sign, the `$newText` interpolates the `newText` variable):
 ///
 /// ```dart
 /// onChanged: (String newText) {
@@ -573,14 +739,6 @@ class EditableText extends StatefulWidget {
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
-  ///
-  /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
-  /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
-  /// [style], [cursorColor], [cursorOpacityAnimates], [backgroundCursorColor],
-  /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
-  /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
-  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],
-  /// [readOnly], and [enableIMEPersonalizedLearning] arguments must not be null.
   EditableText({
     super.key,
     required this.controller,
@@ -599,7 +757,13 @@ class EditableText extends StatefulWidget {
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.locale,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     this.textScaleFactor,
+    this.textScaler,
     this.maxLines = 1,
     this.minLines,
     this.expands = false,
@@ -639,6 +803,10 @@ class EditableText extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
     ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
     this.autofillClient,
@@ -647,50 +815,31 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.contentInsertionConfiguration,
+    this.contextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-  }) : assert(controller != null),
-       assert(focusNode != null),
-       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
-       assert(autocorrect != null),
+    this.undoController,
+  }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(enableSuggestions != null),
-       assert(showSelectionHandles != null),
-       assert(readOnly != null),
-       assert(forceLine != null),
-       assert(style != null),
-       assert(cursorColor != null),
-       assert(cursorOpacityAnimates != null),
-       assert(paintCursorAboveText != null),
-       assert(backgroundCursorColor != null),
-       assert(selectionHeightStyle != null),
-       assert(selectionWidthStyle != null),
-       assert(textAlign != null),
-       assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          "minLines can't be greater than maxLines",
        ),
-       assert(expands != null),
        assert(
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
-       assert(autofocus != null),
-       assert(rendererIgnoresPointer != null),
-       assert(scrollPadding != null),
-       assert(dragStartBehavior != null),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = toolbarOptions ??
+       toolbarOptions = selectionControls is TextSelectionHandleControls && toolbarOptions == null ? ToolbarOptions.empty : toolbarOptions ??
            (obscureText
                ? (readOnly
                    // No point in even offering "Select All" in a read-only obscured
                    // field.
-                   ? const ToolbarOptions()
+                   ? ToolbarOptions.empty
                    // Writable, but obscured.
                    : const ToolbarOptions(
                        selectAll: true,
@@ -709,8 +858,6 @@ class EditableText extends StatefulWidget {
                        selectAll: true,
                        paste: true,
                      ))),
-       assert(clipBehavior != null),
-       assert(enableIMEPersonalizedLearning != null),
        assert(
           spellCheckConfiguration == null ||
           spellCheckConfiguration == const SpellCheckConfiguration.disabled() ||
@@ -750,7 +897,7 @@ class EditableText extends StatefulWidget {
   /// copied with copy or cut. If [readOnly] is also true, then the text cannot
   /// be selected.
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to false.
   /// {@endtemplate}
   final bool obscureText;
 
@@ -766,7 +913,7 @@ class EditableText extends StatefulWidget {
   /// When this is set to true, the text cannot be modified
   /// by any shortcut or keyboard operation. The text is still selectable.
   ///
-  /// Defaults to false. Must not be null.
+  /// Defaults to false.
   /// {@endtemplate}
   final bool readOnly;
 
@@ -775,7 +922,7 @@ class EditableText extends StatefulWidget {
   /// When this is set to false, the width will be based on text width, which
   /// will also be affected by [textWidthBasis].
   ///
-  /// Defaults to true. Must not be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -815,7 +962,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   /// {@endtemplate}
   final bool autocorrect;
 
@@ -830,6 +977,11 @@ class EditableText extends StatefulWidget {
 
   /// The text style to use for the editable text.
   final TextStyle style;
+
+  /// Controls the undo state of the current editable text.
+  ///
+  /// If null, this widget will create its own [UndoHistoryController].
+  final UndoHistoryController? undoController;
 
   /// {@template flutter.widgets.editableText.strutStyle}
   /// The strut style used for the vertical layout.
@@ -859,14 +1011,14 @@ class EditableText extends StatefulWidget {
     if (_strutStyle == null) {
       return StrutStyle.fromTextStyle(style, forceStrutHeight: true);
     }
-    return _strutStyle!.inheritFromTextStyle(style);
+    return _strutStyle.inheritFromTextStyle(style);
   }
   final StrutStyle? _strutStyle;
 
   /// {@template flutter.widgets.editableText.textAlign}
   /// How the text should be aligned horizontally.
   ///
-  /// Defaults to [TextAlign.start] and cannot be null.
+  /// Defaults to [TextAlign.start].
   /// {@endtemplate}
   final TextAlign textAlign;
 
@@ -894,7 +1046,7 @@ class EditableText extends StatefulWidget {
   /// Only supports text keyboards, other keyboard types will ignore this
   /// configuration. Capitalization is locale-aware.
   ///
-  /// Defaults to [TextCapitalization.none]. Must not be null.
+  /// Defaults to [TextCapitalization.none].
   ///
   /// See also:
   ///
@@ -913,6 +1065,9 @@ class EditableText extends StatefulWidget {
   final Locale? locale;
 
   /// {@template flutter.widgets.editableText.textScaleFactor}
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -921,11 +1076,17 @@ class EditableText extends StatefulWidget {
   /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   /// {@endtemplate}
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   final double? textScaleFactor;
 
+  /// {@macro flutter.painting.textPainter.textScaler}
+  final TextScaler? textScaler;
+
   /// The color to use when painting the cursor.
-  ///
-  /// Cannot be null.
   final Color cursorColor;
 
   /// The color to use when painting the autocorrection Rect.
@@ -943,8 +1104,12 @@ class EditableText extends StatefulWidget {
   /// The color to use when painting the background cursor aligned with the text
   /// while rendering the floating cursor.
   ///
-  /// Cannot be null. By default it is the disabled grey color from
-  /// CupertinoColors.
+  /// Typically this would be set to [CupertinoColors.inactiveGray].
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}
@@ -1080,7 +1245,7 @@ class EditableText extends StatefulWidget {
   /// If true, the keyboard will open as soon as this text field obtains focus.
   /// Otherwise, the keyboard is only shown after the user taps the text field.
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to false.
   /// {@endtemplate}
   // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
   // keyboard behavior.
@@ -1097,11 +1262,14 @@ class EditableText extends StatefulWidget {
   final Color? selectionColor;
 
   /// {@template flutter.widgets.editableText.selectionControls}
-  /// Optional delegate for building the text selection handles and toolbar.
+  /// Optional delegate for building the text selection handles.
   ///
-  /// The [EditableText] widget used on its own will not trigger the display
-  /// of the selection toolbar by itself. The toolbar is shown by calling
-  /// [EditableTextState.showToolbar] in response to an appropriate user event.
+  /// Historically, this field also controlled the toolbar. This is now handled
+  /// by [contextMenuBuilder] instead. However, for backwards compatibility, when
+  /// [selectionControls] is set to an object that does not mix in
+  /// [TextSelectionHandleControls], [contextMenuBuilder] is ignored and the
+  /// [TextSelectionControls.buildToolbar] method is used instead.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -1111,7 +1279,6 @@ class EditableText extends StatefulWidget {
   ///  * [TextField], a Material Design themed wrapper of [EditableText], which
   ///    shows the selection toolbar upon appropriate user events based on the
   ///    user's platform set in [ThemeData.platform].
-  /// {@endtemplate}
   final TextSelectionControls? selectionControls;
 
   /// {@template flutter.widgets.editableText.keyboardType}
@@ -1139,8 +1306,8 @@ class EditableText extends StatefulWidget {
   /// [TextEditingController.addListener].
   ///
   /// [onChanged] is called before [onSubmitted] when user indicates completion
-  /// of editing, such as when pressing the "done" button on the keyboard. That default
-  /// behavior can be overridden. See [onEditingComplete] for details.
+  /// of editing, such as when pressing the "done" button on the keyboard. That
+  /// default behavior can be overridden. See [onEditingComplete] for details.
   ///
   /// {@tool dartpad}
   /// This example shows how onChanged could be used to check the TextField's
@@ -1203,6 +1370,18 @@ class EditableText extends StatefulWidget {
   /// By default, [onSubmitted] is called after [onChanged] when the user
   /// has finalized editing; or, if the default behavior has been overridden,
   /// after [onEditingComplete]. See [onEditingComplete] for details.
+  ///
+  /// ## Testing
+  /// The following is the recommended way to trigger [onSubmitted] in a test:
+  ///
+  /// ```dart
+  /// await tester.testTextInput.receiveAction(TextInputAction.done);
+  /// ```
+  ///
+  /// Sending a `LogicalKeyboardKey.enter` via `tester.sendKeyEvent` will not
+  /// trigger [onSubmitted]. This is because on a real device, the engine
+  /// translates the enter key to a done action, but `tester.sendKeyEvent` sends
+  /// the key to the framework only.
   /// {@endtemplate}
   final ValueChanged<String>? onSubmitted;
 
@@ -1301,10 +1480,28 @@ class EditableText extends StatefulWidget {
   /// the editing position.
   final MouseCursor? mouseCursor;
 
-  /// If true, the [RenderEditable] created by this widget will not handle
-  /// pointer events, see [RenderEditable] and [RenderEditable.ignorePointer].
+  /// Whether the caller will provide gesture handling (true), or if the
+  /// [EditableText] is expected to handle basic gestures (false).
+  ///
+  /// When this is false, the [EditableText] (or more specifically, the
+  /// [RenderEditable]) enables some rudimentary gestures (tap to position the
+  /// cursor, long-press to select all, and some scrolling behavior).
+  ///
+  /// These behaviors are sufficient for debugging purposes but are inadequate
+  /// for user-facing applications. To enable platform-specific behaviors, use a
+  /// [TextSelectionGestureDetectorBuilder] to wrap the [EditableText], and set
+  /// [rendererIgnoresPointer] to true.
+  ///
+  /// When [rendererIgnoresPointer] is true true, the [RenderEditable] created
+  /// by this widget will not handle pointer events.
   ///
   /// This property is false by default.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderEditable.ignorePointer], which implements this feature.
+  ///  * [TextSelectionGestureDetectorBuilder], which implements platform-specific
+  ///    gestures and behaviors.
   final bool rendererIgnoresPointer;
 
   /// {@template flutter.widgets.editableText.cursorWidth}
@@ -1334,11 +1531,13 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final Radius? cursorRadius;
 
+  /// {@template flutter.widgets.editableText.cursorOpacityAnimates}
   /// Whether the cursor will animate from fully transparent to fully opaque
   /// during each cursor blink.
   ///
   /// By default, the cursor opacity will animate on iOS platforms and will not
   /// animate on Android platforms.
+  /// {@endtemplate}
   final bool cursorOpacityAnimates;
 
   ///{@macro flutter.rendering.RenderEditable.cursorOffset}
@@ -1566,6 +1765,94 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@template flutter.widgets.editableText.contentInsertionConfiguration}
+  /// Configuration of handler for media content inserted via the system input
+  /// method.
+  ///
+  /// Defaults to null in which case media content insertion will be disabled,
+  /// and the system will display a message informing the user that the text field
+  /// does not support inserting media content.
+  ///
+  /// Set [ContentInsertionConfiguration.onContentInserted] to provide a handler.
+  /// Additionally, set [ContentInsertionConfiguration.allowedMimeTypes]
+  /// to limit the allowable mime types for inserted content.
+  ///
+  /// {@tool dartpad}
+  ///
+  /// This example shows how to access the data for inserted content in your
+  /// `TextField`.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// If [contentInsertionConfiguration] is not provided, by default
+  /// an empty list of mime types will be sent to the Flutter Engine.
+  /// A handler function must be provided in order to customize the allowable
+  /// mime types for inserted content.
+  ///
+  /// If rich content is inserted without a handler, the system will display
+  /// a message informing the user that the current text input does not support
+  /// inserting rich content.
+  /// {@endtemplate}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
+
+  /// {@template flutter.widgets.EditableText.contextMenuBuilder}
+  /// Builds the text selection toolbar when requested by the user.
+  ///
+  /// The context menu is built when [EditableTextState.showToolbar] is called,
+  /// typically by one of the callbacks installed by the widget created by
+  /// [TextSelectionGestureDetectorBuilder.buildGestureDetector]. The widget
+  /// returned by [contextMenuBuilder] is passed to a [ContextMenuController].
+  ///
+  /// If no callback is provided, no context menu will be shown.
+  ///
+  /// The [EditableTextContextMenuBuilder] signature used by the
+  /// [contextMenuBuilder] callback has two parameters, the [BuildContext] of
+  /// the [EditableText] and the [EditableTextState] of the [EditableText].
+  ///
+  /// The [EditableTextState] has two properties that are especially useful when
+  /// building the widgets for the context menu:
+  ///
+  /// * [EditableTextState.contextMenuAnchors] specifies the desired anchor
+  ///   position for the context menu.
+  ///
+  /// * [EditableTextState.contextMenuButtonItems] represents the buttons that
+  ///   should typically be built for this widget (e.g. cut, copy, paste).
+  ///
+  /// The [TextSelectionToolbarLayoutDelegate] class may be particularly useful
+  /// in honoring the preferred anchor positions.
+  ///
+  /// For backwards compatibility, when [selectionControls] is set to an object
+  /// that does not mix in [TextSelectionHandleControls], [contextMenuBuilder]
+  /// is ignored and the [TextSelectionControls.buildToolbar] method is used
+  /// instead.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to customize the menu, in this case by keeping the
+  /// default buttons for the platform but modifying their appearance.
+  ///
+  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to show a custom button only when an email address
+  /// is currently selected.
+  ///
+  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///   * [AdaptiveTextSelectionToolbar], which builds the default text selection
+  ///     toolbar for the current platform, but allows customization of the
+  ///     buttons.
+  ///   * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
+  ///     button Widgets for the current platform given
+  ///     [ContextMenuButtonItem]s.
+  ///   * [BrowserContextMenu], which allows the browser's context menu on web
+  ///     to be disabled and Flutter-rendered context menus to appear.
+  /// {@endtemplate}
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
   /// Configuration that details how spell check should be performed.
   ///
@@ -1574,20 +1861,113 @@ class EditableText extends StatefulWidget {
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
-  /// it is used. It is currently supported only on Android.
+  /// it is used. It is currently supported only on Android and iOS.
   ///
   /// If this configuration is left null, then spell check is disabled by default.
   /// {@endtemplate}
   final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  /// The configuration for the magnifier to use with selections in this text
+  /// field.
   ///
   /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
+
+  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
+  /// platform's default selection menu for an editable field.
+  ///
+  /// For example, [EditableText] uses this to generate the default buttons for
+  /// its context menu.
+  ///
+  /// See also:
+  ///
+  /// * [EditableTextState.contextMenuButtonItems], which gives the
+  ///   [ContextMenuButtonItem]s for a specific EditableText.
+  /// * [SelectableRegion.getSelectableButtonItems], which performs a similar
+  ///   role but for content that is selectable but not editable.
+  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
+  ///   take a list of [ContextMenuButtonItem]s with
+  ///   [AdaptiveTextSelectionToolbar.buttonItems].
+  /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
+  ///   Widgets for the current platform given [ContextMenuButtonItem]s.
+  static List<ContextMenuButtonItem> getEditableButtonItems({
+    required final ClipboardStatus? clipboardStatus,
+    required final VoidCallback? onCopy,
+    required final VoidCallback? onCut,
+    required final VoidCallback? onPaste,
+    required final VoidCallback? onSelectAll,
+    required final VoidCallback? onLookUp,
+    required final VoidCallback? onSearchWeb,
+    required final VoidCallback? onShare,
+    required final VoidCallback? onLiveTextInput,
+  }) {
+    final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
+
+    // Configure button items with clipboard.
+    if (onPaste == null || clipboardStatus != ClipboardStatus.unknown) {
+      // If the paste button is enabled, don't render anything until the state
+      // of the clipboard is known, since it's used to determine if paste is
+      // shown.
+
+      // On Android, the share button is before the select all button.
+      final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
+
+      resultButtonItem.addAll(<ContextMenuButtonItem>[
+        if (onCut != null)
+          ContextMenuButtonItem(
+            onPressed: onCut,
+            type: ContextMenuButtonType.cut,
+          ),
+        if (onCopy != null)
+          ContextMenuButtonItem(
+            onPressed: onCopy,
+            type: ContextMenuButtonType.copy,
+          ),
+        if (onPaste != null)
+          ContextMenuButtonItem(
+            onPressed: onPaste,
+            type: ContextMenuButtonType.paste,
+          ),
+        if (onShare != null && showShareBeforeSelectAll)
+          ContextMenuButtonItem(
+            onPressed: onShare,
+            type: ContextMenuButtonType.share,
+          ),
+        if (onSelectAll != null)
+          ContextMenuButtonItem(
+            onPressed: onSelectAll,
+            type: ContextMenuButtonType.selectAll,
+          ),
+        if (onLookUp != null)
+          ContextMenuButtonItem(
+            onPressed: onLookUp,
+            type: ContextMenuButtonType.lookUp,
+          ),
+        if (onSearchWeb != null)
+          ContextMenuButtonItem(
+            onPressed: onSearchWeb,
+            type: ContextMenuButtonType.searchWeb,
+          ),
+        if (onShare != null && !showShareBeforeSelectAll)
+          ContextMenuButtonItem(
+            onPressed: onShare,
+            type: ContextMenuButtonType.share,
+          ),
+      ]);
+    }
+
+    // Config button items with Live Text.
+    if (onLiveTextInput != null) {
+      resultButtonItem.add(ContextMenuButtonItem(
+        onPressed: onLiveTextInput,
+        type: ContextMenuButtonType.liveTextInput,
+      ));
+    }
+
+    return resultButtonItem;
+  }
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
@@ -1647,7 +2027,6 @@ class EditableText extends StatefulWidget {
           if (keyboardType != null) {
             return keyboardType;
           }
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -1750,7 +2129,7 @@ class EditableText extends StatefulWidget {
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
@@ -1763,7 +2142,9 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
+    properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[], defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
   }
 }
 
@@ -1780,11 +2161,34 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
-  final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
+
+  /// Detects whether the clipboard can paste.
+  final ClipboardStatusNotifier clipboardStatus = kIsWeb
+      // Web browsers will show a permission dialog when Clipboard.hasStrings is
+      // called. In an EditableText, this will happen before the paste button is
+      // clicked, often before the context menu is even shown. To avoid this
+      // poor user experience, always show the paste button on web.
+      ? _WebClipboardStatusNotifier()
+      : ClipboardStatusNotifier();
+
+  /// Detects whether the Live Text input is enabled.
+  ///
+  /// See also:
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  final LiveTextInputStatusNotifier? _liveTextInputStatus =
+      kIsWeb ? null : LiveTextInputStatusNotifier();
 
   TextInputConnection? _textInputConnection;
-  TextSelectionOverlay? _selectionOverlay;
+  bool get _hasInputConnection => _textInputConnection?.attached ?? false;
 
+  TextSelectionOverlay? _selectionOverlay;
+  ScrollNotificationObserverState? _scrollNotificationObserver;
+  ({TextEditingValue value, Rect selectionBounds})? _dataWhenToolbarShowScheduled;
+  bool _listeningToScrollNotificationObserver = false;
+
+  bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
+
+  final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;
   ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
 
@@ -1801,6 +2205,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
 
   late SpellCheckConfiguration _spellCheckConfiguration;
+  late TextStyle _style;
 
   /// Configuration that determines how spell check will be performed.
   ///
@@ -1823,7 +2228,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// These results will be updated via calls to spell check through a
   /// [SpellCheckService] and used by this widget to build the [TextSpan] tree
   /// for text input and menus for replacement suggestions of misspelled words.
-  SpellCheckResults? _spellCheckResults;
+  SpellCheckResults? spellCheckResults;
+
+  bool get _spellCheckResultsReceived => spellCheckEnabled && spellCheckResults != null && spellCheckResults!.suggestionSpans.isNotEmpty;
+
+  /// The text processing service used to retrieve the native text processing actions.
+  final ProcessTextService _processTextService = DefaultProcessTextService();
+
+  /// The list of native text processing actions provided by the engine.
+  final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
 
   /// Whether to create an input connection with the platform for text editing
   /// or not.
@@ -1851,23 +2264,121 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
-  Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+  Color get _cursorColor {
+    final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
+    return widget.cursorColor.withOpacity(effectiveOpacity);
+  }
 
   @override
-  bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
+  bool get cutEnabled {
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      return widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
+    }
+    return !widget.readOnly
+        && !widget.obscureText
+        && !textEditingValue.selection.isCollapsed;
+  }
 
   @override
-  bool get copyEnabled => widget.toolbarOptions.copy && !widget.obscureText;
+  bool get copyEnabled {
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      return widget.toolbarOptions.copy && !widget.obscureText;
+    }
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed;
+  }
 
   @override
-  bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
+  bool get pasteEnabled {
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      return widget.toolbarOptions.paste && !widget.readOnly;
+    }
+    return !widget.readOnly
+        && (clipboardStatus.value == ClipboardStatus.pasteable);
+  }
 
   @override
-  bool get selectAllEnabled => widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
+  bool get selectAllEnabled {
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      return widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
+    }
+
+    if (!widget.enableInteractiveSelection
+        || (widget.readOnly
+            && widget.obscureText)) {
+      return false;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+        return false;
+      case TargetPlatform.iOS:
+        return textEditingValue.text.isNotEmpty
+            && textEditingValue.selection.isCollapsed;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return textEditingValue.text.isNotEmpty
+           && !(textEditingValue.selection.start == 0
+               && textEditingValue.selection.end == textEditingValue.text.length);
+    }
+  }
+
+  @override
+  bool get lookUpEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed
+        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
+  @override
+  bool get searchWebEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed
+        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
+  @override
+  bool get shareEnabled {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return !widget.obscureText
+            && !textEditingValue.selection.isCollapsed
+            && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
+    }
+  }
+
+  @override
+  bool get liveTextInputEnabled {
+    return _liveTextInputStatus?.value == LiveTextInputStatus.enabled &&
+        !widget.obscureText &&
+        !widget.readOnly &&
+        textEditingValue.selection.isCollapsed;
+  }
 
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
+  void _onChangedLiveTextInputStatus() {
+    setState(() {
+      // Inform the widget that the value of liveTextInputStatus has changed.
     });
   }
 
@@ -1883,7 +2394,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textEditingValue.selection;
-    assert(selection != null);
     if (selection.isCollapsed || widget.obscureText) {
       return;
     }
@@ -1909,10 +2419,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             ),
             SelectionChangedCause.toolbar,
           );
-          break;
       }
     }
-    _clipboardStatus?.update();
+    clipboardStatus.update();
   }
 
   /// Cut current selection to [Clipboard].
@@ -1923,7 +2432,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
-    assert(selection != null);
     if (selection.isCollapsed) {
       return;
     }
@@ -1935,21 +2443,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
-    _clipboardStatus?.update();
+    clipboardStatus.update();
+  }
+
+  bool get _allowPaste {
+    return !widget.readOnly && textEditingValue.selection.isValid;
   }
 
   /// Paste text from [Clipboard].
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
-    if (widget.readOnly) {
-      return;
-    }
-    final TextSelection selection = textEditingValue.selection;
-    assert(selection != null);
-    if (!selection.isValid) {
+    if (!_allowPaste) {
       return;
     }
     // Snapshot the input before using `await`.
@@ -1958,16 +2465,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (data == null) {
       return;
     }
+    _pasteText(cause, data.text!);
+  }
+
+  void _pasteText(SelectionChangedCause cause, String text) {
+    if (!_allowPaste) {
+      return;
+    }
 
     // After the paste, the cursor should be collapsed and located after the
     // pasted content.
+    final TextSelection selection = textEditingValue.selection;
     final int lastSelectionIndex = math.max(selection.baseOffset, selection.extentOffset);
     final TextEditingValue collapsedTextEditingValue = textEditingValue.copyWith(
       selection: TextSelection.collapsed(offset: lastSelectionIndex),
     );
 
     userUpdateTextEditingValue(
-      collapsedTextEditingValue.replaced(selection, data.text!),
+      collapsedTextEditingValue.replaced(selection, text),
       cause,
     );
     if (cause == SelectionChangedCause.toolbar) {
@@ -1976,7 +2491,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
   }
@@ -1999,11 +2514,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (cause == SelectionChangedCause.toolbar) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          hideToolbar();
+      }
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           bringIntoView(textEditingValue.selection.extent);
-          break;
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           break;
@@ -2011,26 +2535,336 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Look up the current selection,
+  /// as in the "Look Up" edit menu button on iOS.
+  ///
+  /// Currently this is only implemented for iOS.
+  ///
+  /// Throws an error if the selection is empty or collapsed.
+  Future<void> lookUpSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (widget.obscureText || text.isEmpty) {
+      return;
+    }
+    await SystemChannels.platform.invokeMethod(
+      'LookUp.invoke',
+      text,
+    );
+  }
+
+  /// Launch a web search on the current selection,
+  /// as in the "Search Web" edit menu button on iOS.
+  ///
+  /// Currently this is only implemented for iOS.
+  ///
+  /// When 'obscureText' is true or the selection is empty,
+  /// this function will not do anything
+  Future<void> searchWebForSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+    if (widget.obscureText) {
+      return;
+    }
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod(
+        'SearchWeb.invoke',
+        text,
+      );
+    }
+  }
+
+  /// Launch the share interface for the current selection,
+  /// as in the "Share..." edit menu button on iOS.
+  ///
+  /// Currently this is only implemented for iOS and Android.
+  ///
+  /// When 'obscureText' is true or the selection is empty,
+  /// this function will not do anything
+  Future<void> shareSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+    if (widget.obscureText) {
+      return;
+    }
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod(
+        'Share.invoke',
+        text,
+      );
+    }
+  }
+
+  void _startLiveTextInput(SelectionChangedCause cause) {
+    if (!liveTextInputEnabled) {
+      return;
+    }
+    if (_hasInputConnection) {
+      LiveText.startLiveTextInput();
+    }
+    if (cause == SelectionChangedCause.toolbar) {
+      hideToolbar();
+    }
+  }
+
+  /// Finds specified [SuggestionSpan] that matches the provided index using
+  /// binary search.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], the Material style spell check
+  ///    suggestions toolbar that uses this method to render the correct
+  ///    suggestions in the toolbar for a misspelled word.
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    if (!_spellCheckResultsReceived
+        || spellCheckResults!.suggestionSpans.last.range.end < cursorIndex) {
+      // No spell check results have been received or the cursor index is out
+      // of range that suggestionSpans covers.
+      return null;
+    }
+
+    final List<SuggestionSpan> suggestionSpans = spellCheckResults!.suggestionSpans;
+    int leftIndex = 0;
+    int rightIndex = suggestionSpans.length - 1;
+    int midIndex = 0;
+
+    while (leftIndex <= rightIndex) {
+      midIndex = ((leftIndex + rightIndex) / 2).floor();
+      final int currentSpanStart = suggestionSpans[midIndex].range.start;
+      final int currentSpanEnd = suggestionSpans[midIndex].range.end;
+
+      if (cursorIndex <= currentSpanEnd && cursorIndex >= currentSpanStart) {
+        return suggestionSpans[midIndex];
+      }
+      else if (cursorIndex <= currentSpanStart) {
+        rightIndex = midIndex - 1;
+      }
+      else {
+        leftIndex = midIndex + 1;
+      }
+    }
+    return null;
+  }
+
   /// Infers the [SpellCheckConfiguration] used to perform spell check.
   ///
   /// If spell check is enabled, this will try to infer a value for
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
-    if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
+    final SpellCheckService? spellCheckService = configuration?.spellCheckService;
+    final bool spellCheckAutomaticallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
+    final bool spellCheckServiceIsConfigured = spellCheckService != null || spellCheckService == null && WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
+    if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
+      // Only enable spell check if a non-disabled configuration is provided
+      // and if that configuration does not specify a spell check service,
+      // a native spell checker must be supported.
+      assert(() {
+        if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'Spell check was enabled with spellCheckConfiguration, but the '
+                'current platform does not have a supported spell check '
+                'service, and none was provided. Consider disabling spell '
+                'check for this platform or passing a SpellCheckConfiguration '
+                'with a specified spell check service.',
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+        return true;
+      }());
       return const SpellCheckConfiguration.disabled();
     }
 
-    SpellCheckService? spellCheckService = configuration.spellCheckService;
+    return configuration.copyWith(spellCheckService: spellCheckService ?? DefaultSpellCheckService());
+  }
 
-    assert(
-      spellCheckService != null
-      || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined,
-      'spellCheckService must be specified for this platform because no default service available',
+  /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
+  @Deprecated(
+    'Use `contextMenuBuilder` instead of `toolbarOptions`. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  List<ContextMenuButtonItem>? buttonItemsForToolbarOptions([TargetPlatform? targetPlatform]) {
+    final ToolbarOptions toolbarOptions = widget.toolbarOptions;
+    if (toolbarOptions == ToolbarOptions.empty) {
+      return null;
+    }
+    return <ContextMenuButtonItem>[
+      if (toolbarOptions.cut && cutEnabled)
+        ContextMenuButtonItem(
+          onPressed: () {
+            cutSelection(SelectionChangedCause.toolbar);
+          },
+          type: ContextMenuButtonType.cut,
+        ),
+      if (toolbarOptions.copy && copyEnabled)
+        ContextMenuButtonItem(
+          onPressed: () {
+            copySelection(SelectionChangedCause.toolbar);
+          },
+          type: ContextMenuButtonType.copy,
+        ),
+      if (toolbarOptions.paste && pasteEnabled)
+        ContextMenuButtonItem(
+          onPressed: () {
+            pasteText(SelectionChangedCause.toolbar);
+          },
+          type: ContextMenuButtonType.paste,
+        ),
+      if (toolbarOptions.selectAll && selectAllEnabled)
+        ContextMenuButtonItem(
+          onPressed: () {
+            selectAll(SelectionChangedCause.toolbar);
+          },
+          type: ContextMenuButtonType.selectAll,
+        ),
+    ];
+  }
+
+  /// Gets the line heights at the start and end of the selection for the given
+  /// [EditableTextState].
+  _GlyphHeights _getGlyphHeights() {
+    final TextSelection selection = textEditingValue.selection;
+
+    // Only calculate handle rects if the text in the previous frame
+    // is the same as the text in the current frame. This is done because
+    // widget.renderObject contains the renderEditable from the previous frame.
+    // If the text changed between the current and previous frames then
+    // widget.renderObject.getRectForComposingRange might fail. In cases where
+    // the current frame is different from the previous we fall back to
+    // renderObject.preferredLineHeight.
+    final InlineSpan span = renderEditable.text!;
+    final String prevText = span.toPlainText();
+    final String currText = textEditingValue.text;
+    if (prevText != currText || !selection.isValid || selection.isCollapsed) {
+      return _GlyphHeights(
+        start: renderEditable.preferredLineHeight,
+        end: renderEditable.preferredLineHeight,
+      );
+    }
+
+    final String selectedGraphemes = selection.textInside(currText);
+    final int firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+    final Rect? startCharacterRect = renderEditable.getRectForComposingRange(TextRange(
+      start: selection.start,
+      end: selection.start + firstSelectedGraphemeExtent,
+    ));
+    final int lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+    final Rect? endCharacterRect = renderEditable.getRectForComposingRange(TextRange(
+      start: selection.end - lastSelectedGraphemeExtent,
+      end: selection.end,
+    ));
+    return _GlyphHeights(
+      start: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
+      end: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
     );
+  }
 
-    spellCheckService = spellCheckService ?? DefaultSpellCheckService();
+  /// {@template flutter.widgets.EditableText.getAnchors}
+  /// Returns the anchor points for the default context menu.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
+  ///    for the default context menu buttons.
+  TextSelectionToolbarAnchors get contextMenuAnchors {
+    if (renderEditable.lastSecondaryTapDownPosition != null) {
+      return TextSelectionToolbarAnchors(
+        primaryAnchor: renderEditable.lastSecondaryTapDownPosition!,
+      );
+    }
 
-    return configuration.copyWith(spellCheckService: spellCheckService);
+    final _GlyphHeights glyphHeights = _getGlyphHeights();
+    final TextSelection selection = textEditingValue.selection;
+    final List<TextSelectionPoint> points =
+        renderEditable.getEndpointsForSelection(selection);
+    return TextSelectionToolbarAnchors.fromSelection(
+      renderBox: renderEditable,
+      startGlyphHeight: glyphHeights.start,
+      endGlyphHeight: glyphHeights.end,
+      selectionEndpoints: points,
+    );
+  }
+
+  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
+  /// platform's default selection menu for [EditableText].
+  ///
+  /// See also:
+  ///
+  /// * [EditableText.getEditableButtonItems], which performs a similar role,
+  ///   but for any editable field, not just specifically EditableText.
+  /// * [SelectableRegionState.contextMenuButtonItems], which performs a similar
+  ///   role but for content that is selectable but not editable.
+  /// * [contextMenuAnchors], which provides the anchor points for the default
+  ///   context menu.
+  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
+  ///   take a list of [ContextMenuButtonItem]s with
+  ///   [AdaptiveTextSelectionToolbar.buttonItems].
+  /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
+  ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
+  List<ContextMenuButtonItem> get contextMenuButtonItems {
+    return buttonItemsForToolbarOptions() ?? EditableText.getEditableButtonItems(
+      clipboardStatus: clipboardStatus.value,
+      onCopy: copyEnabled
+          ? () => copySelection(SelectionChangedCause.toolbar)
+          : null,
+      onCut: cutEnabled
+          ? () => cutSelection(SelectionChangedCause.toolbar)
+          : null,
+      onPaste: pasteEnabled
+          ? () => pasteText(SelectionChangedCause.toolbar)
+          : null,
+      onSelectAll: selectAllEnabled
+          ? () => selectAll(SelectionChangedCause.toolbar)
+          : null,
+      onLookUp: lookUpEnabled
+          ? () => lookUpSelection(SelectionChangedCause.toolbar)
+          : null,
+      onSearchWeb: searchWebEnabled
+          ? () => searchWebForSelection(SelectionChangedCause.toolbar)
+          : null,
+      onShare: shareEnabled
+          ? () => shareSelection(SelectionChangedCause.toolbar)
+          : null,
+      onLiveTextInput: liveTextInputEnabled
+          ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
+          : null,
+    )..addAll(_textProcessingActionButtonItems);
+  }
+
+  List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final TextSelection selection = textEditingValue.selection;
+    if (widget.obscureText || !selection.isValid || selection.isCollapsed) {
+      return buttonItems;
+    }
+
+    for (final ProcessTextAction action in _processTextActions) {
+      buttonItems.add(ContextMenuButtonItem(
+        label: action.label,
+        onPressed: () async {
+          final String selectedText = selection.textInside(textEditingValue.text);
+          if (selectedText.isNotEmpty) {
+            final String? processedText = await _processTextService.processTextAction(action.id, selectedText, widget.readOnly);
+            // If an activity does not return a modified version, just hide the toolbar.
+            // Otherwise use the result to replace the selected text.
+            if (processedText != null && _allowPaste) {
+              _pasteText(SelectionChangedCause.toolbar, processedText);
+            } else {
+              hideToolbar();
+            }
+          }
+        },
+      ));
+    }
+    return buttonItems;
   }
 
   // State lifecycle:
@@ -2038,12 +2872,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
-    _clipboardStatus?.addListener(_onChangedClipboardStatus);
+    _liveTextInputStatus?.addListener(_onChangedLiveTextInputStatus);
+    clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
-    _scrollController.addListener(_updateSelectionOverlayForScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+    _initProcessTextActions();
+  }
+
+  /// Query the engine to initialize the list of text processing actions to show
+  /// in the text selection toolbar.
+  Future<void> _initProcessTextActions() async {
+    _processTextActions.clear();
+    _processTextActions.addAll(await _processTextService.queryTextActions());
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -2054,7 +2896,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final AutofillGroupState? newAutofillGroup = AutofillGroup.of(context);
+    _style = MediaQuery.boldTextOf(context)
+        ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
+        : widget.style;
+
+    final AutofillGroupState? newAutofillGroup = AutofillGroup.maybeOf(context);
     if (currentAutofillScope != newAutofillGroup) {
       _currentAutofillScope?.unregister(autofillId);
       _currentAutofillScope = newAutofillGroup;
@@ -2065,21 +2911,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _didAutoFocus = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (mounted && renderEditable.hasSize) {
+          _flagInternalFocus();
           FocusScope.of(context).autofocus(widget.focusNode);
         }
-      });
+      }, debugLabel: 'EditableText.autofocus');
     }
 
     // Restart or stop the blinking cursor when TickerMode changes.
     final bool newTickerEnabled = TickerMode.of(context);
     if (_tickersEnabled != newTickerEnabled) {
       _tickersEnabled = newTickerEnabled;
-      if (_tickersEnabled && _cursorActive) {
+      if (_showBlinkingCursor) {
         _startCursorBlink();
       } else if (!_tickersEnabled && _cursorTimer != null) {
-        // Cannot use _stopCursorTimer because it would reset _cursorActive.
-        _cursorTimer!.cancel();
-        _cursorTimer = null;
+        _stopCursorBlink();
       }
     }
 
@@ -2088,7 +2933,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Hide the text selection toolbar on mobile when orientation changes.
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     if (_lastOrientation == null) {
       _lastOrientation = orientation;
       return;
@@ -2102,6 +2947,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         hideToolbar();
       }
     }
+
+    if (_listeningToScrollNotificationObserver) {
+      // Only update subscription when we have previously subscribed to the
+      // scroll notification observer. We only subscribe to the scroll
+      // notification observer when the context menu is shown on platforms that
+      // support _platformSupportsFadeOnScroll.
+      _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
+      _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+      _scrollNotificationObserver?.addListener(_handleContextMenuOnParentScroll);
+    }
   }
 
   @override
@@ -2112,7 +2967,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.controller.addListener(_didChangeTextEditingValue);
       _updateRemoteEditingValueIfNeeded();
     }
-    if (widget.controller.selection != oldWidget.controller.selection) {
+
+    if (_selectionOverlay != null
+        && (widget.contextMenuBuilder != oldWidget.contextMenuBuilder ||
+            widget.selectionControls != oldWidget.selectionControls ||
+            widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped ||
+            widget.dragStartBehavior != oldWidget.dragStartBehavior ||
+            widget.magnifierConfiguration != oldWidget.magnifierConfiguration)) {
+      final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
+      final bool shouldShowHandles = _selectionOverlay!.handlesVisible;
+      _selectionOverlay!.dispose();
+      _selectionOverlay = _createSelectionOverlay();
+      if (shouldShowToolbar || shouldShowHandles) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+          if (shouldShowToolbar) {
+            _selectionOverlay!.showToolbar();
+          }
+          if (shouldShowHandles) {
+            _selectionOverlay!.showHandles();
+          }
+        });
+      }
+    } else if (widget.controller.selection != oldWidget.controller.selection) {
       _selectionOverlay?.update(_value);
     }
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
@@ -2128,15 +3004,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       updateKeepAlive();
     }
 
-    if (widget.scrollController != oldWidget.scrollController) {
-      (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
-      _scrollController.addListener(_updateSelectionOverlayForScroll);
-    }
-
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
     } else if (oldWidget.readOnly && _hasFocus) {
-      _openInputConnection();
+      // _openInputConnection must be called after layout information is available.
+      // See https://github.com/flutter/flutter/issues/126312
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _openInputConnection();
+      }, debugLabel: 'EditableText.openInputConnection');
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -2145,22 +3020,45 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    if (_hasInputConnection) {
+      if (oldWidget.obscureText != widget.obscureText) {
+        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+      }
+    }
+
     if (widget.style != oldWidget.style) {
-      final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
+      _style = MediaQuery.boldTextOf(context)
+          ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
+          : widget.style;
       if (_hasInputConnection) {
         _textInputConnection!.setStyle(
-          fontFamily: style.fontFamily,
-          fontSize: style.fontSize,
-          fontWeight: style.fontWeight,
+          fontFamily: _style.fontFamily,
+          fontSize: _style.fontSize,
+          fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
         );
       }
     }
-    if (widget.selectionEnabled && pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false)) {
-      _clipboardStatus?.update();
+
+    if (widget.showCursor != oldWidget.showCursor) {
+      _startOrStopCursorTimerIfNeeded();
+    }
+    final bool canPaste = widget.selectionControls is TextSelectionHandleControls
+        ? pasteEnabled
+        : widget.selectionControls?.canPaste(this) ?? false;
+    if (widget.selectionEnabled && pasteEnabled && canPaste) {
+      clipboardStatus.update();
+    }
+  }
+
+  void _disposeScrollNotificationObserver() {
+    _listeningToScrollNotificationObserver = false;
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
+      _scrollNotificationObserver = null;
     }
   }
 
@@ -2181,9 +3079,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
-    _clipboardStatus?.removeListener(_onChangedClipboardStatus);
-    _clipboardStatus?.dispose();
+    _liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
+    _liveTextInputStatus?.dispose();
+    clipboardStatus.removeListener(_onChangedClipboardStatus);
+    clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
+    FocusManager.instance.removeListener(_unflagInternalFocus);
+    _disposeScrollNotificationObserver();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
@@ -2236,11 +3138,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
-      _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
+      SelectionChangedCause cause;
+      if (_textInputConnection?.scribbleInProgress ?? false) {
+        cause = SelectionChangedCause.scribble;
+      } else if (_pointOffsetOrigin != null) {
+        // For floating cursor selection when force pressing the space bar.
+        cause = SelectionChangedCause.forcePress;
+      } else {
+        cause = SelectionChangedCause.keyboard;
+      }
+      _handleSelectionChanged(value.selection, cause);
     } else {
-      // Only hide the toolbar overlay, the selection handle's visibility will be handled
-      // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
-      hideToolbar(false);
+      if (value.text != _value.text) {
+        // Hide the toolbar if the text was changed, but only hide the toolbar
+        // overlay; the selection handle's visibility will be handled
+        // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
+        hideToolbar(false);
+      }
       _currentPromptRectRange = null;
 
       final bool revealObscuredInput = _hasInputConnection
@@ -2253,17 +3167,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
-    // Wherever the value is changed by the user, schedule a showCaretOnScreen
-    // to make sure the user can see the changes they just made. Programmatical
-    // changes to `textEditingValue` do not trigger the behavior even if the
-    // text field is focused.
-    _scheduleShowCaretOnScreen(withAnimation: true);
-    if (_hasInputConnection) {
-      // To keep the cursor from blinking while typing, we want to restart the
-      // cursor timer every time a new character is typed.
+    if (_showBlinkingCursor && _cursorTimer != null) {
+      // To keep the cursor from blinking while typing, restart the timer here.
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
     }
+
+    // Wherever the value is changed by the user, schedule a showCaretOnScreen
+    // to make sure the user can see the changes they just made. Programmatic
+    // changes to `textEditingValue` do not trigger the behavior even if the
+    // text field is focused.
+    _scheduleShowCaretOnScreen(withAnimation: true);
   }
 
   bool _checkNeedsAdjustAffinity(TextEditingValue value) {
@@ -2284,7 +3198,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (!_isMultiline) {
           _finalizeEditing(action, shouldUnfocus: true);
         }
-        break;
       case TextInputAction.done:
       case TextInputAction.go:
       case TextInputAction.next:
@@ -2292,7 +3205,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case TextInputAction.search:
       case TextInputAction.send:
         _finalizeEditing(action, shouldUnfocus: true);
-        break;
       case TextInputAction.continueAction:
       case TextInputAction.emergencyCall:
       case TextInputAction.join:
@@ -2302,7 +3214,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // Finalize editing, but don't give up focus because this keyboard
         // action does not imply the user is done inputting information.
         _finalizeEditing(action, shouldUnfocus: false);
-        break;
     }
   }
 
@@ -2311,8 +3222,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.onAppPrivateCommand?.call(action, data);
   }
 
+  @override
+  void insertContent(KeyboardInsertedContent content) {
+    assert(widget.contentInsertionConfiguration?.allowedMimeTypes.contains(content.mimeType) ?? false);
+    widget.contentInsertionConfiguration?.onContentInserted.call(content);
+  }
+
   // The original position of the caret on FloatingCursorDragState.start.
-  Rect? _startCaretRect;
+  Offset? _startCaretCenter;
 
   // The most recent text position as determined by the location of the floating
   // cursor.
@@ -2334,7 +3251,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _floatingCursorResetController ??= AnimationController(
       vsync: this,
     )..addListener(_onFloatingCursorResetTick);
-    switch(point.state) {
+    switch (point.state) {
       case FloatingCursorDragState.Start:
         if (_floatingCursorResetController!.isAnimating) {
           _floatingCursorResetController!.stop();
@@ -2347,21 +3264,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // we cache the position.
         _pointOffsetOrigin = point.offset;
 
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
-        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        final Offset startCaretCenter;
+        final TextPosition currentTextPosition;
+        final bool shouldResetOrigin;
+        // Only non-null when starting a floating cursor via long press.
+        if (point.startLocation != null) {
+          shouldResetOrigin = false;
+          (startCaretCenter, currentTextPosition) = point.startLocation!;
+        } else {
+          shouldResetOrigin = true;
+          currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
+          startCaretCenter = renderEditable.getLocalRectForCaret(currentTextPosition).center;
+        }
 
-        _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
+        _startCaretCenter = startCaretCenter;
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(_startCaretCenter! - _floatingCursorOffset, shouldResetOrigin: shouldResetOrigin);
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
-        break;
       case FloatingCursorDragState.Update:
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
-        final Offset rawCursorOffset = _startCaretRect!.center + centeredPoint - _floatingCursorOffset;
+        final Offset rawCursorOffset = _startCaretCenter! + centeredPoint - _floatingCursorOffset;
 
         _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
         _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
-        break;
       case FloatingCursorDragState.End:
         // Resume cursor blinking.
         _startCursorBlink();
@@ -2370,7 +3296,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _floatingCursorResetController!.value = 0.0;
           _floatingCursorResetController!.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
         }
-        break;
     }
   }
 
@@ -2378,11 +3303,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
     if (_floatingCursorResetController!.isCompleted) {
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
-      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset) {
+      // During a floating cursor's move gesture (1 finger), a cursor is
+      // animated only visually, without actually updating the selection.
+      // Only after move gesture is complete, this function will be called
+      // to actually update the selection to the new cursor location with
+      // zero selection length.
+
+      // However, During a floating cursor's selection gesture (2 fingers), the
+      // selection is constantly updated by the engine throughout the gesture.
+      // Thus when the gesture is complete, we should not update the selection
+      // to the cursor location with zero selection length, because that would
+      // overwrite the selection made by floating cursor selection.
+
+      // Here we use `isCollapsed` to distinguish between floating cursor's
+      // move gesture (1 finger) vs selection gesture (2 fingers), as
+      // the engine does not provide information other than notifying a
+      // new selection during with selection gesture (2 fingers).
+      if (renderEditable.selection!.isCollapsed) {
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), SelectionChangedCause.forcePress);
+        _handleSelectionChanged(TextSelection.fromPosition(_lastTextPosition!), SelectionChangedCause.forcePress);
       }
-      _startCaretRect = null;
+      _startCaretCenter = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
       _lastBoundedOffset = null;
@@ -2428,13 +3369,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           case TextInputAction.emergencyCall:
           case TextInputAction.newline:
             widget.focusNode.unfocus();
-            break;
           case TextInputAction.next:
             widget.focusNode.nextFocus();
-            break;
           case TextInputAction.previous:
             widget.focusNode.previousFocus();
-            break;
         }
       }
     }
@@ -2571,11 +3509,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 
-  bool get _hasInputConnection => _textInputConnection?.attached ?? false;
   /// Whether to send the autofill information to the autofill service. True by
   /// default.
   bool get _needsAutofill => _effectiveAutofillClient.textInputConfiguration.autofillConfiguration.enabled;
 
+  // Must be called after layout.
+  // See https://github.com/flutter/flutter/issues/126312
   void _openInputConnection() {
     if (!_shouldCreateInputConnection) {
       return;
@@ -2595,14 +3534,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
-      _updateComposingRectIfNeeded();
-      _updateCaretRectIfNeeded();
-      final TextStyle style = widget.style;
+      _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
         ..setStyle(
-          fontFamily: style.fontFamily,
-          fontSize: style.fontSize,
-          fontWeight: style.fontWeight,
+          fontFamily: _style.fontFamily,
+          fontSize: _style.fontSize,
+          fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
         )
@@ -2624,6 +3561,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.close();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
+      _scribbleCacheKey = null;
+      removeTextPlaceholder();
     }
   }
 
@@ -2663,13 +3602,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
 
-    final TextStyle style = widget.style;
     newConnection
       ..show()
       ..setStyle(
-        fontFamily: style.fontFamily,
-        fontSize: style.fontSize,
-        fontWeight: style.fontWeight,
+        fontFamily: _style.fontFamily,
+        fontSize: _style.fontSize,
+        fontWeight: _style.fontWeight,
         textDirection: _textDirection,
         textAlign: widget.textAlign,
       )
@@ -2679,13 +3617,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 
   @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    if (_hasFocus && _hasInputConnection) {
+      oldControl?.hide();
+      newControl?.show();
+    }
+  }
+
+  @override
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
-      _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
+      widget.focusNode.unfocus();
     }
+  }
+
+  // Indicates that a call to _handleFocusChanged originated within
+  // EditableText, allowing it to distinguish between internal and external
+  // focus changes.
+  bool _nextFocusChangeIsInternal = false;
+
+  // Sets _nextFocusChangeIsInternal to true only until any subsequent focus
+  // change happens.
+  void _flagInternalFocus() {
+    _nextFocusChangeIsInternal = true;
+    FocusManager.instance.addListener(_unflagInternalFocus);
+  }
+
+  void _unflagInternalFocus() {
+    _nextFocusChangeIsInternal = false;
+    FocusManager.instance.removeListener(_unflagInternalFocus);
   }
 
   /// Express interest in interacting with the keyboard.
@@ -2699,6 +3662,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       _openInputConnection();
     } else {
+      _flagInternalFocus();
       widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
     }
   }
@@ -2714,13 +3678,167 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _updateSelectionOverlayForScroll() {
-    _selectionOverlay?.updateForScroll();
+  final bool _platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
+    TargetPlatform.android ||
+    TargetPlatform.iOS => true,
+    TargetPlatform.fuchsia ||
+    TargetPlatform.linux ||
+    TargetPlatform.macOS ||
+    TargetPlatform.windows => false,
+  };
+
+  bool _isInternalScrollableNotification(BuildContext? notificationContext) {
+    final ScrollableState? scrollableState = notificationContext?.findAncestorStateOfType<ScrollableState>();
+    return _scrollableKey.currentContext == scrollableState?.context;
   }
 
-  void _createSelectionOverlay() {
-    _selectionOverlay = TextSelectionOverlay(
-      clipboardStatus: _clipboardStatus,
+  bool _scrollableNotificationIsFromSameSubtree(BuildContext? notificationContext) {
+    if (notificationContext == null) {
+      return false;
+    }
+    BuildContext? currentContext = context;
+    // The notification context of a ScrollNotification points to the RawGestureDetector
+    // of the Scrollable. We get the ScrollableState associated with this notification
+    // by looking up the tree.
+    final ScrollableState? notificationScrollableState = notificationContext.findAncestorStateOfType<ScrollableState>();
+    if (notificationScrollableState == null) {
+      return false;
+    }
+    while (currentContext != null) {
+      final ScrollableState? scrollableState = currentContext.findAncestorStateOfType<ScrollableState>();
+      if (scrollableState == notificationScrollableState) {
+        return true;
+      }
+      currentContext = scrollableState?.context;
+    }
+    return false;
+  }
+
+  void _handleContextMenuOnParentScroll(ScrollNotification notification) {
+    // Do some preliminary checks to avoid expensive subtree traversal.
+    if (notification is! ScrollStartNotification
+       && notification is! ScrollEndNotification) {
+      return;
+    }
+    if (notification is ScrollStartNotification
+       && _dataWhenToolbarShowScheduled != null) {
+      return;
+    }
+    if (notification is ScrollEndNotification
+       && _dataWhenToolbarShowScheduled == null) {
+      return;
+    }
+    if (notification is ScrollEndNotification
+       && _dataWhenToolbarShowScheduled!.value != _value) {
+      _dataWhenToolbarShowScheduled = null;
+      _disposeScrollNotificationObserver();
+      return;
+    }
+    if (_isInternalScrollableNotification(notification.context)) {
+      return;
+    }
+    if (!_scrollableNotificationIsFromSameSubtree(notification.context)) {
+      return;
+    }
+    _handleContextMenuOnScroll(notification);
+  }
+
+  Rect _calculateDeviceRect() {
+    final Size screenSize = MediaQuery.sizeOf(context);
+    final ui.FlutterView view = View.of(context);
+    final double obscuredVertical = (view.padding.top + view.padding.bottom + view.viewInsets.bottom) / view.devicePixelRatio;
+    final double obscuredHorizontal = (view.padding.left + view.padding.right) / view.devicePixelRatio;
+    final Size visibleScreenSize = Size(screenSize.width - obscuredHorizontal, screenSize.height - obscuredVertical);
+    return Rect.fromLTWH(view.padding.left / view.devicePixelRatio, view.padding.top / view.devicePixelRatio, visibleScreenSize.width, visibleScreenSize.height);
+  }
+
+  bool _showToolbarOnScreenScheduled = false;
+  void _handleContextMenuOnScroll(ScrollNotification notification) {
+    if (_webContextMenuEnabled) {
+      return;
+    }
+    if (!_platformSupportsFadeOnScroll) {
+      _selectionOverlay?.updateForScroll();
+      return;
+    }
+    // When the scroll begins and the toolbar is visible, hide it
+    // until scrolling ends.
+    //
+    // The selection and renderEditable need to be visible within the current
+    // viewport for the toolbar to show when scrolling ends. If they are not
+    // then the toolbar is shown when they are scrolled back into view, unless
+    // invalidated by a change in TextEditingValue.
+    if (notification is ScrollStartNotification) {
+      if (_dataWhenToolbarShowScheduled != null) {
+        return;
+      }
+      final bool toolbarIsVisible = _selectionOverlay != null
+                                  && _selectionOverlay!.toolbarIsVisible
+                                  && !_selectionOverlay!.spellCheckToolbarIsVisible;
+      if (!toolbarIsVisible) {
+        return;
+      }
+      final List<TextBox> selectionBoxes = renderEditable.getBoxesForSelection(_value.selection);
+      final Rect selectionBounds = _value.selection.isCollapsed || selectionBoxes.isEmpty
+                                      ? renderEditable.getLocalRectForCaret(_value.selection.extent)
+                                      : selectionBoxes
+                                          .map((TextBox box) => box.toRect())
+                                          .reduce((Rect result, Rect rect) => result.expandToInclude(rect));
+      _dataWhenToolbarShowScheduled = (value: _value, selectionBounds: selectionBounds);
+      _selectionOverlay?.hideToolbar();
+    } else if (notification is ScrollEndNotification) {
+      if (_dataWhenToolbarShowScheduled == null) {
+        return;
+      }
+      if (_dataWhenToolbarShowScheduled!.value != _value) {
+        // Value has changed so we should invalidate any toolbar scheduling.
+        _dataWhenToolbarShowScheduled = null;
+        _disposeScrollNotificationObserver();
+        return;
+      }
+
+      if (_showToolbarOnScreenScheduled) {
+        return;
+      }
+      _showToolbarOnScreenScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _showToolbarOnScreenScheduled = false;
+        if (!mounted) {
+          return;
+        }
+        final Rect deviceRect = _calculateDeviceRect();
+        final bool selectionVisibleInEditable = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
+        final Rect selectionBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), _dataWhenToolbarShowScheduled!.selectionBounds);
+        final bool selectionOverlapsWithDeviceRect = !selectionBounds.hasNaN && deviceRect.overlaps(selectionBounds);
+
+        if (selectionVisibleInEditable
+          && selectionOverlapsWithDeviceRect
+          && _selectionInViewport(_dataWhenToolbarShowScheduled!.selectionBounds)) {
+          showToolbar();
+          _dataWhenToolbarShowScheduled = null;
+        }
+      }, debugLabel: 'EditableText.scheduleToolbar');
+    }
+  }
+
+  bool _selectionInViewport(Rect selectionBounds) {
+    RenderAbstractViewport? closestViewport = RenderAbstractViewport.maybeOf(renderEditable);
+    while (closestViewport != null) {
+      final Rect selectionBoundsLocalToViewport = MatrixUtils.transformRect(renderEditable.getTransformTo(closestViewport), selectionBounds);
+      if (selectionBoundsLocalToViewport.hasNaN
+         || closestViewport.paintBounds.hasNaN
+         || !closestViewport.paintBounds.overlaps(selectionBoundsLocalToViewport)) {
+        return false;
+      }
+      closestViewport = RenderAbstractViewport.maybeOf(closestViewport.parent);
+    }
+    return true;
+  }
+
+  TextSelectionOverlay _createSelectionOverlay() {
+    final EditableTextContextMenuBuilder? contextMenuBuilder = widget.contextMenuBuilder;
+    final TextSelectionOverlay selectionOverlay = TextSelectionOverlay(
+      clipboardStatus: clipboardStatus,
       context: context,
       value: _value,
       debugRequiredFor: widget,
@@ -2732,8 +3850,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
+      contextMenuBuilder: contextMenuBuilder == null || _webContextMenuEnabled
+        ? null
+        : (BuildContext context) {
+          return contextMenuBuilder(
+            context,
+            this,
+          );
+        },
       magnifierConfiguration: widget.magnifierConfiguration,
     );
+
+    return selectionOverlay;
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -2741,7 +3869,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
-    if (!widget.controller.isSelectionWithinTextBounds(selection)) {
+    if (!widget.controller._isSelectionWithinTextBounds(selection)) {
       return;
     }
 
@@ -2762,19 +3890,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case SelectionChangedCause.tap:
       case SelectionChangedCause.toolbar:
         requestKeyboard();
-        break;
       case SelectionChangedCause.keyboard:
         if (_hasFocus) {
           requestKeyboard();
         }
-        break;
     }
-    if (widget.selectionControls == null) {
+    if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
     } else {
       if (_selectionOverlay == null) {
-        _createSelectionOverlay();
+        _selectionOverlay = _createSelectionOverlay();
       } else {
         _selectionOverlay!.update(_value);
       }
@@ -2796,16 +3922,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // To keep the cursor from blinking while it moves, restart the timer here.
-    if (_cursorTimer != null) {
+    if (_showBlinkingCursor && _cursorTimer != null) {
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
     }
-  }
-
-  Rect? _currentCaretRect;
-  // ignore: use_setters_to_change_properties, (this is used as a callback, can't be a setter)
-  void _handleCaretChanged(Rect caretRect) {
-    _currentCaretRect = caretRect;
   }
 
   // Animation configuration for scrolling the caret back on screen.
@@ -2821,7 +3941,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-      if (_currentCaretRect == null || !_scrollController.hasClients) {
+      // Since we are in a post frame callback, check currentContext in case
+      // RenderEditable has been disposed (in which case it will be null).
+      final RenderEditable? renderEditable =
+          _editableKey.currentContext?.findRenderObject() as RenderEditable?;
+      if (renderEditable == null
+          || !(renderEditable.selection?.isValid ?? false)
+          || !_scrollController.hasClients) {
         return;
       }
 
@@ -2852,7 +3978,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final EdgeInsets caretPadding = widget.scrollPadding
         .copyWith(bottom: bottomSpacing);
 
-      final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
+      final Rect caretRect = renderEditable.getLocalRectForCaret(renderEditable.selection!.extent);
+      final RevealedOffset targetOffset = _getOffsetToRevealCaret(caretRect);
+
+      final Rect rectToReveal;
+      final TextSelection selection = textEditingValue.selection;
+      if (selection.isCollapsed) {
+        rectToReveal = targetOffset.rect;
+      } else {
+        final List<TextBox> selectionBoxes = renderEditable.getBoxesForSelection(selection);
+        // selectionBoxes may be empty if, for example, the selection does not
+        // encompass a full character, like if it only contained part of an
+        // extended grapheme cluster.
+        if (selectionBoxes.isEmpty) {
+          rectToReveal = targetOffset.rect;
+        } else {
+          rectToReveal = selection.baseOffset < selection.extentOffset ?
+            selectionBoxes.last.toRect() : selectionBoxes.first.toRect();
+        }
+      }
 
       if (withAnimation) {
         _scrollController.animateTo(
@@ -2861,34 +4005,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           curve: _caretAnimationCurve,
         );
         renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
+          rect: caretPadding.inflateRect(rectToReveal),
           duration: _caretAnimationDuration,
           curve: _caretAnimationCurve,
         );
       } else {
         _scrollController.jumpTo(targetOffset.offset);
         renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
+          rect: caretPadding.inflateRect(rectToReveal),
         );
       }
-    });
+    }, debugLabel: 'EditableText.showCaret');
   }
 
   late double _lastBottomViewInset;
 
   @override
   void didChangeMetrics() {
-    if (_lastBottomViewInset != WidgetsBinding.instance.window.viewInsets.bottom) {
+    if (!mounted) {
+      return;
+    }
+    final ui.FlutterView view = View.of(context);
+    if (_lastBottomViewInset != view.viewInsets.bottom) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _selectionOverlay?.updateForScroll();
-      });
-      if (_lastBottomViewInset < WidgetsBinding.instance.window.viewInsets.bottom) {
+      }, debugLabel: 'EditableText.updateForScroll');
+      if (_lastBottomViewInset < view.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
         // (on both iOS and Android). So we don't need to show caret with animation.
         _scheduleShowCaretOnScreen(withAnimation: false);
       }
     }
-    _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
+    _lastBottomViewInset = view.viewInsets.bottom;
   }
 
   Future<void> _performSpellCheck(final String text) async {
@@ -2900,17 +4048,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         'Locale must be specified in widget or Localization widget must be in scope',
       );
 
-      final List<SuggestionSpan>? spellCheckResults = await
+      final List<SuggestionSpan>? suggestions = await
         _spellCheckConfiguration
           .spellCheckService!
             .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (spellCheckResults == null) {
+      if (suggestions == null) {
         // The request to fetch spell check suggestions was canceled due to ongoing request.
         return;
       }
 
-      _spellCheckResults = SpellCheckResults(text, spellCheckResults);
+      spellCheckResults = SpellCheckResults(text, suggestions);
       renderEditable.text = buildTextSpan();
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -2924,19 +4072,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
-    // Only apply input formatters if the text has changed (including uncommitted
-    // text in the composing region), or when the user committed the composing
-    // text.
-    // Gboard is very persistent in restoring the composing region. Applying
-    // input formatters on composing-region-only changes (except clearing the
-    // current composing region) is very infinite-loop-prone: the formatters
-    // will keep trying to modify the composing region while Gboard will keep
-    // trying to restore the original composing region.
-    final bool textChanged = _value.text != value.text
-                          || (!_value.composing.isCollapsed && value.composing.isCollapsed);
-    final bool selectionChanged = _value.selection != value.selection;
+    final TextEditingValue oldValue = _value;
+    final bool textChanged = oldValue.text != value.text;
+    final bool textCommitted = !oldValue.composing.isCollapsed && value.composing.isCollapsed;
+    final bool selectionChanged = oldValue.selection != value.selection;
 
-    if (textChanged) {
+    if (textChanged || textCommitted) {
+      // Only apply input formatters if the text has changed (including uncommitted
+      // text in the composing region), or when the user committed the composing
+      // text.
+      // Gboard is very persistent in restoring the composing region. Applying
+      // input formatters on composing-region-only changes (except clearing the
+      // current composing region) is very infinite-loop-prone: the formatters
+      // will keep trying to modify the composing region while Gboard will keep
+      // trying to restore the original composing region.
       try {
         value = widget.inputFormatters?.fold<TextEditingValue>(
           value,
@@ -2956,6 +4105,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    final TextSelection oldTextSelection = textEditingValue.selection;
+
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
@@ -2969,10 +4120,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
+      _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
     }
-    if (textChanged) {
+    final String currentText = _value.text;
+    if (oldValue.text != currentText) {
       try {
-        widget.onChanged?.call(_value.text);
+        widget.onChanged?.call(currentText);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -2982,14 +4135,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ));
       }
     }
-
     endBatchEdit();
   }
 
-  void _onCursorColorTick() {
-    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
-    _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
+  void _bringIntoViewBySelectionState(TextSelection oldSelection, TextSelection newSelection, SelectionChangedCause? cause) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (cause == SelectionChangedCause.longPress ||
+            cause == SelectionChangedCause.drag) {
+          bringIntoView(newSelection.extent);
+        }
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        if (cause == SelectionChangedCause.drag) {
+          if (oldSelection.baseOffset != newSelection.baseOffset) {
+            bringIntoView(newSelection.base);
+          } else if (oldSelection.extentOffset != newSelection.extentOffset) {
+            bringIntoView(newSelection.extent);
+          }
+        }
+    }
   }
+
+  void _onCursorColorTick() {
+    final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
+    renderEditable.cursorColor = widget.cursorColor.withOpacity(effectiveOpacity);
+    _cursorVisibilityNotifier.value = widget.showCursor && (EditableText.debugDeterministicCursor || _cursorBlinkOpacityController.value > 0);
+  }
+
+  bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled && !renderEditable.floatingCursorOn;
 
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
@@ -3009,13 +4186,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   int _obscureShowCharTicksPending = 0;
   int? _obscureLatestCharIndex;
 
-  // Indicates whether the cursor should be blinking right now (but it may
-  // actually not blink because it's disabled via TickerMode.of(context)).
-  bool _cursorActive = false;
-
   void _startCursorBlink() {
     assert(!(_cursorTimer?.isActive ?? false) || !(_backingCursorBlinkOpacityController?.isAnimating ?? false));
-    _cursorActive = true;
+    if (!widget.showCursor) {
+      return;
+    }
     if (!_tickersEnabled) {
       return;
     }
@@ -3055,8 +4230,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _stopCursorBlink({ bool resetCharTicks = true }) {
-    _cursorActive = false;
-    _cursorBlinkOpacityController.value = 0.0;
+    // If the cursor is animating, stop the animation, and we always
+    // want the cursor to be visible when the floating cursor is enabled.
+    _cursorBlinkOpacityController.value = renderEditable.floatingCursorOn ? 1.0 : 0.0;
     _cursorTimer?.cancel();
     _cursorTimer = null;
     if (resetCharTicks) {
@@ -3065,22 +4241,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _startOrStopCursorTimerIfNeeded() {
-    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed) {
-      _startCursorBlink();
-    }
-    else if (_cursorActive && (!_hasFocus || !_value.selection.isCollapsed)) {
+    if (!_showBlinkingCursor) {
       _stopCursorBlink();
+    } else if (_cursorTimer == null) {
+      _startCursorBlink();
     }
   }
 
   void _didChangeTextEditingValue() {
+    if (_hasFocus && !_value.selection.isValid) {
+      // If this field is focused and the selection is invalid, place the cursor at
+      // the end. Does not rely on _handleFocusChanged because it makes selection
+      // handles visible on Android.
+      // Unregister as a listener to the text controller while making the change.
+      widget.controller.removeListener(_didChangeTextEditingValue);
+      widget.controller.selection = _adjustedSelectionWhenFocused()!;
+      widget.controller.addListener(_didChangeTextEditingValue);
+    }
     _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
     setState(() { /* We use widget.controller.value in build(). */ });
-    _adjacentLineAction.stopCurrentVerticalRunIfSelectionChanges();
+    _verticalSelectionUpdateAction.stopCurrentVerticalRunIfSelectionChanges();
   }
 
   void _handleFocusChanged() {
@@ -3090,19 +4274,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
-      _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
+      _lastBottomViewInset = View.of(context).viewInsets.bottom;
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
-      if (!_value.selection.isValid) {
-        // Place cursor at the end if the selection is invalid when we receive focus.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
+      final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
+      if (updatedSelection != null) {
+        _handleSelectionChanged(updatedSelection, null);
       }
-
-      _cachedText = '';
-      _cachedFirstRect = null;
-      _cachedSize = Size.zero;
-      _cachedPlaceholder = -1;
     } else {
       WidgetsBinding.instance.removeObserver(this);
       setState(() { _currentPromptRectRange = null; });
@@ -3110,142 +4289,182 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
-  String _cachedText = '';
-  Rect? _cachedFirstRect;
-  Size _cachedSize = Size.zero;
-  int _cachedPlaceholder = -1;
-  TextStyle? _cachedTextStyle;
+  TextSelection? _adjustedSelectionWhenFocused() {
+    TextSelection? selection;
+    final bool shouldSelectAll = widget.selectionEnabled && kIsWeb
+        && !_isMultiline && !_nextFocusChangeIsInternal;
+    if (shouldSelectAll) {
+      // On native web, single line <input> tags select all when receiving
+      // focus.
+      selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _value.text.length,
+      );
+    } else if (!_value.selection.isValid) {
+      // Place cursor at the end if the selection is invalid when we receive focus.
+      selection = TextSelection.collapsed(offset: _value.text.length);
+    }
+    return selection;
+  }
+
+  void _compositeCallback(Layer layer) {
+    // The callback can be invoked when the layer is detached.
+    // The input connection can be closed by the platform in which case this
+    // widget doesn't rebuild.
+    if (!renderEditable.attached || !_hasInputConnection) {
+      return;
+    }
+    assert(mounted);
+    assert((context as Element).debugIsActive);
+    _updateSizeAndTransform();
+  }
+
+  // Must be called after layout.
+  // See https://github.com/flutter/flutter/issues/126312
+  void _updateSizeAndTransform() {
+    final Size size = renderEditable.size;
+    final Matrix4 transform = renderEditable.getTransformTo(null);
+    _textInputConnection!.setEditableSizeAndTransform(size, transform);
+  }
+
+  void _schedulePeriodicPostFrameCallbacks([Duration? duration]) {
+    if (!_hasInputConnection) {
+      return;
+    }
+    _updateSelectionRects();
+    _updateComposingRectIfNeeded();
+    _updateCaretRectIfNeeded();
+    SchedulerBinding.instance.addPostFrameCallback(
+      _schedulePeriodicPostFrameCallbacks,
+      debugLabel: 'EditableText.postFrameCallbacks'
+    );
+  }
+  _ScribbleCacheKey? _scribbleCacheKey;
 
   void _updateSelectionRects({bool force = false}) {
-    if (!widget.scribbleEnabled) {
-      return;
-    }
-    if (defaultTargetPlatform != TargetPlatform.iOS) {
-      return;
-    }
-    // This is to avoid sending selection rects on non-iPad devices.
-    if (WidgetsBinding.instance.window.physicalSize.shortestSide < _kIPadWidth) {
+    if (!widget.scribbleEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
       return;
     }
 
-    final String text = renderEditable.text?.toPlainText(includeSemanticsLabels: false) ?? '';
-    final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
-    final Rect? firstRect = firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
     final ScrollDirection scrollDirection = _scrollController.position.userScrollDirection;
-    final Size size = renderEditable.size;
-    final bool textChanged = text != _cachedText;
-    final bool textStyleChanged = _cachedTextStyle != widget.style;
-    final bool firstRectChanged = _cachedFirstRect != firstRect;
-    final bool sizeChanged = _cachedSize != size;
-    final bool placeholderChanged = _cachedPlaceholder != _placeholderLocation;
-    if (scrollDirection == ScrollDirection.idle && (force || textChanged || textStyleChanged || firstRectChanged || sizeChanged || placeholderChanged)) {
-      _cachedText = text;
-      _cachedFirstRect = firstRect;
-      _cachedTextStyle = widget.style;
-      _cachedSize = size;
-      _cachedPlaceholder = _placeholderLocation;
-      bool belowRenderEditableBottom = false;
-      final List<SelectionRect> rects = List<SelectionRect?>.generate(
-        _cachedText.characters.length,
-        (int i) {
-          if (belowRenderEditableBottom) {
-            return null;
-          }
-
-          final int offset = _cachedText.characters.getRange(0, i).string.length;
-          final List<Rect> boxes = renderEditable.getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + _cachedText.characters.characterAt(i).string.length));
-          if (boxes.isEmpty) {
-            return null;
-          }
-
-          final SelectionRect selectionRect = SelectionRect(
-            bounds: boxes.first,
-            position: offset,
-          );
-          if (renderEditable.paintBounds.bottom < selectionRect.bounds.top) {
-            belowRenderEditableBottom = true;
-            return null;
-          }
-          return selectionRect;
-        },
-      ).where((SelectionRect? selectionRect) {
-        if (selectionRect == null) {
-          return false;
-        }
-        if (renderEditable.paintBounds.right < selectionRect.bounds.left || selectionRect.bounds.right < renderEditable.paintBounds.left) {
-          return false;
-        }
-        if (renderEditable.paintBounds.bottom < selectionRect.bounds.top || selectionRect.bounds.bottom < renderEditable.paintBounds.top) {
-          return false;
-        }
-        return true;
-      }).map<SelectionRect>((SelectionRect? selectionRect) => selectionRect!).toList();
-      _textInputConnection!.setSelectionRects(rects);
+    if (scrollDirection != ScrollDirection.idle) {
+      return;
     }
+
+    final InlineSpan inlineSpan = renderEditable.text!;
+    final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
+      (final TextScaler textScaler, _)     => textScaler,
+      (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
+      (null, null)                         => MediaQuery.textScalerOf(context),
+    };
+
+    final _ScribbleCacheKey newCacheKey = _ScribbleCacheKey(
+      inlineSpan: inlineSpan,
+      textAlign: widget.textAlign,
+      textDirection: _textDirection,
+      textScaler: effectiveTextScaler,
+      textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+      locale: widget.locale,
+      structStyle: widget.strutStyle,
+      placeholder: _placeholderLocation,
+      size: renderEditable.size,
+    );
+
+    final RenderComparison comparison = force
+      ? RenderComparison.layout
+      : _scribbleCacheKey?.compare(newCacheKey) ?? RenderComparison.layout;
+    if (comparison.index < RenderComparison.layout.index) {
+      return;
+    }
+    _scribbleCacheKey = newCacheKey;
+
+    final List<SelectionRect> rects = <SelectionRect>[];
+    int graphemeStart = 0;
+    // Can't use _value.text here: the controller value could change between
+    // frames.
+    final String plainText = inlineSpan.toPlainText(includeSemanticsLabels: false);
+    final CharacterRange characterRange = CharacterRange(plainText);
+    while (characterRange.moveNext()) {
+      final int graphemeEnd = graphemeStart + characterRange.current.length;
+      final List<TextBox> boxes = renderEditable.getBoxesForSelection(
+        TextSelection(baseOffset: graphemeStart, extentOffset: graphemeEnd),
+      );
+
+      final TextBox? box = boxes.isEmpty ? null : boxes.first;
+      if (box != null) {
+        final Rect paintBounds = renderEditable.paintBounds;
+        // Stop early when characters are already below the bottom edge of the
+        // RenderEditable, regardless of its clipBehavior.
+        if (paintBounds.bottom <= box.top) {
+          break;
+        }
+        // Include any TextBox which intersects with the RenderEditable.
+        if (paintBounds.left <= box.right &&
+            box.left <= paintBounds.right &&
+            paintBounds.top <= box.bottom) {
+          // At least some part of the letter is visible within the text field.
+          rects.add(SelectionRect(position: graphemeStart, bounds: box.toRect(), direction: box.direction));
+        }
+      }
+      graphemeStart = graphemeEnd;
+    }
+    _textInputConnection!.setSelectionRects(rects);
   }
 
-  void _updateSizeAndTransform() {
-    if (_hasInputConnection) {
-      final Size size = renderEditable.size;
-      final Matrix4 transform = renderEditable.getTransformTo(null);
-      _textInputConnection!.setEditableSizeAndTransform(size, transform);
-      _updateSelectionRects();
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateSizeAndTransform());
-    } else if (_placeholderLocation != -1) {
-      removeTextPlaceholder();
-    }
-  }
-
-  // Sends the current composing rect to the iOS text input plugin via the text
-  // input channel. We need to keep sending the information even if no text is
-  // currently marked, as the information usually lags behind. The text input
-  // plugin needs to estimate the composing rect based on the latest caret rect,
-  // when the composing rect info didn't arrive in time.
+  // Sends the current composing rect to the embedder's text input plugin.
+  //
+  // In cases where the composing rect hasn't been updated in the embedder due
+  // to the lag of asynchronous messages over the channel, the position of the
+  // current caret rect is used instead.
+  //
+  // See: [_updateCaretRectIfNeeded]
   void _updateComposingRectIfNeeded() {
     final TextRange composingRange = _value.composing;
-    if (_hasInputConnection) {
-      assert(mounted);
-      Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
-      // Send the caret location instead if there's no marked text yet.
-      if (composingRect == null) {
-        assert(!composingRange.isValid || composingRange.isCollapsed);
-        final int offset = composingRange.isValid ? composingRange.start : 0;
-        composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
-      }
-      assert(composingRect != null);
-      _textInputConnection!.setComposingRect(composingRect);
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
+    assert(mounted);
+    Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
+    // Send the caret location instead if there's no marked text yet.
+    if (composingRect == null) {
+      assert(!composingRange.isValid || composingRange.isCollapsed);
+      final int offset = composingRange.isValid ? composingRange.start : 0;
+      composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
     }
+    _textInputConnection!.setComposingRect(composingRect);
   }
 
+  // Sends the current caret rect to the embedder's text input plugin.
+  //
+  // The position of the caret rect is updated periodically such that if the
+  // user initiates composing input, the current cursor rect can be used for
+  // the first character until the composing rect can be sent.
+  //
+  // On selection changes, the start of the selection is used. This ensures
+  // that regardless of the direction the selection was created, the cursor is
+  // set to the position where next text input occurs. This position is used to
+  // position the IME's candidate selection menu.
+  //
+  // See: [_updateComposingRectIfNeeded]
   void _updateCaretRectIfNeeded() {
-    if (_hasInputConnection) {
-      if (renderEditable.selection != null && renderEditable.selection!.isValid &&
-          renderEditable.selection!.isCollapsed) {
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
-        final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-        _textInputConnection!.setCaretRect(caretRect);
-      }
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
+    final TextSelection? selection = renderEditable.selection;
+    if (selection == null || !selection.isValid) {
+      return;
     }
+    final TextPosition currentTextPosition = TextPosition(offset: selection.start);
+    final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+    _textInputConnection!.setCaretRect(caretRect);
   }
 
-  TextDirection get _textDirection {
-    final TextDirection result = widget.textDirection ?? Directionality.of(context);
-    assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
-    return result;
-  }
+  TextDirection get _textDirection => widget.textDirection ?? Directionality.of(context);
 
   /// The renderer for this widget's descendant.
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
-  RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
+  late final RenderEditable renderEditable = _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
   TextEditingValue get textEditingValue => _value;
 
-  double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
+  double get _devicePixelRatio => MediaQuery.devicePixelRatioOf(context);
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
@@ -3263,8 +4482,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // unfocused field that previously had a selection in the same spot.
     if (value == textEditingValue) {
       if (!widget.focusNode.hasFocus) {
+        _flagInternalFocus();
         widget.focusNode.requestFocus();
-        _createSelectionOverlay();
+        _selectionOverlay ??= _createSelectionOverlay();
       }
       return;
     }
@@ -3288,23 +4508,35 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool showToolbar() {
     // Web is using native dom elements to enable clipboard functionality of the
-    // toolbar: copy, paste, select, cut. It might also provide additional
-    // functionality depending on the browser (such as translate). Due to this
-    // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb) {
+    // context menu: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this,
+    // we should not show a Flutter toolbar for the editable text elements
+    // unless the browser's context menu is explicitly disabled.
+    if (_webContextMenuEnabled) {
       return false;
     }
 
-    if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
+    if (_selectionOverlay == null) {
       return false;
     }
-    _clipboardStatus?.update();
+    _liveTextInputStatus?.update();
+    clipboardStatus.update();
     _selectionOverlay!.showToolbar();
+    // Listen to parent scroll events when the toolbar is visible so it can be
+    // hidden during a scroll on supported platforms.
+    if (_platformSupportsFadeOnScroll) {
+      _listeningToScrollNotificationObserver = true;
+      _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
+      _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+      _scrollNotificationObserver?.addListener(_handleContextMenuOnParentScroll);
+    }
     return true;
   }
 
   @override
   void hideToolbar([bool hideHandles = true]) {
+    // Stop listening to parent scroll events when toolbar is hidden.
+    _disposeScrollNotificationObserver();
     if (hideHandles) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
@@ -3316,11 +4548,80 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   /// Toggles the visibility of the toolbar.
   void toggleToolbar([bool hideHandles = true]) {
-    assert(_selectionOverlay != null);
-    if (_selectionOverlay!.toolbarIsVisible) {
+    final TextSelectionOverlay selectionOverlay = _selectionOverlay ??= _createSelectionOverlay();
+    if (selectionOverlay.toolbarIsVisible) {
       hideToolbar(hideHandles);
     } else {
       showToolbar();
+    }
+  }
+
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  bool showSpellCheckSuggestionsToolbar() {
+    // Spell check suggestions toolbars are intended to be shown on non-web
+    // platforms. Additionally, the Cupertino style toolbar can't be drawn on
+    // the web with the HTML renderer due to
+    // https://github.com/flutter/flutter/issues/123560.
+    if (!spellCheckEnabled
+        || _webContextMenuEnabled
+        || widget.readOnly
+        || _selectionOverlay == null
+        || !_spellCheckResultsReceived
+        || findSuggestionSpanAtCursorIndex(textEditingValue.selection.extentOffset) == null) {
+      // Only attempt to show the spell check suggestions toolbar if there
+      // is a toolbar specified and spell check suggestions available to show.
+      return false;
+    }
+
+    assert(
+      _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder != null,
+      'spellCheckSuggestionsToolbarBuilder must be defined in '
+      'SpellCheckConfiguration to show a toolbar with spell check '
+      'suggestions',
+    );
+
+    _selectionOverlay!
+      .showSpellCheckSuggestionsToolbar(
+        (BuildContext context) {
+          return _spellCheckConfiguration
+            .spellCheckSuggestionsToolbarBuilder!(
+              context,
+              this,
+          );
+        },
+    );
+    return true;
+  }
+
+  /// Shows the magnifier at the position given by `positionToShow`,
+  /// if there is no magnifier visible.
+  ///
+  /// Updates the magnifier to the position given by `positionToShow`,
+  /// if there is a magnifier visible.
+  ///
+  /// Does nothing if a magnifier couldn't be shown, such as when the selection
+  /// overlay does not currently exist.
+  void showMagnifier(Offset positionToShow) {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay!.updateMagnifier(positionToShow);
+    } else {
+      _selectionOverlay!.showMagnifier(positionToShow);
+    }
+  }
+
+  /// Hides the magnifier if it is visible.
+  void hideMagnifier() {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay!.hideMagnifier();
     }
   }
 
@@ -3348,7 +4649,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void removeTextPlaceholder() {
-    if (!widget.scribbleEnabled) {
+    if (!widget.scribbleEnabled || _placeholderLocation == -1) {
       return;
     }
 
@@ -3400,6 +4701,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+      allowedMimeTypes: widget.contentInsertionConfiguration == null
+        ? const <String>[]
+        : widget.contentInsertionConfiguration!.allowedMimeTypes,
     );
   }
 
@@ -3418,86 +4722,102 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback? _semanticsOnCopy(TextSelectionControls? controls) {
     return widget.selectionEnabled
-        && copyEnabled
         && _hasFocus
-        && (controls?.canCopy(this) ?? false)
-      ? () => controls!.handleCopy(this)
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? copyEnabled
+            : copyEnabled && (widget.selectionControls?.canCopy(this) ?? false))
+      ? () {
+        controls?.handleCopy(this);
+        copySelection(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
   VoidCallback? _semanticsOnCut(TextSelectionControls? controls) {
     return widget.selectionEnabled
-        && cutEnabled
         && _hasFocus
-        && (controls?.canCut(this) ?? false)
-      ? () => controls!.handleCut(this)
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? cutEnabled
+            : cutEnabled && (widget.selectionControls?.canCut(this) ?? false))
+      ? () {
+        controls?.handleCut(this);
+        cutSelection(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
   VoidCallback? _semanticsOnPaste(TextSelectionControls? controls) {
     return widget.selectionEnabled
-        && pasteEnabled
         && _hasFocus
-        && (controls?.canPaste(this) ?? false)
-        && (_clipboardStatus == null || _clipboardStatus!.value == ClipboardStatus.pasteable)
-      ? () => controls!.handlePaste(this)
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? pasteEnabled
+            : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false))
+        && (clipboardStatus.value == ClipboardStatus.pasteable)
+      ? () {
+        controls?.handlePaste(this);
+        pasteText(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
+  // Returns the closest boundary location to `extent` but not including `extent`
+  // itself (unless already at the start/end of the text), in the direction
+  // specified by `forward`.
+  TextPosition _moveBeyondTextBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
+    assert(extent.offset >= 0);
+    final int newOffset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(extent.offset) ?? _value.text.length
+      // if x is a boundary defined by `textBoundary`, most textBoundaries (except
+      // LineBreaker) guarantees `x == textBoundary.getLeadingTextBoundaryAt(x)`.
+      // Use x - 1 here to make sure we don't get stuck at the fixed point x.
+      : textBoundary.getLeadingTextBoundaryAt(extent.offset - 1) ?? 0;
+    return TextPosition(offset: newOffset);
+  }
+
+  // Returns the closest boundary location to `extent`, including `extent`
+  // itself, in the direction specified by `forward`.
+  //
+  // This method returns a fixed point of itself: applying `_toTextBoundary`
+  // again on the returned TextPosition gives the same TextPosition. It's used
+  // exclusively for handling line boundaries, since performing "move to line
+  // start" more than once usually doesn't move you to the previous line.
+  TextPosition _moveToTextBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
+    assert(extent.offset >= 0);
+    final int caretOffset;
+    switch (extent.affinity) {
+      case TextAffinity.upstream:
+        if (extent.offset < 1 && !forward) {
+          assert (extent.offset == 0);
+          return const TextPosition(offset: 0);
+        }
+        // When the text affinity is upstream, the caret is associated with the
+        // grapheme before the code unit at `extent.offset`.
+        // TODO(LongCatIsLooong): don't assume extent.offset is at a grapheme
+        // boundary, and do this instead:
+        // final int graphemeStart = CharacterRange.at(string, extent.offset).stringBeforeLength - 1;
+        caretOffset = math.max(0, extent.offset - 1);
+      case TextAffinity.downstream:
+        caretOffset = extent.offset;
+    }
+    // The line boundary range does not include some control characters
+    // (most notably, Line Feed), in which case there's
+    // `x ∉ getTextBoundaryAt(x)`. In case `caretOffset` points to one such
+    // control character, we define that these control characters themselves are
+    // still part of the previous line, but also exclude them from the
+    // line boundary range since they're non-printing. IOW, no additional
+    // processing needed since the LineBoundary class does exactly that.
+    return forward
+      ? TextPosition(offset: textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? _value.text.length, affinity: TextAffinity.upstream)
+      : TextPosition(offset: textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? 0);
+  }
 
   // --------------------------- Text Editing Actions ---------------------------
 
-  _TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
-    final _TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value) : _CharacterBoundary(_value);
-    return _CollapsedSelectionBoundary(atomicTextBoundary, intent.forward);
-  }
-
-  _TextBoundary _nextWordBoundary(DirectionalTextEditingIntent intent) {
-    final _TextBoundary atomicTextBoundary;
-    final _TextBoundary boundary;
-
-    if (widget.obscureText) {
-      atomicTextBoundary = _CodeUnitBoundary(_value);
-      boundary = _DocumentBoundary(_value);
-    } else {
-      final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
-      atomicTextBoundary = _CharacterBoundary(textEditingValue);
-      // This isn't enough. Newline characters.
-      boundary = _ExpandedTextBoundary(_WhitespaceBoundary(textEditingValue), _WordBoundary(renderEditable, textEditingValue));
-    }
-
-    final _MixedBoundary mixedBoundary = intent.forward
-      ? _MixedBoundary(atomicTextBoundary, boundary)
-      : _MixedBoundary(boundary, atomicTextBoundary);
-    // Use a _MixedBoundary to make sure we don't leave invalid codepoints in
-    // the field after deletion.
-    return _CollapsedSelectionBoundary(mixedBoundary, intent.forward);
-  }
-
-  _TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
-    final _TextBoundary atomicTextBoundary;
-    final _TextBoundary boundary;
-
-    if (widget.obscureText) {
-      atomicTextBoundary = _CodeUnitBoundary(_value);
-      boundary = _DocumentBoundary(_value);
-    } else {
-      final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
-      atomicTextBoundary = _CharacterBoundary(textEditingValue);
-      boundary = _LineBreak(renderEditable, textEditingValue);
-    }
-
-    // The _MixedBoundary is to make sure we don't leave invalid code units in
-    // the field after deletion.
-    // `boundary` doesn't need to be wrapped in a _CollapsedSelectionBoundary,
-    // since the document boundary is unique and the linebreak boundary is
-    // already caret-location based.
-    return intent.forward
-      ? _MixedBoundary(_CollapsedSelectionBoundary(atomicTextBoundary, true), boundary)
-      : _MixedBoundary(boundary, _CollapsedSelectionBoundary(atomicTextBoundary, false));
-  }
-
-  _TextBoundary _documentBoundary(DirectionalTextEditingIntent intent) => _DocumentBoundary(_value);
+  TextBoundary _characterBoundary() => widget.obscureText ? _CodePointBoundary(_value.text) : CharacterBoundary(_value.text);
+  TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
+  TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
+  TextBoundary _paragraphBoundary() => ParagraphBoundary(_value.text);
+  TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
     return Action<T>.overridable(context: context, defaultAction: defaultAction);
@@ -3512,7 +4832,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// When the cursor is at the start of the text, does nothing.
   void _transposeCharacters(TransposeCharactersIntent intent) {
     if (_value.text.characters.length <= 1
-        || _value.selection == null
         || !_value.selection.isCollapsed
         || _value.selection.baseOffset == 0) {
       return;
@@ -3572,7 +4891,106 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Handles [ScrollIntent] by scrolling the [Scrollable] inside of
+  /// [EditableText].
+  void _scroll(ScrollIntent intent) {
+    if (intent.type != ScrollIncrementType.page) {
+      return;
+    }
+
+    final ScrollPosition position = _scrollController.position;
+    if (widget.maxLines == 1) {
+      _scrollController.jumpTo(position.maxScrollExtent);
+      return;
+    }
+
+    // If the field isn't scrollable, do nothing. For example, when the lines of
+    // text is less than maxLines, the field has nothing to scroll.
+    if (position.maxScrollExtent == 0.0 && position.minScrollExtent == 0.0) {
+      return;
+    }
+
+    final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
+    final double increment = ScrollAction.getDirectionalIncrement(state!, intent);
+    final double destination = clampDouble(
+      position.pixels + increment,
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (destination == position.pixels) {
+      return;
+    }
+    _scrollController.jumpTo(destination);
+  }
+
+  /// Extend the selection down by page if the `forward` parameter is true, or
+  /// up by page otherwise.
+  void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
+    if (widget.maxLines == 1) {
+      return;
+    }
+
+    final TextSelection nextSelection;
+    final Rect extentRect = renderEditable.getLocalRectForCaret(
+      _value.selection.extent,
+    );
+    final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
+    final double increment = ScrollAction.getDirectionalIncrement(
+      state!,
+      ScrollIntent(
+        direction: intent.forward ? AxisDirection.down : AxisDirection.up,
+        type: ScrollIncrementType.page,
+      ),
+    );
+    final ScrollPosition position = _scrollController.position;
+    if (intent.forward) {
+      if (_value.selection.extentOffset >= _value.text.length) {
+        return;
+      }
+      final Offset nextExtentOffset =
+          Offset(extentRect.left, extentRect.top + increment);
+      final double height = position.maxScrollExtent + renderEditable.size.height;
+      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels >= height
+          ? TextPosition(offset: _value.text.length)
+          : renderEditable.getPositionForPoint(
+              renderEditable.localToGlobal(nextExtentOffset),
+            );
+      nextSelection = _value.selection.copyWith(
+        extentOffset: nextExtent.offset,
+      );
+    } else {
+      if (_value.selection.extentOffset <= 0) {
+        return;
+      }
+      final Offset nextExtentOffset =
+          Offset(extentRect.left, extentRect.top + increment);
+      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
+          ? const TextPosition(offset: 0)
+          : renderEditable.getPositionForPoint(
+              renderEditable.localToGlobal(nextExtentOffset),
+            );
+      nextSelection = _value.selection.copyWith(
+        extentOffset: nextExtent.offset,
+      );
+    }
+
+    bringIntoView(nextSelection.extent);
+    userUpdateTextEditingValue(
+      _value.copyWith(selection: nextSelection),
+      SelectionChangedCause.keyboard,
+    );
+  }
+
   void _updateSelection(UpdateSelectionIntent intent) {
+    assert(
+      intent.newSelection.start <= intent.currentTextEditingValue.text.length,
+      'invalid selection: ${intent.newSelection}: it must not exceed the current text length ${intent.currentTextEditingValue.text.length}',
+    );
+    assert(
+      intent.newSelection.end <= intent.currentTextEditingValue.text.length,
+      'invalid selection: ${intent.newSelection}: it must not exceed the current text length ${intent.currentTextEditingValue.text.length}',
+    );
+
     bringIntoView(intent.newSelection.extent);
     userUpdateTextEditingValue(
       intent.currentTextEditingValue.copyWith(selection: intent.newSelection),
@@ -3581,41 +4999,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
   late final Action<UpdateSelectionIntent> _updateSelectionAction = CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection);
 
-  late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this);
-
-  void _expandSelectionToDocumentBoundary(ExpandSelectionToDocumentBoundaryIntent intent) {
-    final _TextBoundary textBoundary = _documentBoundary(intent);
-    _expandSelection(intent.forward, textBoundary, true);
-  }
-
-  void _expandSelectionToLinebreak(ExpandSelectionToLineBreakIntent intent) {
-    final _TextBoundary textBoundary = _linebreak(intent);
-    _expandSelection(intent.forward, textBoundary);
-  }
-
-  void _expandSelection(bool forward, _TextBoundary textBoundary, [bool extentAtIndex = false]) {
-    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
-    if (!textBoundarySelection.isValid) {
-      return;
-    }
-
-    final bool inOrder = textBoundarySelection.baseOffset <= textBoundarySelection.extentOffset;
-    final bool towardsExtent = forward == inOrder;
-    final TextPosition position = towardsExtent
-        ? textBoundarySelection.extent
-        : textBoundarySelection.base;
-
-    final TextPosition newExtent = forward
-      ? textBoundary.getTrailingTextBoundaryAt(position)
-      : textBoundary.getLeadingTextBoundaryAt(position);
-
-    final TextSelection newSelection = textBoundarySelection.expandTo(newExtent, textBoundarySelection.isCollapsed || extentAtIndex);
-    userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection),
-      SelectionChangedCause.keyboard,
-    );
-    bringIntoView(newSelection.extent);
-  }
+  late final _UpdateTextSelectionVerticallyAction<DirectionalCaretMovementIntent> _verticalSelectionUpdateAction =
+      _UpdateTextSelectionVerticallyAction<DirectionalCaretMovementIntent>(this);
 
   Object? _hideToolbarIfVisible(DismissIntent intent) {
     if (_selectionOverlay?.toolbarIsVisible ?? false) {
@@ -3643,22 +5028,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             if (kIsWeb) {
               widget.focusNode.unfocus();
             }
-            break;
           case ui.PointerDeviceKind.mouse:
           case ui.PointerDeviceKind.stylus:
           case ui.PointerDeviceKind.invertedStylus:
           case ui.PointerDeviceKind.unknown:
             widget.focusNode.unfocus();
-            break;
           case ui.PointerDeviceKind.trackpad:
             throw UnimplementedError('Unexpected pointer down event for trackpad');
         }
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         widget.focusNode.unfocus();
-        break;
     }
   }
 
@@ -3670,20 +5051,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
 
     // Delete
-    DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary)),
-    DeleteToNextWordBoundaryIntent: _makeOverridable(_DeleteTextAction<DeleteToNextWordBoundaryIntent>(this, _nextWordBoundary)),
-    DeleteToLineBreakIntent: _makeOverridable(_DeleteTextAction<DeleteToLineBreakIntent>(this, _linebreak)),
+    DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary, _moveBeyondTextBoundary)),
+    DeleteToNextWordBoundaryIntent: _makeOverridable(_DeleteTextAction<DeleteToNextWordBoundaryIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary)),
+    DeleteToLineBreakIntent: _makeOverridable(_DeleteTextAction<DeleteToLineBreakIntent>(this, _linebreak, _moveToTextBoundary)),
 
     // Extend/Move Selection
-    ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary)),
-    ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
-    ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _linebreak)),
-    ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
-    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ExpandSelectionToDocumentBoundaryIntent>(onInvoke: _expandSelectionToDocumentBoundary)),
-    ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
-    ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
-    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
+    ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, _characterBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: false)),
+    ExtendSelectionByPageIntent: _makeOverridable(CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage)),
+    ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+    ExtendSelectionToNextParagraphBoundaryIntent : _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+    ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true)),
+    ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+    ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
+    ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _scroll),
+
+    // Expand Selection
+    ExpandSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExpandSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true, isExpand: true)),
+    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExpandSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveToTextBoundary, ignoreNonCollapsedSelection: true, isExpand: true, extentAtIndex: true)),
 
     // Copy Paste
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
@@ -3699,99 +5087,155 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    return TextFieldTapRegion(
-      onTapOutside: widget.onTapOutside ?? _defaultOnTapOutside,
-      debugLabel: kReleaseMode ? null : 'EditableText',
-      child: MouseRegion(
-        cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-        child: Actions(
-          actions: _actions,
-          child: _TextEditingHistory(
-            controller: widget.controller,
-            onTriggered: (TextEditingValue value) {
-              userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
-            },
-            child: Focus(
+    final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
+      (final TextScaler textScaler, _)     => textScaler,
+      (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
+      (null, null)                         => MediaQuery.textScalerOf(context),
+    };
+
+    return _CompositionCallback(
+      compositeCallback: _compositeCallback,
+      enabled: _hasInputConnection,
+      child: TextFieldTapRegion(
+        onTapOutside: _hasFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
+        debugLabel: kReleaseMode ? null : 'EditableText',
+        child: MouseRegion(
+          cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+          child: Actions(
+            actions: _actions,
+            child: UndoHistory<TextEditingValue>(
+              value: widget.controller,
+              onTriggered: (TextEditingValue value) {
+                userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+              },
+              shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
+                if (!newValue.selection.isValid) {
+                  return false;
+                }
+
+                if (oldValue == null) {
+                  return true;
+                }
+
+                switch (defaultTargetPlatform) {
+                  case TargetPlatform.iOS:
+                  case TargetPlatform.macOS:
+                  case TargetPlatform.fuchsia:
+                  case TargetPlatform.linux:
+                  case TargetPlatform.windows:
+                    // Composing text is not counted in history coalescing.
+                    if (!widget.controller.value.composing.isCollapsed) {
+                      return false;
+                    }
+                  case TargetPlatform.android:
+                    // Gboard on Android puts non-CJK words in composing regions. Coalesce
+                    // composing text in order to allow the saving of partial words in that
+                    // case.
+                    break;
+                }
+
+                return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
+              },
+              undoStackModifier: (TextEditingValue value) {
+                // On Android we should discard the composing region when pushing
+                // a new entry to the undo stack. This prevents the TextInputPlugin
+                // from restarting the input on every undo/redo when the composing
+                // region is changed by the framework.
+                return defaultTargetPlatform == TargetPlatform.android ? value.copyWith(composing: TextRange.empty) : value;
+              },
               focusNode: widget.focusNode,
-              includeSemantics: false,
-              debugLabel: kReleaseMode ? null : 'EditableText',
-              child: Scrollable(
-                excludeFromSemantics: true,
-                axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-                controller: _scrollController,
-                physics: widget.scrollPhysics,
-                dragStartBehavior: widget.dragStartBehavior,
-                restorationId: widget.restorationId,
-                // If a ScrollBehavior is not provided, only apply scrollbars when
-                // multiline. The overscroll indicator should not be applied in
-                // either case, glowing or stretching.
-                scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-                  scrollbars: _isMultiline,
-                  overscroll: false,
-                ),
-                viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                  return CompositedTransformTarget(
-                    link: _toolbarLayerLink,
-                    child: Semantics(
-                      onCopy: _semanticsOnCopy(controls),
-                      onCut: _semanticsOnCut(controls),
-                      onPaste: _semanticsOnPaste(controls),
-                      child: _ScribbleFocusable(
-                        focusNode: widget.focusNode,
-                        editableKey: _editableKey,
-                        enabled: widget.scribbleEnabled,
-                        updateSelectionRects: () {
-                          _openInputConnection();
-                          _updateSelectionRects(force: true);
-                        },
-                        child: _Editable(
-                          key: _editableKey,
-                          startHandleLayerLink: _startHandleLayerLink,
-                          endHandleLayerLink: _endHandleLayerLink,
-                          inlineSpan: buildTextSpan(),
-                          value: _value,
-                          cursorColor: _cursorColor,
-                          backgroundCursorColor: widget.backgroundCursorColor,
-                          showCursor: EditableText.debugDeterministicCursor
-                              ? ValueNotifier<bool>(widget.showCursor)
-                              : _cursorVisibilityNotifier,
-                          forceLine: widget.forceLine,
-                          readOnly: widget.readOnly,
-                          hasFocus: _hasFocus,
-                          maxLines: widget.maxLines,
-                          minLines: widget.minLines,
-                          expands: widget.expands,
-                          strutStyle: widget.strutStyle,
-                          selectionColor: widget.selectionColor,
-                          textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                          textAlign: widget.textAlign,
-                          textDirection: _textDirection,
-                          locale: widget.locale,
-                          textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-                          textWidthBasis: widget.textWidthBasis,
-                          obscuringCharacter: widget.obscuringCharacter,
-                          obscureText: widget.obscureText,
-                          offset: offset,
-                          onCaretChanged: _handleCaretChanged,
-                          rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                          cursorWidth: widget.cursorWidth,
-                          cursorHeight: widget.cursorHeight,
-                          cursorRadius: widget.cursorRadius,
-                          cursorOffset: widget.cursorOffset ?? Offset.zero,
-                          selectionHeightStyle: widget.selectionHeightStyle,
-                          selectionWidthStyle: widget.selectionWidthStyle,
-                          paintCursorAboveText: widget.paintCursorAboveText,
-                          enableInteractiveSelection: widget._userSelectionEnabled,
-                          textSelectionDelegate: this,
-                          devicePixelRatio: _devicePixelRatio,
-                          promptRectRange: _currentPromptRectRange,
-                          promptRectColor: widget.autocorrectionTextRectColor,
-                          clipBehavior: widget.clipBehavior,
-                        ),
-                      ),
+              controller: widget.undoController,
+              child: Focus(
+                focusNode: widget.focusNode,
+                includeSemantics: false,
+                debugLabel: kReleaseMode ? null : 'EditableText',
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification notification) {
+                    _handleContextMenuOnScroll(notification);
+                    _scribbleCacheKey = null;
+                    return false;
+                  },
+                  child: Scrollable(
+                    key: _scrollableKey,
+                    excludeFromSemantics: true,
+                    axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                    controller: _scrollController,
+                    physics: widget.scrollPhysics,
+                    dragStartBehavior: widget.dragStartBehavior,
+                    restorationId: widget.restorationId,
+                    // If a ScrollBehavior is not provided, only apply scrollbars when
+                    // multiline. The overscroll indicator should not be applied in
+                    // either case, glowing or stretching.
+                    scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+                      scrollbars: _isMultiline,
+                      overscroll: false,
                     ),
-                  );
-                },
+                    viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                      return CompositedTransformTarget(
+                        link: _toolbarLayerLink,
+                        child: Semantics(
+                          onCopy: _semanticsOnCopy(controls),
+                          onCut: _semanticsOnCut(controls),
+                          onPaste: _semanticsOnPaste(controls),
+                          child: _ScribbleFocusable(
+                            focusNode: widget.focusNode,
+                            editableKey: _editableKey,
+                            enabled: widget.scribbleEnabled,
+                            updateSelectionRects: () {
+                              _openInputConnection();
+                              _updateSelectionRects(force: true);
+                            },
+                            child: SizeChangedLayoutNotifier(
+                              child: _Editable(
+                                key: _editableKey,
+                                startHandleLayerLink: _startHandleLayerLink,
+                                endHandleLayerLink: _endHandleLayerLink,
+                                inlineSpan: buildTextSpan(),
+                                value: _value,
+                                cursorColor: _cursorColor,
+                                backgroundCursorColor: widget.backgroundCursorColor,
+                                showCursor: _cursorVisibilityNotifier,
+                                forceLine: widget.forceLine,
+                                readOnly: widget.readOnly,
+                                hasFocus: _hasFocus,
+                                maxLines: widget.maxLines,
+                                minLines: widget.minLines,
+                                expands: widget.expands,
+                                strutStyle: widget.strutStyle,
+                                selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                    ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                    : widget.selectionColor,
+                                textScaler: effectiveTextScaler,
+                                textAlign: widget.textAlign,
+                                textDirection: _textDirection,
+                                locale: widget.locale,
+                                textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                                textWidthBasis: widget.textWidthBasis,
+                                obscuringCharacter: widget.obscuringCharacter,
+                                obscureText: widget.obscureText,
+                                offset: offset,
+                                rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                                cursorWidth: widget.cursorWidth,
+                                cursorHeight: widget.cursorHeight,
+                                cursorRadius: widget.cursorRadius,
+                                cursorOffset: widget.cursorOffset ?? Offset.zero,
+                                selectionHeightStyle: widget.selectionHeightStyle,
+                                selectionWidthStyle: widget.selectionWidthStyle,
+                                paintCursorAboveText: widget.paintCursorAboveText,
+                                enableInteractiveSelection: widget._userSelectionEnabled,
+                                textSelectionDelegate: this,
+                                devicePixelRatio: _devicePixelRatio,
+                                promptRectRange: _currentPromptRectRange,
+                                promptRectColor: widget.autocorrectionTextRectColor,
+                                clipBehavior: widget.clipBehavior,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
@@ -3805,24 +5249,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
+
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      // Newer verions of iOS (iOS 15+) no longer reveal the most recently
+      // Newer versions of iOS (iOS 15+) no longer reveal the most recently
       // entered character.
       const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
         TargetPlatform.android, TargetPlatform.fuchsia,
       };
-      final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
+      final bool brieflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);
-      if (breiflyShowPassword) {
+      if (brieflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length) {
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
         }
       }
-      return TextSpan(style: widget.style, text: text);
+      return TextSpan(style: _style, text: text);
     }
     if (_placeholderLocation >= 0 && _placeholderLocation <= _value.text.length) {
       final List<_ScribblePlaceholder> placeholders = <_ScribblePlaceholder>[];
@@ -3834,16 +5279,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       } else {
         placeholders.add(const _ScribblePlaceholder(child: SizedBox.shrink(), size: Size(100.0, 0.0)));
       }
-      return TextSpan(style: widget.style, children: <InlineSpan>[
+      return TextSpan(style: _style, children: <InlineSpan>[
           TextSpan(text: _value.text.substring(0, placeholderLocation)),
           ...placeholders,
           TextSpan(text: _value.text.substring(placeholderLocation)),
         ],
       );
     }
-    final bool spellCheckResultsReceived = spellCheckEnabled && _spellCheckResults != null;
     final bool withComposing = !widget.readOnly && _hasFocus;
-    if (spellCheckResultsReceived) {
+    if (_spellCheckResultsReceived) {
       // If the composing range is out of range for the current text, ignore it to
       // preserve the tree integrity, otherwise in release mode a RangeError will
       // be thrown and this EditableText will be built with a broken subtree.
@@ -3854,16 +5298,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return buildTextSpanWithSpellCheckSuggestions(
         _value,
         composingRegionOutOfRange,
-        widget.style,
+        _style,
         _spellCheckConfiguration.misspelledTextStyle!,
-        _spellCheckResults!,
+        spellCheckResults!,
       );
     }
 
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
       context: context,
-      style: widget.style,
+      style: _style,
       withComposing: withComposing,
     );
   }
@@ -3889,14 +5333,13 @@ class _Editable extends MultiChildRenderObjectWidget {
     required this.expands,
     this.strutStyle,
     this.selectionColor,
-    required this.textScaleFactor,
+    required this.textScaler,
     required this.textAlign,
     required this.textDirection,
     this.locale,
     required this.obscuringCharacter,
     required this.obscureText,
     required this.offset,
-    this.onCaretChanged,
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
     this.cursorHeight,
@@ -3911,22 +5354,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-  }) : assert(textDirection != null),
-       assert(rendererIgnoresPointer != null),
-       super(children: _extractChildren(inlineSpan));
-
-  // Traverses the InlineSpan tree and depth-first collects the list of
-  // child widgets that are created in WidgetSpans.
-  static List<Widget> _extractChildren(InlineSpan span) {
-    final List<Widget> result = <Widget>[];
-    span.visitChildren((InlineSpan span) {
-      if (span is WidgetSpan) {
-        result.add(span.child);
-      }
-      return true;
-    });
-    return result;
-  }
+  }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
 
   final InlineSpan inlineSpan;
   final TextEditingValue value;
@@ -3943,7 +5371,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final bool expands;
   final StrutStyle? strutStyle;
   final Color? selectionColor;
-  final double textScaleFactor;
+  final TextScaler textScaler;
   final TextAlign textAlign;
   final TextDirection textDirection;
   final Locale? locale;
@@ -3952,7 +5380,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
   final ViewportOffset offset;
-  final CaretChangedHandler? onCaretChanged;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final double? cursorHeight;
@@ -3985,13 +5412,12 @@ class _Editable extends MultiChildRenderObjectWidget {
       expands: expands,
       strutStyle: strutStyle,
       selectionColor: selectionColor,
-      textScaleFactor: textScaleFactor,
+      textScaler: textScaler,
       textAlign: textAlign,
       textDirection: textDirection,
       locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
-      onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
@@ -4020,6 +5446,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..cursorColor = cursorColor
       ..startHandleLayerLink = startHandleLayerLink
       ..endHandleLayerLink = endHandleLayerLink
+      ..backgroundCursorColor = backgroundCursorColor
       ..showCursor = showCursor
       ..forceLine = forceLine
       ..readOnly = readOnly
@@ -4029,13 +5456,12 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..expands = expands
       ..strutStyle = strutStyle
       ..selectionColor = selectionColor
-      ..textScaleFactor = textScaleFactor
+      ..textScaler = textScaler
       ..textAlign = textAlign
       ..textDirection = textDirection
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..selection = value.selection
       ..offset = offset
-      ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textHeightBehavior = textHeightBehavior
       ..textWidthBasis = textWidthBasis
@@ -4054,6 +5480,46 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
+  }
+}
+
+@immutable
+class _ScribbleCacheKey  {
+  const _ScribbleCacheKey({
+    required this.inlineSpan,
+    required this.textAlign,
+    required this.textDirection,
+    required this.textScaler,
+    required this.textHeightBehavior,
+    required this.locale,
+    required this.structStyle,
+    required this.placeholder,
+    required this.size,
+  });
+
+  final TextAlign textAlign;
+  final TextDirection textDirection;
+  final TextScaler textScaler;
+  final TextHeightBehavior? textHeightBehavior;
+  final Locale? locale;
+  final StrutStyle structStyle;
+  final int placeholder;
+  final Size size;
+  final InlineSpan inlineSpan;
+
+  RenderComparison compare(_ScribbleCacheKey other) {
+    if (identical(other, this)) {
+      return RenderComparison.identical;
+    }
+    final bool needsLayout = textAlign != other.textAlign
+                          || textDirection != other.textDirection
+                          || textScaler != other.textScaler
+                          || (textHeightBehavior ?? const TextHeightBehavior()) != (other.textHeightBehavior ?? const TextHeightBehavior())
+                          || locale != other.locale
+                          || structStyle != other.structStyle
+                          || placeholder != other.placeholder
+                          || size != other.size;
+    return needsLayout ? RenderComparison.layout : inlineSpan.compareTo(other.inlineSpan);
   }
 }
 
@@ -4134,7 +5600,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
     }
     final Rect intersection = calculatedBounds.intersect(rect);
     final HitTestResult result = HitTestResult();
-    WidgetsBinding.instance.hitTest(result, intersection.center);
+    WidgetsBinding.instance.hitTestInView(result, intersection.center, View.of(context).viewId);
     return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
   }
 
@@ -4157,365 +5623,141 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 class _ScribblePlaceholder extends WidgetSpan {
   const _ScribblePlaceholder({
     required super.child,
-    super.alignment,
-    super.baseline,
     required this.size,
-  }) : assert(child != null),
-       assert(baseline != null || !(
-         identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.baseline)
-       ));
+  });
 
   /// The size of the span, used in place of adding a placeholder size to the [TextPainter].
   final Size size;
 
   @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+  void build(ui.ParagraphBuilder builder, {
+    TextScaler textScaler = TextScaler.noScaling,
+    List<PlaceholderDimensions>? dimensions,
+  }) {
     assert(debugAssertIsValid());
     final bool hasStyle = style != null;
     if (hasStyle) {
-      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+      builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
-    builder.addPlaceholder(
-      size.width,
-      size.height,
-      alignment,
-      scale: textScaleFactor,
-    );
+    builder.addPlaceholder(size.width, size.height, alignment);
     if (hasStyle) {
       builder.pop();
     }
   }
 }
 
-/// An interface for retriving the logical text boundary (left-closed-right-open)
-/// at a given location in a document.
+/// A text boundary that uses code points as logical boundaries.
 ///
-/// Depending on the implementation of the [_TextBoundary], the input
-/// [TextPosition] can either point to a code unit, or a position between 2 code
-/// units (which can be visually represented by the caret if the selection were
-/// to collapse to that position).
+/// A code point represents a single character. This may be smaller than what is
+/// represented by a user-perceived character, or grapheme. For example, a
+/// single grapheme (in this case a Unicode extended grapheme cluster) like
+/// "👨‍👩‍👦" consists of five code points: the man emoji, a zero
+/// width joiner, the woman emoji, another zero width joiner, and the boy emoji.
+/// The [String] has a length of eight because each emoji consists of two code
+/// units.
 ///
-/// For example, [_LineBreak] interprets the input [TextPosition] as a caret
-/// location, since in Flutter the caret is generally painted between the
-/// character the [TextPosition] points to and its previous character, and
-/// [_LineBreak] cares about the affinity of the input [TextPosition]. Most
-/// other text boundaries however, interpret the input [TextPosition] as the
-/// location of a code unit in the document, since it's easier to reason about
-/// the text boundary given a code unit in the text.
+/// Code units are the units by which Dart's String class is measured, which is
+/// encoded in UTF-16.
 ///
-/// To convert a "code-unit-based" [_TextBoundary] to "caret-location-based",
-/// use the [_CollapsedSelectionBoundary] combinator.
-abstract class _TextBoundary {
-  const _TextBoundary();
+/// See also:
+///
+///  * [String.runes], which deals with code points like this class.
+///  * [String.characters], which deals with graphemes.
+///  * [CharacterBoundary], which is a [TextBoundary] like this class, but whose
+///    boundaries are graphemes instead of code points.
+class _CodePointBoundary extends TextBoundary {
+  const _CodePointBoundary(this._text);
 
-  TextEditingValue get textEditingValue;
+  final String _text;
 
-  /// Returns the leading text boundary at the given location, inclusive.
-  TextPosition getLeadingTextBoundaryAt(TextPosition position);
-
-  /// Returns the trailing text boundary at the given location, exclusive.
-  TextPosition getTrailingTextBoundaryAt(TextPosition position);
-
-  TextRange getTextBoundaryAt(TextPosition position) {
-    return TextRange(
-      start: getLeadingTextBoundaryAt(position).offset,
-      end: getTrailingTextBoundaryAt(position).offset,
-    );
+  // Returns true if the given position falls in the center of a surrogate pair.
+  bool _breaksSurrogatePair(int position) {
+    assert(position > 0 && position < _text.length && _text.length > 1);
+    return TextPainter.isHighSurrogate(_text.codeUnitAt(position - 1))
+        && TextPainter.isLowSurrogate(_text.codeUnitAt(position));
   }
-}
-
-// -----------------------------  Text Boundaries -----------------------------
-
-class _CodeUnitBoundary extends _TextBoundary {
-  const _CodeUnitBoundary(this.textEditingValue);
 
   @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) => TextPosition(offset: position.offset);
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) => TextPosition(offset: math.min(position.offset + 1, textEditingValue.text.length));
-}
-
-// The word modifier generally removes the word boundaries around white spaces
-// (and newlines), IOW white spaces and some other punctuations are considered
-// a part of the next word in the search direction.
-class _WhitespaceBoundary extends _TextBoundary {
-  const _WhitespaceBoundary(this.textEditingValue);
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    for (int index = position.offset; index >= 0; index -= 1) {
-      if (!TextLayoutMetrics.isWhitespace(textEditingValue.text.codeUnitAt(index))) {
-        return TextPosition(offset: index);
-      }
+  int? getLeadingTextBoundaryAt(int position) {
+    if (_text.isEmpty || position < 0) {
+      return null;
     }
-    return const TextPosition(offset: 0);
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    for (int index = position.offset; index < textEditingValue.text.length; index += 1) {
-      if (!TextLayoutMetrics.isWhitespace(textEditingValue.text.codeUnitAt(index))) {
-        return TextPosition(offset: index + 1);
-      }
+    if (position == 0) {
+      return 0;
     }
-    return TextPosition(offset: textEditingValue.text.length);
-  }
-}
+    if (position >= _text.length) {
+      return _text.length;
+    }
+    if (_text.length <= 1) {
+      return position;
+    }
 
-// Most apps delete the entire grapheme when the backspace key is pressed.
-// Also always put the new caret location to character boundaries to avoid
-// sending malformed UTF-16 code units to the paragraph builder.
-class _CharacterBoundary extends _TextBoundary {
-  const _CharacterBoundary(this.textEditingValue);
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
-    return TextPosition(
-      offset: CharacterRange.at(textEditingValue.text, position.offset, endOffset).stringBeforeLength,
-    );
+    return _breaksSurrogatePair(position)
+        ? position - 1
+        : position;
   }
 
   @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
-    final CharacterRange range = CharacterRange.at(textEditingValue.text, position.offset, endOffset);
-    return TextPosition(
-      offset: textEditingValue.text.length - range.stringAfterLength,
-    );
+  int? getTrailingTextBoundaryAt(int position) {
+    if (_text.isEmpty || position >= _text.length) {
+      return null;
+    }
+    if (position < 0) {
+      return 0;
+    }
+    if (position == _text.length - 1) {
+      return _text.length;
+    }
+    if (_text.length <= 1) {
+      return position;
+    }
+
+    return _breaksSurrogatePair(position + 1)
+        ? position + 2
+        : position + 1;
   }
-
-  @override
-  TextRange getTextBoundaryAt(TextPosition position) {
-    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
-    final CharacterRange range = CharacterRange.at(textEditingValue.text, position.offset, endOffset);
-    return TextRange(
-      start: range.stringBeforeLength,
-      end: textEditingValue.text.length - range.stringAfterLength,
-    );
-  }
-}
-
-// [UAX #29](https://unicode.org/reports/tr29/) defined word boundaries.
-class _WordBoundary extends _TextBoundary {
-  const _WordBoundary(this.textLayout, this.textEditingValue);
-
-  final TextLayoutMetrics textLayout;
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textLayout.getWordBoundary(position).start,
-      // Word boundary seems to always report downstream on many platforms.
-      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
-    );
-  }
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textLayout.getWordBoundary(position).end,
-      // Word boundary seems to always report downstream on many platforms.
-      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
-    );
-  }
-}
-
-// The linebreaks of the current text layout. The input [TextPosition]s are
-// interpreted as caret locations because [TextPainter.getLineAtOffset] is
-// text-affinity-aware.
-class _LineBreak extends _TextBoundary {
-  const _LineBreak(
-    this.textLayout,
-    this.textEditingValue,
-  );
-
-  final TextLayoutMetrics textLayout;
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textLayout.getLineAtOffset(position).start,
-    );
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textLayout.getLineAtOffset(position).end,
-      affinity: TextAffinity.upstream,
-    );
-  }
-}
-
-// The document boundary is unique and is a constant function of the input
-// position.
-class _DocumentBoundary extends _TextBoundary {
-  const _DocumentBoundary(this.textEditingValue);
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) => const TextPosition(offset: 0);
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textEditingValue.text.length,
-      affinity: TextAffinity.upstream,
-    );
-  }
-}
-
-// ------------------------  Text Boundary Combinators ------------------------
-
-// Expands the innerTextBoundary with outerTextBoundary.
-class _ExpandedTextBoundary extends _TextBoundary {
-  _ExpandedTextBoundary(this.innerTextBoundary, this.outerTextBoundary);
-
-  final _TextBoundary innerTextBoundary;
-  final _TextBoundary outerTextBoundary;
-
-  @override
-  TextEditingValue get textEditingValue {
-    assert(innerTextBoundary.textEditingValue == outerTextBoundary.textEditingValue);
-    return innerTextBoundary.textEditingValue;
-  }
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return outerTextBoundary.getLeadingTextBoundaryAt(
-      innerTextBoundary.getLeadingTextBoundaryAt(position),
-    );
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return outerTextBoundary.getTrailingTextBoundaryAt(
-      innerTextBoundary.getTrailingTextBoundaryAt(position),
-    );
-  }
-}
-
-// Force the innerTextBoundary to interpret the input [TextPosition]s as caret
-// locations instead of code unit positions.
-//
-// The innerTextBoundary must be a [_TextBoundary] that interprets the input
-// [TextPosition]s as code unit positions.
-class _CollapsedSelectionBoundary extends _TextBoundary {
-  _CollapsedSelectionBoundary(this.innerTextBoundary, this.isForward);
-
-  final _TextBoundary innerTextBoundary;
-  final bool isForward;
-
-  @override
-  TextEditingValue get textEditingValue => innerTextBoundary.textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return isForward
-      ? innerTextBoundary.getLeadingTextBoundaryAt(position)
-      : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getLeadingTextBoundaryAt(TextPosition(offset: position.offset - 1));
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return isForward
-      ? innerTextBoundary.getTrailingTextBoundaryAt(position)
-      : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getTrailingTextBoundaryAt(TextPosition(offset: position.offset - 1));
-  }
-}
-
-// A _TextBoundary that creates a [TextRange] where its start is from the
-// specified leading text boundary and its end is from the specified trailing
-// text boundary.
-class _MixedBoundary extends _TextBoundary {
-  _MixedBoundary(this.leadingTextBoundary, this.trailingTextBoundary);
-
-  final _TextBoundary leadingTextBoundary;
-  final _TextBoundary trailingTextBoundary;
-
-  @override
-  TextEditingValue get textEditingValue {
-    assert(leadingTextBoundary.textEditingValue == trailingTextBoundary.textEditingValue);
-    return leadingTextBoundary.textEditingValue;
-  }
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) => leadingTextBoundary.getLeadingTextBoundaryAt(position);
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) => trailingTextBoundary.getTrailingTextBoundaryAt(position);
 }
 
 // -------------------------------  Text Actions -------------------------------
 class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextAction<T> {
-  _DeleteTextAction(this.state, this.getTextBoundariesForIntent);
+  _DeleteTextAction(this.state, this.getTextBoundary, this._applyTextBoundary);
 
   final EditableTextState state;
-  final _TextBoundary Function(T intent) getTextBoundariesForIntent;
-
-  TextRange _expandNonCollapsedRange(TextEditingValue value) {
-    final TextRange selection = value.selection;
-    assert(selection.isValid);
-    assert(!selection.isCollapsed);
-    final _TextBoundary atomicBoundary = state.widget.obscureText
-      ? _CodeUnitBoundary(value)
-      : _CharacterBoundary(value);
-
-    return TextRange(
-      start: atomicBoundary.getLeadingTextBoundaryAt(TextPosition(offset: selection.start)).offset,
-      end: atomicBoundary.getTrailingTextBoundaryAt(TextPosition(offset: selection.end - 1)).offset,
-    );
-  }
+  final TextBoundary Function() getTextBoundary;
+  final _ApplyTextBoundary _applyTextBoundary;
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
     final TextSelection selection = state._value.selection;
-    assert(selection.isValid);
-
-    if (!selection.isCollapsed) {
-      return Actions.invoke(
-        context!,
-        ReplaceTextIntent(state._value, '', _expandNonCollapsedRange(state._value), SelectionChangedCause.keyboard),
-      );
-    }
-
-    final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-    if (!textBoundary.textEditingValue.selection.isValid) {
+    if (!selection.isValid) {
       return null;
     }
-    if (!textBoundary.textEditingValue.selection.isCollapsed) {
+    assert(selection.isValid);
+    // Expands the selection to ensure the range covers full graphemes.
+    final TextBoundary atomicBoundary = state._characterBoundary();
+    if (!selection.isCollapsed) {
+      // Expands the selection to ensure the range covers full graphemes.
+      final TextRange range = TextRange(
+        start: atomicBoundary.getLeadingTextBoundaryAt(selection.start) ?? state._value.text.length,
+        end: atomicBoundary.getTrailingTextBoundaryAt(selection.end - 1) ?? 0,
+      );
       return Actions.invoke(
         context!,
-        ReplaceTextIntent(state._value, '', _expandNonCollapsedRange(textBoundary.textEditingValue), SelectionChangedCause.keyboard),
+        ReplaceTextIntent(state._value, '', range, SelectionChangedCause.keyboard),
       );
     }
 
+    final int target = _applyTextBoundary(selection.base, intent.forward, getTextBoundary()).offset;
+
+    final TextRange rangeToDelete = TextSelection(
+      baseOffset: intent.forward
+        ? atomicBoundary.getLeadingTextBoundaryAt(selection.baseOffset) ?? state._value.text.length
+        : atomicBoundary.getTrailingTextBoundaryAt(selection.baseOffset - 1) ?? 0,
+      extentOffset: target,
+    );
     return Actions.invoke(
       context!,
-      ReplaceTextIntent(
-        textBoundary.textEditingValue,
-        '',
-        textBoundary.getTextBoundaryAt(textBoundary.textEditingValue.selection.base),
-        SelectionChangedCause.keyboard,
-      ),
+      ReplaceTextIntent(state._value, '', rangeToDelete, SelectionChangedCause.keyboard),
     );
   }
 
@@ -4526,13 +5768,19 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
 class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
   _UpdateTextSelectionAction(
     this.state,
-    this.ignoreNonCollapsedSelection,
-    this.getTextBoundariesForIntent,
-  );
+    this.getTextBoundary,
+    this.applyTextBoundary, {
+    required this.ignoreNonCollapsedSelection,
+    this.isExpand = false,
+    this.extentAtIndex = false,
+  });
 
   final EditableTextState state;
   final bool ignoreNonCollapsedSelection;
-  final _TextBoundary Function(T intent) getTextBoundariesForIntent;
+  final bool isExpand;
+  final bool extentAtIndex;
+  final TextBoundary Function() getTextBoundary;
+  final _ApplyTextBoundary applyTextBoundary;
 
   static const int NEWLINE_CODE_UNIT = 10;
 
@@ -4547,7 +5795,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
         && state.textEditingValue.text.codeUnitAt(position.offset) != NEWLINE_CODE_UNIT;
   }
 
-  // Returns true iff the given position at a wordwrap boundary in the
+  // Returns true if the given position at a wordwrap boundary in the
   // downstream position.
   bool _isAtWordwrapDownstream(TextPosition position) {
     final TextPosition start = TextPosition(
@@ -4563,46 +5811,15 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     assert(selection.isValid);
 
     final bool collapseSelection = intent.collapseSelection || !state.widget.selectionEnabled;
-    // Collapse to the logical start/end.
-    TextSelection collapse(TextSelection selection) {
-      assert(selection.isValid);
-      assert(!selection.isCollapsed);
-      return selection.copyWith(
-        baseOffset: intent.forward ? selection.end : selection.start,
-        extentOffset: intent.forward ? selection.end : selection.start,
-      );
-    }
-
     if (!selection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
-      return Actions.invoke(
-        context!,
-        UpdateSelectionIntent(state._value, collapse(selection), SelectionChangedCause.keyboard),
-      );
+      return Actions.invoke(context!, UpdateSelectionIntent(
+        state._value,
+        TextSelection.collapsed(offset: intent.forward ? selection.end : selection.start),
+        SelectionChangedCause.keyboard,
+      ));
     }
 
-    final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-
-    // "textBoundary's selection is only updated after rebuild; if the text
-    // is the same, use the selection from state, which is more recent.
-    // This is necessary on macOS where alt+up sends the moveBackward:
-    // and moveToBeginningOfParagraph: selectors at the same time.
-    final TextSelection textBoundarySelection =
-        textBoundary.textEditingValue.text == state._value.text
-            ? state._value.selection
-            : textBoundary.textEditingValue.selection;
-
-    if (!textBoundarySelection.isValid) {
-      return null;
-    }
-    if (!textBoundarySelection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
-      return Actions.invoke(
-        context!,
-        UpdateSelectionIntent(state._value, collapse(textBoundarySelection), SelectionChangedCause.keyboard),
-      );
-    }
-
-    TextPosition extent = textBoundarySelection.extent;
-
+    TextPosition extent = selection.extent;
     // If continuesAtWrap is true extent and is at the relevant wordwrap, then
     // move it just to the other side of the wordwrap.
     if (intent.continuesAtWrap) {
@@ -4618,79 +5835,24 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       }
     }
 
-    final TextPosition newExtent = intent.forward
-      ? textBoundary.getTrailingTextBoundaryAt(extent)
-      : textBoundary.getLeadingTextBoundaryAt(extent);
-
-    final TextSelection newSelection = collapseSelection
+    final bool shouldTargetBase = isExpand && (intent.forward ? selection.baseOffset > selection.extentOffset : selection.baseOffset < selection.extentOffset);
+    final TextPosition newExtent = applyTextBoundary(shouldTargetBase ? selection.base : extent, intent.forward, getTextBoundary());
+    final TextSelection newSelection = collapseSelection || (!isExpand && newExtent.offset == selection.baseOffset)
       ? TextSelection.fromPosition(newExtent)
-      : textBoundarySelection.extendTo(newExtent);
+      : isExpand ? selection.expandTo(newExtent, extentAtIndex || selection.isCollapsed) : selection.extendTo(newExtent);
 
-    // If collapseAtReversal is true and would have an effect, collapse it.
-    if (!selection.isCollapsed && intent.collapseAtReversal
-        && (selection.baseOffset < selection.extentOffset !=
-        newSelection.baseOffset < newSelection.extentOffset)) {
-      return Actions.invoke(
-        context!,
-        UpdateSelectionIntent(
-          state._value,
-          TextSelection.fromPosition(selection.base),
-          SelectionChangedCause.keyboard,
-        ),
-      );
-    }
-
-    return Actions.invoke(
-      context!,
-      UpdateSelectionIntent(textBoundary.textEditingValue, newSelection, SelectionChangedCause.keyboard),
-    );
+    final bool shouldCollapseToBase = intent.collapseAtReversal
+      && (selection.baseOffset - selection.extentOffset) * (selection.baseOffset - newSelection.extentOffset) < 0;
+    final TextSelection newRange = shouldCollapseToBase ? TextSelection.fromPosition(selection.base) : newSelection;
+    return Actions.invoke(context!, UpdateSelectionIntent(state._value, newRange, SelectionChangedCause.keyboard));
   }
 
   @override
   bool get isActionEnabled => state._value.selection.isValid;
 }
 
-class _ExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent> {
-  _ExtendSelectionOrCaretPositionAction(this.state, this.getTextBoundariesForIntent);
-
-  final EditableTextState state;
-  final _TextBoundary Function(ExtendSelectionToNextWordBoundaryOrCaretLocationIntent intent) getTextBoundariesForIntent;
-
-  @override
-  Object? invoke(ExtendSelectionToNextWordBoundaryOrCaretLocationIntent intent, [BuildContext? context]) {
-    final TextSelection selection = state._value.selection;
-    assert(selection.isValid);
-
-    final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
-    if (!textBoundarySelection.isValid) {
-      return null;
-    }
-
-    final TextPosition extent = textBoundarySelection.extent;
-    final TextPosition newExtent = intent.forward
-      ? textBoundary.getTrailingTextBoundaryAt(extent)
-      : textBoundary.getLeadingTextBoundaryAt(extent);
-
-    final TextSelection newSelection = (newExtent.offset - textBoundarySelection.baseOffset) * (textBoundarySelection.extentOffset - textBoundarySelection.baseOffset) < 0
-      ? textBoundarySelection.copyWith(
-        extentOffset: textBoundarySelection.baseOffset,
-        affinity: textBoundarySelection.extentOffset > textBoundarySelection.baseOffset ? TextAffinity.downstream : TextAffinity.upstream,
-      )
-      : textBoundarySelection.extendTo(newExtent);
-
-    return Actions.invoke(
-      context!,
-      UpdateSelectionIntent(textBoundary.textEditingValue, newSelection, SelectionChangedCause.keyboard),
-    );
-  }
-
-  @override
-  bool get isActionEnabled => state.widget.selectionEnabled && state._value.selection.isValid;
-}
-
-class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
-  _UpdateTextSelectionToAdjacentLineAction(this.state);
+class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
+  _UpdateTextSelectionVerticallyAction(this.state);
 
   final EditableTextState state;
 
@@ -4732,10 +5894,12 @@ class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovemen
     final VerticalCaretMovementRun currentRun = _verticalMovementRun
       ?? state.renderEditable.startVerticalCaretMovement(state.renderEditable.selection!.extent);
 
-    final bool shouldMove = intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
+    final bool shouldMove = intent is ExtendSelectionVerticallyToAdjacentPageIntent
+      ? currentRun.moveByOffset((intent.forward ? 1.0 : -1.0) * state.renderEditable.size.height)
+      : intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
     final TextPosition newExtent = shouldMove
       ? currentRun.current
-      : (intent.forward ? TextPosition(offset: state._value.text.length) : const TextPosition(offset: 0));
+      : intent.forward ? TextPosition(offset: value.text.length) : const TextPosition(offset: 0);
     final TextSelection newSelection = collapseSelection
       ? TextSelection.fromPosition(newExtent)
       : value.selection.extendTo(newExtent);
@@ -4793,254 +5957,32 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
 }
 
-/// A void function that takes a [TextEditingValue].
-@visibleForTesting
-typedef TextEditingValueCallback = void Function(TextEditingValue value);
-
-/// Provides undo/redo capabilities for text editing.
-///
-/// Listens to [controller] as a [ValueNotifier] and saves relevant values for
-/// undoing/redoing. The cadence at which values are saved is a best
-/// approximation of the native behaviors of a hardware keyboard on Flutter's
-/// desktop platforms, as there are subtle differences between each of these
-/// platforms.
-///
-/// Listens to keyboard undo/redo shortcuts and calls [onTriggered] when a
-/// shortcut is triggered that would affect the state of the [controller].
-class _TextEditingHistory extends StatefulWidget {
-  /// Creates an instance of [_TextEditingHistory].
-  const _TextEditingHistory({
-    required this.child,
-    required this.controller,
-    required this.onTriggered,
+/// The start and end glyph heights of some range of text.
+@immutable
+class _GlyphHeights {
+  const _GlyphHeights({
+    required this.start,
+    required this.end,
   });
 
-  /// The child widget of [_TextEditingHistory].
-  final Widget child;
+  /// The glyph height of the first line.
+  final double start;
 
-  /// The [TextEditingController] to save the state of over time.
-  final TextEditingController controller;
-
-  /// Called when an undo or redo causes a state change.
-  ///
-  /// If the state would still be the same before and after the undo/redo, this
-  /// will not be called. For example, receiving a redo when there is nothing
-  /// to redo will not call this method.
-  ///
-  /// It is also not called when the controller is changed for reasons other
-  /// than undo/redo.
-  final TextEditingValueCallback onTriggered;
-
-  @override
-  State<_TextEditingHistory> createState() => _TextEditingHistoryState();
+  /// The glyph height of the last line.
+  final double end;
 }
 
-class _TextEditingHistoryState extends State<_TextEditingHistory> {
-  final _UndoStack<TextEditingValue> _stack = _UndoStack<TextEditingValue>();
-  late final _Throttled<TextEditingValue> _throttledPush;
-  Timer? _throttleTimer;
-
-  // This duration was chosen as a best fit for the behavior of Mac, Linux,
-  // and Windows undo/redo state save durations, but it is not perfect for any
-  // of them.
-  static const Duration _kThrottleDuration = Duration(milliseconds: 500);
-
-  void _undo(UndoTextIntent intent) {
-    _update(_stack.undo());
-  }
-
-  void _redo(RedoTextIntent intent) {
-    _update(_stack.redo());
-  }
-
-  void _update(TextEditingValue? nextValue) {
-    if (nextValue == null) {
-      return;
-    }
-    if (nextValue.text == widget.controller.text) {
-      return;
-    }
-    widget.onTriggered(widget.controller.value.copyWith(
-      text: nextValue.text,
-      selection: nextValue.selection,
-    ));
-  }
-
-  void _push() {
-    if (widget.controller.value == TextEditingValue.empty) {
-      return;
-    }
-
-    _throttleTimer = _throttledPush(widget.controller.value);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _throttledPush = _throttle<TextEditingValue>(
-      duration: _kThrottleDuration,
-      function: _stack.push,
-    );
-    _push();
-    widget.controller.addListener(_push);
-  }
-
-  @override
-  void didUpdateWidget(_TextEditingHistory oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
-      _stack.clear();
-      oldWidget.controller.removeListener(_push);
-      widget.controller.addListener(_push);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_push);
-    _throttleTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Actions(
-      actions: <Type, Action<Intent>> {
-        UndoTextIntent: Action<UndoTextIntent>.overridable(context: context, defaultAction: CallbackAction<UndoTextIntent>(onInvoke: _undo)),
-        RedoTextIntent: Action<RedoTextIntent>.overridable(context: context, defaultAction: CallbackAction<RedoTextIntent>(onInvoke: _redo)),
-      },
-      child: widget.child,
-    );
-  }
-}
-
-/// A data structure representing a chronological list of states that can be
-/// undone and redone.
-class _UndoStack<T> {
-  /// Creates an instance of [_UndoStack].
-  _UndoStack();
-
-  final List<T> _list = <T>[];
-
-  // The index of the current value, or null if the list is emtpy.
-  late int _index;
-
-  /// Returns the current value of the stack.
-  T? get currentValue => _list.isEmpty ? null : _list[_index];
-
-  /// Add a new state change to the stack.
-  ///
-  /// Pushing identical objects will not create multiple entries.
-  void push(T value) {
-    if (_list.isEmpty) {
-      _index = 0;
-      _list.add(value);
-      return;
-    }
-
-    assert(_index < _list.length && _index >= 0);
-
-    if (value == currentValue) {
-      return;
-    }
-
-    // If anything has been undone in this stack, remove those irrelevant states
-    // before adding the new one.
-    if (_index != null && _index != _list.length - 1) {
-      _list.removeRange(_index + 1, _list.length);
-    }
-    _list.add(value);
-    _index = _list.length - 1;
-  }
-
-  /// Returns the current value after an undo operation.
-  ///
-  /// An undo operation moves the current value to the previously pushed value,
-  /// if any.
-  ///
-  /// Iff the stack is completely empty, then returns null.
-  T? undo() {
-    if (_list.isEmpty) {
-      return null;
-    }
-
-    assert(_index < _list.length && _index >= 0);
-
-    if (_index != 0) {
-      _index = _index - 1;
-    }
-
-    return currentValue;
-  }
-
-  /// Returns the current value after a redo operation.
-  ///
-  /// A redo operation moves the current value to the value that was last
-  /// undone, if any.
-  ///
-  /// Iff the stack is completely empty, then returns null.
-  T? redo() {
-    if (_list.isEmpty) {
-      return null;
-    }
-
-    assert(_index < _list.length && _index >= 0);
-
-    if (_index < _list.length - 1) {
-      _index = _index + 1;
-    }
-
-    return currentValue;
-  }
-
-  /// Remove everything from the stack.
-  void clear() {
-    _list.clear();
-    _index = -1;
-  }
-
-  @override
-  String toString() {
-    return '_UndoStack $_list';
-  }
-}
-
-/// A function that can be throttled with the throttle function.
-typedef _Throttleable<T> = void Function(T currentArg);
-
-/// A function that has been throttled by [_throttle].
-typedef _Throttled<T> = Timer Function(T currentArg);
-
-/// Returns a _Throttled that will call through to the given function only a
-/// maximum of once per duration.
+/// A [ClipboardStatusNotifier] whose [value] is hardcoded to
+/// [ClipboardStatus.pasteable].
 ///
-/// Only works for functions that take exactly one argument and return void.
-_Throttled<T> _throttle<T>({
-  required Duration duration,
-  required _Throttleable<T> function,
-  // If true, calls at the start of the timer.
-  bool leadingEdge = false,
-}) {
-  Timer? timer;
-  bool calledDuringTimer = false;
-  late T arg;
+/// Useful to avoid showing a permission dialog on web, which happens when
+/// [Clipboard.hasStrings] is called.
+class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
+  @override
+  ClipboardStatus value = ClipboardStatus.pasteable;
 
-  return (T currentArg) {
-    arg = currentArg;
-    if (timer != null) {
-      calledDuringTimer = true;
-      return timer!;
-    }
-    if (leadingEdge) {
-      function(arg);
-    }
-    calledDuringTimer = false;
-    timer = Timer(duration, () {
-      if (!leadingEdge || calledDuringTimer) {
-        function(arg);
-      }
-      timer = null;
-    });
-    return timer!;
-  };
+  @override
+  Future<void> update() {
+    return Future<void>.value();
+  }
 }

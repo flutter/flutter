@@ -45,17 +45,17 @@ class TextMagnifier extends StatefulWidget {
     magnifierBuilder: (
       BuildContext context,
       MagnifierController controller,
-      ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
+      ValueNotifier<MagnifierInfo> magnifierInfo,
     ) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
           return CupertinoTextMagnifier(
             controller: controller,
-            magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
+            magnifierInfo: magnifierInfo,
           );
         case TargetPlatform.android:
           return TextMagnifier(
-              magnifierInfo: magnifierOverlayInfoBearer,
+              magnifierInfo: magnifierInfo,
           );
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -75,7 +75,7 @@ class TextMagnifier extends StatefulWidget {
   /// [TextMagnifier] positions itself based on [magnifierInfo].
   ///
   /// {@macro widgets.material.magnifier.positionRules}
-  final ValueNotifier<MagnifierOverlayInfoBearer>
+  final ValueNotifier<MagnifierInfo>
       magnifierInfo;
 
   @override
@@ -86,7 +86,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
   // Should _only_ be null on construction. This is because of the animation logic.
   //
   // Animations are added when `last_build_y != current_build_y`. This condition
-  // is true on the inital render, which would mean that the inital
+  // is true on the initial render, which would mean that the initial
   // build would be animated - this is undesired. Thus, this is null for the
   // first frame and the condition becomes `magnifierPosition != null && last_build_y != this_build_y`.
   Offset? _magnifierPosition;
@@ -132,9 +132,9 @@ class _TextMagnifierState extends State<TextMagnifier> {
 
   /// {@macro widgets.material.magnifier.positionRules}
   void _determineMagnifierPositionAndFocalPoint() {
-    final MagnifierOverlayInfoBearer selectionInfo =
+    final MagnifierInfo selectionInfo =
         widget.magnifierInfo.value;
-    final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
+    final Rect screenRect = Offset.zero & MediaQuery.sizeOf(context);
 
     // Since by default we draw at the top left corner, this offset
     // shifts the magnifier so we draw at the center, and then also includes
@@ -286,7 +286,7 @@ class Magnifier extends StatelessWidget {
   /// The vertical distance that the magnifier should be above the focal point.
   ///
   /// [kStandardVerticalFocalPointShift] is an unmodifiable constant so that positioning of this
-  /// [Magnifier] can be done with a garunteed size, as opposed to an estimate.
+  /// [Magnifier] can be done with a guaranteed size, as opposed to an estimate.
   @visibleForTesting
   static const double kStandardVerticalFocalPointShift = 22;
 

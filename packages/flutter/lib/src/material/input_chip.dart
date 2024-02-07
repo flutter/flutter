@@ -7,8 +7,12 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'color_scheme.dart';
+import 'colors.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'material_state.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -27,8 +31,8 @@ import 'theme_data.dart';
 /// Input chips work together with other UI elements. They can appear:
 ///
 ///  * In a [Wrap] widget.
-///  * In a horizontally scrollable list, like a [ListView] whose
-///    scrollDirection is [Axis.horizontal].
+///  * In a horizontally scrollable list, for example configured such as a
+///    [ListView] with [ListView.scrollDirection] set to [Axis.horizontal].
 ///
 /// {@tool dartpad}
 /// This example shows how to create [InputChip]s with [onSelected] and
@@ -36,6 +40,16 @@ import 'theme_data.dart';
 /// When the user taps the delete icon, the chip will be deleted.
 ///
 /// ** See code in examples/api/lib/material/input_chip/input_chip.0.dart **
+/// {@end-tool}
+///
+///
+/// {@tool dartpad}
+/// The following example shows how to generate [InputChip]s from
+/// user text input. When the user enters a pizza topping in the text field,
+/// the user is presented with a list of suggestions. When selecting one of the
+/// suggestions, an [InputChip] is generated in the text field.
+///
+/// ** See code in examples/api/lib/material/input_chip/input_chip.1.dart **
 /// {@end-tool}
 ///
 /// ## Material Design 3
@@ -69,10 +83,8 @@ class InputChip extends StatelessWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
-  /// arguments must not be null. The [pressElevation] and [elevation] must be
-  /// null or non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const InputChip({
     super.key,
     this.avatar,
@@ -96,6 +108,7 @@ class InputChip extends StatelessWidget
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
+    this.color,
     this.backgroundColor,
     this.padding,
     this.visualDensity,
@@ -108,17 +121,7 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-    @Deprecated(
-      'Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.'
-    )
-    this.useDeleteButtonTooltip = true,
-  }) : assert(selected != null),
-       assert(isEnabled != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -164,6 +167,8 @@ class InputChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
+  final MaterialStateProperty<Color?>? color;
+  @override
   final Color? backgroundColor;
   @override
   final EdgeInsetsGeometry? padding;
@@ -187,18 +192,12 @@ class InputChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
-  @override
-  @Deprecated(
-    'Migrate to deleteButtonTooltipMessage. '
-    'This feature was deprecated after v2.10.0-0.3.pre.'
-  )
-  final bool useDeleteButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _InputChipDefaultsM3(context, isEnabled)
+      ? _InputChipDefaultsM3(context, isEnabled, selected)
       : null;
     final Widget? resolvedDeleteIcon = deleteIcon
       ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
@@ -211,7 +210,6 @@ class InputChip extends StatelessWidget
       deleteIcon: resolvedDeleteIcon,
       onDeleted: onDeleted,
       deleteIconColor: deleteIconColor,
-      useDeleteButtonTooltip: useDeleteButtonTooltip,
       deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       onSelected: onSelected,
       onPressed: onPressed,
@@ -225,6 +223,7 @@ class InputChip extends StatelessWidget
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
+      color: color,
       backgroundColor: backgroundColor,
       padding: padding,
       visualDensity: visualDensity,
@@ -237,6 +236,7 @@ class InputChip extends StatelessWidget
       checkmarkColor: checkmarkColor,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
     );
   }
 }
@@ -248,69 +248,102 @@ class InputChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
-
 class _InputChipDefaultsM3 extends ChipThemeData {
-  const _InputChipDefaultsM3(this.context, this.isEnabled)
+  _InputChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
 
   final BuildContext context;
   final bool isEnabled;
+  final bool isSelected;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.onSurfaceVariant
+      : _colors.onSurface,
+  );
 
   @override
-  Color? get backgroundColor => null;
+  MaterialStateProperty<Color?>? get color =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return _colors.secondaryContainer;
+      }
+      return null;
+    });
 
   @override
-  Color? get shadowColor => null;
+  Color? get shadowColor => Colors.transparent;
 
   @override
-  @override Color? get surfaceTintColor => null;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  Color? get selectedColor => Theme.of(context).colorScheme.secondaryContainer;
+  Color? get checkmarkColor => isEnabled
+    ? isSelected
+      ? _colors.primary
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
-  Color? get checkmarkColor => null;
+  Color? get deleteIconColor => isEnabled
+    ? isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
-  Color? get disabledColor => null;
-
-  @override
-  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
-
-  @override
-  BorderSide? get side => isEnabled
-    ? BorderSide(color: Theme.of(context).colorScheme.outline)
-    : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
+  BorderSide? get side => !isSelected
+    ? isEnabled
+      ? BorderSide(color: _colors.outline)
+      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? null
-      : Theme.of(context).colorScheme.onSurface,
+      ? isSelected
+        ? _colors.primary
+        : _colors.onSurfaceVariant
+      : _colors.onSurface,
     size: 18.0,
   );
 
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
 
-  /// The chip at text scale 1 starts with 8px on each side and as text scaling
-  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
-  /// Once the widget has a text scaling of 2 or higher than the label padding
-  /// remains 4px.
+  /// The label padding of the chip scales with the font size specified in the
+  /// [labelStyle], and the system font size settings that scale font sizes
+  /// globally.
+  ///
+  /// The chip at effective font size 14.0 starts with 8px on each side and as
+  /// the font size scales up to closer to 28.0, the label padding is linearly
+  /// interpolated from 8px to 4px. Once the label has a font size of 2 or
+  /// higher, label padding remains 4px.
   @override
-  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
-  )!;
+  EdgeInsetsGeometry? get labelPadding {
+    final double fontSize = labelStyle?.fontSize ?? 14.0;
+    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
+    return EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(fontSizeRatio - 1.0, 0.0, 1.0),
+    )!;
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - InputChip

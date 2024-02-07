@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dds/dap.dart';
-import 'package:dds/src/dap/protocol_generated.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -14,6 +13,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../../src/common.dart';
 import '../test_data/basic_project.dart';
 import '../test_data/compile_error_project.dart';
+import '../test_data/project.dart';
 import '../test_utils.dart';
 import 'test_client.dart';
 import 'test_server.dart';
@@ -60,14 +60,51 @@ void main() {
 
       final String output = _uniqueOutputLines(outputEvents);
 
-      expectLines(output, <Object>[
+      expectLines(
+        output,
+        <Object>[
         'Launching $relativeMainPath on Flutter test device in debug mode...',
-        startsWith('Connecting to VM Service at'),
-        'topLevelFunction',
-        'Application finished.',
-        '',
-        startsWith('Exited'),
-      ]);
+          startsWith('Connecting to VM Service at'),
+          'topLevelFunction',
+          'Application finished.',
+          '',
+          startsWith('Exited'),
+        ],
+        allowExtras: true,
+      );
+    });
+
+    testWithoutContext('logs to client when sendLogsToClient=true', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            sendLogsToClient: true,
+          ),
+        ),
+      ], eagerError: true);
+
+      // Capture events while terminating.
+      final Future<List<Event>> logEventsFuture = dap.client.events('dart.log').toList();
+      await dap.client.terminate();
+
+      // Ensure logs contain both the app.stop request and the result.
+      final List<Event> logEvents = await logEventsFuture;
+      final List<String> logMessages = logEvents.map((Event l) => (l.body! as Map<String, Object?>)['message']! as String).toList();
+      expect(
+        logMessages,
+        containsAll(<Matcher>[
+          startsWith('==> [Flutter] [{"id":1,"method":"app.stop"'),
+          startsWith('<== [Flutter] [{"id":1,"result":true}]'),
+        ]),
+      );
     });
 
     testWithoutContext('can run and terminate a Flutter app in noDebug mode', () async {
@@ -92,13 +129,17 @@ void main() {
 
       final String output = _uniqueOutputLines(outputEvents);
 
-      expectLines(output, <Object>[
-        'Launching $relativeMainPath on Flutter test device in debug mode...',
-        'topLevelFunction',
-        'Application finished.',
-        '',
-        startsWith('Exited'),
-      ]);
+      expectLines(
+        output,
+        <Object>[
+          'Launching $relativeMainPath on Flutter test device in debug mode...',
+          'topLevelFunction',
+          'Application finished.',
+          '',
+          startsWith('Exited'),
+        ],
+        allowExtras: true,
+      );
 
       // If we're running with an out-of-process debug adapter, ensure that its
       // own process shuts down after we terminated.
@@ -143,17 +184,22 @@ void main() {
 
       final String output = _uniqueOutputLines(outputEvents);
       expect(output, contains('this code does not compile'));
-      expect(output, contains('Exception: Failed to build'));
+      expect(output, contains('Error: Failed to build'));
       expect(output, contains('Exited (1)'));
     });
 
-    /// Helper that tests exception output in either debug or noDebug mode.
-    Future<void> testExceptionOutput({required bool noDebug}) async {
-        final BasicProjectThatThrows project = BasicProjectThatThrows();
+    group('structured errors', () {
+      /// Helper that runs [project] and collects the output.
+      ///
+      /// Line and column numbers are replaced with "1" to avoid fragile tests.
+      Future<String> getExceptionOutput(
+        Project project, {
+        required bool noDebug,
+        required bool ansiColors,
+      }) async {
         await project.setUpIn(tempDir);
 
-        final List<OutputEventBody> outputEvents =
-            await dap.client.collectAllOutput(launch: () {
+        final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(launch: () {
           // Terminate the app after we see the exception because otherwise
           // it will keep running and `collectAllOutput` won't end.
           dap.client.output
@@ -163,23 +209,85 @@ void main() {
             noDebug: noDebug,
             cwd: project.dir.path,
             toolArgs: <String>['-d', 'flutter-tester'],
+            allowAnsiColorOutput: ansiColors,
           );
         });
 
-        final String output = _uniqueOutputLines(outputEvents);
-        final List<String> outputLines = output.split('\n');
-        expect( outputLines, containsAllInOrder(<String>[
-            '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════',
-            'The following _Exception was thrown building App(dirty):',
-            'Exception: c',
-            'The relevant error-causing widget was:',
-        ]));
-        expect(output, contains('App:${Uri.file(project.dir.path)}/lib/main.dart:24:12'));
-    }
+        String output = _uniqueOutputLines(outputEvents);
 
-    testWithoutContext('correctly outputs exceptions in debug mode', () => testExceptionOutput(noDebug: false));
+        // Replace out any line/columns to make tests less fragile.
+        output = output.replaceAll(RegExp(r'\.dart:\d+:\d+'), '.dart:1:1');
 
-    testWithoutContext('correctly outputs exceptions in noDebug mode', () => testExceptionOutput(noDebug: true));
+        return output;
+      }
+
+      testWithoutContext('correctly outputs exceptions in debug mode', () async {
+        final BasicProjectThatThrows project = BasicProjectThatThrows();
+        final String output = await getExceptionOutput(project, noDebug: false, ansiColors: false);
+
+        expect(
+          output,
+          contains('''
+════════ Exception caught by widgets library ═══════════════════════════════════
+The following _Exception was thrown building App(dirty):
+Exception: c
+
+The relevant error-causing widget was:
+    App App:${Uri.file(project.dir.path)}/lib/main.dart:1:1'''),
+        );
+      });
+
+      testWithoutContext('correctly outputs colored exceptions when supported', () async {
+        final BasicProjectThatThrows project = BasicProjectThatThrows();
+        final String output = await getExceptionOutput(project, noDebug: false, ansiColors: true);
+
+        // Frames in the stack trace that are the users own code will be unformatted, but
+        // frames from the framework are faint (starting with `\x1B[2m`).
+
+        expect(
+          output,
+          contains('''
+════════ Exception caught by widgets library ═══════════════════════════════════
+The following _Exception was thrown building App(dirty):
+Exception: c
+
+The relevant error-causing widget was:
+    App App:${Uri.file(project.dir.path)}/lib/main.dart:1:1
+
+When the exception was thrown, this was the stack:
+#0      c (package:test/main.dart:1:1)
+          ^ source: package:test/main.dart
+#1      App.build (package:test/main.dart:1:1)
+          ^ source: package:test/main.dart
+\x1B[2m#2      StatelessElement.build (package:flutter/src/widgets/framework.dart:1:1)\x1B[0m
+          ^ source: package:flutter/src/widgets/framework.dart
+\x1B[2m#3      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:1:1)\x1B[0m
+          ^ source: package:flutter/src/widgets/framework.dart'''),
+        );
+      });
+
+      testWithoutContext('correctly outputs exceptions in noDebug mode', () async {
+        final BasicProjectThatThrows project = BasicProjectThatThrows();
+        final String output = await getExceptionOutput(project, noDebug: true, ansiColors: false);
+
+        // When running in noDebug mode, we don't get the Flutter.Error event so
+        // we get the basic Flutter-formatted version of the error.
+        expect(
+          output,
+          contains('''
+══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
+The following _Exception was thrown building App(dirty):
+Exception: c
+
+The relevant error-causing widget was:
+  App'''),
+        );
+        expect(
+          output,
+          contains('App:${Uri.file(project.dir.path)}/lib/main.dart:1:1'),
+        );
+      });
+    });
 
     testWithoutContext('can hot reload', () async {
       final BasicProject project = BasicProject();
@@ -213,9 +321,65 @@ void main() {
             startsWith('Reloaded'),
             'topLevelFunction',
           ],
+          allowExtras: true,
+      );
+
+      // Repeat the test for hot reload with custom syntax.
+      final Future<List<String>> customOutputEventsFuture = dap.client.stdoutOutput
+          // But skip any topLevelFunctions that come before the reload.
+          .skipWhile((String output) => output.startsWith('topLevelFunction'))
+          .take(2)
+          .toList();
+
+      await dap.client.customSyntaxHotReload();
+
+      expectLines(
+          (await customOutputEventsFuture).join(),
+          <Object>[
+            startsWith('Reloaded'),
+            'topLevelFunction',
+          ],
+          allowExtras: true,
       );
 
       await dap.client.terminate();
+    });
+
+    testWithoutContext('sends progress notifications during hot reload', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.initialize(supportsProgressReporting: true),
+        dap.client.launch(
+              cwd: project.dir.path,
+              noDebug: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+      ], eagerError: true);
+
+      // Capture progress events during a reload.
+      final Future<List<Event>> progressEventsFuture = dap.client.progressEvents().toList();
+      await dap.client.hotReload();
+      await dap.client.terminate();
+
+      // Verify the progress events.
+      final List<Event> progressEvents = await progressEventsFuture;
+      expect(progressEvents, hasLength(2));
+
+      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      expect(eventKinds, <String>['progressStart', 'progressEnd']);
+
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      expect(start.progressId, isNotNull);
+      expect(start.title, 'Flutter');
+      expect(start.message, 'Hot reloading…');
+      expect(end.progressId, start.progressId);
+      expect(end.message, isNull);
     });
 
     testWithoutContext('can hot restart', () async {
@@ -250,9 +414,47 @@ void main() {
             startsWith('Restarted application'),
             'topLevelFunction',
           ],
+          allowExtras: true,
       );
 
       await dap.client.terminate();
+    });
+
+    testWithoutContext('sends progress notifications during hot restart', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.initialize(supportsProgressReporting: true),
+        dap.client.launch(
+              cwd: project.dir.path,
+              noDebug: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+      ], eagerError: true);
+
+      // Capture progress events during a restart.
+      final Future<List<Event>> progressEventsFuture = dap.client.progressEvents().toList();
+      await dap.client.hotRestart();
+      await dap.client.terminate();
+
+      // Verify the progress events.
+      final List<Event> progressEvents = await progressEventsFuture;
+      expect(progressEvents, hasLength(2));
+
+      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      expect(eventKinds, <String>['progressStart', 'progressEnd']);
+
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      expect(start.progressId, isNotNull);
+      expect(start.title, 'Flutter');
+      expect(start.message, 'Hot restarting…');
+      expect(end.progressId, start.progressId);
+      expect(end.message, isNull);
     });
 
     testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
@@ -333,6 +535,30 @@ void main() {
       expect(stateChangeEvent['value'], 'true'); // extension state change values are always strings
 
       await dap.client.terminate();
+    });
+
+    testWithoutContext('provides appStarted events to the client', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to send a 'flutter.appStart' event.
+      final Future<Event> appStartFuture = dap.client.event('flutter.appStart');
+      await Future.wait(<Future<void>>[
+        appStartFuture,
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
+        ),
+      ], eagerError: true);
+
+      await dap.client.terminate();
+
+      final Event appStart = await appStartFuture;
+      final Map<String, Object?> params = appStart.body! as Map<String, Object?>;
+      expect(params['deviceId'], 'flutter-tester');
+      expect(params['mode'], 'debug');
     });
 
     testWithoutContext('provides appStarted events to the client', () async {
@@ -454,21 +680,37 @@ void main() {
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
       ], eagerError: true);
 
-      // Detach.
-      await dap.client.terminate();
+      // Detach and expected resume and correct output.
+      await Future.wait(<Future<void>>[
+        // We should print "Detached" instead of "Exited".
+        dap.client.outputEvents.firstWhere((OutputEventBody event) => event.output.contains('\nDetached')),
+        // We should still get terminatedEvent (this signals the DAP server terminating).
+        dap.client.event('terminated'),
+        // We should get output showing the app resumed.
+        testProcess.output.firstWhere((String output) => output.contains('topLevelFunction')),
+        // Trigger the detach.
+        dap.client.terminate(),
+      ]);
 
-      // Ensure we get additional output (confirming the process resumed).
-      await testProcess.output.first;
     });
   });
 }
 
 /// Extracts the output from a set of [OutputEventBody], removing any
 /// adjacent duplicates and combining into a single string.
+///
+/// If the output event contains a [Source], the name will be shown on the
+/// following line indented and prefixed with `^ source:`.
 String _uniqueOutputLines(List<OutputEventBody> outputEvents) {
   String? lastItem;
   return outputEvents
-      .map((OutputEventBody e) => e.output)
+      .map((OutputEventBody e) {
+        final String output = e.output;
+        final Source? source = e.source;
+        return source != null
+            ? '$output          ^ source: ${source.name}\n'
+            : output;
+      })
       .where((String output) {
         // Skip the item if it's the same as the previous one.
         final bool isDupe = output == lastItem;

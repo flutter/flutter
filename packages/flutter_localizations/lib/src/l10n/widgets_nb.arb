@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "Flytt til starten",
+  "reorderItemToEnd": "Flytt til slutten",
+  "reorderItemUp": "Flytt opp",
+  "reorderItemDown": "Flytt ned",
+  "reorderItemLeft": "Flytt til venstre",
+  "reorderItemRight": "Flytt til høyre"
+}

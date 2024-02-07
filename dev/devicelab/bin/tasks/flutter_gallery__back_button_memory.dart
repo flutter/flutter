@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Measure application memory usage after pausing and resuming the app
-/// with the Android back button.
-
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -13,6 +10,8 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 const String packageName = 'io.flutter.demo.gallery';
 const String activityName = 'io.flutter.demo.gallery.MainActivity';
 
+/// Measure application memory usage after pausing and resuming the app
+/// with the Android back button.
 class BackButtonMemoryTest extends MemoryTest {
   BackButtonMemoryTest() : super('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', 'test_memory/back_button.dart', packageName);
 

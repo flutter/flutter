@@ -52,4 +52,56 @@ void main() {
     expect(childParentData.offset.dy, equals(10.0));
     expect(parent.size, equals(const Size(100.0, 110.0)));
   });
+
+  test('RenderFlex and RenderIgnoreBaseline (control test -- with baseline)', () {
+    final RenderBox a, b;
+    final RenderBox root = RenderFlex(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[
+        a = RenderParagraph(
+          const TextSpan(text: 'a', style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest')), // places baseline at y=96
+          textDirection: TextDirection.ltr,
+        ),
+        b = RenderParagraph(
+          const TextSpan(text: 'b', style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest')), // 24 above baseline, 8 below baseline
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    );
+    layout(root);
+
+    final Offset aPos = a.localToGlobal(Offset.zero);
+    final Offset bPos = b.localToGlobal(Offset.zero);
+    expect(aPos.dy, 0.0);
+    expect(bPos.dy, 96.0 - 24.0);
+  });
+
+  test('RenderFlex and RenderIgnoreBaseline (with ignored baseline)', () {
+    final RenderBox a, b;
+    final RenderBox root = RenderFlex(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[
+        RenderIgnoreBaseline(
+          child: a = RenderParagraph(
+            const TextSpan(text: 'a', style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest')),
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+        b = RenderParagraph(
+          const TextSpan(text: 'b', style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest')),
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    );
+    layout(root);
+
+    final Offset aPos = a.localToGlobal(Offset.zero);
+    final Offset bPos = b.localToGlobal(Offset.zero);
+    expect(aPos.dy, 0.0);
+    expect(bPos.dy, 0.0);
+  });
 }

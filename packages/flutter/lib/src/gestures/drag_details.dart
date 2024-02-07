@@ -20,13 +20,10 @@ export 'velocity_tracker.dart' show Velocity;
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
-  ///
-  /// The [globalPosition] argument must not be null.
   DragDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -66,15 +63,12 @@ typedef GestureDragDownCallback = void Function(DragDownDetails details);
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
-  ///
-  /// The [globalPosition] argument must not be null.
   DragStartDetails({
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -109,10 +103,12 @@ class DragStartDetails {
   String toString() => '${objectRuntimeType(this, 'DragStartDetails')}($globalPosition)';
 }
 
+/// {@template flutter.gestures.dragdetails.GestureDragStartCallback}
 /// Signature for when a pointer has contacted the screen and has begun to move.
 ///
 /// The `details` object provides the position of the touch when it first
 /// touched the surface.
+/// {@endtemplate}
 ///
 /// See [DragGestureRecognizer.onStart].
 typedef GestureDragStartCallback = void Function(DragStartDetails details);
@@ -126,22 +122,17 @@ typedef GestureDragStartCallback = void Function(DragStartDetails details);
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragUpdateDetails {
-  /// Creates details for a [DragUpdateDetails].
-  ///
-  /// The [delta] argument must not be null.
+  /// Creates details for a [GestureDragUpdateCallback].
   ///
   /// If [primaryDelta] is non-null, then its value must match one of the
   /// coordinates of [delta] and the other coordinate must be zero.
-  ///
-  /// The [globalPosition] argument must be provided and must not be null.
   DragUpdateDetails({
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
     required this.globalPosition,
     Offset? localPosition,
-  }) : assert(delta != null),
-       assert(
+  }) : assert(
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
            || (primaryDelta == delta.dy && delta.dx == 0.0),
@@ -195,11 +186,13 @@ class DragUpdateDetails {
   String toString() => '${objectRuntimeType(this, 'DragUpdateDetails')}($delta)';
 }
 
+/// {@template flutter.gestures.dragdetails.GestureDragUpdateCallback}
 /// Signature for when a pointer that is in contact with the screen and moving
 /// has moved again.
 ///
 /// The `details` object provides the position of the touch and the distance it
 /// has traveled since the last update.
+/// {@endtemplate}
 ///
 /// See [DragGestureRecognizer.onUpdate].
 typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
@@ -215,15 +208,16 @@ typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 class DragEndDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
-  /// The [velocity] argument must not be null.
+  /// If [primaryVelocity] is non-null, its value must match one of the
+  /// coordinates of `velocity.pixelsPerSecond` and the other coordinate
+  /// must be zero.
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-  }) : assert(velocity != null),
-       assert(
+  }) : assert(
          primaryVelocity == null
-           || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy,
+           || (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0)
+           || (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
        );
 
   /// The velocity the pointer was moving when it stopped contacting the screen.

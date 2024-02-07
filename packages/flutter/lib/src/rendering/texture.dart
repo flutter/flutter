@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -29,9 +31,9 @@ import 'object.dart';
 ///
 /// See also:
 ///
-///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
+///  * [TextureRegistry](/javadoc/io/flutter/view/TextureRegistry.html)
 ///    for how to create and manage backend textures on Android.
-///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * [TextureRegistry Protocol](/ios-embedder/protocol_flutter_texture_registry-p.html)
 ///    for how to create and manage backend textures on iOS.
 class TextureBox extends RenderBox {
   /// Creates a box backed by the texture identified by [textureId], and use
@@ -40,8 +42,7 @@ class TextureBox extends RenderBox {
     required int textureId,
     bool freeze = false,
     FilterQuality filterQuality = FilterQuality.low,
-  }) : assert(textureId != null),
-      _textureId = textureId,
+  }) : _textureId = textureId,
       _freeze = freeze,
       _filterQuality = filterQuality;
 
@@ -49,7 +50,6 @@ class TextureBox extends RenderBox {
   int get textureId => _textureId;
   int _textureId;
   set textureId(int value) {
-    assert(value != null);
     if (value != _textureId) {
       _textureId = value;
       markNeedsPaint();
@@ -60,7 +60,6 @@ class TextureBox extends RenderBox {
   bool get freeze => _freeze;
   bool _freeze;
   set freeze(bool value) {
-    assert(value != null);
     if (value != _freeze) {
       _freeze = value;
       markNeedsPaint();
@@ -71,7 +70,6 @@ class TextureBox extends RenderBox {
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
-    assert(value != null);
     if (value != _filterQuality) {
       _filterQuality = value;
       markNeedsPaint();
@@ -88,7 +86,8 @@ class TextureBox extends RenderBox {
   bool get isRepaintBoundary => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 

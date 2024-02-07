@@ -66,6 +66,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             androidSdk: _androidSdk,
             userMessages: _userMessages,
             fileSystem: _fileSystem,
+            buildInfo: buildInfo,
           );
         }
         return AndroidApk.fromApk(
@@ -97,6 +98,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);

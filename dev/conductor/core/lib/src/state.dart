@@ -15,7 +15,7 @@ const String kStateFileName = '.flutter_conductor_state.json';
 
 const String betaPostReleaseMsg = """
   'Ensure the following post release steps are complete:',
-  '\t 1. Post announcement to discord',
+  '\t 1. Post announcement to discord and press the publish button',
   '\t\t Discord: ${globals.discordReleaseChannel}',
   '\t 2. Post announcement flutter release hotline chat room',
   '\t\t Chatroom: ${globals.flutterReleaseHotline}',
@@ -28,16 +28,29 @@ const String stablePostReleaseMsg = """
   '\t\t Best practices: ${globals.hotfixDocumentationBestPractices}',
   '\t 2. Post announcement to flutter-announce group',
   '\t\t Flutter Announce: ${globals.flutterAnnounceGroup}',
-  '\t 3. Post announcement to discord',
+  '\t 3. Post announcement to discord and press the publish button',
   '\t\t Discord: ${globals.discordReleaseChannel}',
   '\t 4. Post announcement flutter release hotline chat room',
   '\t\t Chatroom: ${globals.flutterReleaseHotline}',
 """;
+// The helper functions in `state.dart` wrap the code-generated dart files in
+// `lib/src/proto/`. The most interesting of these functions is:
+
+// * `pb.ConductorState readStateFromFile(File)` - uses the code generated
+// `.mergeFromProto3Json()` method to deserialize the JSON content from the
+// config file into a Dart instance of the `ConductorState` class.
+// * `void writeStateFromFile(File, pb.ConductorState, List<String>)`
+// - similarly calls the `.toProto3Json()` method to serialize a
+// * `ConductorState` instance to a JSON string which is then written to disk.
+// `String phaseInstructions(pb.ConductorState state)` - returns instructions
+// for what the user is supposed to do next based on `state.currentPhase`.
+// * `String presentState(pb.ConductorState state)` - pretty print the state file.
+// This is a little easier to read than the raw JSON.
 
 String luciConsoleLink(String channel, String groupName) {
   assert(
     globals.kReleaseChannels.contains(channel),
-    'channel $channel not recognized',
+    'channel "$channel" not recognized',
   );
   assert(
     <String>['flutter', 'engine', 'packaging'].contains(groupName),
@@ -45,6 +58,9 @@ String luciConsoleLink(String channel, String groupName) {
   );
   final String consoleName =
       channel == 'master' ? groupName : '${channel}_$groupName';
+  if (groupName == 'packaging') {
+    return 'https://luci-milo.appspot.com/p/dart-internal/g/flutter_packaging/console';
+  }
   return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
 }
 
@@ -86,8 +102,7 @@ String presentState(pb.ConductorState state) {
   } else {
     buffer.writeln('0 Engine cherrypicks.');
   }
-  if (state.engine.dartRevision != null &&
-      state.engine.dartRevision.isNotEmpty) {
+  if (state.engine.dartRevision.isNotEmpty) {
     buffer.writeln('New Dart SDK revision: ${state.engine.dartRevision}');
   }
   buffer.writeln('Framework Repo');
@@ -149,6 +164,10 @@ String phaseInstructions(pb.ConductorState state) {
         return <String>[
           'There are no engine cherrypicks, so issue `conductor next` to continue',
           'to the next step.',
+          '\n',
+          '******************************************************',
+          '* Create a new entry in http://go/release-eng-retros *',
+          '******************************************************',
         ].join('\n');
       }
       return <String>[
@@ -158,10 +177,10 @@ String phaseInstructions(pb.ConductorState state) {
           '\t${cherrypick.trunkRevision}',
         'See ${globals.kReleaseDocumentationUrl} for more information.',
       ].join('\n');
-    case ReleasePhase.CODESIGN_ENGINE_BINARIES:
+    case ReleasePhase.VERIFY_ENGINE_CI:
       if (!requiresEnginePR(state)) {
-        return 'You must now codesign the engine binaries for commit '
-            '${state.engine.startingGitHead}.';
+        return 'You must verify engine CI has passed: '
+            '${luciConsoleLink(state.releaseChannel, 'engine')}';
       }
       // User's working branch was pushed to their mirror, but a PR needs to be
       // opened on GitHub.
@@ -212,8 +231,6 @@ String phaseInstructions(pb.ConductorState state) {
         'verify pre-submit CI builds on your pull request are successful, merge your ',
         'pull request, validate post-submit CI.',
       ].join('\n');
-    case ReleasePhase.PUBLISH_CHANNEL:
-      return 'Issue `conductor next` to publish your release to the release branch.';
     case ReleasePhase.VERIFY_RELEASE:
       return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
@@ -267,12 +284,20 @@ String githubAccount(String remoteUrl) {
 /// Will throw a [ConductorException] if [ReleasePhase.RELEASE_COMPLETED] is
 /// passed as an argument, as there is no next phase.
 ReleasePhase getNextPhase(ReleasePhase currentPhase) {
-  assert(currentPhase != null);
-  final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
-  if (nextPhase == null) {
-    throw globals.ConductorException('There is no next ReleasePhase!');
+  switch (currentPhase) {
+    case ReleasePhase.PUBLISH_VERSION:
+      return ReleasePhase.VERIFY_RELEASE;
+    case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
+    case ReleasePhase.VERIFY_ENGINE_CI:
+    case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
+    case ReleasePhase.VERIFY_RELEASE:
+    case ReleasePhase.RELEASE_COMPLETED:
+      final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
+      if (nextPhase != null) {
+        return nextPhase;
+      }
   }
-  return nextPhase;
+  throw globals.ConductorException('There is no next ReleasePhase!');
 }
 
 // Indent two spaces.

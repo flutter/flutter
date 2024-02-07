@@ -5,8 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '_html_element_view_io.dart' if (dart.library.js_util) '_html_element_view_web.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -64,7 +66,6 @@ class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
   /// {@template flutter.widgets.AndroidView.constructorArgs}
-  /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   /// {@endtemplate}
   const AndroidView({
@@ -77,10 +78,7 @@ class AndroidView extends StatefulWidget {
     this.creationParams,
     this.creationParamsCodec,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(viewType != null),
-       assert(hitTestBehavior != null),
-       assert(creationParams == null || creationParamsCodec != null),
-       assert(clipBehavior != null);
+  }) : assert(creationParams == null || creationParamsCodec != null);
 
   /// The unique identifier for Android view type to be embedded by this widget.
   ///
@@ -159,15 +157,16 @@ class AndroidView extends StatefulWidget {
   /// ```
   ///
   /// {@template flutter.widgets.AndroidView.gestureRecognizers.descFoot}
-  /// A platform view can be configured to consume all pointers that were put down in its bounds
-  /// by passing a factory for an [EagerGestureRecognizer] in [gestureRecognizers].
-  /// [EagerGestureRecognizer] is a special gesture recognizer that immediately claims the gesture
-  /// after a pointer down event.
+  /// A platform view can be configured to consume all pointers that were put
+  /// down in its bounds by passing a factory for an [EagerGestureRecognizer] in
+  /// [gestureRecognizers]. [EagerGestureRecognizer] is a special gesture
+  /// recognizer that immediately claims the gesture after a pointer down event.
   ///
-  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
+  /// The [gestureRecognizers] property must not contain more than one factory
+  /// with the same [Factory.type].
   ///
-  /// Changing `gestureRecognizers` results in rejection of any active gesture arenas (if the
-  /// platform view is actively participating in an arena).
+  /// Changing [gestureRecognizers] results in rejection of any active gesture
+  /// arenas (if the platform view is actively participating in an arena).
   /// {@endtemplate}
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
@@ -189,38 +188,22 @@ class AndroidView extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
   State<AndroidView> createState() => _AndroidViewState();
 }
 
-// TODO(amirh): describe the embedding mechanism.
-// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
-/// Embeds an iOS view in the Widget hierarchy.
+/// Common superclass for iOS and macOS platform views.
 ///
-/// {@macro flutter.rendering.RenderUiKitView}
-///
-/// Embedding iOS views is an expensive operation and should be avoided when a Flutter
-/// equivalent is possible.
-///
-/// {@macro flutter.widgets.AndroidView.layout}
-///
-/// {@macro flutter.widgets.AndroidView.gestures}
-///
-/// {@macro flutter.widgets.AndroidView.lifetime}
-///
-/// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
-/// nothing while maintaining the same layout constraints.
-///
-/// If a conic path clipping is applied to a UIKitView,
-/// a quad path is used to approximate the clip due to limitation of Quartz.
-class UiKitView extends StatefulWidget {
-  /// Creates a widget that embeds an iOS view.
+/// Platform views are used to embed native views in the widget hierarchy, with
+/// support for transforms, clips, and opacity similar to any other Flutter widget.
+abstract class _DarwinView extends StatefulWidget {
+  /// Creates a widget that embeds a platform view.
   ///
   /// {@macro flutter.widgets.AndroidView.constructorArgs}
-  const UiKitView({
+  const _DarwinView({
     super.key,
     required this.viewType,
     this.onPlatformViewCreated,
@@ -229,9 +212,7 @@ class UiKitView extends StatefulWidget {
     this.creationParams,
     this.creationParamsCodec,
     this.gestureRecognizers,
-  }) : assert(viewType != null),
-       assert(hitTestBehavior != null),
-       assert(creationParams == null || creationParamsCodec != null);
+  }) : assert(creationParams == null || creationParamsCodec != null);
 
   // TODO(amirh): reference the iOS API doc once available.
   /// The unique identifier for iOS view type to be embedded by this widget.
@@ -248,13 +229,13 @@ class UiKitView extends StatefulWidget {
   /// {@macro flutter.widgets.AndroidView.layoutDirection}
   final TextDirection? layoutDirection;
 
-  /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createWithFrame:viewIdentifier:arguments:)
+  /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/ios-embedder/protocol_flutter_platform_view_factory-p.html#a4e3c4390cd6ebd982390635e9bca4edc)
   ///
   /// This can be used by plugins to pass constructor parameters to the embedded iOS view.
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
-  /// platform side. It should match the codec returned by [-\[FlutterPlatformViewFactory createArgsCodec:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createArgsCodec)
+  /// platform side. It should match the codec returned by [-\[FlutterPlatformViewFactory createArgsCodec:\]](/ios-embedder/protocol_flutter_platform_view_factory-p.html#a32c3c067cb45a83dfa720c74a0d5c93c)
   ///
   /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
   ///
@@ -303,10 +284,87 @@ class UiKitView extends StatefulWidget {
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
   final Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers;
+}
+
+// TODO(amirh): describe the embedding mechanism.
+// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
+/// Embeds an iOS view in the Widget hierarchy.
+///
+/// Embedding iOS views is an expensive operation and should be avoided when a Flutter
+/// equivalent is possible.
+///
+/// {@macro flutter.widgets.AndroidView.layout}
+///
+/// {@macro flutter.widgets.AndroidView.gestures}
+///
+/// {@macro flutter.widgets.AndroidView.lifetime}
+///
+/// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
+/// nothing while maintaining the same layout constraints.
+///
+/// Clipping operations on a UiKitView can result slow performance.
+/// If a conic path clipping is applied to a UIKitView,
+/// a quad path is used to approximate the clip due to limitation of Quartz.
+class UiKitView extends _DarwinView {
+  /// Creates a widget that embeds an iOS view.
+  ///
+  /// {@macro flutter.widgets.AndroidView.constructorArgs}
+  const UiKitView({
+    super.key,
+    required super.viewType,
+    super.onPlatformViewCreated,
+    super.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
+    super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+    super.gestureRecognizers,
+  }) : assert(creationParams == null || creationParamsCodec != null);
 
   @override
   State<UiKitView> createState() => _UiKitViewState();
 }
+
+/// Widget that contains a macOS AppKit view.
+///
+/// Embedding macOS views is an expensive operation and should be avoided where
+/// a Flutter equivalent is possible.
+///
+/// The platform view's lifetime is the same as the lifetime of the [State]
+/// object for this widget. When the [State] is disposed the platform view (and
+/// auxiliary resources) are lazily released (some resources are immediately
+/// released and some by platform garbage collector). A stateful widget's state
+/// is disposed when the widget is removed from the tree or when it is moved
+/// within the tree. If the stateful widget has a key and it's only moved
+/// relative to its siblings, or it has a [GlobalKey] and it's moved within the
+/// tree, it will not be disposed.
+///
+/// Construction of AppKitViews is done asynchronously, before the underlying
+/// NSView is ready this widget paints nothing while maintaining the same
+/// layout constraints.
+class AppKitView extends _DarwinView {
+  /// Creates a widget that embeds a macOS AppKit NSView.
+  const AppKitView({
+    super.key,
+    required super.viewType,
+    super.onPlatformViewCreated,
+    super.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
+    super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+    super.gestureRecognizers,
+  });
+
+  @override
+  State<AppKitView> createState() => _AppKitViewState();
+}
+
+/// Callback signature for when the platform view's DOM element was created.
+///
+/// [element] is the DOM element that was created.
+///
+/// Also see [HtmlElementView.fromTagName] that uses this callback
+/// signature.
+typedef ElementCreatedCallback = void Function(Object element);
 
 /// Embeds an HTML element in the Widget hierarchy in Flutter Web.
 ///
@@ -349,8 +407,30 @@ class HtmlElementView extends StatelessWidget {
     super.key,
     required this.viewType,
     this.onPlatformViewCreated,
-  }) : assert(viewType != null),
-       assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
+    this.creationParams,
+  });
+
+  /// Creates a platform view that creates a DOM element specified by [tagName].
+  ///
+  /// [isVisible] indicates whether the view is visible to the user or not.
+  /// Setting this to false allows the rendering pipeline to perform extra
+  /// optimizations knowing that the view will not result in any pixels painted
+  /// on the screen.
+  ///
+  /// [onElementCreated] is called when the DOM element is created. It can be
+  /// used by the app to customize the element by adding attributes and styles.
+  factory HtmlElementView.fromTagName({
+    Key? key,
+    required String tagName,
+    bool isVisible = true,
+    ElementCreatedCallback? onElementCreated,
+  }) =>
+      HtmlElementViewImpl.createFromTagName(
+        key: key,
+        tagName: tagName,
+        isVisible: isVisible,
+        onElementCreated: onElementCreated,
+      );
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
   ///
@@ -362,75 +442,11 @@ class HtmlElementView extends StatelessWidget {
   /// May be null.
   final PlatformViewCreatedCallback? onPlatformViewCreated;
 
-  @override
-  Widget build(BuildContext context) {
-    return PlatformViewLink(
-      viewType: viewType,
-      onCreatePlatformView: _createHtmlElementView,
-      surfaceFactory: (BuildContext context, PlatformViewController controller) {
-        return PlatformViewSurface(
-          controller: controller,
-          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-        );
-      },
-    );
-  }
-
-  /// Creates the controller and kicks off its initialization.
-  _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
-    final _HtmlElementViewController controller = _HtmlElementViewController(params.id, viewType);
-    controller._initialize().then((_) {
-      params.onPlatformViewCreated(params.id);
-      onPlatformViewCreated?.call(params.id);
-    });
-    return controller;
-  }
-}
-
-class _HtmlElementViewController extends PlatformViewController {
-  _HtmlElementViewController(
-    this.viewId,
-    this.viewType,
-  );
+  /// Passed as the 2nd argument (i.e. `params`) of the registered view factory.
+  final Object? creationParams;
 
   @override
-  final int viewId;
-
-  /// The unique identifier for the HTML view type to be embedded by this widget.
-  ///
-  /// A PlatformViewFactory for this type must have been registered.
-  final String viewType;
-
-  bool _initialized = false;
-
-  Future<void> _initialize() async {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': viewType,
-    };
-    await SystemChannels.platform_views.invokeMethod<void>('create', args);
-    _initialized = true;
-  }
-
-  @override
-  Future<void> clearFocus() async {
-    // Currently this does nothing on Flutter Web.
-    // TODO(het): Implement this. See https://github.com/flutter/flutter/issues/39496
-  }
-
-  @override
-  Future<void> dispatchPointerEvent(PointerEvent event) async {
-    // We do not dispatch pointer events to HTML views because they may contain
-    // cross-origin iframes, which only accept user-generated events.
-  }
-
-  @override
-  Future<void> dispose() async {
-    if (_initialized) {
-      await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
-    }
-  }
+  Widget build(BuildContext context) => buildImpl(context);
 }
 
 class _AndroidViewState extends State<AndroidView> {
@@ -490,7 +506,7 @@ class _AndroidViewState extends State<AndroidView> {
     _layoutDirection = newLayoutDirection;
 
     if (widget.viewType != oldWidget.viewType) {
-      _controller.dispose();
+      _controller.disposePostFrame();
       _createNewAndroidView();
       return;
     }
@@ -508,6 +524,8 @@ class _AndroidViewState extends State<AndroidView> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 
@@ -563,31 +581,31 @@ class _AndroidViewState extends State<AndroidView> {
   }
 }
 
-class _UiKitViewState extends State<UiKitView> {
-  UiKitViewController? _controller;
+abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT extends DarwinPlatformViewController, RenderT extends RenderDarwinPlatformView<ControllerT>, ViewT extends _DarwinPlatformView<ControllerT, RenderT>> extends State<PlatformViewT> {
+  ControllerT? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
-  late FocusNode _focusNode;
+
+  @visibleForTesting
+  FocusNode? focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
-    final UiKitViewController? controller = _controller;
+    final ControllerT? controller = _controller;
     if (controller == null) {
       return const SizedBox.expand();
     }
     return Focus(
-      focusNode: _focusNode,
+      focusNode: focusNode,
       onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
-      child: _UiKitPlatformView(
-        controller: _controller!,
-        hitTestBehavior: widget.hitTestBehavior,
-        gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
-      ),
+      child: childPlatformView()
     );
   }
+
+  ViewT childPlatformView();
 
   void _initializeOnce() {
     if (_initialized) {
@@ -613,7 +631,7 @@ class _UiKitViewState extends State<UiKitView> {
   }
 
   @override
-  void didUpdateWidget(UiKitView oldWidget) {
+  void didUpdateWidget(PlatformViewT oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
@@ -622,6 +640,9 @@ class _UiKitViewState extends State<UiKitView> {
 
     if (widget.viewType != oldWidget.viewType) {
       _controller?.dispose();
+      _controller = null;
+      focusNode?.dispose();
+      focusNode = null;
       _createNewUiKitView();
       return;
     }
@@ -639,20 +660,16 @@ class _UiKitViewState extends State<UiKitView> {
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
+    focusNode?.dispose();
+    focusNode = null;
     super.dispose();
   }
 
   Future<void> _createNewUiKitView() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
-    final UiKitViewController controller = await PlatformViewsService.initUiKitView(
-      id: id,
-      viewType: widget.viewType,
-      layoutDirection: _layoutDirection!,
-      creationParams: widget.creationParams,
-      creationParamsCodec: widget.creationParamsCodec,
-      onFocus: () {
-        _focusNode.requestFocus();
-      }
+    final ControllerT controller = await createNewViewController(
+      id
     );
     if (!mounted) {
       controller.dispose();
@@ -661,11 +678,13 @@ class _UiKitViewState extends State<UiKitView> {
     widget.onPlatformViewCreated?.call(id);
     setState(() {
       _controller = controller;
-      _focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
+      focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
     });
   }
 
-  void _onFocusChange(bool isFocused, UiKitViewController controller) {
+  Future<ControllerT> createNewViewController(int id);
+
+  void _onFocusChange(bool isFocused, ControllerT controller) {
     if (!isFocused) {
       // Unlike Android, we do not need to send "clearFocus" channel message
       // to the engine, because focusing on another view will automatically
@@ -679,16 +698,63 @@ class _UiKitViewState extends State<UiKitView> {
   }
 }
 
+class _UiKitViewState extends _DarwinViewState<UiKitView, UiKitViewController, RenderUiKitView, _UiKitPlatformView> {
+  @override
+  Future<UiKitViewController> createNewViewController(int id) async {
+    return PlatformViewsService.initUiKitView(
+      id: id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection!,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        focusNode?.requestFocus();
+      }
+    );
+  }
+
+  @override
+  _UiKitPlatformView childPlatformView() {
+    return _UiKitPlatformView(
+        controller: _controller!,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
+      );
+  }
+}
+
+class _AppKitViewState extends _DarwinViewState<AppKitView, AppKitViewController, RenderAppKitView, _AppKitPlatformView> {
+  @override
+  Future<AppKitViewController> createNewViewController(int id) async {
+    return PlatformViewsService.initAppKitView(
+      id: id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection!,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        focusNode?.requestFocus();
+      }
+    );
+  }
+
+  @override
+  _AppKitPlatformView childPlatformView() {
+    return _AppKitPlatformView(
+        controller: _controller!,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
+      );
+  }
+}
+
 class _AndroidPlatformView extends LeafRenderObjectWidget {
   const _AndroidPlatformView({
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(controller != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null),
-       assert(clipBehavior != null);
+  });
 
   final AndroidViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
@@ -713,18 +779,29 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   }
 }
 
-class _UiKitPlatformView extends LeafRenderObjectWidget {
-  const _UiKitPlatformView({
+abstract class _DarwinPlatformView<TController extends DarwinPlatformViewController, TRender extends RenderDarwinPlatformView<TController>> extends LeafRenderObjectWidget {
+  const _DarwinPlatformView({
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
-  }) : assert(controller != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null);
+  });
 
-  final UiKitViewController controller;
+  final TController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  @override
+  @mustCallSuper
+  void updateRenderObject(BuildContext context, TRender renderObject) {
+    renderObject
+      ..viewController = controller
+      ..hitTestBehavior = hitTestBehavior
+      ..updateGestureRecognizers(gestureRecognizers);
+  }
+}
+
+class _UiKitPlatformView extends _DarwinPlatformView<UiKitViewController, RenderUiKitView> {
+  const _UiKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -734,12 +811,18 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
       gestureRecognizers: gestureRecognizers,
     );
   }
+}
+
+class _AppKitPlatformView extends _DarwinPlatformView<AppKitViewController, RenderAppKitView> {
+  const _AppKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
 
   @override
-  void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {
-    renderObject.viewController = controller;
-    renderObject.hitTestBehavior = hitTestBehavior;
-    renderObject.updateGestureRecognizers(gestureRecognizers);
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderAppKitView(
+      viewController: controller,
+      hitTestBehavior: hitTestBehavior,
+      gestureRecognizers: gestureRecognizers,
+    );
   }
 }
 
@@ -755,8 +838,7 @@ class PlatformViewCreationParams {
     required this.viewType,
     required this.onPlatformViewCreated,
     required this.onFocusChanged,
-  }) : assert(id != null),
-       assert(onPlatformViewCreated != null);
+  });
 
   /// The unique identifier for the new platform view.
   ///
@@ -832,8 +914,6 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 class PlatformViewLink extends StatefulWidget {
   /// Construct a [PlatformViewLink] widget.
   ///
-  /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
-  ///
   /// See also:
   ///
   ///  * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
@@ -843,10 +923,7 @@ class PlatformViewLink extends StatefulWidget {
     required PlatformViewSurfaceFactory surfaceFactory,
     required CreatePlatformViewCallback onCreatePlatformView,
     required this.viewType,
-    }) : assert(surfaceFactory != null),
-         assert(onCreatePlatformView != null),
-         assert(viewType != null),
-         _surfaceFactory = surfaceFactory,
+    }) : _surfaceFactory = surfaceFactory,
          _onCreatePlatformView = onCreatePlatformView;
 
 
@@ -876,11 +953,11 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       return const SizedBox.expand();
     }
     if (!_platformViewCreated) {
-      // Depending on the implementation, the initial size can be used to size
-      // the platform view.
-      return _PlatformViewPlaceHolder(onLayout: (Size size) {
-        if (controller.awaitingCreation) {
-          controller.create(size: size);
+      // Depending on the implementation, the first non-empty size can be used
+      // to size the platform view.
+      return _PlatformViewPlaceHolder(onLayout: (Size size, Offset position) {
+        if (controller.awaitingCreation && !size.isEmpty) {
+          controller.create(size: size, position: position);
         }
       });
     }
@@ -904,7 +981,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.viewType != oldWidget.viewType) {
-      _controller?.dispose();
+      _controller?.disposePostFrame();
       // The _surface has to be recreated as its controller is disposed.
       // Setting _surface to null will trigger its creation in build().
       _surface = null;
@@ -925,9 +1002,11 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   }
 
   void _onPlatformViewCreated(int id) {
-    setState(() {
-      _platformViewCreated = true;
-    });
+    if (mounted) {
+      setState(() {
+        _platformViewCreated = true;
+      });
+    }
   }
 
   void _handleFrameworkFocusChanged(bool isFocused) {
@@ -950,6 +1029,8 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void dispose() {
     _controller?.dispose();
     _controller = null;
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 }
@@ -973,17 +1054,13 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 // TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
-  /// Construct a `PlatformViewSurface`.
-  ///
-  /// The [controller] must not be null.
+  /// Construct a [PlatformViewSurface].
   const PlatformViewSurface({
     super.key,
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
-  }) : assert(controller != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null);
+  });
 
   /// The controller for the platform view integrated by this [PlatformViewSurface].
   ///
@@ -1069,30 +1146,85 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 ///
 ///  * [AndroidView] which embeds an Android platform view in the widget hierarchy.
 ///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
-class AndroidViewSurface extends PlatformViewSurface {
+class AndroidViewSurface extends StatefulWidget {
   /// Construct an `AndroidPlatformViewSurface`.
   const AndroidViewSurface({
     super.key,
+    required this.controller,
+    required this.hitTestBehavior,
+    required this.gestureRecognizers,
+  });
+
+  /// The controller for the platform view integrated by this [AndroidViewSurface].
+  ///
+  /// See [PlatformViewSurface.controller] for details.
+  final AndroidViewController controller;
+
+  /// Which gestures should be forwarded to the PlatformView.
+  ///
+  /// See [PlatformViewSurface.gestureRecognizers] for details.
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  /// {@macro flutter.widgets.AndroidView.hitTestBehavior}
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  @override
+  State<StatefulWidget> createState() {
+    return _AndroidViewSurfaceState();
+  }
+}
+
+class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.controller.isCreated) {
+      // Schedule a rebuild once creation is complete and the final display
+      // type is known.
+      widget.controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.controller.requiresViewComposition) {
+      return _PlatformLayerBasedAndroidViewSurface(
+        controller: widget.controller,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers,
+      );
+    } else {
+      return _TextureBasedAndroidViewSurface(
+        controller: widget.controller,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers,
+      );
+    }
+  }
+
+  void _onPlatformViewCreated(int _) {
+    // Trigger a re-build based on the current controller state.
+    setState(() {});
+  }
+}
+
+// Displays an Android platform view via GL texture.
+class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
+  const _TextureBasedAndroidViewSurface({
     required AndroidViewController super.controller,
     required super.hitTestBehavior,
     required super.gestureRecognizers,
-  }) : assert(controller != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null);
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     final AndroidViewController viewController = controller as AndroidViewController;
-    // Compose using the Android view hierarchy.
-    // This is useful when embedding a SurfaceView into a Flutter app.
-    // SurfaceViews cannot be composed using GL textures.
-    if (viewController is ExpensiveAndroidViewController) {
-      final PlatformViewRenderBox renderBox =
-          super.createRenderObject(context) as PlatformViewRenderBox;
-      viewController.pointTransformer =
-          (Offset position) => renderBox.globalToLocal(position);
-      return renderBox;
-    }
     // Use GL texture based composition.
     // App should use GL texture unless they require to embed a SurfaceView.
     final RenderAndroidView renderBox = RenderAndroidView(
@@ -1106,9 +1238,27 @@ class AndroidViewSurface extends PlatformViewSurface {
   }
 }
 
+class _PlatformLayerBasedAndroidViewSurface extends PlatformViewSurface {
+  const _PlatformLayerBasedAndroidViewSurface({
+    required AndroidViewController super.controller,
+    required super.hitTestBehavior,
+    required super.gestureRecognizers,
+  });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    final AndroidViewController viewController = controller as AndroidViewController;
+    final PlatformViewRenderBox renderBox =
+        super.createRenderObject(context) as PlatformViewRenderBox;
+    viewController.pointTransformer =
+        (Offset position) => renderBox.globalToLocal(position);
+    return renderBox;
+  }
+}
+
 /// A callback used to notify the size of the platform view placeholder.
 /// This size is the initial size of the platform view.
-typedef _OnLayoutCallback = void Function(Size size);
+typedef _OnLayoutCallback = void Function(Size size, Offset position);
 
 /// A [RenderBox] that notifies its size to the owner after a layout.
 class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
@@ -1124,7 +1274,10 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
   @override
   void performLayout() {
     super.performLayout();
-    onLayout(size);
+    // A call to `localToGlobal` requires waiting for a frame to render first.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      onLayout(size, localToGlobal(Offset.zero));
+    }, debugLabel: 'PlatformViewPlaceholderBox.onLayout');
   }
 }
 
@@ -1147,5 +1300,15 @@ class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _PlatformViewPlaceholderBox renderObject) {
     renderObject.onLayout = onLayout;
+  }
+}
+
+extension on PlatformViewController {
+  /// Disposes the controller in a post-frame callback, to allow other widgets to
+  /// remove their listeners before the controller is disposed.
+  void disposePostFrame() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      dispose();
+    }, debugLabel: 'PlatformViewController.dispose');
   }
 }

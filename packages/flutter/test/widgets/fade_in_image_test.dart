@@ -15,9 +15,7 @@ import '../painting/image_test_utils.dart';
 const Duration animationDuration = Duration(milliseconds: 50);
 
 class FadeInImageParts {
-  const FadeInImageParts(this.fadeInImageElement, this.placeholder, this.target)
-      : assert(fadeInImageElement != null),
-        assert(target != null);
+  const FadeInImageParts(this.fadeInImageElement, this.placeholder, this.target);
 
   final ComponentElement fadeInImageElement;
   final FadeInImageElements? placeholder;
@@ -32,16 +30,6 @@ class FadeInImageParts {
     expect(animatedFadeOutFadeInElement, isNotNull);
     return animatedFadeOutFadeInElement!.state;
   }
-
-  Element? get semanticsElement {
-    Element? result;
-    fadeInImageElement.visitChildren((Element child) {
-      if (child.widget is Semantics) {
-        result = child;
-      }
-    });
-    return result;
-  }
 }
 
 class FadeInImageElements {
@@ -53,6 +41,8 @@ class FadeInImageElements {
   double get opacity => rawImage.opacity?.value ?? 1.0;
   BoxFit? get fit => rawImage.fit;
   FilterQuality? get filterQuality => rawImage.filterQuality;
+  Color? get color => rawImage.color;
+  BlendMode? get colorBlendMode => rawImage.colorBlendMode;
 }
 
 class LoadTestImageProvider extends ImageProvider<Object> {
@@ -70,7 +60,7 @@ class LoadTestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
     throw UnimplementedError();
   }
 }
@@ -102,11 +92,23 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   }
 }
 
-Future<void> main() async {
+void main() {
   // These must run outside test zone to complete
-  final ui.Image targetImage = await createTestImage();
-  final ui.Image placeholderImage = await createTestImage();
-  final ui.Image replacementImage = await createTestImage();
+  late final ui.Image targetImage;
+  late final ui.Image placeholderImage;
+  late final ui.Image replacementImage;
+
+  setUpAll(() async {
+    targetImage = await createTestImage();
+    placeholderImage = await createTestImage();
+    replacementImage = await createTestImage();
+  });
+
+  tearDownAll(() {
+    targetImage.dispose();
+    placeholderImage.dispose();
+    replacementImage.dispose();
+  });
 
   group('FadeInImage', () {
     testWidgets('animates an uncached image', (WidgetTester tester) async {
@@ -191,6 +193,44 @@ Future<void> main() async {
       expect(parts.target.opacity, 1);
 
       // Until the new image provider provides the image.
+      secondImageProvider.complete();
+      await tester.pump();
+
+      parts = findFadeInImage(tester);
+      expect(parts.target.rawImage.image!.isCloneOf(replacementImage), isTrue);
+      expect(parts.target.opacity, 1);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/111011
+    testWidgets("FadeInImage's image obeys gapless playback when first image is cached but second isn't",
+            (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+      final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
+
+      // Pre-cache the initial image.
+      imageProvider.resolve(ImageConfiguration.empty);
+      imageProvider.complete();
+      placeholderProvider.complete();
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: secondImageProvider,
+      ));
+
+      FadeInImageParts parts = findFadeInImage(tester);
+      // Continually shows previously loaded image until the new image provider provides the image.
+      expect(parts.placeholder, isNull);
+      expect(parts.target.rawImage.image!.isCloneOf(targetImage), isTrue);
+      expect(parts.target.opacity, 1);
+
+      // Now, provide the image.
       secondImageProvider.complete();
       await tester.pump();
 
@@ -337,6 +377,29 @@ Future<void> main() async {
       await tester.pump(animationDuration);
       expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
+    });
+
+    testWidgets('Image color and colorBlend parameters', (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+        color: const Color(0xFF00FF00),
+        colorBlendMode: BlendMode.clear,
+        placeholderColor: const Color(0xFF0000FF),
+        placeholderColorBlendMode: BlendMode.modulate,
+        fadeOutDuration: animationDuration,
+        fadeInDuration: animationDuration,
+        excludeFromSemantics: true,
+      ));
+
+      expect(findFadeInImage(tester).placeholder?.color, const Color(0xFF0000FF));
+      expect(findFadeInImage(tester).placeholder?.colorBlendMode, BlendMode.modulate);
+      await tester.pump(animationDuration);
+      expect(findFadeInImage(tester).target.color, const Color(0xFF00FF00));
+      expect(findFadeInImage(tester).target.colorBlendMode, BlendMode.clear);
     });
 
     group('ImageProvider', () {

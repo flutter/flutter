@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -27,14 +26,14 @@ void main () {
 
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
         final Map<dynamic, dynamic> typedMessage = message as Map<dynamic, dynamic>;
         semanticEvents.add(typedMessage.cast<String, Object>());
       });
     });
 
     tearDown(() {
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
     });
 
     testWidgets('forTap', (WidgetTester tester) async {

@@ -87,6 +87,61 @@ void main() {
       expect(box.size.height, equals(100.0));
     });
 
+    testWidgets('calls onEnd when animation is completed', (WidgetTester tester) async {
+      int callCount = 0;
+      void handleEnd() {
+        callCount++;
+      }
+
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            onEnd: handleEnd,
+            duration: const Duration(milliseconds: 200),
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      expect(callCount, equals(0));
+
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            onEnd: handleEnd,
+            duration: const Duration(milliseconds: 200),
+            child: const SizedBox(
+              width: 200.0,
+              height: 200.0,
+            ),
+          ),
+        ),
+      );
+
+      expect(callCount, equals(0));
+      await tester.pumpAndSettle();
+      expect(callCount, equals(1));
+
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            onEnd: handleEnd,
+            duration: const Duration(milliseconds: 200),
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(callCount, equals(2));
+    });
+
     testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
@@ -286,7 +341,7 @@ void main() {
       final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
       expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-      for(final Clip clip in Clip.values) {
+      for (final Clip clip in Clip.values) {
         await tester.pumpWidget(
           Center(
             child: AnimatedSize(
@@ -323,7 +378,7 @@ void main() {
               ),
             ),
           ),
-          duration,
+          duration: duration,
         );
       }
 
@@ -431,6 +486,43 @@ void main() {
       expect(
         tester.renderObject<RenderBox>(find.byType(AnimatedSize)).size,
         const Size.square(150),
+      );
+    });
+
+    testWidgets('disposes animation and controller', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Center(
+          child: AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+
+      await tester.pumpWidget(
+        const Center(),
+      );
+
+      expect(box.debugAnimation, isNotNull);
+      expect(box.debugAnimation!.isDisposed, isTrue);
+      expect(box.debugController, isNotNull);
+      expect(
+        () => box.debugController!.dispose(),
+        throwsA(isA<AssertionError>().having(
+          (AssertionError error) => error.message,
+          'message',
+          equalsIgnoringHashCodes(
+            'AnimationController.dispose() called more than once.\n'
+            'A given AnimationController cannot be disposed more than once.\n'
+            'The following AnimationController object was disposed multiple times:\n'
+            '  AnimationController#00000(⏮ 0.000; paused; DISPOSED)',
+          ),
+        )),
       );
     });
   });

@@ -137,6 +137,7 @@ void main() {
       expect(await device.isLatestBuildInstalled(linuxApp), false);
       expect(await device.isAppInstalled(linuxApp), false);
       expect(await device.stopApp(linuxApp), false);
+      expect(await device.stopApp(null), false);
       expect(device.category, Category.mobile);
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -165,7 +166,7 @@ void main() {
         directory: dir,
         logger: BufferLogger.test()
       )
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('CustomDevice: no devices listed if custom devices feature flag disabled', () async {
@@ -183,7 +184,7 @@ void main() {
         directory: dir,
         logger: BufferLogger.test()
       )
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('CustomDevices.devices', () async {
@@ -207,7 +208,7 @@ void main() {
           directory: dir,
           logger: BufferLogger.test()
         )
-      ).devices,
+      ).devices(),
       hasLength(1)
     );
   });
@@ -226,7 +227,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: testConfig.pingCommand,
-          onRun: () => pingCommandWasExecuted = true,
+          onRun: (_) => pingCommandWasExecuted = true,
           stdout: testConfigPingSuccessOutput
         ),
       ]),
@@ -317,7 +318,7 @@ void main() {
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
             FakeCommand(command: testConfig.uninstallCommand),
-            FakeCommand(command: testConfig.installCommand, onRun: () => bothCommandsWereExecuted = true),
+            FakeCommand(command: testConfig.installCommand, onRun: (_) => bothCommandsWereExecuted = true),
           ])
       );
 
@@ -358,7 +359,7 @@ void main() {
     expect(forwardPortCommandCompleter.isCompleted, true);
   });
 
-  testWithoutContext('CustomDevice forwards observatory port correctly when port forwarding is configured', () async {
+  testWithoutContext('CustomDevice forwards VM Service port correctly when port forwarding is configured', () async {
     final Completer<void> runDebugCompleter = Completer<void>();
     final Completer<void> forwardPortCompleter = Completer<void>();
 
@@ -390,7 +391,7 @@ void main() {
     final LaunchResult launchResult = await appSession.start(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug));
 
     expect(launchResult.started, true);
-    expect(launchResult.observatoryUri, Uri.parse('http://127.0.0.1:12345/abcd/'));
+    expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:12345/abcd/'));
     expect(runDebugCompleter.isCompleted, false);
     expect(forwardPortCompleter.isCompleted, false);
 
@@ -399,7 +400,7 @@ void main() {
     expect(forwardPortCompleter.isCompleted, true);
   });
 
-  testWithoutContext('CustomDeviceAppSession forwards observatory port correctly when port forwarding is not configured', () async {
+  testWithoutContext('CustomDeviceAppSession forwards VM Service port correctly when port forwarding is not configured', () async {
     final Completer<void> runDebugCompleter = Completer<void>();
 
     final FakeProcessManager processManager = FakeProcessManager.list(
@@ -427,7 +428,7 @@ void main() {
     final LaunchResult launchResult = await appSession.start(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug));
 
     expect(launchResult.started, true);
-    expect(launchResult.observatoryUri, Uri.parse('http://192.168.178.123:12345/abcd/'));
+    expect(launchResult.vmServiceUri, Uri.parse('http://192.168.178.123:12345/abcd/'));
     expect(runDebugCompleter.isCompleted, false);
 
     expect(await appSession.stop(), true);
@@ -500,8 +501,8 @@ void main() {
         bundleBuilder: FakeBundleBuilder()
       );
       expect(result.started, true);
-      expect(result.hasObservatory, true);
-      expect(result.observatoryUri, Uri.tryParse('http://127.0.0.1:12345/abcd/'));
+      expect(result.hasVmService, true);
+      expect(result.vmServiceUri, Uri.tryParse('http://127.0.0.1:12345/abcd/'));
       expect(runDebugCompleter.isCompleted, false);
       expect(forwardPortCompleter.isCompleted, false);
 
@@ -521,7 +522,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: testConfig.screenshotCommand!,
-        onRun: () => screenshotCommandWasExecuted = true,
+        onRun: (_) => screenshotCommandWasExecuted = true,
       ),
     ]);
 
@@ -547,7 +548,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: testConfig.screenshotCommand!,
-        onRun: () => screenshotCommandWasExecuted = true,
+        onRun: (_) => screenshotCommandWasExecuted = true,
       ),
     ]);
 
@@ -643,6 +644,8 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
+    Uri? nativeAssets,
+    bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem
   }) async {}
 }

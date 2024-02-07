@@ -26,16 +26,14 @@ typedef OrientationWidgetBuilder = Widget Function(BuildContext context, Orienta
 ///    landscape or portrait mode.
 class OrientationBuilder extends StatelessWidget {
   /// Creates an orientation builder.
-  ///
-  /// The [builder] argument must not be null.
   const OrientationBuilder({
     super.key,
     required this.builder,
-  }) : assert(builder != null);
+  });
 
   /// Builds the widgets below this widget given this widget's orientation.
   ///
-  /// A widget's orientation is simply a factor of its width relative to its
+  /// A widget's orientation is a factor of its width relative to its
   /// height. For example, a [Column] widget will have a landscape orientation
   /// if its width exceeds its height, even though it displays its children in
   /// a vertical array.

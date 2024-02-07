@@ -423,6 +423,33 @@ void main() {
     expect(buildCount, equals(2));
   });
 
+  testWidgets("BuildContext.getInheritedWidgetOfExactType doesn't create a dependency", (WidgetTester tester) async {
+    int buildCount = 0;
+    final GlobalKey<void> inheritedKey = GlobalKey();
+    final ChangeNotifier notifier = ChangeNotifier();
+    addTearDown(notifier.dispose);
+
+    final Widget builder = Builder(
+      builder: (BuildContext context) {
+        expect(context.getInheritedWidgetOfExactType<ChangeNotifierInherited>(), equals(inheritedKey.currentWidget));
+        buildCount += 1;
+        return Container();
+      },
+    );
+
+    final Widget inner = ChangeNotifierInherited(
+      key: inheritedKey,
+      notifier: notifier,
+      child: builder,
+    );
+
+    await tester.pumpWidget(inner);
+    expect(buildCount, equals(1));
+    notifier.notifyListeners();
+    await tester.pumpWidget(inner);
+    expect(buildCount, equals(1));
+  });
+
   testWidgets('initState() dependency on Inherited asserts', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/5491
     bool exceptionCaught = false;
@@ -438,6 +465,7 @@ void main() {
   testWidgets('InheritedNotifier', (WidgetTester tester) async {
     int buildCount = 0;
     final ChangeNotifier notifier = ChangeNotifier();
+    addTearDown(notifier.dispose);
 
     final Widget builder = Builder(
       builder: (BuildContext context) {

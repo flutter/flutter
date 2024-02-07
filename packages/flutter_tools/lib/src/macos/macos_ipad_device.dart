@@ -14,7 +14,6 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../ios/application_package.dart';
 import '../ios/ios_workflow.dart';
 import '../project.dart';
 
@@ -29,7 +28,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required OperatingSystemUtils operatingSystemUtils,
   })  : _operatingSystemUtils = operatingSystemUtils,
         super(
-          'designed-for-ipad',
+          'mac-designed-for-ipad',
           platformType: PlatformType.macos,
           ephemeral: false,
           processManager: processManager,
@@ -50,16 +49,19 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   bool isSupported() => _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync() && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
   }
 
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) => null;
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) => null;
 
   @override
   Future<LaunchResult> startApp(
-    IOSApp package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -74,13 +76,12 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
   @override
   Future<bool> stopApp(
-    IOSApp app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async => false;
 
   @override
-  Future<void> buildForDevice(
-    covariant IOSApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
   }) async {
@@ -119,10 +120,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
-      _iosWorkflow.canListDevices && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64 && allowDiscovery;
-
-  /// Set to show ARM macOS as an iOS device target.
-  static bool allowDiscovery = false;
+      _iosWorkflow.canListDevices && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
@@ -143,5 +141,5 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 
   @override
-  List<String> get wellKnownIds => const <String>['designed-for-ipad'];
+  List<String> get wellKnownIds => const <String>['mac-designed-for-ipad'];
 }

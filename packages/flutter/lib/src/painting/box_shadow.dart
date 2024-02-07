@@ -80,15 +80,14 @@ class BoxShadow extends ui.Shadow {
 
   /// Linearly interpolate between two box shadows.
   ///
-  /// If either box shadow is null, this function linearly interpolates from a
+  /// If either box shadow is null, this function linearly interpolates from
   /// a box shadow that matches the other box shadow in color but has a zero
   /// offset and a zero blurRadius.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxShadow? lerp(BoxShadow? a, BoxShadow? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);
@@ -111,9 +110,8 @@ class BoxShadow extends ui.Shadow {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static List<BoxShadow>? lerpList(List<BoxShadow>? a, List<BoxShadow>? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     a ??= <BoxShadow>[];
     b ??= <BoxShadow>[];

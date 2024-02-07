@@ -42,6 +42,10 @@ abstract class ScrollContext {
   /// The direction in which the widget scrolls.
   AxisDirection get axisDirection;
 
+  /// The [FlutterView.devicePixelRatio] of the view that the [Scrollable] this
+  /// [ScrollContext] is associated with is drawn into.
+  double get devicePixelRatio;
+
   /// Whether the contents of the widget should ignore [PointerEvent] inputs.
   ///
   /// Setting this value to true prevents the use from interacting with the

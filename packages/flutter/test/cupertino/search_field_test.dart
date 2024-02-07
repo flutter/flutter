@@ -94,11 +94,13 @@ void main() {
   testWidgets(
     'text entries are padded by default',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'initial');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'initial'),
+              controller: controller,
             ),
           ),
         ),
@@ -107,8 +109,24 @@ void main() {
       expect(
         tester.getTopLeft(find.text('initial')) -
             tester.getTopLeft(find.byType(CupertinoSearchTextField)),
-        const Offset(29.8, 8.0),
+        const Offset(31.5, 8.0),
       );
+    },
+  );
+
+  testWidgets('can change keyboard type', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoSearchTextField(
+              keyboardType: TextInputType.number,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(CupertinoSearchTextField));
+      await tester.showKeyboard(find.byType(CupertinoSearchTextField));
+      expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.number'));
     },
   );
 
@@ -116,6 +134,7 @@ void main() {
     'can control text content via controller',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -204,18 +223,21 @@ void main() {
   testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'input');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'input'),
+              controller: controller,
             ),
           ),
         ),
       );
 
       expect(
-        tester.getTopRight(find.byIcon(CupertinoIcons.search)).dx + 3.8,
+        tester.getTopRight(find.byIcon(CupertinoIcons.search)).dx + 5.5,
         tester.getTopLeft(find.byType(EditableText)).dx,
       );
 
@@ -223,7 +245,7 @@ void main() {
         tester.getTopLeft(find.byType(EditableText)).dx,
         tester.getTopLeft(find.byType(CupertinoSearchTextField)).dx +
             tester.getSize(find.byIcon(CupertinoIcons.search)).width +
-            9.8,
+            11.5,
       );
     },
   );
@@ -231,18 +253,21 @@ void main() {
   testWidgets(
     'suffix widget is after the text',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'Hi');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'Hi'),
+              controller: controller,
             ),
           ),
         ),
       );
 
       expect(
-        tester.getTopRight(find.byType(EditableText)).dx + 5.0,
+        tester.getTopRight(find.byType(EditableText)).dx + 5.5,
         tester.getTopLeft(find.byIcon(CupertinoIcons.xmark_circle_fill)).dx,
       );
 
@@ -252,7 +277,7 @@ void main() {
             tester
                 .getSize(find.byIcon(CupertinoIcons.xmark_circle_fill))
                 .width -
-            10.0,
+            10.5,
       );
     },
   );
@@ -313,6 +338,7 @@ void main() {
     'clear button shows with right visibility mode',
     (WidgetTester tester) async {
       TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -333,7 +359,7 @@ void main() {
       expect(find.text('text input'), findsOneWidget);
 
       controller = TextEditingController();
-
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -358,6 +384,7 @@ void main() {
     'clear button removes text',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -386,6 +413,7 @@ void main() {
     (WidgetTester tester) async {
       String value = 'text entry';
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -469,6 +497,7 @@ void main() {
     'custom suffix onTap overrides default clearing behavior',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'Text');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -565,6 +594,7 @@ void main() {
 
   testWidgets('autofocus:true gives focus to the widget', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -607,5 +637,21 @@ void main() {
 
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.smartDashesType, SmartDashesType.disabled);
+  });
+
+  testWidgets(
+      'enableIMEPersonalizedLearning is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            enableIMEPersonalizedLearning: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.enableIMEPersonalizedLearning, false);
   });
 }

@@ -15,12 +15,10 @@ apps in general, see the
 ### Translations for one locale: .arb files
 
 The Material and Cupertino libraries use
-[Application Resource Bundle](https://code.google.com/p/arb/wiki/ApplicationResourceBundleSpecification)
+[Application Resource Bundle](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification)
 files, which have a `.arb` extension, to store localized translations
 of messages, format strings, and other values. This format is also
-used by the Dart [intl](https://pub.dev/packages/intl)
-package and it is supported by the
-[Google Translators Toolkit](https://translate.google.com/toolkit).
+used by the Dart [intl](https://pub.dev/packages/intl) package.
 
 The Material and Cupertino libraries only depend on a small subset
 of the ARB format. Each .arb file contains a single JSON table that
@@ -213,7 +211,7 @@ Google contributes translations for all the languages supported by
 this package. (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
-[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=2_bug.md).
+[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=2_bug.yml).
 
 
 ### See Also

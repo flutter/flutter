@@ -5,11 +5,11 @@
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import '../src/darwin_common.dart';
 
 void main() {
   group('iOS app validation', () {
@@ -42,18 +42,22 @@ void main() {
       );
 
       // Pre-cache iOS engine Flutter.xcframework artifacts.
-      processManager.runSync(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'precache',
-        '--ios',
-      ], workingDirectory: tempDir.path);
+      ProcessResult result = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'precache',
+          '--ios',
+        ],
+        workingDirectory: tempDir.path,
+      );
+      expect(result, const ProcessResultMatcher());
 
       // Pretend the SDK was on an external drive with stray "._" files in the xcframework
       hiddenFile = xcframeworkArtifact.childFile('._Info.plist')..createSync();
 
       // Test a plugin example app to allow plugins validation.
-      processManager.runSync(<String>[
+      result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
@@ -63,6 +67,7 @@ void main() {
         'plugin',
         'hello',
       ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
 
       pluginRoot = tempDir.childDirectory('hello');
       projectRoot = pluginRoot.childDirectory('example').path;
@@ -74,8 +79,8 @@ void main() {
     });
 
     for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
-      group('build in ${buildMode.name} mode', () {
-        late Directory buildPath;
+      group('build in ${buildMode.cliName} mode', () {
+        late Directory outputPath;
         late Directory outputApp;
         late Directory frameworkDirectory;
         late Directory outputFlutterFramework;
@@ -83,6 +88,9 @@ void main() {
         late Directory outputAppFramework;
         late File outputAppFrameworkBinary;
         late File outputPluginFrameworkBinary;
+        late Directory buildPath;
+        late Directory buildAppFrameworkDsym;
+        late File buildAppFrameworkDsymBinary;
         late ProcessResult buildResult;
 
         setUpAll(() {
@@ -93,19 +101,19 @@ void main() {
             'ios',
             '--verbose',
             '--no-codesign',
-            '--${buildMode.name}',
+            '--${buildMode.cliName}',
             '--obfuscate',
             '--split-debug-info=foo debug info/',
           ], workingDirectory: projectRoot);
 
-          buildPath = fileSystem.directory(fileSystem.path.join(
+          outputPath = fileSystem.directory(fileSystem.path.join(
             projectRoot,
             'build',
             'ios',
             'iphoneos',
           ));
 
-          outputApp = buildPath.childDirectory('Runner.app');
+          outputApp = outputPath.childDirectory('Runner.app');
 
           frameworkDirectory = outputApp.childDirectory('Frameworks');
           outputFlutterFramework = frameworkDirectory.childDirectory('Flutter.framework');
@@ -115,6 +123,16 @@ void main() {
           outputAppFrameworkBinary = outputAppFramework.childFile('App');
 
           outputPluginFrameworkBinary = frameworkDirectory.childDirectory('hello.framework').childFile('hello');
+
+          buildPath = fileSystem.directory(fileSystem.path.join(
+            projectRoot,
+            'build',
+            'ios',
+            '${sentenceCase(buildMode.cliName)}-iphoneos',
+          ));
+
+          buildAppFrameworkDsym = buildPath.childDirectory('App.framework.dSYM');
+          buildAppFrameworkDsymBinary = buildAppFrameworkDsym.childFile('Contents/Resources/DWARF/App');
         });
 
         testWithoutContext('flutter build ios builds a valid app', () {
@@ -128,6 +146,8 @@ void main() {
           expect(outputAppFrameworkBinary, exists);
           expect(outputAppFramework.childFile('Info.plist'), exists);
 
+          expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
+
           final File vmSnapshot = fileSystem.file(fileSystem.path.join(
             outputAppFramework.path,
             'flutter_assets',
@@ -135,14 +155,9 @@ void main() {
           ));
 
           expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
-
-          // Archiving should contain a bitcode blob, but not building.
-          // This mimics Xcode behavior and prevents a developer from having to install a
-          // 300+MB app.
-          expect(containsBitcode(outputFlutterFrameworkBinary.path, processManager), isFalse);
         });
 
-        testWithoutContext('Info.plist dart observatory Bonjour service', () {
+        testWithoutContext('Info.plist dart VM Service Bonjour service', () {
           final String infoPlistPath = fileSystem.path.join(
             outputApp.path,
             'Info.plist',
@@ -158,7 +173,7 @@ void main() {
               infoPlistPath,
             ],
           );
-          final bool bonjourServicesFound = (bonjourServices.stdout as String).contains('_dartobservatory._tcp');
+          final bool bonjourServicesFound = (bonjourServices.stdout as String).contains('_dartVmService._tcp');
           expect(bonjourServicesFound, buildMode == BuildMode.debug);
 
           final ProcessResult localNetworkUsage = processManager.runSync(
@@ -177,17 +192,27 @@ void main() {
         });
 
         testWithoutContext('check symbols', () {
-          final ProcessResult symbols = processManager.runSync(
-            <String>[
-              'nm',
-              '-g',
-              outputAppFrameworkBinary.path,
-              '-arch',
-              'arm64',
-            ],
-          );
-          final bool aotSymbolsFound = (symbols.stdout as String).contains('_kDartVmSnapshot');
-          expect(aotSymbolsFound, buildMode != BuildMode.debug);
+          final List<String> symbols =
+              AppleTestUtils.getExportedSymbols(outputAppFrameworkBinary.path);
+          if (buildMode == BuildMode.debug) {
+            expect(symbols, isEmpty);
+          } else {
+            expect(symbols, equals(AppleTestUtils.requiredSymbols));
+          }
+        });
+
+        testWithoutContext('check symbols in dSYM', () {
+          if (buildMode == BuildMode.debug) {
+            // dSYM is not created for a debug build.
+            expect(buildAppFrameworkDsymBinary.existsSync(), isFalse);
+          } else {
+            final List<String> symbols =
+                AppleTestUtils.getExportedSymbols(buildAppFrameworkDsymBinary.path);
+            expect(symbols, containsAll(AppleTestUtils.requiredSymbols));
+            // The actual number of symbols is going to vary but there should
+            // be "many" in the dSYM. At the time of writing, it was 7656.
+            expect(symbols.length, greaterThanOrEqualTo(5000));
+          }
         });
 
         testWithoutContext('xcode_backend embed_and_thin', () {
@@ -219,11 +244,12 @@ void main() {
                 'ios',
                 'Release-iphoneos',
               ),
-              'TARGET_BUILD_DIR': buildPath.path,
+              'TARGET_BUILD_DIR': outputPath.path,
               'FRAMEWORKS_FOLDER_PATH': 'Runner.app/Frameworks',
               'VERBOSE_SCRIPT_LOGGING': '1',
               'FLUTTER_BUILD_MODE': 'release',
               'ACTION': 'install',
+              'FLUTTER_BUILD_DIR': 'build',
               // Skip bitcode stripping since we just checked that above.
             },
           );
@@ -328,7 +354,110 @@ void main() {
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
+
+    testWithoutContext('archive', () {
+      final File appIconFile = fileSystem.file(fileSystem.path.join(
+        projectRoot,
+        'ios',
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
+        'Icon-App-20x20@1x.png',
+      ));
+      // Resizes app icon to 123x456 (it is supposed to be 20x20).
+      appIconFile.writeAsBytesSync(appIconFile.readAsBytesSync()
+        ..buffer.asByteData().setInt32(16, 123)
+        ..buffer.asByteData().setInt32(20, 456));
+
+      final ProcessResult output = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'xcarchive',
+          '--verbose',
+        ],
+        workingDirectory: projectRoot,
+      );
+
+      // Note this isBot so usage won't actually be sent,
+      // this log line is printed whenever the app is archived.
+      expect(output.stdout, contains('Sending archive event if usage enabled'));
+
+      // The output contains extra time related prefix, so cannot use a single string.
+      const List<String> expectedValidationMessages = <String>[
+        '[!] App Settings Validation\n',
+        '    • Version Number: 1.0.0\n',
+        '    • Build Number: 1\n',
+        '    • Display Name: Hello\n',
+        '    • Deployment Target: 12.0\n',
+        '    • Bundle Identifier: com.example.hello\n',
+        '    ! Your application still contains the default "com.example" bundle identifier.\n',
+        '[!] App Icon and Launch Image Assets Validation\n',
+        '    ! App icon is set to the default placeholder icon. Replace with unique icons.\n',
+        '    ! App icon is using the incorrect size (e.g. Icon-App-20x20@1x.png).\n',
+        '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
+        'To update the settings, please refer to https://docs.flutter.dev/deployment/ios\n',
+      ];
+      expect(expectedValidationMessages, unorderedEquals(expectedValidationMessages));
+
+      final Directory archivePath = fileSystem.directory(fileSystem.path.join(
+        projectRoot,
+        'build',
+        'ios',
+        'archive',
+        'Runner.xcarchive',
+      ));
+
+      final Directory products = archivePath.childDirectory('Products');
+      expect(products, exists);
+
+      final Directory dSYM = archivePath.childDirectory('dSYMs').childDirectory('Runner.app.dSYM');
+      expect(dSYM, exists);
+
+      final Directory applications = products.childDirectory('Applications');
+
+      final Directory appBundle = applications
+          .listSync()
+          .whereType<Directory>()
+          .singleWhere((Directory directory) => fileSystem.path.extension(directory.path) == '.app');
+
+      final String flutterFramework = fileSystem.path.join(
+        appBundle.path,
+        'Frameworks',
+        'Flutter.framework',
+        'Flutter',
+      );
+
+      // Exits 0 only if codesigned.
+      final ProcessResult flutterCodesign = processManager.runSync(
+        <String>[
+          'xcrun',
+          'codesign',
+          '--verify',
+          flutterFramework,
+        ],
+      );
+      expect(flutterCodesign, const ProcessResultMatcher());
+
+      final String appFramework = fileSystem.path.join(
+        appBundle.path,
+        'Frameworks',
+        'App.framework',
+        'App',
+      );
+
+      final ProcessResult appCodesign = processManager.runSync(
+        <String>[
+          'xcrun',
+          'codesign',
+          '--verify',
+          appFramework,
+        ],
+      );
+      expect(appCodesign, const ProcessResultMatcher());
+    });
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
-     timeout: const Timeout(Duration(minutes: 7))
+     timeout: const Timeout(Duration(minutes: 10))
   );
 }

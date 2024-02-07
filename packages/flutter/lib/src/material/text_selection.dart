@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -19,6 +20,17 @@ const double _kHandleSize = 22.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
+/// Android Material styled text selection handle controls.
+///
+/// Specifically does not manage the toolbar, which is left to
+/// [EditableText.contextMenuBuilder].
+@Deprecated(
+  'Use `MaterialTextSelectionControls`. '
+  'This feature was deprecated after v3.3.0-0.5.pre.',
+)
+class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls with TextSelectionHandleControls {
+}
+
 /// Android Material styled text selection controls.
 ///
 /// The [materialTextSelectionControls] global variable has a
@@ -29,6 +41,10 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
 
   /// Builder for material-style copy/paste text selection toolbar.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   Widget buildToolbar(
     BuildContext context,
@@ -37,7 +53,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
@@ -107,6 +123,10 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     }
   }
 
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   bool canSelectAll(TextSelectionDelegate delegate) {
     // Android allows SelectAll when selection is not collapsed, unless
@@ -144,7 +164,7 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   });
 
-  final ClipboardStatusNotifier? clipboardStatus;
+  final ValueListenable<ClipboardStatus>? clipboardStatus;
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
@@ -183,8 +203,8 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
 
   @override
   void dispose() {
-    super.dispose();
     widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    super.dispose();
   }
 
   @override
@@ -288,6 +308,12 @@ class _TextSelectionHandlePainter extends CustomPainter {
     return color != oldPainter.color;
   }
 }
+
+// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
+// deleted, when users should migrate back to materialTextSelectionControls.
+// See https://github.com/flutter/flutter/pull/124262
+/// Text selection handle controls that follow the Material Design specification.
+final TextSelectionControls materialTextSelectionHandleControls = MaterialTextSelectionHandleControls();
 
 /// Text selection controls that follow the Material Design specification.
 final TextSelectionControls materialTextSelectionControls = MaterialTextSelectionControls();

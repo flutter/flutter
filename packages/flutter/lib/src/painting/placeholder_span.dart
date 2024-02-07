@@ -15,12 +15,16 @@ import 'text_style.dart';
 /// An immutable placeholder that is embedded inline within text.
 ///
 /// [PlaceholderSpan] represents a placeholder that acts as a stand-in for other
-/// content. A [PlaceholderSpan] by itself does not contain useful
-/// information to change a [TextSpan]. Instead, this class must be extended
-/// to define contents.
+/// content. A [PlaceholderSpan] by itself does not contain useful information
+/// to change a [TextSpan]. [WidgetSpan] from the widgets library extends
+/// [PlaceholderSpan] and may be used instead to specify a widget as the contents
+/// of the placeholder.
 ///
-/// [WidgetSpan] from the widgets library extends [PlaceholderSpan] and may be
-/// used instead to specify a widget as the contents of the placeholder.
+/// Flutter widgets such as [TextField], [Text] and [RichText] do not recognize
+/// [PlaceholderSpan] subclasses other than [WidgetSpan]. **Consider
+/// implementing the [WidgetSpan] interface instead of the [Placeholder]
+/// interface.**
+///
 ///
 /// See also:
 ///
@@ -68,25 +72,17 @@ abstract class PlaceholderSpan extends InlineSpan {
     collector.add(InlineSpanSemanticsInformation.placeholder);
   }
 
-  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
-  /// to be able to construct a [SemanticsNode].
-  ///
-  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (0xFFFC) that is inserted to represent it.
-  ///
-  /// Null is added to `semanticsElements` for [PlaceholderSpan]s.
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    semanticsOffsets.add(offset.value);
-    semanticsOffsets.add(offset.value + 1);
-    semanticsElements.add(null); // null indicates this is a placeholder.
-    offset.increment(1);
-  }
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
     properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('baseline', baseline, defaultValue: null));
+  }
+
+  @override
+  bool debugAssertIsValid() {
+    assert(false, 'Consider implementing the WidgetSpan interface instead.');
+    return super.debugAssertIsValid();
   }
 }

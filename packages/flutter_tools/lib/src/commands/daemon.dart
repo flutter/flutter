@@ -25,6 +25,7 @@ import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../proxied_devices/debounce_data_stream.dart';
 import '../proxied_devices/file_transfer.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -67,7 +68,7 @@ class DaemonCommand extends FlutterCommand {
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
       try {
-        port = int.parse(stringArgDeprecated('listen-on-tcp-port')!);
+        port = int.parse(stringArg('listen-on-tcp-port')!);
       } on FormatException catch (error) {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
@@ -102,35 +103,37 @@ class DaemonCommand extends FlutterCommand {
 class _DaemonServer {
   _DaemonServer({
     this.port,
-    this.logger,
+    required this.logger,
     this.notifyingLogger,
   });
 
   final int? port;
 
   /// Stdout logger used to print general server-related errors.
-  final Logger? logger;
+  final Logger logger;
 
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
   Future<void> run() async {
     final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
-    logger!.printStatus('Daemon server listening on ${serverSocket.port}');
+    logger.printStatus('Daemon server listening on ${serverSocket.port}');
 
     final StreamSubscription<Socket> subscription = serverSocket.listen(
       (Socket socket) async {
         // We have to listen to socket.done. Otherwise when the connection is
         // reset, we will receive an uncatchable exception.
         // https://github.com/dart-lang/sdk/issues/25518
-        final Future<void> socketDone = socket.done.catchError((Object error, StackTrace stackTrace) {
-          logger!.printError('Socket error: $error');
-          logger!.printTrace('$stackTrace');
-        });
+        final Future<void> socketDone = socket.done.then<void>(
+          (_) {},
+          onError: (Object error, StackTrace stackTrace) {
+            logger.printError('Socket error: $error');
+            logger.printTrace('$stackTrace');
+          });
         final Daemon daemon = Daemon(
           DaemonConnection(
-            daemonStreams: DaemonStreams.fromSocket(socket, logger: logger!),
-            logger: logger!,
+            daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
+            logger: logger,
           ),
           notifyingLogger: notifyingLogger,
         );
@@ -153,6 +156,7 @@ class Daemon {
     this.connection, {
     this.notifyingLogger,
     this.logToStdout = false,
+    FileTransfer fileTransfer = const FileTransfer(),
   }) {
     // Set up domains.
     registerDomain(daemonDomain = DaemonDomain(this));
@@ -160,7 +164,7 @@ class Daemon {
     registerDomain(deviceDomain = DeviceDomain(this));
     registerDomain(emulatorDomain = EmulatorDomain(this));
     registerDomain(devToolsDomain = DevToolsDomain(this));
-    registerDomain(proxyDomain = ProxyDomain(this));
+    registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -210,7 +214,6 @@ class Daemon {
 
     try {
       final String method = request.data['method']! as String;
-      assert(method != null);
       if (!method.contains('.')) {
         throw DaemonException('method not understood: $method');
       }
@@ -279,8 +282,9 @@ abstract class Domain {
     }).then<Object?>((Object? result) {
       daemon.connection.sendResponse(id, _toJsonable(result));
       return null;
-    }).catchError((Object error, StackTrace stackTrace) {
+    }, onError: (Object error, StackTrace stackTrace) {
       daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
+      return null;
     });
   }
 
@@ -332,6 +336,7 @@ class DaemonDomain extends Domain {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
+    registerHandler('setNotifyVerbose', setNotifyVerbose);
 
     sendEvent(
       'daemon.connected',
@@ -343,7 +348,7 @@ class DaemonDomain extends Domain {
 
     _subscription = daemon.notifyingLogger!.onMessage.listen((LogMessage message) {
       if (daemon.logToStdout) {
-        if (message.level == 'status') {
+        if (message.level == 'status' || message.level == 'trace') {
           // We use `print()` here instead of `stdout.writeln()` in order to
           // capture the print output for testing.
           // ignore: avoid_print
@@ -411,36 +416,167 @@ class DaemonDomain extends Domain {
   /// is correct.
   Future<Map<String, Object>> getSupportedPlatforms(Map<String, Object?> args) async {
     final String? projectRoot = _getStringArg(args, 'projectRoot', required: true);
-    final List<String> result = <String>[];
+    final List<String> platformTypes = <String>[];
+    final Map<String, Object> platformTypesMap = <String, Object>{};
     try {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
       final Set<SupportedPlatform> supportedPlatforms = flutterProject.getSupportedPlatforms().toSet();
-      if (featureFlags.isLinuxEnabled && supportedPlatforms.contains(SupportedPlatform.linux)) {
-        result.add('linux');
+
+      void handlePlatformType(
+        PlatformType platform,
+      ) {
+        final List<Map<String, Object>> reasons = <Map<String, Object>>[];
+        switch (platform) {
+          case PlatformType.linux:
+            if (!featureFlags.isLinuxEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Linux feature is not enabled',
+                'fixText': 'Run "flutter config --enable-linux-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.linux)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Linux platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=linux ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.macos:
+            if (!featureFlags.isMacOSEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the macOS feature is not enabled',
+                'fixText': 'Run "flutter config --enable-macos-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.macos)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the macOS platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=macos ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.windows:
+            if (!featureFlags.isWindowsEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows feature is not enabled',
+                'fixText': 'Run "flutter config --enable-windows-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.windows)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=windows ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.ios:
+            if (!featureFlags.isIOSEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the iOS feature is not enabled',
+                'fixText': 'Run "flutter config --enable-ios"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.ios)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the iOS platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=ios ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.android:
+            if (!featureFlags.isAndroidEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Android feature is not enabled',
+                'fixText': 'Run "flutter config --enable-android"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.android)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Android platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=android ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.web:
+            if (!featureFlags.isWebEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Web feature is not enabled',
+                'fixText': 'Run "flutter config --enable-web"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.web)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Web platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=web ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.fuchsia:
+            if (!featureFlags.isFuchsiaEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Fuchsia feature is not enabled',
+                'fixText': 'Run "flutter config --enable-fuchsia"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Fuchsia platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=fuchsia ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.custom:
+            if (!featureFlags.areCustomDevicesEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the custom devices feature is not enabled',
+                'fixText': 'Run "flutter config --enable-custom-devices"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+          case PlatformType.windowsPreview:
+            // TODO(fujino): detect if there any plugins with native code
+            if (!featureFlags.isPreviewDeviceEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Preview Device feature is not enabled',
+                'fixText': 'Run "flutter config --enable-flutter-preview',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.windows)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=windows ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+        }
+
+        if (reasons.isEmpty) {
+          platformTypes.add(platform.name);
+          platformTypesMap[platform.name] = const <String, Object>{
+            'isSupported': true,
+          };
+        } else {
+          platformTypesMap[platform.name] = <String, Object>{
+            'isSupported': false,
+            'reasons': reasons,
+          };
+        }
       }
-      if (featureFlags.isMacOSEnabled && supportedPlatforms.contains(SupportedPlatform.macos)) {
-        result.add('macos');
-      }
-      if (featureFlags.isWindowsEnabled && supportedPlatforms.contains(SupportedPlatform.windows)) {
-        result.add('windows');
-      }
-      if (featureFlags.isIOSEnabled && supportedPlatforms.contains(SupportedPlatform.ios)) {
-        result.add('ios');
-      }
-      if (featureFlags.isAndroidEnabled && supportedPlatforms.contains(SupportedPlatform.android)) {
-        result.add('android');
-      }
-      if (featureFlags.isWebEnabled && supportedPlatforms.contains(SupportedPlatform.web)) {
-        result.add('web');
-      }
-      if (featureFlags.isFuchsiaEnabled && supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
-        result.add('fuchsia');
-      }
-      if (featureFlags.areCustomDevicesEnabled) {
-        result.add('custom');
-      }
+
+      PlatformType.values.forEach(handlePlatformType);
+
       return <String, Object>{
-        'platforms': result,
+        // TODO(fujino): delete this key https://github.com/flutter/flutter/issues/140473
+        'platforms': platformTypes,
+        'platformTypes': platformTypesMap,
       };
     } on Exception catch (err, stackTrace) {
       sendEvent('log', <String, Object?>{
@@ -449,15 +585,32 @@ class DaemonDomain extends Domain {
         'error': true,
       });
       // On any sort of failure, fall back to Android and iOS for backwards
-      // comparability.
-      return <String, Object>{
+      // compatibility.
+      return const <String, Object>{
         'platforms': <String>[
           'android',
           'ios',
         ],
+        'platformTypes': <String, Object>{
+          'android': <String, Object>{'isSupported': true},
+          'ios': <String, Object>{'isSupported': true},
+        },
       };
     }
   }
+
+  /// If notifyVerbose is set, the daemon will forward all verbose logs.
+  Future<void> setNotifyVerbose(Map<String, Object?> args) async {
+    daemon.notifyingLogger?.notifyVerbose = _getBoolArg(args, 'verbose') ?? true;
+  }
+}
+
+/// The reason a [PlatformType] is not currently supported.
+///
+/// The [name] of this value will be sent as a response to daemon client.
+enum _ReasonCode {
+  create,
+  config,
 }
 
 typedef RunOrAttach = Future<void> Function({
@@ -497,10 +650,10 @@ class AppDomain extends Domain {
     String? packagesFilePath,
     String? dillOutputPath,
     bool ipv6 = false,
-    bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
+    bool enableDevTools = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -535,6 +688,7 @@ class AppDomain extends Domain {
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         systemClock: globals.systemClock,
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -548,9 +702,9 @@ class AppDomain extends Domain {
         projectRootPath: projectRootPath,
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
-        multidexEnabled: multidexEnabled,
         hostIsIde: true,
         machine: machine,
+        analytics: globals.analytics,
       );
     } else {
       runner = ColdRunner(
@@ -559,7 +713,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
-        multidexEnabled: multidexEnabled,
         machine: machine,
       );
     }
@@ -573,7 +726,7 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: true,
+          enableDevTools: enableDevTools,
           route: route,
         );
       },
@@ -610,6 +763,7 @@ class AppDomain extends Domain {
       'directory': projectDirectory,
       'supportsRestart': isRestartSupported(enableHotReload, device),
       'launchMode': launchMode.toString(),
+      'mode': runner.debuggingOptions.buildInfo.modeName,
     });
 
     Completer<DebugConnectionInfo>? connectionInfoCompleter;
@@ -835,6 +989,9 @@ class DeviceDomain extends Domain {
     registerHandler('startApp', startApp);
     registerHandler('stopApp', stopApp);
     registerHandler('takeScreenshot', takeScreenshot);
+    registerHandler('startDartDevelopmentService', startDartDevelopmentService);
+    registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
+    registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -875,12 +1032,12 @@ class DeviceDomain extends Domain {
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  /// Return a list of the current devices, with each device represented as a map
-  /// of properties (id, name, platform, ...).
+  /// Return a list of the currently connected devices, with each device
+  /// represented as a map of properties (id, name, platform, ...).
   Future<List<Map<String, Object?>>> getDevices([ Map<String, Object?>? args ]) async {
     return <Map<String, Object?>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.devices)
+        for (final Device device in await discoverer.devices(filter: DeviceDiscoveryFilter()))
           await _deviceToMap(device),
     ];
   }
@@ -946,7 +1103,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
     final String buildMode = _getStringArg(args, 'buildMode', required: true)!;
-    return await device.supportsRuntimeMode(getBuildModeForName(buildMode));
+    return await device.supportsRuntimeMode(BuildMode.fromCliName(buildMode));
   }
 
   /// Creates an application package from a file in the temp directory.
@@ -1013,7 +1170,9 @@ class DeviceDomain extends Domain {
     );
     return <String, Object?>{
       'started': result.started,
-      'observatoryUri': result.observatoryUri?.toString(),
+      'vmServiceUri': result.vmServiceUri?.toString(),
+      // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
+      'observatoryUri': result.vmServiceUri?.toString(),
     };
   }
 
@@ -1024,8 +1183,11 @@ class DeviceDomain extends Domain {
     if (device == null) {
       throw DaemonException("device '$deviceId' not found");
     }
-    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
-    final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId!]!;
+    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId');
+    ApplicationPackage? applicationPackage;
+    if (applicationPackageId != null) {
+      applicationPackage = _applicationPackages[applicationPackageId];
+    }
     return device.stopApp(
       applicationPackage,
       userIdentifier: _getStringArg(args, 'userIdentifier'),
@@ -1050,6 +1212,50 @@ class DeviceDomain extends Domain {
     }
   }
 
+  /// Starts DDS for the device.
+  Future<String?> startDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final bool? disableServiceAuthCodes = _getBoolArg(args, 'disableServiceAuthCodes');
+    final String vmServiceUriStr = _getStringArg(args, 'vmServiceUri', required: true)!;
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    await device.dds.startDartDevelopmentService(
+      Uri.parse(vmServiceUriStr),
+      logger: globals.logger,
+      disableServiceAuthCodes: disableServiceAuthCodes,
+    );
+    unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
+    return device.dds.uri?.toString();
+  }
+
+  /// Starts DDS for the device.
+  Future<void> shutdownDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    await device.dds.shutdown();
+  }
+
+  Future<void> setExternalDevToolsUriForDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String uri = _getStringArg(args, 'uri', required: true)!;
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    device.dds.setExternalDevToolsUri(Uri.parse(uri));
+  }
+
   @override
   Future<void> dispose() {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
@@ -1058,10 +1264,12 @@ class DeviceDomain extends Domain {
     return Future<void>.value();
   }
 
-  /// Return the device matching the deviceId field in the args.
+  /// Return the connected device matching the deviceId field in the args.
   Future<Device?> _getDevice(String? deviceId) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices(
+        filter: DeviceDiscoveryFilter(),
+      );
       Device? device;
       for (final Device localDevice in devices) {
         if (localDevice.id == deviceId) {
@@ -1151,7 +1359,7 @@ Object? _toJsonable(Object? obj) {
 }
 
 class NotifyingLogger extends DelegatingLogger {
-  NotifyingLogger({ required this.verbose, required Logger parent }) : super(parent) {
+  NotifyingLogger({ required this.verbose, required Logger parent, this.notifyVerbose = false }) : super(parent) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
@@ -1160,6 +1368,8 @@ class NotifyingLogger extends DelegatingLogger {
   final bool verbose;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
+
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1191,6 +1401,7 @@ class NotifyingLogger extends DelegatingLogger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
     _sendMessage(LogMessage('warning', message));
   }
@@ -1217,6 +1428,10 @@ class NotifyingLogger extends DelegatingLogger {
 
   @override
   void printTrace(String message) {
+    if (notifyVerbose) {
+      _sendMessage(LogMessage('trace', message));
+      return;
+    }
     if (!verbose) {
       return;
     }
@@ -1254,7 +1469,7 @@ class NotifyingLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, Object?>? args]) { }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;
@@ -1301,6 +1516,7 @@ class EmulatorDomain extends Domain {
   EmulatorManager emulators = EmulatorManager(
     fileSystem: globals.fs,
     logger: globals.logger,
+    java: globals.java,
     androidSdk: globals.androidSdk,
     processManager: globals.processManager,
     androidWorkflow: androidWorkflow!,
@@ -1337,7 +1553,10 @@ class EmulatorDomain extends Domain {
 }
 
 class ProxyDomain extends Domain {
-  ProxyDomain(Daemon daemon) : super(daemon, 'proxy') {
+  ProxyDomain(Daemon daemon, {
+    required FileTransfer fileTransfer,
+  }) : _fileTransfer = fileTransfer,
+    super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);
     registerHandlerWithBinary('updateFile', updateFile);
@@ -1345,6 +1564,8 @@ class ProxyDomain extends Domain {
     registerHandler('disconnect', disconnect);
     registerHandlerWithBinary('write', write);
   }
+
+  final FileTransfer _fileTransfer;
 
   final Map<String, Socket> _forwardedConnections = <String, Socket>{};
   int _id = 0;
@@ -1360,12 +1581,26 @@ class ProxyDomain extends Domain {
   /// Calculate rolling hashes for a file in the local temporary directory.
   Future<Map<String, Object?>?> calculateFileHashes(Map<String, Object?> args) async {
     final String path = _getStringArg(args, 'path', required: true)!;
+    final bool cacheResult = _getBoolArg(args, 'cacheResult') ?? false;
     final File file = tempDirectory.childFile(path);
     if (!await file.exists()) {
       return null;
     }
-    final BlockHashes result = await FileTransfer().calculateBlockHashesOfFile(file);
-    return result.toJson();
+    final File hashFile = file.parent.childFile('${file.basename}.hashes');
+    if (hashFile.existsSync() && hashFile.statSync().modified.isAfter(file.statSync().modified)) {
+      // If the cached hash file is newer than the file, assume that the cached
+      // is up to date. Return the cached result directly.
+      final String cachedJson = await hashFile.readAsString();
+      return json.decode(cachedJson) as Map<String, Object?>;
+    }
+    final BlockHashes result = await _fileTransfer.calculateBlockHashesOfFile(file);
+    final Map<String, Object?> resultObject = result.toJson();
+
+    if (cacheResult) {
+      await hashFile.writeAsString(json.encode(resultObject));
+    }
+
+    return resultObject;
   }
 
   Future<bool?> updateFile(Map<String, Object?> args, Stream<List<int>>? binary) async {
@@ -1376,7 +1611,7 @@ class ProxyDomain extends Domain {
     }
     final List<Map<String, Object?>> deltaJson = (args['delta']! as List<Object?>).cast<Map<String, Object?>>();
     final List<FileDeltaBlock> delta = FileDeltaBlock.fromJsonList(deltaJson);
-    final bool result = await FileTransfer().rebuildFile(file, delta, binary!);
+    final bool result = await _fileTransfer.rebuildFile(file, delta, binary!);
     return result;
   }
 
@@ -1405,14 +1640,16 @@ class ProxyDomain extends Domain {
     }
 
     _forwardedConnections[id] = socket;
-    socket.listen((List<int> data) {
+    debounceDataStream(socket).listen((List<int> data) {
       sendEvent('proxy.data.$id', null, data);
     }, onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     });
 
-    unawaited(socket.done.catchError((Object error, StackTrace stackTrace) {
+    unawaited(socket.done.then<Object?>(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     }).then((Object? _) {
@@ -1524,7 +1761,7 @@ class AppRunLogger extends DelegatingLogger {
         'id': eventId,
         'progressId': eventType,
         if (message != null) 'message': message,
-        if (finished != null) 'finished': finished,
+        'finished': finished,
       };
 
       domain!._sendAppEvent(app, 'progress', event);
@@ -1541,7 +1778,7 @@ class AppRunLogger extends DelegatingLogger {
   }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;
@@ -1560,14 +1797,11 @@ class LogMessage {
 }
 
 /// The method by which the Flutter app was launched.
-class LaunchMode {
+enum LaunchMode {
+  run._('run'),
+  attach._('attach');
+
   const LaunchMode._(this._value);
-
-  /// The app was launched via `flutter run`.
-  static const LaunchMode run = LaunchMode._('run');
-
-  /// The app was launched via `flutter attach`.
-  static const LaunchMode attach = LaunchMode._('attach');
 
   final String _value;
 
@@ -1590,7 +1824,7 @@ class DebounceOperationQueue<T, K> {
   final Map<K, Future<T>> _operationQueue = <K, Future<T>>{};
   Future<void>? _inProgressAction;
 
-  Future<T>? queueAndDebounce(
+  Future<T> queueAndDebounce(
     K operationType,
     Duration debounceDuration,
     Future<T> Function() action,
@@ -1599,7 +1833,7 @@ class DebounceOperationQueue<T, K> {
     // debounce timer and return its future.
     if (_operationQueue[operationType] != null) {
       _debounceTimers[operationType]?.reset();
-      return _operationQueue[operationType];
+      return _operationQueue[operationType]!;
     }
 
     // Otherwise, put one in the queue with a timer.

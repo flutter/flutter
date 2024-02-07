@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -15,9 +16,11 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
+import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
@@ -42,6 +45,7 @@ import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
+import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
 
 abstract class DoctorValidatorsProvider {
@@ -49,17 +53,20 @@ abstract class DoctorValidatorsProvider {
   // [FeatureFlags].
   factory DoctorValidatorsProvider.test({
     Platform? platform,
+    Logger? logger,
     required FeatureFlags featureFlags,
   }) {
     return _DefaultDoctorValidatorsProvider(
       featureFlags: featureFlags,
       platform: platform ?? FakePlatform(),
+      logger: logger ?? BufferLogger.test(),
     );
   }
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
+    logger: globals.logger,
     platform: globals.platform,
     featureFlags: featureFlags,
   );
@@ -72,12 +79,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   _DefaultDoctorValidatorsProvider({
     required this.platform,
     required this.featureFlags,
-  });
+    required Logger logger,
+  }) : _logger = logger;
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
   final Platform platform;
   final FeatureFlags featureFlags;
+  final Logger _logger;
 
   late final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
     platform: platform,
@@ -110,9 +119,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators(
         fileSystem: globals.fs,
         platform: platform,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         plistParser: globals.plistParser,
         processManager: globals.processManager,
+        logger: _logger,
       ),
       ...VsCodeValidator.installedValidators(globals.fs, platform, globals.processManager),
     ];
@@ -121,18 +131,30 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
-        flutterVersion: () => globals.flutterVersion,
+        flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
       ),
+      if (platform.isWindows)
+        WindowsVersionValidator(
+          operatingSystemUtils: globals.os,
+          processLister: ProcessLister(globals.processManager),
+        ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
       if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode!, userMessages: userMessages), globals.cocoapodsValidator!]),
+        GroupedValidator(<DoctorValidator>[
+          XcodeValidator(
+            xcode: globals.xcode!,
+            userMessages: globals.userMessages,
+            iosSimulatorUtils: globals.iosSimulatorUtils!,
+          ),
+          globals.cocoapodsValidator!,
+        ]),
       if (webWorkflow.appliesToHostPlatform)
         ChromeValidator(
           chromiumLauncher: ChromiumLauncher(
@@ -148,7 +170,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
           processManager: globals.processManager,
-          userMessages: userMessages,
+          userMessages: globals.userMessages,
         ),
       if (windowsWorkflow!.appliesToHostPlatform)
         visualStudioValidator!,
@@ -216,9 +238,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 class Doctor {
   Doctor({
     required Logger logger,
-  }) : _logger = logger;
+    required SystemClock clock,
+    Analytics? analytics,
+  })  : _logger = logger,
+        _clock = clock,
+        _analytics = analytics ?? globals.analytics;
 
   final Logger _logger;
+  final SystemClock _clock;
+  final Analytics _analytics;
 
   List<DoctorValidator> get validators {
     return DoctorValidatorsProvider._instance.validators;
@@ -288,19 +316,14 @@ class Doctor {
         case ValidationType.crash:
           lineBuffer.write('the doctor check crashed without a result.');
           sawACrash = true;
-          break;
         case ValidationType.missing:
           lineBuffer.write('is not installed.');
-          break;
         case ValidationType.partial:
           lineBuffer.write('is partially installed; more components are available.');
-          break;
         case ValidationType.notAvailable:
           lineBuffer.write('is not available.');
-          break;
-        case ValidationType.installed:
+        case ValidationType.success:
           lineBuffer.write('is fully installed.');
-          break;
       }
 
       if (result.statusInfo != null) {
@@ -315,7 +338,7 @@ class Doctor {
       ));
       buffer.writeln();
 
-      if (result.type != ValidationType.installed) {
+      if (result.type != ValidationType.success) {
         missingComponent = true;
       }
     }
@@ -340,7 +363,9 @@ class Doctor {
   /// Maximum allowed duration for an entire validator to take.
   ///
   /// This should only ever be reached if a process is stuck.
-  static const Duration doctorDuration = Duration(minutes: 10);
+  // Reduce this to under 5 minutes to diagnose:
+  // https://github.com/flutter/flutter/issues/111686
+  static const Duration doctorDuration = Duration(minutes: 4, seconds: 30);
 
   /// Print information about the state of installed tooling.
   ///
@@ -365,6 +390,10 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
+    // This timestamp will be used on the backend of GA4 to group each of the events that
+    // were sent for each doctor validator and its result
+    final int analyticsTimestamp = _clock.now().millisecondsSinceEpoch;
+
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner(
@@ -384,19 +413,47 @@ class Doctor {
         case ValidationType.crash:
           doctorResult = false;
           issues += 1;
-          break;
         case ValidationType.missing:
           doctorResult = false;
           issues += 1;
-          break;
         case ValidationType.partial:
         case ValidationType.notAvailable:
           issues += 1;
-          break;
-        case ValidationType.installed:
+        case ValidationType.success:
           break;
       }
       if (sendEvent) {
+        if (validator is GroupedValidator) {
+          for (int i = 0; i < validator.subValidators.length; i++) {
+            final DoctorValidator subValidator = validator.subValidators[i];
+
+            // Ensure that all of the subvalidators in the group have
+            // a corresponding subresult in case a validator crashed
+            final ValidationResult subResult;
+            try {
+              subResult = validator.subResults[i];
+            } on RangeError {
+              continue;
+            }
+
+            _analytics.send(Event.doctorValidatorResult(
+              validatorName: subValidator.title,
+              result: subResult.typeStr,
+              statusInfo: subResult.statusInfo,
+              partOfGroupedValidator: true,
+              doctorInvocationId: analyticsTimestamp,
+            ));
+          }
+        } else {
+          _analytics.send(Event.doctorValidatorResult(
+            validatorName: validator.title,
+            result: result.typeStr,
+            statusInfo: result.statusInfo,
+            partOfGroupedValidator: false,
+            doctorInvocationId: analyticsTimestamp,
+          ));
+        }
+        // TODO(eliasyishak): remove this after migrating from package:usage
         DoctorResultEvent(validator: validator, result: result).send();
       }
 
@@ -410,7 +467,7 @@ class Doctor {
       }
 
       for (final ValidationMessage message in result.messages) {
-        if (!message.isInformation || verbose == true) {
+        if (!message.isInformation || verbose) {
           int hangingIndent = 2;
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
@@ -505,7 +562,10 @@ class FlutterValidator extends DoctorValidator {
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
 
-      messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel));
+      final String flutterRoot = _flutterRoot();
+      messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel, flutterRoot));
+
+      _validateRequiredBinaries(flutterRoot).forEach(messages.add);
       messages.add(_getFlutterUpstreamMessage(version));
       if (gitUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterGitUrl(gitUrl)));
@@ -518,11 +578,11 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
       messages.add(ValidationMessage(_userMessages.devToolsVersion(_devToolsVersion())));
-      final String? pubUrl = _platform.environment['PUB_HOSTED_URL'];
+      final String? pubUrl = _platform.environment[kPubDevOverride];
       if (pubUrl != null) {
         messages.add(ValidationMessage(_userMessages.pubMirrorURL(pubUrl)));
       }
-      final String? storageBaseUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+      final String? storageBaseUrl = _platform.environment[kFlutterStorageBaseUrl];
       if (storageBaseUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterMirrorURL(storageBaseUrl)));
       }
@@ -539,13 +599,16 @@ class FlutterValidator extends DoctorValidator {
       buffer.writeln(_userMessages.flutterBinariesDoNotRun);
       if (_platform.isLinux) {
         buffer.writeln(_userMessages.flutterBinariesLinuxRepairCommands);
+      } else if (_platform.isMacOS && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
+        buffer.writeln('Flutter requires the Rosetta translation environment on ARM Macs. Try running:');
+        buffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
       }
       messages.add(ValidationMessage.error(buffer.toString()));
     }
 
     ValidationType valid;
     if (messages.every((ValidationMessage message) => message.isInformation)) {
-      valid = ValidationType.installed;
+      valid = ValidationType.success;
     } else {
       // The issues for this validator stem from broken git configuration of the local install;
       // in that case, make it clear that it is fine to continue, but freshness check/upgrades
@@ -568,23 +631,62 @@ class FlutterValidator extends DoctorValidator {
     );
   }
 
-  ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {
-    String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
+  ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel, String flutterRoot) {
+    String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, flutterRoot);
 
-    // The tool sets the channel as "unknown", if the current branch is on a
-    // "detached HEAD" state or doesn't have an upstream, and sets the
-    // frameworkVersion as "0.0.0-unknown" if  "git describe" on HEAD doesn't
-    // produce an expected format to be parsed for the frameworkVersion.
-    if (versionChannel != 'unknown' && frameworkVersion != '0.0.0-unknown') {
+    // The tool sets the channel as kUserBranch, if the current branch is on a
+    // "detached HEAD" state, doesn't have an upstream, or is on a user branch,
+    // and sets the frameworkVersion as "0.0.0-unknown" if "git describe" on
+    // HEAD doesn't produce an expected format to be parsed for the frameworkVersion.
+    if (versionChannel != kUserBranch && frameworkVersion != '0.0.0-unknown') {
       return ValidationMessage(flutterVersionMessage);
     }
-    if (versionChannel == 'unknown') {
+    if (versionChannel == kUserBranch) {
       flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownChannel}';
     }
     if (frameworkVersion == '0.0.0-unknown') {
       flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownVersion}';
     }
     return ValidationMessage.hint(flutterVersionMessage);
+  }
+
+  List<ValidationMessage> _validateRequiredBinaries(String flutterRoot) {
+    final ValidationMessage? flutterWarning = _validateSdkBinary('flutter', flutterRoot);
+    final ValidationMessage? dartWarning = _validateSdkBinary('dart', flutterRoot);
+    return <ValidationMessage>[
+      if (flutterWarning != null) flutterWarning,
+      if (dartWarning != null) dartWarning,
+    ];
+  }
+
+  /// Return a warning if the provided [binary] on the user's path does not
+  /// resolve within the Flutter SDK.
+  ValidationMessage? _validateSdkBinary(String binary, String flutterRoot) {
+    final String flutterBinDir = _fileSystem.path.join(flutterRoot, 'bin');
+
+    final File? flutterBin = _operatingSystemUtils.which(binary);
+    if (flutterBin == null) {
+      return ValidationMessage.hint(
+        'The $binary binary is not on your path. Consider adding '
+        '$flutterBinDir to your path.',
+      );
+    }
+    final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
+    if (!_filePathContainsDirPath(flutterRoot, resolvedFlutterPath)) {
+      final String hint = 'Warning: `$binary` on your path resolves to '
+          '$resolvedFlutterPath, which is not inside your current Flutter '
+          'SDK checkout at $flutterRoot. Consider adding $flutterBinDir to '
+          'the front of your path.';
+      return ValidationMessage.hint(hint);
+    }
+    return null;
+  }
+
+  bool _filePathContainsDirPath(String directory, String file) {
+    // calling .canonicalize() will normalize for alphabetic case and path
+    // separators
+    return _fileSystem.path.canonicalize(file)
+        .startsWith(_fileSystem.path.canonicalize(directory) + _fileSystem.path.separator);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
@@ -635,7 +737,9 @@ class DeviceValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<Device> devices = await _deviceManager.getAllConnectedDevices();
+    final List<Device> devices = await _deviceManager.refreshAllDevices(
+      timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
+    );
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
       installedMessages = (await Device.descriptions(devices))
@@ -655,13 +759,13 @@ class DeviceValidator extends DoctorValidator {
     } else if (diagnostics.isNotEmpty) {
       installedMessages.addAll(diagnosticMessages);
       return ValidationResult(
-        ValidationType.installed,
+        ValidationType.success,
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );
     } else {
       return ValidationResult(
-        ValidationType.installed,
+        ValidationType.success,
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );
@@ -673,8 +777,10 @@ class DeviceValidator extends DoctorValidator {
 class DoctorText {
   DoctorText(
     BufferLogger logger, {
+    SystemClock? clock,
     @visibleForTesting Doctor? doctor,
-  }) : _doctor = doctor ?? Doctor(logger: logger), _logger = logger;
+  })  : _doctor = doctor ?? Doctor(logger: logger, clock: clock ?? globals.systemClock),
+        _logger = logger;
 
   final BufferLogger _logger;
   final Doctor _doctor;

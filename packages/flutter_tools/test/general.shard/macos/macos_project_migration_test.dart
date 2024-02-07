@@ -5,17 +5,23 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/macos/migrations/flutter_application_migration.dart';
 import 'package:flutter_tools/src/macos/migrations/macos_deployment_target_migration.dart';
 import 'package:flutter_tools/src/macos/migrations/remove_macos_framework_link_and_embedding_migration.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('remove link and embed migration', () {
     late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem memoryFileSystem;
     late BufferLogger testLogger;
     late FakeMacOSProject macOSProject;
@@ -24,6 +30,10 @@ void main() {
     setUp(() {
       testUsage = TestUsage();
       memoryFileSystem = MemoryFileSystem.test();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: memoryFileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
       testLogger = BufferLogger.test();
       macOSProject = FakeMacOSProject();
@@ -36,9 +46,11 @@ void main() {
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
-      expect(macosProjectMigration.migrate(), isTrue);
+      macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
 
       expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
@@ -60,9 +72,11 @@ void main() {
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
-      expect(macosProjectMigration.migrate(), isTrue);
+      macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
 
       expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
       expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -81,8 +95,9 @@ shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
-      expect(macosProjectMigration.migrate(), isTrue);
+      macosProjectMigration.migrate();
       expect(xcodeProjectInfoFile.readAsStringSync(), contents);
       expect(testLogger.statusText, isEmpty);
     });
@@ -104,9 +119,11 @@ keep this 2
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
-      expect(macosProjectMigration.migrate(), isTrue);
+      macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
 
       expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
@@ -126,12 +143,20 @@ keep this 2
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
 
       expect(macosProjectMigration.migrate,
           throwsToolExit(message: 'Your Xcode project requires migration'));
       expect(testUsage.events, contains(
         const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
+      ));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.appleUsageEvent(
+            workflow: 'macos-migration',
+            parameter: 'remove-frameworks',
+            result: 'failure',
+          )
       ));
     });
 
@@ -146,11 +171,19 @@ keep this 2
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
       expect(macosProjectMigration.migrate,
           throwsToolExit(message: 'Your Xcode project requires migration'));
       expect(testUsage.events, contains(
         const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
+      ));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.appleUsageEvent(
+            workflow: 'macos-migration',
+            parameter: 'remove-frameworks',
+            result: 'failure',
+          )
       ));
     });
   });
@@ -178,7 +211,7 @@ keep this 2
         project,
         testLogger,
       );
-      expect(macOSProjectMigration.migrate(), isTrue);
+      macOSProjectMigration.migrate();
       expect(xcodeProjectInfoFile.existsSync(), isFalse);
       expect(podfile.existsSync(), isFalse);
 
@@ -188,12 +221,12 @@ keep this 2
     });
 
     testWithoutContext('skipped if nothing to upgrade', () {
-      const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
+      const String xcodeProjectInfoFileContents = 'MACOSX_DEPLOYMENT_TARGET = 10.14;';
       xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
       final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-      const String podfileFileContents = "# platform :osx, '10.13'";
+      const String podfileFileContents = "# platform :osx, '10.14'";
       podfile.writeAsStringSync(podfileFileContents);
       final DateTime podfileLastModified = podfile.lastModifiedSync();
 
@@ -201,7 +234,7 @@ keep this 2
         project,
         testLogger,
       );
-      expect(macOSProjectMigration.migrate(), isTrue);
+      macOSProjectMigration.migrate();
 
       expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
       expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
@@ -211,7 +244,7 @@ keep this 2
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('Xcode project is migrated to 10.13', () {
+    testWithoutContext('Xcode project is migrated from 10.11 to 10.14', () {
       xcodeProjectInfoFile.writeAsStringSync('''
  				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
@@ -227,20 +260,144 @@ platform :osx, '10.11'
         project,
         testLogger,
       );
-      expect(macOSProjectMigration.migrate(), isTrue);
+      macOSProjectMigration.migrate();
 
       expect(xcodeProjectInfoFile.readAsStringSync(), '''
+ 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+ 				MTL_ENABLE_DEBUG_INFO = YES;
+''');
+
+      expect(podfile.readAsStringSync(), '''
+# platform :osx, '10.14'
+platform :osx, '10.14'
+''');
+      // Only print once even though 2 lines were changed.
+      expect('Updating minimum macOS deployment target to 10.14'.allMatches(testLogger.statusText).length, 1);
+    });
+
+    testWithoutContext('Xcode project is migrated from 10.13 to 10.14', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
  				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
  				MTL_ENABLE_DEBUG_INFO = YES;
 ''');
 
-      expect(podfile.readAsStringSync(), '''
+      podfile.writeAsStringSync('''
 # platform :osx, '10.13'
 platform :osx, '10.13'
 ''');
+
+      final MacOSDeploymentTargetMigration macOSProjectMigration = MacOSDeploymentTargetMigration(
+        project,
+        testLogger,
+      );
+      macOSProjectMigration.migrate();
+
+      expect(xcodeProjectInfoFile.readAsStringSync(), '''
+ 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+ 				MTL_ENABLE_DEBUG_INFO = YES;
+''');
+
+      expect(podfile.readAsStringSync(), '''
+# platform :osx, '10.14'
+platform :osx, '10.14'
+''');
       // Only print once even though 2 lines were changed.
-      expect('Updating minimum macOS deployment target to 10.13'.allMatches(testLogger.statusText).length, 1);
+      expect('Updating minimum macOS deployment target to 10.14'.allMatches(testLogger.statusText).length, 1);
+    });
+  });
+
+  group('update NSPrincipalClass from FlutterApplication to NSApplication', () {
+    late MemoryFileSystem memoryFileSystem;
+    late BufferLogger testLogger;
+    late FakeMacOSProject project;
+    late File infoPlistFile;
+    late FakePlistParser fakePlistParser;
+    late FlutterProjectFactory flutterProjectFactory;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      fakePlistParser = FakePlistParser();
+      testLogger = BufferLogger.test();
+      project = FakeMacOSProject();
+      infoPlistFile = memoryFileSystem.file('Info.plist');
+      project.defaultHostInfoPlist = infoPlistFile;
+      flutterProjectFactory = FlutterProjectFactory(
+        fileSystem: memoryFileSystem,
+        logger: testLogger,
+      );
+    });
+
+    void testWithMocks(String description, Future<void> Function() testMethod) {
+      testUsingContext(description, testMethod, overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        PlistParser: () => fakePlistParser,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+    }
+
+    testWithMocks('skipped if files are missing', () async {
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      macOSProjectMigration.migrate();
+      expect(infoPlistFile.existsSync(), isFalse);
+
+      expect(testLogger.traceText, isEmpty);
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithMocks('skipped if no NSPrincipalClass key exists to upgrade', () async {
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), isNull);
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithMocks('skipped if already de-upgraded (or never migrated)', () async {
+      fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'NSApplication');
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithMocks('Info.plist migrated to use NSApplication', () async {
+      fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'FlutterApplication');
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
+      // Only print once.
+      expect('Updating ${infoPlistFile.basename} to use NSApplication instead of FlutterApplication.'.allMatches(testLogger.statusText).length, 1);
+    });
+
+    testWithMocks('Skip if NSPrincipalClass is not NSApplication', () async {
+      const String differentApp = 'DIFFERENTApplication';
+      fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, differentApp);
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), differentApp);
+      expect(testLogger.traceText, isEmpty);
     });
   });
 }
@@ -248,6 +405,9 @@ platform :osx, '10.13'
 class FakeMacOSProject extends Fake implements MacOSProject {
   @override
   File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
+
+  @override
+  File defaultHostInfoPlist = MemoryFileSystem.test().file('InfoplistFile');
 
   @override
   File podfile = MemoryFileSystem.test().file('Podfile');

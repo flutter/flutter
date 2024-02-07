@@ -21,11 +21,6 @@ import 'framework.dart';
 /// than [Widget] as the type of their `child` property.
 ///
 /// Use [PreferredSize] to give a preferred size to an arbitrary widget.
-// (We ignore `avoid_implementing_value_types` here because the superclass
-// doesn't really implement `operator ==`, it just overrides it to _prevent_ it
-// from being implemented, which is the exact opposite of the spirit of the
-// `avoid_implementing_value_types` lint.)
-// ignore: avoid_implementing_value_types
 abstract class PreferredSizeWidget implements Widget {
   /// The size this widget would prefer if it were otherwise unconstrained.
   ///
@@ -69,8 +64,8 @@ class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a widget that has a preferred size that the parent can query.
   const PreferredSize({
     super.key,
-    required this.child,
     required this.preferredSize,
+    required this.child,
   });
 
   /// The widget below this widget in the tree.

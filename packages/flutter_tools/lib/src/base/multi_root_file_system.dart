@@ -44,8 +44,7 @@ class MultiRootFileSystem extends ForwardingFileSystem {
     required FileSystem delegate,
     required String scheme,
     required List<String> roots,
-  })   : assert(delegate != null),
-        assert(roots.isNotEmpty),
+  })   : assert(roots.isNotEmpty),
         _scheme = scheme,
         _roots = roots.map((String root) => delegate.path.normalize(root)).toList(),
         super(delegate);
@@ -249,7 +248,8 @@ class MultiRootDirectory
     'MultiRootDirectory(fileSystem = $fileSystem, delegate = $delegate)';
 }
 
-class MultiRootLink extends MultiRootFileSystemEntity<Link, io.Link>
+class MultiRootLink
+    extends MultiRootFileSystemEntity<Link, io.Link>
     with ForwardingLink {
   MultiRootLink({
     required super.fileSystem,

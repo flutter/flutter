@@ -40,11 +40,8 @@ import 'theme_data.dart';
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
-  /// The [shape], [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], [disabledElevation], [padding], [constraints],
-  /// [autofocus], and [clipBehavior] arguments must not be null. Additionally,
-  /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
-  /// [disabledElevation] must be non-negative.
+  /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
+  /// and [disabledElevation] parameters must be non-negative.
   const RawMaterialButton({
     super.key,
     required this.onPressed,
@@ -74,17 +71,11 @@ class RawMaterialButton extends StatefulWidget {
     this.child,
     this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
-       assert(shape != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(focusElevation != null && focusElevation >= 0.0),
-       assert(hoverElevation != null && hoverElevation >= 0.0),
-       assert(highlightElevation != null && highlightElevation >= 0.0),
-       assert(disabledElevation != null && disabledElevation >= 0.0),
-       assert(padding != null),
-       assert(constraints != null),
-       assert(animationDuration != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null);
+       assert(elevation >= 0.0),
+       assert(focusElevation >= 0.0),
+       assert(hoverElevation >= 0.0),
+       assert(highlightElevation >= 0.0),
+       assert(disabledElevation >= 0.0);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -294,7 +285,7 @@ class RawMaterialButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -367,7 +358,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         right: densityAdjustment.dx,
         bottom: densityAdjustment.dy,
       ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
 
     final Widget result = ConstrainedBox(
@@ -421,10 +412,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         );
         assert(minSize.width >= 0.0);
         assert(minSize.height >= 0.0);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
-        break;
     }
 
     return Semantics(

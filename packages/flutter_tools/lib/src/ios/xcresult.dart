@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../../src/base/process.dart';
 import '../../src/convert.dart' show json;
 import '../../src/macos/xcode.dart';
@@ -75,7 +77,7 @@ class XCResultGenerator {
 /// This is the result from an `xcrun xcresulttool get --path <resultPath> --format json` run.
 /// The result contains useful information such as build errors and warnings.
 class XCResult {
-  /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
+  /// Parse the `resultJson` and stores useful information in the returned `XCResult`.
   factory XCResult({required Map<String, Object?> resultJson, List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
 
@@ -102,6 +104,13 @@ class XCResult {
         issueDiscarder: issueDiscarders,
       ));
     }
+
+    final Object? actionsMap = resultJson['actions'];
+    if (actionsMap is Map<String, Object?>) {
+      final List<XCResultIssue> actionIssues = _parseActionIssues(actionsMap, issueDiscarders: issueDiscarders);
+      issues.addAll(actionIssues);
+    }
+
     return XCResult._(issues: issues);
   }
 
@@ -109,6 +118,20 @@ class XCResult {
     return XCResult._(
       parseSuccess: false,
       parsingErrorMessage: errorMessage,
+    );
+  }
+
+  /// Create a [XCResult] with constructed [XCResultIssue]s for testing.
+  @visibleForTesting
+  factory XCResult.test({
+    List<XCResultIssue>? issues,
+    bool? parseSuccess,
+    String? parsingErrorMessage,
+  }) {
+    return XCResult._(
+      issues: issues ?? const <XCResultIssue>[],
+      parseSuccess: parseSuccess ?? true,
+      parsingErrorMessage: parsingErrorMessage,
     );
   }
 
@@ -180,6 +203,24 @@ class XCResultIssue {
       }
     }
 
+    return XCResultIssue._(
+      type: type,
+      subType: subType,
+      message: message,
+      location: location,
+      warnings: warnings,
+    );
+  }
+
+  /// Create a [XCResultIssue] without JSON parsing for testing.
+  @visibleForTesting
+  factory XCResultIssue.test({
+    XCResultIssueType type = XCResultIssueType.error,
+    String? subType,
+    String? message,
+    String? location,
+    List<String> warnings = const <String>[],
+  }) {
     return XCResultIssue._(
       type: type,
       subType: subType,
@@ -349,3 +390,84 @@ List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
   }
   return issues;
 }
+
+List<XCResultIssue> _parseActionIssues(
+  Map<String, Object?> actionsMap, {
+  required List<XCResultIssueDiscarder> issueDiscarders,
+}) {
+  // Example of json:
+  // {
+  //   "actions" : {
+  //     "_values" : [
+  //       {
+  //         "actionResult" : {
+  //           "_type" : {
+  //             "_name" : "ActionResult"
+  //           },
+  //           "issues" : {
+  //             "_type" : {
+  //               "_name" : "ResultIssueSummaries"
+  //             },
+  //             "testFailureSummaries" : {
+  //               "_type" : {
+  //                 "_name" : "Array"
+  //               },
+  //               "_values" : [
+  //                 {
+  //                   "_type" : {
+  //                     "_name" : "TestFailureIssueSummary",
+  //                     "_supertype" : {
+  //                       "_name" : "IssueSummary"
+  //                     }
+  //                   },
+  //                   "issueType" : {
+  //                     "_type" : {
+  //                       "_name" : "String"
+  //                     },
+  //                     "_value" : "Uncategorized"
+  //                   },
+  //                   "message" : {
+  //                     "_type" : {
+  //                       "_name" : "String"
+  //                     },
+  //                     "_value" : "Unable to find a destination matching the provided destination specifier:\n\t\t{ id:1234D567-890C-1DA2-34E5-F6789A0123C4 }\n\n\tIneligible destinations for the \"Runner\" scheme:\n\t\t{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 17.0 is not installed. To use with Xcode, first download and install the platform }"
+  //                   }
+  //                 }
+  //               ]
+  //             }
+  //           }
+  //         }
+  //       }
+  //     ]
+  //   }
+  // }
+  final List<XCResultIssue> issues = <XCResultIssue>[];
+    final Object? actionsValues = actionsMap['_values'];
+    if (actionsValues is! List<Object?>) {
+      return issues;
+    }
+
+    for (final Object? actionValue in actionsValues) {
+      if (actionValue is!Map<String, Object?>) {
+        continue;
+      }
+      final Object? actionResult = actionValue['actionResult'];
+      if (actionResult is! Map<String, Object?>) {
+        continue;
+      }
+      final Object? actionResultIssues = actionResult['issues'];
+      if (actionResultIssues is! Map<String, Object?>) {
+        continue;
+      }
+      final Object? testFailureSummaries = actionResultIssues['testFailureSummaries'];
+      if (testFailureSummaries is Map<String, Object?>) {
+        issues.addAll(_parseIssuesFromIssueSummariesJson(
+          type: XCResultIssueType.error,
+          issueSummariesJson: testFailureSummaries,
+          issueDiscarder: issueDiscarders,
+        ));
+      }
+    }
+
+    return issues;
+  }

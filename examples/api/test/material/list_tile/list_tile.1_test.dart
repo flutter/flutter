@@ -16,6 +16,7 @@ void main() {
 
     expect(find.byType(ListTile), findsNWidgets(totalTiles));
 
+    // The ListTile widget is wrapped in a Card widget.
     for (int i = 0; i < totalTiles; i++) {
       expect(
         find.ancestor(

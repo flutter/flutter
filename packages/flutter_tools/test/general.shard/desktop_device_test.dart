@@ -86,7 +86,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
-      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildMode.debug);
+      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildInfo.debug);
       fileSystem.file(executableName).writeAsStringSync('\n');
       final FakeApplicationPackage package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
@@ -96,7 +96,7 @@ void main() {
       );
 
       expect(result.started, true);
-      expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
+      expect(result.vmServiceUri, Uri.parse('http://127.0.0.1/0'));
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {
@@ -151,18 +151,20 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_6': 'trace-allowlist=foo,bar',
           'FLUTTER_ENGINE_SWITCH_7': 'trace-skia-allowlist=skia.a,skia.b',
           'FLUTTER_ENGINE_SWITCH_8': 'trace-systrace=true',
-          'FLUTTER_ENGINE_SWITCH_9': 'endless-trace-buffer=true',
-          'FLUTTER_ENGINE_SWITCH_10': 'dump-skp-on-shader-compilation=true',
-          'FLUTTER_ENGINE_SWITCH_11': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
-          'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
-          'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
-          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
-          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '19',
+          'FLUTTER_ENGINE_SWITCH_9': 'trace-to-file=path/to/trace.binpb',
+          'FLUTTER_ENGINE_SWITCH_10': 'endless-trace-buffer=true',
+          'FLUTTER_ENGINE_SWITCH_11': 'dump-skp-on-shader-compilation=true',
+          'FLUTTER_ENGINE_SWITCH_12': 'cache-sksl=true',
+          'FLUTTER_ENGINE_SWITCH_13': 'purge-persistent-cache=true',
+          'FLUTTER_ENGINE_SWITCH_14': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCH_15': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_16': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCH_17': 'start-paused=true',
+          'FLUTTER_ENGINE_SWITCH_18': 'disable-service-auth-codes=true',
+          'FLUTTER_ENGINE_SWITCH_19': 'dart-flags=--null_assertions',
+          'FLUTTER_ENGINE_SWITCH_20': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_21': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '21',
         }
       ),
     ]);
@@ -184,6 +186,7 @@ void main() {
         traceAllowlist: 'foo,bar',
         traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,
@@ -209,7 +212,8 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
           'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
           'FLUTTER_ENGINE_SWITCH_4': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCHES': '4',
+          'FLUTTER_ENGINE_SWITCH_5': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCHES': '5',
         }
       ),
     ]);
@@ -300,6 +304,66 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('Desktop devices pass through the enable-impeller flag', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+    );
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
+
+  testWithoutContext('Desktop devices pass through the --no-enable-impeller flag', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+    );
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.disabled,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({
@@ -357,8 +421,7 @@ class FakeDesktopDevice extends DesktopDevice {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  Future<void> buildForDevice(
-    ApplicationPackage package, {
+  Future<void> buildForDevice({
     String? mainPath,
     BuildInfo? buildInfo,
   }) async {
@@ -368,11 +431,11 @@ class FakeDesktopDevice extends DesktopDevice {
 
   // Dummy implementation that just returns the build mode name.
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) {
     if (nullExecutablePathForDevice) {
       return null;
     }
-    return buildMode == null ? 'null' : getNameForBuildMode(buildMode);
+    return buildInfo.mode.cliName;
   }
 }
 

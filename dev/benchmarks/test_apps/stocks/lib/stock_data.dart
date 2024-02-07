@@ -78,11 +78,6 @@ class StockData extends ChangeNotifier {
   void _fetchNextChunk() {
     _httpClient!.get(_urlToFetch(_nextChunk++)).then<void>((http.Response response) {
       final String json = response.body;
-      if (json == null) {
-        debugPrint('Failed to load stock data chunk ${_nextChunk - 1}');
-        _end();
-        return;
-      }
       const JsonDecoder decoder = JsonDecoder();
       add(decoder.convert(json) as List<dynamic>);
       if (_nextChunk < _chunkCount) {

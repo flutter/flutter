@@ -12,7 +12,10 @@ import 'package:meta/meta.dart';
 
 const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
 
-final bool hasColor = stdout.supportsAnsiEscapes;
+// If running from LUCI set to False.
+final bool isLuci =  Platform.environment['LUCI_CI'] == 'True';
+final bool hasColor = stdout.supportsAnsiEscapes && !isLuci;
+
 
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors
@@ -82,8 +85,7 @@ VoidCallback? onError;
 bool get hasError => _hasError;
 bool _hasError = false;
 
-Iterable<String> get errorMessages => _errorMessages;
-List<String> _errorMessages = <String>[];
+List<List<String>> _errorMessages = <List<String>>[];
 
 final List<String> _pendingLogs = <String>[];
 Timer? _hideTimer; // When this is null, the output is verbose.
@@ -93,7 +95,8 @@ void foundError(List<String> messages) {
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
   final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
-  print('$red╔═╡${bold}ERROR$reset$red╞═${"═" * (width - 9)}');
+  final String title = 'ERROR #${_errorMessages.length + 1}';
+  print('$red╔═╡$bold$title$reset$red╞═${"═" * (width - 4 - title.length)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
     print('$red║$reset $message');
   }
@@ -104,11 +107,9 @@ void foundError(List<String> messages) {
   // another error.
   _pendingLogs.forEach(_printLoudly);
   _pendingLogs.clear();
-  _errorMessages.addAll(messages);
+  _errorMessages.add(messages);
   _hasError = true;
-  if (onError != null) {
-    onError!();
-  }
+  onError?.call();
 }
 
 @visibleForTesting
@@ -120,13 +121,32 @@ void resetErrorStatus() {
   _hideTimer = null;
 }
 
-Never reportErrorsAndExit() {
+Never reportSuccessAndExit(String message) {
   _hideTimer?.cancel();
   _hideTimer = null;
+  print('$clock $message$reset');
+  system.exit(0);
+}
+
+Never reportErrorsAndExit(String message) {
+  _hideTimer?.cancel();
+  _hideTimer = null;
+  print('$clock $message$reset');
   print(redLine);
-  print('For your convenience, the error messages reported above are repeated here:');
-  _errorMessages.forEach(print);
+  print('${red}For your convenience, the error messages reported above are repeated here:$reset');
+  final bool printSeparators = _errorMessages.any((List<String> messages) => messages.length > 1);
+  if (printSeparators) {
+    print('  🙙  🙛  ');
+  }
+  for (int index = 0; index < _errorMessages.length * 2 - 1; index += 1) {
+    if (index.isEven) {
+      _errorMessages[index ~/ 2].forEach(print);
+    } else if (printSeparators) {
+      print('  🙙  🙛  ');
+    }
+  }
   print(redLine);
+  print('You may find the errors by searching for "╡ERROR #" in the logs.');
   system.exit(1);
 }
 
@@ -134,7 +154,7 @@ void printProgress(String message) {
   _pendingLogs.clear();
   _hideTimer?.cancel();
   _hideTimer = null;
-  print('$clock $message $reset');
+  print('$clock $message$reset');
   if (hasColor) {
     // This sets up a timer to switch to verbose mode when the tests take too long,
     // so that if a test hangs we can see the logs.

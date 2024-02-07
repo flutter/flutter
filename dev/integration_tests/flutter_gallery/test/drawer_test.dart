@@ -105,7 +105,7 @@ void main() {
     await tester.tap(find.text('Small'));
     await tester.pumpAndSettle();
     Size textSize = tester.getSize(find.text('Text size'));
-    expect(textSize, equals(const Size(116.0, 13.0)));
+    expect(textSize, equals(within(distance: 0.05, from: const Size(115.2, 13.0))));
 
     // Set font scale back to the default.
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(1));

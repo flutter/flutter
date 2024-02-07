@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -328,13 +327,13 @@ void main() {
     expect(renderOpacity.needsCompositing, false);
   });
 
-  test('RenderOpacity does not composite if it is opaque', () {
+  test('RenderOpacity does composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
-    expect(renderOpacity.needsCompositing, false);
+    expect(renderOpacity.needsCompositing, true);
   });
 
   test('RenderOpacity does composite if it is partially opaque', () {
@@ -370,7 +369,7 @@ void main() {
     expect(renderAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderAnimatedOpacity does not composite if it is opaque', () {
+  test('RenderAnimatedOpacity does composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
@@ -381,7 +380,7 @@ void main() {
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
-    expect(renderAnimatedOpacity.needsCompositing, false);
+    expect(renderAnimatedOpacity.needsCompositing, true);
   });
 
   test('RenderAnimatedOpacity does composite if it is partially opaque', () {
@@ -545,10 +544,8 @@ void main() {
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip!);
-          break;
         case null:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none);
-          break;
       }
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       box.paint(context, Offset.zero);
@@ -805,10 +802,10 @@ void main() {
   });
 
   test('Offstage implements paintsChild correctly', () {
-    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderConstrainedBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderConstrainedBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
-    parent.adoptChild(offstage);
+    parent.child = offstage;
 
     expect(offstage.paintsChild(box), true);
 
@@ -819,9 +816,7 @@ void main() {
 
   test('Opacity implements paintsChild correctly', () {
     final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final RenderOpacity opacity = RenderOpacity(child: box);
-    parent.adoptChild(opacity);
 
     expect(opacity.paintsChild(box), true);
 
@@ -832,10 +827,8 @@ void main() {
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
     final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
     final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
-    parent.adoptChild(opacity);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
@@ -849,10 +842,8 @@ void main() {
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
     final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
-    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
     final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
-    parent.adoptChild(opacity);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
@@ -890,7 +881,7 @@ void main() {
   });
 
   // Simulate painting a RenderBox as if 'debugPaintSizeEnabled == true'
-  Function(PaintingContext, Offset) debugPaint(RenderBox renderBox) {
+  DebugPaintCallback debugPaint(RenderBox renderBox) {
     layout(renderBox);
     pumpFrame(phase: EnginePhase.compositingBits);
     return (PaintingContext context, Offset offset) {
@@ -900,7 +891,7 @@ void main() {
   }
 
   test('RenderClipPath.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
-    Function(PaintingContext, Offset) debugPaintClipRect(Clip clip) {
+    DebugPaintCallback debugPaintClipRect(Clip clip) {
       final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
       final RenderClipPath renderClipPath = RenderClipPath(clipBehavior: clip, child: child);
       return debugPaint(renderClipPath);
@@ -917,7 +908,7 @@ void main() {
   });
 
   test('RenderClipRect.debugPaintSize draws a rect and a debug text when clipBehavior is not Clip.none', () {
-    Function(PaintingContext, Offset) debugPaintClipRect(Clip clip) {
+    DebugPaintCallback debugPaintClipRect(Clip clip) {
       final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
       final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: clip, child: child);
       return debugPaint(renderClipRect);
@@ -933,7 +924,7 @@ void main() {
   });
 
   test('RenderClipRRect.debugPaintSize draws a rounded rect and a debug text when clipBehavior is not Clip.none', () {
-    Function(PaintingContext, Offset) debugPaintClipRRect(Clip clip) {
+    DebugPaintCallback debugPaintClipRRect(Clip clip) {
       final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
       final RenderClipRRect renderClipRRect = RenderClipRRect(clipBehavior: clip, child: child);
       return debugPaint(renderClipRRect);
@@ -949,7 +940,7 @@ void main() {
   });
 
   test('RenderClipOval.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
-    Function(PaintingContext, Offset) debugPaintClipOval(Clip clip) {
+    DebugPaintCallback debugPaintClipOval(Clip clip) {
       final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
       final RenderClipOval renderClipOval = RenderClipOval(clipBehavior: clip, child: child);
       return debugPaint(renderClipOval);
@@ -962,6 +953,24 @@ void main() {
     // RenderClipOval.debugPaintSize does not draw when clipBehavior is Clip.none
     expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
     expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
+  });
+
+  test('RenderProxyBox behavior can be mixed in along with another base class', () {
+    final RenderFancyProxyBox fancyProxyBox = RenderFancyProxyBox(fancy: 6);
+    // Box has behavior from its base class:
+    expect(fancyProxyBox.fancyMethod(), 36);
+    // Box has behavior from RenderProxyBox:
+    expect(
+      // ignore: invalid_use_of_protected_member
+      fancyProxyBox.computeDryLayout(const BoxConstraints(minHeight: 8)),
+      const Size(0, 8),
+    );
+  });
+
+  test('computeDryLayout constraints are covariant', () {
+    final RenderBoxWithTestConstraints box = RenderBoxWithTestConstraints();
+    const TestConstraints constraints = TestConstraints(testValue: 6);
+    expect(box.computeDryLayout(constraints), const Size.square(6));
   });
 }
 
@@ -1061,10 +1070,43 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
 
 class TestOffsetLayerA extends OffsetLayer {}
 
+class RenderFancyBox extends RenderBox {
+  RenderFancyBox({required this.fancy}) : super();
+
+  late int fancy;
+
+  int fancyMethod() {
+    return fancy * fancy;
+  }
+}
+
+class RenderFancyProxyBox extends RenderFancyBox
+    with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
+  RenderFancyProxyBox({required super.fancy});
+}
+
 void expectAssertionError() {
   final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
   final bool asserted = errorDetails.toString().contains('Failed assertion');
   if (!asserted) {
     FlutterError.reportError(errorDetails);
+  }
+}
+
+typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset);
+
+class TestConstraints extends BoxConstraints {
+  const TestConstraints({
+    double extent = 100,
+    required this.testValue,
+  }) : super(maxWidth: extent, maxHeight: extent);
+
+  final double testValue;
+}
+
+class RenderBoxWithTestConstraints extends RenderProxyBox {
+  @override
+  Size computeDryLayout(TestConstraints constraints) {
+    return constraints.constrain(Size.square(constraints.testValue));
   }
 }

@@ -17,6 +17,9 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
+import 'custom_rules/analyze.dart';
+import 'custom_rules/no_double_clamp.dart';
+import 'custom_rules/no_stop_watches.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -47,10 +50,9 @@ Future<void> main(List<String> arguments) async {
   printProgress('STARTING ANALYSIS');
   await run(arguments);
   if (hasError) {
-    printProgress('${bold}Test failed.$reset');
-    reportErrorsAndExit();
+    reportErrorsAndExit('${bold}Analysis failed.$reset');
   }
-  printProgress('${bold}Analysis successful.$reset');
+  reportSuccessAndExit('${bold}Analysis successful.$reset');
 }
 
 /// Scans [arguments] for an argument of the form `--dart-sdk` or
@@ -88,8 +90,8 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  printProgress('No Double.clamp');
-  await verifyNoDoubleClamp(flutterRoot);
+  printProgress('TargetPlatform tool/framework consistency');
+  await verifyTargetPlatform(flutterRoot);
 
   printProgress('All tool test files end in _test.dart...');
   await verifyToolTestsEndInTestDart(flutterRoot);
@@ -112,6 +114,9 @@ Future<void> run(List<String> arguments) async {
 
   printProgress('Trailing spaces...');
   await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
+
+  printProgress('Spaces after flow control statements...');
+  await verifySpacesAfterFlowControlStatements(flutterRoot);
 
   printProgress('Deprecations...');
   await verifyDeprecations(flutterRoot);
@@ -143,6 +148,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('null initialized debug fields...');
   await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
+  printProgress('Taboo words...');
+  await verifyTabooDocumentation(flutterRoot);
+
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -156,18 +164,40 @@ Future<void> run(List<String> arguments) async {
 
   // Analyze all the Dart code in the repo.
   printProgress('Dart analysis...');
-  await _runFlutterAnalyze(flutterRoot, options: <String>[
+  final CommandResult dartAnalyzeResult = await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     ...arguments,
   ]);
+
+  if (dartAnalyzeResult.exitCode == 0) {
+    // Only run the private lints when the code is free of type errors. The
+    // lints are easier to write when they can assume, for example, there is no
+    // inheritance cycles.
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches];
+    final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the framework with the following rules:$ruleNames');
+    await analyzeWithRules(flutterRoot, rules,
+      includePaths: <String>['packages/flutter/lib'],
+      excludePaths: <String>['packages/flutter/lib/fix_data'],
+    );
+    final List<AnalyzeRule> testRules = <AnalyzeRule>[noStopwatches];
+    final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
+    await analyzeWithRules(flutterRoot, testRules,
+      includePaths: <String>['packages/flutter/test'],
+    );
+  } else {
+    printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
+  }
 
   printProgress('Executable allowlist...');
   await _checkForNewExecutables();
 
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
+  // We specify a failureMessage so that the actual output is muted in the case where _runFlutterAnalyze above already failed.
   printProgress('Dart analysis (with --watch)...');
-  await _runFlutterAnalyze(flutterRoot, options: <String>[
+  await _runFlutterAnalyze(flutterRoot, failureMessage: 'Dart analyzer failed when --watch was used.', options: <String>[
     '--flutter-repo',
     '--watch',
     '--benchmark',
@@ -178,6 +208,13 @@ Future<void> run(List<String> arguments) async {
   printProgress('Snippet code...');
   await runCommand(dart,
     <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
+    workingDirectory: flutterRoot,
+  );
+
+  // Make sure that all of the existing samples are linked from at least one API doc comment.
+  printProgress('Code sample link validation...');
+  await runCommand(dart,
+    <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'check_code_samples.dart')],
     workingDirectory: flutterRoot,
   );
 
@@ -193,7 +230,7 @@ Future<void> run(List<String> arguments) async {
       ],
       workingDirectory: flutterRoot,
     );
-    await _runFlutterAnalyze(outDir.path, options: <String>[
+    await _runFlutterAnalyze(outDir.path, failureMessage: 'Dart analyzer failed on mega_gallery benchmark.', options: <String>[
       '--watch',
       '--benchmark',
       ...arguments,
@@ -201,6 +238,14 @@ Future<void> run(List<String> arguments) async {
   } finally {
     outDir.deleteSync(recursive: true);
   }
+
+  // Ensure gen_default links the correct files
+  printProgress('Correct file names in gen_defaults.dart...');
+  await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
+
+  // Ensure integration test files are up-to-date with the app template.
+  printProgress('Up to date integration test template files...');
+  await verifyIntegrationTestTemplateFiles(flutterRoot);
 }
 
 
@@ -209,71 +254,138 @@ Future<void> run(List<String> arguments) async {
 FeatureSet _parsingFeatureSet() => FeatureSet.latestLanguageVersion();
 
 _Line _getLine(ParseStringResult parseResult, int offset) {
-  final int lineNumber =
-      parseResult.lineInfo.getLocation(offset).lineNumber;
+  final int lineNumber = parseResult.lineInfo.getLocation(offset).lineNumber;
   final String content = parseResult.content.substring(
-      parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
-      parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
+    parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
+    parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1,
+  );
   return _Line(lineNumber, content);
 }
 
-class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
-  _DoubleClampVisitor(this.parseResult);
-
-  final List<_Line> clamps = <_Line>[];
-  final ParseStringResult parseResult;
-
-  @override
-  CompilationUnit? visitMethodInvocation(MethodInvocation node) {
-    if (node.methodName.name == 'clamp') {
-      final _Line line = _getLine(parseResult, node.function.offset);
-      if (!line.content.contains('// ignore_clamp_double_lint')) {
-        clamps.add(line);
+Future<void> verifyTargetPlatform(String workingDirectory) async {
+  final File framework = File('$workingDirectory/packages/flutter/lib/src/foundation/platform.dart');
+  final Set<String> frameworkPlatforms = <String>{};
+  List<String> lines = framework.readAsLinesSync();
+  int index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Can no longer find TargetPlatform enum.']);
+      return;
+    }
+    if (lines[index].startsWith('enum TargetPlatform {')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Could not find end of TargetPlatform enum.']);
+      return;
+    }
+    String line = lines[index].trim();
+    final int comment = line.indexOf('//');
+    if (comment >= 0) {
+      line = line.substring(0, comment);
+    }
+    if (line == '}') {
+      break;
+    }
+    if (line.isNotEmpty) {
+      if (line.endsWith(',')) {
+        frameworkPlatforms.add(line.substring(0, line.length - 1));
+      } else {
+        foundError(<String>['${framework.path}:$index: unparseable line when looking for TargetPlatform values']);
       }
     }
-
-    node.visitChildren(this);
-    return null;
+    index += 1;
+  }
+  final File tool = File('$workingDirectory/packages/flutter_tools/lib/src/resident_runner.dart');
+  final Set<String> toolPlatforms = <String>{};
+  lines = tool.readAsLinesSync();
+  index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Can no longer find nextPlatform logic.']);
+      return;
+    }
+    if (lines[index].trim().startsWith('const List<String> platforms = <String>[')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Could not find end of nextPlatform logic.']);
+      return;
+    }
+    final String line = lines[index].trim();
+    if (line.startsWith("'") && line.endsWith("',")) {
+      toolPlatforms.add(line.substring(1, line.length - 2));
+    } else if (line == '];') {
+      break;
+    } else {
+      foundError(<String>['${tool.path}:$index: unparseable line when looking for nextPlatform values']);
+    }
+    index += 1;
+  }
+  final Set<String> frameworkExtra = frameworkPlatforms.difference(toolPlatforms);
+  if (frameworkExtra.isNotEmpty) {
+    foundError(<String>['TargetPlatform has some extra values not found in the tool: ${frameworkExtra.join(", ")}']);
+  }
+  final Set<String> toolExtra = toolPlatforms.difference(frameworkPlatforms);
+  if (toolExtra.isNotEmpty) {
+    foundError(<String>['The nextPlatform logic in the tool has some extra values not found in TargetPlatform: ${toolExtra.join(", ")}']);
   }
 }
 
-/// Verify that we use clampDouble instead of Double.clamp for performance reasons.
-///
-/// We currently can't distinguish valid uses of clamp from problematic ones so
-/// if the clamp is operating on a type other than a `double` the
-/// `// ignore_clamp_double_lint` comment must be added to the line where clamp is
-/// invoked.
-///
-/// See also:
-///   * https://github.com/flutter/flutter/pull/103559
-///   * https://github.com/flutter/flutter/issues/103917
-Future<void> verifyNoDoubleClamp(String workingDirectory) async {
-  final String flutterLibPath = '$workingDirectory/packages/flutter/lib';
-  final Stream<File> testFiles =
-      _allFiles(flutterLibPath, 'dart', minimumMatches: 100);
+/// Verify Token Templates are mapped to correct file names while generating
+/// M3 defaults in /dev/tools/gen_defaults/bin/gen_defaults.dart.
+Future<void> verifyTokenTemplatesUpdateCorrectFiles(String workingDirectory) async {
   final List<String> errors = <String>[];
-  await for (final File file in testFiles) {
-    try {
-      final ParseStringResult parseResult = parseFile(
-        featureSet: _parsingFeatureSet(),
-        path: file.absolute.path,
-      );
-      final _DoubleClampVisitor visitor = _DoubleClampVisitor(parseResult);
-      visitor.visitCompilationUnit(parseResult.unit);
-      for (final _Line clamp in visitor.clamps) {
-        errors.add('${file.path}:${clamp.line}: `clamp` method used without ignore_clamp_double_lint comment.');
+
+  String getMaterialDirPath(List<String> lines) {
+    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
+    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
+    return path.join(workingDirectory, relativePath);
+  }
+
+  String getFileName(String line) {
+    const String materialLibString = r"'$materialLib/";
+    final String leftClamp = line.substring(line.indexOf(materialLibString) + materialLibString.length);
+    return leftClamp.substring(0, leftClamp.indexOf("'"));
+  }
+
+  final String genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
+  final File file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
+  final List<String> lines = file.readAsLinesSync();
+  final String materialDirPath = getMaterialDirPath(lines);
+  bool atLeastOneTargetLineExists = false;
+
+  for (final String line in lines) {
+    if (line.contains('updateFile();')) {
+      atLeastOneTargetLineExists = true;
+      final String fileName = getFileName(line);
+      final String filePath = path.join(materialDirPath, fileName);
+      final File file = File(filePath);
+
+      if (!file.existsSync()) {
+        errors.add('file $filePath does not exist.');
       }
-    } catch (ex) {
-      // TODO(gaaclarke): There is a bug with super parameter parsing on mac so
-      // we skip certain files until that is fixed.
-      // https://github.com/dart-lang/sdk/issues/49032
-      print('skipping ${file.path}: $ex');
     }
   }
+
+  assert(atLeastOneTargetLineExists, 'No lines exist that this test expects to '
+      'verify. Check if the target file is correct or remove this test');
+
+  // Fail if any errors
   if (errors.isNotEmpty) {
+    final String s = errors.length > 1 ? 's' : '';
+    final String itThem = errors.length > 1 ? 'them' : 'it';
     foundError(<String>[
       ...errors,
-      '\n${bold}See: https://github.com/flutter/flutter/pull/103559',
+      '${bold}Please correct the file name$s or remove $itThem from /dev/tools/gen_defaults/bin/gen_defaults.dart$reset',
     ]);
   }
 }
@@ -479,6 +591,14 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             String possibleReason = '';
             if (lines[lineNumber].trimLeft().startsWith('"')) {
               possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
+            } else if (!lines[lineNumber].contains("'")) {
+              possibleReason = ' It might be missing the line saying "This feature was deprecated after...".';
+            } else if (!lines[lineNumber].trimRight().endsWith(" '")) {
+              if (lines[lineNumber].contains('This feature was deprecated')) {
+                possibleReason = ' There might not be an explanatory message.';
+              } else {
+                possibleReason = ' There might be a missing space character at the end of the line.';
+              }
             }
             throw 'Deprecation notice does not match required pattern.$possibleReason';
           }
@@ -491,6 +611,8 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             if (firstChar.toUpperCase() != firstChar) {
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
             }
+          } else {
+            message += messageMatch.namedGroup('message')!;
           }
           lineNumber += 1;
           if (lineNumber >= lines.length) {
@@ -510,7 +632,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
           }
         }
         if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?')) {
-          throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
+          throw 'Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "$message".';
         }
         if (!lines[lineNumber].startsWith("$indent  '")) {
           throw 'Unexpected deprecation notice indent.';
@@ -540,7 +662,6 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
 }
 
 String _generateLicense(String prefix) {
-  assert(prefix != null);
   return '${prefix}Copyright 2014 The Flutter Authors. All rights reserved.\n'
          '${prefix}Use of this source code is governed by a BSD-style license that can be\n'
          '${prefix}found in the LICENSE file.';
@@ -552,6 +673,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'cc', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'cpp', overrideMinimumMatches ?? 0, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
@@ -975,6 +1097,38 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
   }
 }
 
+final RegExp _flowControlStatementWithoutSpace = RegExp(r'(^|[ \t])(if|switch|for|do|while|catch)\(', multiLine: true);
+
+Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { int minimumMatches = 4000 }) async {
+  const Set<String> extensions = <String>{
+    '.dart',
+    '.java',
+    '.js',
+    '.kt',
+    '.swift',
+    '.c',
+    '.cc',
+    '.cpp',
+    '.h',
+    '.m',
+  };
+  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
+    .where((File file) => extensions.contains(path.extension(file.path)))
+    .toList();
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      if (lines[index].contains(_flowControlStatementWithoutSpace)) {
+        problems.add('${file.path}:${index + 1}: no space after flow control statement');
+      }
+    }
+  }
+  if (problems.isNotEmpty) {
+    foundError(problems);
+  }
+}
+
 String _bullets(String value) => ' * $value';
 
 Future<void> verifyIssueLinks(String workingDirectory) async {
@@ -988,7 +1142,7 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
     Directory(path.join(workingDirectory, '.github', 'ISSUE_TEMPLATE'))
       .listSync()
       .whereType<File>()
-      .where((File file) => path.extension(file.path) == '.md')
+      .where((File file) => path.extension(file.path) == '.md' || path.extension(file.path) == '.yml')
       .map<String>((File file) => path.basename(file.path))
       .toSet();
   final String kTemplates = 'The available templates are:\n${templateNames.map(_bullets).join("\n")}';
@@ -1519,8 +1673,6 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
 // UTILITY FUNCTIONS
 
 bool _listEquals<T>(List<T> a, List<T> b) {
-  assert(a != null);
-  assert(b != null);
   if (a.length != b.length) {
     return false;
   }
@@ -1719,7 +1871,14 @@ Future<void> _checkConsumerDependencies() async {
 
       final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
-        workset.add(dependencyTree[dependency]!);
+        // Don't add dependencies we've already seen or we will get stuck
+        // forever if there are any circular references.
+        // TODO(dantup): Consider failing gracefully with the names of the
+        //  packages once the cycle between test_api and matcher is resolved.
+        //  https://github.com/dart-lang/test/issues/1979
+        if (!dependencies.contains(dependency)) {
+          workset.add(dependencyTree[dependency]!);
+        }
       }
     }
   }
@@ -1761,18 +1920,17 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
   final List<String> errors = <String>[];
   for (final File file in files) {
     final List<String> lines = file.readAsLinesSync();
-    for (int i = 0; i < lines.length; i += 1) {
-      final String line = lines[i];
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
       if (!line.contains(_kDebugOnlyAnnotation)) {
         continue;
       }
-      final String nextLine = lines[i + 1];
+      final String nextLine = lines[index + 1];
       if (_nullInitializedField.firstMatch(nextLine) == null) {
-        errors.add('${file.path} L$i');
+        errors.add('${file.path}:$index');
       }
     }
   }
-
   if (errors.isNotEmpty) {
     foundError(<String>[
      '${bold}ERROR: ${red}fields annotated with @_debugOnly must null initialize.$reset',
@@ -1785,13 +1943,114 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
   }
 }
 
+final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply|note:|note that)\b', caseSensitive: false);
+
+Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatches = 100 }) async {
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
+      final Match? match = tabooPattern.firstMatch(line);
+      if (match != null) {
+        errors.add('${file.path}:${index + 1}: Found use of the taboo word "${match.group(1)}" in documentation string.');
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    foundError(<String>[
+      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
+      '${bold}In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
+      '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-empty-prose for details.$reset',
+      ...errors,
+    ]);
+  }
+}
+
+const List<String> _kIgnoreList = <String>[
+  'Runner.rc.tmpl',
+  'flutter_window.cpp',
+];
+final String _kIntegrationTestsRelativePath = path.join('dev', 'integration_tests');
+final String _kTemplateRelativePath = path.join('packages', 'flutter_tools', 'templates', 'app_shared', 'windows.tmpl', 'runner');
+final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
+const String _kProjectNameKey = '{{projectName}}';
+const String _kTmplExt = '.tmpl';
+final String _kLicensePath = path.join('dev', 'conductor', 'core', 'lib', 'src', 'proto', 'license_header.txt');
+
+String _getFlutterLicense(String flutterRoot) {
+  return '${File(path.join(flutterRoot, _kLicensePath)).readAsLinesSync().join("\n")}\n\n';
+}
+
+String _removeLicenseIfPresent(String fileContents, String license) {
+  if (fileContents.startsWith(license)) {
+    return fileContents.substring(license.length);
+  }
+  return fileContents;
+}
+
+Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
+  final List<String> errors = <String>[];
+  final String license = _getFlutterLicense(flutterRoot);
+  final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
+  final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
+  final Iterable<Directory>subDirs = Directory(integrationTestsPath).listSync().toList().whereType<Directory>();
+  for (final Directory testPath in subDirs) {
+    final String projectName = path.basename(testPath.path);
+    final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);
+    final Directory runner = Directory(runnerPath);
+    if (!runner.existsSync()) {
+      continue;
+    }
+    final Iterable<File> files = Directory(templatePath).listSync().toList().whereType<File>();
+    for (final File templateFile in files) {
+      final String fileName = path.basename(templateFile.path);
+      if (_kIgnoreList.contains(fileName)) {
+        continue;
+      }
+      String templateFileContents = templateFile.readAsLinesSync().join('\n');
+      String appFilePath = path.join(runnerPath, fileName);
+      if (fileName.endsWith(_kTmplExt)) {
+        appFilePath = appFilePath.substring(0, appFilePath.length - _kTmplExt.length); // Remove '.tmpl' from app file path
+        templateFileContents = templateFileContents.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
+      }
+      String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
+      appFileContents = _removeLicenseIfPresent(appFileContents, license);
+      if (appFileContents != templateFileContents) {
+        int indexOfDifference;
+        for (indexOfDifference = 0; indexOfDifference < appFileContents.length; indexOfDifference++) {
+          if (indexOfDifference >= templateFileContents.length || templateFileContents.codeUnitAt(indexOfDifference) != appFileContents.codeUnitAt(indexOfDifference)) {
+            break;
+          }
+        }
+        final String error = '''
+Error: file $fileName mismatched for integration test $testPath
+Verify the integration test has been migrated to the latest app template.
+=====$appFilePath======
+$appFileContents
+=====${templateFile.path}======
+$templateFileContents
+==========
+Diff at character #$indexOfDifference
+        ''';
+        errors.add(error);
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    foundError(errors);
+  }
+}
+
 Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
+  String? failureMessage,
 }) async {
   return runCommand(
     flutter,
     <String>['analyze', ...options],
     workingDirectory: workingDirectory,
+    failureMessage: failureMessage,
   );
 }
 
@@ -1921,8 +2180,10 @@ bool _isGeneratedPluginRegistrant(File file) {
   final String filename = path.basename(file.path);
   return !file.path.contains('.pub-cache')
       && (filename == 'GeneratedPluginRegistrant.java' ||
+          filename == 'GeneratedPluginRegistrant.swift' ||
           filename == 'GeneratedPluginRegistrant.h' ||
           filename == 'GeneratedPluginRegistrant.m' ||
           filename == 'generated_plugin_registrant.dart' ||
-          filename == 'generated_plugin_registrant.h');
+          filename == 'generated_plugin_registrant.h' ||
+          filename == 'generated_plugin_registrant.cc');
 }

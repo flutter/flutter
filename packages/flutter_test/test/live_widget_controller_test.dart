@@ -2,10 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+// This test is very fragile and bypasses some zone-related checks.
+// It is written this way to verify some invariants that would otherwise
+// be difficult to check.
+// Do not use this test as a guide for writing good Flutter code.
+
+class TestBinding extends WidgetsFlutterBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  @override
+  bool debugCheckZone(String entryPoint) { return true; }
+
+  static TestBinding get instance => BindingBase.checkInstance(_instance);
+  static TestBinding? _instance;
+
+  static TestBinding ensureInitialized() {
+    if (TestBinding._instance == null) {
+      TestBinding();
+    }
+    return TestBinding.instance;
+  }
+}
 
 class CountButton extends StatefulWidget {
   const CountButton({super.key});
@@ -65,6 +92,8 @@ class _AnimateSampleState extends State<AnimateSample>
 }
 
 void main() {
+  TestBinding.ensureInitialized();
+
   test('Test pump on LiveWidgetController', () async {
     runApp(const MaterialApp(home: Center(child: CountButton())));
 
@@ -109,7 +138,7 @@ void main() {
     final List<PointerEventRecord> records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
         // Typically PointerAddedEvent is not used in testers, but for records
-        // captured on a device it is usually what start a gesture.
+        // captured on a device it is usually what starts a gesture.
         PointerAddedEvent(
           position: location,
         ),
@@ -147,7 +176,7 @@ void main() {
     expect(timeDiffs.length, records.length);
     for (final Duration diff in timeDiffs) {
       // Allow some freedom of time delay in real world.
-      // TODO(pdblasi-google): The expected wiggle room should be -1, but occassional
+      // TODO(pdblasi-google): The expected wiggle room should be -1, but occasional
       // results were reaching -6. This assert has been adjusted to reduce flakiness,
       // but the root cause is still unknown. (https://github.com/flutter/flutter/issues/109638)
       assert(diff.inMilliseconds > -7, 'timeDiffs were: $timeDiffs (offending time was ${diff.inMilliseconds}ms)');

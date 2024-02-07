@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('IconButtonThemeData lerp special cases', () {
+    expect(IconButtonThemeData.lerp(null, null, 0), null);
+    const IconButtonThemeData data = IconButtonThemeData();
+    expect(identical(IconButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no IconButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
@@ -32,7 +38,7 @@ void main() {
     expect(material.borderRadius, null);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -221,12 +227,12 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     Material material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, null); //default
+    expect(material.shadowColor, Colors.transparent); //default
 
     await tester.pumpWidget(buildFrame(overallShadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
 
     await tester.pumpWidget(buildFrame(themeShadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation

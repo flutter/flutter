@@ -11,6 +11,7 @@ import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
 import 'src/base/user_messages.dart';
+import 'src/build_system/build_targets.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
@@ -28,7 +29,6 @@ import 'src/commands/doctor.dart';
 import 'src/commands/downgrade.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
-import 'src/commands/format.dart';
 import 'src/commands/generate.dart';
 import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
@@ -48,6 +48,7 @@ import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
+import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/pre_run_validator.dart';
@@ -107,10 +108,11 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
+      BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,
@@ -125,8 +127,20 @@ Future<void> main(List<String> args) async {
           windows: globals.platform.isWindows,
         );
       },
+      AnsiTerminal: () {
+        return AnsiTerminal(
+          stdio: globals.stdio,
+          platform: globals.platform,
+          now: DateTime.now(),
+          // So that we don't animate anything before calling applyFeatureFlags, default
+          // the animations to disabled in real apps.
+          defaultCliAnimationEnabled: false,
+        );
+        // runner.run calls "terminal.applyFeatureFlags()"
+      },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
+    shutdownHooks: globals.shutdownHooks,
   );
 }
 
@@ -143,11 +157,37 @@ List<FlutterCommand> generateCommands({
     terminal: globals.terminal,
     artifacts: globals.artifacts!,
     // new ProjectValidators should be added here for the --suggestions to run
-    allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
+    allProjectValidators: <ProjectValidator>[
+      GeneralInfoProjectValidator(),
+      VariableDumpMachineProjectValidator(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+      ),
+    ],
+    suppressAnalytics: globals.flutterUsage.suppressAnalytics,
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
-  AttachCommand(verboseHelp: verboseHelp),
-  BuildCommand(verboseHelp: verboseHelp),
+  AttachCommand(
+    verboseHelp: verboseHelp,
+    stdio: globals.stdio,
+    logger: globals.logger,
+    terminal: globals.terminal,
+    signals: globals.signals,
+    platform: globals.platform,
+    processInfo: globals.processInfo,
+    fileSystem: globals.fs,
+  ),
+  BuildCommand(
+    artifacts: globals.artifacts!,
+    fileSystem: globals.fs,
+    buildSystem: globals.buildSystem,
+    osUtils: globals.os,
+    processUtils: globals.processUtils,
+    verboseHelp: verboseHelp,
+    androidSdk: globals.androidSdk,
+    logger: globals.logger,
+  ),
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
   ConfigCommand(verboseHelp: verboseHelp),
@@ -166,14 +206,14 @@ List<FlutterCommand> generateCommands({
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
   DoctorCommand(verbose: verbose),
-  DowngradeCommand(verboseHelp: verboseHelp),
+  DowngradeCommand(verboseHelp: verboseHelp, logger: globals.logger),
   DriveCommand(verboseHelp: verboseHelp,
     fileSystem: globals.fs,
     logger: globals.logger,
     platform: globals.platform,
+    signals: globals.signals,
   ),
   EmulatorsCommand(),
-  FormatCommand(verboseHelp: verboseHelp),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
@@ -181,8 +221,13 @@ List<FlutterCommand> generateCommands({
     artifacts: globals.artifacts!,
     processManager: globals.processManager,
   ),
-  InstallCommand(),
-  LogsCommand(),
+  InstallCommand(
+    verboseHelp: verboseHelp,
+  ),
+  LogsCommand(
+    sigint: ProcessSignal.sigint,
+    sigterm: ProcessSignal.sigterm,
+  ),
   MakeHostAppEditableCommand(),
   PackagesCommand(),
   PrecacheCommand(
@@ -193,7 +238,7 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
   ),
   RunCommand(verboseHelp: verboseHelp),
-  ScreenshotCommand(),
+  ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
   TestCommand(verboseHelp: verboseHelp, verbose: verbose),
   UpgradeCommand(verboseHelp: verboseHelp),

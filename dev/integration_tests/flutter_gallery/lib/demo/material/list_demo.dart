@@ -32,7 +32,7 @@ class ListDemo extends StatefulWidget {
 class _ListDemoState extends State<ListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  PersistentBottomSheetController<void>? _bottomSheet;
+  PersistentBottomSheetController? _bottomSheet;
   _MaterialListType? _itemType = _MaterialListType.threeLine;
   bool? _dense = false;
   bool? _showAvatars = true;
@@ -51,7 +51,7 @@ class _ListDemoState extends State<ListDemo> {
   }
 
   void _showConfigurationSheet() {
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((BuildContext bottomSheetContext) {
+    final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((BuildContext bottomSheetContext) {
       return Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: Colors.black26)),
@@ -212,13 +212,10 @@ class _ListDemoState extends State<ListDemo> {
       case _MaterialListType.oneLine:
       case _MaterialListType.oneLineWithAvatar:
         itemTypeText = 'Single-line';
-        break;
       case _MaterialListType.twoLine:
         itemTypeText = 'Two-line';
-        break;
       case _MaterialListType.threeLine:
         itemTypeText = 'Three-line';
-        break;
       case null:
         break;
     }

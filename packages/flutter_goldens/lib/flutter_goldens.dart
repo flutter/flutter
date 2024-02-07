@@ -8,17 +8,22 @@ import 'dart:io' as io show OSError, SocketException;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_goldens_client/skia_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
-export 'package:flutter_goldens_client/skia_client.dart';
+import 'skia_client.dart';
+export 'skia_client.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
+// If you are trying to debug this package, you may like to use the golden test
+// titled "Inconsequential golden test" in this file:
+//   /packages/flutter/test/widgets/basic_test.dart
+
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
+final RegExp _kMainBranch = RegExp(r'master|main');
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
@@ -40,7 +45,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
   }
-
   await testMain();
 }
 
@@ -97,11 +101,11 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   });
 
   /// The directory to which golden file URIs will be resolved in [compare] and
-  /// [update], cannot be null.
+  /// [update].
   final Uri basedir;
 
   /// A client for uploading image tests and making baseline requests to the
-  /// Flutter Gold Dashboard, cannot be null.
+  /// Flutter Gold Dashboard.
   final SkiaGoldClient skiaClient;
 
   /// The file system used to perform file access.
@@ -259,7 +263,9 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
       // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
-      && !platform.environment.containsKey('GOLD_TRYJOB');
+      && !platform.environment.containsKey('GOLD_TRYJOB')
+      // Only run on main branch.
+      && _kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
 
     return luciPostSubmit;
   }
@@ -346,7 +352,9 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   static bool isAvailableForEnvironment(Platform platform) {
     final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
-      && platform.environment.containsKey('GOLD_TRYJOB');
+      && platform.environment.containsKey('GOLD_TRYJOB')
+      // Only run on the main branch
+      && _kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
     return luciPreSubmit;
   }
 }
@@ -378,8 +386,6 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   });
 
   /// Describes the reason for using the [FlutterSkippingFileComparator].
-  ///
-  /// Cannot be null.
   final String reason;
 
   /// Creates a new [FlutterSkippingFileComparator] that mirrors the
@@ -415,9 +421,11 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   /// If we are in a CI environment, LUCI or Cirrus, but are not using the other
   /// comparators, we skip.
   static bool isAvailableForEnvironment(Platform platform) {
-    return platform.environment.containsKey('SWARMING_TASK_ID')
+    return (platform.environment.containsKey('SWARMING_TASK_ID')
       // Some builds are still being run on Cirrus, we should skip these.
-      || platform.environment.containsKey('CIRRUS_CI');
+      || platform.environment.containsKey('CIRRUS_CI'))
+      // If we are in CI, skip on branches that are not main.
+      && !_kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
   }
 }
 
@@ -477,7 +485,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       platform,
     );
 
-    if(!baseDirectory.existsSync()) {
+    if (!baseDirectory.existsSync()) {
       baseDirectory.createSync(recursive: true);
     }
 
@@ -536,10 +544,12 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     );
 
     if (result.passed) {
+      result.dispose();
       return true;
     }
 
     final String error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
     throw FlutterError(error);
   }
 }

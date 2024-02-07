@@ -18,15 +18,10 @@ import 'object.dart';
 /// container, this class has no width and height members. To determine the
 /// width or height of the rectangle, convert it to a [Rect] using [toRect()]
 /// (passing the container's own Rect), and then examine that object.
-///
-/// The fields [left], [right], [bottom], and [top] must not be null.
 @immutable
 class RelativeRect {
   /// Creates a RelativeRect with the given values.
-  ///
-  /// The arguments must not be null.
-  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom)
-    : assert(left != null && top != null && right != null && bottom != null);
+  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
   /// and the RelativeRect (the output) are in the coordinate space of the
@@ -77,11 +72,9 @@ class RelativeRect {
       case TextDirection.rtl:
         left = end;
         right = start;
-        break;
       case TextDirection.ltr:
         left = start;
         right = end;
-        break;
     }
 
     return RelativeRect.fromLTRB(left, top, right, bottom);
@@ -166,9 +159,8 @@ class RelativeRect {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static RelativeRect? lerp(RelativeRect? a, RelativeRect? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return RelativeRect.fromLTRB(b!.left * t, b.top * t, b.right * t, b.bottom * t);
@@ -354,10 +346,7 @@ class RenderStack extends RenderBox
     TextDirection? textDirection,
     StackFit fit = StackFit.loose,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(alignment != null),
-       assert(fit != null),
-       assert(clipBehavior != null),
-       _alignment = alignment,
+  }) : _alignment = alignment,
        _textDirection = textDirection,
        _fit = fit,
        _clipBehavior = clipBehavior {
@@ -405,7 +394,6 @@ class RenderStack extends RenderBox
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
   set alignment(AlignmentGeometry value) {
-    assert(value != null);
     if (_alignment == value) {
       return;
     }
@@ -435,7 +423,6 @@ class RenderStack extends RenderBox
   StackFit get fit => _fit;
   StackFit _fit;
   set fit(StackFit value) {
-    assert(value != null);
     if (_fit != value) {
       _fit = value;
       markNeedsLayout();
@@ -444,11 +431,19 @@ class RenderStack extends RenderBox
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Stacks only clip children whose geometry overflow the stack. A child that
+  /// paints outside its bounds (e.g. a box with a shadow) will not be clipped,
+  /// regardless of the value of this property. Similarly, a child that itself
+  /// has a descendant that overflows the stack will not be clipped, as only the
+  /// geometry of the stack's direct children are considered.
+  ///
+  /// To clip children whose geometry does not overflow the stack, consider
+  /// using a [RenderClipRect] render object.
+  ///
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -552,7 +547,8 @@ class RenderStack extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
@@ -570,20 +566,11 @@ class RenderStack extends RenderBox
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
-    final BoxConstraints nonPositionedConstraints;
-    assert(fit != null);
-    switch (fit) {
-      case StackFit.loose:
-        nonPositionedConstraints = constraints.loosen();
-        break;
-      case StackFit.expand:
-        nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-        break;
-      case StackFit.passthrough:
-        nonPositionedConstraints = constraints;
-        break;
-    }
-    assert(nonPositionedConstraints != null);
+    final BoxConstraints nonPositionedConstraints = switch (fit) {
+      StackFit.loose => constraints.loosen(),
+      StackFit.expand => BoxConstraints.tight(constraints.biggest),
+      StackFit.passthrough => constraints,
+    };
 
     RenderBox? child = firstChild;
     while (child != null) {
@@ -755,7 +742,6 @@ class RenderIndexedStack extends RenderStack {
     if (firstChild == null || index == null) {
       return false;
     }
-    assert(position != null);
     final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData! as StackParentData;
     return result.addWithPaintOffset(

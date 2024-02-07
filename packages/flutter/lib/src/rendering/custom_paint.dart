@@ -119,6 +119,23 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 /// ```
 /// {@end-tool}
 ///
+/// ## Composition and the sharing of canvases
+///
+/// Widgets (or rather, render objects) are composited together using a minimum
+/// number of [Canvas]es, for performance reasons. As a result, a
+/// [CustomPainter]'s [Canvas] may be the same as that used by other widgets
+/// (including other [CustomPaint] widgets).
+///
+/// This is mostly unnoticeable, except when using unusual [BlendMode]s. For
+/// example, trying to use [BlendMode.dstOut] to "punch a hole" through a
+/// previously-drawn image may erase more than was intended, because previous
+/// widgets will have been painted onto the same canvas.
+///
+/// To avoid this issue, consider using [Canvas.saveLayer] and
+/// [Canvas.restore] when using such blend modes. Creating new layers is
+/// relatively expensive, however, and should be done sparingly to avoid
+/// introducing jank.
+///
 /// See also:
 ///
 ///  * [Canvas], the class that a custom painter uses to paint.
@@ -276,7 +293,7 @@ abstract class CustomPainter extends Listenable {
 /// the accessibility of applications.
 ///
 /// Implement [CustomPainter.semanticsBuilder] to build the semantic
-/// description of the whole picture drawn by a [CustomPaint], rather that one
+/// description of the whole picture drawn by a [CustomPaint], rather than one
 /// particular rectangle.
 ///
 /// See also:
@@ -286,16 +303,13 @@ abstract class CustomPainter extends Listenable {
 @immutable
 class CustomPainterSemantics {
   /// Creates semantics information describing a rectangle on a canvas.
-  ///
-  /// Arguments `rect` and `properties` must not be null.
   const CustomPainterSemantics({
     this.key,
     required this.rect,
     required this.properties,
     this.transform,
     this.tags,
-  }) : assert(rect != null),
-       assert(properties != null);
+  });
 
   /// Identifies this object in a list of siblings.
   ///
@@ -371,8 +385,7 @@ class RenderCustomPaint extends RenderProxyBox {
     this.isComplex = false,
     this.willChange = false,
     RenderBox? child,
-  }) : assert(preferredSize != null),
-       _painter = painter,
+  }) : _painter = painter,
        _foregroundPainter = foregroundPainter,
        _preferredSize = preferredSize,
        super(child);
@@ -467,7 +480,6 @@ class RenderCustomPaint extends RenderProxyBox {
   Size get preferredSize => _preferredSize;
   Size _preferredSize;
   set preferredSize(Size value) {
-    assert(value != null);
     if (preferredSize == value) {
       return;
     }
@@ -480,12 +492,17 @@ class RenderCustomPaint extends RenderProxyBox {
   /// The compositor contains a raster cache that holds bitmaps of layers in
   /// order to avoid the cost of repeatedly rendering those layers on each
   /// frame. If this flag is not set, then the compositor will apply its own
-  /// heuristics to decide whether the this layer is complex enough to benefit
-  /// from caching.
+  /// heuristics to decide whether the layer containing this render object is
+  /// complex enough to benefit from caching.
   bool isComplex;
 
   /// Whether the raster cache should be told that this painting is likely
   /// to change in the next frame.
+  ///
+  /// This hint tells the compositor not to cache the layer containing this
+  /// render object because the cache will not be used in the future. If this
+  /// hint is not set, the compositor will apply its own heuristics to decide
+  /// whether this layer is likely to be reused in the future.
   bool willChange;
 
   @override
@@ -872,11 +889,17 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.checked != null) {
       config.isChecked = properties.checked;
     }
+    if (properties.mixed != null) {
+      config.isCheckStateMixed = properties.mixed;
+    }
     if (properties.selected != null) {
       config.isSelected = properties.selected!;
     }
     if (properties.button != null) {
       config.isButton = properties.button!;
+    }
+    if (properties.expanded != null) {
+      config.isExpanded = properties.expanded;
     }
     if (properties.link != null) {
       config.isLink = properties.link!;

@@ -20,6 +20,8 @@ export 'package:flutter/scheduler.dart' show TickerFuture, TickerProvider;
 export 'animation.dart' show Animation, AnimationStatus;
 export 'curves.dart' show Curve;
 
+const String _flutterAnimationLibrary = 'package:flutter/animation.dart';
+
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // late bool dismissed;
@@ -206,6 +208,19 @@ enum AnimationBehavior {
 /// controllers are created in [State.initState] and disposed in
 /// [State.dispose], as described in the previous section.)
 ///
+/// {@tool dartpad}
+/// This example shows how to use [AnimationController] and
+/// [SlideTransition] to create an animated digit like you might find
+/// on an old pinball machine our your car's odometer.  New digit
+/// values slide into place from below, as the old value slides
+/// upwards and out of view. Taps that occur while the controller is
+/// already animating cause the controller's
+/// [AnimationController.duration] to be reduced so that the visuals
+/// don't fall behind.
+///
+/// ** See code in examples/api/lib/animation/animation_controller/animated_digit.0.dart **
+/// {@end-tool}
+
 /// See also:
 ///
 ///  * [Tween], the base class for converting an [AnimationController] to a
@@ -230,9 +245,9 @@ class AnimationController extends Animation<double>
   ///   value at which this animation is deemed to be completed. It cannot be
   ///   null.
   ///
-  /// * `vsync` is the [TickerProvider] for the current context. It can be
-  ///   changed by calling [resync]. It is required and must not be null. See
-  ///   [TickerProvider] for advice on obtaining a ticker provider.
+  /// * `vsync` is the required [TickerProvider] for the current context. It can
+  ///   be changed by calling [resync]. See [TickerProvider] for advice on
+  ///   obtaining a ticker provider.
   AnimationController({
     double? value,
     this.duration,
@@ -242,11 +257,11 @@ class AnimationController extends Animation<double>
     this.upperBound = 1.0,
     this.animationBehavior = AnimationBehavior.normal,
     required TickerProvider vsync,
-  }) : assert(lowerBound != null),
-       assert(upperBound != null),
-       assert(upperBound >= lowerBound),
-       assert(vsync != null),
+  }) : assert(upperBound >= lowerBound),
        _direction = _AnimationDirection.forward {
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
@@ -261,9 +276,9 @@ class AnimationController extends Animation<double>
   /// * [debugLabel] is a string to help identify this animation during
   ///   debugging (used by [toString]).
   ///
-  /// * `vsync` is the [TickerProvider] for the current context. It can be
-  ///   changed by calling [resync]. It is required and must not be null. See
-  ///   [TickerProvider] for advice on obtaining a ticker provider.
+  /// * `vsync` is the required [TickerProvider] for the current context. It can
+  ///   be changed by calling [resync]. See [TickerProvider] for advice on
+  ///   obtaining a ticker provider.
   ///
   /// This constructor is most useful for animations that will be driven using a
   /// physics simulation, especially when the physics simulation has no
@@ -275,13 +290,25 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
-  }) : assert(value != null),
-       assert(vsync != null),
-       lowerBound = double.negativeInfinity,
+  }) : lowerBound = double.negativeInfinity,
        upperBound = double.infinity,
        _direction = _AnimationDirection.forward {
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
+  }
+
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
+  void _maybeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterAnimationLibrary,
+        className: '$AnimationController',
+        object: this,
+      );
+    }
   }
 
   /// The value at which this animation is deemed to be dismissed.
@@ -363,7 +390,6 @@ class AnimationController extends Animation<double>
   ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
   ///    which start the animation controller.
   set value(double newValue) {
-    assert(newValue != null);
     stop();
     _internalSetValue(newValue);
     notifyListeners();
@@ -582,7 +608,6 @@ class AnimationController extends Animation<double>
           // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
           // for at least one frame.
           scale = 0.05;
-          break;
         case AnimationBehavior.preserve:
           break;
       }
@@ -657,7 +682,6 @@ class AnimationController extends Animation<double>
     }());
     assert(max >= min);
     assert(max <= upperBound && min >= lowerBound);
-    assert(reverse != null);
     stop();
     return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter));
   }
@@ -674,15 +698,18 @@ class AnimationController extends Animation<double>
   /// and initial velocity.
   ///
   /// If velocity is positive, the animation will complete, otherwise it will
-  /// dismiss.
+  /// dismiss. The velocity is specified in units per second. If the
+  /// [SemanticsBinding.disableAnimations] flag is set, the velocity is somewhat
+  /// arbitrarily multiplied by 200.
   ///
-  /// The [springDescription] parameter can be used to specify a custom [SpringType.criticallyDamped]
-  /// or [SpringType.overDamped] spring to drive the animation with. Defaults to null, which uses a
-  /// [SpringType.criticallyDamped] spring. See [SpringDescription.withDampingRatio] for how
-  /// to create a suitable [SpringDescription].
+  /// The [springDescription] parameter can be used to specify a custom
+  /// [SpringType.criticallyDamped] or [SpringType.overDamped] spring with which
+  /// to drive the animation. By default, a [SpringType.criticallyDamped] spring
+  /// is used. See [SpringDescription.withDampingRatio] for how to create a
+  /// suitable [SpringDescription].
   ///
-  /// The resulting spring simulation cannot be of type [SpringType.underDamped],
-  /// as this can lead to unexpected look of the produced animation.
+  /// The resulting spring simulation cannot be of type [SpringType.underDamped];
+  /// such a spring would oscillate rather than fling.
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
@@ -699,10 +726,7 @@ class AnimationController extends Animation<double>
     if (SemanticsBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-          // TODO(zanderso): determine a better process for setting velocity.
-          // the value below was arbitrarily chosen because it worked for the drawer widget.
-          scale = 200.0;
-          break;
+          scale = 200.0; // This is arbitrary (it was chosen because it worked for the drawer widget).
         case AnimationBehavior.preserve:
           break;
       }
@@ -711,8 +735,10 @@ class AnimationController extends Animation<double>
       ..tolerance = _kFlingTolerance;
     assert(
       simulation.type != SpringType.underDamped,
-      'The resulting spring simulation is of type SpringType.underDamped.\n'
-      'This can lead to unexpected look of the animation, please adjust the springDescription parameter',
+      'The specified spring simulation is of type SpringType.underDamped.\n'
+      'An underdamped spring results in oscillation rather than a fling. '
+      'Consider specifying a different springDescription, or use animateWith() '
+      'with an explicit SpringSimulation if an underdamped spring is intentional.',
     );
     stop();
     return _startSimulation(simulation);
@@ -744,7 +770,6 @@ class AnimationController extends Animation<double>
   }
 
   TickerFuture _startSimulation(Simulation simulation) {
-    assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
     _lastElapsedDuration = Duration.zero;
@@ -755,15 +780,6 @@ class AnimationController extends Animation<double>
       AnimationStatus.reverse;
     _checkStatusChanged();
     return result;
-  }
-
-  /// Update the simulation without restarting the animation.
-  ///
-  /// The current simulation will be replaced with the provided [Simulation].
-  /// It is only valid to call this when an animation is currently underway.
-  void updateSimulation(Simulation simulation) {
-    assert(isAnimating);
-    _simulation = simulation;
   }
 
   /// Stops running this animation.
@@ -816,6 +832,9 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _ticker!.dispose();
     _ticker = null;
     clearStatusListeners();
@@ -851,7 +870,13 @@ class AnimationController extends Animation<double>
   String toStringDetails() {
     final String paused = isAnimating ? '' : '; paused';
     final String ticker = _ticker == null ? '; DISPOSED' : (_ticker!.muted ? '; silenced' : '');
-    final String label = debugLabel == null ? '' : '; for $debugLabel';
+    String label = '';
+    assert(() {
+      if (debugLabel != null) {
+        label = '; for $debugLabel';
+      }
+      return true;
+    }());
     final String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
     return '$more$paused$ticker$label';
   }
@@ -859,9 +884,7 @@ class AnimationController extends Animation<double>
 
 class _InterpolationSimulation extends Simulation {
   _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve, double scale)
-    : assert(_begin != null),
-      assert(_end != null),
-      assert(duration != null && duration.inMicroseconds > 0),
+    : assert(duration.inMicroseconds > 0),
       _durationInSeconds = (duration.inMicroseconds * scale) / Duration.microsecondsPerSecond;
 
   final double _durationInSeconds;

@@ -5,6 +5,7 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
+import '../flutter_manifest.dart';
 
 /// Represents a configured deferred component as defined in
 /// the app's pubspec.yaml.
@@ -12,7 +13,7 @@ class DeferredComponent {
   DeferredComponent({
     required this.name,
     this.libraries = const <String>[],
-    this.assets = const <Uri>[],
+    this.assets = const <AssetsEntry>[],
   }) : _assigned = false;
 
   /// The name of the deferred component. There should be a matching
@@ -28,8 +29,8 @@ class DeferredComponent {
   /// libraries that are not listed here.
   final List<String> libraries;
 
-  /// Assets that are part of this component as a Uri relative to the project directory.
-  final List<Uri> assets;
+  /// Assets that are part of this component.
+  final List<AssetsEntry> assets;
 
   /// The minimal set of [LoadingUnit]s needed that contain all of the dart libraries in
   /// [libraries].
@@ -50,7 +51,7 @@ class DeferredComponent {
 
   /// Indicates if the component has loading units assigned.
   ///
-  /// Unassigned components simply reflect the pubspec.yaml configuration directly,
+  /// Unassigned components reflect the pubspec.yaml configuration directly,
   /// contain no loading unit data, and [loadingUnits] is null. Once assigned, the component
   /// will contain a set of [loadingUnits] which contains the [LoadingUnit]s that the
   /// component needs to include. Loading units can be assigned with the [assignLoadingUnits]
@@ -71,9 +72,6 @@ class DeferredComponent {
   void assignLoadingUnits(List<LoadingUnit> allLoadingUnits) {
     _assigned = true;
     _loadingUnits = <LoadingUnit>{};
-    if (allLoadingUnits == null) {
-      return;
-    }
     for (final String lib in libraries) {
       for (final LoadingUnit loadingUnit in allLoadingUnits) {
         if (loadingUnit.libraries.contains(lib)) {
@@ -98,8 +96,11 @@ class DeferredComponent {
       }
     }
     out.write('\n  Assets:');
-    for (final Uri asset in assets) {
-      out.write('\n    - ${asset.path}');
+    for (final AssetsEntry asset in assets) {
+      out.write('\n    - ${asset.uri.path}');
+      if (asset.flavors.isNotEmpty) {
+        out.write(' (flavors: ${asset.flavors.join(', ')})');
+      }
     }
     return out.toString();
   }

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
@@ -256,9 +255,9 @@ void main() {
     expect(renderSliver.geometry!.scrollExtent, 14.0);
     expect(renderSliver.constraints.crossAxisExtent, 800.0);
     expect(semantics.nodesWith(label: 'a true'), hasLength(1));
-    expect(log, <String>['created new state']);
+    expect(log, <String>[]);
     await tester.tap(find.byKey(anchor), warnIfMissed: false);
-    expect(log, <String>['created new state']);
+    expect(log, <String>[]);
     log.clear();
 
     // visible: false, maintain state, animation, size.

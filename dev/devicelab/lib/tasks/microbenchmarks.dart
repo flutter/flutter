@@ -15,7 +15,10 @@ import '../microbenchmarks.dart';
 
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
-TaskFunction createMicrobenchmarkTask({bool enableImpeller = false}) {
+TaskFunction createMicrobenchmarkTask({
+  bool? enableImpeller,
+  Map<String, String> environment = const <String, String>{},
+}) {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -32,7 +35,8 @@ TaskFunction createMicrobenchmarkTask({bool enableImpeller = false}) {
             // --release doesn't work on iOS due to code signing issues
             '--profile',
             '--no-publish-port',
-            if (enableImpeller) '--enable-impeller',
+            if (enableImpeller != null && enableImpeller) '--enable-impeller',
+            if (enableImpeller != null && !enableImpeller) '--no-enable-impeller',
             '-d',
             device.deviceId,
           ];
@@ -40,9 +44,9 @@ TaskFunction createMicrobenchmarkTask({bool enableImpeller = false}) {
           return startFlutter(
             'run',
             options: options,
+            environment: environment,
           );
         });
-
         return readJsonResults(flutterProcess);
       }
 
@@ -57,6 +61,7 @@ TaskFunction createMicrobenchmarkTask({bool enableImpeller = false}) {
       ...await runMicrobench('lib/foundation/standard_message_codec_bench.dart'),
       ...await runMicrobench('lib/foundation/standard_method_codec_bench.dart'),
       ...await runMicrobench('lib/foundation/timeline_bench.dart'),
+      ...await runMicrobench('lib/foundation/decode_and_parse_asset_manifest.dart'),
       ...await runMicrobench('lib/geometry/matrix_utils_transform_bench.dart'),
       ...await runMicrobench('lib/geometry/rrect_contains_bench.dart'),
       ...await runMicrobench('lib/gestures/gesture_detector_bench.dart'),

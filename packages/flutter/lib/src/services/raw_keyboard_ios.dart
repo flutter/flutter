@@ -10,9 +10,11 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for iOS.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
 ///
 /// This object contains information about key events obtained from iOS'
 /// `UIKey` interface.
@@ -20,20 +22,22 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataIos extends RawKeyEventData {
   /// Creates a key event data structure specific for iOS.
-  ///
-  /// The [characters], [charactersIgnoringModifiers], and [modifiers], arguments
-  /// must not be null.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataIos({
     this.characters = '',
     this.charactersIgnoringModifiers = '',
     this.keyCode = 0,
     this.modifiers = 0,
-  }) : assert(characters != null),
-       assert(charactersIgnoringModifiers != null),
-       assert(keyCode != null),
-       assert(modifiers != null);
+  });
 
   /// The Unicode characters associated with a key-up or key-down event.
   ///
@@ -165,19 +169,14 @@ class RawKeyEventDataIos extends RawKeyEventData {
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
-        break;
       case ModifierKey.shiftModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
-        break;
       case ModifierKey.altModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
-        break;
       case ModifierKey.metaModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
-        break;
       case ModifierKey.capsLockModifier:
         result = independentModifier & modifierCapsLock != 0;
-        break;
     // On iOS, the function modifier bit is set for any function key, like F1,
     // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
     // that of the Fn modifier key, so there's no good way to emulate that on
@@ -188,7 +187,6 @@ class RawKeyEventDataIos extends RawKeyEventData {
       case ModifierKey.scrollLockModifier:
         // These modifier masks are not used in iOS keyboards.
         result = false;
-        break;
     }
     assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;

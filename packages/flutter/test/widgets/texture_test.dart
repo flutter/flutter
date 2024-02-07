@@ -25,6 +25,7 @@ void main() {
     expect(textureBox.freeze, true);
 
     final ContainerLayer containerLayer = ContainerLayer();
+    addTearDown(containerLayer.dispose);
     final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
     final Layer layer = containerLayer.lastChild!;
@@ -53,6 +54,7 @@ void main() {
     expect(textureBox.filterQuality, FilterQuality.low);
 
     final ContainerLayer containerLayer = ContainerLayer();
+    addTearDown(containerLayer.dispose);
     final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
     final Layer layer = containerLayer.lastChild!;
@@ -82,6 +84,7 @@ void main() {
     expect(textureBox.filterQuality, FilterQuality.none);
 
     final ContainerLayer containerLayer = ContainerLayer();
+    addTearDown(containerLayer.dispose);
     final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
     final Layer layer = containerLayer.lastChild!;
@@ -110,6 +113,7 @@ void main() {
     expect(textureBox.filterQuality, FilterQuality.low);
 
     final ContainerLayer containerLayer = ContainerLayer();
+    addTearDown(containerLayer.dispose);
     final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
     final Layer layer = containerLayer.lastChild!;

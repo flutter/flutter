@@ -8,19 +8,30 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'rendering_tester.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
+  test('PipelineOwner dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => PipelineOwner().dispose(), PipelineOwner),
+      areCreateAndDispose,
+    );
+  });
+
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
-    final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {
-      onNeedVisualUpdateCallCount +=1;
-    });
+    final PipelineOwner owner = PipelineOwner(
+      onNeedVisualUpdate: () {
+        onNeedVisualUpdateCallCount +=1;
+      },
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {}
+    );
     owner.ensureSemantics();
     renderObject.attach(owner);
     renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information is up to date.
@@ -29,6 +40,49 @@ void main() {
     expect(onNeedVisualUpdateCallCount, 1);
     renderObject.markNeedsSemanticsUpdate();
     expect(onNeedVisualUpdateCallCount, 2);
+  });
+
+  test('onSemanticsUpdate is called during flushSemantics.', () {
+    int onSemanticsUpdateCallCount = 0;
+    final PipelineOwner owner = PipelineOwner(
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+        onSemanticsUpdateCallCount += 1;
+      },
+    );
+    owner.ensureSemantics();
+
+    expect(onSemanticsUpdateCallCount, 0);
+
+    final TestRenderObject renderObject = TestRenderObject();
+    renderObject.attach(owner);
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    owner.flushSemantics();
+
+    expect(onSemanticsUpdateCallCount, 1);
+  });
+
+  test('Enabling semantics without configuring onSemanticsUpdate is invalid.', () {
+    final PipelineOwner pipelineOwner = PipelineOwner();
+    expect(() => pipelineOwner.ensureSemantics(), throwsAssertionError);
+  });
+
+
+  test('onSemanticsUpdate during sendSemanticsUpdate.', () {
+    int onSemanticsUpdateCallCount = 0;
+    final SemanticsOwner owner = SemanticsOwner(
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+        onSemanticsUpdateCallCount += 1;
+      },
+    );
+
+    final SemanticsNode node = SemanticsNode.root(owner: owner);
+    node.rect = Rect.largest;
+
+    expect(onSemanticsUpdateCallCount, 0);
+
+    owner.sendSemanticsUpdate();
+
+    expect(onSemanticsUpdateCallCount, 1);
   });
 
   test('detached RenderObject does not do semantics', () {

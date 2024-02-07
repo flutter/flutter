@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -210,7 +210,7 @@ void main() {
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         // This is the value of `<int>[1, 2, 3, 4, 5]` run through `osUtils.gzipLevel1Stream`.
-        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (List<int> chunk in expectedEncoded) ...chunk]),
+        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (final List<int> chunk in expectedEncoded) ...chunk]),
       ]),
       uploadRetryThrottle: Duration.zero,
     );
@@ -505,13 +505,13 @@ void main() {
     final MemoryIOSink frontendServerStdIn = MemoryIOSink();
     Stream<List<int>> frontendServerStdOut() async* {
       int processed = 0;
-      while(true) {
-        while(frontendServerStdIn.writes.length == processed) {
+      while (true) {
+        while (frontendServerStdIn.writes.length == processed) {
           await Future<dynamic>.delayed(const Duration(milliseconds: 5));
         }
 
         String? boundaryKey;
-        while(processed < frontendServerStdIn.writes.length) {
+        while (processed < frontendServerStdIn.writes.length) {
           final List<int> data = frontendServerStdIn.writes[processed];
           final String stringData = utf8.decode(data);
           if (stringData.startsWith('compile ')) {
@@ -620,9 +620,14 @@ void main() {
           return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
         };
       final FakeBundle bundle = FakeBundle()
-        ..entries['foo.frag'] = DevFSByteContent(<int>[1, 2, 3, 4])
-        ..entries['not.frag'] = DevFSByteContent(<int>[1, 2, 3, 4])
-        ..entryKinds['foo.frag'] = AssetKind.shader;
+        ..entries['foo.frag'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.shader,
+        )
+        ..entries['not.frag'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),
@@ -672,7 +677,10 @@ void main() {
           return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
         };
       final FakeBundle bundle = FakeBundle()
-        ..entries['FontManifest.json'] = DevFSByteContent(<int>[1, 2, 3, 4]);
+        ..entries['FontManifest.json'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),
@@ -701,7 +709,18 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   Future<CompilerOutput> Function(Uri mainUri, List<Uri>? invalidatedFiles)? onRecompile;
 
   @override
-  Future<CompilerOutput> recompile(Uri mainUri, List<Uri>? invalidatedFiles, {String? outputPath, PackageConfig? packageConfig, String? projectRootPath, FileSystem? fs, bool suppressErrors = false, bool checkDartPluginRegistry = false, File? dartPluginRegistrant}) {
+  Future<CompilerOutput> recompile(
+    Uri mainUri,
+    List<Uri>? invalidatedFiles, {
+    String? outputPath,
+    PackageConfig? packageConfig,
+    String? projectRootPath,
+    FileSystem? fs,
+    bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
+    File? dartPluginRegistrant,
+    Uri? nativeAssetsYaml,
+  }) {
     return onRecompile?.call(mainUri, invalidatedFiles)
       ?? Future<CompilerOutput>.value(const CompilerOutput('', 1, <Uri>[]));
   }
@@ -721,18 +740,22 @@ class FakeBundle extends AssetBundle {
   List<File> get additionalDependencies => <File>[];
 
   @override
-  Future<int> build({String manifestPath = defaultManifestPath, String? assetDirPath, String? packagesPath, bool deferredComponentsEnabled = false, TargetPlatform? targetPlatform}) async {
+  Future<int> build({
+    String manifestPath = defaultManifestPath,
+    String? assetDirPath,
+    String? packagesPath,
+    bool deferredComponentsEnabled = false,
+    TargetPlatform? targetPlatform,
+    String? flavor,
+  }) async {
     return 0;
   }
 
   @override
-  Map<String, Map<String, DevFSContent>> get deferredComponentsEntries => <String, Map<String, DevFSContent>>{};
+  Map<String, Map<String, AssetBundleEntry>> get deferredComponentsEntries => <String, Map<String, AssetBundleEntry>>{};
 
   @override
-  final Map<String, DevFSContent> entries = <String, DevFSContent>{};
-
-  @override
-  final Map<String, AssetKind> entryKinds = <String, AssetKind>{};
+  final Map<String, AssetBundleEntry> entries = <String, AssetBundleEntry>{};
 
   @override
   List<File> get inputFiles => <File>[];
@@ -807,7 +830,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) async {

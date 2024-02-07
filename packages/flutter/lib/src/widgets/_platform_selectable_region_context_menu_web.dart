@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-import 'dart:ui' as ui;
+import 'dart:js_interop';
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/rendering.dart';
 
+import '../web.dart' as web;
 import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
@@ -27,9 +28,9 @@ const String _kClassRule = '''
 ''';
 const int _kRightClickButton = 2;
 
-typedef _WebSelectionCallBack = void Function(html.Element, html.MouseEvent);
+typedef _WebSelectionCallBack = void Function(web.HTMLElement, web.MouseEvent);
 
-/// Function signature for `ui.platformViewRegistry.registerViewFactory`.
+/// Function signature for `ui_web.platformViewRegistry.registerViewFactory`.
 @visibleForTesting
 typedef RegisterViewFactory = void Function(String, Object Function(int viewId), {bool isVisible});
 
@@ -67,19 +68,24 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   // Keeps track if this widget has already registered its view factories or not.
   static String? _registeredViewType;
 
-  /// See `_platform_selectable_region_context_menu_io.dart`.
+  static RegisterViewFactory get _registerViewFactory =>
+      debugOverrideRegisterViewFactory ?? ui_web.platformViewRegistry.registerViewFactory;
+
+  /// Override this to provide a custom implementation of [ui_web.platformViewRegistry.registerViewFactory].
+  ///
+  /// This should only be used for testing.
+  // See `_platform_selectable_region_context_menu_io.dart`.
   @visibleForTesting
-  // ignore: undefined_prefixed_name, invalid_assignment, avoid_dynamic_calls
-  static RegisterViewFactory registerViewFactory = ui.platformViewRegistry.registerViewFactory;
+  static RegisterViewFactory? debugOverrideRegisterViewFactory;
 
   // Registers the view factories for the interceptor widgets.
   static void _register() {
     assert(_registeredViewType == null);
-    _registeredViewType = _registerWebSelectionCallback((html.Element element, html.MouseEvent event) {
+    _registeredViewType = _registerWebSelectionCallback((web.HTMLElement element, web.MouseEvent event) {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // Converts the html right click event to flutter coordinate.
-        final Offset localOffset = Offset(event.offset.x.toDouble(), event.offset.y.toDouble());
+        final Offset localOffset = Offset(event.offsetX.toDouble(), event.offsetY.toDouble());
         final Matrix4 transform = client.getTransformTo(null);
         final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
         client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
@@ -88,9 +94,9 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         element.innerText = client.getSelectedContent()?.plainText ?? '';
 
         // Programmatically select the dom element in browser.
-        final html.Range range = html.document.createRange();
+        final web.Range range = web.document.createRange();
         range.selectNode(element);
-        final html.Selection? selection = html.window.getSelection();
+        final web.Selection? selection = web.window.getSelection();
         if (selection != null) {
           selection.removeAllRanges();
           selection.addRange(range);
@@ -100,31 +106,31 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   }
 
   static String _registerWebSelectionCallback(_WebSelectionCallBack callback) {
-    registerViewFactory(_viewType, (int viewId) {
-      final html.Element htmlElement = html.DivElement();
+    _registerViewFactory(_viewType, (int viewId) {
+      final web.HTMLElement htmlElement = web.document.createElement('div') as web.HTMLElement;
       htmlElement
         ..style.width = '100%'
         ..style.height = '100%'
-        ..classes.add(_kClassName);
+        ..classList.add(_kClassName);
 
       // Create css style for _kClassName.
-      final html.StyleElement styleElement = html.StyleElement();
-      html.document.head!.append(styleElement);
-      final html.CssStyleSheet sheet = styleElement.sheet! as html.CssStyleSheet;
+      final web.HTMLStyleElement styleElement = web.document.createElement('style') as web.HTMLStyleElement;
+      web.document.head!.append(styleElement as JSAny);
+      final web.CSSStyleSheet sheet = styleElement.sheet!;
       sheet.insertRule(_kClassRule, 0);
       sheet.insertRule(_kClassSelectionRule, 1);
 
-      htmlElement.onMouseDown.listen((html.MouseEvent event) {
-        if (event.button != _kRightClickButton) {
+      htmlElement.addEventListener('mousedown', (web.Event event) {
+        final web.MouseEvent mouseEvent = event as web.MouseEvent;
+        if (mouseEvent.button != _kRightClickButton) {
           return;
         }
-        callback(htmlElement, event);
-      });
+        callback(htmlElement, mouseEvent);
+      }.toJS);
       return htmlElement;
     }, isVisible: false);
     return _viewType;
   }
-
 
   @override
   Widget build(BuildContext context) {

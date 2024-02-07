@@ -1,0 +1,172 @@
+name: My app is slow or missing frames
+description: |
+  You are writing an application but have discovered that it is slow,
+  you are not hitting 60Hz, or you are getting jank (missed frames).
+labels: 'from: performance template'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for using Flutter!
+
+        If you are looking for support, please check out our documentation
+        or consider asking a question on Stack Overflow:
+
+          - https://flutter.dev/
+          - https://api.flutter.dev/
+          - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: Please tell us exactly how to reproduce the problem you are running into.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Code sample
+      description: |
+        Please create a minimal reproducible sample that shows the problem and attach it below between the lines with the backticks.
+
+        Try to reproduce the problem in a test app. Either run `flutter create janktest` and recreate the situation you are experiencing in that app, or clone your app and delete code until you have the jank reproducing with a single `.dart` file.
+
+        If you need more than just a `.dart` file (for example, assets are needed to reproduce the issue, or plugins/packages are needed to reproduce the issue) then create a GitHub repository and upload code there.
+
+        Without this we will unlikely be able to progress on the issue, and because of that we regretfully will have to close it.
+
+        Note: Please do not upload screenshots of text. Instead, use code blocks or the above mentioned ways to upload your code sample.
+      value: |
+        <details open><summary>Code sample</summary>
+
+        ```dart
+        [Paste your code here]
+        ```
+
+        </details>
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Performance profiling on master channel
+      description: |
+        Switch flutter to master channel and run this app on a physical device using profile mode with Skia tracing enabled, as follows:
+        ```console
+        flutter channel master
+        flutter run --profile --trace-skia
+        ```
+        The bleeding edge master channel is encouraged here because Flutter is constantly fixing bugs and improving its performance. Your problem in an older Flutter version may have already been solved in the master channel.
+      options:
+      - label: The issue still persists on the master channel
+        required: true
+  - type: textarea
+    attributes:
+      label: Timeline Traces
+      description: |
+        Open Flutter DevTools and save a timeline trace of the performance issue so we know which functions might be causing it. See "How to Collect and Read Timeline Traces" on this blog post: https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af3#a499
+
+        Make sure the performance overlay is turned OFF when recording the trace as that may affect the performance of the profile run. (Pressing ‘P’ on the command line toggles the overlay.)
+
+        If the trace are too large to be uploaded to GitHub, you may upload them as a `zip` file or use online tools like https://pastebin.com to share it.
+      value: |
+        <details open><summary>Timeline Traces JSON</summary>
+
+        ```json
+        [Paste the Timeline Traces here]
+        ```
+
+        </details>
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Video demonstration
+      description: |
+        Record a video of the performance issue using another phone so we can have an intuitive understanding of what happened.
+
+        Don’t use "adb screenrecord", as that affects the performance of the profile run.
+      value: |
+        <details open>
+        <summary>Video demonstration</summary>
+
+        [Upload media here]
+
+        </details>
+  - type: dropdown
+    id: target_platforms
+    attributes:
+      label: What target platforms are you seeing this bug on?
+      multiple: true
+      options:
+        - Android
+        - iOS
+        - Web
+        - macOS
+        - Linux
+        - Windows
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: OS/Browser name and version | Device information
+      description: |
+        Which target OS version is the test system running? For Web, please provide browser version.
+        Please also include the device information (model, CPU architecture, etc).
+    validations:
+      required: true
+  - type: dropdown
+    id: device-kind
+    attributes:
+      label: Does the problem occur on emulator/simulator as well as on physical devices?
+      options:
+        - "Unknown"
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: dropdown
+    id: enable-impeller
+    attributes:
+      label: Is the problem only reproducible with Impeller?
+      description: |
+        Please check https://docs.flutter.dev/perf/impeller as the guideline on how to enable/disable it.
+      options:
+        - "N/A"
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Logs
+      description: |
+        Include the full logs of the commands you are running between the lines with the backticks below. If you are running any `flutter` commands, please include the output of running them with `--verbose`; for example, the output of running `flutter --verbose create foo`.
+
+        If the logs are too large to be uploaded to GitHub, you may upload them as a `txt` file or use online tools like https://pastebin.com to share it.
+
+        Note: Please do not upload screenshots of text. Instead, use code blocks or the above mentioned ways to upload logs.
+      value: |
+        <details open><summary>Logs</summary>
+
+        ```console
+        [Paste your logs here]
+        ```
+
+        </details>
+  - type: textarea
+    attributes:
+      label: Flutter Doctor output
+      description: |
+        Finally, paste the output of running `flutter doctor -v` here, with your device plugged in.
+      value: |
+        <details open><summary>Doctor output</summary>
+
+        ```console
+        [Paste your output here]
+        ```
+
+        </details>
+    validations:
+      required: true

@@ -11,7 +11,9 @@
 /// ```dart
 /// print(x);
 /// ```
+String? bar;
 
 /// error: empty dart block
 /// ```dart
 /// ```
+String? foo;

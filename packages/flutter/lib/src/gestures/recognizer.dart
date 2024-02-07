@@ -48,6 +48,35 @@ enum DragStartBehavior {
   start,
 }
 
+/// Configuration of multi-finger drag strategy on multi-touch devices.
+///
+/// When dragging with only one finger, there's no difference in behavior
+/// between the two settings.
+///
+/// Used by [DragGestureRecognizer.multitouchDragStrategy].
+enum MultitouchDragStrategy {
+  /// Only the latest active pointer is tracked by the recognizer.
+  ///
+  /// If the tracked pointer is released, the latest of the remaining active
+  /// pointers will continue to be tracked.
+  ///
+  /// This is the behavior typically seen on Android.
+  latestPointer,
+
+  /// All active pointers will be tracked together. The scrolling offset
+  /// is the sum of the offsets of all active pointers.
+  ///
+  /// When a [Scrollable] drives scrolling by this drag strategy, the scrolling
+  /// speed will double or triple, depending on how many fingers are dragging
+  /// at the same time.
+  sumAllPointers,
+}
+
+/// Signature for `allowedButtonsFilter` in [GestureRecognizer].
+/// Used to filter the input buttons of incoming pointer events.
+/// The parameter `buttons` comes from [PointerEvent.buttons].
+typedef AllowedButtonsFilter = bool Function(int buttons);
+
 /// The base class that all gesture recognizers inherit from.
 ///
 /// Provides a basic API that can be used by classes that work with
@@ -73,14 +102,19 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// {@endtemplate}
   GestureRecognizer({
     this.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       _supportedDevices = kind == null ? supportedDevices : <PointerDeviceKind>{ kind };
+    this.supportedDevices,
+    AllowedButtonsFilter? allowedButtonsFilter,
+  }) : _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/gestures.dart',
+        className: '$GestureRecognizer',
+        object: this,
+      );
+    }
+  }
 
   /// The recognizer's owner.
   ///
@@ -96,7 +130,30 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// `supportedDevices` in the constructor, or the currently deprecated `kind`.
   /// These cannot both be set. If both are null, events from all device kinds will be
   /// tracked and recognized.
-  final Set<PointerDeviceKind>? _supportedDevices;
+  Set<PointerDeviceKind>? supportedDevices;
+
+  /// {@template flutter.gestures.multidrag._allowedButtonsFilter}
+  /// Called when interaction starts. This limits the dragging behavior
+  /// for custom clicks (such as scroll click). Its parameter comes
+  /// from [PointerEvent.buttons].
+  ///
+  /// Due to how [kPrimaryButton], [kSecondaryButton], etc., use integers,
+  /// bitwise operations can help filter how buttons are pressed.
+  /// For example, if someone simultaneously presses the primary and secondary
+  /// buttons, the default behavior will return false. The following code
+  /// accepts any button press with primary:
+  /// `(int buttons) => buttons & kPrimaryButton != 0`.
+  ///
+  /// When value is `(int buttons) => false`, allow no interactions.
+  /// When value is `(int buttons) => true`, allow all interactions.
+  ///
+  /// Defaults to all buttons.
+  /// {@endtemplate}
+  final AllowedButtonsFilter _allowedButtonsFilter;
+
+  // The default value for [allowedButtonsFilter].
+  // Accept any input.
+  static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
   /// Holds a mapping between pointer IDs and the kind of devices they are
   /// coming from.
@@ -185,9 +242,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
   @protected
   bool isPointerAllowed(PointerDownEvent event) {
-    // Currently, it only checks for device kind. But in the future we could check
-    // for other things e.g. mouse button.
-    return _supportedDevices == null || _supportedDevices!.contains(event.kind);
+    return (supportedDevices == null ||
+            supportedDevices!.contains(event.kind)) &&
+        _allowedButtonsFilter(event.buttons);
   }
 
   /// Handles a pointer pan/zoom being added that's not allowed by this recognizer.
@@ -199,7 +256,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Checks whether or not a pointer pan/zoom is allowed to be tracked by this recognizer.
   @protected
   bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) {
-    return _supportedDevices == null || _supportedDevices!.contains(event.kind);
+    return supportedDevices == null || supportedDevices!.contains(event.kind);
   }
 
   /// For a given pointer ID, returns the device kind associated with it.
@@ -219,7 +276,13 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// recognizer is being unregistered from a [GestureDetector], the
   /// GestureDetector widget calls this method).
   @mustCallSuper
-  void dispose() { }
+  void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+  }
 
   /// Returns a very short pretty description of the gesture that the
   /// recognizer looks for, like 'tap' or 'horizontal drag'.
@@ -237,7 +300,6 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   @protected
   @pragma('vm:notify-debugger-on-exception')
   T? invokeCallback<T>(String name, RecognizerCallback<T> callback, { String Function()? debugReport }) {
-    assert(callback != null);
     T? result;
     try {
       assert(() {
@@ -292,12 +354,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   OneSequenceGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
@@ -427,7 +485,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void startTrackingPointer(int pointer, [Matrix4? transform]) {
     GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent, transform);
     _trackedPointers.add(pointer);
-    assert(!_entries.containsValue(pointer));
+    // TODO(goderbauer): Enable assert after recognizers properly clean up their defunct `_entries`, see https://github.com/flutter/flutter/issues/117356.
+    // assert(!_entries.containsKey(pointer));
     _entries[pointer] = _addPointerToArena(pointer);
   }
 
@@ -504,12 +563,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     this.preAcceptSlopTolerance = kTouchSlop,
     this.postAcceptSlopTolerance = kTouchSlop,
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',

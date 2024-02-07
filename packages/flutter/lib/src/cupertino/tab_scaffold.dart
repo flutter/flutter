@@ -32,11 +32,10 @@ class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
   ///
-  /// The [initialIndex] must not be null and defaults to 0. The value must be
-  /// greater than or equal to 0, and less than the total number of tabs.
+  /// The [initialIndex] defaults to 0. The value must be greater than or equal
+  /// to 0, and less than the total number of tabs.
   CupertinoTabController({ int initialIndex = 0 })
     : _index = initialIndex,
-      assert(initialIndex != null),
       assert(initialIndex >= 0);
 
   bool _isDisposed = false;
@@ -52,7 +51,6 @@ class CupertinoTabController extends ChangeNotifier {
   int get index => _index;
   int _index;
   set index(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (_index == value) {
       return;
@@ -125,8 +123,6 @@ class CupertinoTabController extends ChangeNotifier {
 ///  * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/bars/tab-bars/).
 class CupertinoTabScaffold extends StatefulWidget {
   /// Creates a layout for applications with a tab bar at the bottom.
-  ///
-  /// The [tabBar] and [tabBuilder] arguments must not be null.
   CupertinoTabScaffold({
     super.key,
     required this.tabBar,
@@ -135,9 +131,7 @@ class CupertinoTabScaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
     this.restorationId,
-  }) : assert(tabBar != null),
-       assert(tabBuilder != null),
-       assert(
+  }) : assert(
          controller == null || controller.index < tabBar.items.length,
          "The CupertinoTabController's current index ${controller.index} is "
          'out of bounds for the tab bar with ${tabBar.items.length} tabs',
@@ -162,15 +156,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
   ///
-  /// By default `tabBar` has its text scale factor set to 1.0 and does not
-  /// respond to text scale factor changes from the operating system, to match
-  /// the native iOS behavior. To override this behavior, wrap each of the `tabBar`'s
-  /// items inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
-  /// value. The text scale factor value from the operating system can be retrieved
-  /// int many ways, such as querying [MediaQuery.textScaleFactorOf] against
-  /// [CupertinoApp]'s [BuildContext].
-  ///
-  /// Must not be null.
+  /// By default [tabBar] disables text scaling to match the native iOS behavior.
+  /// To override this behavior, wrap each of the [tabBar]'s items inside a
+  /// [MediaQuery] with the desired [TextScaler].
   final CupertinoTabBar tabBar;
 
   /// Controls the currently selected tab index of the [tabBar], as well as the
@@ -194,8 +182,6 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
   /// bottom padding indicating the area of obstructing overlap from the
   /// [tabBar].
-  ///
-  /// Must not be null.
   final IndexedWidgetBuilder tabBuilder;
 
   /// The color of the widget that underlies the entire scaffold.
@@ -209,7 +195,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
   /// prevents widgets inside the body from being obscured by the keyboard.
   ///
-  /// Defaults to true and cannot be null.
+  /// Defaults to true.
   final bool resizeToAvoidBottomInset;
 
   /// Restoration ID to save and restore the state of the [CupertinoTabScaffold].
@@ -324,12 +310,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
       contentPadding = EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom);
     }
 
-    if (widget.tabBar != null &&
-        // Only pad the content with the height of the tab bar if the tab
-        // isn't already entirely obstructed by a keyboard or other view insets.
-        // Don't double pad.
-        (!widget.resizeToAvoidBottomInset ||
-            widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom)) {
+    // Only pad the content with the height of the tab bar if the tab
+    // isn't already entirely obstructed by a keyboard or other view insets.
+    // Don't double pad.
+    if (!widget.resizeToAvoidBottomInset || widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double bottomPadding =
@@ -367,8 +351,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
         children: <Widget>[
           // The main content being at the bottom is added to the stack first.
           content,
-          MediaQuery(
-            data: existingMediaQuery.copyWith(textScaleFactor: 1),
+          MediaQuery.withNoTextScaling(
             child: Align(
               alignment: Alignment.bottomCenter,
               // Override the tab bar's currentIndex to the current tab and hook in
@@ -406,9 +389,7 @@ class _TabSwitchingView extends StatefulWidget {
     required this.currentTabIndex,
     required this.tabCount,
     required this.tabBuilder,
-  }) : assert(currentTabIndex != null),
-       assert(tabCount != null && tabCount > 0),
-       assert(tabBuilder != null);
+  }) : assert(tabCount > 0);
 
   final int currentTabIndex;
   final int tabCount;
@@ -527,11 +508,10 @@ class RestorableCupertinoTabController extends RestorableChangeNotifier<Cupertin
   /// Creates a [RestorableCupertinoTabController] to control the tab index of
   /// [CupertinoTabScaffold] and [CupertinoTabBar].
   ///
-  /// The `initialIndex` must not be null and defaults to 0. The value must be
-  /// greater than or equal to 0, and less than the total number of tabs.
+  /// The `initialIndex` defaults to zero. The value must be greater than or
+  /// equal to zero, and less than the total number of tabs.
   RestorableCupertinoTabController({ int initialIndex = 0 })
-    : assert(initialIndex != null),
-      assert(initialIndex >= 0),
+    : assert(initialIndex >= 0),
       _initialIndex = initialIndex;
 
   final int _initialIndex;

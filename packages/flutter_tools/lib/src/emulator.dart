@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import 'android/android_emulator.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
+import 'android/java.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -22,12 +23,14 @@ EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 /// A class to get all available emulators.
 class EmulatorManager {
   EmulatorManager({
+    required Java? java,
     AndroidSdk? androidSdk,
     required Logger logger,
     required ProcessManager processManager,
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
-  }) : _androidSdk = androidSdk,
+  }) : _java = java,
+       _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _androidEmulators = AndroidEmulators(
         androidSdk: androidSdk,
@@ -39,6 +42,7 @@ class EmulatorManager {
     _emulatorDiscoverers.add(_androidEmulators);
   }
 
+  final Java? _java;
   final AndroidSdk? _androidSdk;
   final AndroidEmulators _androidEmulators;
   final ProcessUtils _processUtils;
@@ -56,8 +60,8 @@ class EmulatorManager {
         emulator.id.toLowerCase() == searchText ||
         emulator.name.toLowerCase() == searchText;
     bool startsWithEmulatorId(Emulator emulator) =>
-        emulator.id.toLowerCase().startsWith(searchText) == true ||
-        emulator.name.toLowerCase().startsWith(searchText) == true;
+        emulator.id.toLowerCase().startsWith(searchText) ||
+        emulator.name.toLowerCase().startsWith(searchText);
 
     Emulator? exactMatch;
     for (final Emulator emulator in emulators) {
@@ -152,7 +156,7 @@ class EmulatorManager {
         '-n', emulatorName,
         '-k', sdkId,
         '-d', device,
-      ], environment: _androidSdk?.sdkManagerEnv,
+      ], environment: _java?.environment,
     );
     return CreateEmulatorResult(
       emulatorName,
@@ -175,7 +179,7 @@ class EmulatorManager {
       '-c',
     ];
     final RunResult runResult = await _processUtils.run(args,
-        environment: _androidSdk?.sdkManagerEnv);
+        environment: _java?.environment);
     if (runResult.exitCode != 0) {
       return null;
     }
@@ -205,7 +209,7 @@ class EmulatorManager {
       '-n', 'temp',
     ];
     final RunResult runResult = await _processUtils.run(args,
-        environment: _androidSdk?.sdkManagerEnv);
+        environment: _java?.environment);
 
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr

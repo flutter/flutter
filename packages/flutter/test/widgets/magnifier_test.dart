@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
@@ -225,6 +226,7 @@ void main() {
 
         final OverlayEntry fakeBeforeOverlayEntry =
             OverlayEntry(builder: (_) => fakeBefore);
+        addTearDown(() => fakeBeforeOverlayEntry..remove()..dispose());
 
         Overlay.of(context).insert(fakeBeforeOverlayEntry);
         magnifierController.show(
@@ -251,6 +253,7 @@ void main() {
         await runFakeAsync((FakeAsync async) async {
           final _MockAnimationController animationController =
               _MockAnimationController();
+          addTearDown(animationController.dispose);
 
           const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
