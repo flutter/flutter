@@ -26,6 +26,7 @@ import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/testbed.dart';
 
@@ -690,6 +691,7 @@ void main() {
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
       webRenderer: WebRendererMode.html,
+      rootDirectory: fileSystem.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -800,6 +802,7 @@ void main() {
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
       webRenderer: WebRendererMode.html,
+      rootDirectory: fileSystem.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -909,6 +912,7 @@ void main() {
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
         webRenderer: WebRendererMode.canvaskit,
+        rootDirectory: fileSystem.currentDirectory,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -971,6 +975,7 @@ void main() {
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
       webRenderer: WebRendererMode.canvaskit,
+      rootDirectory: fileSystem.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1017,6 +1022,7 @@ void main() {
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
       webRenderer: WebRendererMode.canvaskit,
+      rootDirectory: fileSystem.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1064,6 +1070,7 @@ void main() {
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
       webRenderer: WebRendererMode.auto,
+      rootDirectory: fileSystem.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1112,6 +1119,7 @@ void main() {
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
+      rootDirectory: fileSystem.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1263,6 +1271,7 @@ void main() {
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
+      rootDirectory: fileSystem.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);

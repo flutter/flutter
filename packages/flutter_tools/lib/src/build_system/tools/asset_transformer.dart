@@ -34,7 +34,7 @@ final class DevelopmentAssetTransformer {
   Future<DevFSContent?> retransformAsset({
     required DevFSContent inputAsset,
     required List<AssetTransformerEntry> transformerEntries,
-    required String? workingDirectory,
+    required String workingDirectory,
   }) async {
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
     late File inputFile;

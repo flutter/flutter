@@ -12,6 +12,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
+import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
@@ -140,6 +141,7 @@ Future<void> writeBundle(
   Logger? loggerOverride,
   required TargetPlatform targetPlatform,
   required ImpellerStatus impellerStatus,
+  required String projectRootPath,
 }) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
@@ -168,6 +170,13 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
+  final AssetTransformer assetTransformer = AssetTransformer(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts!,
+  );
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -187,7 +196,15 @@ Future<void> writeBundle(
           bool doCopy = true;
           switch (entry.value.kind) {
             case AssetKind.regular:
-              break;
+            if (entry.value.transformers.isNotEmpty) {
+              await assetTransformer.transformAsset(
+                asset: input,
+                outputPath: file.absolute.path,
+                transformerEntries: entry.value.transformers,
+                workingDirectory: projectRootPath,
+                throwOnFailure: true,
+              );
+            }
             case AssetKind.font:
               break;
             case AssetKind.shader:

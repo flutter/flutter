@@ -680,6 +680,7 @@ class WebDevFS implements DevFS {
     required this.nativeNullAssertions,
     required this.nullSafetyMode,
     required this.webRenderer,
+    required this.rootDirectory,
     this.testMode = false,
   }) : _port = port;
 
@@ -834,7 +835,7 @@ class WebDevFS implements DevFS {
   String get fsName => 'web_asset';
 
   @override
-  Directory? get rootDirectory => null;
+  final Directory rootDirectory;
 
   @override
   Future<UpdateFSReport> update({
@@ -853,7 +854,6 @@ class WebDevFS implements DevFS {
     DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
     lastPackageConfig = packageConfig;
@@ -900,6 +900,7 @@ class WebDevFS implements DevFS {
           bundle.entries,
           targetPlatform: TargetPlatform.web_javascript,
           impellerStatus: ImpellerStatus.disabled,
+          projectRootPath: rootDirectory.path,
         );
       }
     }
@@ -920,7 +921,7 @@ class WebDevFS implements DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       packageConfig: packageConfig,
-      projectRootPath: projectRootPath,
+      projectRootPath: rootDirectory.path,
       fs: globals.fs,
       dartPluginRegistrant: dartPluginRegistrant,
     );

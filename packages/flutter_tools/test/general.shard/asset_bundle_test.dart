@@ -540,6 +540,7 @@ flutter:
       loggerOverride: testLogger,
       targetPlatform: TargetPlatform.android,
       impellerStatus: ImpellerStatus.disabled,
+      projectRootPath: fileSystem.currentDirectory.path,
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -662,6 +663,7 @@ flutter:
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.android,
         impellerStatus: ImpellerStatus.disabled,
+        projectRootPath: fileSystem.currentDirectory.path,
       );
 
     }, overrides: <Type, Generator>{
@@ -710,6 +712,7 @@ flutter:
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
+        projectRootPath: fileSystem.currentDirectory.path,
       );
 
     }, overrides: <Type, Generator>{
@@ -793,6 +796,7 @@ flutter:
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
+        projectRootPath: fileSystem.currentDirectory.path,
       );
       expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{

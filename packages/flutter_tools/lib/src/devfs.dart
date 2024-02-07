@@ -489,7 +489,7 @@ class DevFS {
   final DevelopmentAssetTransformer _assetTransformer;
 
   final String fsName;
-  final Directory? rootDirectory;
+  final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
   final Set<String> shaderPathsToEvict = <String>{};
   final Set<String> scenePathsToEvict = <String>{};
@@ -513,7 +513,7 @@ class DevFS {
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
-      return rootDirectory!.uri.resolve(deviceUriSuffix);
+      return rootDirectory.uri.resolve(deviceUriSuffix);
     }
     return deviceUri;
   }
@@ -609,7 +609,7 @@ class DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       fs: _fileSystem,
-      projectRootPath: rootDirectory?.path,
+      projectRootPath: rootDirectory.path,
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
@@ -686,7 +686,7 @@ class DevFS {
               final Future<DevFSContent?> pending = _assetTransformer.retransformAsset(
                 inputAsset: entry.content,
                 transformerEntries: entry.transformers,
-                workingDirectory: projectRootPath,
+                workingDirectory: rootDirectory.path,
               );
               pendingAssetBuilds.add(pending);
               pending.then((DevFSContent? content) {
