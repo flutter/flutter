@@ -875,6 +875,7 @@ targets:
       - .ci.yaml
 
   - name: Linux module_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/143059
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
