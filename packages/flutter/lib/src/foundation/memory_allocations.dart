@@ -331,7 +331,7 @@ class FlutterMemoryAllocations {
     try {
       return builder();
     } finally {
-      ObjectCreated._exemptionFromDisposal --;
+      ObjectCreated._exemptionFromDisposal--;
     }
   }
 
