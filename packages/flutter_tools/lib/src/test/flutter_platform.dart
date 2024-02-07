@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../test/test_wrapper.dart';
 

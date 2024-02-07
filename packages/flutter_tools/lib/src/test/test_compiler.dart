@@ -15,6 +15,7 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import 'test_time_recorder.dart';
 
@@ -217,10 +218,4 @@ class TestCompiler {
       compilationQueue.removeAt(0);
     }
   }
-}
-
-/// An interface to enable overriding native assets build logic in other
-/// build systems.
-abstract class TestCompilerNativeAssetsBuilder {
-  Future<Uri?> build(BuildInfo buildInfo);
 }
