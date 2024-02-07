@@ -37,7 +37,7 @@ import 'theme_data.dart';
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to use `iconAlignment` to align the button icon to the start
-// or the end of the button.
+/// or the end of the button.
 ///
 /// ** See code in examples/api/lib/material/button_style_button/button_style_button.icon_alignment.0.dart **
 /// {@end-tool}
