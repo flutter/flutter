@@ -573,12 +573,14 @@ class _PopupMenu<T> extends StatelessWidget {
     required this.route,
     required this.semanticLabel,
     this.constraints,
+    this.itemKeys,
     required this.clipBehavior,
   });
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
   final BoxConstraints? constraints;
+  final List<GlobalKey>? itemKeys;
   final Clip clipBehavior;
 
   @override
@@ -609,6 +611,7 @@ class _PopupMenu<T> extends StatelessWidget {
             route.itemSizes[i] = size;
           },
           child: FadeTransition(
+            key: itemKeys?[i],
             opacity: opacity,
             child: item,
           ),
@@ -791,6 +794,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
     required this.position,
     required this.items,
+    this.itemKeys,
     this.initialValue,
     this.elevation,
     this.surfaceTintColor,
@@ -811,6 +815,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
+  final List<GlobalKey>? itemKeys;
   final List<Size?> itemSizes;
   final T? initialValue;
   final double? elevation;
@@ -836,6 +841,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     return super.createAnimation();
   }
 
+  void scrollTo(int selectedItemIndex) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (itemKeys?[selectedItemIndex].currentContext != null) {
+        Scrollable.ensureVisible(itemKeys![selectedItemIndex].currentContext!);
+      }
+    });
+  }
+
   @override
   Duration get transitionDuration => popUpAnimationStyle?.duration ?? _kMenuDuration;
 
@@ -859,9 +872,13 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         }
       }
     }
+    if (selectedItemIndex != null) {
+      scrollTo(selectedItemIndex);
+    }
 
     final Widget menu = _PopupMenu<T>(
       route: this,
+      itemKeys: itemKeys,
       semanticLabel: semanticLabel,
       constraints: constraints,
       clipBehavior: clipBehavior,
@@ -958,6 +975,7 @@ Future<T?> showMenu<T>({
   required BuildContext context,
   required RelativeRect position,
   required List<PopupMenuEntry<T>> items,
+  List<GlobalKey>? itemKeys,
   T? initialValue,
   double? elevation,
   Color? shadowColor,
@@ -985,10 +1003,12 @@ Future<T?> showMenu<T>({
       semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
+  final List<GlobalKey> menuItemKeys = itemKeys ?? List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(_PopupMenuRoute<T>(
     position: position,
     items: items,
+    itemKeys: menuItemKeys,
     initialValue: initialValue,
     elevation: elevation,
     shadowColor: shadowColor,
@@ -1328,6 +1348,8 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+  List<GlobalKey>? _itemKeys;
+
   /// A method to show a popup menu with the items supplied to
   /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
   ///
@@ -1360,6 +1382,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       Offset.zero & overlay.size,
     );
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
+    _itemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
       widget.onOpened?.call();
@@ -1369,6 +1392,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         shadowColor: widget.shadowColor ?? popupMenuTheme.shadowColor,
         surfaceTintColor: widget.surfaceTintColor ?? popupMenuTheme.surfaceTintColor,
         items: items,
+        itemKeys: _itemKeys,
         initialValue: widget.initialValue,
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,

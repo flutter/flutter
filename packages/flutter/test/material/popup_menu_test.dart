@@ -4007,6 +4007,53 @@ void main() {
     expect(listViewportBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
     expect(listViewportBounds, overlaps(buttonBounds));
   });
+
+  testWidgets('The selected item should always visible', (WidgetTester tester) async {
+    const int length = 50;
+    int selectedIndex = length - 1;
+    Widget buildPopupMenu({ AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: PopupMenuButton<int>(
+              initialValue: selectedIndex,
+              constraints: const BoxConstraints(maxHeight: 100),
+              itemBuilder: (BuildContext context) {
+                return List<PopupMenuEntry<int>>.generate(length, (int index) {
+                  return PopupMenuItem<int>(
+                      value: index,
+                      child: Text('Item $index'));
+                });
+              },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Click here to open popup menu '),
+                  Icon(Icons.ads_click),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildPopupMenu());
+    await tester.tap(find.ancestor(of: find.byIcon(Icons.ads_click), matching: find.byType(Row)));
+    await tester.pumpAndSettle();
+
+    final Finder item49 = find.text('Item 49');
+    expect(selectedIndex, 49);
+    expect(item49, findsOneWidget);
+    await tester.tap(item49);
+    await tester.pumpAndSettle();
+
+    selectedIndex = 20;
+    await tester.pumpWidget(buildPopupMenu());
+    await tester.tap(find.ancestor(of: find.byIcon(Icons.ads_click), matching: find.byType(Row)));
+    await tester.pumpAndSettle();
+    expect(find.text('Item 20'), findsOneWidget);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
