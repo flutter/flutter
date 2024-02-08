@@ -120,6 +120,8 @@
 // filters.
 - (void)applyBlurBackdropFilters:(NSArray<PlatformViewFilter*>*)filters;
 
+// For testing only.
+- (NSMutableArray*)backdropFilterSubviews;
 @end
 
 namespace flutter {

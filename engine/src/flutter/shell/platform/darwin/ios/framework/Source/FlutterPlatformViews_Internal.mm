@@ -236,7 +236,7 @@ static BOOL _preparedOnce = NO;
 
 - (NSMutableArray*)backdropFilterSubviews {
   if (!_backdropFilterSubviews) {
-    _backdropFilterSubviews = [[[NSMutableArray alloc] init] retain];
+    _backdropFilterSubviews = [[NSMutableArray alloc] init];
   }
   return _backdropFilterSubviews;
 }
