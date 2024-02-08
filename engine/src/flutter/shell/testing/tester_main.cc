@@ -35,7 +35,6 @@
 
 #if ALLOW_IMPELLER
 #include <vulkan/vulkan.h>                                        // nogncheck
-#include "flutter/vulkan/procs/vulkan_proc_table.h"               // nogncheck
 #include "impeller/entity/vk/entity_shaders_vk.h"                 // nogncheck
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"      // nogncheck
 #include "impeller/entity/vk/modern_shaders_vk.h"                 // nogncheck
@@ -69,7 +68,6 @@ static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
 struct ImpellerVulkanContextHolder {
   ImpellerVulkanContextHolder() = default;
   ImpellerVulkanContextHolder(ImpellerVulkanContextHolder&&) = default;
-  fml::RefPtr<vulkan::VulkanProcTable> vulkan_proc_table;
   std::shared_ptr<impeller::ContextVK> context;
   std::shared_ptr<impeller::SurfaceContextVK> surface_context;
 
@@ -77,15 +75,8 @@ struct ImpellerVulkanContextHolder {
 };
 
 bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
-  vulkan_proc_table =
-      fml::MakeRefCounted<vulkan::VulkanProcTable>(&vkGetInstanceProcAddr);
-  if (!vulkan_proc_table->NativeGetInstanceProcAddr()) {
-    FML_LOG(ERROR) << "Could not load Swiftshader library.";
-    return false;
-  }
   impeller::ContextVK::Settings context_settings;
-  context_settings.proc_address_callback =
-      vulkan_proc_table->NativeGetInstanceProcAddr();
+  context_settings.proc_address_callback = &vkGetInstanceProcAddr;
   context_settings.shader_libraries_data = ShaderLibraryMappings();
   context_settings.cache_directory = fml::paths::GetCachesDirectory();
   context_settings.enable_validation = enable_validation;
