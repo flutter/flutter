@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -20,7 +24,9 @@ final class DevelopmentAssetTransformer {
     required FileSystem fileSystem,
     required AssetTransformer transformer,
     @visibleForTesting math.Random? random,
-  }) : _fileSystem = fileSystem, _transformer = transformer,        _random = random ?? math.Random();
+  })  : _fileSystem = fileSystem,
+        _transformer = transformer,
+        _random = random ?? math.Random();
 
   final AssetTransformer _transformer;
   final FileSystem _fileSystem;

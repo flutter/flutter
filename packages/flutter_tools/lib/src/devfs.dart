@@ -461,7 +461,7 @@ class DevFS {
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  })  : _vmService = serviceProtocol,
+  }) : _vmService = serviceProtocol,
         _logger = logger,
         _fileSystem = fileSystem,
         _httpWriter = _DevFSHttpWriter(
