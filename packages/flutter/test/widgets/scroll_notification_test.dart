@@ -316,7 +316,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0);
-    expect(notifcation, isNull);
+    expect(notification, isNull);
 
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(790, 45));
     await tester.pumpAndSettle();
