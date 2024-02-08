@@ -186,7 +186,10 @@ void main() {
 
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, 0);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+    expect(
+      () => painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero),
+      throwsA(isA<FlutterError>().having((FlutterError e) => e.message, 'message', contains('not a valid location'))),
+    );
     expect(caretOffset.dx, 0);
     painter.dispose();
   });
@@ -250,11 +253,11 @@ void main() {
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 19), ui.Rect.zero);
     expect(caretOffset.dx, 98); // 👏
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 20), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👏
+    expect(caretOffset.dx, 126); // 👏
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 21), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // <medium skin tone modifier>
+    expect(caretOffset.dx, 126); // <medium skin tone modifier>
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 22), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // <medium skin tone modifier>
+    expect(caretOffset.dx, 126); // <medium skin tone modifier>
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
     expect(caretOffset.dx, 126); // end of string
     painter.dispose();
@@ -323,7 +326,7 @@ void main() {
           TextSpan(text: 'words ', style: TextStyle(fontWeight: FontWeight.bold)),
           TextSpan(text: '👩‍🚀', style: TextStyle()),
         ])),
-        <double>[0, 14, 28, 42, 56, 70, 84, 84, 84, 84, 84, 112]);
+        <double>[0, 14, 28, 42, 56, 70, 84, 112, 112, 112, 112, 112]);
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter caret emoji test RTL: letters next to emoji, as separate TextBoxes', () {
@@ -341,7 +344,7 @@ void main() {
           TextSpan(text: 'מילים ', style: TextStyle(fontWeight: FontWeight.bold)),
           TextSpan(text: '👩‍🚀', style: TextStyle()),
         ])),
-        <double>[112, 98, 84, 70, 56, 42, 28, 28, 28, 28, 28, 0]);
+        <double>[112, 98, 84, 70, 56, 42, 28, 0, 0, 0, 0, 0]);
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter caret center space test', () {

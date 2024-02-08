@@ -4,6 +4,9 @@
 
 import 'dart:collection';
 
+import 'package:meta/meta.dart' show immutable;
+
+
 // COMMON SIGNATURES
 
 /// Signature for callbacks that report that an underlying value has changed.
@@ -247,4 +250,57 @@ Duration lerpDuration(Duration a, Duration b, double t) {
   return Duration(
     microseconds: (a.inMicroseconds + (b.inMicroseconds - a.inMicroseconds) * t).round(),
   );
+}
+
+sealed class Either<L, R> {
+  const factory Either.left(L value) = Left<L, Never>._;
+  const factory Either.right(R value) = Right<Never, R>._;
+}
+
+@immutable
+final class Left<L, R> implements Either<L, R> {
+  const Left._(this.value);
+  final L value;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Left<L, Never> && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+}
+
+@immutable
+final class Right<L, R> implements Either<L, R> {
+  const Right._(this.value);
+  final R value;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Right<Never, R> && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+}
+
+extension NullableLeft<L extends Object, R> on Either<L, R> {
+  L? get maybeLeft => switch (this) {
+    Left(:final L value) => value,
+    Right() => null,
+  };
+}
+
+extension NullableRight<R extends Object> on Either<Object?, R> {
+  R? get maybeRight => switch (this) {
+    Left() => null,
+    Right(:final R value) => value,
+  };
 }
