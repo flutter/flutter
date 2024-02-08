@@ -114,7 +114,7 @@ class DependencyVersionChecker {
                 checkAGPVersion(agpVersion, project)
             } else {
                 project.logger.error("Warning: unable to detect project AGP version. Skipping " +
-                        "version checking. \nThis may be because you have applied the Flutter Gradle Plugin after AGP.")
+                        "version checking. \nThis may be because you have applied AGP after the Flutter Gradle Plugin.")
             }
 
             kgpVersion = getKGPVersion(project)
@@ -122,7 +122,7 @@ class DependencyVersionChecker {
                 checkKGPVersion(kgpVersion, project)
             } else {
                 project.logger.error("Warning: unable to detect project KGP version. Skipping " +
-                        "version checking. \nThis may be because you have applied the Flutter Gradle Plugin after KGP.")
+                        "version checking. \nThis may be because you have applied KGP after the Flutter Gradle Plugin.")
             }
         }
 
