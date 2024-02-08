@@ -387,9 +387,10 @@ class _TextPainterLayoutCacheWithOffset {
     }
 
     // Special case:
-    // When the paint offset and the paragraph width are both +∞, it's likely
-    // that the text layout engine skipped layout. Always try to relayout to
-    if (!paintOffset.dx.isFinite && !paragraph.width.isFinite && minWidth.isFinite) {
+    // When the paint offset is +∞, it's likely that the text layout engine
+    // skipped layout because there weren't anything to paint. Always try to
+    // re-compute the text layout.
+    if (!paintOffset.dx.isFinite && minWidth.isFinite) {
       assert(paintOffset.dx == double.infinity);
       assert(paragraph.width == double.infinity);
       return false;
