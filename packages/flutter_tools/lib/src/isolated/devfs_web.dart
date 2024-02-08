@@ -182,7 +182,7 @@ class WebAssetServer implements AssetReader {
     required WebRendererMode webRenderer,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
-// TODO(markzipan): Make sure this default value aligns with that in the debugger options.
+    // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
     bool ddcModuleSystem = false,
   }) async {
     InternetAddress address;
@@ -230,7 +230,7 @@ class WebAssetServer implements AssetReader {
       modules,
       digests,
       nullSafetyMode,
-ddcModuleSystem,
+      ddcModuleSystem,
       webRenderer: webRenderer,
     );
     if (testMode) {
@@ -342,7 +342,7 @@ ddcModuleSystem,
   }
 
   final NullSafetyMode _nullSafetyMode;
-final bool _ddcModuleSystem;
+  final bool _ddcModuleSystem;
   final HttpServer _httpServer;
   final WebMemoryFS _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -525,9 +525,7 @@ final bool _ddcModuleSystem;
   final WebRendererMode webRenderer;
 
   shelf.Response _serveIndex() {
-
     final IndexHtml indexHtml = _getIndexHtml();
-
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': <dynamic>[
@@ -701,7 +699,7 @@ class WebDevFS implements DevFS {
     required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.nullSafetyMode,
-required this.ddcModuleSystem,
+    required this.ddcModuleSystem,
     required this.webRenderer,
     this.testMode = false,
   }) : _port = port;
@@ -718,7 +716,7 @@ required this.ddcModuleSystem,
   final bool enableDds;
   final Map<String, String> extraHeaders;
   final bool testMode;
-final bool ddcModuleSystem;
+  final bool ddcModuleSystem;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nullAssertions;
@@ -829,7 +827,7 @@ final bool ddcModuleSystem;
       nullSafetyMode,
       webRenderer: webRenderer,
       testMode: testMode,
-ddcModuleSystem: ddcModuleSystem,
+      ddcModuleSystem: ddcModuleSystem,
     );
 
     final int selectedPort = webAssetServer.selectedPort;
@@ -891,12 +889,12 @@ ddcModuleSystem: ddcModuleSystem,
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
-if (ddcModuleSystem) {
+      if (ddcModuleSystem) {
         webAssetServer.writeBytes(
             'ddc_module_loader.js', ddcModuleLoaderJS.readAsBytesSync());
       } else {
-      webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
-}
+        webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      }
       webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes(
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
