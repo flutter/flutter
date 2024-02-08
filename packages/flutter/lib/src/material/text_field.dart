@@ -7,6 +7,7 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -830,6 +831,7 @@ class TextField extends StatefulWidget {
   final UndoHistoryController? undoController;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    // TODO(justinmc): Flag it off by default.
     // TODO(justinmc): Don't forget CupertinoTextField. Anything else like TextFormField?
     if (defaultTargetPlatform == TargetPlatform.iOS &&
         (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
@@ -1640,18 +1642,20 @@ TextStyle _m3CounterErrorStyle(BuildContext context) =>
 
 // END GENERATED TOKEN PROPERTIES - TextField
 
-class _IOSSystemContextMenu extends StatelessWidget {
-  const _IOSSystemContextMenu({
-    required this.renderBox,
-    required this.startGlyphHeight,
-    required this.endGlyphHeight,
-    required this.selectionEndpoints,
-  });
+class _IOSSystemContextMenu extends StatefulWidget {
+  _IOSSystemContextMenu({
+    required RenderBox renderBox,
+    required double startGlyphHeight,
+    required double endGlyphHeight,
+    required List<TextSelectionPoint> selectionEndpoints,
+  }) : _selectionRect = _getSelectionRect(
+         renderBox,
+         startGlyphHeight,
+         endGlyphHeight,
+         selectionEndpoints,
+       );
 
-    final RenderBox renderBox;
-    final double startGlyphHeight;
-    final double endGlyphHeight;
-    final List<TextSelectionPoint> selectionEndpoints;
+    final Rect _selectionRect;
 
   // TODO(justinmc): Deduplicate logic with TextSelectionToolbarAnchors.fromSelection?
   static Rect _getSelectionRect(
@@ -1686,47 +1690,23 @@ class _IOSSystemContextMenu extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return _IOSSystemContextMenuWithWidth(
-      selectionRect: _getSelectionRect(
-        renderBox,
-        startGlyphHeight,
-        endGlyphHeight,
-        selectionEndpoints,
-      ),
-      screenWidth: MediaQuery.of(context).size.width,
-    );
-  }
+  State<_IOSSystemContextMenu> createState() => _IOSSystemContextMenuWithWidthState();
 }
 
-class _IOSSystemContextMenuWithWidth extends StatefulWidget {
-  const _IOSSystemContextMenuWithWidth({
-    required this.selectionRect,
-    required this.screenWidth,
-  });
-
-  final Rect selectionRect;
-  final double screenWidth;
-
-  @override
-  State<_IOSSystemContextMenuWithWidth> createState() => _IOSSystemContextMenuWithWidthState();
-}
-
-class _IOSSystemContextMenuWithWidthState extends State<_IOSSystemContextMenuWithWidth> {
+class _IOSSystemContextMenuWithWidthState extends State<_IOSSystemContextMenu> {
   @override
   void initState() {
     super.initState();
     ContextMenuController.removeAny();
 
-    ContextMenu.showSystemContextMenu(widget.selectionRect);
+    ContextMenu.showSystemContextMenu(widget._selectionRect);
   }
 
   @override
-  void didUpdateWidget(_IOSSystemContextMenuWithWidth oldWidget) {
+  void didUpdateWidget(_IOSSystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectionRect != oldWidget.selectionRect ||
-        widget.screenWidth != oldWidget.screenWidth) {
-      ContextMenu.showSystemContextMenu(widget.selectionRect);
+    if (widget._selectionRect != oldWidget._selectionRect) {
+      ContextMenu.showSystemContextMenu(widget._selectionRect);
     }
   }
 
