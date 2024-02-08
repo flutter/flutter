@@ -280,7 +280,9 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
           ? null
           : _colors.onSurface.withOpacity(0.12);
       }
-      return null;
+      return _chipVariant == _ChipVariant.flat
+        ? null
+        : _colors.surfaceContainerLow;
     });
 
   @override
