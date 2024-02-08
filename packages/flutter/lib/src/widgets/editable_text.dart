@@ -1029,8 +1029,23 @@ class EditableText extends StatefulWidget {
            : inputFormatters,
        showCursor = showCursor ?? !readOnly;
 
-  /// docs - initialize this with a default plugin
-  static TextEditingPlugin textEditingPlugin = DefaultTextEditingPlugin();
+  static TextEditingPlugin? _plugin;
+
+  // If we try to access the plugin before a user sets it, initialize with default.
+  static TextEditingPlugin get effectivePlugin {
+    _plugin ??= DefaultTextEditingPlugin();
+    return _plugin!;
+  }
+  
+  // Throw error if user tries setting a non-empty plugin. Otherwise set the plugin.
+  static void usePlugin(TextEditingPlugin newPlugin) {
+    if (_plugin != null) {
+      // throw an error and tell the user that they have to set the plugin early on.
+      throw StateError('Plugin as already been set.');
+    }
+
+    _plugin = newPlugin;
+  }
   
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -2294,7 +2309,7 @@ class EditableText extends StatefulWidget {
 
 /// State for a [EditableText].
 class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient implements AutofillClient {
-  final TextEditingPlugin _textEditingPlugin = EditableText.textEditingPlugin;
+  final TextEditingPlugin _textEditingPlugin = EditableText.effectivePlugin;
   Timer? _cursorTimer;
   AnimationController get _cursorBlinkOpacityController {
     return _backingCursorBlinkOpacityController ??= AnimationController(

@@ -36,6 +36,7 @@ class EditableWeb extends StatefulWidget {
     required this.scrollTop,
     required this.scrollLeft,
     required this.textEditingValue,
+    required this.updateEditingValue,
   });
 
   final TextStyle? textStyle;
@@ -63,6 +64,7 @@ class EditableWeb extends StatefulWidget {
   final double scrollTop;
   final double scrollLeft;
   final String textEditingValue;
+  final void Function(TextEditingValue) updateEditingValue;
 
   @override
   State<EditableWeb> createState() => _EditableWebState();
@@ -85,7 +87,7 @@ class _EditableWebState extends State<EditableWeb> {
 
   @override
   void dispose() {
-    (EditableText.textEditingPlugin as NativeWebTextEditingPlugin).deregisterInstance(widget.clientId);
+    (EditableText.effectivePlugin as NativeWebTextEditingPlugin).deregisterInstance(widget.clientId);
     super.dispose();
   }
 
@@ -661,7 +663,7 @@ class _EditableWebState extends State<EditableWeb> {
     _inputEl = inputEl;
 
     // register instance via clientId.
-    (EditableText.textEditingPlugin as NativeWebTextEditingPlugin).registerInstance(widget.clientId, this);
+    (EditableText.effectivePlugin as NativeWebTextEditingPlugin).registerInstance(widget.clientId, this);
   }
 
   /* Incoming methods (back to framework)
@@ -674,7 +676,8 @@ class _EditableWebState extends State<EditableWeb> {
     - TextInputClient.onConnectionClosed
   */
   void updateEditingState(TextEditingValue value) {
-    TextInput.updateEditingValue(value);
+    // todo: we replaced TextInput.updateEditingValue - this wrapper is probably redundant
+    widget.updateEditingValue(value);
   }
 
   void updateEditingStateWithTag() {
@@ -859,6 +862,7 @@ class NativeWebTextEditingPlugin extends TextEditingPlugin {
             currentAutofillScope: editableText.currentAutofillScope,
             scrollTop: editableText.widget.keyboardType == TextInputType.multiline ? editableText.scrollController.offset : 0,
             scrollLeft: editableText.widget.keyboardType == TextInputType.multiline ? editableText.scrollController.offset : 0,
+            updateEditingValue: editableText.updateEditingValue,
           ),
         ),
         editable
