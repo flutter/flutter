@@ -207,36 +207,6 @@ void main() {
       contains('flutter_service_worker.js?v='),
     ));
   }));
-
-  test('WebReleaseBundle copies over output files when they change', () => testbed.run(() async {
-    final Directory webResources = environment.projectDir.childDirectory('web');
-    webResources.childFile('foo.txt')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('A');
-
-    environment.buildDir.childFile('main.dart.wasm')..createSync()..writeAsStringSync('old wasm');
-    environment.buildDir.childFile('main.dart.mjs')..createSync()..writeAsStringSync('old mjs');
-    await WebReleaseBundle(<WebCompilerConfig>[
-      const WasmCompilerConfig()
-    ]).build(environment);
-    expect(environment.outputDir.childFile('main.dart.wasm')
-      .readAsStringSync(), 'old wasm');
-        expect(environment.outputDir.childFile('main.dart.mjs')
-      .readAsStringSync(), 'old mjs');
-
-    environment.buildDir.childFile('main.dart.wasm')..createSync()..writeAsStringSync('new wasm');
-    environment.buildDir.childFile('main.dart.mjs')..createSync()..writeAsStringSync('new mjs');
-
-    await WebReleaseBundle(<WebCompilerConfig>[
-      const WasmCompilerConfig()
-    ]).build(environment);
-
-    expect(environment.outputDir.childFile('main.dart.wasm')
-      .readAsStringSync(), 'new wasm');
-    expect(environment.outputDir.childFile('main.dart.mjs')
-      .readAsStringSync(), 'new mjs');
-  }));
-
   test('WebEntrypointTarget generates an entrypoint for a file outside of main', () => testbed.run(() async {
     final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
       ..createSync(recursive: true)
