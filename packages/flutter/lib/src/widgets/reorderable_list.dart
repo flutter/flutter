@@ -1116,7 +1116,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   Widget build(BuildContext context) {
     if (_dragging) {
       final Size size = _extentSize(_listState._dragInfo!.itemExtent, _listState._scrollDirection);
-      return SizedBox.fromSize(size);
+      return SizedBox.fromSize(size: size);
     }
     _listState._registerItem(this);
     return Transform(
@@ -1140,7 +1140,10 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   }
 
   void updateForGap(int dragIndex, int gapIndex, double gapExtent, bool animate, bool reverse) {
-    late final Offset newTargetOffset;
+    // An offset needs to be added to create a gap when we are between the
+    // moving element (dragIndex) and the current gap position (gapIndex).
+    // For how to update the gap position, refer to [_dragUpdateItems].
+    final Offset newTargetOffset;
     if (gapIndex < dragIndex && index < dragIndex && index >= gapIndex) {
       newTargetOffset = _extentOffset(reverse ? -gapExtent : gapExtent, _listState._scrollDirection);
     } else if (gapIndex > dragIndex && index > dragIndex && index < gapIndex) {
