@@ -434,32 +434,37 @@ String _gitCommitDate({
   bool lenient = false,
   required String? workingDirectory,
 }) {
-  final List<String> args = FlutterVersion.gitLog(<String>[
+  final List<String> command = FlutterVersion.gitLog(<String>[
     gitRef,
     '-n',
     '1',
     '--pretty=format:%ad',
     '--date=iso',
   ]);
-  try {
-    // Don't plumb 'lenient' through directly so that we can print an error
-    // if something goes wrong.
-    return _runSync(
-      args,
-      lenient: false,
-      workingDirectory: workingDirectory,
-    );
-  } on VersionCheckError catch (e) {
-    if (lenient) {
-      final DateTime dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
-      globals.printError('Failed to find the latest git commit date: $e\n'
-        'Returning $dummyDate instead.');
-      // Return something that DateTime.parse() can parse.
-      return dummyDate.toString();
-    } else {
-      rethrow;
-    }
+
+  final ProcessResult result = globals.processManager.runSync(
+    command,
+    workingDirectory: workingDirectory,
+  );
+
+  if (result.exitCode == 0) {
+    return (result.stdout as String).trim();
   }
+
+  if (lenient) {
+    final DateTime dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
+    globals.printError('Failed to find the latest git commit date: ${result.stderr}\n'
+      'Returning $dummyDate instead.');
+    // Return something that DateTime.parse() can parse.
+    return dummyDate.toString();
+  }
+
+  throw VersionCheckError(
+    'Failed to find the latest git commit date.\n '
+    'Command exited with code ${result.exitCode}: ${command.join(' ')}\n'
+    'Standard out: ${result.stdout}\n'
+    'Standard error: ${result.stderr}',
+  );
 }
 
 class _FlutterVersionFromFile extends FlutterVersion {
@@ -853,35 +858,6 @@ class VersionCheckError implements Exception {
 
   @override
   String toString() => '$VersionCheckError: $message';
-}
-
-/// Runs [command] and returns the standard output as a string.
-///
-/// If [lenient] is true and the command fails, returns an empty string.
-/// Otherwise, throws a [ToolExit] exception.
-String _runSync(
-  List<String> command, {
-  bool lenient = true,
-  required String? workingDirectory,
-}) {
-  final ProcessResult results = globals.processManager.runSync(
-    command,
-    workingDirectory: workingDirectory,
-  );
-
-  if (results.exitCode == 0) {
-    return (results.stdout as String).trim();
-  }
-
-  if (!lenient) {
-    throw VersionCheckError(
-      'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
-      'Standard out: ${results.stdout}\n'
-      'Standard error: ${results.stderr}'
-    );
-  }
-
-  return '';
 }
 
 String _runGit(String command, ProcessUtils processUtils, String? workingDirectory) {
