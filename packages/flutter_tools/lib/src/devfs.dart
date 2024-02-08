@@ -570,7 +570,6 @@ class DevFS {
     DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
     final DateTime candidateCompileTime = DateTime.now();
@@ -598,7 +597,7 @@ class DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       fs: _fileSystem,
-      projectRootPath: projectRootPath,
+      projectRootPath: rootDirectory?.path,
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
