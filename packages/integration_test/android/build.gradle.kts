@@ -28,6 +28,11 @@ rootProject.allprojects {
 }
 
 android {
+    // Conditional for compatibility with AGP <4.2.
+    if (project.findProject("android")?.hasProperty("namespace") == true) {
+        namespace = "dev.flutter.integration_test"
+    }
+
     namespace = "dev.flutter.integration_test"
     compileSdk = 34
 
