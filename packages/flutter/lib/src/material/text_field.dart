@@ -831,7 +831,8 @@ class TextField extends StatefulWidget {
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     // TODO(justinmc): Don't forget CupertinoTextField. Anything else like TextFormField?
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
+    if (defaultTargetPlatform == TargetPlatform.iOS &&
+        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
       final (
         startGlyphHeight: double startGlyphHeight,
         endGlyphHeight: double endGlyphHeight,
@@ -1717,7 +1718,7 @@ class _IOSSystemContextMenuWithWidthState extends State<_IOSSystemContextMenuWit
     super.initState();
     ContextMenuController.removeAny();
 
-    TextInput.showSystemContextMenu(widget.selectionRect);
+    ContextMenu.showSystemContextMenu(widget.selectionRect);
   }
 
   @override
@@ -1725,7 +1726,7 @@ class _IOSSystemContextMenuWithWidthState extends State<_IOSSystemContextMenuWit
     super.didUpdateWidget(oldWidget);
     if (widget.selectionRect != oldWidget.selectionRect ||
         widget.screenWidth != oldWidget.screenWidth) {
-      TextInput.showSystemContextMenu(widget.selectionRect);
+      ContextMenu.showSystemContextMenu(widget.selectionRect);
     }
   }
 

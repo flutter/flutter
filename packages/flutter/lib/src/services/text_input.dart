@@ -2140,10 +2140,6 @@ class TextInput {
   static void unregisterScribbleElement(String elementIdentifier) {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
-
-  static void showSystemContextMenu(Rect rect) {
-    _PlatformTextInputControl.instance.showSystemContextMenu(rect);
-  }
 }
 
 /// An interface for implementing text input controls that receive text editing
@@ -2411,21 +2407,6 @@ class _PlatformTextInputControl with TextInputControl {
     _channel.invokeMethod<void>(
       'TextInput.finishAutofillContext',
       shouldSave,
-    );
-  }
-
-  //@override
-  void showSystemContextMenu(Rect rect) {
-    _channel.invokeMethod<void>(
-      'TextInput.showSystemContextMenu',
-      <String, dynamic>{
-        'target_rect': <String, double>{
-          'x': rect.left,
-          'y': rect.top,
-          'width': rect.width,
-          'height': rect.height,
-        },
-      },
     );
   }
 }

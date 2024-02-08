@@ -17,6 +17,7 @@ export 'src/services/binary_messenger.dart';
 export 'src/services/binding.dart';
 export 'src/services/browser_context_menu.dart';
 export 'src/services/clipboard.dart';
+export 'src/services/context_menu.dart';
 export 'src/services/debug.dart';
 export 'src/services/deferred_component.dart';
 export 'src/services/flavor.dart';
