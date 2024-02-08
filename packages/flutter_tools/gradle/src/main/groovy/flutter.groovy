@@ -324,6 +324,11 @@ class FlutterPlugin implements Plugin<Project> {
 
         // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
         // supported range.
+        // TODO(gmackall) Dependency version checking is currently implemented as an additional
+        // Gradle plugin because we can't import it from Groovy code. As part of the Groovy
+        // -> Kotlin migration, we should remove this complexity and perform the checks inside
+        // of the main Flutter Gradle Plugin.
+        // See https://github.com/flutter/flutter/issues/121541#issuecomment-1920363687.
         final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks")
                 && project.getProperty("skipDependencyChecks");
         if (!shouldSkipDependencyChecks) {
