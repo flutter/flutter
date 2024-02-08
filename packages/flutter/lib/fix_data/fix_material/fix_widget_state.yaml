@@ -43,10 +43,8 @@ transforms:
       uris: [ 'material.dart', 'widgets.dart' ]
       function: 'MaterialPropertyResolver'
     changes:
-      - kind: 'replacedBy'
-        newElement:
-          uris: [ 'widgets.dart' ]
-          function: 'WidgetPropertyResolver'
+      - kind: 'rename'
+        newName: 'WidgetPropertyResolver'
 
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetStateColor'"
