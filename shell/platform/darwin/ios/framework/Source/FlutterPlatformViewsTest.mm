@@ -246,6 +246,17 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertTrue([childClippingView pointInside:CGPointMake(199, 199) withEvent:nil]);
 }
 
+- (void)testReleasesBackdropFilterSubviewsOnChildClippingViewDealloc {
+  __weak NSMutableArray<UIVisualEffectView*>* weakBackdropFilterSubviews = nil;
+  @autoreleasepool {
+    ChildClippingView* clipping_view = [[ChildClippingView alloc] initWithFrame:CGRectZero];
+    weakBackdropFilterSubviews = clipping_view.backdropFilterSubviews;
+    XCTAssertNotNil(weakBackdropFilterSubviews);
+    clipping_view = nil;
+  }
+  XCTAssertNil(weakBackdropFilterSubviews);
+}
+
 - (void)testApplyBackdropFilter {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
