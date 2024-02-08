@@ -21,9 +21,9 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
-import '../src/common.dart';
-import 'test_utils.dart' show ProcessResultMatcher, fileSystem, platform;
-import 'transition_test_utils.dart';
+import '../../src/common.dart';
+import '../test_utils.dart' show ProcessResultMatcher, fileSystem, platform;
+import '../transition_test_utils.dart';
 
 final String hostOs = platform.operatingSystem;
 
