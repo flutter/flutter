@@ -135,7 +135,7 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
   if (radius_ < 0.0) {
     return {};
   }
-  auto determinant = entity.GetTransform().GetDeterminant();
+  Scalar determinant = entity.GetTransform().GetDeterminant();
   if (determinant == 0) {
     return {};
   }
@@ -143,26 +143,23 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
   Scalar min_size = 1.0f / sqrt(std::abs(determinant));
   Scalar radius = std::max(radius_, min_size);
 
-  auto vertices_per_geom = ComputeCircleDivisions(
+  size_t vertices_per_geom = ComputeCircleDivisions(
       entity.GetTransform().GetMaxBasisLength() * radius, round_);
 
-  auto points_per_circle = 3 + (vertices_per_geom - 3) * 3;
-  auto total = points_per_circle * points_.size();
+  size_t points_per_circle = 3 + (vertices_per_geom - 3) * 3;
+  size_t total = points_per_circle * points_.size();
 
-  auto cmd_buffer = renderer.GetContext()->CreateCommandBuffer();
-  auto compute_pass = cmd_buffer->CreateComputePass();
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  std::shared_ptr<CommandBuffer> cmd_buffer =
+      renderer.GetContext()->CreateCommandBuffer();
+  std::shared_ptr<ComputePass> compute_pass = cmd_buffer->CreateComputePass();
+  HostBuffer& host_buffer = renderer.GetTransientsBuffer();
 
-  auto points_data =
+  BufferView points_data =
       host_buffer.Emplace(points_.data(), points_.size() * sizeof(Point),
                           DefaultUniformAlignment());
 
-  DeviceBufferDescriptor buffer_desc;
-  buffer_desc.size = total * sizeof(Point);
-  buffer_desc.storage_mode = StorageMode::kDevicePrivate;
-
-  auto geometry_buffer = DeviceBuffer::AsBufferView(
-      renderer.GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc));
+  BufferView geometry_buffer =
+      host_buffer.Emplace(nullptr, total * sizeof(Point), alignof(Point));
 
   BufferView output;
   {
@@ -190,13 +187,8 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
   }
 
   if (texture_coverage.has_value() && effect_transform.has_value()) {
-    DeviceBufferDescriptor buffer_desc;
-    buffer_desc.size = total * sizeof(Vector4);
-    buffer_desc.storage_mode = StorageMode::kDevicePrivate;
-
-    auto geometry_uv_buffer = DeviceBuffer::AsBufferView(
-        renderer.GetContext()->GetResourceAllocator()->CreateBuffer(
-            buffer_desc));
+    BufferView geometry_uv_buffer =
+        host_buffer.Emplace(nullptr, total * sizeof(Vector4), alignof(Vector4));
 
     using UV = UvComputeShader;
 
@@ -227,7 +219,7 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
 
   return {
       .type = PrimitiveType::kTriangle,
-      .vertex_buffer = {.vertex_buffer = output,
+      .vertex_buffer = {.vertex_buffer = std::move(output),
                         .vertex_count = total,
                         .index_type = IndexType::kNone},
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
