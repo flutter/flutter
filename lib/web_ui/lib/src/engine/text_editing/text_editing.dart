@@ -1940,19 +1940,19 @@ class TextInputSetClient extends TextInputCommand {
 /// Creates the text editing strategy used in non-a11y mode.
 DefaultTextEditingStrategy createDefaultTextEditingStrategy(HybridTextEditing textEditing) {
   DefaultTextEditingStrategy strategy;
-  if (browserEngine == BrowserEngine.webkit &&
-      operatingSystem == OperatingSystem.iOs) {
+
+  if(operatingSystem == OperatingSystem.iOs) {
     strategy = IOSTextEditingStrategy(textEditing);
-  } else if (browserEngine == BrowserEngine.webkit) {
-    strategy = SafariDesktopTextEditingStrategy(textEditing);
-  } else if (browserEngine == BrowserEngine.blink &&
-      operatingSystem == OperatingSystem.android) {
+  } else if(operatingSystem == OperatingSystem.android) {
     strategy = AndroidTextEditingStrategy(textEditing);
-  } else if (browserEngine == BrowserEngine.firefox) {
+  } else if(browserEngine == BrowserEngine.webkit) {
+    strategy = SafariDesktopTextEditingStrategy(textEditing);
+  } else if(browserEngine == BrowserEngine.firefox) {
     strategy = FirefoxTextEditingStrategy(textEditing);
   } else {
     strategy = GloballyPositionedTextEditingStrategy(textEditing);
   }
+
   return strategy;
 }
 
