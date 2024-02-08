@@ -307,7 +307,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
       }
       return _chipVariant == _ChipVariant.flat
         ? null
-        : null;
+        : _colors.surfaceContainerLow;
     });
 
   @override
