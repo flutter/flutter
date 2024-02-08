@@ -13,7 +13,7 @@ void main() {
     expect(const SawTooth(3), hasOneLineDescription);
     expect(const Interval(0.25, 0.75), hasOneLineDescription);
     expect(const Interval(0.25, 0.75, curve: Curves.ease), hasOneLineDescription);
-    expect(const Suspended(0.25, curve: Curves.ease), hasOneLineDescription);
+    expect(const Split(0.25, beginCurve: Curves.ease), hasOneLineDescription);
   });
 
   test('Curve flipped control test', () {
@@ -187,9 +187,9 @@ void main() {
 
     expect(() => const Interval(0.0, 1.0).transform(-0.0001), throwsAssertionError);
     expect(() => const Interval(0.0, 1.0).transform(1.0001), throwsAssertionError);
-    
-    expect(() => const Suspended(0.0).transform(-0.0001), throwsAssertionError);
-    expect(() => const Suspended(0.0).transform(1.0001), throwsAssertionError);
+
+    expect(() => const Split(0.0).transform(-0.0001), throwsAssertionError);
+    expect(() => const Split(0.0).transform(1.0001), throwsAssertionError);
 
     expect(() => const Threshold(0.5).transform(-0.0001), throwsAssertionError);
     expect(() => const Threshold(0.5).transform(1.0001), throwsAssertionError);
@@ -226,8 +226,8 @@ void main() {
     expect(const Interval(0, 1).transform(0), 0);
     expect(const Interval(0, 1).transform(1), 1);
 
-    expect(const Suspended(0).transform(0), 0);
-    expect(const Suspended(0).transform(1), 1);
+    expect(const Split(0.5).transform(0), 0);
+    expect(const Split(0.5).transform(1), 1);
 
     expect(const Threshold(0.5).transform(0), 0);
     expect(const Threshold(0.5).transform(1), 1);
@@ -266,8 +266,8 @@ void main() {
     expect(Curves.bounceInOut.transform(1), 1);
   });
 
-  test('Suspended interpolates values properly', () {
-    const Suspended curve = Suspended(0.3);
+  test('Split interpolates values properly', () {
+    const Split curve = Split(0.3);
 
     const double tolerance = 1e-6;
     expect(curve.transform(0.0), equals(0.0));

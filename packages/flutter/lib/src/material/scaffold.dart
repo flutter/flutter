@@ -3184,9 +3184,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   void _handleDragEnd(DragEndDetails details, { bool? isClosing }) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = Suspended(
+    animationCurve = Split(
       widget.animationController.value,
-      curve: _standardBottomSheetCurve,
+      endCurve: _standardBottomSheetCurve,
     );
   }
 

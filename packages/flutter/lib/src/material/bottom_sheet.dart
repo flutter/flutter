@@ -703,9 +703,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
   void handleDragEnd(DragEndDetails details, {bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = Suspended(
+    animationCurve = Split(
       widget.route.animation!.value,
-      curve: _modalBottomSheetCurve,
+      endCurve: _modalBottomSheetCurve,
     );
   }
 

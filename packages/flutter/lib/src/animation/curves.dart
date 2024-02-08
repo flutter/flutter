@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -193,64 +192,76 @@ class Interval extends Curve {
   }
 }
 
-/// A curve that progresses linearly until [begin], then curved
-/// (according to [curve]) from t at [begin] to 1.0.
+/// A curve that progresses according to [beginCurve] until [split], then
+/// according to [endCurve].
 ///
-/// Unlike [Interval], [curve] will not start at zero, but at the point
-/// corresponding to t=`begin`.
-///
-/// For example, if [begin] is set to 0.5, and [curve] is set to
-/// [Curves.easeOut], then the bottom-left quarter of the curve will be a
-/// straight line, and the top-right quarter will contain the entire
-/// [Curves.easeOut] curve.
-///
-/// Suspended curves are useful in situations where a widget must track the
+/// Split curves are useful in situations where a widget must track the
 /// user's finger (which requires a linear animation), but can also be flung
-/// using a curve specified with the [curve] argument, after the finger is
-/// released. In such a case, the value of [begin] would be the progress
+/// using a curve specified with the [endCurve] argument, after the finger is
+/// released. In such a case, the value of [split] would be the progress
 /// of the animation at the time when the finger was released.
 ///
-/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_suspended.mp4}
-class Suspended extends Curve {
-  /// Creates a suspended curve.
-  ///
-  /// The [begin] and [curve] arguments must not be null.
-  const Suspended(
-    this.begin, {
-    this.curve = Curves.easeOutCubic,
+/// For example, if [split] is set to 0.5, [beginCurve] is [Curves.linear],
+/// and [endCurve] is [Curves.easeOutCubic], then the bottom-left quarter of the
+/// curve will be a straight line, and the top-right quarter will contain the
+/// entire [Curves.easeOutCubic] curve.
+///
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_split.mp4}
+class Split extends Curve {
+  /// Creates a split curve.
+  const Split(
+    this.split, {
+    this.beginCurve = Curves.linear,
+    this.endCurve = Curves.easeOutCubic,
   });
 
-  /// The progress value at which [curve] should begin.
+  /// The progress value separating [beginCurve] from [endCurve].
   ///
-  /// From t=0.0 to t=`begin`, the interval's value progresses linearly (i.e, = t).
-  final double begin;
+  /// The value before which the curve progresses according to [beginCurve] and
+  /// after which the curve progresses according to [endCurve].
+  ///
+  /// When t is exactly `split`, the curve has the value `split`.
+  ///
+  /// Must be greater than 0 and smaller than 1.0.
+  final double split;
 
-  /// The curve to use when [begin] is reached.
+  /// The curve to use before [split] is reached.
   ///
-  /// This defaults to [Curves.easeOutCubic].
-  final Curve curve;
+  /// Defaults to [Curves.linear].
+  final Curve beginCurve;
+
+  /// The curve to use after [split] is reached.
+  ///
+  /// Defaults to [Curves.easeOutCubic].
+  final Curve endCurve;
 
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    assert(begin >= 0.0 && begin <= 1.0);
+    assert(split > 0.0 && split < 1.0);
 
-    if (t < begin) {
+    if (t == 0.0 || t == 1.0) {
       return t;
     }
 
-    if (t == 1.0) {
-      return t;
+    if (t == split) {
+      return split;
     }
 
-    final double curveProgress = (t - begin) / (1 - begin);
-    final double transformed = curve.transform(curveProgress);
-    return lerpDouble(begin, 1, transformed)!;
+    if (t < split) {
+      final double curveProgress = t / split;
+      final double transformed = beginCurve.transform(curveProgress);
+      return lerpDouble(0, split, transformed)!;
+    } else {
+      final double curveProgress = (t - split) / (1 - split);
+      final double transformed = endCurve.transform(curveProgress);
+      return lerpDouble(split, 1, transformed)!;
+    }
   }
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($begin, $curve)';
+    return '${describeIdentity(this)}($split, $beginCurve, $endCurve)';
   }
 }
 
