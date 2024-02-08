@@ -98,7 +98,6 @@ void main() {
       required this.materialState,
     });
 
-    /// Wrapper around `WidgetStateMixin.isPressed/isHovered/isFocused/etc`.
     final bool Function(_MyWidgetState state) evaluator;
 
     /// Stream passed down to the child [_InnerWidget] to begin the process.
