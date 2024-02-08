@@ -742,13 +742,8 @@ class AndroidDevice extends Device {
     }
     _loggingProcess = await startProcess(
       adbPath,
-      // Make logcat less chatty by filtering down to just ActivityManager
-      // (to let us know when app starts), flutter (needed by tests to see
-      // log output), and fatal messages (hopefully catches tombstones).
-      // For local testing, this can just be:
-      //   <String>['-s', deviceId, 'logcat']
-      // to view the whole log, or just run logcat alongside this.
-      <String>['-s', deviceId, 'logcat', 'ActivityManager:I', 'flutter:V', '*:F'],
+      // Catch the whole log.
+      <String>['-s', deviceId, 'logcat'],
     );
     _loggingProcess!.stdout
       .transform<String>(const Utf8Decoder(allowMalformed: true))
