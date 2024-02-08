@@ -3734,7 +3734,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: _MaterialStateBorderSide(getBorderSide),
+              side: _WidgetStateBorderSide(getBorderSide),
             ),
           ),
         ),
@@ -3812,7 +3812,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: _MaterialStateBorderSide(getBorderSide),
+              side: _WidgetStateBorderSide(getBorderSide),
             ),
           ),
         ),
@@ -4214,7 +4214,7 @@ void main() {
             child: ChoiceChip(
               selected: selected,
               label: const Text('Chip'),
-              shape: _MaterialStateOutlinedBorder(getShape),
+              shape: _WidgetStateOutlinedBorder(getShape),
               onSelected: enabled ? (_) {} : null,
             ),
           ),
@@ -4284,7 +4284,7 @@ void main() {
             child: ChoiceChip(
               selected: selected,
               label: const Text('Chip'),
-              shape: _MaterialStateOutlinedBorder(getShape),
+              shape: _WidgetStateOutlinedBorder(getShape),
               onSelected: enabled ? (_) {} : null,
             ),
           ),
@@ -4360,8 +4360,8 @@ void main() {
           body: ChoiceChip(
             selected: selected,
             label: const Text('Chip'),
-            shape: _MaterialStateOutlinedBorder(getShape),
-            side: _MaterialStateBorderSide(getBorderSide),
+            shape: _WidgetStateOutlinedBorder(getShape),
+            side: _WidgetStateBorderSide(getBorderSide),
             onSelected: enabled ? (_) {} : null,
           ),
         ),
@@ -4411,8 +4411,8 @@ void main() {
           body: ChoiceChip(
             selected: selected,
             label: const Text('Chip'),
-            shape: _MaterialStateOutlinedBorder(getShape),
-            side: _MaterialStateBorderSide(getBorderSide),
+            shape: _WidgetStateOutlinedBorder(getShape),
+            side: _WidgetStateBorderSide(getBorderSide),
             onSelected: enabled ? (_) {} : null,
           ),
         ),
@@ -5623,8 +5623,8 @@ void main() {
   });
 }
 
-class _MaterialStateOutlinedBorder extends StadiumBorder implements WidgetStateOutlinedBorder {
-  const _MaterialStateOutlinedBorder(this.resolver);
+class _WidgetStateOutlinedBorder extends StadiumBorder implements WidgetStateOutlinedBorder {
+  const _WidgetStateOutlinedBorder(this.resolver);
 
   final WidgetPropertyResolver<OutlinedBorder?> resolver;
 
@@ -5632,8 +5632,8 @@ class _MaterialStateOutlinedBorder extends StadiumBorder implements WidgetStateO
   OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
 }
 
-class _MaterialStateBorderSide extends WidgetStateBorderSide {
-  const _MaterialStateBorderSide(this.resolver);
+class _WidgetStateBorderSide extends WidgetStateBorderSide {
+  const _WidgetStateBorderSide(this.resolver);
 
   final WidgetPropertyResolver<BorderSide?> resolver;
 

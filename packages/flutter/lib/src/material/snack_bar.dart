@@ -92,7 +92,7 @@ class SnackBarAction extends StatefulWidget {
     required this.onPressed,
   }) : assert(backgroundColor is! WidgetStateColor || disabledBackgroundColor == null,
         'disabledBackgroundColor must not be provided when background color is '
-        'a MaterialStateColor');
+        'a WidgetStateColor');
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].

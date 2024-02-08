@@ -30,8 +30,8 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// Dynamically changes to a [CupertinoScrollbar], an iOS style scrollbar, by
 /// default on the iOS platform.
 ///
-/// The color of the Scrollbar thumb will change when [MaterialState.dragged],
-/// or [MaterialState.hovered] on desktop and web platforms. These stateful
+/// The color of the Scrollbar thumb will change when [WidgetState.dragged],
+/// or [WidgetState.hovered] on desktop and web platforms. These stateful
 /// color choices can be changed using [ScrollbarThemeData.thumbColor].
 ///
 /// {@tool dartpad}
@@ -55,11 +55,11 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// {@end-tool}
 ///
 /// A scrollbar track can be added using [trackVisibility]. This can also be
-/// drawn when triggered by a hover event, or based on any [MaterialState] by
+/// drawn when triggered by a hover event, or based on any [WidgetState] by
 /// using [ScrollbarThemeData.trackVisibility].
 ///
 /// The [thickness] of the track and scrollbar thumb can be changed dynamically
-/// in response to [MaterialState]s using [ScrollbarThemeData.thickness].
+/// in response to [WidgetState]s using [ScrollbarThemeData.thickness].
 ///
 /// See also:
 ///
@@ -243,19 +243,19 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
 
-  MaterialStateProperty<bool> get _trackVisibility => MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+  WidgetStateProperty<bool> get _trackVisibility => WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.hovered) && _showTrackOnHover) {
       return true;
     }
     return widget.trackVisibility ?? _scrollbarTheme.trackVisibility?.resolve(states) ?? false;
   });
 
-  Set<MaterialState> get _states => <MaterialState>{
-    if (_dragIsActive) MaterialState.dragged,
-    if (_hoverIsActive) MaterialState.hovered,
+  Set<WidgetState> get _states => <WidgetState>{
+    if (_dragIsActive) WidgetState.dragged,
+    if (_hoverIsActive) WidgetState.hovered,
   };
 
-  MaterialStateProperty<Color> get _thumbColor {
+  WidgetStateProperty<Color> get _thumbColor {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     late Color dragColor;
@@ -276,8 +276,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
           : onSurface.withOpacity(0.3);
     }
 
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.dragged)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.dragged)) {
         return _scrollbarTheme.thumbColor?.resolve(states) ?? dragColor;
       }
 
@@ -295,10 +295,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     });
   }
 
-  MaterialStateProperty<Color> get _trackColor {
+  WidgetStateProperty<Color> get _trackColor {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (showScrollbar && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackColor?.resolve(states)
           ?? (brightness == Brightness.light
@@ -309,10 +309,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     });
   }
 
-  MaterialStateProperty<Color> get _trackBorderColor {
+  WidgetStateProperty<Color> get _trackBorderColor {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (showScrollbar && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackBorderColor?.resolve(states)
           ?? (brightness == Brightness.light
@@ -323,9 +323,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     });
   }
 
-  MaterialStateProperty<double> get _thickness {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _trackVisibility.resolve(states)) {
+  WidgetStateProperty<double> get _thickness {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered) && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.thickness?.resolve(states)
           ?? _kScrollbarThicknessWithTrack;
       }

@@ -210,7 +210,7 @@ class FilledButton extends ButtonStyleButton {
   /// [ButtonStyle] given simple values.
   ///
   /// The [foregroundColor] and [disabledForegroundColor] colors are used
-  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// to create a [WidgetStateProperty] [ButtonStyle.foregroundColor], and
   /// a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
   ///
   /// If [overlayColor] is specified and its value is [Colors.transparent]

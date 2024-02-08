@@ -1829,7 +1829,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
   });
 
-  testWidgets('Material2 - Checkbox MaterialStateBorderSide applies unconditionally', (WidgetTester tester) async {
+  testWidgets('Material2 - Checkbox WidgetStateBorderSide applies unconditionally', (WidgetTester tester) async {
     const Color borderColor = Color(0xfff44336);
     const BorderSide side = BorderSide(
       width: 4,
@@ -1883,7 +1883,7 @@ void main() {
     expectBorder();
   });
 
-  testWidgets('Material3 - Checkbox MaterialStateBorderSide applies unconditionally', (WidgetTester tester) async {
+  testWidgets('Material3 - Checkbox WidgetStateBorderSide applies unconditionally', (WidgetTester tester) async {
     const Color borderColor = Color(0xfff44336);
     const BorderSide side = BorderSide(
       width: 4,
@@ -2064,7 +2064,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Material3 - Checkbox MaterialStateBorderSide applies in error states', (WidgetTester tester) async {
+  testWidgets('Material3 - Checkbox WidgetStateBorderSide applies in error states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     addTearDown(focusNode.dispose);
     final ThemeData themeData = ThemeData(useMaterial3: true);

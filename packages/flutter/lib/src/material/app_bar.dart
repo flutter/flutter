@@ -793,7 +793,7 @@ class _AppBarState extends State<AppBar> {
 
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
-          // React to a change in MaterialState.scrolledUnder
+          // React to a change in WidgetState.scrolledUnder
         });
       }
     }

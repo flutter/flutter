@@ -333,7 +333,7 @@ class ToggleButtons extends StatelessWidget {
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
   ///
-  /// If fillColor is a [MaterialStateProperty<Color>], then [WidgetStateProperty.resolve]
+  /// If fillColor is a [WidgetStateProperty<Color>], then [WidgetStateProperty.resolve]
   /// is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.disabled]

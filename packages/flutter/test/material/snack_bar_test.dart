@@ -1080,9 +1080,9 @@ void main() {
     }
   });
 
-  testWidgets('Snackbar labels can be colored as MaterialStateColor (Material 3)',
+  testWidgets('Snackbar labels can be colored as WidgetStateColor (Material 3)',
       (WidgetTester tester) async {
-    const _TestMaterialStateColor usedColor = _TestMaterialStateColor();
+    const _TestWidgetStateColor usedColor = _TestWidgetStateColor();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3590,7 +3590,7 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
     expect(materialAfterDismissed.color, Colors.transparent);
   });
 
-  testWidgets('SnackBarAction backgroundColor works as a MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('SnackBarAction backgroundColor works as a WidgetStateColor', (WidgetTester tester) async {
     final WidgetStateColor backgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
@@ -3695,7 +3695,7 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
     expect(materialAfterDismissed.color, disabledBackgroundColor);
   });
 
-  testWidgets('SnackBarAction asserts when backgroundColor is a MaterialStateColor and disabledBackgroundColor is also provided', (WidgetTester tester) async {
+  testWidgets('SnackBarAction asserts when backgroundColor is a WidgetStateColor and disabledBackgroundColor is also provided', (WidgetTester tester) async {
     final Color backgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
@@ -3738,7 +3738,7 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
     expect(tester.takeException(), isAssertionError.having(
       (AssertionError e) => e.toString(),
       'description',
-      contains('disabledBackgroundColor must not be provided when background color is a MaterialStateColor'))
+      contains('disabledBackgroundColor must not be provided when background color is a WidgetStateColor'))
     );
   });
 
@@ -4030,8 +4030,8 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
   return dragGestures;
 }
 
-class _TestMaterialStateColor extends WidgetStateColor {
-  const _TestMaterialStateColor() : super(_colorRed);
+class _TestWidgetStateColor extends WidgetStateColor {
+  const _TestWidgetStateColor() : super(_colorRed);
 
   static const int _colorRed = 0xFFF44336;
   static const int _colorBlue = 0xFF2196F3;

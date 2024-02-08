@@ -394,7 +394,7 @@ class InkResponse extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.hovered].
@@ -512,7 +512,7 @@ class InkResponse extends StatelessWidget {
   /// [splashColor]. If non-null, it is resolved against one of
   /// [WidgetState.focused], [WidgetState.hovered], and
   /// [WidgetState.pressed]. It's convenient to use when the parent
-  /// widget can pass along its own MaterialStateProperty value for
+  /// widget can pass along its own WidgetStateProperty value for
   /// the overlay color.
   ///
   /// [WidgetState.pressed] triggers a ripple (an ink splash), per
@@ -844,7 +844,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.onTap?.call();
     }
     // Delay the call to `updateHighlight` to simulate a pressed delay
-    // and give MaterialStatesController listeners a chance to react.
+    // and give WidgetStatesController listeners a chance to react.
     _activationTimer = Timer(_activationDuration, () {
       updateHighlight(_HighlightType.pressed, value: false);
     });
@@ -1117,7 +1117,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void handleFocusUpdate(bool hasFocus) {
     _hasFocus = hasFocus;
     // Set here rather than updateHighlight because this widget's
-    // (MaterialState) states include MaterialState.focused if
+    // (WidgetState) states include WidgetState.focused if
     // the InkWell _has_ the focus, rather than if it's showing
     // the focus per FocusManager.instance.highlightMode.
     statesController.update(WidgetState.focused, hasFocus);

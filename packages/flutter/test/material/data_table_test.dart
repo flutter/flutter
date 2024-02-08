@@ -2162,7 +2162,7 @@ void main() {
     });
   });
 
-  testWidgets('Heading cell cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+  testWidgets('Heading cell cursor resolves WidgetStateMouseCursor correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2223,7 +2223,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 
-  testWidgets('DataRow cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+  testWidgets('DataRow cursor resolves WidgetStateMouseCursor correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

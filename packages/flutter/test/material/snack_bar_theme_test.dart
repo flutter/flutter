@@ -374,7 +374,7 @@ void main() {
     expect(materialAfterDismissed.color, Colors.amber);
   });
 
-  testWidgets('SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided', (WidgetTester tester) async {
+  testWidgets('SnackBarThemeData asserts when actionBackgroundColor is a WidgetStateColor and disabledActionBackgroundColor is also provided', (WidgetTester tester) async {
     final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
@@ -405,7 +405,7 @@ void main() {
     )), throwsA(isA<AssertionError>().having(
         (AssertionError e) => e.toString(),
         'description',
-        contains('disabledBackgroundColor must not be provided when background color is a MaterialStateColor'))
+        contains('disabledBackgroundColor must not be provided when background color is a WidgetStateColor'))
       )
     );
   });

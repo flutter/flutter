@@ -2248,7 +2248,7 @@ void main() {
     });
   });
 
-  group('MaterialStateColor scrolledUnder', () {
+  group('WidgetStateColor scrolledUnder', () {
     const Color scrolledColor = Color(0xff00ff00);
     const Color defaultColor = Color(0xff0000ff);
 

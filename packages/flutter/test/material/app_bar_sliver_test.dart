@@ -821,7 +821,7 @@ void main() {
       expect(titleOffset.dx, titleSpacing);
   });
 
-  group('MaterialStateColor scrolledUnder', () {
+  group('WidgetStateColor scrolledUnder', () {
     const double collapsedHeight = kToolbarHeight;
     const double expandedHeight = 200.0;
     const Color scrolledColor = Color(0xff00ff00);

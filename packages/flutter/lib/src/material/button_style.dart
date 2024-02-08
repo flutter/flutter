@@ -32,7 +32,7 @@ typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<WidgetSta
 ///
 /// Many of the ButtonStyle properties are [WidgetStateProperty] objects which
 /// resolve to different values depending on the button's state. For example
-/// the [Color] properties are defined with `MaterialStateProperty<Color>` and
+/// the [Color] properties are defined with `WidgetStateProperty<Color>` and
 /// can resolve to different colors depending on if the button is pressed,
 /// hovered, focused, disabled, etc.
 ///
@@ -44,9 +44,9 @@ typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<WidgetSta
 /// ```dart
 /// ElevatedButton(
 ///   style: ButtonStyle(
-///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-///       (Set<MaterialState> states) {
-///         if (states.contains(MaterialState.pressed)) {
+///     backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+///       (Set<WidgetState> states) {
+///         if (states.contains(WidgetState.pressed)) {
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
 ///         }
 ///         return null; // Use the component's default.
@@ -67,7 +67,7 @@ typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<WidgetSta
 /// ```dart
 /// ElevatedButton(
 ///   style: const ButtonStyle(
-///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
+///     backgroundColor: WidgetStatePropertyAll<Color>(Colors.green),
 ///   ),
 ///   child: const Text('Let me play among the stars'),
 ///   onPressed: () {

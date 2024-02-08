@@ -93,28 +93,6 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
 ///
-/// {@tool snippet}
-///
-/// This example defines a [MaterialStateColor] with a const constructor.
-///
-/// ```dart
-/// class MyColor extends MaterialStateColor {
-///   const MyColor() : super(_defaultColor);
-///
-///   static const int _defaultColor = 0xcafefeed;
-///   static const int _pressedColor = 0xdeadbeef;
-///
-///   @override
-///   Color resolve(Set<MaterialState> states) {
-///     if (states.contains(MaterialState.pressed)) {
-///       return const Color(_pressedColor);
-///     }
-///     return const Color(_defaultColor);
-///   }
-/// }
-/// ```
-/// {@end-tool}
-///
 /// See also
 ///
 ///  * [WidgetStateColor], the non-Material version that can be used

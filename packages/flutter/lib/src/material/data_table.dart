@@ -195,8 +195,8 @@ class DataRow {
   ///
   /// ```dart
   /// DataRow(
-  ///   color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected)) {
+  ///   color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.
@@ -522,8 +522,8 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.dataRowColor}
   /// ```dart
   /// DataTable(
-  ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected)) {
+  ///   dataRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.
@@ -597,8 +597,8 @@ class DataTable extends StatelessWidget {
   /// DataTable(
   ///   columns: _columns,
   ///   rows: _rows,
-  ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.hovered)) {
+  ///   headingRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.hovered)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.

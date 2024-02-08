@@ -206,7 +206,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 
-  /// Returns null if [value] is null, otherwise `MaterialStatePropertyAll<T>(value)`.
+  /// Returns null if [value] is null, otherwise `WidgetStatePropertyAll<T>(value)`.
   ///
   /// A convenience method for subclasses.
   static WidgetStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : WidgetStatePropertyAll<T>(value);
@@ -260,7 +260,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   WidgetStatesController? internalStatesController;
 
   void handleStatesControllerChange() {
-    // Force a rebuild to resolve MaterialStateProperty properties
+    // Force a rebuild to resolve WidgetStateProperty properties
     setState(() { });
   }
 

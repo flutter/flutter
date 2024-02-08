@@ -642,7 +642,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Custom button fillColor - Non MaterialState', (WidgetTester tester) async {
+  testWidgets('Custom button fillColor - Non WidgetState', (WidgetTester tester) async {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(
@@ -693,7 +693,7 @@ void main() {
     expect(buttonColor('Second child').color, theme.colorScheme.surface.withOpacity(0.0));
   });
 
-  testWidgets('Custom button fillColor - MaterialState', (WidgetTester tester) async {
+  testWidgets('Custom button fillColor - WidgetState', (WidgetTester tester) async {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(

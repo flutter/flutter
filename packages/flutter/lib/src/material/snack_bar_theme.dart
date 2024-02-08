@@ -78,7 +78,7 @@ class SnackBarThemeData with Diagnosticable {
           'Action overflow threshold must be between 0 and 1 inclusive'),
         assert(actionBackgroundColor is! WidgetStateColor || disabledActionBackgroundColor == null,
           'disabledBackgroundColor must not be provided when background color is '
-          'a MaterialStateColor');
+          'a WidgetStateColor');
 
   /// Overrides the default value for [SnackBar.backgroundColor].
   ///

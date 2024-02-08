@@ -764,7 +764,7 @@ void main() {
     expect(hourDecoration.fillColor?.value, timePickerTheme.hourMinuteColor?.value);
   });
 
-  testWidgets('Time picker dayPeriodColor does the right thing with non-MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('Time picker dayPeriodColor does the right thing with non-WidgetStateColor', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme().copyWith(dayPeriodColor: Colors.red);
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
@@ -778,7 +778,7 @@ void main() {
     expect(pmMaterial.color, Colors.transparent);
   });
 
-  testWidgets('Time picker dayPeriodColor does the right thing with MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('Time picker dayPeriodColor does the right thing with WidgetStateColor', (WidgetTester tester) async {
     final WidgetStateColor testColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         return Colors.green;

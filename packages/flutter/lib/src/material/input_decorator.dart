@@ -2527,7 +2527,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState`. The color defaults to gray, be blue while focused
+/// based on the `WidgetState`. The color defaults to gray, be blue while focused
 /// and red if in an error state.
 ///
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.0.dart **
@@ -2535,7 +2535,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState` through the use of `ThemeData`. The color defaults
+/// based on the `WidgetState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.
 ///
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.1.dart **
@@ -3432,8 +3432,8 @@ class InputDecoration {
 
   /// The shape of the border to draw around the decoration's container.
   ///
-  /// If [border] is a [MaterialStateUnderlineInputBorder]
-  /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
+  /// If [border] is a [WidgetStateUnderlineInputBorder]
+  /// or [WidgetStateOutlineInputBorder], then the effective border can depend on
   /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
@@ -4203,8 +4203,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The shape of the border to draw around the decoration's container.
   ///
-  /// If [border] is a [MaterialStateUnderlineInputBorder]
-  /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
+  /// If [border] is a [WidgetStateUnderlineInputBorder]
+  /// or [WidgetStateOutlineInputBorder], then the effective border can depend on
   /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// The decoration's container is the area which is filled if [filled] is

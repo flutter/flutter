@@ -471,28 +471,28 @@ class Slider extends StatefulWidget {
   /// slider thumb is hovered and with an opacity of 0.12 when slider thumb
   /// is focused or dragged, If [ThemeData.useMaterial3] is false, defaults
   /// to [ColorScheme.primary] with an opacity of 0.12.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.slider.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.dragged].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.dragged].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [SliderThemeData.mouseCursor] is used. If that
-  /// is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// The callback used to create a semantic value from a slider value.
@@ -795,11 +795,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
     const SliderInteraction defaultAllowedInteraction = SliderInteraction.tapAndSlide;
 
-    final Set<MaterialState> states = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-      if (_hovering) MaterialState.hovered,
-      if (_focused) MaterialState.focused,
-      if (_dragging) MaterialState.dragged,
+    final Set<WidgetState> states = <WidgetState>{
+      if (!_enabled) WidgetState.disabled,
+      if (_hovering) WidgetState.hovered,
+      if (_focused) WidgetState.focused,
+      if (_dragging) WidgetState.dragged,
     };
 
     // The value indicator's color is not the same as the thumb and active track
@@ -817,8 +817,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     Color? effectiveOverlayColor() {
       return widget.overlayColor?.resolve(states)
         ?? widget.activeColor?.withOpacity(0.12)
-        ?? MaterialStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states)
-        ?? MaterialStateProperty.resolveAs<Color?>(defaults.overlayColor, states);
+        ?? WidgetStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states)
+        ?? WidgetStateProperty.resolveAs<Color?>(defaults.overlayColor, states);
     }
 
     sliderTheme = sliderTheme.copyWith(
@@ -845,9 +845,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
       valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? defaults.valueIndicatorTextStyle,
     );
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
-      ?? MaterialStateMouseCursor.clickable.resolve(states);
+      ?? WidgetStateMouseCursor.clickable.resolve(states);
     final SliderInteraction effectiveAllowedInteraction = widget.allowedInteraction
       ?? sliderTheme.allowedInteraction
       ?? defaultAllowedInteraction;
@@ -2013,14 +2013,14 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get disabledThumbColor => Color.alphaBlend(_colors.onSurface.withOpacity(0.38), _colors.surface);
 
   @override
-  Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.dragged)) {
+  Color? get overlayColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.dragged)) {
       return _colors.primary.withOpacity(0.12);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return _colors.primary.withOpacity(0.08);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return _colors.primary.withOpacity(0.12);
     }
 

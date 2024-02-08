@@ -4482,7 +4482,7 @@ void main() {
     });
 
     testWidgets(
-      "Tab's ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed",
+      "Tab's ink response splashColor matches resolved Tab overlayColor for WidgetState.pressed",
       (WidgetTester tester) async {
         const Color splashColor = Color(0xf00fffff);
         await tester.pumpWidget(
@@ -5222,7 +5222,7 @@ void main() {
               return Colors.white;
             } else {
               // this is a third color to also test if unselectedLabelColor
-              // is ignored when labelColor is MaterialStateColor
+              // is ignored when labelColor is WidgetStateColor
               return Colors.transparent;
             }
           })

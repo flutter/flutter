@@ -193,11 +193,11 @@ class SegmentedButton<T> extends StatefulWidget {
   /// [ButtonStyle] given simple values.
   ///
   /// The [foregroundColor], [selectedForegroundColor], and [disabledForegroundColor]
-  /// colors are used to create a [MaterialStateProperty] [ButtonStyle.foregroundColor],
+  /// colors are used to create a [WidgetStateProperty] [ButtonStyle.foregroundColor],
   /// and a derived [ButtonStyle.overlayColor].
   ///
   /// The [backgroundColor], [selectedBackgroundColor] and [disabledBackgroundColor]
-  /// colors are used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
+  /// colors are used to create a [WidgetStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle.mouseCursor].

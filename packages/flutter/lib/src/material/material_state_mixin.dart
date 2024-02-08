@@ -18,36 +18,6 @@ import 'material_state.dart';
 /// to manage the set of active [MaterialState]s, and the calling of [setState]
 /// as necessary.
 ///
-/// {@tool snippet}
-/// This example shows how to write a [StatefulWidget] that uses the
-/// [MaterialStateMixin] class to watch [MaterialState] values.
-///
-/// ```dart
-/// class MyWidget extends StatefulWidget {
-///   const MyWidget({super.key, required this.color, required this.child});
-///
-///   final MaterialStateColor color;
-///   final Widget child;
-///
-///   @override
-///   State<MyWidget> createState() => MyWidgetState();
-/// }
-///
-/// class MyWidgetState extends State<MyWidget> with MaterialStateMixin<MyWidget> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return InkWell(
-///       onFocusChange: updateMaterialState(MaterialState.focused),
-///       child: ColoredBox(
-///         color: widget.color.resolve(materialStates),
-///         child: widget.child,
-///       ),
-///     );
-///   }
-/// }
-/// ```
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [WidgetStateMixin], the generic version of `MaterialStatesController`
@@ -80,41 +50,6 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// If supplied, the [onChanged] function is only called when child widgets
   /// report events that make changes to the current set of [MaterialState]s.
   ///
-  /// {@tool snippet}
-  /// This example shows how to use the [updateMaterialState] callback factory
-  /// in other widgets, including the optional [onChanged] callback.
-  ///
-  /// ```dart
-  /// class MyWidget extends StatefulWidget {
-  ///   const MyWidget({super.key, this.onPressed});
-  ///
-  ///   /// Something important this widget must do when pressed.
-  ///   final VoidCallback? onPressed;
-  ///
-  ///   @override
-  ///   State<MyWidget> createState() => MyWidgetState();
-  /// }
-  ///
-  /// class MyWidgetState extends State<MyWidget> with MaterialStateMixin<MyWidget> {
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return ColoredBox(
-  ///       color: isPressed ? Colors.black : Colors.white,
-  ///       child: InkWell(
-  ///         onHighlightChanged: updateMaterialState(
-  ///           MaterialState.pressed,
-  ///           onChanged: (bool val) {
-  ///             if (val) {
-  ///               widget.onPressed?.call();
-  ///             }
-  ///           },
-  ///         ),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
   @protected
   ValueChanged<bool> updateMaterialState(MaterialState key, {ValueChanged<bool>? onChanged}) {
     return (bool value) {

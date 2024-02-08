@@ -280,7 +280,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.hovered].
@@ -1434,9 +1434,9 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   }
 }
 
-// This MaterialStateProperty is passed along to the menu item's InkWell which
-// resolves the property against MaterialState.disabled, MaterialState.hovered,
-// MaterialState.focused.
+// This WidgetStateProperty is passed along to the menu item's InkWell which
+// resolves the property against WidgetState.disabled, WidgetState.hovered,
+// WidgetState.focused.
 class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
@@ -1451,7 +1451,7 @@ class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   }
 
   @override
-  String get debugDescription => 'MaterialStateMouseCursor(PopupMenuItemState)';
+  String get debugDescription => 'WidgetStateMouseCursor(PopupMenuItemState)';
 }
 
 class _PopupMenuDefaultsM2 extends PopupMenuThemeData {

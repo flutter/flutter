@@ -373,7 +373,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('ink response splashColor matches resolved overlayColor for MaterialState.pressed', (WidgetTester tester) async {
+  testWidgets('ink response splashColor matches resolved overlayColor for WidgetState.pressed', (WidgetTester tester) async {
     // Same test as 'ink response splashColor matches splashColor
     // parameter' except that the splash color is specified with the
     // overlayColor parameter.
@@ -2170,7 +2170,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     await gesture.moveTo(const Offset(10, 10)); // fade out the overlay
     await tester.pump(); // trigger the fade out animation
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    // Fadeout begins with the MaterialStates.hovered overlay color
+    // Fadeout begins with the WidgetStates.hovered overlay color
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
     // 50ms fadeout is 50% complete, overlay color alpha goes from 0xff to 0x80
     await tester.pump(const Duration(milliseconds: 25));

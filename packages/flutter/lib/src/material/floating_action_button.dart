@@ -632,9 +632,9 @@ class FloatingActionButton extends StatelessWidget {
   }
 }
 
-// This MaterialStateProperty is passed along to RawMaterialButton which
-// resolves the property against MaterialState.pressed, MaterialState.hovered,
-// MaterialState.focused, MaterialState.disabled.
+// This WidgetStateProperty is passed along to RawMaterialButton which
+// resolves the property against WidgetState.pressed, WidgetState.hovered,
+// WidgetState.focused, WidgetState.disabled.
 class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
@@ -649,7 +649,7 @@ class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   }
 
   @override
-  String get debugDescription => 'MaterialStateMouseCursor(FloatActionButton)';
+  String get debugDescription => 'WidgetStateMouseCursor(FloatActionButton)';
 }
 
 // This widget's size matches its child's size unless its constraints

@@ -1139,7 +1139,7 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
-  /// [MaterialState]s by using [ScrollbarThemeData.thumbVisibility].
+  /// [WidgetState]s by using [ScrollbarThemeData.thumbVisibility].
   final bool? thumbVisibility;
 
   /// The [OutlinedBorder] of the scrollbar's thumb.
@@ -1215,7 +1215,7 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
-  /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
+  /// [WidgetState]s by using [ScrollbarThemeData.trackVisibility].
   final bool? trackVisibility;
 
   /// The [Radius] of the scrollbar track's rounded rectangle corners.
