@@ -2470,9 +2470,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             Widget hourSelectionOverlay = _startSelectionOverlay;
             Widget minuteSelectionOverlay = _endSelectionOverlay;
 
-            if(widget.selectionOverlayBuilder != null) {
-              hourSelectionOverlay = widget.selectionOverlayBuilder!(context, 0, 2);
-              minuteSelectionOverlay = widget.selectionOverlayBuilder!(context, 1, 2);
+            if (widget.selectionOverlayBuilder != null) {
+              hourSelectionOverlay =
+                  widget.selectionOverlayBuilder!(context, 0, 2);
+              minuteSelectionOverlay =
+                  widget.selectionOverlayBuilder!(context, 1, 2);
             }
 
             columns = <Widget>[
@@ -2508,9 +2510,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             Widget minuteSelectionOverlay = _startSelectionOverlay;
             Widget secondSelectionOverlay = _endSelectionOverlay;
 
-            if(widget.selectionOverlayBuilder != null) {
-              minuteSelectionOverlay = widget.selectionOverlayBuilder!(context, 0, 2);
-              secondSelectionOverlay = widget.selectionOverlayBuilder!(context, 1, 2);
+            if (widget.selectionOverlayBuilder != null) {
+              minuteSelectionOverlay =
+                  widget.selectionOverlayBuilder!(context, 0, 2);
+              secondSelectionOverlay =
+                  widget.selectionOverlayBuilder!(context, 1, 2);
             }
 
             columns = <Widget>[
