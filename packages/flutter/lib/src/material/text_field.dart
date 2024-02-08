@@ -19,7 +19,6 @@ import 'feedback.dart';
 import 'input_decorator.dart';
 import 'magnifier.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';

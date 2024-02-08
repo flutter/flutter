@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 
 import 'checkbox_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';

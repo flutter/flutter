@@ -13,7 +13,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'material_state.dart';
 import 'shadows.dart';
 import 'switch_theme.dart';
 import 'theme.dart';

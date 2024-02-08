@@ -20,7 +20,6 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'menu_bar_theme.dart';
 import 'menu_button_theme.dart';
 import 'menu_style.dart';
