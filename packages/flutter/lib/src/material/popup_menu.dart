@@ -715,23 +715,12 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
+    final double y = position.top;
+
+    // Find the ideal horizontal position.
     // size: The size of the overlay.
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
-
-    final double buttonHeight = size.height - position.top - position.bottom;
-    // Find the ideal vertical position.
-    double y = position.top;
-    if (selectedItemIndex != null) {
-      double selectedItemOffset = _kMenuVerticalPadding;
-      for (int index = 0; index < selectedItemIndex!; index += 1) {
-        selectedItemOffset += itemSizes[index]!.height;
-      }
-      selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
-      y = y + buttonHeight / 2.0 - selectedItemOffset;
-    }
-
-    // Find the ideal horizontal position.
     double x;
     if (position.left > position.right) {
       // Menu button is closer to the right edge, so grow to the left, aligned to the right edge.
