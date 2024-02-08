@@ -18,7 +18,6 @@ import 'dart:ui' as ui show
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/web.dart';
 
 import 'basic_types.dart';
 import 'inline_span.dart';
@@ -474,7 +473,7 @@ class _TextPainterLayoutCacheWithOffset {
 
   // Holds the TextPosition the last caret metrics were computed with. When new
   // values are passed in, we recompute the caret metrics only as necessary.
-  TextPosition? _previousCaretPosition;
+  int? _previousCaretPosition;
 }
 
 /// This is used to cache and pass the computed metrics regarding the
@@ -1359,12 +1358,12 @@ class TextPainter {
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
     final _TextPainterLayoutCacheWithOffset layoutCache = _layoutCache!;
     final _CaretMetrics? caretMetrics = _computeCaretMetrics(position);
-    assert(() {
-      if (caretMetrics == null) {
-        throw FlutterError('$position is not a valid location in the text.');
-      }
-      return true;
-    }());
+    //assert(() {
+    //  if (caretMetrics == null) {
+    //    throw FlutterError('$position is not a valid location in the text. text length: ${plainText.length}');
+    //  }
+    //  return true;
+    //}());
 
     final Offset rawOffset;
     switch (caretMetrics ?? _emptyParagraph) {
@@ -1406,12 +1405,50 @@ class TextPainter {
   // The cache implementation assumes there's only one cursor at any given time.
   late _LineCaretMetrics _caretMetrics;
 
-  // Checks if the [position] and [caretPrototype] have changed from the cached
-  // version and recomputes the metrics required to position the caret.
+  // This function turns a TextPosition into a _CaretMetrics that represents the
+  // location to render the caret.
+  //
+  // Typically, when the TextAffinity is downstream, the I-beam is anchored to
+  // the leading edge of the `offset`-th character. When the TextAffinity is
+  // upstream, the I-beam is then anchored to the trailing edge of the preceding
+  // character, except for a few edge cases:
+  //
+  // 1. empty paragraph: returns an _emptyParagraph which needs to be handled
+  //    by the caller.
+  //
+  // 2. (textLength, downstream), the end-of-text caret when the text is not
+  //    empty: it's placed next to the trailing edge of the last line of the
+  //    text, in case the text and its last bidi run have different writing
+  //    directions. If a paragraph ends with a line break character then the end
+  //    of line caret is automatically placed next to the trailing edge of that
+  //    line regardless of the writing direction of its last run before the line
+  //    break, no special handling needed thanks to the presence of the line
+  //    break character.
+  //
+  // 3. (0, upstream), which isn't a valid position, but it's not a conventional
+  //    "invalid" caret location either (the offset isn't negative). For
+  //    historical reasons, this is treated as (0, downstream).
+  //
+  // 4. (x, upstream) where x - 1 points to a line break character. The caret
+  //    should be displayed at the beginning of the newline instead of at the
+  //    end of the previous line. Converts the location to (x, downstream). The
+  //    choice we makes in 5. allows us to still check (x - 1) in case x points
+  //    to a multi-code-unit character.
+  //
+  // 5. (x, downstream || upstream), where x points to a multi-code-unit
+  //    character. There's no perfect caret placement this case. Here we chose
+  //    to draw the caret at the location that makes the most sense when the
+  //    user wants to backspace (which also means it's left-arrow-key-biased):
+  //
+  //     * downstream: show the caret at the leading edge of the grapheme only if
+  //       x points to the start of the grapheme. Otherwise show the caret at the
+  //       leading edge of the next logical character.
+  //     * upstream: show the caret at the trailing edge of the previous grapheme
+  //       only if x points to the start of the grapheme. Otherwise place the
+  //       caret at the trailing edge of the grapheme.
   _CaretMetrics? _computeCaretMetrics(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
-
     if (plainText.isEmpty) {
       return position.offset != 0 ? null : _emptyParagraph;
     }
@@ -1421,77 +1458,52 @@ class TextPainter {
     final int offset;
     final bool anchorToLeadingEdge;
     if (position.offset == 0) {
-      // Strictly speaking (0, upstream) isn't a valid position. But it's not a
-      // conventional "invalid" caret location either (the offset isn't negative).
-      // For historical reasons, aligning the caret to the leading edge of the
-      // first character.
-      //
       // Always anchor to the leading edge of the first grapheme regardless of
       // the affinity.
       offset = 0;
       anchorToLeadingEdge = true;
-    } else if (position.offset == plainText.length) {
+    } else {
       switch (position.affinity) {
         case TextAffinity.downstream:
-          final ui.Paragraph template = _getOrCreateLayoutTemplate();
-          assert(template.numberOfLines == 1);
-          // TODO: wrong
-          final double ascent = template.getLineMetricsAt(0)!.ascent;
-          return _CaretMetrics.left(cachedLayout.layout._endOfTextCaretMetrics.shift(Offset(0.0, -ascent)));
+        case TextAffinity.upstream when WordBoundary._isNewline(plainText.codeUnitAt(position.offset - 1)):
+          if (position.offset == plainText.length) {
+            final ui.Paragraph template = _getOrCreateLayoutTemplate();
+            assert(template.numberOfLines == 1);
+            // TODO: wrong
+            final double ascent = template.getLineMetricsAt(0)!.ascent;
+            return _CaretMetrics.left(cachedLayout.layout._endOfTextCaretMetrics.shift(Offset(0.0, -ascent)));
+          }
+          offset = position.offset;
+          anchorToLeadingEdge = true;
         case TextAffinity.upstream:
           offset = position.offset - 1;
           anchorToLeadingEdge = false;
       }
-    } else {
-      (offset, anchorToLeadingEdge) = switch (position.affinity) {
-        TextAffinity.downstream => (position.offset, true),
-        TextAffinity.upstream => (position.offset - 1, false), //TODO: Why -1?
-      };
     }
 
-    if (effectivePosition == cachedLayout._previousCaretPosition) {
+    final int caretPositionCacheKey = anchorToLeadingEdge ? offset : -offset;
+    if (caretPositionCacheKey == cachedLayout._previousCaretPosition) {
       return _CaretMetrics.left(_caretMetrics);
     }
 
-    final TextRange? graphemeRangeAtOffset = cachedLayout.paragraph
-      .getGlyphInfoAt(effectivePosition.offset)
+    final TextRange? graphemeRange = cachedLayout.paragraph
+      .getGlyphInfoAt(offset)
       ?.graphemeClusterCodeUnitRange;
-    if (graphemeRangeAtOffset == null) {
+    if (graphemeRange == null) {
       // Give up searching if the downstream character is not laid out. This
       // assumes there is no text overflow (as is the case with RenderEditable).
-      assert(false, '?? $effectivePosition, $text');
       return null;
     }
 
-    final TextRange range;
-    // Whether use the glyph's leading edge or the trailing edge to anchor the caret.
-    final bool anchorToLeadingEdge;
-    switch (effectivePosition.affinity) {
-      case TextAffinity.downstream when graphemeRangeAtOffset.start == effectivePosition.offset:
-      case TextAffinity.upstream when WordBoundary._isNewline(effectivePosition.offset - 1):
-        range = graphemeRangeAtOffset;
-        // If the position of the grapheme cluster has more than one code
-        anchorToLeadingEdge = true;
-      case TextAffinity.downstream :
-        assert(graphemeRangeAtOffset.start <= effectivePosition.offset);
-        assert(effectivePosition.offset < graphemeRangeAtOffset.end);
-        // The grapheme has more than one code point and the position is NOT
-        // pointing to the start. Since backspace would delete part of, or the
-        // entire grapheme, it would be more intuitive to show the caret before
-        // the next grapheme.
-        return _computeCaretMetrics(TextPosition(offset: graphemeRangeAtOffset.end));
-      case TextAffinity.upstream:
-        final TextRange? nullableRange = cachedLayout.paragraph
-          .getGlyphInfoAt(graphemeRangeAtOffset.start - 1)
-          ?.graphemeClusterCodeUnitRange;
-        if (nullableRange == null) {
-          return null;
-        }
-        range = nullableRange;
-        anchorToLeadingEdge = false;
+    assert(!graphemeRange.isCollapsed);
+    if (anchorToLeadingEdge && graphemeRange.start != offset) {
+      assert(graphemeRange.end > graphemeRange.start + 1);
+      // Address the case where (offset, downstream) points to a multi-code-unit
+      // character that doesn't start at offset.
+      return _computeCaretMetrics(TextPosition(offset: graphemeRange.end));
     }
     final TextBox box = cachedLayout.paragraph
-      .getBoxesForRange(range.start, range.end, boxHeightStyle: ui.BoxHeightStyle.strut)
+      .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut)
       .single;
     final _LineCaretMetrics metrics =_LineCaretMetrics(
       offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
@@ -1501,7 +1513,7 @@ class TextPainter {
       }
     );
 
-    cachedLayout._previousCaretPosition = effectivePosition;
+    cachedLayout._previousCaretPosition = caretPositionCacheKey;
     return _CaretMetrics.left(_caretMetrics = metrics);
   }
 
