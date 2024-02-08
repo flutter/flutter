@@ -185,6 +185,118 @@ flutter:
     );
   });
 
+  // TODO—dontmerge—this file has gotten pretty huge. I think we could start
+  // by moving asset-related tests to their own file. I don't want to do it now,
+  // lest the diff blows up.
+  group('asset transformers', () {
+    testWithoutContext('fails when transformers section is not a list', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - path: asset/hello.txt
+      transformers: I am not a list
+  ''';
+      FlutterManifest.createFromString(manifest, logger: logger);
+      expect(
+        logger.errorText,
+        // TODO—dontmerge—probably should refactor the validator to say
+        // "list of elements with type <T>".
+        contains(
+          'Expected transformers list of entry "asset/hello.txt" to be a list '
+          'of Map, but found String.\n'
+        ),
+      );
+    });
+  testWithoutContext('fails when a transformers section is not a list', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - path: asset/hello.txt
+      transformers: I am not a list
+  ''';
+      FlutterManifest.createFromString(manifest, logger: logger);
+      expect(
+        logger.errorText,
+        'Expected transformers list of entry "asset/hello.txt" to be a list '
+        'of Map, but found String.\n'
+      );
+    });
+  testWithoutContext('fails when a transformers section package is not a string', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - path: asset/hello.txt
+      transformers:
+        - package:
+            i am a key: i am a value
+  ''';
+      FlutterManifest.createFromString(manifest, logger: logger);
+      expect(
+        logger.errorText,
+        'In transformer of asset "asset/hello.txt": '
+        'Expected "package" to be a String. Found YamlMap instead.\n',
+      );
+    });
+
+    testWithoutContext('fails when a transformer is missing the package field', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - path: asset/hello.txt
+      transformers:
+        - args: ["-e"]
+    ''';
+      FlutterManifest.createFromString(manifest, logger: logger);
+      expect(
+        logger.errorText,
+        'In transformer of asset "asset/hello.txt": Expected "package" to be a '
+        'String. Found Null instead.\n',
+      );
+    });
+
+    testWithoutContext('fails when a transformer has args field that is not a list of strings', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - path: asset/hello.txt
+      transformers:
+        - package: my_transformer
+          args: hello
+    ''';
+      FlutterManifest.createFromString(manifest, logger: logger);
+      expect(
+        logger.errorText,
+        'In transformer of asset "asset/hello.txt": Expected args to be a list '
+        'of String, but found String.\n',
+      );
+    });
+  });
+
   testWithoutContext('FlutterManifest has one font family with one asset', () async {
     const String manifest = '''
 name: test

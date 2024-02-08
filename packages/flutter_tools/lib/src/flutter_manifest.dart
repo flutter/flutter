@@ -475,6 +475,9 @@ final class AssetTransformerEntry {
     required List<String>? args,
   }): args = args ?? const <String>[];
 
+  final String package;
+  final List<String>? args;
+
   static (AssetTransformerEntry? entry, String? error) tryParse(Object? yaml, String asset) {
     if (yaml == null) {
       return (null, 'Transformer entry is null.');
@@ -490,8 +493,7 @@ final class AssetTransformerEntry {
 
     final Object? args = yaml['args'];
     if (args != null) {
-      final List<String> argsErrors = <String>[];
-      _validateListType<String>(args, argsErrors, 'args', 'String');
+      final List<String> argsErrors = _validateListType<String>(args, 'args', 'String');
       if (argsErrors.isNotEmpty) {
         return (null, argsErrors.join('\n'));
       }
@@ -500,14 +502,53 @@ final class AssetTransformerEntry {
     return (
       AssetTransformerEntry(
         package: package,
-        args: (args ?? <String>[]) as List<String>,
+        args: args == null ? <String>[] : (List<String>.from(args as YamlList)),
       ),
       null,
     );
   }
 
-  final String package;
-  final List<String>? args;
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! AssetTransformerEntry) {
+      return false;
+    }
+
+    final bool argsAreEqual = (() {
+      if (args == null && other.args == null) {
+        return true;
+      }
+      if (args?.length != other.args?.length) {
+        return false;
+      }
+
+      for (int index = 0; index < args!.length; index += 1) {
+        if (args![index] != other.args![index]) {
+          return false;
+        }
+      }
+      return true;
+    })();
+
+    return package == other.package && argsAreEqual;
+  }
+
+  @override
+  int get hashCode => Object.hashAll(
+    <Object?>[
+      package.hashCode,
+      args?.map((String e) => e.hashCode),
+    ],
+  );
+
+  @override
+  String toString() {
+    return 'package: $package, args: $args';
+  }
+
 }
 
 void _validateFlutter(YamlMap? yaml, List<String> errors) {
@@ -570,7 +611,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
             'Expected "$yamlKey" to contain strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
           );
         } else {
-          _validateListType<String>(yamlValue, errors, '"$yamlKey"', 'files');
+          errors.addAll(_validateListType<String>(yamlValue, '"$yamlKey"', 'files'));
         }
       case 'module':
         if (yamlValue is! YamlMap) {
@@ -605,28 +646,27 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   }
 }
 
-bool _validateListType<T>(Object yamlList, List<String> errors, String context, String typeAlias) {
+List<String> _validateListType<T>(Object yamlList,  String context, String typeAlias) {
+  final List<String> errors = <String>[];
+
   if (yamlList is! YamlList) {
-    errors.add('Expected $context to be a list of $typeAlias, but found ${yamlList.runtimeType}.');
-    return true;
+    return <String>['Expected $context to be a list of $typeAlias, but found ${yamlList.runtimeType}.'];
   }
 
-  bool result = true;
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
       // ignore: avoid_dynamic_calls
       errors.add('Expected $context to be a list of $typeAlias, but element $i was a ${yamlList[i].runtimeType}');
-      result = false;
     }
   }
-  return result;
+  return errors;
 }
 
-bool _validateListTypeNullable<T>(Object? yamlList, List<String> errors, String context, String typeAlias) {
+List<String> _validateListTypeNullable<T>(Object? yamlList, String context, String typeAlias) {
   if (yamlList == null) {
-    return true;
+    return <String>[];
   }
-  return _validateListType<T>(yamlList, errors, context, typeAlias);
+  return _validateListType<T>(yamlList, context, typeAlias);
 }
 
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
@@ -649,7 +689,7 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
         if (libraries is! YamlList) {
           errors.add('Expected "libraries" key in the $i element of "${kvp.key}" to be a list, but got $libraries (${libraries.runtimeType}).');
         } else {
-          _validateListType<String>(libraries, errors, '"libraries" key in the $i element of "${kvp.key}"', 'dart library Strings');
+          errors.addAll(_validateListType<String>(libraries, '"libraries" key in the $i element of "${kvp.key}"', 'dart library Strings'));
         }
       }
       if (valueMap.containsKey('assets')) {
@@ -810,30 +850,33 @@ class AssetsEntry {
       final List<String> errors = <String>[];
 
       final Object? flavorsYaml = yaml[_flavorKey];
-      final bool flavorsSectionIsValid = _validateListTypeNullable<String>(
+      final List<String> flavorsListErrors = _validateListTypeNullable<String>(
         flavorsYaml,
-        errors,
         '$_flavorKey list of entry "$path"',
         'String',
       );
-      final List<String> flavors = flavorsYaml == null || !flavorsSectionIsValid
+      errors.addAll(flavorsListErrors.map((String e) => 'Flavors of asset "$path": $e'));
+
+      final List<String> flavors = flavorsYaml == null || flavorsListErrors.isNotEmpty
         ? <String>[]
         : List<String>.from(flavorsYaml as YamlList);
 
       final Object? transformersYaml = yaml[_transformersKey];
-      final bool transformersSectionIsValid = _validateListTypeNullable<YamlMap>(
+
+      final List<String> transformersListErrors =  _validateListTypeNullable<YamlMap>(
         transformersYaml,
-        errors,
         '$_transformersKey list of entry "$path"',
         'Map',
       );
+      errors.addAll(transformersListErrors);
+
       final List<AssetTransformerEntry> transformers = <AssetTransformerEntry>[];
 
-      if (transformersYaml != null && transformersSectionIsValid) {
+      if (transformersYaml != null && transformersListErrors.isEmpty) {
         for (final Object? transformerEntry in List<Object?>.from(transformersYaml as YamlList)) {
           final (AssetTransformerEntry? entry, String? error) = AssetTransformerEntry.tryParse(transformerEntry, path);
           if (error != null) {
-            errors.add(error);
+            errors.add('In transformer of asset "$path": $error');
           } else {
             transformers.add(entry!);
           }
