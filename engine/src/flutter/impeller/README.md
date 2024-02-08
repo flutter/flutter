@@ -60,12 +60,6 @@ states of completion:
       for a specific client rendering API. The interfaces in these targets are
       meant to be private for non-WSI user targets. No Impeller sub-frameworks
       may depend on these targets.
-* **`//impeller/archivist`**: Allows persisting objects to disk as performantly
-  as possible (usually on a background thread). The framework is meant to be
-  used for storing frame meta-data and related profiling/instrumentation
-  information. Collection of information should succeed despite process crashes
-  and retrieval of traces must not use inordinate amounts of time or memory
-  (which usually leads to crashes).
 * **`//impeller/geometry`**: All (or, most of) the math! This C++ mathematics
   library is used extensively by Impeller and its clients. The reasonably
   interesting bit about this library is that all types can be used
