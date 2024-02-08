@@ -1,4 +1,4 @@
-Signature: 1f0ae3d5f0836b5fcedf3e003e06cab6
+Signature: a06443a5d68ada23b7379297c6224720
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -738,187 +738,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libdriver_runtime.so
@@ -1824,187 +1643,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libdriver_runtime.so
@@ -2910,187 +2548,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libdriver_runtime.so
@@ -4190,22 +3647,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/sysca
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/resource.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/types.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/types.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/assert.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/compiler.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/listnode.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/processargs.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/status.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/debug.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/exception.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/log.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/object.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/pci.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/port.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/profile.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/resource.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/types.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/types.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/assert.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/compiler.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/listnode.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -4286,22 +3727,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/sys
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/resource.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/types.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/types.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/assert.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/compiler.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/listnode.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/processargs.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/status.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/debug.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/exception.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/log.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/object.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/pci.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/port.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/profile.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/resource.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/types.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/types.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/assert.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/compiler.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/listnode.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -4382,22 +3807,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscall
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/resource.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/types.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/types.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/assert.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/compiler.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/listnode.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/processargs.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/status.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/debug.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/exception.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/log.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/object.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/pci.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/port.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/profile.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/resource.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/types.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/types.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/assert.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/compiler.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/listnode.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -4582,22 +3991,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscall
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/resource.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/types.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/compiler.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/listnode.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/processargs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/status.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/debug.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/exception.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/log.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/object.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/pci.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/port.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/profile.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/resource.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/types.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/assert.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/compiler.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/listnode.h
@@ -4678,22 +4071,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/sysca
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/resource.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/types.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/compiler.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/listnode.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/processargs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/status.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/debug.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/exception.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/log.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/object.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/pci.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/port.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/profile.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/resource.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/types.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/assert.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/compiler.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/listnode.h
@@ -4774,22 +4151,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/resource.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/types.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/compiler.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/listnode.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/processargs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/status.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/debug.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/exception.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/log.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/object.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/pci.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/port.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/profile.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/resource.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/types.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/assert.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/compiler.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/listnode.h
@@ -4999,17 +4360,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/sysca
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/policy.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/system.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/tls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/device/audio.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/fidl.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/hw/gpt.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/process.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/rights.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/sanitizer.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/hypervisor.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/iommu.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/policy.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/system.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/tls.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/device/audio.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/fidl.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/hw/gpt.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -5065,17 +4415,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/sys
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/policy.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/system.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/tls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/device/audio.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/fidl.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/hw/gpt.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/process.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/rights.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/sanitizer.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/hypervisor.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/iommu.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/policy.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/system.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/tls.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/device/audio.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/fidl.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/hw/gpt.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -5131,17 +4470,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscall
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/policy.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/system.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/tls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/device/audio.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/fidl.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/hw/gpt.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/process.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/rights.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/sanitizer.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/hypervisor.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/iommu.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/policy.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/system.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/tls.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/device/audio.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/fidl.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/hw/gpt.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -5330,17 +4658,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscall
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/policy.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/system.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/tls.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/device/audio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/fidl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/hw/gpt.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/process.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/rights.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/sanitizer.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/hypervisor.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/iommu.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/policy.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/system.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/tls.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/device/audio.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/fidl.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/hw/gpt.h
@@ -5396,17 +4713,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/sysca
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/policy.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/system.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/tls.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/device/audio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/fidl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/hw/gpt.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/process.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/rights.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/sanitizer.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/hypervisor.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/iommu.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/policy.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/system.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/tls.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/device/audio.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/fidl.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/hw/gpt.h
@@ -5462,17 +4768,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/policy.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/system.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/tls.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/device/audio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/fidl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/hw/gpt.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/process.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/rights.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/sanitizer.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/hypervisor.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/iommu.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/policy.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/system.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/tls.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/device/audio.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/fidl.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/hw/gpt.h
@@ -5698,13 +4993,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/limit
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/smc.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/threads.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/time.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/dlfcn.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/features.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/hw/pci.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/limits.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/smc.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/threads.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/time.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/dlfcn.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/features.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/hw/pci.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -5740,13 +5028,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/lim
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/smc.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/threads.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/time.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/dlfcn.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/features.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/hw/pci.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/limits.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/smc.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/threads.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/time.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/dlfcn.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/features.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/hw/pci.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -5782,13 +5063,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/limits.
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/smc.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/threads.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/time.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/dlfcn.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/features.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/hw/pci.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/limits.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/smc.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/threads.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/time.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/dlfcn.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/features.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/hw/pci.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -6045,13 +5319,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/limits.
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/smc.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/threads.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/hw/pci.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/smc.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/time.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/dlfcn.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/features.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/hw/pci.h
@@ -6087,13 +5354,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/limit
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/smc.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/threads.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/hw/pci.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/smc.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/time.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/dlfcn.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/features.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/hw/pci.h
@@ -6129,13 +5389,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/limits.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/smc.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/threads.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/hw/pci.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/smc.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/time.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/dlfcn.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/features.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/hw/pci.h
@@ -7102,187 +6355,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libdriver_runtime.so
@@ -8188,187 +7260,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libdriver_runtime.so
@@ -9274,187 +8165,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libdriver_runtime.so
@@ -10454,13 +9164,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/looku
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/clock.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/scheduler.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/utc.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/exception.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/hw/debug/arm64.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/hw/debug/x86.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/lookup.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/clock.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/scheduler.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/utc.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/exception.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/hw/debug/arm64.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/hw/debug/x86.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -10496,13 +9199,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/loo
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/clock.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/scheduler.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/utc.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/exception.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/hw/debug/arm64.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/hw/debug/x86.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/lookup.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/clock.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/scheduler.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/utc.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/exception.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/hw/debug/arm64.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/hw/debug/x86.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -10538,13 +9234,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/lookup.
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/clock.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/scheduler.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/utc.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/exception.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/hw/debug/arm64.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/hw/debug/x86.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/lookup.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/clock.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/scheduler.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/utc.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/exception.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/hw/debug/arm64.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/hw/debug/x86.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -10880,13 +9569,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/lookup.
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/clock.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/utc.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/exception.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/hw/debug/arm64.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/hw/debug/x86.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/lookup.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/clock.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/scheduler.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/utc.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/exception.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/hw/debug/arm64.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/hw/debug/x86.h
@@ -10922,13 +9604,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/looku
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/clock.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/utc.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/exception.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/hw/debug/arm64.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/hw/debug/x86.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/lookup.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/clock.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/scheduler.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/utc.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/exception.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/hw/debug/arm64.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/hw/debug/x86.h
@@ -10964,13 +9639,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/lookup.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/clock.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/utc.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/exception.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/hw/debug/arm64.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/hw/debug/x86.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/lookup.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/clock.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/scheduler.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/utc.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/exception.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/hw/debug/arm64.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/hw/debug/x86.h
@@ -11277,11 +9945,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/boot/
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls-next.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/testonly-syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/analyzer.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/boot/crash-reason.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls-next.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/testonly-syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/analyzer.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/boot/crash-reason.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -11307,11 +9970,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/boo
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls-next.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/testonly-syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/analyzer.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/boot/crash-reason.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls-next.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/testonly-syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/analyzer.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/boot/crash-reason.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -11337,11 +9995,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/boot/cr
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls-next.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/testonly-syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/analyzer.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/boot/crash-reason.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls-next.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/testonly-syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/analyzer.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/boot/crash-reason.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -11543,11 +10196,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/boot/cr
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/string_view.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls-next.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/testonly-syscalls.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/analyzer.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/boot/crash-reason.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/string_view.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls-next.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/testonly-syscalls.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/analyzer.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/boot/crash-reason.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/string_view.h
@@ -11573,11 +10221,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/boot/
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/string_view.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls-next.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/testonly-syscalls.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/analyzer.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/boot/crash-reason.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/string_view.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls-next.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/testonly-syscalls.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/analyzer.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/boot/crash-reason.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/string_view.h
@@ -11603,11 +10246,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/boot/cras
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/string_view.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls-next.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/testonly-syscalls.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/analyzer.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/boot/crash-reason.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/string_view.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls-next.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/testonly-syscalls.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/analyzer.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/boot/crash-reason.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/string_view.h
@@ -11774,19 +10412,16 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/constants.fidl + 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/rsn.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/types.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-15/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/availability.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -11943,19 +10578,16 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/rsn.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/types.fidl
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/availability.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/availability.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/availability.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/sysroot/include/zircon/availability.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/availability.h
@@ -12203,9 +10835,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/zx/overview.fidl + ../../../fuchsia/sdk/
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -12221,9 +10850,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/zircon/sysca
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -12239,9 +10865,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/include/zircon/sys
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -12524,9 +11147,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/zx/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/include/zircon/syscalls/iob.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/errors.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/internal/cdecls.inc
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/include/zircon/syscalls/iob.h
@@ -12542,9 +11162,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/zircon/syscall
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/include/zircon/syscalls/iob.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/errors.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/internal/cdecls.inc
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/include/zircon/syscalls/iob.h
@@ -12560,9 +11177,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/include/zircon/sysca
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/include/zircon/syscalls/iob.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/errors.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/internal/cdecls.inc
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/include/zircon/syscalls/iob.h
@@ -13720,187 +12334,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-14/dist/libdriver_runtime.so
@@ -14806,187 +13239,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-14/dist/libdriver_runtime.so
@@ -15892,187 +14144,6 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libasync-loop-default.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libbackend_fuchsia_globals.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libdriver_runtime.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libheapdump_instrumentation.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libvfs_internal.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/riscv64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/riscv64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/inotify.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libbackend_fuchsia_globals.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-14/dist/libdriver_runtime.so
