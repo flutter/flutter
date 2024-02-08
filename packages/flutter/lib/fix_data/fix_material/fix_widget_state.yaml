@@ -41,7 +41,7 @@ transforms:
     date: 2024-02-01
     element:
       uris: [ 'material.dart', 'widgets.dart' ]
-      function: 'MaterialPropertyResolver'
+      typedef: 'MaterialPropertyResolver'
     changes:
       - kind: 'rename'
         newName: 'WidgetPropertyResolver'
