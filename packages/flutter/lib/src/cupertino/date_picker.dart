@@ -1236,11 +1236,18 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         children: List<Widget>.generate(31, (int index) {
           final int day = index + 1;
           final  int? dayOfWeek = widget.showDayOfWeek ? DateTime(selectedYear, selectedMonth, day).weekday : null;
+          final bool isInvalidDay = (day > daysInCurrentMonth)
+                                 || (widget.minimumDate?.year  == selectedYear &&
+                                     widget.minimumDate!.month == selectedMonth &&
+                                     widget.minimumDate!.day   >  day)
+                                 || (widget.maximumDate?.year  == selectedYear &&
+                                     widget.maximumDate!.month == selectedMonth &&
+                                     widget.maximumDate!.day   <  day);
           return itemPositioningBuilder(
             context,
             Text(
               localizations.datePickerDayOfMonth(day, dayOfWeek),
-              style: _themeTextStyle(context, isValid: day <= daysInCurrentMonth),
+              style: _themeTextStyle(context, isValid: !isInvalidDay),
             ),
           );
         }),

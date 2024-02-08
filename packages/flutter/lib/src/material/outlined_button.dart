@@ -203,6 +203,7 @@ class OutlinedButton extends ButtonStyleButton {
     };
     final MaterialStateProperty<Color?>? backgroundColorProp = switch ((backgroundColor, disabledBackgroundColor)) {
       (null, null) => null,
+      (_, null) => MaterialStatePropertyAll<Color?>(backgroundColor),
       (_, _) => _OutlinedButtonDefaultColor(backgroundColor, disabledBackgroundColor),
     };
     final MaterialStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {

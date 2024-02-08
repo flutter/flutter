@@ -441,12 +441,10 @@ class FilledButton extends ButtonStyleButton {
   /// [padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    switch (_variant) {
-      case _FilledButtonVariant.filled:
-        return _FilledButtonDefaultsM3(context);
-      case _FilledButtonVariant.tonal:
-        return _FilledTonalButtonDefaultsM3(context);
-    }
+    return switch (_variant) {
+      _FilledButtonVariant.filled => _FilledButtonDefaultsM3(context),
+      _FilledButtonVariant.tonal  => _FilledTonalButtonDefaultsM3(context),
+    };
   }
 
   /// Returns the [FilledButtonThemeData.style] of the closest
