@@ -2245,6 +2245,41 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
+    test('sets correct input type for Firefox on Android', () {
+      debugOperatingSystemOverride = OperatingSystem.android;
+      debugBrowserEngineOverride = BrowserEngine.firefox;
+
+      /// During initialization [HybridTextEditing] will pick the correct
+      /// text editing strategy for [OperatingSystem.android].
+      textEditing = HybridTextEditing();
+
+      showKeyboard(inputType: 'text');
+      expect(getEditingInputMode(), null);
+
+      showKeyboard(inputType: 'number');
+      expect(getEditingInputMode(), 'numeric');
+
+      showKeyboard(inputType: 'number');
+      expect(getEditingInputMode(), 'numeric');
+
+      showKeyboard(inputType: 'number', decimal: true);
+      expect(getEditingInputMode(), 'decimal');
+
+      showKeyboard(inputType: 'phone');
+      expect(getEditingInputMode(), 'tel');
+
+      showKeyboard(inputType: 'emailAddress');
+      expect(getEditingInputMode(), 'email');
+
+      showKeyboard(inputType: 'url');
+      expect(getEditingInputMode(), 'url');
+
+      showKeyboard(inputType: 'none');
+      expect(getEditingInputMode(), 'none');
+
+      hideKeyboard();
+    });
+
     test('prevent mouse events on Android', () {
       // Regression test for https://github.com/flutter/flutter/issues/124483.
       debugOperatingSystemOverride = OperatingSystem.android;
