@@ -770,7 +770,6 @@ class IconButton extends StatelessWidget {
 
     return Semantics(
       button: true,
-      container: true,
       enabled: onPressed != null,
       child: InkResponse(
         focusNode: focusNode,

@@ -869,7 +869,7 @@ class _DatePickerHeader extends StatelessWidget {
       case Orientation.portrait:
         return Semantics(
           container: true,
-          child:SizedBox(
+          child: SizedBox(
             height: _datePickerHeaderPortraitHeight,
             child: Material(
               color: backgroundColor,
@@ -889,7 +889,10 @@ class _DatePickerHeader extends StatelessWidget {
                       children: <Widget>[
                         Expanded(child: title),
                         if (entryModeButton != null)
-                          entryModeButton!,
+                         Semantics(
+                          container: true,
+                          child: entryModeButton,
+                        ),
                       ],
                     ),
                   ],
