@@ -1116,7 +1116,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   Widget build(BuildContext context) {
     if (_dragging) {
       final Size size = _extentSize(_listState._dragInfo!.itemExtent, _listState._scrollDirection);
-      return SizedBox(width: size.width, height: size.height);
+      return SizedBox.fromSize(size);
     }
     _listState._registerItem(this);
     return Transform(
