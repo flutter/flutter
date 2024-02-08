@@ -66,7 +66,6 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
-        webRenderer: WebRendererMode.canvaskit,
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
@@ -292,7 +291,6 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.unsound,
-      webRenderer: WebRendererMode.canvaskit,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -312,7 +310,6 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.unsound,
-      webRenderer: WebRendererMode.canvaskit,
     );
 
     // Defaults to "/" when there's no base element.
@@ -334,7 +331,6 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
-        webRenderer: WebRendererMode.canvaskit,
       ),
       throwsToolExit(),
     );
@@ -355,7 +351,6 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
-        webRenderer: WebRendererMode.canvaskit,
       ),
       throwsToolExit(),
     );
@@ -689,7 +684,6 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
-      webRenderer: WebRendererMode.html,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -751,6 +745,13 @@ void main() {
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
+    // Toggle CanvasKit
+    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.html);
+    webDevFS.webAssetServer.webRenderer = WebRendererMode.canvaskit;
+
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
+
     // Generated entrypoint.
     expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
       contains('GENERATED'));
@@ -799,7 +800,6 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
-      webRenderer: WebRendererMode.html,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -861,6 +861,11 @@ void main() {
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
+    // Toggle CanvasKit
+    webDevFS.webAssetServer.webRenderer = WebRendererMode.canvaskit;
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
+
     // Generated entrypoint.
     expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
       contains('GENERATED'));
@@ -908,7 +913,6 @@ void main() {
         extraHeaders: const <String, String>{},
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
-        webRenderer: WebRendererMode.canvaskit,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -970,7 +974,6 @@ void main() {
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
-      webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1016,7 +1019,6 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
-      webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1063,7 +1065,6 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
-      webRenderer: WebRendererMode.auto,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1111,7 +1112,6 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
-      webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1148,9 +1148,7 @@ void main() {
       null,
       const <String, String>{},
       NullSafetyMode.unsound,
-      webRenderer: WebRendererMode.canvaskit,
-      testMode: true
-    );
+      testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
@@ -1182,9 +1180,7 @@ void main() {
         extraHeaderKey: extraHeaderValue,
       },
       NullSafetyMode.unsound,
-      webRenderer: WebRendererMode.canvaskit,
-      testMode: true
-    );
+      testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
 
@@ -1219,7 +1215,6 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.sound,
-      webRenderer: WebRendererMode.canvaskit,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1262,7 +1257,6 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
-      webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);

@@ -135,7 +135,7 @@ class FlutterDevice {
       }
 
       final String platformDillPath = globals.fs.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
+        getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
         platformDillName,
       );
 

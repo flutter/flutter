@@ -43,11 +43,16 @@ void main() {
   testUsingContext('WebBuilder sets environment on success', () async {
     final TestBuildSystem buildSystem =
         TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(target, isA<WebServiceWorker>());
+      final WebServiceWorker webServiceWorker = target as WebServiceWorker;
+      expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
+      expect(webServiceWorker.webRenderer, WebRendererMode.auto);
+
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
+        'WasmOmitTypeChecks': 'false',
+        'RunWasmOpt': 'none',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -72,16 +77,10 @@ void main() {
       'target',
       BuildInfo.debug,
       ServiceWorkerStrategy.offlineFirst,
-      compilerConfigs: <WebCompilerConfig>[
-        const WasmCompilerConfig(
-          wasmOpt: WasmOptLevel.none,
-          renderer: WebRendererMode.skwasm,
-        ),
-        const JsCompilerConfig.run(
-          nativeNullAssertions: true,
-          renderer: WebRendererMode.canvaskit,
-        ),
-      ],
+      compilerConfig: const WasmCompilerConfig(
+        omitTypeChecks: false,
+        wasmOpt: WasmOptLevel.none,
+      ),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -103,7 +102,7 @@ void main() {
         label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
-                  'RunWasmOpt: none; WasmOmitTypeChecks: false; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+                  'RunWasmOpt: none; WasmOmitTypeChecks: false; wasm-compile: true; web-renderer: auto;',
       ),
           ),
         ],
@@ -116,7 +115,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'RunWasmOpt: none; WasmOmitTypeChecks: false; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+          settings: 'RunWasmOpt: none; WasmOmitTypeChecks: false; wasm-compile: true; web-renderer: auto;',
         ),
       ]),
     );
@@ -124,12 +123,12 @@ void main() {
     // Sends timing event.
     final TestTimingEvent timingEvent = testUsage.timings.single;
     expect(timingEvent.category, 'build');
-    expect(timingEvent.variableName, 'dual-compile');
+    expect(timingEvent.variableName, 'dart2wasm');
     expect(
       analyticsTimingEventExists(
         sentEvents: fakeAnalytics.sentEvents,
         workflow: 'build',
-        variableName: 'dual-compile',
+        variableName: 'dart2wasm',
       ),
       true,
     );
@@ -162,9 +161,7 @@ void main() {
               'target',
               BuildInfo.debug,
               ServiceWorkerStrategy.offlineFirst,
-              compilerConfigs: <WebCompilerConfig>[
-                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto),
-              ]
+              compilerConfig: const JsCompilerConfig.run(nativeNullAssertions: true),
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
 
