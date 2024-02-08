@@ -2173,31 +2173,6 @@ void main() {
 
     // find the selection overlay
     expect(find.byWidget(selectionOverlay), findsExactly(3));
-
-    // For mode = CupertinoDatePickerMode.time
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoDatePicker(
-            mode: CupertinoDatePickerMode.time,
-            onDateTimeChanged: (_) {},
-            initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
-              return selectionOverlay;
-            },
-          ),
-        ),
-      ),
-    );
-
-    // find the selection overlay
-    expect(find.byWidget(selectionOverlay), findsExactly(3));
-
-
   });
 
 
@@ -2241,7 +2216,7 @@ void main() {
       color: const Color(0x12345678),
     );
 
-    // For mode = CupertinoDatePickerMode.time
+    // For mode = CupertinoDatePickerMode.dateAndTime
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
