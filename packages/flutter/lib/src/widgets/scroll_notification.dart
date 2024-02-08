@@ -271,7 +271,7 @@ class OverscrollNotification extends ScrollNotification {
 /// [ScrollPosition.isScrollingNotifier]. An alternative example is provided
 /// with [ScrollPosition.isScrollingNotifier].
 ///
-/// ** See code in examples/api/lib/widgets/scroll_end_notification/scroll_end_notification.0.dart
+/// ** See code in examples/api/lib/widgets/scroll_end_notification/scroll_end_notification.0.dart **
 /// {@end-tool}
 ///
 /// See also:
