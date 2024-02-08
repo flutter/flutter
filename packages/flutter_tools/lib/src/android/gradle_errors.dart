@@ -112,15 +112,16 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
 @visibleForTesting
 final GradleHandledError networkErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
+    "> Could not get resource 'http",
+    'java.io.FileNotFoundException',
     'java.io.FileNotFoundException: https://downloads.gradle.org',
-    'java.io.IOException: Unable to tunnel through proxy',
     'java.io.IOException: Server returned HTTP response code: 502',
+    'java.io.IOException: Unable to tunnel through proxy',
     'java.lang.RuntimeException: Timeout of',
+    'java.net.ConnectException: Connection timed out',
+    'java.net.SocketException: Connection reset',
     'java.util.zip.ZipException: error in opening zip file',
     'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
-    'java.net.SocketException: Connection reset',
-    'java.io.FileNotFoundException',
-    "> Could not get resource 'http",
   ]),
   handler: ({
     required String line,
