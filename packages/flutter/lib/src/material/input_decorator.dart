@@ -16,6 +16,7 @@ import 'icon_button.dart';
 import 'icon_button_theme.dart';
 import 'input_border.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -3431,8 +3432,8 @@ class InputDecoration {
 
   /// The shape of the border to draw around the decoration's container.
   ///
-  /// If [border] is a [WidgetStateUnderlineInputBorder]
-  /// or [WidgetStateOutlineInputBorder], then the effective border can depend on
+  /// If [border] is a [MaterialStateUnderlineInputBorder]
+  /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
   /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
@@ -4202,8 +4203,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The shape of the border to draw around the decoration's container.
   ///
-  /// If [border] is a [WidgetStateUnderlineInputBorder]
-  /// or [WidgetStateOutlineInputBorder], then the effective border can depend on
+  /// If [border] is a [MaterialStateUnderlineInputBorder]
+  /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
   /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// The decoration's container is the area which is filled if [filled] is
