@@ -56,7 +56,6 @@ config("impeller_public_config") {
 
 group("impeller") {
   public_deps = [
-    "archivist",
     "base",
     "geometry",
     "tessellator",
@@ -81,7 +80,6 @@ impeller_component("impeller_unittests") {
   testonly = true
 
   deps = [
-    "archivist:archivist_unittests",
     "base:base_unittests",
     "compiler:compiler_unittests",
     "core:allocator_unittests",
