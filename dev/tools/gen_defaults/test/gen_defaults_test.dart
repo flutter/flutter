@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(davidmartos96): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/142716
+// Fails with "flutter test --test-randomize-ordering-seed=20240201"
+@Tags(<String>['no-shuffle'])
+library;
+
 import 'dart:async';
 import 'dart:io';
 
@@ -12,7 +19,15 @@ import 'package:test/test.dart';
 
 void main() {
   final TokenLogger logger = tokenLogger;
+  // Required init with empty at least once to init late fields.
+  // Then we can use the `clear` method.
   logger.init(allTokens: <String, dynamic>{}, versionMap: <String, List<String>>{});
+
+  setUp(() {
+    // Cleanup the global token logger before each test, to not be tied to a particular
+    // test order.
+    logger.clear();
+  });
 
   test('Templates will append to the end of a file', () {
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');

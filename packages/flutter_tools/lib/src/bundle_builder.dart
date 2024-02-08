@@ -12,9 +12,8 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
-import 'build_system/targets/common.dart';
-import 'build_system/targets/scene_importer.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
@@ -78,8 +77,8 @@ class BundleBuilder {
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug
-        ? const CopyFlutterBundle()
-        : const ReleaseCopyFlutterBundle();
+        ? globals.buildTargets.copyFlutterBundle
+        : globals.buildTargets.releaseCopyFlutterBundle;
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
@@ -169,11 +168,6 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
-  ShaderTarget shaderTarget = ShaderTarget.sksl;
-  if (targetPlatform == TargetPlatform.tester && impellerStatus == ImpellerStatus.enabled) {
-    shaderTarget = ShaderTarget.impellerSwiftShader;
-  }
-
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -200,8 +194,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
-                target: shaderTarget,
-                json: targetPlatform == TargetPlatform.web_javascript,
+                targetPlatform: targetPlatform,
               );
             case AssetKind.model:
               doCopy = !await sceneImporter.importScene(

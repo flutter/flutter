@@ -104,6 +104,15 @@ void main() {
     const bool enableFeedback = false;
     const AlignmentGeometry alignment = Alignment.centerLeft;
 
+    final Key backgroundKey = UniqueKey();
+    final Key foregroundKey = UniqueKey();
+    Widget backgroundBuilder(BuildContext context, Set<MaterialState> states, Widget? child) {
+      return KeyedSubtree(key: backgroundKey, child: child!);
+    }
+    Widget foregroundBuilder(BuildContext context, Set<MaterialState> states, Widget? child) {
+      return KeyedSubtree(key: foregroundKey, child: child!);
+    }
+
     final ButtonStyle style = TextButton.styleFrom(
       foregroundColor: foregroundColor,
       disabledForegroundColor: disabledColor,
@@ -122,6 +131,8 @@ void main() {
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
       alignment: alignment,
+      backgroundBuilder: backgroundBuilder,
+      foregroundBuilder: foregroundBuilder,
     );
 
     Widget buildFrame({ ButtonStyle? buttonStyle, ButtonStyle? themeStyle, ButtonStyle? overallStyle }) {
@@ -185,6 +196,8 @@ void main() {
       expect(tester.getSize(find.byType(TextButton)), const Size(200, 200));
       final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
       expect(align.alignment, alignment);
+      expect(find.descendant(of: findMaterial, matching: find.byKey(backgroundKey)), findsOneWidget);
+      expect(find.descendant(of: findInkWell, matching: find.byKey(foregroundKey)), findsOneWidget);
     }
 
     testWidgets('Button style overrides defaults', (WidgetTester tester) async {

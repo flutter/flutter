@@ -207,7 +207,6 @@ void main() {
       contains('flutter_service_worker.js?v='),
     ));
   }));
-
   test('WebEntrypointTarget generates an entrypoint for a file outside of main', () => testbed.run(() async {
     final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
       ..createSync(recursive: true)
