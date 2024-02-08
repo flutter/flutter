@@ -930,7 +930,10 @@ class _DatePickerHeader extends StatelessWidget {
                   if (entryModeButton != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: entryModeButton,
+                      child: Semantics(
+                        container: true,
+                        child: entryModeButton,
+                      ),
                     ),
                 ],
               ),

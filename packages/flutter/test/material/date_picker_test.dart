@@ -1596,7 +1596,19 @@ void main() {
           isFocusable: true,
         ));
 
-        // The semantics of the InputDatePickerFormField are tested in its tests.
+        expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
+          label: 'Enter Date',
+          isTextField: true,
+          isFocused: true,
+          value: '01/15/2016',
+          hasTapAction: true,
+          hasSetTextAction: true,
+          hasSetSelectionAction: true,
+          hasCopyAction: true,
+          hasCutAction: true,
+          hasMoveCursorBackwardByCharacterAction: true,
+          hasMoveCursorBackwardByWordAction: true,
+        ));
 
         // Ok/Cancel buttons
         expect(tester.getSemantics(find.text('OK')), matchesSemantics(
