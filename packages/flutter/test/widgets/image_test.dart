@@ -2097,6 +2097,8 @@ void main() {
     streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
     await tester.pump();
     expect(lastFrame, 0);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsLayout, isFalse);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsPaint, isFalse);
     expect(tester.getSize(find.byType(Image)), const Size(1, 1));
 
     streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
