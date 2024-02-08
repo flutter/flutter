@@ -301,7 +301,7 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateOutlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
+  static MaterialStateOutlineInputBorder resolveWith(WidgetPropertyResolver<InputBorder> callback) =>
       _MaterialStateOutlineInputBorder(callback);
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
@@ -320,7 +320,7 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
 class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
   const _MaterialStateOutlineInputBorder(this._resolve);
 
-  final MaterialPropertyResolver<InputBorder> _resolve;
+  final WidgetPropertyResolver<InputBorder> _resolve;
 
   @override
   InputBorder resolve(Set<WidgetState> states) => _resolve(states);
@@ -364,7 +364,7 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateUnderlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
+  static MaterialStateUnderlineInputBorder resolveWith(WidgetPropertyResolver<InputBorder> callback) =>
       _MaterialStateUnderlineInputBorder(callback);
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
@@ -383,7 +383,7 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
 class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBorder {
   const _MaterialStateUnderlineInputBorder(this._resolve);
 
-  final MaterialPropertyResolver<InputBorder> _resolve;
+  final WidgetPropertyResolver<InputBorder> _resolve;
 
   @override
   InputBorder resolve(Set<WidgetState> states) => _resolve(states);
