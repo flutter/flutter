@@ -4,6 +4,7 @@
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
+#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -141,6 +142,59 @@ TEST(ContextVKTest, CanCreateContextWithValidationLayers) {
   const CapabilitiesVK* capabilites_vk =
       reinterpret_cast<const CapabilitiesVK*>(context->GetCapabilities().get());
   ASSERT_TRUE(capabilites_vk->AreValidationsEnabled());
+}
+
+// In Impeller's 2D renderer, we no longer use stencil-only formats. They're
+// less widely supported than combined depth-stencil formats, so make sure we
+// don't fail initialization if we can't find a suitable stencil format.
+TEST(CapabilitiesVKTest, ContextInitializesWithNoStencilFormat) {
+  const std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalDeviceFormatPropertiesCallback(
+              [](VkPhysicalDevice physicalDevice, VkFormat format,
+                 VkFormatProperties* pFormatProperties) {
+                if (format == VK_FORMAT_B8G8R8A8_UNORM) {
+                  pFormatProperties->optimalTilingFeatures =
+                      static_cast<VkFormatFeatureFlags>(
+                          vk::FormatFeatureFlagBits::eColorAttachment);
+                } else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT) {
+                  pFormatProperties->optimalTilingFeatures =
+                      static_cast<VkFormatFeatureFlags>(
+                          vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+                }
+                // Ignore just the stencil format.
+              })
+          .Build();
+  ASSERT_NE(context, nullptr);
+  const CapabilitiesVK* capabilites_vk =
+      reinterpret_cast<const CapabilitiesVK*>(context->GetCapabilities().get());
+  ASSERT_EQ(capabilites_vk->GetDefaultDepthStencilFormat(),
+            PixelFormat::kD32FloatS8UInt);
+  ASSERT_EQ(capabilites_vk->GetDefaultStencilFormat(),
+            PixelFormat::kD32FloatS8UInt);
+}
+
+// Impeller's 2D renderer relies on hardware support for a combined
+// depth-stencil format (widely supported). So fail initialization if a suitable
+// one couldn't be found. That way we have an opportunity to fallback to
+// OpenGLES.
+TEST(CapabilitiesVKTest,
+     ContextFailsInitializationForNoCombinedDepthStencilFormat) {
+  ScopedValidationDisable disable_validation;
+  const std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalDeviceFormatPropertiesCallback(
+              [](VkPhysicalDevice physicalDevice, VkFormat format,
+                 VkFormatProperties* pFormatProperties) {
+                if (format == VK_FORMAT_B8G8R8A8_UNORM) {
+                  pFormatProperties->optimalTilingFeatures =
+                      static_cast<VkFormatFeatureFlags>(
+                          vk::FormatFeatureFlagBits::eColorAttachment);
+                }
+                // Ignore combined depth-stencil formats.
+              })
+          .Build();
+  ASSERT_EQ(context, nullptr);
 }
 
 }  // namespace testing

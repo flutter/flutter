@@ -153,19 +153,16 @@ VkResult vkEnumeratePhysicalDevices(VkInstance instance,
   return VK_SUCCESS;
 }
 
+static thread_local std::function<void(VkPhysicalDevice physicalDevice,
+                                       VkFormat format,
+                                       VkFormatProperties* pFormatProperties)>
+    g_format_properties_callback;
+
 void vkGetPhysicalDeviceFormatProperties(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
     VkFormatProperties* pFormatProperties) {
-  if (format == VK_FORMAT_B8G8R8A8_UNORM) {
-    pFormatProperties->optimalTilingFeatures =
-        static_cast<VkFormatFeatureFlags>(
-            vk::FormatFeatureFlagBits::eColorAttachment);
-  } else if (format == VK_FORMAT_S8_UINT) {
-    pFormatProperties->optimalTilingFeatures =
-        static_cast<VkFormatFeatureFlags>(
-            vk::FormatFeatureFlagBits::eDepthStencilAttachment);
-  }
+  g_format_properties_callback(physicalDevice, format, pFormatProperties);
 }
 
 void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
@@ -813,7 +810,24 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
 }  // namespace
 
 MockVulkanContextBuilder::MockVulkanContextBuilder()
-    : instance_extensions_({"VK_KHR_surface", "VK_MVK_macos_surface"}) {}
+    : instance_extensions_({"VK_KHR_surface", "VK_MVK_macos_surface"}),
+      format_properties_callback_([](VkPhysicalDevice physicalDevice,
+                                     VkFormat format,
+                                     VkFormatProperties* pFormatProperties) {
+        if (format == VK_FORMAT_B8G8R8A8_UNORM) {
+          pFormatProperties->optimalTilingFeatures =
+              static_cast<VkFormatFeatureFlags>(
+                  vk::FormatFeatureFlagBits::eColorAttachment);
+        } else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT) {
+          pFormatProperties->optimalTilingFeatures =
+              static_cast<VkFormatFeatureFlags>(
+                  vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+        } else if (format == VK_FORMAT_S8_UINT) {
+          pFormatProperties->optimalTilingFeatures =
+              static_cast<VkFormatFeatureFlags>(
+                  vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+        }
+      }) {}
 
 std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   auto message_loop = fml::ConcurrentMessageLoop::Create();
@@ -824,6 +838,7 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   }
   g_instance_extensions = instance_extensions_;
   g_instance_layers = instance_layers_;
+  g_format_properties_callback = format_properties_callback_;
   std::shared_ptr<ContextVK> result = ContextVK::Create(std::move(settings));
   return result;
 }
