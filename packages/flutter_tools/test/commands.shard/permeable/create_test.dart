@@ -2849,7 +2849,7 @@ void main() {
     expect(env['flutter']!.allows(Version(3, 2, 9)), false);
   });
 
-  testUsingContext('newly created iOS plugins has min iOS version of 11.0', () async {
+  testUsingContext('newly created iOS plugins has correct min iOS version', () async {
     Cache.flutterRoot = '../..';
     final String flutterToolsAbsolutePath = globals.fs.path.join(
       Cache.flutterRoot!,
@@ -2882,7 +2882,7 @@ void main() {
 
     for (final String templatePath in iosPluginTemplates) {
       final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '11.0'"));
+      expect(rawTemplate, contains("s.platform = :ios, '12.0'"));
     }
 
     final CreateCommand command = CreateCommand();
@@ -2892,7 +2892,7 @@ void main() {
     expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'),
         exists);
     final String rawPodSpec = await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
-    expect(rawPodSpec, contains("s.platform = :ios, '11.0'"));
+    expect(rawPodSpec, contains("s.platform = :ios, '12.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {
