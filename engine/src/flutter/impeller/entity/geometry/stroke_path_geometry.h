@@ -9,11 +9,6 @@
 
 namespace impeller {
 
-class VertexWriter {
- public:
-  virtual void AppendVertex(const Point& point) = 0;
-};
-
 /// @brief A geometry that is created from a stroked path object.
 class StrokePathGeometry final : public Geometry {
  public:
@@ -33,21 +28,7 @@ class StrokePathGeometry final : public Geometry {
 
   Join GetStrokeJoin() const;
 
-  using CapProc = std::function<void(VertexWriter& vtx_builder,
-                                     const Point& position,
-                                     const Point& offset,
-                                     Scalar scale,
-                                     bool reverse)>;
-  using JoinProc = std::function<void(VertexWriter& vtx_builder,
-                                      const Point& position,
-                                      const Point& start_offset,
-                                      const Point& end_offset,
-                                      Scalar miter_limit,
-                                      Scalar scale)>;
-
  private:
-  using VS = SolidFillVertexShader;
-
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
@@ -67,62 +48,6 @@ class StrokePathGeometry final : public Geometry {
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   bool SkipRendering() const;
-
-  static Scalar CreateBevelAndGetDirection(VertexWriter& vtx_builder,
-                                           const Point& position,
-                                           const Point& start_offset,
-                                           const Point& end_offset);
-
-  static void CreateSolidStrokeVertices(VertexWriter& vtx_builder,
-                                        const Path::Polyline& path,
-                                        Scalar stroke_width,
-                                        Scalar scaled_miter_limit,
-                                        const JoinProc& join_proc,
-                                        const CapProc& cap_proc,
-                                        Scalar scale);
-
-  static StrokePathGeometry::JoinProc GetJoinProc(Join stroke_join);
-
-  static StrokePathGeometry::CapProc GetCapProc(Cap cap);
-
-  static void CreateButtCap(VertexWriter& vtx_builder,
-                            const Point& position,
-                            const Point& offset,
-                            Scalar scale,
-                            bool reverse);
-
-  static void CreateRoundCap(VertexWriter& vtx_builder,
-                             const Point& position,
-                             const Point& offset,
-                             Scalar scale,
-                             bool reverse);
-
-  static void CreateSquareCap(VertexWriter& vtx_builder,
-                              const Point& position,
-                              const Point& offset,
-                              Scalar scale,
-                              bool reverse);
-
-  static void CreateMiterJoin(VertexWriter& vtx_builder,
-                              const Point& position,
-                              const Point& start_offset,
-                              const Point& end_offset,
-                              Scalar miter_limit,
-                              Scalar scale);
-
-  static void CreateRoundJoin(VertexWriter& vtx_builder,
-                              const Point& position,
-                              const Point& start_offset,
-                              const Point& end_offset,
-                              Scalar miter_limit,
-                              Scalar scale);
-
-  static void CreateBevelJoin(VertexWriter& vtx_builder,
-                              const Point& position,
-                              const Point& start_offset,
-                              const Point& end_offset,
-                              Scalar miter_limit,
-                              Scalar scale);
 
   Path path_;
   Scalar stroke_width_;
