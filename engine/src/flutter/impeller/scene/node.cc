@@ -14,7 +14,6 @@
 #include "impeller/base/thread.h"
 #include "impeller/base/validation.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/image/decompressed_image.h"
 #include "impeller/scene/animation/animation_player.h"
 #include "impeller/scene/importer/conversions.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
@@ -80,17 +79,12 @@ static std::shared_ptr<Texture> UnpackTextureFromFlatbuffer(
       return nullptr;
   }
 
-  DecompressedImage::Format format;
   switch (embedded->component_count()) {
-    case 1:
-      format = DecompressedImage::Format::kGrey;
-      break;
-    case 3:
-      format = DecompressedImage::Format::kRGB;
-      break;
     case 4:
-      format = DecompressedImage::Format::kRGBA;
+      // RGBA.
       break;
+    case 1:
+    case 3:
     default:
       FML_LOG(WARNING) << "Textures with " << embedded->component_count()
                        << " components are not supported." << std::endl;
@@ -106,15 +100,11 @@ static std::shared_ptr<Texture> UnpackTextureFromFlatbuffer(
 
   auto image_mapping = std::make_shared<fml::NonOwnedMapping>(
       embedded->bytes()->Data(), embedded->bytes()->size());
-  auto decompressed_image =
-      DecompressedImage(ISize(embedded->width(), embedded->height()), format,
-                        image_mapping)
-          .ConvertToRGBA();
 
   auto texture_descriptor = TextureDescriptor{};
   texture_descriptor.storage_mode = StorageMode::kHostVisible;
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
-  texture_descriptor.size = decompressed_image.GetSize();
+  texture_descriptor.size = ISize(embedded->width(), embedded->height());
   // TODO(bdero): Generate mipmaps for embedded textures.
   texture_descriptor.mip_count = 1u;
 
@@ -124,7 +114,7 @@ static std::shared_ptr<Texture> UnpackTextureFromFlatbuffer(
     return nullptr;
   }
 
-  auto uploaded = texture->SetContents(decompressed_image.GetAllocation());
+  auto uploaded = texture->SetContents(image_mapping);
   if (!uploaded) {
     FML_LOG(ERROR) << "Could not upload texture to device memory.";
     return nullptr;

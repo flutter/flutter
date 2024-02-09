@@ -6,6 +6,8 @@ import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 impeller_component("playground") {
+  testonly = true
+
   sources = [
     "playground.cc",
     "playground.h",
@@ -46,9 +48,9 @@ impeller_component("playground") {
 
   public_deps = [
     "../fixtures:shader_fixtures",
-    "../image:image_skia_backend",
     "../renderer",
     "../scene/shaders",
+    "image:image_skia_backend",
     "imgui:imgui_impeller_backend",
     "//flutter/fml",
     "//flutter/third_party/glfw",

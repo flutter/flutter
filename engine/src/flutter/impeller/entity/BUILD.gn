@@ -233,7 +233,6 @@ impeller_component("entity") {
     ":entity_shaders",
     ":framebuffer_blend_entity_shaders",
     ":modern_entity_shaders",
-    "../image:image_skia_backend",
     "../renderer",
     "../typographer",
   ]

@@ -14,7 +14,7 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/quaternion.h"
 #include "impeller/geometry/vector.h"
-#include "impeller/image/decompressed_image.h"
+#include "impeller/playground/image/decompressed_image.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/scene/animation/animation_clip.h"

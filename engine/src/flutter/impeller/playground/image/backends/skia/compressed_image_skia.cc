@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/image/backends/skia/compressed_image_skia.h"
+#include "impeller/playground/image/backends/skia/compressed_image_skia.h"
 
 #include <memory>
 

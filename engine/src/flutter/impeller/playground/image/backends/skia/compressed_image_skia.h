@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_IMAGE_BACKENDS_SKIA_COMPRESSED_IMAGE_SKIA_H_
-#define FLUTTER_IMPELLER_IMAGE_BACKENDS_SKIA_COMPRESSED_IMAGE_SKIA_H_
+#ifndef FLUTTER_IMPELLER_PLAYGROUND_IMAGE_BACKENDS_SKIA_COMPRESSED_IMAGE_SKIA_H_
+#define FLUTTER_IMPELLER_PLAYGROUND_IMAGE_BACKENDS_SKIA_COMPRESSED_IMAGE_SKIA_H_
 
 #include "flutter/fml/macros.h"
-#include "impeller/image/compressed_image.h"
+#include "impeller/playground/image/compressed_image.h"
 
 namespace impeller {
 
@@ -30,4 +30,4 @@ class CompressedImageSkia final : public CompressedImage {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_IMAGE_BACKENDS_SKIA_COMPRESSED_IMAGE_SKIA_H_
+#endif  // FLUTTER_IMPELLER_PLAYGROUND_IMAGE_BACKENDS_SKIA_COMPRESSED_IMAGE_SKIA_H_

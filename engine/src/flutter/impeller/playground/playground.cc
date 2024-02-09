@@ -8,8 +8,8 @@
 #include <sstream>
 
 #include "fml/time/time_point.h"
-#include "impeller/image/backends/skia/compressed_image_skia.h"
-#include "impeller/image/decompressed_image.h"
+#include "impeller/playground/image/backends/skia/compressed_image_skia.h"
+#include "impeller/playground/image/decompressed_image.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
@@ -20,8 +20,8 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
-#include "impeller/image/compressed_image.h"
 #include "impeller/playground/backend/vulkan/swiftshader_utilities.h"
+#include "impeller/playground/image/compressed_image.h"
 #include "impeller/playground/imgui/imgui_impl_impeller.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_impl.h"
