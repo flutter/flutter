@@ -13,9 +13,7 @@ import sys
 import os
 import platform
 
-SRC_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def get_out_dir(args):
@@ -230,8 +228,7 @@ def setup_rbe(args):
         'reclient',
     )
     bootstrap_path = os.path.join(cipd_reclient_dir, 'bootstrap')
-    bootstrap_path = bootstrap_path + '.exe' if get_host_os(
-    ) == 'win' else bootstrap_path
+    bootstrap_path = bootstrap_path + '.exe' if get_host_os() == 'win' else bootstrap_path
     reproxy_path = os.path.join(cipd_reclient_dir, 'reproxy')
     rbe_cfg_path = os.path.join(
         SRC_ROOT,
@@ -261,13 +258,10 @@ def setup_rbe(args):
   if args.rbe_platform:
     rbe_gn_args['rbe_platform'] = args.rbe_platform
 
-  rbe_gn_args['rbe_dir'] = os.path.join(
-      SRC_ROOT, 'buildtools', buildtools_dir(), 'reclient'
-  )
+  rbe_gn_args['rbe_dir'] = os.path.join(SRC_ROOT, 'buildtools', buildtools_dir(), 'reclient')
 
   rbe_gn_args['rbe_cfg'] = os.path.join(
-      SRC_ROOT, 'flutter', 'build', 'rbe',
-      'rewrapper-' + buildtools_dir() + '.cfg'
+      SRC_ROOT, 'flutter', 'build', 'rbe', 'rewrapper-' + buildtools_dir() + '.cfg'
   )
 
   if sys.platform == 'darwin':
@@ -304,9 +298,7 @@ def setup_goma(args):
     buildtools_platform = 'mac-x64'
 
   # Prefer the goma fetched by gclient if it exists.
-  cipd_goma_dir = os.path.join(
-      SRC_ROOT, 'buildtools', buildtools_platform, 'goma'
-  )
+  cipd_goma_dir = os.path.join(SRC_ROOT, 'buildtools', buildtools_platform, 'goma')
 
   # Next, if GOMA_DIR is set, use that install.
   goma_dir = os.environ.get('GOMA_DIR')
@@ -315,8 +307,7 @@ def setup_goma(args):
   # documentation.
   goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
   # GOMA has a different default (home) path on gWindows.
-  if not os.path.exists(goma_home_dir) and sys.platform.startswith(
-      ('cygwin', 'win')):
+  if not os.path.exists(goma_home_dir) and sys.platform.startswith(('cygwin', 'win')):
     goma_home_dir = os.path.join('c:\\', 'src', 'goma', 'goma-win64')
 
   if args.target_os == 'wasm' or args.web:
@@ -324,8 +315,7 @@ def setup_goma(args):
     goma_gn_args['goma_dir'] = None
     if args.goma:
       print('Disabling GOMA for wasm builds, it is not supported yet.')
-  elif args.goma is not False and not running_on_luci and os.path.exists(
-      cipd_goma_dir):
+  elif args.goma is not False and not running_on_luci and os.path.exists(cipd_goma_dir):
     goma_gn_args['use_goma'] = True
     goma_gn_args['goma_dir'] = cipd_goma_dir
   elif args.goma is not False and goma_dir and os.path.exists(goma_dir):
@@ -386,28 +376,24 @@ def to_gn_args(args):
           'you are trying to create an output directory to use for clangd ' +
           '(i.e. for VSCode integration), use a host build instead.\n\n' +
           'See https://github.com/flutter/flutter/wiki/' +
-          'Setting-up-the-Engine-development-environment' +
-          '#vscode-with-cc-intellisense-cc'
+          'Setting-up-the-Engine-development-environment' + '#vscode-with-cc-intellisense-cc'
       )
     gn_args['enable_unittests'] = True
   if args.no_enable_unittests:
     gn_args['enable_unittests'] = False
 
   # Skia GN args.
-  gn_args['skia_enable_flutter_defines'
-         ] = True  # Enable Flutter API guards in Skia.
+  gn_args['skia_enable_flutter_defines'] = True  # Enable Flutter API guards in Skia.
   gn_args['skia_use_dng_sdk'] = False  # RAW image handling.
   gn_args['skia_use_sfntly'] = False  # PDF handling dependency.
   gn_args['skia_enable_pdf'] = False  # PDF handling.
-  gn_args['skia_use_x11'
-         ] = False  # Never add the X11 dependency (only takes effect on Linux).
+  gn_args['skia_use_x11'] = False  # Never add the X11 dependency (only takes effect on Linux).
   gn_args['skia_use_wuffs'] = True
   gn_args['skia_use_expat'] = True
   gn_args['skia_use_fontconfig'] = args.enable_fontconfig
   gn_args['skia_use_icu'] = True
   gn_args['is_official_build'] = True  # Disable Skia test utilities.
-  gn_args['android_full_debug'
-         ] = args.target_os == 'android' and args.unoptimized
+  gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
   if args.clang is None:
     gn_args['is_clang'] = True
   else:
@@ -459,8 +445,7 @@ def to_gn_args(args):
   # does not exist. Further, we set the 'host_cpu' so that it shares the
   # bitwidth of the 32-bit arm target.
   if sys.platform.startswith(
-      ('cygwin', 'win')
-  ) and args.target_os == 'android' and gn_args['target_cpu'] == 'arm':
+      ('cygwin', 'win')) and args.target_os == 'android' and gn_args['target_cpu'] == 'arm':
     gn_args['host_cpu'] = 'x86'
     gn_args['current_cpu'] = 'x86'
 
@@ -498,8 +483,7 @@ def to_gn_args(args):
     gn_args['dart_default_optimization_level'] = '2'
 
   gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
-  gn_args['dart_component_kind'
-         ] = 'static_library'  # Always link Dart in statically.
+  gn_args['dart_component_kind'] = 'static_library'  # Always link Dart in statically.
   gn_args['embedder_for_target'] = args.embedder_for_target
   gn_args['dart_lib_export_symbols'] = False
   gn_args['flutter_runtime_mode'] = runtime_mode
@@ -537,9 +521,7 @@ def to_gn_args(args):
 
   # DBC is not supported anymore.
   if args.interpreter:
-    raise Exception(
-        '--interpreter is no longer needed on any supported platform.'
-    )
+    raise Exception('--interpreter is no longer needed on any supported platform.')
 
   if args.target_os is None:
     if sys.platform.startswith(('cygwin', 'win')):
@@ -589,8 +571,7 @@ def to_gn_args(args):
   # gn_args['enable_profiling'] = args.runtime_mode != 'release' and args.android_cpu != 'x86'
 
   # Make symbols visible in order to enable symbolization of unit test crash backtraces on Linux
-  gn_args['disable_hidden_visibility'
-         ] = args.target_os == 'linux' and args.unoptimized
+  gn_args['disable_hidden_visibility'] = args.target_os == 'linux' and args.unoptimized
 
   if args.arm_float_abi:
     gn_args['arm_float_abi'] = args.arm_float_abi
@@ -664,16 +645,14 @@ def to_gn_args(args):
 
   # Enable pointer compression on 64-bit mobile targets. iOS is excluded due to
   # its inability to allocate address space without allocating memory.
-  if args.target_os in ['android'] and gn_args['target_cpu'] in ['x64', 'arm64'
-                                                                ]:
+  if args.target_os in ['android'] and gn_args['target_cpu'] in ['x64', 'arm64']:
     gn_args['dart_use_compressed_pointers'] = True
 
   if args.fuchsia_target_api_level is not None:
     gn_args['fuchsia_target_api_level'] = args.fuchsia_target_api_level
   elif args.target_os == 'fuchsia':
     # Read the default target api level from a file so we can update it with a roller
-    with open(os.path.join(os.path.dirname(__file__),
-                           'fuchsia/target_api_level')) as file:
+    with open(os.path.join(os.path.dirname(__file__), 'fuchsia/target_api_level')) as file:
       gn_args['fuchsia_target_api_level'] = int(file.read().strip())
 
   # Flags for Dart features:
@@ -716,8 +695,7 @@ def to_gn_args(args):
   # gen_snapshot, but the build defines otherwise make it look like the build is
   # for a host Windows build and make GN think we will be building ANGLE.
   # Angle is not used on Mac hosts as there are no tests for the OpenGL backend.
-  if is_host_build(args) or (args.target_os == 'android' and
-                             get_host_os() == 'win'):
+  if is_host_build(args) or (args.target_os == 'android' and get_host_os() == 'win'):
     # Do not build unnecessary parts of the ANGLE tree.
     gn_args['angle_build_all'] = False
     gn_args['angle_has_astc_encoder'] = False
@@ -739,12 +717,9 @@ def to_gn_args(args):
     # Requires RTTI. We may want to build this in debug modes, punting on that
     # for now.
     gn_args['angle_enable_vulkan_validation_layers'] = False
-    gn_args['angle_vulkan_headers_dir'
-           ] = '//third_party/vulkan-deps/vulkan-headers/src'
-    gn_args['angle_vulkan_loader_dir'
-           ] = '//third_party/vulkan-deps/vulkan-loader/src'
-    gn_args['angle_vulkan_tools_dir'
-           ] = '//third_party/vulkan-deps/vulkan-tools/src'
+    gn_args['angle_vulkan_headers_dir'] = '//third_party/vulkan-deps/vulkan-headers/src'
+    gn_args['angle_vulkan_loader_dir'] = '//third_party/vulkan-deps/vulkan-loader/src'
+    gn_args['angle_vulkan_tools_dir'] = '//third_party/vulkan-deps/vulkan-tools/src'
 
   if args.darwin_extension_safe:
     gn_args['darwin_extension_safe'] = True
@@ -816,10 +791,7 @@ def to_gn_wasm_args(args, gn_args):
 def run_impeller_cmake(args):
   impeller_cmake_dir = os.path.join('third_party', 'impeller-cmake-example')
   if not os.path.isdir(os.path.join(SRC_ROOT, impeller_cmake_dir)):
-    print(
-        'The Impeller cmake example directory "{}" does not exist'
-        .format(impeller_cmake_dir)
-    )
+    print('The Impeller cmake example directory "{}" does not exist'.format(impeller_cmake_dir))
     return 1
   goma_gn_args = setup_goma(args)
   goma_dir = goma_gn_args['goma_dir']
@@ -897,31 +869,16 @@ def parse_args(args):
   )
 
   parser.add_argument(
-      '--target-os',
-      type=str,
-      choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win']
+      '--target-os', type=str, choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win']
   )
+  parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument(
-      '--android', dest='target_os', action='store_const', const='android'
+      '--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm'
   )
-  parser.add_argument(
-      '--android-cpu',
-      type=str,
-      choices=['arm', 'x64', 'x86', 'arm64'],
-      default='arm'
-  )
-  parser.add_argument(
-      '--ios', dest='target_os', action='store_const', const='ios'
-  )
-  parser.add_argument(
-      '--ios-cpu', type=str, choices=['arm', 'arm64'], default='arm64'
-  )
-  parser.add_argument(
-      '--mac', dest='target_os', action='store_const', const='mac'
-  )
-  parser.add_argument(
-      '--mac-cpu', type=str, choices=['x64', 'arm64'], default='x64'
-  )
+  parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
+  parser.add_argument('--ios-cpu', type=str, choices=['arm', 'arm64'], default='arm64')
+  parser.add_argument('--mac', dest='target_os', action='store_const', const='mac')
+  parser.add_argument('--mac-cpu', type=str, choices=['x64', 'arm64'], default='x64')
   parser.add_argument(
       '--force-mac-arm64',
       action='store_true',
@@ -930,15 +887,9 @@ def parse_args(args):
       'building host binaries.'
   )
   parser.add_argument('--simulator', action='store_true', default=False)
-  parser.add_argument(
-      '--linux', dest='target_os', action='store_const', const='linux'
-  )
-  parser.add_argument(
-      '--fuchsia', dest='target_os', action='store_const', const='fuchsia'
-  )
-  parser.add_argument(
-      '--wasm', dest='target_os', action='store_const', const='wasm'
-  )
+  parser.add_argument('--linux', dest='target_os', action='store_const', const='linux')
+  parser.add_argument('--fuchsia', dest='target_os', action='store_const', const='fuchsia')
+  parser.add_argument('--wasm', dest='target_os', action='store_const', const='wasm')
   parser.add_argument(
       '--wasm-use-dwarf',
       action='store_true',
@@ -947,25 +898,13 @@ def parse_args(args):
       'sourcemap files.'
   )
   parser.add_argument('--web', action='store_true', default=False)
-  parser.add_argument(
-      '--windows', dest='target_os', action='store_const', const='win'
-  )
+  parser.add_argument('--windows', dest='target_os', action='store_const', const='win')
 
-  parser.add_argument(
-      '--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm']
-  )
-  parser.add_argument(
-      '--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default='x64'
-  )
-  parser.add_argument(
-      '--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default='x64'
-  )
-  parser.add_argument(
-      '--simulator-cpu', type=str, choices=['x64', 'arm64'], default='x64'
-  )
-  parser.add_argument(
-      '--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp']
-  )
+  parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
+  parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default='x64')
+  parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default='x64')
+  parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default='x64')
+  parser.add_argument('--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp'])
 
   # Whether to compile in backtrace support.
   # Available for Windows and POSIX platforms whose libc includes execinfo.h.
@@ -994,10 +933,7 @@ def parse_args(args):
   parser.add_argument('--rbe', default=None, action='store_true')
   parser.add_argument('--no-rbe', dest='rbe', action='store_false')
   parser.add_argument(
-      '--rbe-server-address',
-      default=None,
-      type=str,
-      help='The reproxy serveraddress'
+      '--rbe-server-address', default=None, type=str, help='The reproxy serveraddress'
   )
   parser.add_argument(
       '--rbe-exec-strategy',
@@ -1020,10 +956,7 @@ def parse_args(args):
       'settings like the docker image to use to run the command.'
   )
   parser.add_argument(
-      '--rbe-dir',
-      default=None,
-      type=str,
-      help='The location of the reclient binaries.'
+      '--rbe-dir', default=None, type=str, help='The location of the reclient binaries.'
   )
 
   parser.add_argument('--goma', default=None, action='store_true')
@@ -1039,10 +972,7 @@ def parse_args(args):
       'variable may be set to 1 to achieve the same effect.'
   )
   parser.add_argument(
-      '--no-xcode-symlinks',
-      dest='xcode_symlinks',
-      default=False,
-      action='store_false'
+      '--no-xcode-symlinks', dest='xcode_symlinks', default=False, action='store_false'
   )
   parser.add_argument(
       '--depot-tools',
@@ -1056,44 +986,28 @@ def parse_args(args):
   parser.add_argument('--no-lto', dest='lto', action='store_false')
 
   parser.add_argument('--clang', action='store_const', const=True)
-  parser.add_argument(
-      '--no-clang', dest='clang', action='store_const', const=False
-  )
+  parser.add_argument('--no-clang', dest='clang', action='store_const', const=False)
 
+  parser.add_argument('--clang-static-analyzer', default=False, action='store_true')
   parser.add_argument(
-      '--clang-static-analyzer', default=False, action='store_true'
-  )
-  parser.add_argument(
-      '--no-clang-static-analyzer',
-      dest='clang_static_analyzer',
-      action='store_false'
+      '--no-clang-static-analyzer', dest='clang_static_analyzer', action='store_false'
   )
 
   parser.add_argument('--target-sysroot', type=str)
   parser.add_argument('--target-toolchain', type=str)
   parser.add_argument('--target-triple', type=str)
   parser.add_argument(
-      '--operator-new-alignment',
-      dest='operator_new_alignment',
-      type=str,
-      default=None
+      '--operator-new-alignment', dest='operator_new_alignment', type=str, default=None
   )
 
-  parser.add_argument(
-      '--macos-enable-metal', action='store_true', default=False
-  )
+  parser.add_argument('--macos-enable-metal', action='store_true', default=False)
   parser.add_argument('--enable-vulkan', action='store_true', default=False)
 
   parser.add_argument('--enable-fontconfig', action='store_true', default=False)
-  parser.add_argument(
-      '--enable-vulkan-validation-layers', action='store_true', default=False
-  )
+  parser.add_argument('--enable-vulkan-validation-layers', action='store_true', default=False)
 
   parser.add_argument(
-      '--embedder-for-target',
-      dest='embedder_for_target',
-      action='store_true',
-      default=False
+      '--embedder-for-target', dest='embedder_for_target', action='store_true', default=False
   )
 
   parser.add_argument('--coverage', default=False, action='store_true')
@@ -1117,9 +1031,7 @@ def parse_args(args):
       action='store_true',
       help='include trained dart2js and dartdevc snapshots. Enable only on steps that create an SDK'
   )
-  parser.add_argument(
-      '--no-full-dart-sdk', dest='full_dart_sdk', action='store_false'
-  )
+  parser.add_argument('--no-full-dart-sdk', dest='full_dart_sdk', action='store_false')
 
   parser.add_argument(
       '--build-canvaskit',
@@ -1132,8 +1044,7 @@ def parse_args(args):
       '--ide',
       default='',
       type=str,
-      help='The IDE files to generate using GN. Use `gn gen help` and look for the --ide flag to'
-      +
+      help='The IDE files to generate using GN. Use `gn gen help` and look for the --ide flag to' +
       ' see supported IDEs. If this flag is not specified, a platform specific default is selected.'
   )
 
@@ -1189,16 +1100,12 @@ def parse_args(args):
       '--prebuilt-dart-sdk',
       default=True,
       action='store_true',
-      help='Whether to use a prebuilt Dart SDK instead of building one. This defaults to '
-      + 'true and is enabled on CI.'
+      help='Whether to use a prebuilt Dart SDK instead of building one. This defaults to ' +
+      'true and is enabled on CI.'
   )
-  parser.add_argument(
-      '--no-prebuilt-dart-sdk', dest='prebuilt_dart_sdk', action='store_false'
-  )
+  parser.add_argument('--no-prebuilt-dart-sdk', dest='prebuilt_dart_sdk', action='store_false')
 
-  parser.add_argument(
-      '--fuchsia-target-api-level', dest='fuchsia_target_api_level'
-  )
+  parser.add_argument('--fuchsia-target-api-level', dest='fuchsia_target_api_level')
 
   # Flags for Dart features.
   parser.add_argument(
@@ -1245,9 +1152,7 @@ def parse_args(args):
       action='store_true',
       help='Enables tracing calls to Canvas.'
   )
-  parser.add_argument(
-      '--malioc-path', type=str, help='The path to the malioc tool.'
-  )
+  parser.add_argument('--malioc-path', type=str, help='The path to the malioc tool.')
 
   parser.add_argument(
       '--impeller-cmake-example',
