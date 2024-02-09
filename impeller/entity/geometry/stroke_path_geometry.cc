@@ -11,10 +11,28 @@
 #include "impeller/geometry/path_component.h"
 
 namespace impeller {
+using VS = SolidFillVertexShader;
 
-class PositionWriter : public VertexWriter {
+namespace {
+
+template <typename VertexWriter>
+using CapProc = std::function<void(VertexWriter& vtx_builder,
+                                   const Point& position,
+                                   const Point& offset,
+                                   Scalar scale,
+                                   bool reverse)>;
+
+template <typename VertexWriter>
+using JoinProc = std::function<void(VertexWriter& vtx_builder,
+                                    const Point& position,
+                                    const Point& start_offset,
+                                    const Point& end_offset,
+                                    Scalar miter_limit,
+                                    Scalar scale)>;
+
+class PositionWriter {
  public:
-  void AppendVertex(const Point& point) override {
+  void AppendVertex(const Point& point) {
     data_.emplace_back(SolidFillVertexShader::PerVertexData{.position = point});
   }
 
@@ -26,7 +44,7 @@ class PositionWriter : public VertexWriter {
   std::vector<SolidFillVertexShader::PerVertexData> data_ = {};
 };
 
-class PositionUVWriter : public VertexWriter {
+class PositionUVWriter {
  public:
   PositionUVWriter(Point texture_origin,
                    Size texture_coverage,
@@ -39,7 +57,7 @@ class PositionUVWriter : public VertexWriter {
     return data_;
   }
 
-  void AppendVertex(const Point& point) override {
+  void AppendVertex(const Point& point) {
     data_.emplace_back(TextureFillVertexShader::PerVertexData{
         .position = point,
         .texture_coords =
@@ -53,233 +71,14 @@ class PositionUVWriter : public VertexWriter {
   const Matrix effect_transform_;
 };
 
-StrokePathGeometry::StrokePathGeometry(const Path& path,
-                                       Scalar stroke_width,
-                                       Scalar miter_limit,
-                                       Cap stroke_cap,
-                                       Join stroke_join)
-    : path_(path),
-      stroke_width_(stroke_width),
-      miter_limit_(miter_limit),
-      stroke_cap_(stroke_cap),
-      stroke_join_(stroke_join) {}
-
-StrokePathGeometry::~StrokePathGeometry() = default;
-
-Scalar StrokePathGeometry::GetStrokeWidth() const {
-  return stroke_width_;
-}
-
-Scalar StrokePathGeometry::GetMiterLimit() const {
-  return miter_limit_;
-}
-
-Cap StrokePathGeometry::GetStrokeCap() const {
-  return stroke_cap_;
-}
-
-Join StrokePathGeometry::GetStrokeJoin() const {
-  return stroke_join_;
-}
-
-// static
-Scalar StrokePathGeometry::CreateBevelAndGetDirection(VertexWriter& vtx_builder,
-                                                      const Point& position,
-                                                      const Point& start_offset,
-                                                      const Point& end_offset) {
-  Point vtx = position;
-  vtx_builder.AppendVertex(vtx);
-
-  Scalar dir = start_offset.Cross(end_offset) > 0 ? -1 : 1;
-  vtx = position + start_offset * dir;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position + end_offset * dir;
-  vtx_builder.AppendVertex(vtx);
-
-  return dir;
-}
-
-// static
-void StrokePathGeometry::CreateMiterJoin(VertexWriter& vtx_builder,
-                                         const Point& position,
-                                         const Point& start_offset,
-                                         const Point& end_offset,
-                                         Scalar miter_limit,
-                                         Scalar scale) {
-  Point start_normal = start_offset.Normalize();
-  Point end_normal = end_offset.Normalize();
-
-  // 1 for no joint (straight line), 0 for max joint (180 degrees).
-  Scalar alignment = (start_normal.Dot(end_normal) + 1) / 2;
-  if (ScalarNearlyEqual(alignment, 1)) {
-    return;
-  }
-
-  Scalar direction = CreateBevelAndGetDirection(vtx_builder, position,
-                                                start_offset, end_offset);
-
-  Point miter_point = (((start_offset + end_offset) / 2) / alignment);
-  if (miter_point.GetDistanceSquared({0, 0}) > miter_limit * miter_limit) {
-    return;  // Convert to bevel when we exceed the miter limit.
-  }
-
-  // Outer miter point.
-  VS::PerVertexData vtx;
-  vtx.position = position + miter_point * direction;
-  vtx_builder.AppendVertex(vtx.position);
-}
-// static
-void StrokePathGeometry::CreateRoundJoin(VertexWriter& vtx_builder,
-                                         const Point& position,
-                                         const Point& start_offset,
-                                         const Point& end_offset,
-                                         Scalar miter_limit,
-                                         Scalar scale) {
-  Point start_normal = start_offset.Normalize();
-  Point end_normal = end_offset.Normalize();
-
-  // 0 for no joint (straight line), 1 for max joint (180 degrees).
-  Scalar alignment = 1 - (start_normal.Dot(end_normal) + 1) / 2;
-  if (ScalarNearlyEqual(alignment, 0)) {
-    return;
-  }
-
-  Scalar direction = CreateBevelAndGetDirection(vtx_builder, position,
-                                                start_offset, end_offset);
-
-  Point middle =
-      (start_offset + end_offset).Normalize() * start_offset.GetLength();
-  Point middle_normal = middle.Normalize();
-
-  Point middle_handle = middle + Point(-middle.y, middle.x) *
-                                     PathBuilder::kArcApproximationMagic *
-                                     alignment * direction;
-  Point start_handle = start_offset + Point(start_offset.y, -start_offset.x) *
-                                          PathBuilder::kArcApproximationMagic *
-                                          alignment * direction;
-
-  VS::PerVertexData vtx;
-  CubicPathComponent(start_offset, start_handle, middle_handle, middle)
-      .ToLinearPathComponents(scale, [&vtx_builder, direction, &vtx, position,
-                                      middle_normal](const Point& point) {
-        vtx.position = position + point * direction;
-        vtx_builder.AppendVertex(vtx.position);
-        vtx.position = position + (-point * direction).Reflect(middle_normal);
-        vtx_builder.AppendVertex(vtx.position);
-      });
-}
-
-// static
-void StrokePathGeometry::CreateBevelJoin(VertexWriter& vtx_builder,
-                                         const Point& position,
-                                         const Point& start_offset,
-                                         const Point& end_offset,
-                                         Scalar miter_limit,
-                                         Scalar scale) {
-  CreateBevelAndGetDirection(vtx_builder, position, start_offset, end_offset);
-}
-
-// static
-StrokePathGeometry::JoinProc StrokePathGeometry::GetJoinProc(Join stroke_join) {
-  switch (stroke_join) {
-    case Join::kBevel:
-      return &StrokePathGeometry::CreateBevelJoin;
-    case Join::kMiter:
-      return &StrokePathGeometry::CreateMiterJoin;
-    case Join::kRound:
-      return &StrokePathGeometry::CreateRoundJoin;
-  }
-}
-
-// static
-void StrokePathGeometry::CreateButtCap(VertexWriter& vtx_builder,
-                                       const Point& position,
-                                       const Point& offset,
-                                       Scalar scale,
-                                       bool reverse) {
-  Point orientation = offset * (reverse ? -1 : 1);
-  VS::PerVertexData vtx;
-  vtx.position = position + orientation;
-  vtx_builder.AppendVertex(vtx.position);
-  vtx.position = position - orientation;
-  vtx_builder.AppendVertex(vtx.position);
-}
-
-// static
-void StrokePathGeometry::CreateRoundCap(VertexWriter& vtx_builder,
-                                        const Point& position,
-                                        const Point& offset,
-                                        Scalar scale,
-                                        bool reverse) {
-  Point orientation = offset * (reverse ? -1 : 1);
-  Point forward(offset.y, -offset.x);
-  Point forward_normal = forward.Normalize();
-
-  CubicPathComponent arc;
-  if (reverse) {
-    arc = CubicPathComponent(
-        forward, forward + orientation * PathBuilder::kArcApproximationMagic,
-        orientation + forward * PathBuilder::kArcApproximationMagic,
-        orientation);
-  } else {
-    arc = CubicPathComponent(
-        orientation,
-        orientation + forward * PathBuilder::kArcApproximationMagic,
-        forward + orientation * PathBuilder::kArcApproximationMagic, forward);
-  }
-
-  Point vtx = position + orientation;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position - orientation;
-  vtx_builder.AppendVertex(vtx);
-
-  arc.ToLinearPathComponents(scale, [&vtx_builder, &vtx, forward_normal,
-                                     position](const Point& point) {
-    vtx = position + point;
-    vtx_builder.AppendVertex(vtx);
-    vtx = position + (-point).Reflect(forward_normal);
-    vtx_builder.AppendVertex(vtx);
-  });
-}
-
-// static
-void StrokePathGeometry::CreateSquareCap(VertexWriter& vtx_builder,
-                                         const Point& position,
-                                         const Point& offset,
-                                         Scalar scale,
-                                         bool reverse) {
-  Point orientation = offset * (reverse ? -1 : 1);
-  Point forward(offset.y, -offset.x);
-
-  Point vtx = position + orientation;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position - orientation;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position + orientation + forward;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position - orientation + forward;
-  vtx_builder.AppendVertex(vtx);
-}
-
-// static
-StrokePathGeometry::CapProc StrokePathGeometry::GetCapProc(Cap stroke_cap) {
-  switch (stroke_cap) {
-    case Cap::kButt:
-      return &StrokePathGeometry::CreateButtCap;
-    case Cap::kRound:
-      return &StrokePathGeometry::CreateRoundCap;
-    case Cap::kSquare:
-      return &StrokePathGeometry::CreateSquareCap;
-  }
-}
-
+template <typename VertexWriter>
 class StrokeGenerator {
  public:
   StrokeGenerator(const Path::Polyline& p_polyline,
                   const Scalar p_stroke_width,
                   const Scalar p_scaled_miter_limit,
-                  const StrokePathGeometry::JoinProc& p_join_proc,
-                  const StrokePathGeometry::CapProc& p_cap_proc,
+                  const JoinProc<VertexWriter>& p_join_proc,
+                  const CapProc<VertexWriter>& p_cap_proc,
                   const Scalar p_scale)
       : polyline(p_polyline),
         stroke_width(p_stroke_width),
@@ -476,8 +275,8 @@ class StrokeGenerator {
   const Path::Polyline& polyline;
   const Scalar stroke_width;
   const Scalar scaled_miter_limit;
-  const StrokePathGeometry::JoinProc& join_proc;
-  const StrokePathGeometry::CapProc& cap_proc;
+  const JoinProc<VertexWriter>& join_proc;
+  const CapProc<VertexWriter>& cap_proc;
   const Scalar scale;
 
   Point previous_offset;
@@ -485,18 +284,240 @@ class StrokeGenerator {
   SolidFillVertexShader::PerVertexData vtx;
 };
 
-// static
-void StrokePathGeometry::CreateSolidStrokeVertices(
-    VertexWriter& vtx_builder,
-    const Path::Polyline& polyline,
-    Scalar stroke_width,
-    Scalar scaled_miter_limit,
-    const StrokePathGeometry::JoinProc& join_proc,
-    const CapProc& cap_proc,
-    Scalar scale) {
+template <typename VertexWriter>
+void CreateButtCap(VertexWriter& vtx_builder,
+                   const Point& position,
+                   const Point& offset,
+                   Scalar scale,
+                   bool reverse) {
+  Point orientation = offset * (reverse ? -1 : 1);
+  VS::PerVertexData vtx;
+  vtx.position = position + orientation;
+  vtx_builder.AppendVertex(vtx.position);
+  vtx.position = position - orientation;
+  vtx_builder.AppendVertex(vtx.position);
+}
+
+template <typename VertexWriter>
+void CreateRoundCap(VertexWriter& vtx_builder,
+                    const Point& position,
+                    const Point& offset,
+                    Scalar scale,
+                    bool reverse) {
+  Point orientation = offset * (reverse ? -1 : 1);
+  Point forward(offset.y, -offset.x);
+  Point forward_normal = forward.Normalize();
+
+  CubicPathComponent arc;
+  if (reverse) {
+    arc = CubicPathComponent(
+        forward, forward + orientation * PathBuilder::kArcApproximationMagic,
+        orientation + forward * PathBuilder::kArcApproximationMagic,
+        orientation);
+  } else {
+    arc = CubicPathComponent(
+        orientation,
+        orientation + forward * PathBuilder::kArcApproximationMagic,
+        forward + orientation * PathBuilder::kArcApproximationMagic, forward);
+  }
+
+  Point vtx = position + orientation;
+  vtx_builder.AppendVertex(vtx);
+  vtx = position - orientation;
+  vtx_builder.AppendVertex(vtx);
+
+  arc.ToLinearPathComponents(scale, [&vtx_builder, &vtx, forward_normal,
+                                     position](const Point& point) {
+    vtx = position + point;
+    vtx_builder.AppendVertex(vtx);
+    vtx = position + (-point).Reflect(forward_normal);
+    vtx_builder.AppendVertex(vtx);
+  });
+}
+
+template <typename VertexWriter>
+void CreateSquareCap(VertexWriter& vtx_builder,
+                     const Point& position,
+                     const Point& offset,
+                     Scalar scale,
+                     bool reverse) {
+  Point orientation = offset * (reverse ? -1 : 1);
+  Point forward(offset.y, -offset.x);
+
+  Point vtx = position + orientation;
+  vtx_builder.AppendVertex(vtx);
+  vtx = position - orientation;
+  vtx_builder.AppendVertex(vtx);
+  vtx = position + orientation + forward;
+  vtx_builder.AppendVertex(vtx);
+  vtx = position - orientation + forward;
+  vtx_builder.AppendVertex(vtx);
+}
+
+template <typename VertexWriter>
+Scalar CreateBevelAndGetDirection(VertexWriter& vtx_builder,
+                                  const Point& position,
+                                  const Point& start_offset,
+                                  const Point& end_offset) {
+  Point vtx = position;
+  vtx_builder.AppendVertex(vtx);
+
+  Scalar dir = start_offset.Cross(end_offset) > 0 ? -1 : 1;
+  vtx = position + start_offset * dir;
+  vtx_builder.AppendVertex(vtx);
+  vtx = position + end_offset * dir;
+  vtx_builder.AppendVertex(vtx);
+
+  return dir;
+}
+
+template <typename VertexWriter>
+void CreateMiterJoin(VertexWriter& vtx_builder,
+                     const Point& position,
+                     const Point& start_offset,
+                     const Point& end_offset,
+                     Scalar miter_limit,
+                     Scalar scale) {
+  Point start_normal = start_offset.Normalize();
+  Point end_normal = end_offset.Normalize();
+
+  // 1 for no joint (straight line), 0 for max joint (180 degrees).
+  Scalar alignment = (start_normal.Dot(end_normal) + 1) / 2;
+  if (ScalarNearlyEqual(alignment, 1)) {
+    return;
+  }
+
+  Scalar direction = CreateBevelAndGetDirection(vtx_builder, position,
+                                                start_offset, end_offset);
+
+  Point miter_point = (((start_offset + end_offset) / 2) / alignment);
+  if (miter_point.GetDistanceSquared({0, 0}) > miter_limit * miter_limit) {
+    return;  // Convert to bevel when we exceed the miter limit.
+  }
+
+  // Outer miter point.
+  VS::PerVertexData vtx;
+  vtx.position = position + miter_point * direction;
+  vtx_builder.AppendVertex(vtx.position);
+}
+
+template <typename VertexWriter>
+void CreateRoundJoin(VertexWriter& vtx_builder,
+                     const Point& position,
+                     const Point& start_offset,
+                     const Point& end_offset,
+                     Scalar miter_limit,
+                     Scalar scale) {
+  Point start_normal = start_offset.Normalize();
+  Point end_normal = end_offset.Normalize();
+
+  // 0 for no joint (straight line), 1 for max joint (180 degrees).
+  Scalar alignment = 1 - (start_normal.Dot(end_normal) + 1) / 2;
+  if (ScalarNearlyEqual(alignment, 0)) {
+    return;
+  }
+
+  Scalar direction = CreateBevelAndGetDirection(vtx_builder, position,
+                                                start_offset, end_offset);
+
+  Point middle =
+      (start_offset + end_offset).Normalize() * start_offset.GetLength();
+  Point middle_normal = middle.Normalize();
+
+  Point middle_handle = middle + Point(-middle.y, middle.x) *
+                                     PathBuilder::kArcApproximationMagic *
+                                     alignment * direction;
+  Point start_handle = start_offset + Point(start_offset.y, -start_offset.x) *
+                                          PathBuilder::kArcApproximationMagic *
+                                          alignment * direction;
+
+  VS::PerVertexData vtx;
+  CubicPathComponent(start_offset, start_handle, middle_handle, middle)
+      .ToLinearPathComponents(scale, [&vtx_builder, direction, &vtx, position,
+                                      middle_normal](const Point& point) {
+        vtx.position = position + point * direction;
+        vtx_builder.AppendVertex(vtx.position);
+        vtx.position = position + (-point * direction).Reflect(middle_normal);
+        vtx_builder.AppendVertex(vtx.position);
+      });
+}
+
+template <typename VertexWriter>
+void CreateBevelJoin(VertexWriter& vtx_builder,
+                     const Point& position,
+                     const Point& start_offset,
+                     const Point& end_offset,
+                     Scalar miter_limit,
+                     Scalar scale) {
+  CreateBevelAndGetDirection(vtx_builder, position, start_offset, end_offset);
+}
+
+template <typename VertexWriter>
+void CreateSolidStrokeVertices(VertexWriter& vtx_builder,
+                               const Path::Polyline& polyline,
+                               Scalar stroke_width,
+                               Scalar scaled_miter_limit,
+                               const JoinProc<VertexWriter>& join_proc,
+                               const CapProc<VertexWriter>& cap_proc,
+                               Scalar scale) {
   StrokeGenerator stroke_generator(polyline, stroke_width, scaled_miter_limit,
                                    join_proc, cap_proc, scale);
   stroke_generator.Generate(vtx_builder);
+}
+
+// static
+template <typename VertexWriter>
+JoinProc<VertexWriter> GetJoinProc(Join stroke_join) {
+  switch (stroke_join) {
+    case Join::kBevel:
+      return &CreateBevelJoin<VertexWriter>;
+    case Join::kMiter:
+      return &CreateMiterJoin<VertexWriter>;
+    case Join::kRound:
+      return &CreateRoundJoin<VertexWriter>;
+  }
+}
+
+template <typename VertexWriter>
+CapProc<VertexWriter> GetCapProc(Cap stroke_cap) {
+  switch (stroke_cap) {
+    case Cap::kButt:
+      return &CreateButtCap<VertexWriter>;
+    case Cap::kRound:
+      return &CreateRoundCap<VertexWriter>;
+    case Cap::kSquare:
+      return &CreateSquareCap<VertexWriter>;
+  }
+}
+}  // namespace
+
+StrokePathGeometry::StrokePathGeometry(const Path& path,
+                                       Scalar stroke_width,
+                                       Scalar miter_limit,
+                                       Cap stroke_cap,
+                                       Join stroke_join)
+    : path_(path),
+      stroke_width_(stroke_width),
+      miter_limit_(miter_limit),
+      stroke_cap_(stroke_cap),
+      stroke_join_(stroke_join) {}
+
+StrokePathGeometry::~StrokePathGeometry() = default;
+
+Scalar StrokePathGeometry::GetStrokeWidth() const {
+  return stroke_width_;
+}
+
+Scalar StrokePathGeometry::GetMiterLimit() const {
+  return miter_limit_;
+}
+
+Cap StrokePathGeometry::GetStrokeCap() const {
+  return stroke_cap_;
+}
+
+Join StrokePathGeometry::GetStrokeJoin() const {
+  return stroke_join_;
 }
 
 GeometryResult StrokePathGeometry::GetPositionBuffer(
@@ -521,8 +542,8 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   auto polyline = renderer.GetTessellator()->CreateTempPolyline(path_, scale);
   CreateSolidStrokeVertices(position_writer, polyline, stroke_width,
                             miter_limit_ * stroke_width_ * 0.5f,
-                            GetJoinProc(stroke_join_), GetCapProc(stroke_cap_),
-                            scale);
+                            GetJoinProc<PositionWriter>(stroke_join_),
+                            GetCapProc<PositionWriter>(stroke_cap_), scale);
 
   BufferView buffer_view =
       host_buffer.Emplace(position_writer.GetData().data(),
@@ -566,9 +587,10 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
 
   PositionUVWriter writer(Point{0, 0}, texture_coverage.GetSize(),
                           effect_transform);
-  CreateSolidStrokeVertices(
-      writer, polyline, stroke_width, miter_limit_ * stroke_width_ * 0.5f,
-      GetJoinProc(stroke_join_), GetCapProc(stroke_cap_), scale);
+  CreateSolidStrokeVertices(writer, polyline, stroke_width,
+                            miter_limit_ * stroke_width_ * 0.5f,
+                            GetJoinProc<PositionUVWriter>(stroke_join_),
+                            GetCapProc<PositionUVWriter>(stroke_cap_), scale);
 
   BufferView buffer_view = host_buffer.Emplace(
       writer.GetData().data(),
