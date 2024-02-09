@@ -66,6 +66,7 @@ void main() {
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
       contentTextStyle: TextStyle(color: Color(0xff000000)),
       actionsPadding: EdgeInsets.all(8.0),
+      barrierColor: Color(0xff000005),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -80,6 +81,7 @@ void main() {
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
       'actionsPadding: EdgeInsets.all(8.0)',
+      'barrierColor: Color(0xff000005)',
     ]);
   });
 
@@ -498,5 +500,18 @@ void main() {
 
     final RenderParagraph content = _getTextRenderObject(tester, contentText);
     expect(content.text.style!.color, contentTextStyle.color);
+  });
+
+  testWidgets('Custom barrierColor - Theme', (WidgetTester tester) async {
+    const Color barrierColor = Colors.blue;
+    const SimpleDialog dialog = SimpleDialog();
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(barrierColor: barrierColor));
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
+    expect(modalBarrier.color, barrierColor);
   });
 }
