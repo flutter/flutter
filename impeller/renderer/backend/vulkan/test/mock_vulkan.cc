@@ -506,6 +506,12 @@ VkResult vkGetFenceStatus(VkDevice device, VkFence fence) {
   return mock_fence->GetStatus();
 }
 
+VkResult vkResetFences(VkDevice device,
+                       uint32_t fenceCount,
+                       const VkFence* fences) {
+  return VK_SUCCESS;
+}
+
 VkResult vkCreateDebugUtilsMessengerEXT(
     VkInstance instance,
     const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
@@ -773,6 +779,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkWaitForFences;
   } else if (strcmp("vkGetFenceStatus", pName) == 0) {
     return (PFN_vkVoidFunction)vkGetFenceStatus;
+  } else if (strcmp("vkResetFences", pName) == 0) {
+    return (PFN_vkVoidFunction)vkResetFences;
   } else if (strcmp("vkCreateDebugUtilsMessengerEXT", pName) == 0) {
     return (PFN_vkVoidFunction)vkCreateDebugUtilsMessengerEXT;
   } else if (strcmp("vkSetDebugUtilsObjectNameEXT", pName) == 0) {
