@@ -456,6 +456,7 @@
 ../../../flutter/third_party/accessibility/gfx/range/range_unittest.cc
 ../../../flutter/third_party/accessibility/gfx/test
 ../../../flutter/third_party/benchmark
+../../../flutter/third_party/depot_tools
 ../../../flutter/third_party/expat/.git
 ../../../flutter/third_party/expat/.github
 ../../../flutter/third_party/expat/.gitignore

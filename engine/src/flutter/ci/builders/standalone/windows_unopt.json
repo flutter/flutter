@@ -4,7 +4,8 @@
         "os=Windows-10"
     ],
     "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "use_rbe": true
     },
     "dependencies": [
         {
@@ -16,7 +17,9 @@
         "--runtime-mode",
         "debug",
         "--unoptimized",
-        "--prebuilt-dart-sdk"
+        "--prebuilt-dart-sdk",
+        "--rbe",
+        "--no-goma"
     ],
     "name": "host_debug_unopt",
     "ninja": {
