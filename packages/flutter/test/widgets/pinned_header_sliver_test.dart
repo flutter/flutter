@@ -95,4 +95,88 @@ void main() {
     expect(rect2.top, rect1.bottom);
     expect(rect2.width, 800);
   });
+
+  testWidgets('PinnedHeaderSliver: headers that do not start at the top', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => buildText('Item 0.$index'),
+                  childCount: 2,
+                ),
+              ),
+              PinnedHeaderSliver(
+                child: buildText('PinnedHeaderSliver 0'),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => buildText('Item 1.$index'),
+                  childCount: 2,
+                ),
+              ),
+              PinnedHeaderSliver(
+                child: buildText('PinnedHeaderSliver 1'),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => buildText('Item 2.$index'),
+                  childCount: 2,
+                ),
+              ),
+              PinnedHeaderSliver(
+                child: buildText('PinnedHeaderSliver 2'),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => buildText('Item $index'),
+                  childCount: 100,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double itemHeight = tester.getSize(find.byKey(buildKey('Item 0.0'))).height;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+    // Scroll 'Item 0.0' and 'Item 0.1' off the top
+    position.moveTo(itemHeight * 2);
+    await tester.pumpAndSettle();
+
+    // That leaves 'PinnedHeaderSliver 0' at the top
+    final Rect rect0 = tester.getRect(find.byKey(buildKey('PinnedHeaderSliver 0')));
+    expect(rect0.top, 0);
+    expect(rect0.width, 800);
+
+    // Scroll 'Item 1.0' and 'Item 1.1' behind 'PinnedHeaderSliver 0'
+    position.moveTo(itemHeight * 4);
+    await tester.pumpAndSettle();
+
+    // That leaves 'PinnedHeaderSliver 1' below 'PinnedHeaderSliver 0'
+    final Rect rect1 = tester.getRect(find.byKey(buildKey('PinnedHeaderSliver 1')));
+    expect(rect1.top, rect0.bottom);
+    expect(rect1.width, 800);
+
+    // Scroll 'Item 2.0' and 'Item 2.1' behind 'PinnedHeaderSliver 1'
+    position.moveTo(itemHeight * 6);
+    await tester.pumpAndSettle();
+
+    // That leaves 'PinnedHeaderSliver 2' below 'PinnedHeaderSliver 1'
+    final Rect rect2 = tester.getRect(find.byKey(buildKey('PinnedHeaderSliver 2')));
+    expect(rect2.top, rect1.bottom);
+    expect(rect2.width, 800);
+
+    // Scroll some more. The headers are already as close to the top as they
+    // can go - they will not have moved.
+    position.moveTo(itemHeight * 10);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(buildKey('PinnedHeaderSliver 0'))), rect0);
+    expect(tester.getRect(find.byKey(buildKey('PinnedHeaderSliver 1'))), rect1);
+    expect(tester.getRect(find.byKey(buildKey('PinnedHeaderSliver 2'))), rect2);
+  });
 }
