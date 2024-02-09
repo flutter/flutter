@@ -50,7 +50,7 @@ vars = {
   # https://chrome-infra-packages.appspot.com/p/fuchsia/third_party/goma/client
   'goma_version': ' git_revision:41b3bcb64014144a844153fd5588c36411fffb56',
 
-  'reclient_version': 'git_revision:f3883c2237b0eb9cc9524cb571b5ab8378f257e4',
+  'reclient_version': 'git_revision:f61c232b70bc425f0b562480312b114c444d460d',
 
   'gcloud_version': 'version:2@444.0.0.chromium.3',
 
@@ -274,7 +274,10 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '71c9a9987171ef3f8b60a9e0b346bce30ee65933',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '4c8d0040fca0fff675b487618ebaa8b7a8259858',
+
+  'src/flutter/third_party/depot_tools':
+  Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
 
   'src/flutter/third_party/rapidjson':
    Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
@@ -942,11 +945,22 @@ deps = {
     'dep_type': 'cipd',
   },
 
+  'src/buildtools/windows-x64/reclient': {
+    'packages': [
+      {
+        'package': 'infra/rbe/client/${{platform}}',
+        'version': Var('reclient_version'),
+      }
+    ],
+    'condition': 'use_rbe and download_windows_deps',
+    'dep_type': 'cipd',
+  },
+
   'src/flutter/build/rbe': {
     'packages': [
       {
         'package': 'flutter_internal/rbe/reclient_cfgs',
-        'version': 'U42C0v8jI-_YREjd8rbDEt0evvqvLWJ_NTkaiJ_Clt8C',
+        'version': 'CWmlhStMKG4dZhy-dW1ZQbnEB7ZhBS04itNBL-0yLvEC',
       }
     ],
     'condition': 'use_rbe',
