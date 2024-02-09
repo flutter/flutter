@@ -1481,7 +1481,8 @@ class TextPainter {
       }
     }
 
-    final int caretPositionCacheKey = anchorToLeadingEdge ? offset : -offset;
+    //print('> $offset, $anchorToLeadingEdge');
+    final int caretPositionCacheKey = anchorToLeadingEdge ? offset : -offset - 1;
     if (caretPositionCacheKey == cachedLayout._previousCaretPosition) {
       return _CaretMetrics.left(_caretMetrics);
     }
