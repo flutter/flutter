@@ -307,7 +307,7 @@ void main() {
     expectNoCupertinoToolbar();
 
     // Paste it at the end.
-    await gesture.down(textOffsetToPosition(tester, controller.text.length));
+    await gesture.down(textOffsetToPosition(tester, controller.text.length - 1));
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -417,7 +417,7 @@ void main() {
 
     // Paste it at the end.
     gesture = await tester.startGesture(
-      textOffsetToPosition(tester, controller.text.length),
+      textOffsetToPosition(tester, controller.text.length - 1),
       kind: PointerDeviceKind.mouse,
     );
     await tester.pump();
@@ -425,7 +425,7 @@ void main() {
     await gesture.removePointer();
     expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
     gesture = await tester.startGesture(
-      textOffsetToPosition(tester, controller.text.length),
+      textOffsetToPosition(tester, controller.text.length - 1),
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
@@ -10245,7 +10245,7 @@ void main() {
         await skipPastScrollingAnimation(tester);
         expect(controller.value.text, testValueB);
 
-        final Offset endOfTextPos = textOffsetToPosition(tester, 74);
+        final Offset endOfTextPos = textOffsetToPosition(tester, testValueB.length - 1);
 
         // Click on text field to gain focus, and move the selection.
         final TestGesture gesture = await tester.startGesture(endOfTextPos, kind: PointerDeviceKind.mouse);
@@ -12983,7 +12983,7 @@ void main() {
     final double lineHeight = findRenderEditable(tester).preferredLineHeight;
     final double firstCharY = textOffsetToPosition(tester, 0).dy;
     expect(
-      textOffsetToPosition(tester, textLength).dy,
+      textOffsetToPosition(tester, textLength - 1).dy,
       moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 1),
     );
 
@@ -13020,7 +13020,7 @@ void main() {
     // the field, it's now only two line heights down, because it has scrolled
     // down by one line.
     expect(
-      textOffsetToPosition(tester, textLength).dy,
+      textOffsetToPosition(tester, textLength - 1).dy,
       moreOrLessEquals(firstCharY + lineHeight, epsilon: 1),
     );
 

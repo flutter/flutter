@@ -493,9 +493,6 @@ final class _LineCaretMetrics {
 
   /// Whether the caret should be painted to the right of the [offset], or to
   /// the left of it.
-  ///
-  /// This is used to avoid painting the caret onto the glyph that it uses as the
-  /// anchor point, as the oopposite side is where the glyph resides.
   final bool paintToRight;
 
   _LineCaretMetrics shift(Offset offset) {
@@ -1509,8 +1506,8 @@ class TextPainter {
     final _LineCaretMetrics metrics =_LineCaretMetrics(
       offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
       paintToRight: switch (box.direction) {
-        TextDirection.ltr => !anchorToLeadingEdge,
-        TextDirection.rtl => anchorToLeadingEdge,
+        TextDirection.ltr => anchorToLeadingEdge,
+        TextDirection.rtl => !anchorToLeadingEdge,
       }
     );
 
@@ -1576,6 +1573,18 @@ class TextPainter {
     }
     return ui.GlyphInfo(rawGlyphInfo.graphemeClusterLayoutBounds.shift(cachedLayout.paintOffset), rawGlyphInfo.graphemeClusterCodeUnitRange, rawGlyphInfo.writingDirection);
   }
+
+   ui.GlyphInfo? getGlyphInfo(int offset) {
+    assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
+    final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
+    final ui.GlyphInfo? rawGlyphInfo = cachedLayout.paragraph.getGlyphInfoAt(offset);
+    if (rawGlyphInfo == null || cachedLayout.paintOffset == Offset.zero) {
+      return rawGlyphInfo;
+    }
+    return ui.GlyphInfo(rawGlyphInfo.graphemeClusterLayoutBounds.shift(cachedLayout.paintOffset), rawGlyphInfo.graphemeClusterCodeUnitRange, rawGlyphInfo.writingDirection);
+  }
+
 
   /// Returns the closest position within the text for the given pixel offset.
   TextPosition getPositionForOffset(Offset offset) {

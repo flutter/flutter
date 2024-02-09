@@ -181,11 +181,11 @@ void main() {
     }).toList();
   }
 
-  Offset textOffsetToBottomLeftPosition(WidgetTester tester, int offset) {
+  Offset textOffsetToBottomLeftPosition(WidgetTester tester, int offset, { TextAffinity affinity = TextAffinity.downstream }) {
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
       renderEditable.getEndpointsForSelection(
-        TextSelection.collapsed(offset: offset),
+        TextSelection.collapsed(offset: offset, affinity: affinity),
       ),
       renderEditable,
     );
@@ -3384,7 +3384,7 @@ void main() {
     expectCupertinoToolbarForFullSelection();
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
-      const TextSelection.collapsed(offset: 66), // Last character's position.
+      const TextSelection.collapsed(offset: 65, affinity: TextAffinity.upstream), // Last character's position.
     );
 
     expect(lastCharEndpoint.length, 1);
@@ -3396,7 +3396,7 @@ void main() {
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-310.30, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.00, epsilon: 1));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms', (WidgetTester tester) async {
@@ -3455,7 +3455,7 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 61, affinity: TextAffinity.upstream),
+      const TextSelection.collapsed(offset: 60),
     );
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
@@ -3477,7 +3477,7 @@ void main() {
     expectCupertinoToolbarForCollapsedSelection();
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
-      const TextSelection.collapsed(offset: 66), // Last character's position.
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream), // Last character's position.
     );
 
     expect(lastCharEndpoint.length, 1);
@@ -3489,7 +3489,7 @@ void main() {
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-310.20, epsilon: 0.25));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.00, epsilon: 0.25));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -7029,7 +7029,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection!.baseOffset);
+      final TextSelection selection = state.renderEditable.selection!;
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, selection.baseOffset, affinity: selection.affinity);
 
       expect(
         find.byType(CupertinoTextSelectionToolbar),
