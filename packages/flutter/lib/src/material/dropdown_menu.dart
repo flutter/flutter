@@ -759,6 +759,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                 _enableFilter = widget.enableFilter;
               });
             },
+            inputFormatters: widget.inputFormatters,
             decoration: InputDecoration(
               enabled: widget.enabled,
               label: widget.label,
@@ -770,8 +771,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                   child: widget.leadingIcon
               ) : null,
               suffixIcon: trailingButton,
-            ).applyDefaults(effectiveInputDecorationTheme),
-            inputFormatters: widget.inputFormatters,
+            ).applyDefaults(effectiveInputDecorationTheme)
         );
 
         if (widget.expandedInsets != null) {
