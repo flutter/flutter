@@ -2425,7 +2425,6 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 
     final Offset tapTargetSizeOffset = switch (theme.materialTapTargetSize) {
       MaterialTapTargetSize.padded => Offset.zero,
-
       // _dialogSize returns "padded" sizes.
       MaterialTapTargetSize.shrinkWrap => const Offset(0, -12),
     };
