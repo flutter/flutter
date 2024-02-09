@@ -32,12 +32,12 @@ class MaterialStateExample extends StatelessWidget {
     return Theme(
       data: themeData.copyWith(
         inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
-          prefixIconColor: MaterialStateColor.resolveWith(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
+          prefixIconColor: WidgetStateColor.resolveWith(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.focused)) {
                 return Colors.green;
               }
-              if (states.contains(MaterialState.error)) {
+              if (states.contains(WidgetState.error)) {
                 return Colors.red;
               }
               return Colors.grey;

@@ -281,11 +281,11 @@ class _HomeState extends State<Home> {
                   ),
                   TextButton(
                     style: ButtonStyle(
-                      side: MaterialStateProperty.resolveWith<BorderSide?>((Set<MaterialState> states) {
-                        return states.contains(MaterialState.hovered) ? primarySide3 : null;
+                      side: WidgetStateProperty.resolveWith<BorderSide?>((Set<WidgetState> states) {
+                        return states.contains(WidgetState.hovered) ? primarySide3 : null;
                       }),
-                      shape: MaterialStateProperty.resolveWith<OutlinedBorder>((Set<MaterialState> states) {
-                        return states.contains(MaterialState.hovered) ? shape0 : shape1;
+                      shape: WidgetStateProperty.resolveWith<OutlinedBorder>((Set<WidgetState> states) {
+                        return states.contains(WidgetState.hovered) ? shape0 : shape1;
                       }),
                     ),
                     onPressed: () {},
