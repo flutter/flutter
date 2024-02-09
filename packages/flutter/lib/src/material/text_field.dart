@@ -831,24 +831,16 @@ class TextField extends StatefulWidget {
   final UndoHistoryController? undoController;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-    // TODO(justinmc): Flag it off by default.
     // TODO(justinmc): Don't forget CupertinoTextField. Anything else like TextFormField?
-    if (defaultTargetPlatform == TargetPlatform.iOS &&
-        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
-      final (
-        startGlyphHeight: double startGlyphHeight,
-        endGlyphHeight: double endGlyphHeight,
-      ) = editableTextState.getGlyphHeights();
-      return _IOSSystemContextMenu(
-        renderBox: editableTextState.renderEditable,
-        startGlyphHeight: startGlyphHeight,
-        endGlyphHeight: endGlyphHeight,
-        selectionEndpoints: editableTextState.renderEditable.getEndpointsForSelection(editableTextState.textEditingValue.selection),
-      );
-    }
+    return AdaptiveAndSystemTextSelectionToolbar(
+      editableTextState: editableTextState,
+    );
+    /*
+    // TODO(justinmc): Replace the above with this, because it should be "flagged off" by default.
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
+    */
   }
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
@@ -1641,6 +1633,52 @@ TextStyle _m3CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField
+
+class AdaptiveAndSystemTextSelectionToolbar extends StatelessWidget {
+  const AdaptiveAndSystemTextSelectionToolbar({
+    super.key,
+    this.buttonItems,
+    required this.editableTextState,
+  });
+
+  /// The [ContextMenuButtonItem]s that will be turned into buttons in the menu.
+  ///
+  /// In Flutter-drawn menus, buttonItems are turned into button widgets that
+  /// are styled to match the current platform. In system menus, the buttons are
+  /// drawn by the system and not by Flutter.
+  ///
+  /// If null, the default buttons will be used.
+  final List<ContextMenuButtonItem>? buttonItems;
+
+  final EditableTextState editableTextState;
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform == TargetPlatform.iOS &&
+        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
+      final (
+        startGlyphHeight: double startGlyphHeight,
+        endGlyphHeight: double endGlyphHeight,
+      ) = editableTextState.getGlyphHeights();
+      return _IOSSystemContextMenu(
+        renderBox: editableTextState.renderEditable,
+        startGlyphHeight: startGlyphHeight,
+        endGlyphHeight: endGlyphHeight,
+        selectionEndpoints: editableTextState.renderEditable.getEndpointsForSelection(editableTextState.textEditingValue.selection),
+        buttonItems: buttonItems,
+      );
+    }
+    if (buttonItems != null) {
+      return AdaptiveTextSelectionToolbar.buttonItems(
+        buttonItems: buttonItems,
+        anchors: editableTextState.contextMenuAnchors,
+      );
+    }
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
+}
 
 class _IOSSystemContextMenu extends StatefulWidget {
   _IOSSystemContextMenu({
