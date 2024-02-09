@@ -1691,7 +1691,11 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier, WidgetsBindingO
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (_suspendedNode != null) {
+      if (_primaryFocus != rootScope) {
+        assert(_focusDebug(() => 'focus changed while app was paused, ignoring $_suspendedNode'));
+        _suspendedNode = null;
+      }
+      else if (_suspendedNode != null) {
         assert(_focusDebug(() => 'marking node $_suspendedNode to be focused'));
         _markedForFocus = _suspendedNode;
         _suspendedNode = null;
