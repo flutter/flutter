@@ -291,7 +291,7 @@ abstract class Emulator {
       return <String>[];
     }
 
-    final List<String> tableHeader = <String>[
+    const List<String> tableHeader = <String>[
       'Id',
       'Name',
       'Manufacturer',
