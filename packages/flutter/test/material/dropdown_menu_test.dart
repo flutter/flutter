@@ -1973,7 +1973,7 @@ void main() {
     expect(box, paints..rrect(color: theme.colorScheme.primary));
   });
 
-  testWidgets('DropdownMenu honor inputFormatters', (WidgetTester tester) async {
+  testWidgets('DropdownMenu honors inputFormatters', (WidgetTester tester) async {
     int called = 0;
     final TextInputFormatter formatter = TextInputFormatter.withFunction(
       (TextEditingValue oldValue, TextEditingValue newValue) {
