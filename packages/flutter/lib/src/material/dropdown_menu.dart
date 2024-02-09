@@ -164,6 +164,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.expandedInsets,
     this.searchCallback,
     required this.dropdownMenuEntries,
+    this.inputFormatters,
   });
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -388,6 +389,9 @@ class DropdownMenu<T> extends StatefulWidget {
   /// the default function will return the index of the first matching result
   /// which contains the contents of the text input field.
   final SearchCallback<T>? searchCallback;
+
+  /// {@macro flutter.widgets.editableText.inputFormatters}
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -766,7 +770,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                   child: widget.leadingIcon
               ) : null,
               suffixIcon: trailingButton,
-            ).applyDefaults(effectiveInputDecorationTheme)
+            ).applyDefaults(effectiveInputDecorationTheme),
+            inputFormatters: widget.inputFormatters,
         );
 
         if (widget.expandedInsets != null) {
