@@ -1327,7 +1327,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
-/// barrier that darkens everything below the dialog. If `null` the default color
+/// barrier that darkens everything below the dialog. If `null` the `barrierColor`
+/// field from `DialogTheme` is used. If that is `null` the default color
 /// `Colors.black54` is used.
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
@@ -1428,7 +1429,7 @@ Future<T?> showDialog<T>({
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
     context: context,
     builder: builder,
-    barrierColor: barrierColor ?? Colors.black54,
+    barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
     useSafeArea: useSafeArea,

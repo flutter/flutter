@@ -38,6 +38,7 @@ class DialogTheme with Diagnosticable {
     this.titleTextStyle,
     this.contentTextStyle,
     this.actionsPadding,
+    this.barrierColor,
   });
 
   /// Overrides the default value for [Dialog.backgroundColor].
@@ -72,6 +73,9 @@ class DialogTheme with Diagnosticable {
   /// Used to configure the [IconTheme] for the [AlertDialog.icon] widget.
   final Color? iconColor;
 
+  /// Overrides the default value for [barrierColor] in [showDialog].
+  final Color? barrierColor;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DialogTheme copyWith({
@@ -85,6 +89,7 @@ class DialogTheme with Diagnosticable {
     TextStyle? titleTextStyle,
     TextStyle? contentTextStyle,
     EdgeInsetsGeometry? actionsPadding,
+    Color? barrierColor,
   }) {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -97,6 +102,7 @@ class DialogTheme with Diagnosticable {
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
       actionsPadding: actionsPadding ?? this.actionsPadding,
+      barrierColor: barrierColor ?? this.barrierColor,
     );
   }
 
@@ -123,6 +129,7 @@ class DialogTheme with Diagnosticable {
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
       actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
+      barrierColor: Color.lerp(a?.barrierColor, b?.barrierColor, t),
     );
   }
 
@@ -147,7 +154,8 @@ class DialogTheme with Diagnosticable {
         && other.iconColor == iconColor
         && other.titleTextStyle == titleTextStyle
         && other.contentTextStyle == contentTextStyle
-        && other.actionsPadding == actionsPadding;
+        && other.actionsPadding == actionsPadding
+        && other.barrierColor == barrierColor;
   }
 
   @override
@@ -163,5 +171,6 @@ class DialogTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
+    properties.add(ColorProperty('barrierColor', barrierColor));
   }
 }
