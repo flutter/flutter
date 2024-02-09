@@ -93,10 +93,11 @@ class RenderImage extends RenderBox {
       value.dispose();
       return;
     }
+    final bool sizeChanged = _image?.width != value?.width || _image?.height != value?.height;
     _image?.dispose();
     _image = value;
     markNeedsPaint();
-    if (_width == null || _height == null) {
+    if (sizeChanged && (_width == null || _height == null)) {
       markNeedsLayout();
     }
   }
