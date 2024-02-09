@@ -115,22 +115,6 @@ static std::optional<vk::CompositeAlphaFlagBitsKHR> ChooseAlphaCompositionMode(
   return std::nullopt;
 }
 
-static std::optional<vk::Queue> ChoosePresentQueue(
-    const vk::PhysicalDevice& physical_device,
-    const vk::Device& device,
-    const vk::SurfaceKHR& surface) {
-  const auto families = physical_device.getQueueFamilyProperties();
-  for (size_t family_index = 0u; family_index < families.size();
-       family_index++) {
-    auto [result, supported] =
-        physical_device.getSurfaceSupportKHR(family_index, surface);
-    if (result == vk::Result::eSuccess && supported) {
-      return device.getQueue(family_index, 0u);
-    }
-  }
-  return std::nullopt;
-}
-
 std::shared_ptr<SwapchainImplVK> SwapchainImplVK::Create(
     const std::shared_ptr<Context>& context,
     vk::UniqueSurfaceKHR surface,
@@ -181,15 +165,6 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
       ChooseAlphaCompositionMode(surface_caps.supportedCompositeAlpha);
   if (!composite.has_value()) {
     VALIDATION_LOG << "No composition mode supported.";
-    return;
-  }
-
-  auto present_queue = ChoosePresentQueue(vk_context.GetPhysicalDevice(),  //
-                                          vk_context.GetDevice(),          //
-                                          *surface                         //
-  );
-  if (!present_queue.has_value()) {
-    VALIDATION_LOG << "Could not pick present queue.";
     return;
   }
 
@@ -288,7 +263,6 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
 
   context_ = context;
   surface_ = std::move(surface);
-  present_queue_ = present_queue.value();
   surface_format_ = swapchain_info.imageFormat;
   swapchain_ = std::move(swapchain);
   images_ = std::move(swapchain_images);
@@ -476,7 +450,7 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
   present_info.setImageIndices(indices);
   present_info.setWaitSemaphores(*sync->present_ready);
 
-  auto result = present_queue_.presentKHR(present_info);
+  auto result = context.GetGraphicsQueue()->Present(present_info);
 
   switch (result) {
     case vk::Result::eErrorOutOfDateKHR:

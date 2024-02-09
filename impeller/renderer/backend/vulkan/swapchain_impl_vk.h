@@ -66,7 +66,6 @@ class SwapchainImplVK final
  private:
   std::weak_ptr<Context> context_;
   vk::UniqueSurfaceKHR surface_;
-  vk::Queue present_queue_ = {};
   vk::Format surface_format_ = vk::Format::eUndefined;
   vk::UniqueSwapchainKHR swapchain_;
   std::vector<std::shared_ptr<SwapchainImageVK>> images_;
