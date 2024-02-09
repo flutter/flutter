@@ -566,12 +566,10 @@ class Switch extends StatelessWidget {
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
       ?? switchTheme.materialTapTargetSize
       ?? theme.materialTapTargetSize;
-    switch (effectiveMaterialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        return Size(switchConfig.switchWidth, switchConfig.switchHeight);
-      case MaterialTapTargetSize.shrinkWrap:
-        return Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed);
-    }
+    return switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded     => Size(switchConfig.switchWidth, switchConfig.switchHeight),
+      MaterialTapTargetSize.shrinkWrap => Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed),
+    };
   }
 
   @override
@@ -815,12 +813,10 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         ..curve = Curves.linear
         ..reverseCurve = null;
       final double delta = details.primaryDelta! / _trackInnerLength;
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          positionController.value -= delta;
-        case TextDirection.ltr:
-          positionController.value += delta;
-      }
+      positionController.value += switch (Directionality.of(context)) {
+        TextDirection.rtl => -delta,
+        TextDirection.ltr =>  delta,
+      };
     }
   }
 
@@ -1422,13 +1418,10 @@ class _SwitchPainter extends ToggleablePainter {
   void paint(Canvas canvas, Size size) {
     final double currentValue = position.value;
 
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - currentValue;
-      case TextDirection.ltr:
-        visualPosition = currentValue;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - currentValue,
+      TextDirection.ltr => currentValue,
+    };
     if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
       _stopPressAnimation = true;
     } else {

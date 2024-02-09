@@ -292,14 +292,11 @@ class Typography with Diagnosticable {
 
   /// Returns one of [englishLike], [dense], or [tall].
   TextTheme geometryThemeFor(ScriptCategory category) {
-    switch (category) {
-      case ScriptCategory.englishLike:
-        return englishLike;
-      case ScriptCategory.dense:
-        return dense;
-      case ScriptCategory.tall:
-        return tall;
-    }
+    return switch (category) {
+      ScriptCategory.englishLike => englishLike,
+      ScriptCategory.dense       => dense,
+      ScriptCategory.tall        => tall,
+    };
   }
 
   /// Creates a copy of this [Typography] with the given fields

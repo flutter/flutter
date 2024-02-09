@@ -511,14 +511,10 @@ class _IndicatorPainter extends CustomPainter {
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
     double tabLeft, tabRight;
-    switch (_currentTextDirection!) {
-      case TextDirection.rtl:
-        tabLeft = _currentTabOffsets![tabIndex + 1];
-        tabRight = _currentTabOffsets![tabIndex];
-      case TextDirection.ltr:
-        tabLeft = _currentTabOffsets![tabIndex];
-        tabRight = _currentTabOffsets![tabIndex + 1];
-    }
+    (tabLeft, tabRight) = switch (_currentTextDirection!) {
+      TextDirection.rtl => (_currentTabOffsets![tabIndex + 1], _currentTabOffsets![tabIndex]),
+      TextDirection.ltr => (_currentTabOffsets![tabIndex], _currentTabOffsets![tabIndex + 1]),
+    };
 
     if (indicatorSize == TabBarIndicatorSize.label) {
       final double tabWidth = tabKeys[tabIndex].currentContext!.size!.width;
