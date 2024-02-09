@@ -1016,128 +1016,90 @@ void main() {
   variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets('cursor layout', (WidgetTester tester) async {
-    EditableText.debugDeterministicCursor = true;
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-
-    late String changedValue;
-    final Widget widget = MaterialApp(
-      home: RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: Column(
-          children: <Widget>[
-            const SizedBox(width: 10, height: 10),
-            EditableText(
-              backgroundCursorColor: Colors.grey,
-              key: editableTextKey,
-              controller: controller,
-              focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
-              cursorColor: Colors.blue,
-              selectionControls: materialTextSelectionControls,
-              keyboardType: TextInputType.text,
-              onChanged: (String value) {
-                changedValue = value;
-              },
-              cursorWidth: 15.0,
-            ),
-          ],
+  testWidgets('Material2 - Default cursor layout has correct height and vertical offset on iOS and macOS', (WidgetTester tester) async {
+    await tester.pumpWidget(
+       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Material(
+          child: TextField(autofocus: true),
         ),
       ),
     );
-    await tester.pumpWidget(widget);
 
-    // Populate a fake clipboard.
-    const String clipboardContent = 'Hello world!';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData') {
-        return const <String, dynamic>{'text': clipboardContent};
-      }
-      if (methodCall.method == 'Clipboard.hasStrings') {
-        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
-      }
-      return null;
-    });
+    // Default style has a font size of 16 and a line height of 1.0, so preferredLineHeight is 16.
+    // On macOS and iOS the cursor is extended by 2.0 for fidelity.
+    const double cursorExtention = 2.0;
+    const double expectedCursorHeight = 16.0 + cursorExtention;
+    // RenderEditable.getLocalRectForCaret applies a vertical offset on Apple platforms.
+    const double verticalOffset = 2.0;
 
-    // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
-    await tester.longPress(textFinder);
-    tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Paste'));
-    await tester.pump();
-
-    expect(changedValue, clipboardContent);
-
-    await expectLater(
-      find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.2.png'),
-    );
-    EditableText.debugDeterministicCursor = false;
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    expect(renderEditable, paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.0, -verticalOffset / 2, 2.0, expectedCursorHeight),
+        const Radius.circular(2)
+      )
+    ));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('cursor layout has correct height', (WidgetTester tester) async {
-    EditableText.debugDeterministicCursor = true;
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-
-    late String changedValue;
-    final Widget widget = MaterialApp(
-      home: RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: Column(
-          children: <Widget>[
-            const SizedBox(width: 10, height: 10),
-            EditableText(
-              backgroundCursorColor: Colors.grey,
-              key: editableTextKey,
-              controller: controller,
-              focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
-              cursorColor: Colors.blue,
-              selectionControls: materialTextSelectionControls,
-              keyboardType: TextInputType.text,
-              onChanged: (String value) {
-                changedValue = value;
-              },
-              cursorWidth: 15.0,
-              cursorHeight: 30.0,
-            ),
-          ],
+  testWidgets('Material3 - Default cursor layout has correct height and vertical offset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(autofocus: true),
         ),
       ),
     );
-    await tester.pumpWidget(widget);
 
-    // Populate a fake clipboard.
-    const String clipboardContent = 'Hello world!';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData') {
-        return const <String, dynamic>{'text': clipboardContent};
-      }
-      if (methodCall.method == 'Clipboard.hasStrings') {
-        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
-      }
-      return null;
-    });
+    // Default style has a font size of 16 and a line height of 1.5, so preferredLineHeight is 24.
+    const double expectedCursorHeight = 24.0;
 
-    // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
-    await tester.longPress(textFinder);
-    tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pumpAndSettle();
+    expect(findRenderEditable(tester), paints..rect(
+      rect: const Rect.fromLTWH(0.0, 0.0, 2.0, expectedCursorHeight),
+    ));
+  });
 
-    await tester.tap(find.text('Paste'));
-    await tester.pump();
-
-    expect(changedValue, clipboardContent);
-
-    await expectLater(
-      find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.3.png'),
+  testWidgets('Material3 - Default cursor layout has correct height and vertical offset on iOS and macOS', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(autofocus: true),
+        ),
+      ),
     );
-    EditableText.debugDeterministicCursor = false;
+
+    // Default style has a font size of 16 and a line height of 1.5, so preferredLineHeight is 24.
+    // On macOS and iOS the cursor is extended by 2.0 for fidelity.
+    const double cursorReduction = 2.0;
+    const double expectedCursorHeight = 24.0 - cursorReduction;
+    // RenderEditable.getLocalRectForCaret applies a vertical offset on Apple platforms.
+    const double verticalOffset = 2.0;
+
+    expect(findRenderEditable(tester), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.0, (verticalOffset + cursorReduction) / 2, 2.0, expectedCursorHeight),
+        const Radius.circular(2)
+      )
+    ));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('Material3 - Default cursor layout has correct height and vertical offset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(autofocus: true),
+        ),
+      ),
+    );
+
+    // Default style has a font size of 16 and a line height of 1.5, so preferredLineHeight is 24.
+    // On macOS and iOS the cursor is extended by 2.0 for fidelity.
+    const double expectedCursorHeight = 24.0;
+
+    expect(findRenderEditable(tester), paints..rect(
+      rect: const Rect.fromLTWH(0.0, 0.0, 2.0, expectedCursorHeight),
+    ));
+  });
 
   testWidgets('password briefly does not show last character when disabled by system', (WidgetTester tester) async {
     final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;

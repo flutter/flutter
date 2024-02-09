@@ -22,6 +22,7 @@ import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
+const double _kCaretHeightExtention = 2.0; // pixels
 
 // The additional size on the x and y axis with which to expand the prototype
 // cursor to render the floating cursor in pixels.
@@ -1837,6 +1838,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
           caretRect.left,
           caretRect.top - _kCaretHeightOffset,
           caretRect.width,
+          // TODO(bleroux): check if it is intended to use caretHeight instead of caretRect.height.
           caretHeight,
         );
     }
@@ -2285,7 +2287,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        _caretPrototype = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight + 2);
+        final double styleHeight = _textPainter.text?.style?.height ?? 1.0;
+        // Extend the cursor height only when the text style height is less than 1.3.
+        // Extending the cursor height made sense on M2 whose default text style had
+        // a 1.0 line height. On M3, whose default line height is 1.5, the extension
+        // looks bad and might overflow on the label.
+        // When line height is equal or superior to 1.3, cursor height is reduced by
+        // a small amount to get a better rendering.
+        // TODO(bleroux): replace this fix with a long term solution, see
+        // https://github.com/flutter/flutter/issues/7034 and
+        // https://github.com/flutter/flutter/issues/120836.
+        _caretPrototype = styleHeight < 1.3
+          ? Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight + _kCaretHeightExtention)
+          : Rect.fromLTWH(0.0, _kCaretHeightExtention / 2, cursorWidth, cursorHeight - _kCaretHeightExtention);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
