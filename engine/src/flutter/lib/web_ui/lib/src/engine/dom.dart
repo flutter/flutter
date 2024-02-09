@@ -608,6 +608,10 @@ extension DomElementExtension on DomElement {
   external DomElement? _querySelector(JSString selectors);
   DomElement? querySelector(String selectors) => _querySelector(selectors.toJS);
 
+  @JS('closest')
+  external DomElement? _closest(JSString selectors);
+  DomElement? closest(String selectors) => _closest(selectors.toJS);
+
   @JS('matches')
   external JSBoolean _matches(JSString selectors);
   bool matches(String selectors) => _matches(selectors.toJS).toDart;
