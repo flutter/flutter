@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [WidgetStateBorderSide].
+/// Flutter code sample for [MaterialStateBorderSide].
 
 void main() => runApp(const MaterialStateBorderSideExampleApp());
 
@@ -44,8 +44,8 @@ class _MaterialStateBorderSideExampleState extends State<MaterialStateBorderSide
           isSelected = value;
         });
       },
-      side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
-        if (states.contains(WidgetState.selected)) {
+      side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
           return const BorderSide(color: Colors.red);
         }
         return null; // Defer to default value on the theme or widget.

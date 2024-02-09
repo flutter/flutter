@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [WidgetStateMouseCursor].
+/// Flutter code sample for [MaterialStateMouseCursor].
 
 void main() => runApp(const MaterialStateMouseCursorExampleApp());
 
@@ -24,12 +24,12 @@ class MaterialStateMouseCursorExampleApp extends StatelessWidget {
   }
 }
 
-class ListTileCursor extends WidgetStateMouseCursor {
+class ListTileCursor extends MaterialStateMouseCursor {
   const ListTileCursor();
 
   @override
-  MouseCursor resolve(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
       return SystemMouseCursors.forbidden;
     }
     return SystemMouseCursors.click;

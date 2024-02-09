@@ -97,7 +97,7 @@ class _MyWidgetState extends State<MyWidget> {
       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       child: RadioTheme(
         data: RadioThemeData(
-          fillColor: WidgetStateProperty.all<Color>(Colors.white),
+          fillColor: MaterialStateProperty.all<Color>(Colors.white),
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),

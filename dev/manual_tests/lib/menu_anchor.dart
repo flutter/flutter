@@ -42,33 +42,33 @@ class _HomeState extends State<Home> {
     if (_funkyTheme) {
       menuTheme = const MenuThemeData(
         style: MenuStyle(
-          shape: WidgetStatePropertyAll<OutlinedBorder>(
+          shape: MaterialStatePropertyAll<OutlinedBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
                 Radius.circular(10),
               ),
             ),
           ),
-          backgroundColor: WidgetStatePropertyAll<Color?>(Colors.blue),
-          elevation: WidgetStatePropertyAll<double?>(10),
-          padding: WidgetStatePropertyAll<EdgeInsetsDirectional>(
+          backgroundColor: MaterialStatePropertyAll<Color?>(Colors.blue),
+          elevation: MaterialStatePropertyAll<double?>(10),
+          padding: MaterialStatePropertyAll<EdgeInsetsDirectional>(
             EdgeInsetsDirectional.all(20),
           ),
         ),
       );
       menuButtonTheme = const MenuButtonThemeData(
         style: ButtonStyle(
-          shape: WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
-          backgroundColor: WidgetStatePropertyAll<Color?>(Colors.green),
-          foregroundColor: WidgetStatePropertyAll<Color?>(Colors.white),
+          shape: MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+          backgroundColor: MaterialStatePropertyAll<Color?>(Colors.green),
+          foregroundColor: MaterialStatePropertyAll<Color?>(Colors.white),
         ),
       );
       menuBarTheme = const MenuBarThemeData(
         style: MenuStyle(
-          shape: WidgetStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
-          backgroundColor: WidgetStatePropertyAll<Color?>(Colors.blue),
-          elevation: WidgetStatePropertyAll<double?>(10),
-          padding: WidgetStatePropertyAll<EdgeInsetsDirectional>(
+          shape: MaterialStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
+          backgroundColor: MaterialStatePropertyAll<Color?>(Colors.blue),
+          elevation: MaterialStatePropertyAll<double?>(10),
+          padding: MaterialStatePropertyAll<EdgeInsetsDirectional>(
             EdgeInsetsDirectional.all(20),
           ),
         ),
@@ -85,10 +85,10 @@ class _HomeState extends State<Home> {
               menuTheme: _transparent
                   ? MenuThemeData(
                       style: MenuStyle(
-                        backgroundColor: WidgetStatePropertyAll<Color>(
+                        backgroundColor: MaterialStatePropertyAll<Color>(
                           Colors.blue.withOpacity(0.12),
                         ),
-                        elevation: const WidgetStatePropertyAll<double>(0),
+                        elevation: const MaterialStatePropertyAll<double>(0),
                       ),
                     )
                   : menuTheme,
