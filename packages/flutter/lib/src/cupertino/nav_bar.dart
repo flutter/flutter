@@ -807,7 +807,7 @@ class _LargeTitleNavigationBarSliverDelegate
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
-    final double expandedState = shrinkOffset > minExtent ? (shrinkOffset - minExtent) / (maxExtent - minExtent) : 0;
+    final double expandedState = shrinkOffset > minExtent ? clampDouble((shrinkOffset - minExtent) / (maxExtent - minExtent) * 2, 0, 1) : 0;
 
     final _PersistentNavigationBar persistentNavigationBar =
         _PersistentNavigationBar(
