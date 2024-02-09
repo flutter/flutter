@@ -65,7 +65,6 @@ public class FlutterRenderer implements TextureRegistry {
   @NonNull private final AtomicLong nextTextureId = new AtomicLong(0L);
   @Nullable private Surface surface;
   private boolean isDisplayingFlutterUi = false;
-  private int isRenderingToImageViewCount = 0;
   private final Handler handler = new Handler();
 
   @NonNull
@@ -97,19 +96,6 @@ public class FlutterRenderer implements TextureRegistry {
    */
   public boolean isDisplayingFlutterUi() {
     return isDisplayingFlutterUi;
-  }
-
-  /**
-   * Informs the renderer whether the surface it is rendering to is backend by a {@code
-   * FlutterImageView}, which requires additional synchonization in the Vulkan backend.
-   */
-  public void SetRenderingToImageView(boolean value) {
-    if (value) {
-      isRenderingToImageViewCount++;
-    } else {
-      isRenderingToImageViewCount--;
-    }
-    flutterJNI.SetIsRenderingToImageView(isRenderingToImageViewCount > 0);
   }
 
   /**

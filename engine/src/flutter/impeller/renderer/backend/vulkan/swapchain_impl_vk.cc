@@ -30,13 +30,11 @@ struct FrameSynchronizer {
   vk::UniqueSemaphore render_ready;
   vk::UniqueSemaphore present_ready;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
-  /// @brief A latch that is signaled _after_ a given swapchain image is
-  ///        presented.
-  std::shared_ptr<fml::Semaphore> present_semaphore;
   bool is_valid = false;
 
   explicit FrameSynchronizer(const vk::Device& device) {
-    auto acquire_res = device.createFenceUnique({});
+    auto acquire_res = device.createFenceUnique(
+        vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
     auto render_res = device.createSemaphoreUnique({});
     auto present_res = device.createSemaphoreUnique({});
     if (acquire_res.result != vk::Result::eSuccess ||
@@ -54,15 +52,6 @@ struct FrameSynchronizer {
   ~FrameSynchronizer() = default;
 
   bool WaitForFence(const vk::Device& device) {
-    if (!present_semaphore) {
-      return true;
-    }
-
-    if (!present_semaphore->Wait()) {
-      VALIDATION_LOG << "Present semaphore wait failed";
-      return false;
-    }
-    present_semaphore.reset();
     if (auto result = device.waitForFences(
             *acquire,                             // fence
             true,                                 // wait all
@@ -477,56 +466,39 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
     }
   }
 
-  auto task = [&, index, current_frame = current_frame_] {
-    auto context_strong = context_.lock();
-    if (!context_strong) {
-      return;
-    }
+  //----------------------------------------------------------------------------
+  /// Present the image.
+  ///
+  uint32_t indices[] = {static_cast<uint32_t>(index)};
 
-    const auto& sync = synchronizers_[current_frame];
+  vk::PresentInfoKHR present_info;
+  present_info.setSwapchains(*swapchain_);
+  present_info.setImageIndices(indices);
+  present_info.setWaitSemaphores(*sync->present_ready);
 
-    //----------------------------------------------------------------------------
-    /// Present the image.
-    ///
-    uint32_t indices[] = {static_cast<uint32_t>(index)};
+  auto result = present_queue_.presentKHR(present_info);
 
-    vk::PresentInfoKHR present_info;
-    present_info.setSwapchains(*swapchain_);
-    present_info.setImageIndices(indices);
-    present_info.setWaitSemaphores(*sync->present_ready);
-
-    auto result = present_queue_.presentKHR(present_info);
-    sync->present_semaphore->Signal();
-
-    switch (result) {
-      case vk::Result::eErrorOutOfDateKHR:
-        // Caller will recreate the impl on acquisition, not submission.
-        [[fallthrough]];
-      case vk::Result::eErrorSurfaceLostKHR:
-        // Vulkan guarantees that the set of queue operations will still
-        // complete successfully.
-        [[fallthrough]];
-      case vk::Result::eSuboptimalKHR:
-        // Even though we're handling rotation changes via polling, we
-        // still need to handle the case where the swapchain signals that
-        // it's suboptimal (i.e. every frame when we are rotated given we
-        // aren't doing Vulkan pre-rotation).
-        [[fallthrough]];
-      case vk::Result::eSuccess:
-        return;
-      default:
-        VALIDATION_LOG << "Could not present queue: " << vk::to_string(result);
-        return;
-    }
-    FML_UNREACHABLE();
-  };
-
-  sync->present_semaphore = std::make_shared<fml::Semaphore>(0u);
-  if (context.GetSyncPresentation()) {
-    task();
-  } else {
-    context.GetQueueSubmitRunner()->PostTask(task);
+  switch (result) {
+    case vk::Result::eErrorOutOfDateKHR:
+      // Caller will recreate the impl on acquisition, not submission.
+      [[fallthrough]];
+    case vk::Result::eErrorSurfaceLostKHR:
+      // Vulkan guarantees that the set of queue operations will still
+      // complete successfully.
+      [[fallthrough]];
+    case vk::Result::eSuboptimalKHR:
+      // Even though we're handling rotation changes via polling, we
+      // still need to handle the case where the swapchain signals that
+      // it's suboptimal (i.e. every frame when we are rotated given we
+      // aren't doing Vulkan pre-rotation).
+      [[fallthrough]];
+    case vk::Result::eSuccess:
+      break;
+    default:
+      VALIDATION_LOG << "Could not present queue: " << vk::to_string(result);
+      break;
   }
+
   return true;
 }
 

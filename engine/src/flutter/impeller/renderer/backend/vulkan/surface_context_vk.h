@@ -69,9 +69,6 @@ class SurfaceContextVK : public Context,
   // |Context|
   void Shutdown() override;
 
-  // |Context|
-  void SetSyncPresentation(bool value) override;
-
   [[nodiscard]] bool SetWindowSurface(vk::UniqueSurfaceKHR surface,
                                       const ISize& size);
 

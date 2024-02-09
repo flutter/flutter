@@ -91,11 +91,6 @@ class ContextVK final : public Context,
   // |Context|
   void Shutdown() override;
 
-  // |Context|
-  void SetSyncPresentation(bool value) override { sync_presentation_ = value; }
-
-  bool GetSyncPresentation() const { return sync_presentation_; }
-
   void SetOffscreenFormat(PixelFormat pixel_format);
 
   template <typename T>
@@ -202,7 +197,6 @@ class ContextVK final : public Context,
   std::shared_ptr<DescriptorPoolRecyclerVK> descriptor_pool_recycler_;
   std::shared_ptr<CommandQueue> command_queue_vk_;
 
-  bool sync_presentation_ = false;
   const uint64_t hash_;
 
   bool is_valid_ = false;
