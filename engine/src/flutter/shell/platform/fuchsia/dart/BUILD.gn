@@ -99,6 +99,7 @@ dart_library("expect") {
     "config.dart",
     "expect.dart",
     "minitest.dart",
+    "variations.dart",
   ]
 }
 
