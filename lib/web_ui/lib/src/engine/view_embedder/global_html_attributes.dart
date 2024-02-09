@@ -17,6 +17,9 @@ import '../dom.dart';
 class GlobalHtmlAttributes {
   GlobalHtmlAttributes({required this.rootElement, required this.hostElement});
 
+  /// The [FlutterView.viewId] attribute name.
+  static const String flutterViewIdAttributeName = 'flt-view-id';
+
   final DomElement rootElement;
   final DomElement hostElement;
 
@@ -34,7 +37,7 @@ class GlobalHtmlAttributes {
     // Example:
     //
     //     document.querySelector('flutter-view[flt-view-id="$viewId"]')
-    rootElement.setAttribute('flt-view-id', viewId);
+    rootElement.setAttribute(flutterViewIdAttributeName, viewId);
 
     // How was the current renderer selected?
     final String rendererSelection = autoDetectRenderer
