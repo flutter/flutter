@@ -104,7 +104,6 @@ impeller_component("renderer") {
     "../base",
     "../core",
     "../geometry",
-    "../image",
     "../runtime_stage",
     "../tessellator",
   ]

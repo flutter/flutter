@@ -5,6 +5,7 @@
 import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("image") {
+  testonly = true
   public = [
     "compressed_image.h",
     "decompressed_image.h",
@@ -16,35 +17,27 @@ impeller_component("image") {
   ]
 
   public_deps = [
-    "../base",
-    "../geometry",
+    "../../base",
+    "../../geometry",
   ]
 
   deps = [ "//flutter/fml" ]
 }
 
 impeller_component("image_skia_backend") {
+  testonly = true
   public = [ "backends/skia/compressed_image_skia.h" ]
 
   sources = [ "backends/skia/compressed_image_skia.cc" ]
 
   public_deps = [
     ":image",
-    "../base",
-    "../geometry",
+    "../../base",
+    "../../geometry",
   ]
 
   deps = [
     "//flutter/fml",
     "//flutter/skia",
-  ]
-}
-
-impeller_component("image_unittests") {
-  testonly = true
-  sources = []
-  deps = [
-    ":image_skia_backend",
-    "//flutter/testing",
   ]
 }

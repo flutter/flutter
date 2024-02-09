@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_IMAGE_COMPRESSED_IMAGE_H_
-#define FLUTTER_IMPELLER_IMAGE_COMPRESSED_IMAGE_H_
+#ifndef FLUTTER_IMPELLER_PLAYGROUND_IMAGE_COMPRESSED_IMAGE_H_
+#define FLUTTER_IMPELLER_PLAYGROUND_IMAGE_COMPRESSED_IMAGE_H_
 
 #include <memory>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/geometry/size.h"
-#include "impeller/image/decompressed_image.h"
+#include "impeller/playground/image/decompressed_image.h"
 
 namespace impeller {
 
@@ -32,4 +32,4 @@ class CompressedImage {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_IMAGE_COMPRESSED_IMAGE_H_
+#endif  // FLUTTER_IMPELLER_PLAYGROUND_IMAGE_COMPRESSED_IMAGE_H_
