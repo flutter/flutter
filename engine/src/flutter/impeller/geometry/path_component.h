@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_PATH_COMPONENT_H_
 #define FLUTTER_IMPELLER_GEOMETRY_PATH_COMPONENT_H_
 
+#include <functional>
 #include <type_traits>
 #include <variant>
 #include <vector>
@@ -79,6 +80,10 @@ struct QuadraticPathComponent {
   void AppendPolylinePoints(Scalar scale_factor,
                             std::vector<Point>& points) const;
 
+  using PointProc = std::function<void(const Point& point)>;
+
+  void ToLinearPathComponents(Scalar scale_factor, const PointProc& proc) const;
+
   std::vector<Point> Extrema() const;
 
   bool operator==(const QuadraticPathComponent& other) const {
@@ -125,8 +130,9 @@ struct CubicPathComponent {
 
   std::vector<Point> Extrema() const;
 
-  std::vector<QuadraticPathComponent> ToQuadraticPathComponents(
-      Scalar accuracy) const;
+  using PointProc = std::function<void(const Point& point)>;
+
+  void ToLinearPathComponents(Scalar scale, const PointProc& proc) const;
 
   CubicPathComponent Subsegment(Scalar t0, Scalar t1) const;
 

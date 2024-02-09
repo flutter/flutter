@@ -106,6 +106,14 @@ static Scalar ApproximateParabolaIntegral(Scalar x) {
 void QuadraticPathComponent::AppendPolylinePoints(
     Scalar scale_factor,
     std::vector<Point>& points) const {
+  ToLinearPathComponents(scale_factor, [&points](const Point& point) {
+    points.emplace_back(point);
+  });
+}
+
+void QuadraticPathComponent::ToLinearPathComponents(
+    Scalar scale_factor,
+    const PointProc& proc) const {
   auto tolerance = kDefaultCurveTolerance / scale_factor;
   auto sqrt_tolerance = sqrt(tolerance);
 
@@ -141,9 +149,9 @@ void QuadraticPathComponent::AppendPolylinePoints(
     auto u = i * step;
     auto a = a0 + (a2 - a0) * u;
     auto t = (ApproximateParabolaIntegral(a) - u0) * uscale;
-    points.emplace_back(Solve(t));
+    proc(Solve(t));
   }
-  points.emplace_back(p2);
+  proc(p2);
 }
 
 std::vector<Point> QuadraticPathComponent::Extrema() const {
@@ -188,10 +196,8 @@ Point CubicPathComponent::SolveDerivative(Scalar time) const {
 void CubicPathComponent::AppendPolylinePoints(
     Scalar scale,
     std::vector<Point>& points) const {
-  auto quads = ToQuadraticPathComponents(.1);
-  for (const auto& quad : quads) {
-    quad.AppendPolylinePoints(scale, points);
-  }
+  ToLinearPathComponents(
+      scale, [&points](const Point& point) { points.emplace_back(point); });
 }
 
 inline QuadraticPathComponent CubicPathComponent::Lower() const {
@@ -209,9 +215,9 @@ CubicPathComponent CubicPathComponent::Subsegment(Scalar t0, Scalar t1) const {
   return CubicPathComponent(p0, p1, p2, p3);
 }
 
-std::vector<QuadraticPathComponent>
-CubicPathComponent::ToQuadraticPathComponents(Scalar accuracy) const {
-  std::vector<QuadraticPathComponent> quads;
+void CubicPathComponent::ToLinearPathComponents(Scalar scale,
+                                                const PointProc& proc) const {
+  constexpr Scalar accuracy = 0.1;
   // The maximum error, as a vector from the cubic to the best approximating
   // quadratic, is proportional to the third derivative, which is constant
   // across the segment. Thus, the error scales down as the third power of
@@ -229,17 +235,15 @@ CubicPathComponent::ToQuadraticPathComponents(Scalar accuracy) const {
   auto p = p2x2 - p1x2;
   auto err = p.Dot(p);
   auto quad_count = std::max(1., ceil(pow(err / max_hypot2, 1. / 6.0)));
-  quads.reserve(quad_count);
   for (size_t i = 0; i < quad_count; i++) {
     auto t0 = i / quad_count;
     auto t1 = (i + 1) / quad_count;
     auto seg = Subsegment(t0, t1);
     auto p1x2 = 3.0 * seg.cp1 - seg.p1;
     auto p2x2 = 3.0 * seg.cp2 - seg.p2;
-    quads.emplace_back(
-        QuadraticPathComponent(seg.p1, ((p1x2 + p2x2) / 4.0), seg.p2));
+    QuadraticPathComponent(seg.p1, ((p1x2 + p2x2) / 4.0), seg.p2)
+        .ToLinearPathComponents(scale, proc);
   }
-  return quads;
 }
 
 static inline bool NearEqual(Scalar a, Scalar b, Scalar epsilon) {
