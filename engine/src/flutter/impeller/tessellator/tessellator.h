@@ -9,7 +9,6 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/formats.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
@@ -212,6 +211,14 @@ class Tessellator {
   /// @return A point vector containing the vertices in triangle strip format.
   ///
   std::vector<Point> TessellateConvex(const Path& path, Scalar tolerance);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Create a temporary polyline. Only one per-process can exist at
+  ///             a time.
+  ///
+  ///             The tessellator itself is not a thread safe class and should
+  ///             only be used from the raster thread.
+  Path::Polyline CreateTempPolyline(const Path& path, Scalar tolerance);
 
   /// @brief   The pixel tolerance used by the algorighm to determine how
   ///          many divisions to create for a circle.
