@@ -1,4 +1,4 @@
-Signature: f8583850eb070e3d90f1bd28a7a81bde
+Signature: d4f38ca5842c3699318a2f2a07307147
 
 ====================================================================================================
 LIBRARY: dart
@@ -502,7 +502,6 @@ ORIGIN: ../../../third_party/dart/runtime/bin/builtin_natives.cc + ../../../thir
 ORIGIN: ../../../third_party/dart/runtime/bin/crashpad.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/crypto.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/crypto.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/crypto_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/crypto_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/crypto_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/crypto_win.cc + ../../../third_party/dart/LICENSE
@@ -510,25 +509,20 @@ ORIGIN: ../../../third_party/dart/runtime/bin/dartutils.cc + ../../../third_part
 ORIGIN: ../../../third_party/dart/runtime/bin/dartutils.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/directory.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/directory.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/directory_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/directory_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/directory_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/directory_win.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler_android.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler_android.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler_linux.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler_macos.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/eventhandler_win.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/fdutils.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/fdutils_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/fdutils_fuchsia.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/fdutils_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/fdutils_macos.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/file_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/file_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/file_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/file_win.cc + ../../../third_party/dart/LICENSE
@@ -541,25 +535,19 @@ ORIGIN: ../../../third_party/dart/runtime/bin/main.cc + ../../../third_party/dar
 ORIGIN: ../../../third_party/dart/runtime/bin/main_impl.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/platform.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/platform.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/platform_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/platform_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/platform_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/platform_win.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/process.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/process_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/process_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/process_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/process_win.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/run_vm_tests.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/secure_socket_unsupported.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/socket_android.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/socket_base_android.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/socket_base_linux.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/socket_base_macos.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/socket_base_win.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/thread.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/thread_android.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/thread_android.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/thread_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/thread_linux.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/thread_macos.cc + ../../../third_party/dart/LICENSE
@@ -567,7 +555,6 @@ ORIGIN: ../../../third_party/dart/runtime/bin/thread_macos.h + ../../../third_pa
 ORIGIN: ../../../third_party/dart/runtime/bin/thread_win.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/thread_win.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/utils.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/utils_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/utils_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/utils_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/utils_win.cc + ../../../third_party/dart/LICENSE
@@ -869,7 +856,6 @@ FILE: ../../../third_party/dart/runtime/bin/builtin_natives.cc
 FILE: ../../../third_party/dart/runtime/bin/crashpad.cc
 FILE: ../../../third_party/dart/runtime/bin/crypto.cc
 FILE: ../../../third_party/dart/runtime/bin/crypto.h
-FILE: ../../../third_party/dart/runtime/bin/crypto_android.cc
 FILE: ../../../third_party/dart/runtime/bin/crypto_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/crypto_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/crypto_win.cc
@@ -877,25 +863,20 @@ FILE: ../../../third_party/dart/runtime/bin/dartutils.cc
 FILE: ../../../third_party/dart/runtime/bin/dartutils.h
 FILE: ../../../third_party/dart/runtime/bin/directory.cc
 FILE: ../../../third_party/dart/runtime/bin/directory.h
-FILE: ../../../third_party/dart/runtime/bin/directory_android.cc
 FILE: ../../../third_party/dart/runtime/bin/directory_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/directory_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/directory_win.cc
 FILE: ../../../third_party/dart/runtime/bin/eventhandler.cc
 FILE: ../../../third_party/dart/runtime/bin/eventhandler.h
-FILE: ../../../third_party/dart/runtime/bin/eventhandler_android.cc
-FILE: ../../../third_party/dart/runtime/bin/eventhandler_android.h
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_linux.h
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_macos.h
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_win.h
 FILE: ../../../third_party/dart/runtime/bin/fdutils.h
-FILE: ../../../third_party/dart/runtime/bin/fdutils_android.cc
 FILE: ../../../third_party/dart/runtime/bin/fdutils_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/fdutils_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/fdutils_macos.cc
-FILE: ../../../third_party/dart/runtime/bin/file_android.cc
 FILE: ../../../third_party/dart/runtime/bin/file_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/file_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/file_win.cc
@@ -908,25 +889,19 @@ FILE: ../../../third_party/dart/runtime/bin/main.cc
 FILE: ../../../third_party/dart/runtime/bin/main_impl.cc
 FILE: ../../../third_party/dart/runtime/bin/platform.cc
 FILE: ../../../third_party/dart/runtime/bin/platform.h
-FILE: ../../../third_party/dart/runtime/bin/platform_android.cc
 FILE: ../../../third_party/dart/runtime/bin/platform_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/platform_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/platform_win.cc
 FILE: ../../../third_party/dart/runtime/bin/process.h
-FILE: ../../../third_party/dart/runtime/bin/process_android.cc
 FILE: ../../../third_party/dart/runtime/bin/process_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/process_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/process_win.cc
 FILE: ../../../third_party/dart/runtime/bin/run_vm_tests.cc
 FILE: ../../../third_party/dart/runtime/bin/secure_socket_unsupported.cc
-FILE: ../../../third_party/dart/runtime/bin/socket_android.cc
-FILE: ../../../third_party/dart/runtime/bin/socket_base_android.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_linux.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_macos.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_win.h
 FILE: ../../../third_party/dart/runtime/bin/thread.h
-FILE: ../../../third_party/dart/runtime/bin/thread_android.cc
-FILE: ../../../third_party/dart/runtime/bin/thread_android.h
 FILE: ../../../third_party/dart/runtime/bin/thread_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/thread_linux.h
 FILE: ../../../third_party/dart/runtime/bin/thread_macos.cc
@@ -934,7 +909,6 @@ FILE: ../../../third_party/dart/runtime/bin/thread_macos.h
 FILE: ../../../third_party/dart/runtime/bin/thread_win.cc
 FILE: ../../../third_party/dart/runtime/bin/thread_win.h
 FILE: ../../../third_party/dart/runtime/bin/utils.h
-FILE: ../../../third_party/dart/runtime/bin/utils_android.cc
 FILE: ../../../third_party/dart/runtime/bin/utils_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/utils_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/utils_win.cc
@@ -1264,7 +1238,6 @@ ORIGIN: ../../../third_party/dart/runtime/bin/file.cc + ../../../third_party/dar
 ORIGIN: ../../../third_party/dart/runtime/bin/file.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/file_system_watcher.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/file_system_watcher.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/file_system_watcher_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/file_system_watcher_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/file_system_watcher_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/file_system_watcher_win.cc + ../../../third_party/dart/LICENSE
@@ -1287,7 +1260,6 @@ ORIGIN: ../../../third_party/dart/runtime/bin/socket_macos.cc + ../../../third_p
 ORIGIN: ../../../third_party/dart/runtime/bin/socket_win.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/stdio.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/stdio.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/stdio_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/stdio_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/stdio_macos.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/stdio_win.cc + ../../../third_party/dart/LICENSE
@@ -1552,7 +1524,6 @@ FILE: ../../../third_party/dart/runtime/bin/file.cc
 FILE: ../../../third_party/dart/runtime/bin/file.h
 FILE: ../../../third_party/dart/runtime/bin/file_system_watcher.cc
 FILE: ../../../third_party/dart/runtime/bin/file_system_watcher.h
-FILE: ../../../third_party/dart/runtime/bin/file_system_watcher_android.cc
 FILE: ../../../third_party/dart/runtime/bin/file_system_watcher_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/file_system_watcher_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/file_system_watcher_win.cc
@@ -1575,7 +1546,6 @@ FILE: ../../../third_party/dart/runtime/bin/socket_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/socket_win.cc
 FILE: ../../../third_party/dart/runtime/bin/stdio.cc
 FILE: ../../../third_party/dart/runtime/bin/stdio.h
-FILE: ../../../third_party/dart/runtime/bin/stdio_android.cc
 FILE: ../../../third_party/dart/runtime/bin/stdio_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/stdio_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/stdio_win.cc
@@ -2770,7 +2740,6 @@ ORIGIN: ../../../third_party/dart/runtime/bin/main_options.cc + ../../../third_p
 ORIGIN: ../../../third_party/dart/runtime/bin/main_options.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/namespace.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/namespace.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/namespace_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/namespace_fuchsia.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/namespace_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/namespace_macos.cc + ../../../third_party/dart/LICENSE
@@ -2783,7 +2752,6 @@ ORIGIN: ../../../third_party/dart/runtime/bin/secure_socket_utils.cc + ../../../
 ORIGIN: ../../../third_party/dart/runtime/bin/secure_socket_utils.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/security_context.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/security_context.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/security_context_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/security_context_fuchsia.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/security_context_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/security_context_macos.cc + ../../../third_party/dart/LICENSE
@@ -2794,7 +2762,6 @@ ORIGIN: ../../../third_party/dart/runtime/bin/socket_base.cc + ../../../third_pa
 ORIGIN: ../../../third_party/dart/runtime/bin/socket_base.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/sync_socket.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/sync_socket.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/sync_socket_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/sync_socket_fuchsia.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/sync_socket_linux.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/sync_socket_macos.cc + ../../../third_party/dart/LICENSE
@@ -2893,7 +2860,6 @@ FILE: ../../../third_party/dart/runtime/bin/main_options.cc
 FILE: ../../../third_party/dart/runtime/bin/main_options.h
 FILE: ../../../third_party/dart/runtime/bin/namespace.cc
 FILE: ../../../third_party/dart/runtime/bin/namespace.h
-FILE: ../../../third_party/dart/runtime/bin/namespace_android.cc
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/namespace_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/namespace_macos.cc
@@ -2906,7 +2872,6 @@ FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils.h
 FILE: ../../../third_party/dart/runtime/bin/security_context.cc
 FILE: ../../../third_party/dart/runtime/bin/security_context.h
-FILE: ../../../third_party/dart/runtime/bin/security_context_android.cc
 FILE: ../../../third_party/dart/runtime/bin/security_context_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/security_context_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/security_context_macos.cc
@@ -2917,7 +2882,6 @@ FILE: ../../../third_party/dart/runtime/bin/socket_base.cc
 FILE: ../../../third_party/dart/runtime/bin/socket_base.h
 FILE: ../../../third_party/dart/runtime/bin/sync_socket.cc
 FILE: ../../../third_party/dart/runtime/bin/sync_socket.h
-FILE: ../../../third_party/dart/runtime/bin/sync_socket_android.cc
 FILE: ../../../third_party/dart/runtime/bin/sync_socket_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/sync_socket_linux.cc
 FILE: ../../../third_party/dart/runtime/bin/sync_socket_macos.cc
@@ -3203,10 +3167,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/bin/elf_loader.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/elf_loader.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs-android.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs-android.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/bin/socket_base_android.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/lib/ffi.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/observatory/lib/src/elements/tree_map.dart + ../../../third_party/dart/LICENSE
@@ -3291,10 +3252,7 @@ ORIGIN: ../../../third_party/dart/sdk/lib/internal/errors.dart + ../../../third_
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/elf_loader.cc
 FILE: ../../../third_party/dart/runtime/bin/elf_loader.h
-FILE: ../../../third_party/dart/runtime/bin/ifaddrs-android.cc
-FILE: ../../../third_party/dart/runtime/bin/ifaddrs-android.h
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
-FILE: ../../../third_party/dart/runtime/bin/socket_base_android.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/tree_map.dart
@@ -4134,6 +4092,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
+ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs.cc + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs.h + ../../../third_party/dart/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/bin/ifaddrs.cc
+FILE: ../../../third_party/dart/runtime/bin/ifaddrs.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2024, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google LLC nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: dart
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/builders.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/code.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/diagnostic.dart + ../../../third_party/dart/LICENSE
@@ -4750,9 +4745,9 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/03130d49f2147f6f34c1b1056a11fe4f2f26ecad
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/444f7a422da4152a2fedc9f7e81996e12012be7b
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
 
-Total license count: 26
+Total license count: 27
