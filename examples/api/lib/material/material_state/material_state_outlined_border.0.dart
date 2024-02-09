@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [WidgetStateOutlinedBorder].
+/// Flutter code sample for [MaterialStateOutlinedBorder].
 
 void main() => runApp(const MaterialStateOutlinedBorderExampleApp());
 
@@ -19,12 +19,12 @@ class MaterialStateOutlinedBorderExampleApp extends StatelessWidget {
   }
 }
 
-class SelectedBorder extends RoundedRectangleBorder implements WidgetStateOutlinedBorder {
+class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
   const SelectedBorder();
 
   @override
-  OutlinedBorder? resolve(Set<WidgetState> states) {
-    if (states.contains(WidgetState.selected)) {
+  OutlinedBorder? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.selected)) {
       return const RoundedRectangleBorder();
     }
     return null; // Defer to default value on the theme or widget.

@@ -32,11 +32,11 @@ class MaterialStateExample extends StatelessWidget {
       initialValue: 'abc',
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.person),
-        prefixIconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
-          if (states.contains(WidgetState.focused)) {
+        prefixIconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.focused)) {
             return Colors.green;
           }
-          if (states.contains(WidgetState.error)) {
+          if (states.contains(MaterialState.error)) {
             return Colors.red;
           }
           return Colors.grey;

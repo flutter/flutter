@@ -29,19 +29,19 @@ class SelectableButton extends StatefulWidget {
 }
 
 class _SelectableButtonState extends State<SelectableButton> {
-  late final WidgetStatesController statesController;
+  late final MaterialStatesController statesController;
 
   @override
   void initState() {
     super.initState();
-    statesController = WidgetStatesController(<WidgetState>{if (widget.selected) WidgetState.selected});
+    statesController = MaterialStatesController(<MaterialState>{if (widget.selected) MaterialState.selected});
   }
 
   @override
   void didUpdateWidget(SelectableButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selected != oldWidget.selected) {
-      statesController.update(WidgetState.selected, widget.selected);
+      statesController.update(MaterialState.selected, widget.selected);
     }
   }
 
@@ -73,17 +73,17 @@ class _HomeState extends State<Home> {
         child: SelectableButton(
           selected: selected,
           style: ButtonStyle(
-            foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-              (Set<WidgetState> states) {
-                if (states.contains(WidgetState.selected)) {
+            foregroundColor: MaterialStateProperty.resolveWith<Color?>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
                   return Colors.white;
                 }
                 return null; // defer to the defaults
               },
             ),
-            backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-              (Set<WidgetState> states) {
-                if (states.contains(WidgetState.selected)) {
+            backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
                   return Colors.indigo;
                 }
                 return null; // defer to the defaults
