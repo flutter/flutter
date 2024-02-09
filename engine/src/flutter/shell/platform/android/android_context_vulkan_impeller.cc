@@ -17,9 +17,14 @@
 namespace flutter {
 
 static std::shared_ptr<impeller::Context> CreateImpellerContext(
-    const fml::RefPtr<vulkan::VulkanProcTable>& proc_table,
+    const fml::RefPtr<fml::NativeLibrary>& vulkan_dylib,
     bool enable_vulkan_validation,
     bool enable_gpu_tracing) {
+  if (!vulkan_dylib) {
+    VALIDATION_LOG << "Could not open the Vulkan dylib.";
+    return nullptr;
+  }
+
   std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
       std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_vk_data,
                                              impeller_entity_shaders_vk_length),
@@ -34,11 +39,17 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
                                              impeller_modern_shaders_vk_length),
   };
 
-  PFN_vkGetInstanceProcAddr instance_proc_addr =
-      proc_table->NativeGetInstanceProcAddr();
+  auto instance_proc_addr =
+      vulkan_dylib->ResolveFunction<PFN_vkGetInstanceProcAddr>(
+          "vkGetInstanceProcAddr");
+
+  if (!instance_proc_addr.has_value()) {
+    VALIDATION_LOG << "Could not setup Vulkan proc table.";
+    return nullptr;
+  }
 
   impeller::ContextVK::Settings settings;
-  settings.proc_address_callback = instance_proc_addr;
+  settings.proc_address_callback = instance_proc_addr.value();
   settings.shader_libraries_data = std::move(shader_mappings);
   settings.cache_directory = fml::paths::GetCachesDirectory();
   settings.enable_validation = enable_vulkan_validation;
@@ -61,12 +72,11 @@ AndroidContextVulkanImpeller::AndroidContextVulkanImpeller(
     bool enable_validation,
     bool enable_gpu_tracing)
     : AndroidContext(AndroidRenderingAPI::kVulkan),
-      proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>()) {
-  auto impeller_context =
-      CreateImpellerContext(proc_table_, enable_validation, enable_gpu_tracing);
+      vulkan_dylib_(fml::NativeLibrary::Create("libvulkan.so")) {
+  auto impeller_context = CreateImpellerContext(
+      vulkan_dylib_, enable_validation, enable_gpu_tracing);
   SetImpellerContext(impeller_context);
-  is_valid_ =
-      proc_table_->HasAcquiredMandatoryProcAddresses() && impeller_context;
+  is_valid_ = !!impeller_context;
 }
 
 AndroidContextVulkanImpeller::~AndroidContextVulkanImpeller() = default;
