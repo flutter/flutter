@@ -39,6 +39,8 @@ class QueueVK {
   vk::Result Submit(const vk::SubmitInfo& submit_info,
                     const vk::Fence& fence) const;
 
+  vk::Result Present(const vk::PresentInfoKHR& present_info);
+
   void InsertDebugMarker(std::string_view label) const;
 
  private:
