@@ -45,7 +45,6 @@ impeller_component("core") {
   deps = [
     "../base",
     "../geometry",
-    "../image",
     "//flutter/fml",
   ]
 }

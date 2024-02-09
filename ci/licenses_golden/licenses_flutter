@@ -5307,12 +5307,6 @@ ORIGIN: ../../../flutter/impeller/golden_tests/vulkan_screenshotter.h + ../../..
 ORIGIN: ../../../flutter/impeller/golden_tests/vulkan_screenshotter.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/working_directory.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/working_directory.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/image/compressed_image.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/image/compressed_image.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/image/decompressed_image.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/image/decompressed_image.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/blit_command_gles.cc + ../../../flutter/LICENSE
@@ -8147,12 +8141,6 @@ FILE: ../../../flutter/impeller/golden_tests/vulkan_screenshotter.h
 FILE: ../../../flutter/impeller/golden_tests/vulkan_screenshotter.mm
 FILE: ../../../flutter/impeller/golden_tests/working_directory.cc
 FILE: ../../../flutter/impeller/golden_tests/working_directory.h
-FILE: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.cc
-FILE: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.h
-FILE: ../../../flutter/impeller/image/compressed_image.cc
-FILE: ../../../flutter/impeller/image/compressed_image.h
-FILE: ../../../flutter/impeller/image/decompressed_image.cc
-FILE: ../../../flutter/impeller/image/decompressed_image.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/blit_command_gles.cc
