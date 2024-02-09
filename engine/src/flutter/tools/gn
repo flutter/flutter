@@ -215,13 +215,6 @@ def setup_rbe(args):
   if not args.rbe:
     return rbe_gn_args
 
-  if get_host_os() not in ['linux', 'mac']:
-    print(
-        'The --rbe flag has no effect. RBE is currently only supported on '
-        'macOS and Linux.'
-    )
-    return rbe_gn_args
-
   rbe_gn_args['use_rbe'] = True
 
   # When running in CI, the recipes use their own rbe install, and take
@@ -237,9 +230,15 @@ def setup_rbe(args):
         'reclient',
     )
     bootstrap_path = os.path.join(cipd_reclient_dir, 'bootstrap')
+    bootstrap_path = bootstrap_path + '.exe' if get_host_os(
+    ) == 'win' else bootstrap_path
     reproxy_path = os.path.join(cipd_reclient_dir, 'reproxy')
     rbe_cfg_path = os.path.join(
-        SRC_ROOT, 'flutter', 'build', 'rbe', 'reclient.cfg'
+        SRC_ROOT,
+        'flutter',
+        'build',
+        'rbe',
+        'reclient-' + get_host_os() + '.cfg',
     )
     bootstrap_cmd = [
         bootstrap_path,
