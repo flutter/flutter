@@ -23,6 +23,11 @@ vk::Result QueueVK::Submit(const vk::SubmitInfo& submit_info,
   return queue_.submit(submit_info, fence);
 }
 
+vk::Result QueueVK::Present(const vk::PresentInfoKHR& present_info) {
+  Lock lock(queue_mutex_);
+  return queue_.presentKHR(present_info);
+}
+
 void QueueVK::InsertDebugMarker(std::string_view label) const {
   if (!HasValidationLayers()) {
     return;
