@@ -87,15 +87,15 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     // This gradient's appearance reflects the button's state.
     // Always return a gradient decoration so that AnimatedContainer
     // can interpolorate in between. Used by TextButton #7.
-    Decoration? statesToDecoration(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Decoration? statesToDecoration(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return BoxDecoration(
           gradient: LinearGradient(colors: <Color>[color2, color2]), // solid fill
         );
       }
       return BoxDecoration(
         gradient: LinearGradient(
-          colors: switch (states.contains(MaterialState.hovered)) {
+          colors: switch (states.contains(WidgetState.hovered)) {
             true => <Color>[color1, color2],
             false => <Color>[color2, color1],
           },
@@ -196,7 +196,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // theme or the MaterialApp theme's ThemeData.textButtonTheme.
       TextButton(
         style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return ShaderMask(
               shaderCallback: (Rect bounds) {
                 return LinearGradient(
@@ -231,10 +231,10 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // outlines the button's shape.
       TextButton(
         style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return DecoratedBox(
               decoration: BoxDecoration(
-                border: states.contains(MaterialState.hovered)
+                border: states.contains(WidgetState.hovered)
                   ? Border(bottom: BorderSide(color: colorScheme.primary))
                   : const Border(), // essentially "no border"
               ),
@@ -267,7 +267,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         onPressed: () {},
         style: TextButton.styleFrom(
           overlayColor: color2,
-          backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 500),
               decoration: statesToDecoration(states),
@@ -275,8 +275,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
             );
           },
         ).copyWith(
-          side: MaterialStateProperty.resolveWith<BorderSide?>((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
+          side: WidgetStateProperty.resolveWith<BorderSide?>((Set<WidgetState> states) {
+            if (states.contains(WidgetState.hovered)) {
               return BorderSide(width: 3, color: color3);
             }
             return null; // defer to the default
@@ -298,7 +298,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         onPressed: () {},
         style: TextButton.styleFrom(
           foregroundColor: Colors.white,
-          backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return Ink(
               decoration: const BoxDecoration(
                 image: DecorationImage(
@@ -329,9 +329,9 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         onPressed: () {},
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
-            String url = states.contains(MaterialState.hovered) ? smiley3Url : smiley1Url;
-            if (states.contains(MaterialState.pressed)) {
+          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
+            String url = states.contains(WidgetState.hovered) ? smiley3Url : smiley1Url;
+            if (states.contains(WidgetState.pressed)) {
               url = smiley2Url;
             }
             return AnimatedContainer(
