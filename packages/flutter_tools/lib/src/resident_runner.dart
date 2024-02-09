@@ -135,7 +135,7 @@ class FlutterDevice {
       }
 
       final String platformDillPath = globals.fs.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
+        getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
         platformDillName,
       );
 
@@ -560,7 +560,6 @@ class FlutterDevice {
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
-    String? projectRootPath,
     required String pathToReload,
     required String dillOutputPath,
     required List<Uri> invalidatedFiles,
@@ -581,7 +580,6 @@ class FlutterDevice {
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
-        projectRootPath: projectRootPath,
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
