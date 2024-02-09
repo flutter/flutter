@@ -669,6 +669,9 @@ def to_gn_args(args):
   if args.enable_impeller_vulkan:
     gn_args['impeller_enable_vulkan'] = True
 
+  if args.enable_impeller_vulkan_playgrounds:
+    gn_args['impeller_enable_vulkan_playgrounds'] = True
+
   if args.enable_impeller_opengles:
     gn_args['impeller_enable_opengles'] = True
 
@@ -1122,6 +1125,14 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Enable the Impeller Vulkan backend.'
+  )
+
+  parser.add_argument(
+      '--enable-impeller-vulkan-playgrounds',
+      default=False,
+      action='store_true',
+      help='Enable the Impeller Vulkan Playgrounds. ' +
+      'The Impeller Vulkan backend needs to be enabled.'
   )
 
   parser.add_argument(
