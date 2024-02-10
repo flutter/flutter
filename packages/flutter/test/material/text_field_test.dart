@@ -3938,23 +3938,17 @@ void main() {
   // Show the selection menu at the given index into the text by tapping to
   // place the cursor and then tapping on the handle.
   Future<void> showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    state.hideToolbar();
-    state.widget.focusNode.requestFocus();
+    await tester.tapAt(tester.getCenter(find.byType(EditableText)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     expect(find.text('Select all'), findsNothing);
 
-    //print('showMenuAt: $index');
     // Tap the selection handle to bring up the "paste / select all" menu for
     // the last line of text.
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
-    //print('tapped at: ${textOffsetToPosition(tester, index)}');
-    //print(renderEditable.text);
-    //print('${controller.selection} => ${renderEditable.getEndpointsForSelection(controller.selection)}');
     final List<TextSelectionPoint> endpoints = globalize(
       renderEditable.getEndpointsForSelection(controller.selection),
       renderEditable,
@@ -3965,7 +3959,6 @@ void main() {
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-    //print('$index => ${controller.selection}');
   }
 
   testWidgets(
@@ -10252,10 +10245,9 @@ void main() {
         await skipPastScrollingAnimation(tester);
         expect(controller.value.text, testValueB);
 
-        final Offset endOfTextPos = textOffsetToPosition(tester, testValueB.length);
+        final Offset endOfTextPos = textOffsetToPosition(tester, 74);
 
         // Click on text field to gain focus, and move the selection.
-
         final TestGesture gesture = await tester.startGesture(endOfTextPos, kind: PointerDeviceKind.mouse);
         await tester.pump();
         await gesture.up();
@@ -12552,7 +12544,7 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(800, epsilon: 1));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
@@ -12641,14 +12633,14 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(800, epsilon: 1));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-255.0, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms - focused TextField', (WidgetTester tester) async {
@@ -12734,14 +12726,14 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(800, epsilon: 1));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-255.0, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('mouse click and drag can edge scroll', (WidgetTester tester) async {
@@ -12991,7 +12983,7 @@ void main() {
     final double lineHeight = findRenderEditable(tester).preferredLineHeight;
     final double firstCharY = textOffsetToPosition(tester, 0).dy;
     expect(
-      textOffsetToPosition(tester, textLength - 1).dy,
+      textOffsetToPosition(tester, textLength).dy,
       moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 1),
     );
 
@@ -13028,7 +13020,7 @@ void main() {
     // the field, it's now only two line heights down, because it has scrolled
     // down by one line.
     expect(
-      textOffsetToPosition(tester, textLength - 1).dy,
+      textOffsetToPosition(tester, textLength).dy,
       moreOrLessEquals(firstCharY + lineHeight, epsilon: 1),
     );
 
@@ -15265,9 +15257,9 @@ void main() {
   testWidgets('Caret rtl with changing width', (WidgetTester tester) async {
     late StateSetter setState;
     bool isWide = false;
-    const TextStyle style = TextStyle(fontSize: 10, height: 1.0, letterSpacing: 0.0, wordSpacing: 0.0);
     const double wideWidth = 300.0;
     const double narrowWidth = 200.0;
+    const TextStyle style = TextStyle(fontSize: 10, height: 1.0, letterSpacing: 0.0, wordSpacing: 0.0);
     final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
       boilerplate(
@@ -15281,7 +15273,6 @@ void main() {
                 controller: controller,
                 textDirection: TextDirection.rtl,
                 style: style,
-                cursorWidth: 2.0, // ignore: avoid_redundant_argument_values
               ),
             );
           },

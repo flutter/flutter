@@ -1485,8 +1485,8 @@ class TextPainter {
     final _LineCaretMetrics metrics =_LineCaretMetrics(
       offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
       paintToRight: switch (box.direction) {
-        TextDirection.ltr => anchorToLeadingEdge,
-        TextDirection.rtl => !anchorToLeadingEdge,
+        TextDirection.ltr => true,
+        TextDirection.rtl => false,
       }
     );
 

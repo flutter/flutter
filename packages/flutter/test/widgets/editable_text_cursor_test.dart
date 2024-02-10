@@ -995,7 +995,7 @@ void main() {
     expect(find.byType(EditableText), paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTWH(717.3333333333333, -0.9166666666666679, 2.0, 18.0),
+          const Rect.fromLTWH(719.3333333333333, -0.9166666666666679, 2.0, 18.0),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff999999),
