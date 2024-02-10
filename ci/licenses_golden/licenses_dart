@@ -1,4 +1,4 @@
-Signature: 2c38454eb06df30446621eaffe288dc7
+Signature: 4408685a2ae1cdebe07bf76eecd608c4
 
 ====================================================================================================
 LIBRARY: dart
@@ -3716,7 +3716,6 @@ ORIGIN: ../../../third_party/dart/runtime/vm/simulator_x64.cc + ../../../third_p
 ORIGIN: ../../../third_party/dart/runtime/vm/simulator_x64.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_http/http_testing.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/js_names.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/runtime_metrics.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/load_library_priority.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_util_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/synced/embedded_names.dart + ../../../third_party/dart/LICENSE
@@ -3793,7 +3792,6 @@ FILE: ../../../third_party/dart/runtime/vm/simulator_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/simulator_x64.h
 FILE: ../../../third_party/dart/sdk/lib/_http/http_testing.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/js_names.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/runtime_metrics.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/load_library_priority.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_util_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/synced/embedded_names.dart
@@ -4094,9 +4092,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs.h + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/ifaddrs.cc
 FILE: ../../../third_party/dart/runtime/bin/ifaddrs.h
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2024, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -4745,7 +4747,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/10ca8dc7d2b4bfbd3905cd99f1adbf8bae587da7
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/ed5730124fd1c5148a144720284aad056f450cae
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
