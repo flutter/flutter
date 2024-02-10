@@ -18,7 +18,6 @@ import 'devfs.dart';
 import 'device_port_forwarder.dart';
 import 'project.dart';
 import 'vmservice.dart';
-import 'web/compile.dart';
 
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
@@ -953,7 +952,6 @@ class DebuggingOptions {
     this.webEnableExpressionEvaluation = false,
     this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
-    this.webRenderer = WebRendererMode.auto,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
@@ -983,7 +981,6 @@ class DebuggingOptions {
       this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
       this.webHeaders = const <String, String>{},
-      this.webRenderer = WebRendererMode.auto,
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
@@ -1063,7 +1060,6 @@ class DebuggingOptions {
     required this.webEnableExpressionEvaluation,
     required this.webHeaders,
     required this.webLaunchUrl,
-    required this.webRenderer,
     required this.vmserviceOutFile,
     required this.fastStart,
     required this.nullAssertions,
@@ -1147,9 +1143,6 @@ class DebuggingOptions {
 
   /// Allow developers to add custom headers to web server
   final Map<String, String> webHeaders;
-
-  /// Which web renderer to use for the debugging session
-  final WebRendererMode webRenderer;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1259,7 +1252,6 @@ class DebuggingOptions {
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
     'webHeaders': webHeaders,
-    'webRenderer': webRenderer.name,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
@@ -1315,7 +1307,6 @@ class DebuggingOptions {
       webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
       webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
-      webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
       nullAssertions: json['nullAssertions']! as bool,

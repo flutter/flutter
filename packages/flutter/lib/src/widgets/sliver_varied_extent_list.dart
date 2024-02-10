@@ -27,6 +27,9 @@ import 'sliver.dart';
 ///
 ///  * [SliverFixedExtentList], whose children are forced to a given pixel
 ///    extent.
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item instead of a pixel value to define
+///    the main axis extent of each item.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 ///  * [SliverFillViewport], which sizes its children based on the

@@ -120,9 +120,7 @@ void main() {
     webResources.childFile('index.html')
         .createSync(recursive: true);
     environment.buildDir.childFile('main.dart.js').createSync();
-    await WebReleaseBundle(<WebCompilerConfig>[
-      const JsCompilerConfig()
-    ]).build(environment);
+    await const WebReleaseBundle(WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('version.json'), exists);
   }));
@@ -134,9 +132,7 @@ void main() {
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-      ]).build(environment);
+      await const WebReleaseBundle(WebRendererMode.auto, isWasm: false).build(environment);
 
       final String versionFile = environment.outputDir
           .childFile('version.json')
@@ -154,9 +150,7 @@ void main() {
 <!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
-    await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-    ]).build(environment);
+    await const WebReleaseBundle(WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
@@ -169,9 +163,7 @@ void main() {
 <!DOCTYPE html><html><head><base href='/basehreftest/'></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
-    await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-    ]).build(environment);
+    await const WebReleaseBundle(WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
@@ -193,9 +185,7 @@ void main() {
       .writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
 
-    await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-    ]).build(environment);
+    await const WebReleaseBundle(WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'A');
@@ -207,9 +197,7 @@ void main() {
     // Update to arbitrary resource file triggers rebuild.
     webResources.childFile('foo.txt').writeAsStringSync('B');
 
-    await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-    ]).build(environment);
+    await const WebReleaseBundle(WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'B');
@@ -219,7 +207,6 @@ void main() {
       contains('flutter_service_worker.js?v='),
     ));
   }));
-
   test('WebEntrypointTarget generates an entrypoint for a file outside of main', () => testbed.run(() async {
     final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
       ..createSync(recursive: true)
@@ -366,7 +353,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -379,7 +365,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -390,12 +375,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-          csp: true,
-          sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -407,7 +387,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -420,7 +399,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -430,11 +408,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -447,7 +421,6 @@ void main() {
         ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -461,7 +434,6 @@ void main() {
         ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -471,11 +443,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -486,7 +454,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -499,7 +466,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -509,11 +475,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -524,7 +486,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -537,7 +498,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-O4',
         '-o',
@@ -546,11 +506,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -562,7 +518,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--native-null-assertions',
         '--no-source-maps',
         '-o',
@@ -576,7 +531,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--native-null-assertions',
         '--no-source-maps',
         '-O4',
@@ -586,12 +540,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        nativeNullAssertions: true,
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -603,7 +552,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -616,7 +564,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-O3',
         '-o',
@@ -625,12 +572,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        optimizationLevel: 'O3',
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -641,7 +583,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -657,7 +598,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-O4',
         '-o',
@@ -666,11 +606,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
 
     expect(environment.buildDir.childFile('dart2js.d'), exists);
     final Depfile depfile = environment.depFileService.parse(environment.buildDir.childFile('dart2js.d'));
@@ -691,7 +627,6 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -706,7 +641,6 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-O4',
         '-o',
@@ -715,11 +649,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -731,7 +661,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.dart_tool/package_config.json',
@@ -743,7 +672,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '-O4',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -751,9 +679,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig()
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -768,7 +694,6 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -783,7 +708,6 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -793,11 +717,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -809,7 +729,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -822,7 +741,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -833,12 +751,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-        dumpInfo: true,
-        sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -850,7 +763,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -863,7 +775,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -874,12 +785,7 @@ void main() {
       ]
     ));
 
-    await Dart2JSTarget(
-      const JsCompilerConfig(
-          noFrequencyBasedMinification: true,
-          sourceMaps: false,
-      )
-    ).build(environment);
+    await Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -898,8 +804,6 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
-        '-DFLUTTER_WEB_USE_SKIA=true',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
@@ -916,11 +820,7 @@ void main() {
       ])
     );
 
-    await Dart2WasmTarget(
-      const WasmCompilerConfig(
-        renderer: WebRendererMode.canvaskit
-      )
-    ).build(environment);
+    await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
 
     expect(outputJsFile.existsSync(), isFalse);
     final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
@@ -942,8 +842,6 @@ void main() {
       command: <String>[
         ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
-        '-DFLUTTER_WEB_USE_SKIA=true',
         '--omit-type-checks',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -961,12 +859,7 @@ void main() {
       ])
     );
 
-    await Dart2WasmTarget(
-      const WasmCompilerConfig(
-        omitTypeChecks: true,
-        renderer: WebRendererMode.canvaskit
-      )
-    ).build(environment);
+    await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
 
     expect(outputJsFile.existsSync(), isFalse);
     final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
@@ -987,8 +880,6 @@ void main() {
       command: <String>[
         ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
-        '-DFLUTTER_WEB_USE_SKIA=true',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
@@ -1003,12 +894,7 @@ void main() {
           environment.buildDir.childFile('main.dart.wasm').absolute.path,
         ]));
 
-    await Dart2WasmTarget(
-      const WasmCompilerConfig(
-        wasmOpt: WasmOptLevel.debug,
-        renderer: WebRendererMode.canvaskit
-      )
-    ).build(environment);
+    await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
 
     expect(outputJsFile.existsSync(), isFalse);
     final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
@@ -1029,19 +915,12 @@ void main() {
       command: <String>[
         ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
-        '-DFLUTTER_WEB_USE_SKIA=true',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
       ], onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo')));
 
-    await Dart2WasmTarget(
-      const WasmCompilerConfig(
-        wasmOpt: WasmOptLevel.none,
-        renderer: WebRendererMode.canvaskit
-      )
-    ).build(environment);
+    await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -1056,9 +935,6 @@ void main() {
       command: <String>[
         ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
-        '-DFLUTTER_WEB_USE_SKIA=false',
-        '-DFLUTTER_WEB_USE_SKWASM=true',
         '--import-shared-memory',
         '--shared-memory-max-pages=32768',
         '--depfile=${depFile.absolute.path}',
@@ -1077,11 +953,7 @@ void main() {
       ])
     );
 
-    await Dart2WasmTarget(
-      const WasmCompilerConfig(
-        renderer: WebRendererMode.skwasm,
-      )
-    ).build(environment);
+    await Dart2WasmTarget(WebRendererMode.skwasm).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -1129,9 +1001,7 @@ void main() {
     environment.outputDir.childDirectory('a').childFile('a.txt')
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
-    await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-      const JsCompilerConfig()
-    ]).build(environment);
+    await WebServiceWorker(globals.fs, WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
     // Contains file hash.
@@ -1154,9 +1024,7 @@ void main() {
       .childFile('assets/index.html')
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
-    await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-      const JsCompilerConfig()
-    ]).build(environment);
+    await WebServiceWorker(globals.fs, WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
     // Contains the same file hash for both `/` and the root index.html file.
@@ -1178,9 +1046,7 @@ void main() {
     environment.outputDir
       .childFile('main.dart.js.map')
       .createSync(recursive: true);
-    await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-      const JsCompilerConfig()
-    ]).build(environment);
+    await WebServiceWorker(globals.fs, WebRendererMode.auto, isWasm: false).build(environment);
 
     // No caching of source maps.
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
@@ -1190,12 +1056,24 @@ void main() {
       contains('"main.dart.js"'));
   }));
 
-  test('WebBuiltInAssets copies over canvaskit again if the web sdk changes', () => testbed.run(() async {
+  test('wasm build copies and generates specific files', () => testbed.run(() async {
+    globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
+      .createSync(recursive: true);
+
+    await WebBuiltInAssets(globals.fs, WebRendererMode.auto, isWasm: true).build(environment);
+
+    expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
+    expect(environment.outputDir.childDirectory('canvaskit')
+      .childFile('canvaskit.wasm')
+      .existsSync(), true);
+  }));
+
+  test('wasm copies over canvaskit again if the web sdk changes', () => testbed.run(() async {
     final File canvasKitInput = globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
       ..createSync(recursive: true);
     canvasKitInput.writeAsStringSync('foo', flush: true);
 
-    await WebBuiltInAssets(globals.fs).build(environment);
+    await WebBuiltInAssets(globals.fs, WebRendererMode.auto, isWasm: true).build(environment);
 
     final File canvasKitOutputBefore = environment.outputDir.childDirectory('canvaskit')
       .childFile('canvaskit.wasm');
@@ -1204,7 +1082,7 @@ void main() {
 
     canvasKitInput.writeAsStringSync('bar', flush: true);
 
-    await WebBuiltInAssets(globals.fs).build(environment);
+    await WebBuiltInAssets(globals.fs, WebRendererMode.auto, isWasm: true).build(environment);
 
     final File canvasKitOutputAfter = environment.outputDir.childDirectory('canvaskit')
       .childFile('canvaskit.wasm');
