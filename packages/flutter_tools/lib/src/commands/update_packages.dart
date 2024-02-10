@@ -19,6 +19,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../update_packages_pins.dart';
+import '../version.dart';
 
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand() {
@@ -1713,6 +1714,10 @@ Directory createTemporaryFlutterSdk(
   // Fill in version info.
   realFlutter.childFile('version')
     .copySync(directory.childFile('version').path);
+  final File versionJson = FlutterVersion.getVersionFile(realFlutter.fileSystem, realFlutter.path);
+  final Directory binCacheDirectory = directory.childDirectory('bin').childDirectory('cache');
+  binCacheDirectory.createSync(recursive: true);
+  versionJson.copySync(binCacheDirectory.childFile('flutter.version.json').path);
 
   // Directory structure should mirror the current Flutter SDK
   final Directory packages = directory.childDirectory('packages');

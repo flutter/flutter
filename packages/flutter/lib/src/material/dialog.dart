@@ -1327,7 +1327,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
-/// barrier that darkens everything below the dialog. If `null` the default color
+/// barrier that darkens everything below the dialog. If `null` the `barrierColor`
+/// field from `DialogTheme` is used. If that is `null` the default color
 /// `Colors.black54` is used.
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
@@ -1343,6 +1344,11 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// The `routeSettings` argument is passed to [showGeneralDialog],
 /// see [RouteSettings] for details.
+///
+/// If not null, the `traversalEdgeBehavior` argument specifies the transfer of
+/// focus beyond the first and the last items of the dialog route. By default,
+/// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
+/// to allow users to cycle through dialog widgets without leaving the dialog.
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
@@ -1381,12 +1387,6 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// push [DialogRoute] when the button is tapped.
 ///
 /// {@macro flutter.widgets.RestorationManager}
-///
-/// If not null, `traversalEdgeBehavior` argument specifies the transfer of
-/// focus beyond the first and the last items of the dialog route. By default,
-/// uses [TraversalEdgeBehavior.closedLoop], because it's typical for dialogs
-/// to allow users to cycle through widgets inside it without leaving the
-/// dialog.
 ///
 /// ** See code in examples/api/lib/material/dialog/show_dialog.2.dart **
 /// {@end-tool}
@@ -1429,7 +1429,7 @@ Future<T?> showDialog<T>({
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
     context: context,
     builder: builder,
-    barrierColor: barrierColor ?? Colors.black54,
+    barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
     useSafeArea: useSafeArea,
