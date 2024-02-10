@@ -1510,6 +1510,24 @@ void main() {
     painter.dispose();
   });
 
+  test('LongestLine TextPainter properly relayout when maxWidth changes.', () {
+    // Regression test for https://github.com/flutter/flutter/issues/142309.
+    final TextPainter painter = TextPainter()
+      ..textAlign = TextAlign.justify
+      ..textWidthBasis = TextWidthBasis.longestLine
+      ..textDirection = TextDirection.ltr
+      ..text = TextSpan(text: 'A' * 100, style: const TextStyle(fontSize: 10));
+
+    painter.layout(maxWidth: 1000);
+    expect(painter.width, 1000);
+
+    painter.layout(maxWidth: 100);
+    expect(painter.width, 100);
+
+    painter.layout(maxWidth: 1000);
+    expect(painter.width, 1000);
+  });
+
   test('TextPainter line breaking does not round to integers', () {
     const double fontSize = 1.25;
     const String text = '12345';

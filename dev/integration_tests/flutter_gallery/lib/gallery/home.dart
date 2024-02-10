@@ -180,7 +180,7 @@ class _DemoItem extends StatelessWidget {
     final bool isDark = theme.brightness == Brightness.dark;
     // The fontSize to use for computing the heuristic UI scaling factor.
     const double defaultFontSize = 14.0;
-    final double containerScaingFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
+    final double containerScalingFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
     return RawMaterialButton(
       splashColor: theme.primaryColor.withOpacity(0.12),
       highlightColor: Colors.transparent,
@@ -188,7 +188,7 @@ class _DemoItem extends StatelessWidget {
         _launchDemo(context);
       },
       child: Container(
-        constraints: BoxConstraints(minHeight: _kDemoItemHeight * containerScaingFactor),
+        constraints: BoxConstraints(minHeight: _kDemoItemHeight * containerScalingFactor),
         child: Row(
           children: <Widget>[
             Container(
